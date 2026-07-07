@@ -26,12 +26,16 @@
 //  Draw calls added: solid tubes(1) striped tube(1) sunglasses(1) drink(1)
 //  board(1) paddle-shaft(1) paddle-blade(1) = 7.
 // =====================================================================
-import { onWorldReady, registerUpdate, createChibi } from '../framework.js';
+import { onWorldReady, registerUpdate, createChibi, registerBumpable } from '../framework.js';
 import * as THREE from 'three';
 import { scene, toon, bmat, WATER_Y, clamp } from '../core.js';
 import { coastQuery, profileTotal } from '../coast.js';
 
 const CITIZEN = 0.74;   // canonical chibi scale (matches the mayor / citizens)
+
+// ---- "ope" bump line pools (Math.random only — never the shared world rng) ----
+const LINES_TUBER = ["ope — watch the wake!","just floatin'","water's perfect once you're in","ope, sorry bud","did you see a jet ski?"];
+const LINES_PB    = ["ope — watch the wake!","core workout, baby","almost ate it just now"];
 
 // ---- hardcoded palettes (deterministic — never the shared world rng) ----
 const PAL = [
@@ -142,6 +146,10 @@ onWorldReady(() => {
       cup.position.set(0, 0.02, 0.02); parts.handL.add(cup);
     }
 
+    // bumpable: the rig drifts/bobs/spins, so the shared system re-derives the
+    // head anchor from the rig's live world matrix each frame (parts = head).
+    registerBumpable(rig, parts, LINES_TUBER);
+
     const solidIdx = cfg.striped ? -1 : si++;
     if(!cfg.striped){ solidTubes.setColorAt(solidIdx, _col.setHex(cfg.col)); }
 
@@ -178,6 +186,9 @@ onWorldReady(() => {
   blade.position.y = -1.82; paddle.add(blade);
   paddle.position.set(0.12, 1.25, 0.28);    // in front, chest height
   pbRig.add(paddle);
+
+  // bumpable: the board ping-pongs z 40..250, so the anchor rides pbRig's head.
+  registerBumpable(pbRig, pparts, LINES_PB);
 
   // ================================================================= //
   //  PER-FRAME

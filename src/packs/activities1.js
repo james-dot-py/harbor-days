@@ -20,7 +20,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { onWorldReady, registerUpdate, addInteraction, chargeThrow, camForward,
-         holdItem, toast, journalSection, state, getAudioCtx, makeNPC } from '../framework.js';
+         holdItem, toast, journalSection, state, getAudioCtx, makeNPC, registerBumpable } from '../framework.js';
 import { scene, toon, curveMat, clamp, lerp, lerpAngle, pip, WATER_Y } from '../core.js';
 import { coastQuery, profileTotal, tierAt, beachH, LAND } from '../coast.js';
 import { FX } from '../fx.js';
@@ -483,6 +483,14 @@ onWorldReady(player=>{
     makeDog(0,ownerA,{x:91,z:-338},[88,96],[-340,-324],0.82,0xd4e34a,0.6),
     makeDog(1,ownerB,{x:99.5,z:-338},[94,101],[-340,-324],0.76,0x4a90e2,2.7),
   ];
+  // bumpable: dogs are instanced part-meshes (no Object3D), so each gets a tiny
+  // live-position holder + a scalar head-height anchor. Radius a touch smaller
+  // than parklife's (0.9m) — dogs are small. The holder is refreshed in writeDog.
+  const DOG_BUMP=["boof!","boof boof!","*happy tail*"];
+  for(const d of dogs){
+    d.bumpGroup={position:new THREE.Vector3(d.x,d.y,d.z)};
+    registerBumpable(d.bumpGroup, 0.92*d.scale+0.45, DOG_BUMP, 0.9);
+  }
 
   function clampDog(d,x,z){ return avoidPen(clamp(x,d.clampX[0],d.clampX[1]),clamp(z,d.clampZ[0],d.clampZ[1])); }
   function pickLanding(d,water){
@@ -592,6 +600,7 @@ onWorldReady(player=>{
     const hips=[[-0.2,0.32,0],[0.2,0.32,Math.PI],[-0.2,-0.26,Math.PI],[0.2,-0.26,0]];
     for(let l=0;l<4;l++){ const h=hips[l];
       part(legIM,idx*4+l,h[0],0.42,h[1],Math.sin(d.legPh+h[2])*amp,0,0); }
+    if(d.bumpGroup) d.bumpGroup.position.set(d.x,d.y,d.z);   // keep the bump anchor on the dog
   }
   function updateDogPark(dt,t){
     for(const d of dogs){ updDogPair(d,dt,t); writeDog(d); }
