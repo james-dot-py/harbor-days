@@ -9,6 +9,11 @@ import * as THREE from 'three';
 import { scene, toon, mulberry32 } from '../core.js';
 import { registerCell } from '../cells.js';
 import * as WV from '../data/wrigleyville.js';
+import { buildStreets } from './streets.js';
+import { buildStation } from './station.js';
+import { buildStadium } from './stadium.js';
+import { buildRooftops } from './rooftops.js';
+import { buildVillage } from './village.js';
 
 const _r = mulberry32(WV.SEED_W);
 export const wrand = (a = 0, b = 1) => a + (b - a) * _r();
@@ -110,6 +115,12 @@ let built = false;
 export function buildWrigleyville() {
   if (built) return; built = true;
   buildGround();
+  // each builder owns a private m32 seed — files stay order-independent
+  buildStreets();
+  buildStation();
+  buildStadium();
+  buildRooftops();
+  buildVillage();
   scene.add(wrigleyRoot);
   registerCell({
     id: WV.CELL_ID, root: wrigleyRoot,
