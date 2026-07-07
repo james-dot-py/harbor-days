@@ -361,8 +361,8 @@ function buildBowl() {
       caps.push({ pos: [x, 3.62, z], yaw: a + Math.PI / 2, scale: [1, 1, 1] });
     }
   }
-  inst(new THREE.BoxGeometry(3.55, 3.5, 0.8), toon(0xffffff, { mat: { map: ivy } }), wallSegs);
-  inst(new THREE.BoxGeometry(3.6, 0.24, 0.9), toon(0x6b7d5a), caps);
+  inst(new THREE.BoxGeometry(4.3, 3.5, 0.8), toon(0xffffff, { mat: { map: ivy } }), wallSegs);   // overlap: arc fans the edges open
+  inst(new THREE.BoxGeometry(4.35, 0.24, 0.9), toon(0x6b7d5a), caps);
   // foul poles (yellow) where the wall arc meets the foul lines
   const fp = [];
   for (const da of [-0.72, 0.72]) {

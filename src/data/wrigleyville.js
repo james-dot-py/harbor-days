@@ -106,7 +106,7 @@ export const VILLAGE_W = {
     { x: -193, z: -488, ry: Math.PI/2 },           // Sheffield at Waveland
   ],
   statueRow: { z: -491, xs: [-296, -300, -304, -308] }, // plaza north edge (Banks first)
-  carayStatue: { x: -192, z: -490 },               // outside the Bleacher Gate
+  carayStatue: { x: -194.6, z: -489.5 },           // west sidewalk, outside the Bleacher Gate
 };
 
 // ------------------------- CPD barricades -----------------------------
