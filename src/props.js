@@ -328,17 +328,20 @@ export function buildProps(){
   for(const[lx,lz]of CH.LAMPS.extra)lampSpots.push([lx,lz]);
   {
     const nL=lampSpots.length,M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(1,1,1),V=new THREE.Vector3();
-    const posts=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.1,0.15,4,7),toon(0x37584a),nL);
-    const caps=new THREE.InstancedMesh(new THREE.ConeGeometry(0.5,0.42,7),toon(0x37584a),nL);
-    const bulbs=new THREE.InstancedMesh(new THREE.SphereGeometry(0.3,9,8),bmat(0xffd9a0),nL);
+    // real Lakefront Trail lamp: a WHITE GLOBE on a slender GREEN post — a
+    // tapered green pole, a small green collar, and a warm-white glowing sphere.
+    // Same instanced structure (3 draw calls), same spots/counts, same glow.
+    const posts=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.08,0.13,4,7),toon(0x37584a),nL);
+    const collars=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.15,0.12,0.22,8),toon(0x2f5142),nL);
+    const globes=new THREE.InstancedMesh(new THREE.SphereGeometry(0.36,12,11),bmat(0xfff3df),nL);
     lampSpots.forEach(([x,z],i)=>{
-      M.compose(V.set(x,2,z),Q,S);posts.setMatrixAt(i,M);
-      M.compose(V.set(x,4.3,z),Q,S);caps.setMatrixAt(i,M);
-      M.compose(V.set(x,4.02,z),Q,S);bulbs.setMatrixAt(i,M);
+      M.compose(V.set(x,2,z),Q,S);posts.setMatrixAt(i,M);        // post top at y=4.0
+      M.compose(V.set(x,3.9,z),Q,S);collars.setMatrixAt(i,M);    // small collar under the globe
+      M.compose(V.set(x,4.05,z),Q,S);globes.setMatrixAt(i,M);    // globe centred on the glow point
       collide(x,z,0.4);lampGlowPos.push([x,4.05,z]);
     });
-    posts.instanceMatrix.needsUpdate=caps.instanceMatrix.needsUpdate=bulbs.instanceMatrix.needsUpdate=true;
-    scene.add(posts,caps,bulbs);
+    posts.instanceMatrix.needsUpdate=collars.instanceMatrix.needsUpdate=globes.instanceMatrix.needsUpdate=true;
+    scene.add(posts,collars,globes);
   }
   {
     const g=new THREE.BufferGeometry();

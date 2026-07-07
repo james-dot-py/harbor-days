@@ -64,6 +64,26 @@ export function tierAt(lat,zc){       // height on the terraces, or null past th
   return null;
 }
 
+// ---- water color gradient: shore-distance field -----------------------
+// Segments the per-vertex water aShore is sampled against: the open-lake coast
+// + peninsula tip (QUERY_SEGS) PLUS the sheltered harbor BASIN edges (west
+// seawall, north shore, peninsula west bulkhead). Including the basin walls
+// makes basin water read shallow/light (its nearest edge is always close),
+// matching the aerial's greener harbor. One flat list for the hot loop.
+// buildSegs uses NO shared rng -> deterministic; the world's rng order is untouched.
+const SHORE_SEGS=[].concat(...QUERY_SEGS, ...CH.seawallLines({P_START,BASIN_W}).map(buildSegs));
+export function shoreDist(x,z){        // approx Euclidean distance (m) to the nearest shoreline
+  let bd2=1e18;
+  for(let i=0;i<SHORE_SEGS.length;i++){
+    const s=SHORE_SEGS[i];
+    const px=x-s.ax,pz=z-s.az;
+    let t=px*s.tx+pz*s.tz; if(t<0)t=0; else if(t>s.len)t=s.len;
+    const ddx=x-(s.ax+s.tx*t),ddz=z-(s.az+s.tz*t),d2=ddx*ddx+ddz*ddz;
+    if(d2<bd2)bd2=d2;
+  }
+  return Math.sqrt(bd2);
+}
+
 // dog beach — sloped sand cove: dry (h=0) at the north edge, dipping to
 // `depth` at the south waterline. t rises with z (south) so the slope faces
 // the basin water south of the cove.
@@ -90,28 +110,39 @@ function livingWaterMat(baseHex){
 
     // ---- vertex: world-curve + gentle breathing swell (amp <= 0.07) ----
     sh.vertexShader=sh.vertexShader.replace('#include <common>',
-      '#include <common>\nuniform float uCurv;\nuniform float uTime;\nvarying vec2 vWc;');
+      '#include <common>\nuniform float uCurv;\nuniform float uTime;\nattribute float aShore;\nvarying vec2 vWc;\nvarying float vShore;');
     sh.vertexShader=sh.vertexShader.replace('#include <begin_vertex>',
       '#include <begin_vertex>\n'+
       '\tvWc = position.xz;\n'+                 // mesh unrotated & at x=z=0 -> world xz
+      '\tvShore = aShore;\n'+                   // build-time shore distance (m), swell-independent
       // two slow swells, periods ~6s & ~9s, directions ~40 deg apart
       '\ttransformed.y += sin(dot(position.xz, vec2(0.90,0.44))*0.14 + uTime*1.047)*0.045\n'+
       '\t              + sin(dot(position.xz, vec2(0.40,0.91))*0.11 + uTime*0.698)*0.025;');
     sh.vertexShader=sh.vertexShader.replace('gl_Position = projectionMatrix * mvPosition;',
       'mvPosition.y -= uCurv * mvPosition.z * mvPosition.z;\n\tgl_Position = projectionMatrix * mvPosition;');
 
-    // ---- fragment: large-scale hue drift + sparse warm glints ----
+    // ---- fragment: banded shore gradient + hue drift + sparse warm glints ----
     sh.fragmentShader=sh.fragmentShader.replace('#include <common>',
-      '#include <common>\nuniform float uTime;\nvarying vec2 vWc;');
-    // hue life: nudge the base cyan toward a deeper teal / warmer aqua over
-    // very broad (>500m) slowly-drifting fields, before toon lighting -> stays flat.
+      '#include <common>\nuniform float uTime;\nvarying vec2 vWc;\nvarying float vShore;');
+    // Shore-distance color GRADE (the aerial's soft bands hugging the shoreline):
+    // bright turquoise at the water's edge -> deep blue-teal offshore, in 4 TOON
+    // STEPS. Each edge is a ~3 m smoothstep so the swell can't make bands shimmer.
+    // Then the broad slow hue drift layers ON TOP (before toon lighting -> flat).
     sh.fragmentShader=sh.fragmentShader.replace(
       'vec4 diffuseColor = vec4( diffuse, opacity );',
-      'float hz1 = sin(vWc.x*0.012 + uTime*0.05)*0.5 + 0.5;\n'+
+      'vec3 cShore=vec3(0.3490,0.8588,0.9098);\n'+   // 0x59dbe8 bright turquoise (0-14 m)
+      '\tvec3 cAqua =vec3(0.1843,0.6392,0.7098);\n'+ // 0x2fa3b5 mid aqua  (14-38 m, the old base)
+      '\tvec3 cTeal =vec3(0.1451,0.5490,0.6275);\n'+ // 0x258ca0 deeper teal (38-85 m)
+      '\tvec3 cDeep =vec3(0.0902,0.4980,0.6196);\n'+ // 0x177f9e deep blue-teal (>85 m)
+      '\tvec3 band=cShore;\n'+
+      '\tband=mix(band,cAqua,smoothstep(12.5,15.5,vShore));\n'+
+      '\tband=mix(band,cTeal,smoothstep(36.5,39.5,vShore));\n'+
+      '\tband=mix(band,cDeep,smoothstep(83.5,86.5,vShore));\n'+
+      '\tfloat hz1 = sin(vWc.x*0.012 + uTime*0.05)*0.5 + 0.5;\n'+
       '\tfloat hz2 = sin(vWc.y*0.010 - uTime*0.037 + 1.7)*0.5 + 0.5;\n'+
-      '\tvec3 wCol = diffuse;\n'+
-      '\twCol = mix(wCol, diffuse*vec3(0.84,0.95,1.03), hz1*0.45);\n'+   // deeper teal
-      '\twCol = mix(wCol, diffuse*vec3(1.12,1.05,0.95), hz2*0.45);\n'+   // warmer aqua
+      '\tvec3 wCol = band;\n'+
+      '\twCol = mix(wCol, band*vec3(0.84,0.95,1.03), hz1*0.45);\n'+   // deeper teal drift
+      '\twCol = mix(wCol, band*vec3(1.12,1.05,0.95), hz2*0.45);\n'+   // warmer aqua drift
       '\tvec4 diffuseColor = vec4( wCol, opacity );');
     // glints: interference of three drifting sine fields; only the rare near-peak
     // survives the smoothstep -> sparse glitter. Added before fog so distance fades them.
@@ -120,7 +151,8 @@ function livingWaterMat(baseHex){
       '\tfloat g2 = sin(dot(vWc, vec2(-1.1, 1.9)) - uTime*1.0);\n'+
       '\tfloat g3 = sin(dot(vWc, vec2( 0.7,-1.3)) + uTime*0.7);\n'+
       '\tfloat glint = smoothstep(0.90, 1.0, (g1+g2+g3)*0.3333);\n'+
-      '\tgl_FragColor.rgb += vec3(1.0,0.94,0.80) * glint * 0.55;\n'+
+      '\tfloat shoreGlint = mix(1.4, 1.0, smoothstep(0.0, 22.0, vShore));\n'+   // extra sparkle on the bright shore band
+      '\tgl_FragColor.rgb += vec3(1.0,0.94,0.80) * glint * 0.55 * shoreGlint;\n'+
       '\t#include <fog_fragment>');
   };
   return m;
@@ -260,6 +292,14 @@ export function buildCoast(){
   scene.add(flatShape(LAND,0,toon(0x7ecb6f)));
 
   const wgeo=new THREE.PlaneGeometry(CH.WATER.size,CH.WATER.size,CH.WATER.seg,CH.WATER.seg);wgeo.rotateX(-Math.PI/2);
+  // per-vertex shore distance (world xz) -> banded water color in the shader
+  // (~85 ms at full 181x181 res; no rng, no geometry change -> determinism intact).
+  {
+    const wcx=CH.WATER.cx,wcz=CH.WATER.cz,pos=wgeo.attributes.position,n=pos.count;
+    const aShore=new Float32Array(n);
+    for(let i=0;i<n;i++)aShore[i]=shoreDist(pos.getX(i)+wcx,pos.getZ(i)+wcz);
+    wgeo.setAttribute('aShore',new THREE.BufferAttribute(aShore,1));
+  }
   water=new THREE.Mesh(wgeo,livingWaterMat(0x2fa3b5));
   water.position.set(CH.WATER.cx,WATER_Y,CH.WATER.cz);scene.add(water);   // centered on the tall map so the lake never runs out
 

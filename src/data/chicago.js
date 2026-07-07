@@ -122,8 +122,10 @@ export function buildLAND({ COAST_CORNER, COAST_MAIN, COAST_PEN, COAST_GOLF, COA
 /* ------------------------------ TERRACES ----------------------------- */
 // Revetment tier tables. The Belmont Rocks stretch is wider with more
 // steps; the peninsula + golf revetment use the default profile.
-export const TIER_ROCKS   = { zMin:20, zMax:404, w:[3.6,3.0,2.8,2.6,2.4,2.3,2.2], step:0.475 };  // 7 steps — the Rocks read broader; zMax 404 so the SAME profile wraps the whole corner (COAST_MAIN to z340, then COAST_CORNER to z403) instead of reverting to the 4-step default
-export const TIER_DEFAULT = { w:[3.2,2.4,2.2,2.2], step:0.6 };
+// Per the user's on-site photos: the BOTTOM tier is a wide waterline
+// promenade (the main walk/hangout slab) — much wider than the upper steps.
+export const TIER_ROCKS   = { zMin:20, zMax:404, w:[3.6,3.0,2.8,2.6,2.4,2.3,6.0], step:0.475 };  // 7 steps, wide bottom promenade; zMax 404 so the SAME profile wraps the whole corner (COAST_MAIN to z340, then COAST_CORNER to z403) instead of reverting to the 4-step default
+export const TIER_DEFAULT = { w:[3.2,2.4,2.2,4.4], step:0.6 };
 
 // sheet-pile seawalls (flush with the park, straight down). top/bot Y is
 // shared by every wall; the polylines reference the generated pieces.
