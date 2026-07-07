@@ -106,6 +106,7 @@ worldReady(player);
 // ------------------------------ main loop ------------------------------
 const camPos=new THREE.Vector3(CH.SPAWN.camera.x,CH.SPAWN.camera.y,CH.SPAWN.camera.z);
 const camTarget=new THREE.Vector3();
+export const camCtl={snap:false};   // packs set snap=true after a teleport (cells.js rides)
 let assistAmt=0,introT=0;   // introT 1→0: start-of-game camera swoop (skipped in ?play=1)
 let stepT=0,sparkT=0;
 let last=performance.now();
@@ -251,6 +252,7 @@ function frame(now){
     pvx-Math.sin(cam.yaw)*horiz,
     Math.max(player.y+0.55,Math.max(-1.5,pvy+Math.sin(downP)*effD+upT*1.2)),
     pvz-Math.cos(cam.yaw)*horiz);
+  if(camCtl.snap){camPos.copy(camTarget);camCtl.snap=false;}
   camPos.lerp(camTarget,1-Math.exp(-8*dt));
   const shx=(Math.random()-0.5)*fw.shake*0.5,shy=(Math.random()-0.5)*fw.shake*0.5,shz=(Math.random()-0.5)*fw.shake*0.5;
   camera.position.set(camPos.x+shx,camPos.y+shy,camPos.z+shz);

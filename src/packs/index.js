@@ -19,3 +19,4 @@ import './traillife.js';
 import './watertoys.js';
 import './characters.js';
 import './wrigleyville.js';   // neighborhood two — the Wrigleyville cell
+import './wrigley-ride.js';   // the Red Line ride (Belmont ⇄ Addison)
