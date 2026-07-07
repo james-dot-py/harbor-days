@@ -133,9 +133,10 @@ export const BACKDROP_W = {
     { x0: -368, x1: -336, z0: -560, z1: -350 },    // west of Clark bars
     { x0: -320, x1: -240, z0: -560, z1: -530 },    // north of the rooftops
     { x0: -184, x1: -152, z0: -580, z1: -516 },    // NE, toward the tracks
-    { x0: -184, x1: -156, z0: -424, z1: -370 },    // SE block (S of Addison)
-    { x0: -320, x1: -212, z0: -384, z1: -340 },    // S of Addison
-    { x0: -128, x1: -116, z0: -560, z1: -350 },    // sliver east of the tracks
+    { x0: -184, x1: -156, z0: -390, z1: -340 },    // SE block (S of Addison)
+    { x0: -320, x1: -212, z0: -377, z1: -340 },    // S of Addison (behind Cubby)
+    { x0: -122, x1: -110, z0: -560, z1: -350 },    // sliver east of the tracks
+    { x0: -184, x1: -152, z0: -428, z1: -412 },    // NE corner block (N of Addison)
   ],
   floors: [2, 4],                                  // storeys range
 };
