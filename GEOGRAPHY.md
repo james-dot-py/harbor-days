@@ -34,7 +34,13 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
 
 1. **x 0–14 — Lake Shore Drive embankment** (NOT walkable): low berm, stylized
    8-lane ribbon, sparse toon cars whooshing both ways (ambient, like the L today).
-   The L track/gag moves BEHIND it (x ≈ −8, backdrop only).
+   The L track/gag moves BEHIND it (x ≈ −8, backdrop only). **Behind the L
+   (x < −12): the LAKEVIEW BAND** — a low-rise backdrop strip of vintage brick
+   flats/greystones/small pre-war apartment blocks (2–6 stories, occasional
+   taller vintage block; per LSD-at-Belmont photo references, e.g. the 1924
+   Neo-Georgian 3520 N LSD type) — distant and modest, never towering over the
+   park. Instanced boxes like the skyline treatment, but nearer/lower
+   (`LAKEVIEW_BAND` in chicago.js, built in sky.js).
    **Underpasses** (future neighborhood gates + Divvy/foot entrances) at
    Belmont z +105, Addison z −400, Irving Park z −800: short tunnels through the
    berm, fenced dead-end doors for now ("FUTURE ENTRANCE" gag relocates here).
@@ -89,10 +95,15 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
   shore lawn: **(x 70, z −180)**, burgee pole seaward.
 - **Mooring field**: 4 N–S rows of cans mid-basin (x 105–140), **~90 boats** at the
   new scale (instanced — budget is fine).
-- **East peninsula x 160–200, z −330…−25**: treed, walkable via a small bridge/spit
-  at its north root (z −325). The trail SPUR is its access route: it leaves MAIN at
-  the basin north shore, skirts north of the dog-beach cove, and runs out the
-  peninsula to the pier.
+- **East peninsula (the SPIT) x 160–~202, z −330…−25**: treed, walkable via its
+  north root (z −325). **Aerial-canonical shape + route (addison harbor.png,
+  2026-07-07)**: the spit is a gentle TEARDROP — narrow at the root, swelling
+  ~+4 m mid-length (lake edge fx peaks ≈ x200 near z −177) before the tip curl.
+  The trail SPUR leaves MAIN at the basin north shore, skirts north of the
+  dog-beach cove, then runs SET-INLAND (~6–9 m north of the basin shore, z
+  −333…−342 — never hugging the seawall) to the root, and down the spit's
+  SPINE (x ≈ 178–186) with the treed strip flanking it on both sides, ending
+  just above the south-tip terraces (~186,−32) — the aerial's spine road.
   - **West edge x ≈ 160 (basin side) STAYS a flush sheet-pile bulkhead** down to the
     SW turn (~z −24) — docks/moorings INSIDE the harbor, per the aerial.
   - **THE SOUTH-TIP WRAP** (`COAST_TIP`): the tip's horseshoe (SW turn ~x166,z−24 →
@@ -151,12 +162,15 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
     over the water toward the skyline; its north root sits on the revetment top/
     lawn (so it connects to walkable land), a lamp at its tip (z 406, just inside
     the clamp). Water beyond its rails.
-- **MAIN trail south section HUGS the shoreline**: from the AIDS-garden circle it
-  bows EAST and runs ~8–12 m inland of the revetment top around the Belmont point,
-  continues around the CORNER (passing ~8 m NE of the Chevron), and ends at the
-  SW terminus / south map edge (≈ x55, z395 — future Diversey-Lincoln Park gate).
-  Bike centerline x ≈ 137 on the east-facing stretch; walk ribbon +4 to the lake
-  side. Not the old straight inland run at x ≈ 105.
+- **MAIN trail south section HUGS LAKE SHORE DRIVE (aerial-canonical, 2026-07-07)**:
+  per `Downloads/harbor aerial.png`, the real Lakefront Trail on the whole
+  Diversey→Belmont stretch runs BESIDE the Drive, not the shore. From the
+  AIDS-garden east tangent (112,120) it angles SW across the lawn and runs south
+  along the berm (bike centerline x ≈ 20–24; walk ribbon +4 on the park side),
+  past the Diversey range's west fence (≥2.8 m clear), ending at the south map
+  edge ≈ (30,406) — the future Diversey-Lincoln Park gate now sits beside the
+  Drive. The WIDE south lawns + the corner revetment, Chevron and pier lie EAST
+  of the trail — people cross the grass to the rocks, as in the aerial.
 - **Diversey Driving Range & Mini Golf** (BUILT, inland, west of the trail):
   a fenced green range strip **x 28–88, z +242…+283** (fenced W/N/E, open at the
   south tee line) with 4 tee mats, 3 distance boards, ~30 scattered balls and a

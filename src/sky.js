@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { scene, rng, rand, gmap, glowTex, mulberry32 } from './core.js';
+import { scene, rng, rand, gmap, glowTex, mulberry32, curveMat, bmat } from './core.js';
 import * as CH from './data/chicago.js';
 
 // ------------------------------- sky ----------------------------------
@@ -142,5 +142,91 @@ export function buildSky(){
     // park, but the south lawn no longer walks into billboard walls.
     grp.scale.setScalar(2.2);
     scene.add(grp);
+  }
+
+  buildLakeviewBand();
+}
+
+// -------------------------- Lakeview band (west) ----------------------
+// A low-rise vintage-Chicago backdrop wall — 1920s brick flats, greystones
+// and small pre-war apartment blocks — marching the full map length behind
+// the Brown Line 'L' (ambient.js: TRACK_X=-8, DECK_TOP=7.6). Front line at
+// x=-16 (8 m west of the L, well clear of z-fighting the track/berm),
+// bodies extending WEST. Simple rectangular massing with a limestone
+// cornice lip and sparse warm dusk windows on the park-facing (east) side.
+//
+// UNLIKE the skyline block above (an uncurved far-horizon backdrop), this
+// band uses the world-curve materials (curveMat/toon/bmat) — it lives inside
+// the play space right behind the CURVED L track, so it must sink with the
+// same curve or it would appear to float/tower above the L as the L bends
+// away with distance. Randomness is a LOCAL xorshift (coast.js tip pattern);
+// the shared rng()/rand() sequence is never touched, so the deterministic
+// world layout (towels/flowers/trees) stays put (hard constraint #1).
+// 3 draw calls total: bodies + cornice caps + lit windows.
+function buildLakeviewBand(){
+  const B=CH.LAKEVIEW_BAND;
+  let hs=0x2f6b1c07>>>0;                                   // local deterministic jitter (no shared rng)
+  const jr=()=>{hs^=hs<<13;hs>>>=0;hs^=hs>>>17;hs^=hs<<5;hs>>>=0;return hs/4294967296;};
+  const rr=(a,b)=>a+(b-a)*jr();
+  const front=B.front;
+
+  const bodies=[], caps=[], wins=[];                       // collected records -> instanced meshes
+  const white=new THREE.Color(0xffffff);
+  const WIN_CAP=600, floorH=3.2;
+
+  // march z: each block = a body (frontage w along z, depth d west, height h),
+  // then a street gap before the next.
+  let z=B.zr[0];
+  for(;;){
+    const w=rr(B.w[0],B.w[1]);
+    if(z+w>B.zr[1]) break;                                 // last block fully inside the range
+    const tall=jr()<B.tallProb;
+    const h=tall?rr(B.tallH[0],B.tallH[1]):rr(B.h[0],B.h[1]);
+    const d=rr(B.depth[0],B.depth[1]);
+    const col=new THREE.Color(B.colors[(jr()*B.colors.length)|0]);
+    const zc=z+w/2, xc=front-d/2;                          // east face at x=front, extends west
+    bodies.push({w,h,d,x:xc,z:zc,c:col});
+    caps.push({w,h,d,x:xc,z:zc,c:col.clone().lerp(white,0.34)});   // limestone cornice lip
+
+    // sparse warm dusk windows on the EAST face (facing the park)
+    if(wins.length<WIN_CAP){
+      const floors=Math.max(1,Math.round(h/floorH));
+      const cols=Math.max(1,Math.min(4,Math.round(w/5)));
+      const fh=h/floors;
+      for(let f=0;f<floors&&wins.length<WIN_CAP;f++){
+        for(let c=0;c<cols&&wins.length<WIN_CAP;c++){
+          if(jr()>=B.winLitProb) continue;
+          const zz=(zc-w/2)+((c+1)/(cols+1))*w+(jr()*2-1)*0.18;
+          const yy=(f+0.5)*fh+(jr()*2-1)*0.12;
+          wins.push({x:front+0.08,y:yy,z:zz});
+        }
+      }
+    }
+    z+=w+rr(B.spacing[0],B.spacing[1]);
+  }
+
+  const M=new THREE.Matrix4(),V=new THREE.Vector3(),Q=new THREE.Quaternion(),S=new THREE.Vector3();
+
+  // 1) building bodies — one instanced curved-toon box, per-instance brick color
+  const bodyMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),
+    curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),bodies.length);
+  bodies.forEach((b,i)=>{M.compose(V.set(b.x,b.h/2,b.z),Q.identity(),S.set(b.d,b.h,b.w));
+    bodyMesh.setMatrixAt(i,M);bodyMesh.setColorAt(i,b.c);});
+  bodyMesh.instanceMatrix.needsUpdate=true;bodyMesh.instanceColor.needsUpdate=true;scene.add(bodyMesh);
+
+  // 2) cornice caps — a slightly wider, thin box at each roofline (parapet lip)
+  const capMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),
+    curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),caps.length);
+  caps.forEach((b,i)=>{M.compose(V.set(b.x,b.h-0.1,b.z),Q.identity(),S.set(b.d+0.9,0.6,b.w+0.9));
+    capMesh.setMatrixAt(i,M);capMesh.setColorAt(i,b.c);});
+  capMesh.instanceMatrix.needsUpdate=true;capMesh.instanceColor.needsUpdate=true;scene.add(capMesh);
+
+  // 3) warm lit windows — one instanced quad, unlit basic (glowing) on east faces
+  if(wins.length){
+    Q.setFromEuler(new THREE.Euler(0,Math.PI/2,0));        // face +x (east / the park)
+    const winMesh=new THREE.InstancedMesh(new THREE.PlaneGeometry(1,1),
+      bmat(B.winColor,{side:THREE.DoubleSide,fog:false}),wins.length);
+    wins.forEach((wq,i)=>{M.compose(V.set(wq.x,wq.y,wq.z),Q,S.set(1.1,1.3,1));winMesh.setMatrixAt(i,M);});
+    winMesh.instanceMatrix.needsUpdate=true;scene.add(winMesh);
   }
 }

@@ -36,7 +36,7 @@
 // Each fx sums 2-3 sine octaves for a gentle, never-straight organic meander
 // (+/- ~3-6 m), the way a real Belmont Harbor shoreline reads from the air.
 export const COAST_MAIN_PARAMS = { z0:340, z1:16,   fx:z=>150+Math.sin(z*0.020)*3.4+Math.sin(z*0.052+1.3)*1.9+Math.sin(z*0.091+0.6)*1.0 };  // Belmont Rocks (east-facing) — now reaches z340 where the corner wrap begins
-export const COAST_PEN_PARAMS  = { z0:-25, z1:-330, fx:z=>199+Math.sin(z*0.026)*2.8+Math.sin(z*0.058+0.8)*1.7+Math.sin(z*0.101+2.1)*0.9 };  // east peninsula lake edge
+export const COAST_PEN_PARAMS  = { z0:-25, z1:-330, fx:z=>196+4*Math.sin(Math.PI*(z+330)/305)+Math.sin(z*0.058+0.8)*1.2+Math.sin(z*0.101+2.1)*0.7 };  // east peninsula lake edge — TEARDROP (addison harbor.png): narrow at the root/tip (~196), swelling +4 mid-length (peak ~x200 @ z-177), small octaves for the organic read
 export const COAST_GOLF_PARAMS = { z0:-400,z1:-800, fx:z=>232+Math.sin(z*0.017)*1.9+Math.sin(z*0.045+1.1)*1.1+Math.sin(z*0.082+0.4)*0.7 };  // Marovitz trail-side revetment
 // THE CORNER WRAP (Diversey/Fullerton point): the SAME 7-step terraced revetment
 // as the Rocks, swept from east-facing around to south-facing. Fitted-quadratic fx
@@ -197,16 +197,17 @@ export const GRASS_PATCHES = { count:45, xr:[16,225], zr:[-790,300], radius:[2.5
 // (moved) Belmont underpass mouth to the loop's west edge.
 // TRAIL_MAIN stays the BIKE centerline (mainCurve/pathSamples contract).
 export const TRAIL_MAIN=[
-  // SOUTH TERMINUS: hugs ~10 m inland of the CURVED corner revetment top, from the
-  // SW terminus (map's south edge / future Diversey-Lincoln Park gate) around the
-  // point (passing ~8 m NE of the Chevron at 96,372) back to the east-facing rocks.
-  [55,395],[62,389],[76,385],[92,379],[108,371],[124,362],[135,353],[141,346],[139,325],
-  // south section HUGS the shoreline ~8-12 m inland of the Belmont Rocks
-  // revetment top (x~148-153), curving around the point, then bends back
-  // WEST to skim the AIDS-garden circle TANGENTIALLY on its EAST edge (x~111)
-  // — a Y where riders can peel onto the loop (never slicing its interior).
-  [137,306],[138,258],[137,208],[132,172],[122,146],
-  [113,132],[112,120],[111,106],
+  // SOUTH SECTION (aerial-canonical, per Downloads/harbor aerial.png): the real
+  // Lakefront Trail on the whole Diversey->Belmont stretch runs BESIDE LAKE
+  // SHORE DRIVE, not the shore. South terminus beside the berm (~30,406 — the
+  // future Diversey-Lincoln Park gate), straight north past the Diversey
+  // range's WEST fence (bike x~20, walk ribbon +4 park-side => >=2.8 m fence
+  // clearance), then angling NE across the lawn to skim the AIDS-garden circle
+  // TANGENTIALLY on its EAST edge (111,120) — the Y onto the loop. The wide
+  // south lawns / corner revetment / Chevron / pier all lie EAST of the trail;
+  // people cross the grass to the rocks, as in the aerial.
+  [30,406],[25,390],[22,366],[20.5,338],[19.5,306],[19.5,272],[19.5,238],[20,210],[27,190],
+  [36,178],[50,172],[66,168],[82,162],[96,152],[106,138],[112,120],[111,106],
   [104,55],[90,15],[75,-5],
   [58,-45],[48,-95],[44,-150],
   [45,-205],[48,-258],[54,-300],
@@ -219,9 +220,15 @@ export const TRAIL_MAIN=[
   [211,-540],[211,-660],[211,-782],
 ];
 export const TRAIL_SPUR=[
+  // aerial-canonical (Downloads/addison harbor.png): the spit road enters
+  // INLAND at the root (set ~6-9 m north of the basin shore — it was hugging
+  // the seawall at z-327..-329) and runs down the spit's SPINE with the treed
+  // strip flanking both sides, ending just above the south-tip terraces.
   [74,-340],[86,-344],[100,-346],[112,-345],        // skirt NORTH of the dog-beach cove (no ribbon on the sand)
-  [126,-340],[142,-333],[154,-329],[158,-327],      // to the peninsula north root (~158,-326)
-  [164,-315],[170,-280],[178,-215],[184,-150],[190,-95],[192,-48],   // down the peninsula to the pier/tip
+  [128,-342],[144,-337],[157,-333],                 // set-inland run to the root (shore is z-326..-329 here)
+  [166,-323],[173,-305],                            // onto the spit at the root
+  [178,-260],[181,-200],[183,-150],[185,-105],      // the SPINE (trees both sides)
+  [188,-70],[190,-48],[186,-32],                    // ease toward the tip loop
 ];
 // AIDS-garden plaza LOOP: a CLEAN circle (r=16) centred on the Keith Haring
 // sculpture (95,120). Even 8-point ring (repeat the first to close) so the
@@ -271,19 +278,22 @@ export const WORLD_CLAMP = { xMin:14, xMax:244, zMin:-822, zMax:408 };   // zMax
 // cove / harbor water via pip), a few hand-placed on the peninsula, and the
 // dense Bird Sanctuary grove (TREES.north).
 export const TREES = {
-  count:150, guard:14000,
+  count:260, guard:24000,   // 150->260: the real park is much more heavily wooded (aerials); guard raised with it
   region:{ xr:[16,210], zr:[-400,300] },
   garden:{ x0:60, x1:130, z0:55, z1:185 },
   nearPathD2:16,
   dogBeach:{ xMin:86, zMax:-326, zMin:-348 },   // x>xMin && z<zMax && z>zMin
   minGapD2:60,
   scale:[1.0,1.8], pinkProb:0.16,
-  fixed:[   // peninsula (walkable, treed)
+  fixed:[   // the SPIT's treed strip — flanking the spine trail (x~178-186) on BOTH sides, per the aerial
     [172,-60,1.1,false],[178,-110,1.0,true],[182,-160,1.05,false],
     [176,-210,1.0,false],[185,-260,0.95,true],[170,-300,1.1,false],
     [190,-90,0.9,false],[168,-140,1.0,true],
+    [174,-240,1.1,false],[189,-235,1.0,false],[175,-180,1.0,true],[191,-172,1.05,false],
+    [177,-122,1.1,false],[193,-128,0.95,false],[179,-82,1.0,true],[195,-88,1.05,false],
+    [172,-42,1.0,false],[181,-52,0.95,false],[170,-268,1.0,false],[188,-292,1.05,true],
   ],
-  north:{ count:64, xr:[104,196], zr:[-417,-359], scale:[1.6,2.6], pinkProb:0.1 },   // Bird Sanctuary grove (lakeside block)
+  north:{ count:92, xr:[104,196], zr:[-417,-359], scale:[1.6,2.6], pinkProb:0.1 },   // Bird Sanctuary grove (lakeside block) — denser per the aerials
 };
 
 // perimeter hedges: west fence line at x = 14 (inner edge of the LSD berm,
@@ -294,7 +304,7 @@ export const HEDGES = {
   // leaves the underpass mouth at (16,105); Addison z-400, Irving Park z-800).
   west:{ x:14, z0:-812, z1:412, step:5.5, gaps:[[95,115],[-410,-390],[-810,-790]] },   // west perimeter now runs to the new SW corner
   north:{ z:-812, x0:14, x1:232, step:5.5 },
-  cap:{ z:406, x0:14, x1:34, step:5.5 },   // SW corner cap only (x14-34): the rest of the south edge is now the curved shoreline, and x>34 is open lawn/trail down to the revetment
+  cap:{ z:406, x0:14, x1:23, step:5.5 },   // SW corner cap only (x14-23): the aerial-canonical trail now exits the map at (30,406) — the cap stops short of the gate so the ribbon passes clear
   scale:[3,2.2,2.8], y:1.1, color:0x4c9a55,
 };
 
@@ -394,6 +404,25 @@ export const BENCHES = [
 // of floating over the descending steps (the reference photo: a pier starts at the
 // top edge and immediately juts over water). Water flanks both rails. Tip z406 stays
 // inside WORLD_CLAMP.zMax (408).
+// LAKEVIEW BAND — the low-rise backdrop strip of vintage brick flats /
+// greystones / small pre-war apartment blocks behind the L track (x < -12),
+// per LSD-at-Belmont photo references (mostly 2-6 stories, the occasional
+// taller 1920s block — distant and modest, NEVER towering over the park).
+// Built in sky.js as instanced boxes (like the skyline treatment but
+// nearer/lower) with a LOCAL deterministic rng — the shared world rng is
+// never touched.
+export const LAKEVIEW_BAND = {
+  front:-16,                 // band front line (the L track is the backdrop at x~-8)
+  zr:[-812,408],             // the full map length
+  spacing:[15,30],           // street-ish gaps between buildings
+  depth:[8,14],              // how far the blocks extend west
+  w:[10,22],                 // frontage widths
+  h:[7,16],                  // 2-5 stories
+  tallProb:0.12, tallH:[20,26],   // the occasional vintage tower (still modest)
+  colors:[0x8a5a44,0x9c6b50,0xb08968,0xa89078,0x8f8578,0x7b6d5f,0x6e5a4e,0xbfae94],
+  winColor:0xf2e0b6, winLitProb:0.35,   // sparse warm windows at dusk
+};
+
 export const DECKS = [
   { deck:[200,216,-120,-90,0.42], walk:{ x1:200, x2:216, z1:-120.5, z2:-89.5, h:0.42 } },
   { deck:[116,126,373,406,0.42],  walk:{ x1:116, x2:126, z1:372.5, z2:406.5, h:0.42 } },
@@ -558,7 +587,19 @@ export const DIVERSEY = {
   range:{ x0:28, x1:88, z0:242, z1:283 },
   green:0x59b356,
   fence:{ color:0xd7cfbe, postH:1.05, spacing:2.8 },   // W + N + E (south/tee side open)
-  tees:{ xs:[36,48,60,72], z:279, w:2.4, d:1.7, color:0x2f6b3a },
+  // TWO-TIER BAY BUILDING (the real renovated Diversey is a Topgolf-style
+  // double-decker — reference: Downloads/'diversey driving range.jpg' + CPD
+  // photos): ground bays + railed upper deck along the SOUTH/tee edge,
+  // hitting NORTH into the netted field. Dark frame, per-bay dividers,
+  // warm glowing bay interiors at dusk, small cool screens per bay.
+  bays:{ x0:30, x1:66, zFront:280, depth:5.5, storyH:3.1, perLevel:6,
+         frame:0x3a3f45, deck:0x8b857a, divider:0x565b61, rail:0xcfd4d8,
+         glow:0xffd98a, screen:0x9edcff,
+         golfers:[ {x:35,lvl:0},{x:53,lvl:0},{x:41,lvl:1},{x:59,lvl:1} ] },   // posed mid-swing chibis, both levels
+  // TALL PERIMETER NET wrapping the downrange field (W/N/E fence lines):
+  // thin dark posts + translucent net panels — the photo's big vertical presence.
+  net:{ h:12, poleEvery:10, inset:0.5, pole:0x2e3236, poleR:0.16, mesh:0xdadfe4, opacity:0.16 },
+  tees:{ xs:[33,39,45,51,57,63], z:278.4, w:2.4, d:1.7, color:0x2f6b3a },   // one mat per ground bay (bay centers)
   balls:{ count:30, x0:30, x1:86, z0:246, z1:275, color:0xf6f6ee },
   boards:[ ['50',34,266],['100',34,257],['150',34,248] ],   // distance markers down the west edge
   bucket:{ x:76, z:281, color:0x9aa0a6, ball:0xffffff },
