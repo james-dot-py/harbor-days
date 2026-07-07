@@ -22,11 +22,11 @@
 //  for a one-line usage note.
 // =====================================================================
 import * as THREE from 'three';
-import { renderer, scene, camera, toon, curveMat, clamp, lerp, lerpAngle, $, game } from './core.js';
+import { renderer, scene, camera, amb, sun, toon, curveMat, clamp, lerp, lerpAngle, $, game } from './core.js';
 import { cam, keys, joy } from './input.js';
 import { mayor, mparts, createChibi } from './character.js';
 import { fw } from './fx.js';
-import { getAudioCtx } from './audio.js';
+import { getAudioCtx, setAmbienceGrade } from './audio.js';
 import * as CH from './data/chicago.js';
 
 export { createChibi };                 // re-export the chibi builder for packs
@@ -338,6 +338,63 @@ function updateBumpables(dt,player){
   }
 }
 
+// ------------------------------- places (cells) ------------------------
+// definePlace: a named sub-place of the world that feels like WALKING INTO A
+// ROOM. While the player is inside `contains(x,z)`, the world GRADE lerps
+// toward the place's fog/light targets and the ambience mix re-balances —
+// then lerps back out on exit. This is the shared CELL pattern:
+//   * the Bird Sanctuary uses it as a graded open-world room (same scene);
+//   * WRIGLEYVILLE (see WRIGLEYVILLE.md) can use the same machinery for its
+//     whole neighborhood cell — containment tracking + graded transition are
+//     shared here; cell-specific work (mesh-set visibility swaps, clamp +
+//     minimap switches, arrival scripting) hangs off onEnter/onExit, which is
+//     the intended extension point. One pattern, not two.
+//
+// definePlace({
+//   name,                      // label (zone banners stay ZONES' job)
+//   contains(x,z) -> bool,     // point-in-place test (cheap; called ~5 Hz)
+//   fadeS = 1.8,               // seconds for the grade to breathe in/out
+//   grade: { fogColor, fogNear, fogFar,          // linear-fog targets
+//            ambSky, ambGround, ambI, sunI },    // hemisphere/sun targets (all optional)
+//   amb: { ext, bird },        // ambience mix targets (audio.js grade)
+//   onEnter(), onExit(),       // cell hooks (fire at the threshold crossing)
+// }) -> handle
+const _places=[];
+let _placeCur=null,_gradePlace=null,_placeF=0,_placeScan=0;
+const _pBase={cap:false,fogC:new THREE.Color(),fogN:0,fogF:0,ambS:new THREE.Color(),ambG:new THREE.Color(),ambI:0,sunI:0};
+const _pcA=new THREE.Color(),_pcB=new THREE.Color();
+export function definePlace(p){_places.push(p);return p;}
+function updatePlaces(dt,player){
+  if(!_places.length)return;
+  if(!_pBase.cap){_pBase.cap=true;
+    _pBase.fogC.copy(scene.fog.color);_pBase.fogN=scene.fog.near;_pBase.fogF=scene.fog.far;
+    _pBase.ambS.copy(amb.color);_pBase.ambG.copy(amb.groundColor);_pBase.ambI=amb.intensity;_pBase.sunI=sun.intensity;}
+  _placeScan-=dt;
+  if(_placeScan<=0){_placeScan=0.2;
+    let inside=null;
+    for(let i=0;i<_places.length;i++)if(_places[i].contains(player.x,player.z)){inside=_places[i];break}
+    if(inside!==_placeCur){
+      if(_placeCur&&_placeCur.onExit)_placeCur.onExit();
+      _placeCur=inside;
+      if(inside){_gradePlace=inside;if(inside.onEnter)inside.onEnter();}
+    }
+  }
+  if(!_gradePlace)return;
+  const fadeS=_gradePlace.fadeS||1.8;
+  _placeF=clamp(_placeF+(_placeCur===_gradePlace?1:-1)*dt/fadeS,0,1);
+  const f=_placeF,g=_gradePlace.grade||{};
+  if(g.fogColor!==undefined)scene.fog.color.copy(_pBase.fogC).lerp(_pcA.set(g.fogColor),f);
+  if(g.fogNear !==undefined)scene.fog.near=_pBase.fogN+(g.fogNear-_pBase.fogN)*f;
+  if(g.fogFar  !==undefined)scene.fog.far =_pBase.fogF+(g.fogFar -_pBase.fogF)*f;
+  if(g.ambSky  !==undefined)amb.color.copy(_pBase.ambS).lerp(_pcA.set(g.ambSky),f);
+  if(g.ambGround!==undefined)amb.groundColor.copy(_pBase.ambG).lerp(_pcB.set(g.ambGround),f);
+  if(g.ambI    !==undefined)amb.intensity=_pBase.ambI+(g.ambI-_pBase.ambI)*f;
+  if(g.sunI    !==undefined)sun.intensity=_pBase.sunI+(g.sunI-_pBase.sunI)*f;
+  const am=_gradePlace.amb;
+  if(am)setAmbienceGrade(1+((am.ext??1)-1)*f,1+((am.bird??1)-1)*f);
+  if(f<=0)_gradePlace=null;                 // fully outside — release the grade
+}
+
 // --------------------------------- toast -------------------------------
 // toast(main, sub?) : gold banner, auto-hides after 3s, queues if busy.
 const _toastQ=[];let _toastBusy=false;
@@ -398,7 +455,7 @@ export const screenFx={
 const SIT_LIFT=0.34;
 let _sit=null;
 function sitOnBench(b,player){
-  _sit={x:b.x,z:b.z,y:SIT_LIFT,ry:b.ry};
+  _sit={x:b.x,z:b.z,y:SIT_LIFT+(b.y||0),ry:b.ry};   // b.y: base height for elevated seats (decks)
   player.vx=player.vz=0;player.x=b.x;player.z=b.z;
   hidePrompt();
   toast('taking a load off','settle in — move to stand');
@@ -478,6 +535,9 @@ export function runUpdates(dt,t,player){
 
   // --- bumpable figures: shared "ope" bubble (after packs move their rigs) ---
   updateBumpables(dt,player);
+
+  // --- places (cells): graded room transitions ---
+  updatePlaces(dt,player);
 }
 
 // ---------------------- built-in world-ready setup ---------------------
@@ -491,6 +551,11 @@ journalSection('harbor-days','Harbor Days',()=>`
 onWorldReady(()=>{
   for(const b of CH.BENCHES)addInteraction({x:b.x,z:b.z,r:2.2,label:'sit for a bit',onUse:pl=>sitOnBench(b,pl)});
 });
+// pack-facing sit API: register a sittable spot anywhere (benches use the same
+// mechanism internally). s = {x,z,ry, y? (base height, e.g. a deck), r?, label?}
+export function addSitSpot(s){
+  return addInteraction({x:s.x,z:s.z,r:s.r||2.2,label:s.label||'sit for a bit',onUse:pl=>sitOnBench(s,pl)});
+}
 
 // wire the DOM once (index.html is fully parsed before any module runs).
 initDom();

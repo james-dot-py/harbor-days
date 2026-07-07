@@ -18,3 +18,6 @@ import './parklife.js';
 import './traillife.js';
 import './watertoys.js';
 import './characters.js';
+import './badminton.js';
+import './lawnlife.js';
+import './sanctuary.js';

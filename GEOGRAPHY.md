@@ -76,10 +76,20 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
 - Golf entrance off the trail at z ≈ −470 (by the lakeside fieldhouse).
 
 ### Sanctuary + Addison, z −430…−330
-- **Bill Jarvis Migratory Bird Sanctuary** (real 7.84 ac): fenced woodland on the
+- **Bill Jarvis Migratory Bird Sanctuary** (real 7.84 ac): woodland on the
   lakefront strip **x 100–200, z −420…−357** (100 × 63 m), south of the golf
-  (fence z −440) and north of the harbor, dense understory, one gate on the WEST
-  fence by the trail. Bird-bingo pen and plover pen relocate inside/adjacent.
+  (fence z −440) and north of the harbor. **HERO REWORK (2026-07-07, per the
+  Addison aerial): the fence is an ORGANIC loop** (crChain outline, gate + wooden
+  arch on the WEST run by the trail), and the interior is the map's
+  secret-garden ROOM: a winding crushed-limestone WALKING LOOP, dense layered
+  native planting (understory + prairie grasses + purple/yellow wildflowers)
+  kept off the path, three dappled clearings, and an **ELEVATED WOODEN DECK**
+  (x ~169–175, z ~−398…−394, h 2.3, stairs west) — the bird-watching perch,
+  sittable, overlooking a clearing. Entering grades the world (denser greener
+  fog, ducked exterior ambience, boosted birdsong) via the shared
+  `definePlace` cell pattern in framework.js — the same machinery Wrigleyville
+  adopts for its neighborhood cell. Bird-bingo pen and plover pen stay
+  inside/adjacent.
 - The DUAL Lakefront Trail comes down the golf lake side (x ≈ 211) to z ≈ −425,
   bends SW across the golf/sanctuary corridor and down the sanctuary's WEST fence
   (passing x ≈ 91), then continues south to the harbor west shore — the real

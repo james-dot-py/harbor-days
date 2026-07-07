@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { scene, rng, rand, toon, bmat, curveMat, gmap, pip } from './core.js';
 import { LAND } from './coast.js';
 import { collide, walkRects } from './props.js';
+import { createChibi } from './character.js';
 import * as CH from './data/chicago.js';
 
 // =====================================================================
@@ -396,23 +397,127 @@ function buildGolf(POSTS,RAILS){
   fenceRun([[b.x0,b.z0],[b.x1,b.z0]],{spacing:f.spacing,postH:f.postH,color:f.color,collideR:1.25},POSTS,RAILS); // north
 }
 
-// ---- Bird Sanctuary (fence + understory) ------------------------------
+// ---- Bird Sanctuary — the hero ROOM ------------------------------------
+// Organic fence loop + gate arch, layered native planting kept off the
+// interior walking loop (the loop RIBBON itself is built in paths.js so
+// pathSamples guards it), dappled clearings, and the elevated bird-watching
+// DECK (walkable via walkRects, sittable via the sanctuary pack).
 function buildSanctuary(POSTS,RAILS){
-  const S=CH.SANCTUARY,b=S.bounds;
-  for(const ln of rectLines(b))fenceRun(ln,{spacing:S.fence.spacing,postH:S.fence.postH,color:S.fence.color,collideR:1.2,gates:[S.gate]},POSTS,RAILS);
-  // dense understory shrubs (dark greens) inside the fence
-  const U=S.understory,cols=U.colors.map(c=>new THREE.Color(c));
-  const shrub=new THREE.InstancedMesh(new THREE.SphereGeometry(1,8,7),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),U.count);
-  const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),Sc=new THREE.Vector3(),V=new THREE.Vector3();
-  let placed=0,guard=0;
-  while(placed<U.count&&guard++<U.guard){
-    const x=rand(b.x0+1,b.x1-1),z=rand(b.z0+1,b.z1-1);
-    if(!pip(x,z,LAND))continue;
-    const s=rand(U.scale[0],U.scale[1]);
-    M.compose(V.set(x,s*0.75,z),Q.identity(),Sc.set(s,s*0.85,s));shrub.setMatrixAt(placed,M);
-    shrub.setColorAt(placed,cols[(rng()*cols.length)|0]);placed++;
+  const S=CH.SANCTUARY;
+  const outline=CH.sanctuaryOutline(),loop=CH.sanctuaryLoop();
+  // 1. the organic fence (west gate gap)
+  fenceRun(outline,{spacing:S.fence.spacing,postH:S.fence.postH,color:S.fence.color,collideR:1.2,gates:[S.gate]},POSTS,RAILS);
+  // 2. gate ARCH — the room's door
+  {
+    const A=S.arch,pm=toon(A.beam);
+    const pgeo=new THREE.CylinderGeometry(0.09,0.11,A.h,7);
+    for(const s of[-1,1]){
+      const p=new THREE.Mesh(pgeo,pm);p.position.set(A.x,A.h/2,A.z+s*A.w/2);scene.add(p);
+      collide(A.x,A.z+s*A.w/2,0.3,A.h*0.85);
+    }
+    const beam=new THREE.Mesh(new THREE.BoxGeometry(0.16,0.3,A.w+0.5),pm);beam.position.set(A.x,A.h+0.05,A.z);scene.add(beam);
+    const plank=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.42,2.2),toon(0xc9b183));plank.position.set(A.x,A.h-0.36,A.z);scene.add(plank);
   }
-  shrub.count=placed;shrub.instanceMatrix.needsUpdate=true;shrub.instanceColor.needsUpdate=true;scene.add(shrub);
+  // shared placement filters: inside the outline, off the loop, out of clearings
+  const clr2=S.understory.pathClear*S.understory.pathClear;
+  const offLoop=(x,z)=>{for(let i=0;i<loop.length;i++){const dx=x-loop[i][0],dz=z-loop[i][1];if(dx*dx+dz*dz<clr2)return false}return true};
+  const offClear=(x,z)=>{for(const[cx,cz,r]of S.clearings){const dx=x-cx,dz=z-cz;if(dx*dx+dz*dz<r*r)return false}return true};
+  const b=S.bounds;
+  // 3. dense understory shrubs (dark greens), layered sizes
+  {
+    const U=S.understory,cols=U.colors.map(c=>new THREE.Color(c));
+    const shrub=new THREE.InstancedMesh(new THREE.SphereGeometry(1,8,7),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),U.count);
+    const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),Sc=new THREE.Vector3(),V=new THREE.Vector3();
+    let placed=0,guard=0;
+    while(placed<U.count&&guard++<U.guard){
+      const x=rand(b.x0+1,b.x1-1),z=rand(b.z0+1,b.z1-1);
+      const s=rand(U.scale[0],U.scale[1]);                    // draws happen every attempt (stable rng cadence)
+      if(!pip(x,z,outline)||!offLoop(x,z)||!offClear(x,z))continue;
+      M.compose(V.set(x,s*0.75,z),Q.identity(),Sc.set(s,s*0.85,s));shrub.setMatrixAt(placed,M);
+      shrub.setColorAt(placed,cols[(rng()*cols.length)|0]);placed++;
+    }
+    shrub.count=placed;shrub.instanceMatrix.needsUpdate=true;shrub.instanceColor.needsUpdate=true;scene.add(shrub);
+  }
+  // 4. native prairie layer: tall grass tufts + purple/yellow wildflowers
+  {
+    const P=S.prairie;
+    const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),Sc=new THREE.Vector3(1,1,1),V=new THREE.Vector3();
+    const tufts=new THREE.InstancedMesh(new THREE.ConeGeometry(0.11,1.05,5),toon(P.tuftColor,{}),P.tufts);
+    let pt=0,guard=0;
+    while(pt<P.tufts&&guard++<P.tufts*6){
+      const x=rand(b.x0+1,b.x1-1),z=rand(b.z0+1,b.z1-1),s=rand(0.7,1.5);
+      if(!pip(x,z,outline)||!offLoop(x,z)||!offClear(x,z))continue;
+      M.compose(V.set(x,0.5*s,z),Q,Sc.set(s,s,s));tufts.setMatrixAt(pt++,M);
+    }
+    tufts.count=pt;tufts.instanceMatrix.needsUpdate=true;scene.add(tufts);
+    const fcols=P.flowerColors.map(c=>new THREE.Color(c));
+    const stems=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.02,0.02,0.5,4),toon(0x4f7a42,{}),P.flowers);
+    const heads=new THREE.InstancedMesh(new THREE.SphereGeometry(0.09,6,5),toon(0xffffff,{}),P.flowers);
+    let pf=0;guard=0;
+    while(pf<P.flowers&&guard++<P.flowers*6){
+      const x=rand(b.x0+1,b.x1-1),z=rand(b.z0+1,b.z1-1);
+      const ci=(rng()*fcols.length)|0;
+      if(!pip(x,z,outline)||!offLoop(x,z))continue;
+      M.compose(V.set(x,0.25,z),Q,Sc.set(1,1,1));stems.setMatrixAt(pf,M);
+      M.compose(V.set(x,0.55,z),Q,Sc.set(1,1,1));heads.setMatrixAt(pf,M);
+      heads.setColorAt(pf,fcols[ci]);pf++;
+    }
+    stems.count=heads.count=pf;
+    stems.instanceMatrix.needsUpdate=heads.instanceMatrix.needsUpdate=true;
+    heads.instanceColor.needsUpdate=true;scene.add(stems,heads);
+  }
+  // 5. dappled clearings — soft lighter-green circles
+  {
+    const M=new THREE.Matrix4(),Q=new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2,0,0)),Sc=new THREE.Vector3(),V=new THREE.Vector3();
+    const inst=new THREE.InstancedMesh(new THREE.CircleGeometry(1,20),bmat(0x8fd07c),S.clearings.length);
+    S.clearings.forEach(([cx,cz,r],i)=>{M.compose(V.set(cx,0.025,cz),Q,Sc.set(r,r*0.85,1));inst.setMatrixAt(i,M);});
+    inst.instanceMatrix.needsUpdate=true;scene.add(inst);
+  }
+  // 6. the DECK — elevated bird-watching platform (walkable + sittable)
+  {
+    const D=S.deck,cx=(D.x0+D.x1)/2,cz=(D.z0+D.z1)/2,w=D.x1-D.x0,d=D.z1-D.z0;
+    const wood=toon(D.wood),plankM=toon(D.plank),railM=toon(D.rail);
+    const pg=new THREE.CylinderGeometry(0.14,0.17,D.h,7);
+    for(const[px,pz]of[[D.x0+0.35,D.z0+0.35],[D.x1-0.35,D.z0+0.35],[D.x0+0.35,D.z1-0.35],[D.x1-0.35,D.z1-0.35],[cx,D.z0+0.35],[cx,D.z1-0.35]]){
+      const p=new THREE.Mesh(pg,wood);p.position.set(px,D.h/2,pz);scene.add(p);
+      collide(px,pz,0.26,D.h*0.9);
+    }
+    const top=new THREE.Mesh(new THREE.BoxGeometry(w+0.3,0.2,d+0.3),plankM);top.position.set(cx,D.h-0.1,cz);scene.add(top);
+    const rim=new THREE.Mesh(new THREE.BoxGeometry(w+0.44,0.3,d+0.44),wood);rim.position.set(cx,D.h-0.34,cz);scene.add(rim);
+    // guard rails on N/E/S rims (stairs land on the WEST edge): posts + top bar
+    const railPosts=[],railBars=[];
+    const edge=(x1,z1,x2,z2)=>{railBars.push([x1,z1,x2,z2]);
+      const len=Math.hypot(x2-x1,z2-z1),n=Math.max(2,Math.round(len/1.3));
+      for(let k=0;k<=n;k++)railPosts.push([x1+(x2-x1)*k/n,z1+(z2-z1)*k/n]);};
+    edge(D.x0,D.z0,D.x1,D.z0);                       // north rim
+    edge(D.x1,D.z0,D.x1,D.z1);                       // east rim (behind the sit spots)
+    edge(D.x0,D.z1,D.x1,D.z1);                       // south rim
+    edge(D.x0,D.z0,D.x0,D.stairs[0].z0);             // west rim, north of the stair landing
+    edge(D.x0,D.stairs[0].z1,D.x0,D.z1);             // west rim, south of the stair landing
+    const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),Sc=new THREE.Vector3(1,1,1),V=new THREE.Vector3(),E=new THREE.Euler();
+    const rpost=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.045,0.045,1.02,6),railM,railPosts.length);
+    railPosts.forEach(([px,pz],i)=>{M.compose(V.set(px,D.h+0.51,pz),Q.identity(),Sc.set(1,1,1));rpost.setMatrixAt(i,M);});
+    rpost.instanceMatrix.needsUpdate=true;scene.add(rpost);
+    const rbar=new THREE.InstancedMesh(new THREE.BoxGeometry(0.07,0.09,1),railM,railBars.length);
+    railBars.forEach(([x1,z1,x2,z2],i)=>{
+      const len=Math.hypot(x2-x1,z2-z1);E.set(0,Math.atan2(x2-x1,z2-z1),0);Q.setFromEuler(E);
+      M.compose(V.set((x1+x2)/2,D.h+1.02,(z1+z2)/2),Q,Sc.set(1,1,len));rbar.setMatrixAt(i,M);
+    });
+    rbar.instanceMatrix.needsUpdate=true;scene.add(rbar);
+    // rail collision (blocks stepping through at deck level; the skirt below)
+    for(const[x1,z1,x2,z2]of railBars){
+      const len=Math.hypot(x2-x1,z2-z1),n=Math.max(2,Math.round(len/0.8));
+      for(let k=0;k<=n;k++)collide(x1+(x2-x1)*k/n,z1+(z2-z1)*k/n,0.22,D.h+1.1);
+    }
+    // stairs — solid risers on the west side; each is its own walk rect
+    for(const st of D.stairs){
+      const sw=st.x1-st.x0,sd=st.z1-st.z0;
+      const step=new THREE.Mesh(new THREE.BoxGeometry(sw,st.h,sd),plankM);
+      step.position.set((st.x0+st.x1)/2,st.h/2,(st.z0+st.z1)/2);scene.add(step);
+      walkRects.push({x1:st.x0,x2:st.x1,z1:st.z0,z2:st.z1,h:st.h});
+    }
+    walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:D.h});
+  }
 }
 
 // ---- dog-beach fence --------------------------------------------------
@@ -542,6 +647,121 @@ function buildDiversey(POSTS,RAILS){
       const face=new THREE.Mesh(new THREE.CircleGeometry(0.26,14),bmat(0xf6efdd));face.position.set(h.x,1.9,h.z+0.41);scene.add(face);
     }
   }
+
+  // ===================================================================
+  //  TWO-TIER BAY BUILDING (Topgolf-style) + TALL PERIMETER NET
+  //  Built on the range's SOUTH edge: open dark steel frame, per-bay
+  //  divider walls, a railed upper deck, double-sided warm glow panels +
+  //  cool screens per bay, 4 posed chibi golfers, and a 12 m net wrapping
+  //  the field's W/N/E lines. Everything instanced (building ~6 draw calls,
+  //  net 2). NO shared rng — pure data + fixed geometry (determinism-safe).
+  // ===================================================================
+  Q.identity();S.set(1,1,1);
+  const B=D.bays,N=D.net;
+  const bx0=B.x0,bx1=B.x1,zF=B.zFront,dep=B.depth,zB=zF+dep,bzc=(zF+zB)/2;
+  const bw=(bx1-bx0)/B.perLevel,bW=bx1-bx0,bxc=(bx0+bx1)/2;
+  const sH=B.storyH,deckT=0.3,y1=sH+deckT,wallT=0.2,roofB=y1+sH,buildTop=roofB+0.3;
+  const setBox=(im,i,x,y,z,sx,sy,sz)=>{M.compose(V.set(x,y,z),Q,S.set(sx,sy,sz));im.setMatrixAt(i,M);};
+
+  // dark steel frame: roof slab + front/back top & sill beams (6 boxes)
+  const frame=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),toon(B.frame),6);
+  let fi=0;
+  setBox(frame,fi++,bxc,buildTop-0.15,bzc,bW+0.5,0.3,dep+0.5);   // flat roof slab
+  setBox(frame,fi++,bxc,roofB-0.1,zF,bW,0.22,0.22);              // front top beam
+  setBox(frame,fi++,bxc,y1-0.12,zF,bW,0.22,0.22);               // front deck beam
+  setBox(frame,fi++,bxc,0.25,zF,bW,0.22,0.22);                  // front ground sill
+  setBox(frame,fi++,bxc,roofB-0.1,zB,bW,0.22,0.22);             // back top beam
+  setBox(frame,fi++,bxc,0.25,zB,bW,0.22,0.22);                  // back ground sill
+  frame.instanceMatrix.needsUpdate=true;scene.add(frame);
+
+  // deck-toned slabs: ground platform + upper deck + a 3-step stair on the east end
+  const deckM=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),toon(B.deck),5);
+  let dmi=0;
+  setBox(deckM,dmi++,bxc,0.06,bzc,bW,0.12,dep);                 // ground platform
+  setBox(deckM,dmi++,bxc,sH+deckT/2,bzc,bW,deckT,dep);          // upper deck slab (top at y1)
+  const stTop=[y1/3,2*y1/3,y1];
+  for(let s2=0;s2<3;s2++)setBox(deckM,dmi++,bx1+1.6-s2*1.4,stTop[s2]/2,bzc,1.4,stTop[s2],2.8);
+  deckM.instanceMatrix.needsUpdate=true;scene.add(deckM);
+
+  // per-bay divider walls, both levels (perLevel+1 walls x 2 = 14)
+  const divM=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),toon(B.divider),(B.perLevel+1)*2);
+  let dvi=0;
+  for(let j=0;j<=B.perLevel;j++){const x=bx0+j*bw;
+    setBox(divM,dvi++,x,sH/2,bzc,wallT,sH,dep);                 // ground divider
+    setBox(divM,dvi++,x,y1+sH/2,bzc,wallT,sH,dep);}             // upper divider
+  divM.instanceMatrix.needsUpdate=true;scene.add(divM);
+
+  // warm glow panels on each bay's back wall (double-sided so both shots read them)
+  const glowZ=zB-0.3,glow=new THREE.InstancedMesh(new THREE.PlaneGeometry(bw-0.6,2.2),bmat(B.glow,{side:THREE.DoubleSide}),B.perLevel*2);
+  let gli=0;
+  for(let j=0;j<B.perLevel;j++){const x=bx0+(j+0.5)*bw;
+    M.compose(V.set(x,1.45,glowZ),Q,S.set(1,1,1));glow.setMatrixAt(gli++,M);
+    M.compose(V.set(x,y1+1.45,glowZ),Q,S.set(1,1,1));glow.setMatrixAt(gli++,M);}
+  glow.instanceMatrix.needsUpdate=true;scene.add(glow);
+
+  // small cool screens hung near each bay front
+  const scrZ=zF+0.5,screen=new THREE.InstancedMesh(new THREE.PlaneGeometry(1.1,0.75),bmat(B.screen,{side:THREE.DoubleSide}),B.perLevel*2);
+  let sci=0;
+  for(let j=0;j<B.perLevel;j++){const x=bx0+(j+0.5)*bw;
+    M.compose(V.set(x,2.3,scrZ),Q,S.set(1,1,1));screen.setMatrixAt(sci++,M);
+    M.compose(V.set(x,y1+2.3,scrZ),Q,S.set(1,1,1));screen.setMatrixAt(sci++,M);}
+  screen.instanceMatrix.needsUpdate=true;scene.add(screen);
+
+  // guard rail along the upper deck's north (front) edge: 13 posts + a top bar
+  const railH=1.0,railZ=zF+0.2,rail=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),toon(B.rail),14);
+  let ri=0;
+  for(let k=0;k<=12;k++)setBox(rail,ri++,bx0+k*(bW/12),y1+railH/2,railZ,0.08,railH,0.08);
+  setBox(rail,ri++,bxc,y1+railH,railZ,bW,0.08,0.08);            // top bar
+  rail.instanceMatrix.needsUpdate=true;scene.add(rail);
+
+  // colliders across the footprint (~2.4 m grid, r1.4) + the stair block
+  for(let cx=bx0;cx<=bx1+0.01;cx+=2.4)for(let cz=zF;cz<=zB+0.01;cz+=2.4)collide(cx,cz,1.4);
+  collide(bx1+1.6,bzc,1.5);collide(bx1+0.2,bzc,1.5);
+
+  // ---- 4 posed chibi golfers mid-swing (lvl0 on the mats, lvl1 on the deck) ----
+  const CIT=0.74;
+  const gpal=[
+    {suit:0xc85a4a,pants:0x35406e,skin:0xe6b98f,hair:0x2a1c12},
+    {suit:0x3f8f66,pants:0x2b3357,skin:0xc98a5a,hair:0x22160e},
+    {suit:0x5a6db0,pants:0x2f3540,skin:0xe0a878,hair:0x3a2618},
+    {suit:0xd6a63f,pants:0x3a3f45,skin:0xbf7a4a,hair:0x22160e},
+  ];
+  const gpose=[
+    {yaw:0.18,alx:-2.3,alz:0.55,arx:-2.5,arz:0.35,bx:0.05},     // top of backswing
+    {yaw:-0.12,alx:-2.4,alz:-0.5,arx:-2.2,arz:-0.55,bx:0.05},   // follow-through
+    {yaw:0.12,alx:-1.15,alz:0.25,arx:-1.35,arz:0.15,bx:0.22},   // downswing
+    {yaw:-0.16,alx:-1.9,alz:0.4,arx:-1.8,arz:0.35,bx:0.1},      // backswing mid
+  ];
+  B.golfers.forEach((g,i)=>{
+    const up=g.lvl===1,gy=up?y1:0,gz=up?zF+1.3:D.tees.z,p=gpose[i%4];
+    const {group,parts}=createChibi(Object.assign({scale:CIT},gpal[i%4]));
+    group.position.set(g.x,gy,gz);group.rotation.y=Math.PI+p.yaw;   // face NORTH, downrange
+    parts.legL.rotation.z=0.14;parts.legR.rotation.z=-0.14;         // stance
+    parts.armL.rotation.set(p.alx,0,p.alz);parts.armR.rotation.set(p.arx,0,p.arz);
+    parts.body.rotation.x=p.bx;
+    const club=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.024,1.5,6),toon(0x2b2b2b));
+    club.position.set(0.06,-1.25,0.05);club.rotation.z=0.2;parts.armR.add(club);   // gripped, follows the arm
+    scene.add(group);
+    if(!up)collide(g.x,gz,0.45);
+  });
+
+  // ---- TALL PERIMETER NET wrapping the field's W/N/E (inset toward the field) ----
+  const netH=N.h,ins=N.inset;
+  const netPath=[[r.x0+ins,r.z1],[r.x0+ins,r.z0+ins],[r.x1-ins,r.z0+ins],[r.x1-ins,r.z1]];
+  const poles=[],panels=[];
+  for(let e=0;e<netPath.length-1;e++){
+    const ax=netPath[e][0],az=netPath[e][1],bxp=netPath[e+1][0],bzp=netPath[e+1][1];
+    const dx=bxp-ax,dz=bzp-az,len=Math.hypot(dx,dz),n=Math.max(1,Math.round(len/N.poleEvery)),rot=Math.atan2(dx,dz);
+    for(let k=0;k<=n;k++){const t=k/n;if(!(e>0&&k===0))poles.push([ax+dx*t,az+dz*t]);}
+    for(let k=0;k<n;k++){const t=(k+0.5)/n;panels.push([ax+dx*t,az+dz*t,rot,len/n]);}
+  }
+  const poleM=new THREE.InstancedMesh(new THREE.CylinderGeometry(N.poleR,N.poleR,netH,8),toon(N.pole),poles.length);
+  poles.forEach((p,i)=>{M.compose(V.set(p[0],netH/2,p[1]),Q,S.set(1,1,1));poleM.setMatrixAt(i,M);});
+  poleM.instanceMatrix.needsUpdate=true;scene.add(poleM);
+  const panelG=new THREE.PlaneGeometry(1,netH);panelG.rotateY(Math.PI/2);   // unit width along z, netH tall
+  const panelM=new THREE.InstancedMesh(panelG,bmat(N.mesh,{transparent:true,opacity:N.opacity,side:THREE.DoubleSide}),panels.length);
+  panels.forEach((p,i)=>{E.set(0,p[2],0);Q.setFromEuler(E);M.compose(V.set(p[0],netH/2,p[1]),Q,S.set(1,1,p[3]));panelM.setMatrixAt(i,M);});
+  panelM.instanceMatrix.needsUpdate=true;scene.add(panelM);
 }
 
 export function buildStructures(){

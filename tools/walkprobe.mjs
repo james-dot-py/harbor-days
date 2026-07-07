@@ -33,6 +33,9 @@ function beachH(x,z){const b=CH.DOG_BEACH.bounds,s=CH.DOG_BEACH.slope;if(x<b.x0|
 const walkRects=[];
 for(const zc of CH.FINGER_DOCKS.rows)walkRects.push({x1:CH.FINGER_DOCKS.x0,x2:CH.FINGER_DOCKS.x0+CH.FINGER_DOCKS.len,z1:zc-CH.FINGER_DOCKS.halfW,z2:zc+CH.FINGER_DOCKS.halfW});
 for(const d of CH.DECKS)walkRects.push(d.walk);
+{ const D=CH.SANCTUARY.deck;                     // sanctuary bird-watching deck + stairs (matches buildSanctuary)
+  walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:D.h});
+  for(const st of D.stairs)walkRects.push({x1:st.x0,x2:st.x1,z1:st.z0,z2:st.z1,h:st.h}); }
 function onRect(x,z){for(const r of walkRects)if(x>=r.x1&&x<=r.x2&&z>=r.z1&&z<=r.z2)return r;return null}
 
 function walkable(x,z){
@@ -122,10 +125,8 @@ function fenceList(){
   F.push({a:[g.x0,g.z1],b:[g.x0,g.z0],gates:[]});         // golf west
   F.push({a:[g.x0,g.z1],b:[g.x1,g.z1],gates:[]});         // golf south
   F.push({a:[g.x0,g.z0],b:[g.x1,g.z0],gates:[]});         // golf north
-  F.push({a:[s.x0,s.z0],b:[s.x1,s.z0],gates:sg});         // sanctuary (4 sides, 1 gate)
-  F.push({a:[s.x1,s.z0],b:[s.x1,s.z1],gates:sg});
-  F.push({a:[s.x1,s.z1],b:[s.x0,s.z1],gates:sg});
-  F.push({a:[s.x0,s.z1],b:[s.x0,s.z0],gates:sg});
+  { const O=CH.sanctuaryOutline();                        // sanctuary: ORGANIC fence loop (1 gate)
+    for(let i=0;i<O.length-1;i++)F.push({a:O[i],b:O[i+1],gates:sg}); }
   for(const ln of CH.DOG_FENCE.lines) F.push({a:ln[0],b:ln[1],gates:CH.DOG_FENCE.gates});
   return F;
 }
@@ -172,7 +173,23 @@ console.log('\n--- sanctuary is the lakeside block (x100-200, z-420..-357) ---')
   expect(`sanctuary area ${area} == 6300 (100 x 63 lakeside block)`,area,6300);
   expect(`sanctuary north edge (${s.z0}) sits south of the golf south fence (${CH.GOLF.bounds.z1})`,s.z0>CH.GOLF.bounds.z1,true);
   const gt=CH.SANCTUARY.gate;
-  expect('sanctuary gate on the WEST fence (spans x100)',gt.x0<=s.x0&&gt.x1>=s.x0,true); }
+  expect('sanctuary gate on the WEST fence (spans x100)',gt.x0<=s.x0+2&&gt.x1>=s.x0,true); }
+
+console.log('\n--- sanctuary hero room: organic outline + interior loop + deck ---');
+{ const O=CH.sanctuaryOutline(),L=CH.sanctuaryLoop(),s=CH.SANCTUARY.bounds;
+  let out=0;for(const[x,z]of O)if(x<s.x0-1.5||x>s.x1+1.5||z<s.z0-1.5||z>s.z1+1.5)out++;
+  expect(`organic outline stays in the lakeside block (${out} escapees)`,out,0);
+  let bad=0;for(const[x,z]of L)if(!walkable(x,z))bad++;
+  expect(`interior walking loop fully walkable (${bad} bad of ${L.length})`,bad,0);
+  const D=CH.SANCTUARY.deck,dcx=(D.x0+D.x1)/2,dcz=(D.z0+D.z1)/2;
+  expect('deck platform walkable',walkable(dcx,dcz),true);
+  expect(`deck surface at h=${D.h}`,onRect(dcx,dcz).h,D.h);
+  for(const st of D.stairs)expect(`stair rect walkable at h=${st.h}`,onRect((st.x0+st.x1)/2,(st.z0+st.z1)/2).h,st.h);
+  for(const sp of CH.SANCTUARY.deck.sits)expect(`sit spot (${sp.x},${sp.z}) on the deck`,onRect(sp.x,sp.z)!==null,true);
+  // pip the loop inside the outline (the room contains its path)
+  const pipO=(x,z)=>{let c=false;for(let i=0,j=O.length-1;i<O.length;j=i++){const xi=O[i][0],zi=O[i][1],xj=O[j][0],zj=O[j][1];if(((zi>z)!==(zj>z))&&(x<(xj-xi)*(z-zi)/(zj-zi)+xi))c=!c}return c};
+  let outL=0;for(const[x,z]of L)if(!pipO(x,z))outL++;
+  expect(`interior loop fully inside the outline (${outL} out)`,outL,0); }
 
 // ===== Job 5: FURNITURE / PROP-VS-TRAIL AUDIT =====
 // Every data-driven prop (benches, trail lamps, signs, hedges, tennis +

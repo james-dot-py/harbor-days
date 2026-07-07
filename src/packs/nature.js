@@ -232,7 +232,7 @@ onWorldReady(player => {
   birds.forEach(b => scene.add(b));
   const idTargets = birds.map((g, i) => ({ group: g, species: SPECIES[i].name, isPlover: false }));
 
-  const SANC = { x0: 32, x1: 145, z0: -420, z1: -356 };   // = randPerch bounds (SANCTUARY.bounds)
+  const SANC = { x0: 32, x1: 180, z0: -420, z1: -356 };   // perch bounds — extended east so bingo birds range past the new watching DECK (~x172)
   function randPerch() { return { x: rr(SANC.x0, SANC.x1), z: rr(SANC.z0, SANC.z1), y: rr(0.7, 1.7) }; }
   let birdRelocT = 2;
   function relocateBirds() {
@@ -412,6 +412,8 @@ onWorldReady(player => {
   const gate = CH.SANCTUARY.gate;
   binocInters.push(addInteraction({ x: (gate.x0 + gate.x1) / 2, z: gate.z1, r: 2.4, label: 'birdwatch 🔭', onUse: enterBinoc }));
   binocInters.push(addInteraction({ x: 100, z: -342, r: 3.6, label: 'birdwatch 🔭', onUse: enterBinoc }));   // dog-beach vantage (scopes the plover >3m off)
+  { const D = CH.SANCTUARY.deck;                              // the elevated watching DECK — the hero perch
+    binocInters.push(addInteraction({ x: (D.x0 + D.x1) / 2, z: (D.z0 + D.z1) / 2, r: 2.6, label: 'birdwatch 🔭', onUse: enterBinoc })); }
 
   // ------------------------------ 3. FISHING -------------------------- //
   const RACK_X = 208, RACK_Z = -105, TX = 224, TZ = -105;   // rod rack on the peninsula pier deck; cast EAST into open lake

@@ -537,12 +537,52 @@ export const GOLF = {
 // Bill Jarvis Bird Sanctuary — fenced woodland on the lakefront strip, south
 // of the golf and north of the harbor (x 100-200, z -420..-357; 100 x 63 m),
 // dense understory, one gate on the WEST fence by the trail's jog-west.
+// BILL JARVIS MIGRATORY BIRD SANCTUARY — hero rework (2026-07-07, per
+// Downloads/addison harbor.png + harbor-new.md 5c): the fence is now an
+// ORGANIC loop (crChain through `outlineCtrl`), the interior is a lush ROOM —
+// winding walking LOOP, dense layered planting kept off the path, dappled
+// clearings, and an ELEVATED WOODEN DECK (climbable, sittable) overlooking a
+// clearing. Entering feels like walking into a separate room: framework
+// definePlace grades fog/light greener+denser inside and re-balances the
+// ambience (exterior ducked, birdsong boosted) — the shared CELL pattern
+// (see framework.js definePlace; Wrigleyville adopts the same machinery).
 export const SANCTUARY = {
-  bounds:{ x0:100, x1:200, z0:-420, z1:-357 },  // lakeside block: golf is north (z-440), harbor is south
-  gate:{ x0:99, x1:101, z0:-394, z1:-382 },     // gap in the WEST fence (x100), facing the trail
+  bounds:{ x0:100, x1:200, z0:-420, z1:-357 },  // coarse block (nature.js perch/cull bounds): golf north (z-440), harbor south
+  outlineCtrl:[                                  // organic fence loop (closed by crChain)
+    [100,-388],[102,-403],[110,-414],[126,-419],[148,-417],[170,-419],
+    [188,-413],[198,-400],[199,-385],[193,-372],[178,-362],[156,-358],
+    [134,-359],[116,-363],[104,-372],
+  ],
+  gate:{ x0:99, x1:102, z0:-393, z1:-383 },     // gap in the WEST run, facing the trail
+  arch:{ x:100.5, z:-388, w:3.6, h:2.6, beam:0x6d5a3a, text:'BIRD SANCTUARY' },  // gate arch — the room's door
   fence:{ color:0x6d5a3a, postH:1.2, spacing:2.6 },
-  understory:{ count:120, colors:[0x2f6b3a,0x3c7a44,0x27512f,0x356e3e], scale:[0.7,1.6], guard:3000 },
+  loopCtrl:[                                     // interior walking loop (closed by crChain; crushed limestone)
+    [103,-388],[112,-381],[122,-374],[135,-369],[150,-371],[163,-377],
+    [175,-386],[180,-397],[174,-407],[160,-412],[144,-410],[128,-404],
+    [114,-396],[106,-391],
+  ],
+  path:{ width:1.9, color:0xd9c9ac, y:0.055 },
+  clearings:[ [140,-390,7],[158,-392,6],[122,-408,5] ],   // dappled openings (x,z,r) — planting stays out
+  deck:{                                         // the bird-watching perch (walkable, sittable)
+    x0:169.5, x1:175, z0:-398.5, z1:-394, h:2.3, // platform walk rect
+    stairs:[ {x0:168.3,x1:169.5,z0:-397.5,z1:-395.5,h:1.72},
+             {x0:167.1,x1:168.3,z0:-397.5,z1:-395.5,h:1.15},
+             {x0:165.9,x1:167.1,z0:-397.5,z1:-395.5,h:0.57} ],
+    wood:0x8a6a48, rail:0x6d5a3a, plank:0x9c7c55,
+    sits:[ {x:174.1,z:-395.3,ry:-1.45},{x:174.1,z:-397.4,ry:-1.45} ],  // along the EAST rail, facing WEST over the interior + clearings
+  },
+  understory:{ count:200, colors:[0x2f6b3a,0x3c7a44,0x27512f,0x356e3e], scale:[0.7,1.7], guard:6000,
+               pathClear:2.3 },                  // keep planting off the loop + clearings
+  prairie:{ tufts:420, flowers:260,              // native planting: tall grasses + purple/yellow wildflowers
+            tuftColor:0x8fae5e, flowerColors:[0x9a6bd0,0xb98ae6,0xf2c14e,0xead06a] },
+  place:{ fadeS:2.0,                             // the room grade (framework definePlace)
+          grade:{ fogColor:0xa9c48f, fogNear:26, fogFar:120, ambGround:0x77b06e, ambI:1.0, sunI:0.72 },
+          amb:{ ext:0.25, bird:2.2 } },
 };
+// densified fence outline + interior loop (exported so builders + walkprobe
+// share ONE geometry source — walkable and rendered stay lockstep)
+export function sanctuaryOutline(){ const P=crChain([...SANCTUARY.outlineCtrl,SANCTUARY.outlineCtrl[0]],2.4); return P; }
+export function sanctuaryLoop(){ const P=crChain([...SANCTUARY.loopCtrl,SANCTUARY.loopCtrl[0]],2.2); return P; }
 
 // low fence ringing the dog-beach cove's landward sides (N/E/W), gates on
 // BOTH the west and east sides so the trail spur passes through; the south
