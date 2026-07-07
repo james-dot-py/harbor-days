@@ -20,3 +20,5 @@ import './watertoys.js';
 import './characters.js';
 import './wrigleyville.js';   // neighborhood two — the Wrigleyville cell
 import './wrigley-ride.js';   // the Red Line ride (Belmont ⇄ Addison)
+import './wrigley-gameday.js';   // the Wrigleyville game-day event cycle
+import './wrigley-npcs.js';   // neighborhood two — Wrigleyville street-life NPCs
