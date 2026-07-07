@@ -316,6 +316,13 @@ function updateBumpables(dt,player){
       const dx=player.x-b.group.position.x,dz=player.z-b.group.position.z,d2=dx*dx+dz*dz;
       if(b.armed){ if(d2<b.r2&&d2<nd2){nd2=d2;near=b;} }
       else if(d2>b.rearm2) b.armed=true;        // re-arm once the player leaves
+      // piggyback DISTANCE CULLING: posed-chibi groups are exactly the
+      // uncull-ed figures (makeNPC has its own); same hysteresis band as
+      // NPC_CULL. Position-proxy holders (instanced dogs) have no .visible
+      // that matters — setting it is harmless. Keeps the phone draw budget
+      // safe as lawnlife/badminton/golfer chibis pile up.
+      if(b.group.visible!==false){ if(d2>NPC_CULL_HIDE2)b.group.visible=false; }
+      else if(d2<NPC_CULL_SHOW2)b.group.visible=true;
     }
     if(near){ near.armed=false;_bumpSpeaker=near;_bumpT=3;
       bub.textContent=near.lines[(Math.random()*near.lines.length)|0]; }

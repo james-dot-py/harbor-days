@@ -283,7 +283,8 @@ function attemptHit(court){
     court.jState = 'outgoing'; court.windowOpen = false;
     court.mrally++;
     state.badmintonBest = Math.max(state.badmintonBest||0, court.mrally);
-    if(court.mrally % 5 === 0) toast('nice rally!', court.mrally + ' returns in a row 🏸');
+    if(court.mrally===5 || court.mrally===10 || court.mrally===20 || (court.mrally>20 && court.mrally%20===0))
+      toast('nice rally!', court.mrally + ' returns in a row 🏸');    // subtle milestones 5 / 10 / 20 …
   } else {                                                           // swung too early → whiff
     mayorMiss(court);
   }
@@ -332,13 +333,19 @@ function join(court){
   setShuttle(court, court.north.home.x, HIT_TALL, court.north.home.z);
   toast('you joined the rally!', 'press E as the birdie drops in 🏸');
 }
+// leaving is ONE deliberate press at any non-inbound moment: whatever birdie is
+// in play just drops (no ope), the waiting NPC steps back in, and the ambient
+// NPC rally resumes after ~1.5 s. A short cooldown blocks an instant rejoin.
 function leave(court){
   court.mode = 'ambient'; holdItem(null);
-  mparts.armR.rotation.z = 0.25;                       // restore the mayor's rest arm splay
-  court.south.target = { x:court.south.home.x, z:court.south.home.z };
-  court.flight = null; court.dropT = 0; court.rally = 0;
-  court.crossCount = 0; court.crossToMiss = 8 + (Math.random()*7|0);
-  court.holder = 'north'; court.serveTimer = 0.8;
+  mparts.armR.rotation.z = 0.25;                        // restore the mayor's rest arm splay
+  setShuttle(court, court.shuttle.px, 0.13, court.shuttle.pz);   // the live birdie just drops — no ope
+  court.south.target = { x:court.south.home.x, z:court.south.home.z };   // the waiting NPC steps back in
+  court.flight = null; court.windowOpen = false; court.mrally = 0;
+  court.jState = 'serveWait';                           // reset the joined sub-state for a future join
+  court.rally = 0; court.crossCount = 0; court.crossToMiss = 8 + (Math.random()*7|0);
+  court.holder = 'north'; court.dropT = 1.5;            // ambient NPC rally resumes after ~1.5 s
+  court.joinCooldown = 0.8;                             // a quick second E can't instantly rejoin
   court.inter.x = court.interAnchor.x; court.inter.z = court.interAnchor.z;
   court.inter.label = 'join the rally 🏸';
 }
@@ -401,7 +408,7 @@ onWorldReady(player => {
       mode:'ambient', flight:null, dropT:0, rally:0,
       crossCount:0, crossToMiss:8 + (Math.random()*7|0),
       holder:Math.random()<0.5?'north':'south', serveTimer:0.5 + ci*0.6 + Math.random()*0.8,
-      jState:'serveWait', windowOpen:false, mrally:0,
+      jState:'serveWait', windowOpen:false, mrally:0, joinCooldown:0,
       inter:null, interAnchor:null, mayorRacquet:null };
 
     if(cfg.joinable){
@@ -410,9 +417,12 @@ onWorldReady(player => {
       court.interAnchor = { x:ax, z:az };
       court.inter = addInteraction({ x:ax, z:az, r:2.8, priority:1, label:'join the rally 🏸',
         onUse:() => {
-          if(court.mode !== 'joined'){ join(court); }
-          else if(court.jState === 'incoming'){ attemptHit(court); }
-          else { leave(court); }
+          if(court.mode === 'joined'){
+            if(court.jState === 'incoming') attemptHit(court);   // timed return (or an early whiff)
+            else leave(court);                                    // ONE press exits at any non-inbound moment
+          } else if(court.joinCooldown <= 0){                     // gate: no instant rejoin right after leaving
+            join(court);
+          }
         }});
       C1 = court;
     }
@@ -426,6 +436,7 @@ onWorldReady(player => {
     _player = pl;
     for(let i=0;i<courts.length;i++){
       const c = courts[i];
+      if(c.joinCooldown > 0) c.joinCooldown -= dt;          // re-arm the join gate after a leave
       if(c.joinable && c.mode === 'joined') joinedUpdate(c, dt, t);
       else ambientUpdate(c, dt, t);
     }
