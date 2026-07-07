@@ -197,21 +197,114 @@ export function buildProps(){
     stems.instanceMatrix.needsUpdate=heads.instanceMatrix.needsUpdate=true;heads.instanceColor.needsUpdate=true;
     scene.add(stems,heads);
 
+    // Keith Haring "Self-Portrait": a bold bright-green OUTLINED figure — tube
+    // limbs, an OPEN ring torso + faceless ring head (visible gaps within the
+    // body), caught mid-motion (one arm up, one leg raised). Reads as a Haring
+    // line-drawing made solid, not filled blobs.
     const fig=new THREE.Group(),gm=toon(0x4ecb6e);
     const plinth=new THREE.Mesh(new THREE.CylinderGeometry(1.7,2,0.5,16),toon(0xd9cbb2));plinth.position.y=0.25;fig.add(plinth);
-    const torso=new THREE.Mesh(new THREE.SphereGeometry(0.85,10,9),gm);torso.scale.set(0.9,1.35,0.62);torso.position.y=2.6;fig.add(torso);
-    const head=new THREE.Mesh(new THREE.SphereGeometry(0.5,10,9),gm);head.position.y=4.05;fig.add(head);
-    function limb(len,r){const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r*0.85,len,7),gm);m.geometry.translate(0,-len/2,0);return m}
-    const armL=limb(1.5,0.2);armL.position.set(-0.75,3.35,0);armL.rotation.z=2.4;armL.rotation.x=-0.3;fig.add(armL);
-    const armR=limb(1.5,0.2);armR.position.set(0.75,3.35,0);armR.rotation.z=-2.6;armR.rotation.x=0.25;fig.add(armR);
-    const legL=limb(1.6,0.24);legL.position.set(-0.4,1.75,0);legL.rotation.z=0.35;fig.add(legL);
-    const legR=limb(1.6,0.24);legR.position.set(0.42,1.75,0);legR.rotation.z=-0.9;legR.rotation.x=0.4;fig.add(legR);
+    const TR=0.18,_yA=new THREE.Vector3(0,1,0),_d=new THREE.Vector3();
+    function tube(a,b,r=TR){const len=Math.hypot(b[0]-a[0],b[1]-a[1],b[2]-a[2]);
+      const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,8),gm);
+      m.position.set((a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2);
+      m.quaternion.setFromUnitVectors(_yA,_d.set(b[0]-a[0],b[1]-a[1],b[2]-a[2]).normalize());fig.add(m);return m}
+    function joint(p,r){const m=new THREE.Mesh(new THREE.SphereGeometry(r,10,9),gm);m.position.set(p[0],p[1],p[2]);fig.add(m);return m}
+    // OPEN torso frame (upright oval ring) — hollow, the signature cutout
+    const torso=new THREE.Mesh(new THREE.TorusGeometry(0.6,TR,8,22),gm);
+    torso.scale.set(0.82,1.25,0.62);torso.position.y=2.95;fig.add(torso);
+    // faceless ring head + neck
+    const head=new THREE.Mesh(new THREE.TorusGeometry(0.4,0.15,8,20),gm);
+    head.scale.set(1,1,0.75);head.position.y=4.62;fig.add(head);
+    tube([0,3.72,0],[0,4.2,0]);                              // neck
+    // shoulders + hips as joints so tubes read continuous
+    const shL=[-0.5,3.6,0],shR=[0.5,3.6,0],hipL=[-0.35,2.0,0],hipR=[0.35,2.0,0];
+    joint(shL,0.19);joint(shR,0.19);joint(hipL,0.2);joint(hipR,0.2);
+    // right arm UP (bent overhead), left arm swung out/down
+    const elbR=[1.02,4.5,0.05],handR=[0.75,5.35,0.12];
+    tube(shR,elbR);tube(elbR,handR);joint(elbR,0.17);joint(handR,0.19);
+    tube(shL,[-1.25,2.95,0.2]);joint([-1.25,2.95,0.2],0.19);
+    // right leg RAISED (knee up, striding forward), left leg planted back
+    const knR=[0.72,1.4,0.55],footR=[0.5,0.72,1.15];
+    tube(hipR,knR);tube(knR,footR);joint(knR,0.18);joint(footR,0.2);
+    tube(hipL,[-0.7,0.38,-0.3]);joint([-0.7,0.38,-0.3],0.2);
+    // three green motion streaks radiating from the body (Haring action lines)
     for(let k=0;k<3;k++){
-      const arc=new THREE.Mesh(new THREE.TorusGeometry(1.5+k*0.35,0.05,6,24,1.1),bmat(0xfdf6e6));
-      arc.position.y=2.7;arc.rotation.z=0.9+k*0.25;arc.rotation.y=rand(-0.4,0.4);fig.add(arc);
+      const arc=new THREE.Mesh(new THREE.TorusGeometry(1.35+k*0.4,0.07,6,20,0.9),gm);
+      arc.position.y=3.1;arc.rotation.z=1.0+k*0.3;arc.rotation.y=rand(-0.4,0.4);fig.add(arc);
     }
     const HR=CH.HARING;
     fig.scale.setScalar(HR.scale);fig.position.set(HR.pos[0],HR.pos[1],HR.pos[2]);fig.rotation.y=HR.ry;scene.add(fig);collide(HR.pos[0],HR.pos[2],HR.collide);
+  }
+
+  // ---- limestone edging boulders along the AIDS-garden paths (hand-placed) ----
+  // Big rough low-poly blocks edging the loop + connector, like the real garden.
+  // Zero shared rng: a LOCAL m32 drives per-boulder rotation/scale; each seed is
+  // probed against pathSamples and nudged clear (>~1.5 m off every ribbon), kept
+  // on grass (pip). Instanced (1 draw call); collide is jumpable (h=0.8).
+  {
+    const seeds=[[86,110],[84,126],[78,120],[90,140],[70,113],[60,108],[100,98],[88,150],[50,106],[40,104]];
+    const br=m32(0x10cb0017);
+    const clear=[];
+    for(const[sx,sz]of seeds){
+      let x=sx,z=sz;
+      // iteratively push directly away from the nearest ribbon sample until the
+      // nearest is >=1.9 m (sampling ~1.7 m => true distance to the ribbon >=1.5 m)
+      for(let k=0;k<24;k++){
+        let bi=-1,d2=Infinity;
+        for(let i=0;i<pathSamples.length;i++){const p=pathSamples[i];const e=(p[0]-x)**2+(p[1]-z)**2;if(e<d2){d2=e;bi=i}}
+        if(bi<0||d2>=1.9*1.9)break;
+        const p=pathSamples[bi];let ax=x-p[0],az=z-p[1];const L=Math.hypot(ax,az)||1;
+        x=p[0]+ax/L*1.95;z=p[1]+az/L*1.95;
+      }
+      if(pip(x,z,LAND))clear.push([x,z]);
+    }
+    const rock=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1,0),toon(0xb9b0a2,{}),clear.length);
+    const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),E=new THREE.Euler(),S=new THREE.Vector3(),V=new THREE.Vector3();
+    clear.forEach(([x,z],i)=>{
+      const sc=0.72+br()*0.5;                                   // ~0.72..1.22 m base radius
+      E.set(br()*Math.PI,br()*Math.PI*2,br()*Math.PI);Q.setFromEuler(E);
+      M.compose(V.set(x,sc*0.52,z),Q,S.set(sc*1.15,sc*0.78,sc*1.05));   // squat, boulder-ish
+      rock.setMatrixAt(i,M);
+      collide(x,z,sc*1.0,0.8);                                   // jumpable when airborne
+    });
+    rock.instanceMatrix.needsUpdate=true;scene.add(rock);
+  }
+
+  // ---- prairie planting beds (native tall grasses + purple coneflower masses) ----
+  // 3 organic clusters near the garden/lawn edges. Zero shared rng: a LOCAL m32
+  // jitters each blade/flower within ~5 m; every one is pip-guarded on land and
+  // kept off the ribbons. Exactly 3 draw calls: grass + flower stems + heads.
+  {
+    const centers=[[60,150],[120,165],[70,90]];
+    const grassCols=[0x8a9a5b,0x9fae6b,0x76863f].map(c=>new THREE.Color(c));
+    const purples=[0x9a6bd0,0xb58ae0].map(c=>new THREE.Color(c));
+    const pr=m32(0x7a1e0055);
+    const nBlade=40,nFlower=18,R=5;
+    const gN=centers.length*nBlade,fN=centers.length*nFlower;
+    const grass=new THREE.InstancedMesh(new THREE.ConeGeometry(0.07,0.95,4),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),gN);
+    const stems=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.03,0.03,0.62,4),toon(0x5c7b46,{}),fN);
+    const heads=new THREE.InstancedMesh(new THREE.SphereGeometry(0.14,8,7),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),fN);
+    const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),E=new THREE.Euler(),S=new THREE.Vector3(),V=new THREE.Vector3();
+    const clearOf=(x,z)=>{for(let i=0;i<pathSamples.length;i++){const p=pathSamples[i];if((p[0]-x)**2+(p[1]-z)**2<2.4*2.4)return false}return true};
+    const spot=(cx,cz)=>{for(let k=0;k<16;k++){const a=pr()*Math.PI*2,r=Math.sqrt(pr())*R,x=cx+Math.cos(a)*r,z=cz+Math.sin(a)*r;if(pip(x,z,LAND)&&clearOf(x,z))return[x,z]}return[cx,cz]};
+    let gi=0,fi=0;
+    for(const[cx,cz]of centers){
+      for(let b=0;b<nBlade;b++){
+        const[x,z]=spot(cx,cz),s=0.7+pr()*0.9;                  // blade height variance
+        E.set(pr()*0.18-0.09,pr()*Math.PI*2,pr()*0.18-0.09);Q.setFromEuler(E);
+        M.compose(V.set(x,0.475*s,z),Q,S.set(1,s,1));grass.setMatrixAt(gi,M);
+        grass.setColorAt(gi,grassCols[pr()*grassCols.length|0]);gi++;
+      }
+      for(let f=0;f<nFlower;f++){
+        const[x,z]=spot(cx,cz),h=0.55+pr()*0.35;
+        M.compose(V.set(x,h*0.5,z),Q.identity(),S.set(1,h/0.62,1));stems.setMatrixAt(fi,M);
+        M.compose(V.set(x,h+0.06,z),Q.identity(),S.set(1,1.25,1));heads.setMatrixAt(fi,M);
+        heads.setColorAt(fi,purples[pr()*purples.length|0]);fi++;
+      }
+    }
+    grass.instanceMatrix.needsUpdate=stems.instanceMatrix.needsUpdate=heads.instanceMatrix.needsUpdate=true;
+    grass.instanceColor.needsUpdate=heads.instanceColor.needsUpdate=true;
+    scene.add(grass,stems,heads);
   }
 
   // ---- summer life on the rocks: towels, umbrellas, coolers, blocks ----

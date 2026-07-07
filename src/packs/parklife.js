@@ -471,6 +471,47 @@ onWorldReady(() => {
     }
   }
 
+  // ================================================================= //
+  //  7) VOLLEYBALL on the south lawn — a rally frozen in progress: a net
+  //     mid-lawn, two players up at the net (arms up), two waiting, and the
+  //     ball hanging mid-arc above the tape. Static tableau (y=0), well clear
+  //     of every ribbon. Added draw calls: posts(1) net(1) ball(1) = 3.
+  // ================================================================= //
+  {
+    const NX=95, NZ=215, HW=3;                       // net centre + half-width (spans x 92..98)
+    // two posts (instanced)
+    const posts=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.06,0.07,2.0,8), toon(0xcfd4d8), 2);
+    [-HW,HW].forEach((ox,i)=>{ M.compose(V.set(NX+ox,1.0,NZ),Q.identity(),S.set(1,1,1)); posts.setMatrixAt(i,M); });
+    posts.instanceMatrix.needsUpdate=true; scene.add(posts);
+    // sagging net band — one plane, canvas mesh texture (grid + white top tape)
+    const ncv=document.createElement('canvas'); ncv.width=192; ncv.height=40;
+    const ng=ncv.getContext('2d'); ng.clearRect(0,0,192,40);
+    ng.strokeStyle='rgba(238,238,230,0.85)'; ng.lineWidth=1;
+    for(let gx=0;gx<=192;gx+=8){ ng.beginPath(); ng.moveTo(gx+0.5,6); ng.lineTo(gx+0.5,40); ng.stroke(); }
+    for(let gy=8;gy<=40;gy+=8){ ng.beginPath(); ng.moveTo(0,gy+0.5); ng.lineTo(192,gy+0.5); ng.stroke(); }
+    ng.fillStyle='#f6f2e6'; ng.fillRect(0,0,192,5);                        // top tape band
+    const netGeo=new THREE.PlaneGeometry(HW*2,1.0,16,1);
+    { const pos=netGeo.attributes.position;                                // sag the middle down (catenary-ish)
+      for(let i=0;i<pos.count;i++){ const px=pos.getX(i)/HW; pos.setY(i, pos.getY(i)-0.22*(1-px*px)); }
+      pos.needsUpdate=true; }
+    const net=new THREE.Mesh(netGeo, bmat(0xffffff,{map:new THREE.CanvasTexture(ncv),alphaTest:0.4,side:THREE.DoubleSide}));
+    net.position.set(NX,1.45,NZ); net.frustumCulled=false; scene.add(net);
+    // ball frozen mid-arc above the tape (on the north player's side, descending)
+    const ball=new THREE.Mesh(new THREE.SphereGeometry(0.16,12,10), toon(0xf4f1e6));
+    ball.position.set(NX+0.8,3.0,NZ-0.55); scene.add(ball);
+    // 4 chibis: two up at the net (arms up), two waiting to rotate in
+    const faceNet=(x,z)=>Math.atan2(NX-x, NZ-z);
+    const armsUp=parts=>{ parts.armL.rotation.x=-2.4; parts.armL.rotation.z=0.18;
+      parts.armR.rotation.x=-2.4; parts.armR.rotation.z=-0.18;
+      parts.body.rotation.x=-0.08; parts.head.rotation.x=-0.16; };
+    const ready=parts=>{ parts.armL.rotation.x=-0.32; parts.armR.rotation.x=-0.38;
+      parts.armL.rotation.z=-0.12; parts.armR.rotation.z=0.12; parts.body.rotation.x=0.05; };
+    [[95,213.0,1],[95,217.0,1],[90.5,212.0,0],[99.5,218.0,0]].forEach(([x,z,up])=>{
+      const {parts}=makeChibi(x,z,faceNet(x,z),nextPal());
+      (up?armsUp:ready)(parts);
+    });
+  }
+
   // ---- hoisted per-frame scratch (NO allocation in the loop) ----
   const _kv=new THREE.Vector3(), _tm=new THREE.Matrix4(), _ts=new THREE.Vector3(1,1,1);
   const _identQ=new THREE.Quaternion();
