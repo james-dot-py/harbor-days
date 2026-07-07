@@ -182,3 +182,57 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
   Diversey/Lincoln Park growth beyond the SW terminus (the trail ends at a future
   Diversey-Lincoln Park gate ~x55, z395) is still open.
 - West: neighborhoods behind LSD via the underpasses; ridable L.
+
+## WRIGLEY_GEOGRAPHY — neighborhood two (the Wrigleyville cell)
+
+**A separate CELL** (src/cells.js pattern): far west of the lakefront, behind the
+L backdrop, reached only by riding the Red Line from the Belmont stop cluster.
+Cells are mutually invisible (root-group visibility swap + per-cell walkability/
+clamp/minimap). Data: `src/data/wrigleyville.js`; builders: `src/wrigley/*`.
+
+### Anchors (Chicago grid carries over, true latitude)
+- Same z-scale as the lakefront: **Addison = z −400, Waveland = z −500** — the
+  cell sits at its real latitude (the lakefront's Addison underpass stays an
+  honest future on-foot gate). The ride Belmont (z +105) → Addison (z −400)
+  matches the real northbound Red Line.
+- E–W: 1 W-address unit = 1 game unit, anchored so the Red Line embankment
+  (real ~950 W) is **x −140**: `x = −140 − (Waddr − 950)`.
+- **Clark St diagonal**: centerline `x = −290 + 0.28·(z + 400)` (x −290 at
+  Addison → x −318 at Waveland, the real ~16° cant).
+- Cell bounds ~x −390…−110, z −590…−300; clamp x −365…−115, z −580…−310.
+
+| Feature | Position |
+|---|---|
+| Red Line embankment | x −148…−132 (solid berm, N–S full cell; bridge over Addison z −407…−393) |
+| Addison island platform | x −143…−137, z −444…−426, y 7.6; stair inside the north mass to the Addison sidewalk |
+| Sheffield Ave | x −190 (corridor −196…−184) |
+| Kenmore Ave stub | x −230, z −544…−494 (ball-hawk corner) |
+| Stadium block | Clark/Addison/Waveland/Sheffield; footprint poly in STADIUM_W |
+| Marquee | (−284.5, −409.5) facing the Clark & Addison corner |
+| Home plate → center field | (−262,−424) → (−214,−476); LF wall on Waveland, RF on Sheffield |
+| Scoreboard | (−212, −480), top y 20.5, atop the CF bleachers |
+| Gallagher Way plaza | east of Clark, z −494…−430 (Statue Row at its north edge) |
+| Murphy's Bleachers | SE corner Sheffield & Waveland (x −184…−168, z −494…−480) |
+| Engine 78 | 1052 W Waveland → x −250…−234, z −524…−508 |
+| Rooftop brownstones | N of Waveland x −226…−199 (middle one climbable, roof y 9.6) + E of Sheffield z −478…−430 |
+| Cubby Bear + Clark bar row | opposite the marquee + west of Clark z −488…−418 |
+
+### Walkability (game-day street closure = the clamp, diegetically)
+Walkable = corridor quads only (WALK_W in wrigleyville.js — the single
+definition, shared verbatim by main.js and walkprobe): Addison (station→Clark),
+Waveland (Sheffield→Clark + Kenmore stub), Sheffield (Addison→Waveland), Clark
+(Addison→Waveland), Gallagher Way, the station platform + stair, one climbable
+rooftop + its outdoor stair. Every corridor mouth ends at a **CPD blue wooden
+barricade** (BARRICADES_W) with an officer NPC; streets visually continue into
+a low-rise Lakeview backdrop band (BACKDROP_W).
+
+### Standing liberties (deliberate, keep)
+- The cell sits ~x −140 rather than the true ~x −800 (1.6 km inland) — the L
+  ride is a scripted transition, not literal track distance.
+- Stadium at land-scale footprint (1:2), 1:1-ish verticals — same rule as the
+  harbor basin ("a REAL harbor").
+- **Classic postcard Wrigley: no 2015+ video boards**, so the rooftop views
+  work. Hand-turned scoreboard only.
+- Perpetual game day (crowd inside, barricades out, bars loud). The lakefront's
+  Wrigley-glow backdrop gag stays for the lakefront; it hides while the
+  Wrigleyville cell is active (Wave-3 wiring).

@@ -2,6 +2,7 @@
 // pure geometry from coast.js + the new data, so we can assert exact points
 // without needing THREE / a browser. Pure JS mirrors of the engine funcs.
 import * as CH from '../src/data/chicago.js';
+import * as WV from '../src/data/wrigleyville.js';
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const smooth=t=>t*t*(3-2*t);
@@ -371,6 +372,44 @@ for(const [x,z] of [[176,-2],[184,-3],[190,-5],[168,-4],[180,-1]]) expect(`mouth
 
 console.log('\n--- Tip: harbor light sits on a walkable top step ---');
 expect(`harbor light pos (${CH.HARBOR_LIGHT.pos[0]},${CH.HARBOR_LIGHT.pos[1]}) walkable`,walkable(CH.HARBOR_LIGHT.pos[0],CH.HARBOR_LIGHT.pos[1]),true);
+
+// ===== WRIGLEYVILLE CELL — walkableW/surfaceYW are imported from the data
+// module itself (the engine uses the SAME functions — no mirror to drift).
+console.log('\n--- Wrigleyville: street corridors walkable ---');
+for(const [x,z] of [[-200,-400],[-140,-400],[-300,-400],[-190,-450],[-250,-500],[-230,-520],[-280,-460]])
+  expect(`street (${x},${z})`,WV.walkableW(x,z),true);
+expect('Clark diagonal mid-block (-304,-450) walkable',WV.walkableW(WV.clarkX(-450),-450),true);
+expect('Clark @ Waveland (-318,-500) walkable',WV.walkableW(WV.clarkX(-500),-500),true);
+
+console.log('\n--- Wrigleyville: the park + lots are NOT walkable (game day) ---');
+for(const [x,z] of [[-240,-450],[-260,-425],[-210,-480],[-176,-487],[-242,-516],[-221,-540]])
+  expect(`inside a lot (${x},${z}) NOT walkable`,WV.walkableW(x,z),false);
+
+console.log('\n--- Wrigleyville: barricade mouths end the corridors ---');
+for(const [x,z] of [[-120,-400],[-330,-400],[-334,-500],[-180,-500],[-190,-388],[-190,-510],[-230,-548],[-290,-388]])
+  expect(`beyond barricade (${x},${z}) NOT walkable`,WV.walkableW(x,z),false);
+
+console.log('\n--- Wrigleyville: Addison platform + stairs (elevated surfaces) ---');
+expect('platform center (-140,-435) walkable',WV.walkableW(-140,-435),true);
+expect('platform y = 7.6',WV.surfaceYW(-140,-435),7.6);
+expect('track bed west (-145.5,-450) NOT walkable',WV.walkableW(-145.5,-450),false);
+expect('embankment top away from platform (-140,-470) NOT walkable',WV.walkableW(-140,-470),false);
+expect('under the bridge (-140,-400) walkable at street level',WV.walkableW(-140,-400)&&WV.surfaceYW(-140,-400)===0,true);
+{ const yMid=WV.surfaceYW(-140,-418);
+  expect(`station stair mid (-140,-418) between floors (${yMid.toFixed(2)})`,yMid>1&&yMid<7.5,true); }
+expect('station stair landing (-140,-406) at street',WV.surfaceYW(-140,-406),0);
+
+console.log('\n--- Wrigleyville: the climbable rooftop ---');
+expect('roof center (-212.5,-515) walkable',WV.walkableW(-212.5,-515),true);
+expect('roof y = 9.6',WV.surfaceYW(-212.5,-515),9.6);
+{ const yMid=WV.surfaceYW(-206.5,-514);
+  expect(`rooftop stair mid (-206.5,-514) between floors (${yMid.toFixed(2)})`,yMid>1&&yMid<9.5,true); }
+expect('neighbor roof (-221,-515) NOT walkable (only one is open)',WV.walkableW(-221,-515),false);
+
+console.log('\n--- Wrigleyville: Gallagher Way plaza hugs the Clark diagonal ---');
+expect('plaza @ z-460 (clark+20) walkable',WV.walkableW(WV.clarkX(-460)+20,-460),true);
+expect('east of plaza @ z-460 (clark+36) NOT walkable (stadium)',WV.walkableW(WV.clarkX(-460)+36,-460),false);
+expect('plaza does not extend south of z-430 (clark+20,z-420) NOT walkable',WV.walkableW(WV.clarkX(-420)+20,-420),false);
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 process.exit(fail?1:0);

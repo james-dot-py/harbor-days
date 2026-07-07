@@ -5,8 +5,10 @@ import { mayor } from './character.js';
 import * as CH from './data/chicago.js';
 
 // ------------------------------ minimap --------------------------------
-export const mm={cv:$('mmc'),ctx:null,base:null,pings:[]};
-export function worldToMap(x,z){return[(x-CH.MAP.x0)/CH.MAP.w*CH.MAP.cw,(z-CH.MAP.z0)/CH.MAP.h*CH.MAP.ch]}
+export const mm={cv:$('mmc'),ctx:null,base:null,pings:[],cellBase:null,cellB:null};
+// cells.js swaps the base canvas + bounds per active cell (null = lakefront)
+export function mmSetCell(base,bounds){mm.cellBase=base;mm.cellB=bounds}
+export function worldToMap(x,z){const M=mm.cellB||CH.MAP;return[(x-M.x0)/M.w*M.cw,(z-M.z0)/M.h*M.ch]}
 export function mmInit(){
   mm.ctx=mm.cv.getContext('2d');
   const b=document.createElement('canvas');b.width=CH.MAP.cw;b.height=CH.MAP.ch;
@@ -51,7 +53,7 @@ export function mmPing(x,z){mm.pings.push({x,z,t:0})}
 export function mmDraw(dt,player){
   if(!mm.base)return;
   const g=mm.ctx;
-  g.clearRect(0,0,CH.MAP.cw,CH.MAP.ch);g.drawImage(mm.base,0,0);
+  g.clearRect(0,0,CH.MAP.cw,CH.MAP.ch);g.drawImage(mm.cellBase||mm.base,0,0);
   for(let i=mm.pings.length-1;i>=0;i--){
     const p=mm.pings[i];p.t+=dt;
     if(p.t>1.4){mm.pings.splice(i,1);continue}

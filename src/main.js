@@ -12,6 +12,7 @@ import { cam, keys, joy, jump, initInput } from './input.js';
 import { mmInit, mmDraw, initMinimapToggle } from './minimap.js';
 import * as CH from './data/chicago.js';
 import { worldReady, runUpdates, state } from './framework.js';
+import { beginCellCapture, endCellCapture, cellWalk, cellSurf, cellClamp } from './cells.js';
 import './packs/index.js';   // content packs (side-effect); loaded before world build
 
 // ---- dev/debug URL params (harmless in prod build) ----
@@ -21,10 +22,12 @@ const dbgNum=k=>DBG.has(k)?parseFloat(DBG.get(k)):null;
 
 // ---- build the world (order matters: single shared rng, top-to-bottom) ----
 buildSky();
+beginCellCapture();   // lakefront world → one cell root (cells.js); sky + mayor stay global
 buildCoast();
 buildPaths();
 buildProps();
 buildStructures();
+endCellCapture();
 buildMayor();
 
 // ------------------------ walkability + surface ------------------------
@@ -62,6 +65,7 @@ function canMove(nx,nz){
 }
 function onRect(x,z){for(const r of walkRects)if(x>=r.x1&&x<=r.x2&&z>=r.z1&&z<=r.z2)return r;return null}
 function walkable(x,z){
+  const cw=cellWalk();if(cw)return cw(x,z);   // active cell owns walkability
   if(onRect(x,z))return true;
   const bh=beachH(x,z);if(bh!==null)return z>CH.DOG_BEACH.walkZMin;
   if(pip(x,z,LAND))return true;
@@ -73,6 +77,7 @@ function walkable(x,z){
   return false;
 }
 function surfaceY(x,z){
+  const cs=cellSurf();if(cs)return cs(x,z);   // active cell owns surface height
   const r=onRect(x,z);if(r)return r.h;
   const bh=beachH(x,z);if(bh!==null)return bh;
   const q=coastQuery(x,z);
@@ -136,7 +141,8 @@ function frame(now){
     const dx=player.x-c.x,dz=player.z-c.z,R=c.r+0.34,d2=dx*dx+dz*dz;
     if(d2<R*R&&d2>1e-6){const d=Math.sqrt(d2);player.x=c.x+dx/d*R;player.z=c.z+dz/d*R}
   }
-  player.x=clamp(player.x,CH.WORLD_CLAMP.xMin,CH.WORLD_CLAMP.xMax);player.z=clamp(player.z,CH.WORLD_CLAMP.zMin,CH.WORLD_CLAMP.zMax);
+  const CLW=cellClamp()||CH.WORLD_CLAMP;
+  player.x=clamp(player.x,CLW.xMin,CLW.xMax);player.z=clamp(player.z,CLW.zMin,CLW.zMax);
   // ---- vertical: jump / fall / grounded / afloat ----
   const surf=surfaceY(player.x,player.z);
   jump.buf=Math.max(0,jump.buf-dt);
