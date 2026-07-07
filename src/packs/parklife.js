@@ -40,6 +40,27 @@ function groundY(x,z){
   return 0;
 }
 
+// ---- shared shore-facing helpers (used by BOTH the south-steps hangout AND the
+//      Diversey corner, so every step-sitter faces the water in front of them and
+//      the "faces due south" bug can't recur when the shoreline curves) ----------
+// seaward unit normal = normalized gradient of coastQuery.lat (points toward the
+// water); atan2(n.x,n.z) is the yaw that makes a chibi face the lake there.
+function seaNormal(x,z){
+  const e=0.6;
+  const a=coastQuery(x+e,z), b=coastQuery(x-e,z), c=coastQuery(x,z+e), d=coastQuery(x,z-e);
+  let nx=(a?a.lat:0)-(b?b.lat:0), nz=(c?c.lat:0)-(d?d.lat:0);
+  const L=Math.hypot(nx,nz)||1; return {x:nx/L, z:nz/L};
+}
+function seawardYaw(x,z){ const n=seaNormal(x,z); return Math.atan2(n.x,n.z); }
+// march (x,z) onto the isocontour lat==target (Newton on the distance field;
+// |grad lat|~=1 so it settles in a couple of steps).
+function marchLat(x,z,target){
+  for(let k=0;k<24;k++){ const q=coastQuery(x,z); if(!q)break;
+    const d=target-q.lat; if(Math.abs(d)<0.05)break;
+    const n=seaNormal(x,z); x+=n.x*d; z+=n.z*d; }
+  return {x,z,n:seaNormal(x,z)};
+}
+
 // ---- palettes (hardcoded → deterministic, no world rng) --------------
 const PAL = [
   {suit:0xd4694f,pants:0x3c4a63,skin:0xe8b48c,hair:0x3a2a1e},
@@ -58,6 +79,33 @@ const PAL = [
 ];
 let _pi = 0;
 function nextPal(){ return PAL[_pi++ % PAL.length]; }
+
+// ---- posed-chibi "ope" bump lines (midwestern, one pool per pose type) ----
+const LINES_SUN    = ["ope — you're blockin' the sun, bud","five more minutes","ope, sorry — towel's taken","SPF hundred, you betcha"];
+const LINES_STEP   = ["ope","best seats in the city","ope — watch the ledge there","gorgeous out, eh?"];
+const LINES_PICNIC = ["ope — mind the blanket!","pop's in the cooler, help yourself","we got plenty of brats"];
+const LINES_KITE   = ["she's really up there, eh?","forty years flyin' kites"];
+const LINES_ANGLER = ["shhh — you'll scare the perch","they're bitin' today"];
+const LINES_VOLLEY = ["ope — heads up!","little help?"];
+const LINES_CORNER = ["there's the Hancock","ope — take a seat, plenty of room"];
+
+// Every posed chibi registers here so the player can bump it for a line, the
+// way framework's makeNPC does. These figures are ALL static (never moved in
+// the update loop), so we precompute a fixed world-space head anchor ONCE at
+// registration: seated poses drop the group + keep the head upright, but the
+// LYING pose tips the whole group -90° about x, so the head part sits off the
+// group origin in -z, not +y. Reading parts.head's actual world position (not a
+// scalar y-offset) gets the bubble above the body for every pose. The +0.56*sc
+// crown lift mirrors makeNPC's 2.78-vs-2.22 head-radius offset.
+//   bumpable: {group, anchor:Vector3, lines, armed}
+const bumpables = [];
+const _hwv = new THREE.Vector3();               // build-time scratch (not per-frame)
+function registerBump(group, parts, lines){
+  group.updateWorldMatrix(true, true);
+  parts.head.getWorldPosition(_hwv);
+  const sc = group.scale.x || 1;
+  bumpables.push({ group, anchor:new THREE.Vector3(_hwv.x, _hwv.y + 0.56*sc, _hwv.z), lines, armed:true });
+}
 
 function makeChibi(x,z,ry,pal,scale=CITIZEN){
   const {group,parts} = createChibi(Object.assign({scale}, pal));
@@ -118,6 +166,7 @@ onWorldReady(() => {
       const sx=p.x+ox, sz=p.z+oz, ry=Math.atan2(p.x-sx,p.z-sz);
       const {group,parts}=makeChibi(sx,sz,ry,nextPal());
       poseSeated(group,parts,0);
+      registerBump(group,parts,LINES_PICNIC);
     }
     // cooler + a couple of food props on the blanket
     coolerSpots.push({x:p.x+1.25, z:p.z-0.9});
@@ -175,6 +224,7 @@ onWorldReady(() => {
 
     const {group,parts} = makeChibi(su.x, su.z, 0, nextPal());
     poseLying(group,parts,y);
+    registerBump(group,parts,LINES_SUN);
 
     if(su.glasses) glassSpots.push({x:su.x, y:y+0.30+0.4, z:su.z-1.6});  // over the (upturned) face
     if(su.book){
@@ -213,6 +263,7 @@ onWorldReady(() => {
     parts.armR.rotation.x = -1.15; parts.armR.rotation.z = 0.1;        // rod arm up & out
     parts.armL.rotation.x = -0.75; parts.armL.rotation.z = -0.1;
     parts.body.rotation.x = 0.05;
+    registerBump(group,parts,LINES_ANGLER);
     // rod: base near the hands, angled up & out over the water (east = +x)
     E.set(0,0,-0.85); Q.setFromEuler(E);              // tilt the y-cylinder forward
     M.compose(V.set(a.x+0.55, y+1.5, a.z), Q, S.set(1,1,1));
@@ -230,6 +281,7 @@ onWorldReady(() => {
   kf.parts.armR.rotation.x = -2.7;  kf.parts.armR.rotation.z = -0.15;   // right arm up on the line
   kf.parts.armL.rotation.x = -0.5;
   kf.parts.body.rotation.x = -0.18;                                     // lean back, watching aloft
+  registerBump(kf.group, kf.parts, LINES_KITE);
 
   // hand anchor for the string (arm is static → compute once)
   kf.group.updateWorldMatrix(true, true);
@@ -266,40 +318,47 @@ onWorldReady(() => {
   const KSPD = 0.85;                       // figure-8 angular speed
 
   // ================================================================= //
-  //  5) SOUTH-STEPS SKYLINE HANGOUT — the south-facing rocks terraces
-  //     (z~245-300) are THE spot to watch the downtown skyline. Everyone
-  //     turns SOUTH (+z): two couples sitting with their legs over the step
-  //     edge, a solo with a little radio, and one standing, pointing out the
-  //     Hancock. Heights are snapped to each figure's step via groundY
-  //     (coastQuery/tierAt), same as the sunbathers. Static poses -> raw
-  //     createChibi (added after all others, so no palette shuffle above).
+  //  5) SOUTH-STEPS SKYLINE HANGOUT — the rocks terraces here (z~252-274)
+  //     are THE spot to watch the lake + downtown skyline. This stretch of
+  //     shore faces EAST/SSE, so everyone turns to the LOCAL seaward normal
+  //     (seawardYaw, shared with the Diversey corner) — NOT a hardcoded
+  //     south — so they face the water in front of them wherever the shore
+  //     curves: two couples sitting with their legs over the step edge, a
+  //     solo with a little radio, and one standee pointing out at the
+  //     skyline. Heights snap to each figure's step via groundY
+  //     (coastQuery/tierAt), same as the sunbathers. Along-shore (z)
+  //     positions are unchanged. Static poses -> raw createChibi (added
+  //     after all others, so no palette shuffle above).
   // ================================================================= //
   {
-    function sitter(x,z,ry){                       // legs over the step edge, facing south
+    function sitter(x,z){                          // legs over the step edge, facing the water
       const y = groundY(x,z);
-      const {group,parts} = makeChibi(x,z,ry,nextPal());
+      const {group,parts} = makeChibi(x,z,seawardYaw(x,z),nextPal());
       poseSeated(group,parts,y);
+      registerBump(group,parts,LINES_STEP);
     }
-    function pointer(x,z,ry){                       // "there's the Hancock" — arm up at the skyline
+    function pointer(x,z){                          // "there's the skyline" — arm up out at the lake
       const y = groundY(x,z);
-      const {group,parts} = makeChibi(x,z,ry,nextPal());
+      const {group,parts} = makeChibi(x,z,seawardYaw(x,z),nextPal());
       group.position.y = y;
-      parts.armR.rotation.x = -2.35; parts.armR.rotation.z = -0.18;   // arm up, pointing out at the skyline
+      parts.armR.rotation.x = -2.35; parts.armR.rotation.z = -0.18;   // arm up, pointing seaward at the skyline
       parts.armL.rotation.x = -0.12;
-      parts.body.rotation.x = -0.06; parts.head.rotation.x = -0.18;    // chin up toward the Hancock
+      parts.body.rotation.x = -0.06; parts.head.rotation.x = -0.18;    // chin up toward the skyline
+      registerBump(group,parts,LINES_CORNER);
     }
-    sitter(154.0,252,0.10);  sitter(155.5,252,-0.06);   // couple 1 (side by side)
-    sitter(157.0,268,0.08);  sitter(158.5,268,-0.05);   // couple 2
-    sitter(153.0,260,0.02);                              // solo — radio beside them
-    pointer(156.0,274,-0.12);                            // the standee, pointing south
-    // the solo's little radio on the step, speaker facing south
-    const rx=154.4, rz=260, rgy=groundY(rx,rz);
+    sitter(154.0,252);  sitter(155.5,252);   // couple 1 (adjacent steps)
+    sitter(157.0,268);  sitter(158.5,268);   // couple 2
+    sitter(153.0,260);                        // solo — radio beside them
+    pointer(156.0,274);                       // the standee, pointing seaward
+    // the solo's little radio, set beside them along the shore tangent, face seaward
+    const ox=153.0, oz=260, n=seaNormal(ox,oz);
+    const rx=ox-n.z*1.3, rz=oz+n.x*1.3, rgy=groundY(rx,rz), rry=Math.atan2(n.x,n.z);
     const radioBody = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.22,0.15), toon(0x2b2b32));
-    radioBody.position.set(rx,rgy+0.11,rz); scene.add(radioBody);
+    radioBody.position.set(rx,rgy+0.11,rz); radioBody.rotation.y=rry; scene.add(radioBody);
     const radioFace = new THREE.Mesh(new THREE.BoxGeometry(0.34,0.15,0.02), toon(0x50525c));
-    radioFace.position.set(rx,rgy+0.11,rz+0.085); scene.add(radioFace);
+    radioFace.position.set(rx+n.x*0.085,rgy+0.11,rz+n.z*0.085); radioFace.rotation.y=rry; scene.add(radioFace);
     const radioAnt = new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,0.3,5), toon(0x9aa0a6));
-    radioAnt.position.set(rx+0.16,rgy+0.34,rz); radioAnt.rotation.z=-0.3; scene.add(radioAnt);
+    radioAnt.position.set(rx+n.x*0.16,rgy+0.34,rz+n.z*0.16); radioAnt.rotation.z=-0.3; scene.add(radioAnt);
   }
 
   // ================================================================= //
@@ -317,23 +376,7 @@ onWorldReady(() => {
   {
     const dc = m32(48823);                       // local jitter rng for the corner
     const qI = new THREE.Quaternion();           // identity (upright props)
-
-    // seaward unit normal = normalized gradient of coastQuery.lat (points to
-    // the water); atan2(n.x,n.z) is the yaw that faces the lake there.
-    function seaN(x,z){
-      const e=0.6;
-      const a=coastQuery(x+e,z), b=coastQuery(x-e,z), c=coastQuery(x,z+e), d=coastQuery(x,z-e);
-      let nx=(a?a.lat:0)-(b?b.lat:0), nz=(c?c.lat:0)-(d?d.lat:0);
-      const L=Math.hypot(nx,nz)||1; return {x:nx/L, z:nz/L};
-    }
-    // march (x,z) onto the isocontour lat==target (Newton on the distance
-    // field; |grad lat|~=1 so it settles in a couple of steps).
-    function marchLat(x,z,target){
-      for(let k=0;k<24;k++){ const q=coastQuery(x,z); if(!q)break;
-        const d=target-q.lat; if(Math.abs(d)<0.05)break;
-        const n=seaN(x,z); x+=n.x*d; z+=n.z*d; }
-      return {x,z,n:seaN(x,z)};
-    }
+    // marchLat / seaNormal are the shared module-level helpers (see top of file).
 
     const bookSpots=[];   // {x,y,z,ry,tilt} — collected across sitters, one InstancedMesh at the end
 
@@ -350,6 +393,7 @@ onWorldReady(() => {
       if(opt.book) bookSpots.push({x:p.x+p.n.x*0.34,y:y+0.6,z:p.z+p.n.z*0.34,ry,tilt:-0.6});
       if(opt.point){ parts.armR.rotation.x=-2.15; parts.armR.rotation.z=-0.15;   // pointing out at the boats
                      parts.armL.rotation.x=-0.2; parts.head.rotation.x=-0.12; }
+      registerBump(group,parts, opt.point ? LINES_CORNER : LINES_STEP);
       return p;
     }
     // seeds track the shore arc (east-facing z~330 -> south-facing z~394);
@@ -386,6 +430,7 @@ onWorldReady(() => {
         const sx=p.x+ox, sz=p.z+oz, ry=Math.atan2(p.x-sx,p.z-sz);
         const {group,parts}=makeChibi(sx,sz,ry,nextPal());
         poseSeated(group,parts,groundY(sx,sz));
+        registerBump(group,parts,LINES_PICNIC);
       }
       coolSpots.push({x:p.x+1.2, z:p.z-0.85});
       foodSpots2.push({x:p.x+0.25,y:0.12,z:p.z+0.1,c:0xf2c45a});           // roll
@@ -408,9 +453,11 @@ onWorldReady(() => {
         poseSeated(group,parts,y);
         bookSpots.push({x:su.x+Math.sin(ry)*0.34,y:y+0.6,z:su.z+Math.cos(ry)*0.34,ry,tilt:-0.6});
         towelSpots.push({x:su.x,z:su.z,ry,col:su.col});
+        registerBump(group,parts,LINES_STEP);
       } else {
         poseLying(group,parts,y);                                          // lies head-north (like the rocks sunbathers)
         towelSpots.push({x:su.x,z:su.z,ry:0,col:su.col});
+        registerBump(group,parts,LINES_SUN);
       }
     }
 
@@ -450,6 +497,7 @@ onWorldReady(() => {
       parts.armR.rotation.x=-2.6; parts.armR.rotation.z=-0.25;             // wound up mid-throw
       parts.armL.rotation.x=-0.55; parts.body.rotation.x=-0.14;
       parts.legR.rotation.x=0.25;                                          // slight stride
+      registerBump(group,parts,LINES_CORNER);
 
       const dgx=os.x+4.6, dgz=os.z-1.0, dgy=groundY(dgx,dgz);
       const dog=new THREE.Group(), dm=toon(0xe6c98c);
@@ -507,8 +555,9 @@ onWorldReady(() => {
     const ready=parts=>{ parts.armL.rotation.x=-0.32; parts.armR.rotation.x=-0.38;
       parts.armL.rotation.z=-0.12; parts.armR.rotation.z=0.12; parts.body.rotation.x=0.05; };
     [[95,213.0,1],[95,217.0,1],[90.5,212.0,0],[99.5,218.0,0]].forEach(([x,z,up])=>{
-      const {parts}=makeChibi(x,z,faceNet(x,z),nextPal());
+      const {group,parts}=makeChibi(x,z,faceNet(x,z),nextPal());
       (up?armsUp:ready)(parts);
+      registerBump(group,parts,LINES_VOLLEY);
     });
   }
 
@@ -516,7 +565,12 @@ onWorldReady(() => {
   const _kv=new THREE.Vector3(), _tm=new THREE.Matrix4(), _ts=new THREE.Vector3(1,1,1);
   const _identQ=new THREE.Quaternion();
 
-  registerUpdate((dt,t) => {
+  // ---- posed-chibi bump "ope" bubble: ONE reusable div, mirrors makeNPC ----
+  const npcBubble=document.createElement('div'); npcBubble.className='npcbubble'; document.body.appendChild(npcBubble);
+  const _bv=new THREE.Vector3();                    // hoisted head-projection scratch
+  let bumpSpeaker=null, bumpT=0, bumpScan=0;        // current speaker, bubble life (s), scan throttle (s)
+
+  registerUpdate((dt,t,player) => {
     // --- kite figure-8 + wind rhythm ---
     const th = t*KSPD;
     const gust = Math.sin(t*0.31);                     // slow wind; dips the kite on the low side
@@ -559,5 +613,34 @@ onWorldReady(() => {
     }
     bobRed.instanceMatrix.needsUpdate = true;
     bobWht.instanceMatrix.needsUpdate = true;
+
+    // --- posed-chibi "ope" bumps (throttled scan + one shared bubble) ---
+    bumpScan -= dt;
+    if(bumpScan<=0){                                   // ~5 Hz: cheap enough for ~40 static figures
+      bumpScan=0.2;
+      let near=null, nd2=1.3225;                       // trigger radius 1.15m^2 (also the nearest-so-far)
+      for(let i=0;i<bumpables.length;i++){
+        const b=bumpables[i], dx=player.x-b.group.position.x, dz=player.z-b.group.position.z, d2=dx*dx+dz*dz;
+        if(b.armed){ if(d2<nd2){ nd2=d2; near=b; } }
+        else if(d2>6.76) b.armed=true;                 // re-arm once the player leaves 2.6m
+      }
+      if(near){                                        // nearest armed figure within reach says a line, then disarms
+        near.armed=false; bumpSpeaker=near; bumpT=3;
+        npcBubble.textContent=near.lines[(Math.random()*near.lines.length)|0];
+      }
+    }
+    // project the live bubble to the speaker's head every frame (mirror makeNPC's math)
+    if(bumpT>0 && bumpSpeaker){
+      bumpT-=dt;
+      if(bumpT<=0){ npcBubble.style.display='none'; bumpSpeaker=null; }
+      else{
+        _bv.copy(bumpSpeaker.anchor);
+        const dcam=_bv.distanceTo(camera.position); _bv.project(camera);
+        if(_bv.z>1 || dcam>30) npcBubble.style.display='none';           // behind camera / too far
+        else{ npcBubble.style.display='block';
+          npcBubble.style.left=((_bv.x*0.5+0.5)*innerWidth).toFixed(0)+'px';
+          npcBubble.style.top =((-_bv.y*0.5+0.5)*innerHeight).toFixed(0)+'px'; }
+      }
+    }
   });
 });

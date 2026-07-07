@@ -22,9 +22,10 @@ function buildSegs(pts){const segs=[];for(let i=0;i<pts.length-1;i++){const ax=p
 const COAST_SEGS=[buildSegs(COAST_MAIN),buildSegs(COAST_PEN),buildSegs(COAST_GOLF),buildSegs(COAST_MOUTH),buildSegs(COAST_CORNER)];
 const TIP_SEGS=buildSegs(COAST_TIP);
 const QUERY_SEGS=[...COAST_SEGS,TIP_SEGS];      // coastQuery scans the tip too (COAST_SEGS stays 5 for props/beach-life)
-function tierProfile(zc){const rocks=zc>CH.TIER_ROCKS.zMin&&zc<CH.TIER_ROCKS.zMax;return rocks?{w:CH.TIER_ROCKS.w,step:CH.TIER_ROCKS.step}:{w:CH.TIER_DEFAULT.w,step:CH.TIER_DEFAULT.step}}
+function tierProfile(zc){const R=CH.TIER_ROCKS;if(zc>R.zMin&&zc<R.zMax){if(zc>R.cornerZ0){const f=clamp((zc-R.cornerZ0)/(R.cornerZ1-R.cornerZ0),0,1);const w=R.w.slice();w[w.length-1]=R.w[w.length-1]+(R.cornerPromW-R.w[w.length-1])*f;return{w,step:R.step}}return{w:R.w,step:R.step}}return{w:CH.TIER_DEFAULT.w,step:CH.TIER_DEFAULT.step}}
 function profileTotal(zc){const p=tierProfile(zc);let s=0;for(const w of p.w)s+=w;return s}
-function coastQuery(x,z){let best=null,bd2=1e9;for(const C of QUERY_SEGS)for(const s of C){const px=x-s.ax,pz=z-s.az;let t=px*s.tx+pz*s.tz;t=clamp(t,0,s.len);const cx=s.ax+s.tx*t,cz=s.az+s.tz*t;const ddx=x-cx,ddz=z-cz,d2=ddx*ddx+ddz*ddz;if(d2<bd2){bd2=d2;best={lat:ddx*s.nx+ddz*s.nz,d2,z:cz}}}if(!best)return null;best.ae=Math.sqrt(Math.max(0,best.d2-best.lat*best.lat));return best}
+function inPierChannel(x,z){const P=CH.PIER_CHANNEL;if(!P)return false;if(x<P.x0||x>P.x1||z>P.zMax)return false;const topZ=P.topZ0+(P.topZ1-P.topZ0)*(x-P.x0)/(P.x1-P.x0);return z>=topZ}
+function coastQuery(x,z){let best=null,bd2=1e9;for(const C of QUERY_SEGS)for(const s of C){const px=x-s.ax,pz=z-s.az;let t=px*s.tx+pz*s.tz;t=clamp(t,0,s.len);const cx=s.ax+s.tx*t,cz=s.az+s.tz*t;const ddx=x-cx,ddz=z-cz,d2=ddx*ddx+ddz*ddz;if(d2<bd2){bd2=d2;best={lat:ddx*s.nx+ddz*s.nz,d2,z:cz}}}if(!best)return null;best.ae=Math.sqrt(Math.max(0,best.d2-best.lat*best.lat));if(inPierChannel(x,z))best.lat=1e3;return best}
 function tierAt(lat,zc){const p=tierProfile(zc);let acc=0;for(let i=0;i<p.w.length;i++){acc+=p.w[i];if(lat<=acc)return{h:-i*p.step,i,edge:acc}}return null}
 function beachH(x,z){const b=CH.DOG_BEACH.bounds,s=CH.DOG_BEACH.slope;if(x<b.x0||x>b.x1||z<b.z0||z>b.z1)return null;const t=clamp((z-s.ref)/s.span,0,1);return s.depth*smooth(t)}
 
@@ -297,16 +298,24 @@ for(const zc of [348,362,376,390,400]){
   expect(`corner z=${zc}: steps walkable`,allWalk,true);
 }
 
-// ===== Job 4: THE PIER — connects to land at its north end, walkable to the tip =====
-console.log('\n--- Job 4: corner pier connects to land, walkable to the tip, water beyond rails ---');
+// ===== Job 4 + pier re-anchor: THE PIER lands on the revetment top edge and
+// then SPANS OPEN WATER (a carved slip), walkable root->tip, water beyond rails.
+console.log('\n--- Job 4: corner pier lands on the top edge, spans open water, walkable to the tip ---');
 { const P=CH.DECKS[1].walk;                             // corner pier walk rect
   const xc=(P.x1+P.x2)/2;
+  // terrain (ignoring the plank rect) at a point: true only if genuine OPEN WATER
+  const overWater=(x,z)=>{ if(pip(x,z,LAND))return false; const q=coastQuery(x,z);
+    if(q&&q.ae<0.9&&q.lat>-0.6){const t=tierAt(q.lat,q.z);if(t&&q.lat<profileTotal(q.z)-0.3)return false;} return true; };
   expect(`pier north root walkable (${xc},${(P.z1+0.5).toFixed(0)})`,walkable(xc,P.z1+0.5),true);
-  expect('land immediately NORTH of the pier root is walkable (connects)',walkable(xc,P.z1-1.5),true);
+  expect('land immediately NORTH of the pier root is walkable (top-edge landing)',walkable(xc,P.z1-1.5),true);
   expect(`pier walkable at the tip (${xc},${(P.z2-0.5).toFixed(0)})`,walkable(xc,P.z2-0.5),true);
+  expect('pier deck walkable mid-span',walkable(xc,(P.z1+P.z2)/2),true);
   expect(`pier tip inside the world clamp (z${(P.z2-0.5).toFixed(1)} <= ${CH.WORLD_CLAMP.zMax})`,P.z2-0.5<=CH.WORLD_CLAMP.zMax,true);
-  // beside the TIP (jutting past the revetment) is open water; the northern half
-  // of the pier runs over the wrapping terrace, so only sample near the tip.
+  // the deck south of its top-edge landing spans OPEN WATER (carved slip), not the
+  // descending revetment steps — only the plank walk rect makes it walkable.
+  expect(`deck south of root is over WATER not steps (${xc},${(P.z1+12).toFixed(0)})`,overWater(xc,P.z1+12),true);
+  expect(`deck near-tip is over WATER not steps (${xc},${(P.z2-4).toFixed(0)})`,overWater(xc,P.z2-4),true);
+  // water flanks both rails near the tip (pier juts over the lake)
   expect('open water WEST of the pier tip NOT walkable',walkable(P.x1-6,P.z2-2),false);
   expect('open water EAST of the pier tip NOT walkable',walkable(P.x2+6,P.z2-2),false);
 }

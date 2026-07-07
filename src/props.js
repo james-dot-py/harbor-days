@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { scene, rng, rand, toon, bmat, curveMat, gmap, pointsMat, pip, WATER_Y } from './core.js';
 import { COAST_SEGS, tierProfile, profileTotal, beachH, LAND } from './coast.js';
 import { pathSamples, mainCurve } from './paths.js';
@@ -97,58 +98,100 @@ export function buildProps(){
         if(inRect(treeSpots[i],CH.TENNIS.block)||inRect(treeSpots[i],CH.DIVERSEY.range))treeSpots.splice(i,1);
     }
 
-    const n=treeSpots.length,M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
-    // ≤4 InstancedMeshes: tapered trunks, branch stubs, canopy lobes (shared across all trees), shadow blobs.
-    const trunk=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.22,0.4,2.6,7),toon(0x8a5a3b,{}),n);   // wider base taper
-    const branchGeo=new THREE.CylinderGeometry(0.07,0.13,1.35,6);branchGeo.translate(0,0.675,0);          // pivot at base
-    const branch=new THREE.InstancedMesh(branchGeo,toon(0x8a5a3b,{}),n);
-    const R=1.7;                                                                                           // reference (old canopy) radius
-    const lobes=new THREE.InstancedMesh(new THREE.SphereGeometry(1,10,9),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),n*5);
+    const n=treeSpots.length,M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3(),Eu=new THREE.Euler();
+
+    // ---- 5 tree archetypes, each ONE merged BufferGeometry (tapered trunk +
+    // visible branches + leaf masses + edge leaf-cards) with baked VERTEX COLORS
+    // (bark browns vs two-tone leaf greens), drawn as ONE InstancedMesh via a
+    // shared toon material. 5 canopy meshes + 1 shadow mesh = 6 draw calls.
+    // Assignment is per-tree via the LOCAL m32 rng only — the shared world rng is
+    // never touched in this block, so tree PLACEMENT stays byte-identical. ----
+    const bark=new THREE.Color(0x875636),barkD=new THREE.Color(0x6f4529);
+    const lfLo=new THREE.Color(0x4e9d54),lfHi=new THREE.Color(0xa8e08a);         // leaf gradient: dark base → light top
+    const pkLo=new THREE.Color(0xef9ec6),pkHi=new THREE.Color(0xffd6ea),wht=new THREE.Color(0xfff3f8);
+    const _c=new THREE.Color(),Yv=new THREE.Vector3(0,1,0),_dv=new THREE.Vector3(),_qm=new THREE.Matrix4();
+    // paint(g,c0)=flat c0; paint(g,c0,c1,y0,y1)=per-vertex bottom→top gradient
+    function paint(g,c0,c1,y0,y1){
+      const p=g.attributes.position,m=p.count,a=new Float32Array(m*3);
+      for(let i=0;i<m;i++){
+        if(c1){let t=(p.getY(i)-y0)/(y1-y0);t=t<0?0:t>1?1:t;_c.copy(c0).lerp(c1,t);}else _c.copy(c0);
+        a[i*3]=_c.r;a[i*3+1]=_c.g;a[i*3+2]=_c.b;
+      }
+      g.setAttribute('color',new THREE.BufferAttribute(a,3));return g;
+    }
+    const trunkP=(bR,tR,h,seg)=>{const g=new THREE.CylinderGeometry(tR,bR,h,seg);g.translate(0,h/2,0);return paint(g,bark);};
+    const branchP=(a,b,r0,r1,seg)=>{
+      const dx=b[0]-a[0],dy=b[1]-a[1],dz=b[2]-a[2],len=Math.hypot(dx,dy,dz);
+      const g=new THREE.CylinderGeometry(r1,r0,len,seg);g.translate(0,len/2,0);
+      g.applyMatrix4(_qm.makeRotationFromQuaternion(Q.setFromUnitVectors(Yv,_dv.set(dx,dy,dz).normalize())));
+      g.translate(a[0],a[1],a[2]);return paint(g,barkD);
+    };
+    const massP=(cx,cy,cz,rx,ry,rz,ws,hs,c0,c1,y0,y1)=>{const g=new THREE.SphereGeometry(1,ws,hs);g.scale(rx,ry,rz);g.translate(cx,cy,cz);return paint(g,c0,c1,y0,y1);};
+    const cardsP=(P,cx,cy,cz,rx,ry,rz,cnt,sz,c0,c1,y0,y1,rnd)=>{
+      for(let k=0;k<cnt;k++){
+        const th=rnd()*6.2832,u=rnd()*2-1,sp=Math.sqrt(1-u*u);
+        const g=new THREE.TetrahedronGeometry(sz*(0.7+rnd()*0.7),0);
+        g.applyMatrix4(_qm.makeRotationY(rnd()*6.2832));g.applyMatrix4(_qm.makeRotationX(rnd()*6.2832));
+        g.translate(cx+sp*Math.cos(th)*rx,cy+u*ry,cz+sp*Math.sin(th)*rz);
+        P.push(paint(g,c0,c1,y0,y1));
+      }
+    };
+    const merge=P=>BufferGeometryUtils.mergeBufferGeometries(P.map(g=>g.index?g.toNonIndexed():g));
+    // A classic round — round crown, branch forks visible in the gaps
+    const archA=()=>{const rnd=m32(0xA0F1),y0=2.9,y1=5.9,P=[];P.push(trunkP(0.42,0.24,2.7,7));
+      P.push(branchP([0,1.7,0],[0.55,3.7,0.25],0.15,0.06,5),branchP([0,1.8,0],[-0.6,3.8,-0.15],0.14,0.06,5),branchP([0,1.9,0],[0.1,4.1,-0.5],0.13,0.05,5));
+      P.push(massP(0,4.3,0,1.55,1.5,1.55,8,7,lfLo,lfHi,y0,y1));
+      for(const[mx,my,mz]of[[1.15,3.95,0.1],[-0.5,4.0,1.05],[-1.05,4.15,-0.4],[0.35,4.2,-1.05],[0.7,4.75,0.6]])P.push(massP(mx,my,mz,0.95,0.9,0.95,7,6,lfLo,lfHi,y0,y1));
+      cardsP(P,0,4.3,0,1.8,1.6,1.8,30,0.34,lfLo,lfHi,y0,y1,rnd);return merge(P);};
+    // B tall oval — poplar, narrow vertical column of leaf masses
+    const archB=()=>{const rnd=m32(0xB0F2),y0=2.8,y1=7.0,P=[];P.push(trunkP(0.3,0.17,3.0,6));
+      P.push(branchP([0,2.4,0],[0.35,4.6,0.1],0.1,0.05,5),branchP([0,2.6,0],[-0.32,5.0,-0.08],0.1,0.05,5));
+      for(const[mx,my,mz,rr,ry]of[[0,3.4,0,0.95,1.0],[0.1,4.3,0.05,0.9,1.05],[-0.08,5.1,-0.05,0.82,1.0],[0.05,5.9,0,0.66,0.9],[0,6.55,0,0.42,0.6]])P.push(massP(mx,my,mz,rr,ry,rr,7,7,lfLo,lfHi,y0,y1));
+      cardsP(P,0,4.9,0,0.95,2.0,0.95,34,0.3,lfLo,lfHi,y0,y1,rnd);return merge(P);};
+    // C layered tiers — 3 stacked flattened canopy discs + a straight leader
+    const archC=()=>{const rnd=m32(0xC0F3),y0=3.0,y1=6.0,P=[];P.push(trunkP(0.4,0.22,2.6,7));
+      P.push(branchP([0,2.6,0],[0,5.4,0],0.12,0.05,6),branchP([0,3.2,0],[1.5,3.5,0],0.1,0.05,5),branchP([0,4.3,0],[-1.2,4.5,0.2],0.09,0.05,5));
+      P.push(massP(0,3.5,0,1.85,0.55,1.85,9,6,lfLo,lfHi,y0,y1),massP(0.1,4.55,0,1.5,0.5,1.5,9,6,lfLo,lfHi,y0,y1),massP(0,5.45,0,1.05,0.5,1.05,8,6,lfLo,lfHi,y0,y1));
+      cardsP(P,0,3.5,0,1.95,0.4,1.95,12,0.3,lfLo,lfHi,y0,y1,rnd);cardsP(P,0.1,4.55,0,1.6,0.35,1.6,10,0.28,lfLo,lfHi,y0,y1,rnd);cardsP(P,0,5.45,0,1.15,0.35,1.15,8,0.26,lfLo,lfHi,y0,y1,rnd);return merge(P);};
+    // D wide spreading — mature elm, low broad crown, prominent horizontal branches
+    const archD=()=>{const rnd=m32(0xD0F4),y0=2.7,y1=4.8,P=[];P.push(trunkP(0.52,0.32,2.2,8));
+      const arms=[[2.2,3.5,0.3],[-2.0,3.4,0.5],[0.4,3.6,2.1],[0.2,3.5,-2.0]];
+      for(const a of arms)P.push(branchP([0,2.0,0],a,0.18,0.07,6));
+      P.push(massP(0,3.7,0,1.5,1.1,1.5,8,7,lfLo,lfHi,y0,y1));
+      for(const[ax,ay,az]of arms)P.push(massP(ax*0.92,ay+0.25,az*0.92,1.15,0.9,1.15,7,6,lfLo,lfHi,y0,y1));
+      cardsP(P,0,3.7,0,2.7,0.95,2.7,34,0.34,lfLo,lfHi,y0,y1,rnd);return merge(P);};
+    // E cherry — full pink blossom cluster with a couple of white masses baked in
+    const archE=()=>{const rnd=m32(0xE0F5),y0=2.9,y1=5.6,P=[];P.push(trunkP(0.34,0.2,2.4,7));
+      P.push(branchP([0,1.6,0],[0.5,3.4,0.2],0.13,0.05,5),branchP([0,1.7,0],[-0.55,3.5,-0.15],0.12,0.05,5));
+      P.push(massP(0,4.0,0,1.5,1.35,1.5,8,7,pkLo,pkHi,y0,y1));
+      for(const[mx,my,mz,w]of[[1.1,3.8,0.1,0],[-0.55,3.85,0.95,1],[-1.0,3.95,-0.45,0],[0.4,4.0,-1.0,1],[0.65,4.5,0.55,0]])
+        P.push(w?massP(mx,my,mz,0.9,0.85,0.9,7,6,wht,wht,y0,y1):massP(mx,my,mz,0.9,0.85,0.9,7,6,pkLo,pkHi,y0,y1));
+      cardsP(P,0,4.0,0,1.75,1.5,1.75,30,0.32,pkLo,pkHi,y0,y1,rnd);return merge(P);};
+
+    const geos=[archA(),archB(),archC(),archD(),archE()];
+    const leafMat=curveMat(new THREE.MeshToonMaterial({vertexColors:true,gradientMap:gmap}));   // shared across all 5
+    const meshes=geos.map(g=>new THREE.InstancedMesh(g,leafMat,n));                              // over-allocated to n each
+    const counts=[0,0,0,0,0];
     const shad=new THREE.InstancedMesh(new THREE.CircleGeometry(1.5,14),new THREE.MeshBasicMaterial({color:0x2f6b45,transparent:true,opacity:0.22,depthWrite:false}),n);
     curveMat(shad.material);
     const flat=new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2,0,0));
-    const col=new THREE.Color(),hsl={h:0,s:0,l:0};
-    new THREE.Color(0x6fca67).getHSL(hsl);const gH=hsl.h,gS=hsl.s,gL=hsl.l;                                // toon green base, in HSL
-    const pkA=new THREE.Color(0xf7b6d2),pkB=new THREE.Color(0xf49ac1),wht=new THREE.Color(0xfff2f7);
-    const Zax=new THREE.Vector3(0,0,1),Yax=new THREE.Vector3(0,1,0),qT=new THREE.Quaternion(),qA=new THREE.Quaternion();
-    const clamp=THREE.MathUtils.clamp;
-    let li=0,bi=0;
     for(let i=0;i<n;i++){
       const[x,z,s,pink]=treeSpots[i];
       const r=m32((i*2654435761)>>>0);   // LOCAL per-tree rng — placement rng untouched
-      M.compose(V.set(x,1.3*s,z),Q.identity(),S.set(s,s,s));trunk.setMatrixAt(i,M);
-      // canopy: cluster of 3–5 overlapping lobes around the crown
-      const L=3+(r()*3|0),crownY=3.3*s;
-      const treeH=gH+(r()-0.5)*0.02,treeL=gL+(r()-0.5)*0.06;                     // subtle per-tree green
-      const whiteLobe=pink&&r()<0.4?(r()*L|0):-1;                               // occasional white blossom
-      for(let j=0;j<L;j++){
-        const central=j===0;
-        const ang=(j+r()*0.7)/L*Math.PI*2;
-        const spread=(central?0.12:0.5+0.5*r())*s;
-        const vy=(central?0.15:r()*1.15-0.3)*s;                                 // vertical stagger
-        const rad=(central?0.9+0.1*r():0.6+0.3*r())*R*s;                        // 60–100% of old canopy
-        M.compose(V.set(x+Math.cos(ang)*spread,crownY+vy,z+Math.sin(ang)*spread),Q.identity(),S.set(rad,rad*0.9,rad));
-        lobes.setMatrixAt(li,M);
-        if(pink){
-          if(j===whiteLobe)col.copy(wht);
-          else col.copy(r()<0.5?pkA:pkB).offsetHSL(0,0,(r()-0.5)*0.06);
-        }else{
-          col.setHSL(treeH,gS,clamp(treeL+(vy/s)*0.04+(r()-0.5)*0.16,0.15,0.95)); // top lobes lighter + ±8% jitter
-        }
-        lobes.setColorAt(li,col);li++;
-      }
-      // one short branch stub on ~60% of trees, tilted 30–45° into the canopy
-      if(r()<0.6){
-        qT.setFromAxisAngle(Zax,Math.PI/6+r()*Math.PI/12);qA.setFromAxisAngle(Yax,r()*Math.PI*2);
-        M.compose(V.set(x,1.7*s,z),Q.multiplyQuaternions(qA,qT),S.set(s,s,s));branch.setMatrixAt(bi,M);bi++;
-      }
+      // pink→E; greens: A 35% / B 20% / C 20% / D 25% via the local rng.
+      // (skip 3 — m32's 1st output is weakly spread for i*const seeds; the 4th
+      // hits the target weights: measured ~33/21/20/26.)
+      let ai;if(pink)ai=4;else{r();r();r();const w=r();ai=w<0.35?0:w<0.55?1:w<0.75?2:3;}
+      Eu.set(0,r()*Math.PI*2,0);Q.setFromEuler(Eu);                                              // per-tree yaw so clones don't line up
+      M.compose(V.set(x,0,z),Q,S.set(s,s,s));
+      const slot=counts[ai]++;meshes[ai].setMatrixAt(slot,M);
+      const t=0.92+r()*0.16;_c.setRGB(t,t,t);meshes[ai].setColorAt(slot,_c);                     // subtle grayscale tint ×vertexColor
       M.compose(V.set(x,0.03,z),flat,S.set(s,s,s));shad.setMatrixAt(i,M);
       collide(x,z,0.55*s);
     }
-    lobes.count=li;branch.count=bi;
-    trunk.instanceMatrix.needsUpdate=branch.instanceMatrix.needsUpdate=lobes.instanceMatrix.needsUpdate=shad.instanceMatrix.needsUpdate=true;
-    lobes.instanceColor.needsUpdate=true;
-    scene.add(trunk,branch,lobes,shad);
+    for(let k=0;k<5;k++){meshes[k].count=counts[k];meshes[k].instanceMatrix.needsUpdate=true;if(meshes[k].instanceColor)meshes[k].instanceColor.needsUpdate=true;}
+    shad.instanceMatrix.needsUpdate=true;
+    scene.add(meshes[0],meshes[1],meshes[2],meshes[3],meshes[4],shad);
   }
 
   // ---- hedges ----

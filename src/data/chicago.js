@@ -124,8 +124,21 @@ export function buildLAND({ COAST_CORNER, COAST_MAIN, COAST_PEN, COAST_GOLF, COA
 // steps; the peninsula + golf revetment use the default profile.
 // Per the user's on-site photos: the BOTTOM tier is a wide waterline
 // promenade (the main walk/hangout slab) — much wider than the upper steps.
-export const TIER_ROCKS   = { zMin:20, zMax:404, w:[3.6,3.0,2.8,2.6,2.4,2.3,6.0], step:0.475 };  // 7 steps, wide bottom promenade; zMax 404 so the SAME profile wraps the whole corner (COAST_MAIN to z340, then COAST_CORNER to z403) instead of reverting to the 4-step default
-export const TIER_DEFAULT = { w:[3.2,2.4,2.2,4.4], step:0.6 };
+// STEP 0.317: 6 gaps * 0.317 = 1.90 drop, so the bottom promenade sits at
+// y≈-1.9 — just ABOVE the -2.3 lake (reads as a waterline walk, wet-stained at
+// its outer edge) and <= -0.55 so a jetski can still hop out onto it (main.js
+// canMove exit rule). (Was 0.475 -> -2.85, i.e. BELOW the water — the wide
+// promenade made that submersion glaring; the user's 'extended step is
+// underwater' screenshot.)
+// CORNER TAPER: on the wrapped Diversey corner (COAST_CORNER, zc>cornerZ0) the
+// wide bottom promenade tapers 6.0 -> cornerPromW toward the convex SW terminus.
+// A single 22.7 m-wide apron on a convex corner bulges ~20 m seaward and bleeds
+// past the pier into open water; tapering the promenade pulls that apron back so
+// the pier's flanks read as water. f=0 at the z340 join (promenade stays 6.0,
+// flush with the straight rocks -> no seam), f=1 at the terminus.
+export const TIER_ROCKS   = { zMin:20, zMax:404, w:[3.6,3.0,2.8,2.6,2.4,2.3,6.0], step:0.317,
+                              cornerZ0:340, cornerZ1:403, cornerPromW:2.8 };  // 7 steps, wide bottom promenade; zMax 404 so the SAME profile wraps the whole corner (COAST_MAIN to z340, then COAST_CORNER to z403) instead of reverting to the 4-step default
+export const TIER_DEFAULT = { w:[3.2,2.4,2.2,4.4], step:0.6 };  // bottom promenade at -3*0.6 = -1.8 (above the lake, exit-able)
 
 // sheet-pile seawalls (flush with the park, straight down). top/bot Y is
 // shared by every wall; the polylines reference the generated pieces.
@@ -363,14 +376,29 @@ export const BENCHES = [
 ];
 
 // pier plank decks (peninsula lake side + the new corner pier) with walkable rects.
-// Corner pier: x116-126, jutting SOUTH toward the skyline. Its NORTH edge (z373)
-// sits on the revetment top/lawn (at x116-126 the corner top is z~373-378), so it
-// connects to walkable land; its tip (z406) stays inside WORLD_CLAMP.zMax (408) so
-// the player can walk all the way out. Water is beyond the rails (x<116 or x>126).
+// Corner pier: x116-126, jutting SOUTH toward the skyline. Its NW corner lands on
+// the revetment TOP edge (the corner top runs z378 at x116 -> z372 at x126, so the
+// deck's north edge z373 rests on the top/lawn there and connects to walkable land);
+// the REST spans OPEN WATER — the revetment terrace is carved away beneath+beside
+// the deck (PIER_CHANNEL, a slip), so the pier stands on posts over the lake instead
+// of floating over the descending steps (the reference photo: a pier starts at the
+// top edge and immediately juts over water). Water flanks both rails. Tip z406 stays
+// inside WORLD_CLAMP.zMax (408).
 export const DECKS = [
   { deck:[200,216,-120,-90,0.42], walk:{ x1:200, x2:216, z1:-120.5, z2:-89.5, h:0.42 } },
   { deck:[116,126,373,406,0.42],  walk:{ x1:116, x2:126, z1:372.5, z2:406.5, h:0.42 } },
 ];
+
+// The corner pier's SLIP: the revetment terrace is carved to OPEN WATER within this
+// x-band, everywhere SEAWARD of the revetment top edge (north boundary = the top-edge
+// line topZ0@x0 -> topZ1@x1, so no lawn is carved). coast.js skips terrace slabs +
+// sheet-piles here and coastQuery returns water, so the deck spans water (its own walk
+// rect keeps the planks walkable). Band = the deck (x116-126) + a west flank (x113-116):
+// the revetment curves AWAY to the SW here, so open water reads on the pier's west +
+// south; EAST of the deck the revetment WRAPS on (promenade abuts the east rail, per the
+// corner walkprobe). Near the TIP both flanks are water anyway (corner-promenade taper).
+// zMax past the tip so the tip flanks are water too.
+export const PIER_CHANNEL = { x0:113, x1:126, topZ0:380, topZ1:372.5, zMax:411 };
 
 // harbor entrance light at the peninsula's SOUTH TIP (the aerial's entrance marker):
 // a short white tower, a red cap, and a warm glow bulb — sits on the tip's top step
