@@ -29,6 +29,7 @@
 import { onWorldReady, registerUpdate, createChibi } from '../framework.js';
 import * as THREE from 'three';
 import { scene, toon, bmat, WATER_Y, clamp } from '../core.js';
+import { coastQuery, profileTotal } from '../coast.js';
 
 const CITIZEN = 0.74;   // canonical chibi scale (matches the mayor / citizens)
 
@@ -54,6 +55,18 @@ const X_MIN = 171, X_MAX = 188, Z_MIN = 55, Z_MAX = 245;   // keep off the wall 
 const TUBE_R = 0.6, TUBE_T = 0.2;                // torus ring / tube radii
 const TUBE_YOFF = 0.08;                          // tube centre above the waterline
 const SINK = -0.55;                              // how far the chibi sits down into the tube
+const CLEAR = 2.0;                               // keep tubers >= 2 m clear of the promenade edge (user mandate)
+
+// True iff (x,z) is open lake — seaward of the terraced revetment by >= CLEAR m.
+// The promenade's outer edge is NOT at a fixed x (the coast meanders and the terrace
+// field width varies), so a static x-band isn't enough. coastQuery gives signed
+// lateral distance from the coast centerline (water = larger lat) plus the z of the
+// nearest coast point; profileTotal is the terrace width there. No allocation here.
+function inOpenWater(x, z){
+  const q = coastQuery(x, z);
+  if(!q) return true;                            // no coast found -> open water
+  return q.lat >= profileTotal(q.z) + CLEAR;
+}
 
 // ---- paddleboarder ----
 const PB = {x:190, z:45, dir:1, spd:0.8, zMin:40, zMax:250};
@@ -102,8 +115,13 @@ onWorldReady(() => {
   const tubers = [];
   let si = 0;
   TUBERS.forEach((cfg,i) => {
+    // fix up the home: the promenade's outer edge meanders in x, so a static home
+    // can land on/inside the stone. Nudge seaward (+x) until it's open water.
+    let hx = cfg.hx, hz = cfg.hz, tries = 0;
+    while(!inOpenWater(hx,hz) && tries++<12) hx += 1.5;
+
     const rig = new THREE.Group();
-    rig.position.set(cfg.hx, WATER_Y, cfg.hz);
+    rig.position.set(hx, WATER_Y, hz);
     rig.rotation.y = Math.random()*Math.PI*2;
     scene.add(rig);
 
@@ -128,10 +146,10 @@ onWorldReady(() => {
     if(!cfg.striped){ solidTubes.setColorAt(solidIdx, _col.setHex(cfg.col)); }
 
     tubers.push({
-      rig, x:cfg.hx, z:cfg.hz, hx:cfg.hx, hz:cfg.hz,
+      rig, x:hx, z:hz, hx, hz,
       ph:Math.random()*6.283, spin:(Math.random()*2-1)*0.06,
       face:rig.rotation.y, solidIdx, striped:cfg.striped,
-      hasTgt:false, tgtX:cfg.hx, tgtZ:cfg.hz, waitT:Math.random()*3,
+      hasTgt:false, tgtX:hx, tgtZ:hz, waitT:Math.random()*3,
     });
   });
   if(solidTubes.instanceColor) solidTubes.instanceColor.needsUpdate = true;
@@ -173,9 +191,16 @@ onWorldReady(() => {
         tu.waitT -= dt;
         if(tu.waitT<=0){
           const a = Math.random()*6.283, r = Math.random()*ZONE;
-          tu.tgtX = clamp(tu.hx + Math.cos(a)*r, X_MIN, X_MAX);
-          tu.tgtZ = clamp(tu.hz + Math.sin(a)*r, Z_MIN, Z_MAX);
-          tu.hasTgt = true;
+          let tgtX = clamp(tu.hx + Math.cos(a)*r, X_MIN, X_MAX);
+          let tgtZ = clamp(tu.hz + Math.sin(a)*r, Z_MIN, Z_MAX);
+          // keep the target AND the path midpoint out of the promenade (its edge can
+          // bulge between here and there). Nudge east up to 8x; else skip -> re-roll.
+          let ok = false;
+          for(let k=0;k<9;k++){
+            if(inOpenWater(tgtX,tgtZ) && inOpenWater((tu.x+tgtX)/2,(tu.z+tgtZ)/2)){ ok = true; break; }
+            tgtX += 1.5;
+          }
+          if(ok){ tu.tgtX = tgtX; tu.tgtZ = tgtZ; tu.hasTgt = true; }
         }
       } else {
         const dx = tu.tgtX-tu.x, dz = tu.tgtZ-tu.z, d = Math.hypot(dx,dz);

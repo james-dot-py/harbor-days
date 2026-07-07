@@ -137,7 +137,13 @@ export function buildLAND({ COAST_CORNER, COAST_MAIN, COAST_PEN, COAST_GOLF, COA
 // the pier's flanks read as water. f=0 at the z340 join (promenade stays 6.0,
 // flush with the straight rocks -> no seam), f=1 at the terminus.
 export const TIER_ROCKS   = { zMin:20, zMax:404, w:[3.6,3.0,2.8,2.6,2.4,2.3,6.0], step:0.317,
-                              cornerZ0:340, cornerZ1:403, cornerPromW:2.8 };  // 7 steps, wide bottom promenade; zMax 404 so the SAME profile wraps the whole corner (COAST_MAIN to z340, then COAST_CORNER to z403) instead of reverting to the 4-step default
+                              cornerZ0:340, cornerZ1:403, cornerPromW:2.8,
+                              // MOUTH TAPER: north of mouthZ0 the 7 widths pinch toward mouthW
+                              // (total 12.2 = TIER_DEFAULT's total) so the profile hand-off at
+                              // zMin/the mouth junction is flush — was a 10.5 m width cliff
+                              // (the user's 'jagged edge at the mouth'). Same 7 entries + step,
+                              // so tierProfile call counts (and the world rng order) are unchanged.
+                              mouthZ0:44, mouthZ1:20, mouthW:[1.9,1.6,1.5,1.4,1.3,1.2,3.3] };  // 7 steps, wide bottom promenade; zMax 404 so the SAME profile wraps the whole corner (COAST_MAIN to z340, then COAST_CORNER to z403) instead of reverting to the 4-step default
 export const TIER_DEFAULT = { w:[3.2,2.4,2.2,4.4], step:0.6 };  // bottom promenade at -3*0.6 = -1.8 (above the lake, exit-able)
 
 // sheet-pile seawalls (flush with the park, straight down). top/bot Y is
@@ -233,7 +239,7 @@ export const TRAIL_CONNECTOR=[[16,105],[34,108],[54,112],[70,116],[79,120]];
 // the two ribbons run parallel with a ~1.2 m grass strip between them.
 export const TRAIL_STYLE = {
   bike:{ width:3.2, color:0x83878d, y:0.05 },     // asphalt bike path (mainCurve centerline)
-  walk:{ width:2.4, color:0xd9c9ac, y:0.05 },     // crushed-limestone walking path (walkCurve)
+  walk:{ width:2.4, color:0xd9c9ac, y:0.062 },    // crushed-limestone walking path (walkCurve) — ABOVE bike/spur y so crossings (e.g. the spur branch at [74,-340]) layer cleanly instead of z-fighting
   gap:1.2,                                         // grass strip between bike & walk
   spur:{ width:2.6, color:0x83878d, y:0.05 },      // single asphalt connector (fits the cove gates)
   loop:{ width:2.2, color:0xd9c9ac, y:0.06 },      // little garden loop (crushed limestone)
@@ -326,7 +332,11 @@ export const BOATS = [
   { x:210, z:-60,  ry:-0.6, hull:0x7fc8f0, sail:0xffd98a, scale:1.25 },
 ];
 export const DRIFTER = { x:238, z:70, ry:Math.PI, hull:0xf7f3ea, sail:0xff9d94, scale:1.3 };
-export const BUOYS = [ { x:165, z:-8, c:0xff5a5a }, { x:150, z:-12, c:0x5db06b } ];
+// mouth channel markers, red-right-returning (entering from the lake, red on
+// the peninsula-tip side). Mid-CHANNEL: the tip terraces reach ~(176,-5) and the
+// mouth-shore terraces ~(134,-10), so both floats sit in clear water — they were
+// beached against the revetment feet (the user's 'mystery cone in the water').
+export const BUOYS = [ { x:168, z:-2, c:0xff5a5a }, { x:152, z:-2, c:0x5db06b } ];
 
 // finger docks along the west seawall (4 groups, z -300..-60) — narrow
 // plank walkways jutting east into the basin, two moored sailboats each.
@@ -343,7 +353,7 @@ export const FINGER_DOCKS = {
 export const SIGNS = [
   { text:'AIDS GARDEN',         x:95,  z:60,   ry:0.4 },
   { text:'BELMONT HARBOR',      x:78,  z:-30,  ry:Math.PI/2 },
-  { text:'DOG BEACH',           x:100, z:-329, ry:0.2 },
+  { text:'DOG BEACH',           x:103, z:-343, ry:3.0 },            // on the GRASS north of the cove (between fence z-341 and the trail spur), facing the trail — was standing in the sand at the waterline
   { text:'BIRD SANCTUARY',      x:98,  z:-386, ry:-1.4 },          // by the WEST gate; nudged east of the walk ribbon (x~94)
   { text:'WAVELAND FIELDHOUSE', x:202, z:-470, ry:1.3 },           // trail side of the lakeside fieldhouse
   { text:'YACHT CLUB',          x:70,  z:-168, ry:-0.6 },

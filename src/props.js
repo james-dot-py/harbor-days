@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { scene, rng, rand, toon, bmat, curveMat, gmap, pointsMat, pip, WATER_Y } from './core.js';
-import { COAST_SEGS, tierProfile, profileTotal, beachH, LAND } from './coast.js';
+import { COAST_SEGS, tierProfile, profileTotal, beachH, LAND, coastQuery } from './coast.js';
 import { pathSamples, mainCurve } from './paths.js';
 import * as CH from './data/chicago.js';
 
@@ -420,6 +420,12 @@ export function buildProps(){
         const off=acc+p.w[tier]*rand(BL.block.offFrac[0],BL.block.offFrac[1]);
         const sx=rand(0.8,1.6),sy=rand(0.5,0.8),sz=rand(0.7,1.2);
         const bx=s.ax+s.nx*off,by=-tier*p.step+BL.block.yOff,bz=s.az+s.nz*off,ry=rand(0,3),rz=rand(-0.08,0.08);
+        // near the mouth junction the raw segment normal diverges from the
+        // welded slab fan — a block can land past the rebuilt steps, floating
+        // on the water. All rand/rng draws above are already consumed, so
+        // skipping the push keeps the world rng order bit-for-bit intact.
+        const q=coastQuery(bx,bz);
+        if(q&&q.lat>profileTotal(q.z)-0.8)continue;
         Eb.set(0,ry,rz);Qb.setFromEuler(Eb);Mb.compose(Vb.set(bx,by,bz),Qb,Sb.set(sx,sy,sz));blocks.setMatrixAt(pb,Mb);
         collide(bx,bz,BL.block.collide);pb++;
       }
@@ -438,7 +444,13 @@ export function buildProps(){
       const s=segs[(rng()*segs.length)|0];
       if(s.az<FL.zMin||s.az>FL.zMax){i--;continue}
       const tot=profileTotal(s.az),off=tot+rand(FL.offRange[0],FL.offRange[1]);
-      Mf.compose(Vf.set(s.ax+s.nx*off,WATER_Y+0.12,s.az+s.nz*off),Qf,Sf);rings.setMatrixAt(pf,Mf);
+      const fx=s.ax+s.nx*off,fz=s.az+s.nz*off;
+      // raw-normal placement can land on the welded slab fan near the mouth
+      // junction — floaties belong in the water; skip (rand already consumed,
+      // rng order intact)
+      const q=coastQuery(fx,fz);
+      if(q&&q.lat<profileTotal(q.z)+0.7)continue;
+      Mf.compose(Vf.set(fx,WATER_Y+0.12,fz),Qf,Sf);rings.setMatrixAt(pf,Mf);
       rings.setColorAt(pf,flCols[i%flCols.length]);pf++;
     }
     rings.count=pf;rings.instanceMatrix.needsUpdate=true;rings.instanceColor.needsUpdate=true;scene.add(rings);
