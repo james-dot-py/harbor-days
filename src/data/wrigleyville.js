@@ -40,7 +40,7 @@ export const STATION_W = {
   embank : { x0: -148, x1: -132, z0: -580, z1: -310, topY: 7.0 },
   bridge : { z0: -407, z1: -393, clearY: 5.6 },      // over Addison
   platform:{ x0: -143, x1: -137, z0: -444, z1: -426, y: 7.6 },
-  stair  : { x0: -142, x1: -138, z0: -426, z1: -410, yTop: 7.6, yBot: 0.9 },
+  stair  : { x0: -142, x1: -138, z0: -426, z1: -410, yTop: 7.6, yBot: 0.35 },
   landing: { x0: -142, x1: -138, z0: -410, z1: -404 },
   tracks : { west: -145.5, east: -134.5, y: 7.6 },   // rail centerlines
   signZ  : -435,
