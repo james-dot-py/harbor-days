@@ -52,9 +52,10 @@ export async function shot({ name = 'shot', query = '', waitMs = 3500, port = pr
   return { file, started, errors, canary, perf: perfStats };
 }
 
-// ---- CLI (behavior preserved) ----
+// ---- CLI (behavior preserved; optional 4th arg = port) ----
+// node tools/shot.mjs <name> [query] [waitMs] [port]
 if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
-  const r = await shot({ name: process.argv[2] || 'shot', query: process.argv[3] || '', waitMs: +(process.argv[4] || 3500) });
+  const r = await shot({ name: process.argv[2] || 'shot', query: process.argv[3] || '', waitMs: +(process.argv[4] || 3500), port: +(process.argv[5] || process.env.PORT || 5173) });
   console.log('SHOT ' + r.file + ' (' + r.started + ')');
   if (r.canary.length) console.log('CANARY ' + r.canary.join(' | '));
   if (r.errors.length) { console.log('ERRORS:\n' + r.errors.join('\n')); process.exitCode = 1; }

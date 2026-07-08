@@ -30,7 +30,7 @@ page.on('pageerror', e => errors.push('[pageerror] ' + e.message));
 page.on('requestfailed', r => errors.push('[requestfailed] ' + r.url() + ' ' + (r.failure()?.errorText || '')));
 page.on('response', r => { if (r.status() >= 400 && !r.url().includes('favicon')) errors.push('[http ' + r.status() + '] ' + r.url()); });
 
-const PORT = process.env.PORT || 5173;
+const PORT = +(process.argv[4] || process.env.PORT || 5173);   // optional 3rd CLI arg = port
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function nav(x, z) {
   const q = new URLSearchParams('play=1');

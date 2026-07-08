@@ -20,6 +20,7 @@ import './watertoys.js';
 import './characters.js';
 import './badminton.js';
 import './lawnlife.js';
+import './cornhole.js';   // the flagship south-lawn cornhole match (task 003)
 import './sanctuary.js';
 import './wrigleyville.js';   // neighborhood two — the Wrigleyville cell
 import './wrigley-ride.js';   // the Red Line ride (Belmont ⇄ Addison)
