@@ -21,6 +21,10 @@ const DBG=new URLSearchParams(location.search);
 const dbgNum=k=>DBG.has(k)?parseFloat(DBG.get(k)):null;
 
 // ---- autopilot instrumentation: canary echo, error ring, perf probe ----
+// ?quiet=1: suppress transient HUD (hint bar, zone banners) so gate/baseline
+// shots are frame-stable — the hint's 9 s fade boundary made spawn shots
+// bimodal (~2.1% apart) and un-gateable without this.
+const QUIET=DBG.get('quiet')==='1';
 if(DBG.get('canary'))console.log('[canary] '+DBG.get('canary'));
 const errRing=[];   // last 50 of console.error / window.onerror / unhandledrejection
 {
@@ -102,6 +106,7 @@ function surfaceY(x,z){
 const ZONES=CH.ZONES;
 const zoneCool={};let zoneT=0,bannerTO=null;
 function showBanner(n){
+  if(QUIET)return;
   $('bname').textContent=n;
   $('banner').classList.add('show');
   clearTimeout(bannerTO);
@@ -339,11 +344,13 @@ function runStart(){
   $('title').classList.add('hide');
   $('pill').style.display='flex';setType(0);
   $('mini').style.display='block';
-  const h=$('hint');h.style.display='block';
-  h.textContent=document.body.classList.contains('touch')
-    ?'left stick walk · drag to look · ⬆️ jump · ✋ interact · 📖 journal · ✨ type · 🎆 launch'
-    :'WASD move · SPACE jump · Z/C orbit · SHIFT run · E interact · J journal · 1–4 firework · F launch';
-  setTimeout(()=>h.classList.add('hide'),9000);
+  if(!QUIET){
+    const h=$('hint');h.style.display='block';
+    h.textContent=document.body.classList.contains('touch')
+      ?'left stick walk · drag to look · ⬆️ jump · ✋ interact · 📖 journal · ✨ type · 🎆 launch'
+      :'WASD move · SPACE jump · Z/C orbit · SHIFT run · E interact · J journal · 1–4 firework · F launch';
+    setTimeout(()=>h.classList.add('hide'),9000);
+  }
   $('btnHelp').style.display='flex';   // the hint auto-hides; the "?" button is the permanent way back
 }
 

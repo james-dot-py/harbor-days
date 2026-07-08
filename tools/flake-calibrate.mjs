@@ -20,7 +20,10 @@ const SHOTS_DIR = join(HERE, 'shots');
 const BASELINE = join(SHOTS_DIR, 'baseline.png');
 const OUT_JSON = join(HERE, 'flake-calibration.json');
 const THRESHOLDS = [0.1, 0.15, 0.2];
-const QUERY = 'play=1';
+// quiet=1 suppresses the transient HUD (hint bar / zone banners) — without it
+// the hint's 9 s fade boundary makes spawn shots bimodal (~2.1% apart) and the
+// calibration meaningless. Gate + baseline use these SAME canonical params.
+const QUERY = 'play=1&quiet=1';
 
 function arg(flag, def) {
   const i = process.argv.indexOf(flag);
@@ -66,11 +69,14 @@ function pct(r) { return r == null ? '  n/a  ' : (r * 100).toFixed(3) + '%'; }
 
 async function main() {
   const port = +arg('--port', process.env.PORT || 5199);
-  const n = +arg('--n', 5);
-  const waitMs = +arg('--wait', 6500);
+  const n = +arg('--n', 6);
+  const waitMs = +arg('--wait', 3500);
+  // relaunch the browser every k shots (0 = never): varied cold/warm load
+  // timing is what exposed the bimodal HUD flake — sample across it on purpose
+  const freshEvery = +arg('--fresh-browser-every', 2);
   const sharp = (await import('sharp')).default;
 
-  const browser = await puppeteer.launch({ headless: 'new', args: ['--window-size=1280,720', '--mute-audio'] });
+  let browser = await puppeteer.launch({ headless: 'new', args: ['--window-size=1280,720', '--mute-audio'] });
   try {
     // 1. Canary check — make sure we are hitting the intended dev server.
     const canaryId = 'calib' + Date.now();
@@ -85,14 +91,19 @@ async function main() {
     }
     console.log('canary OK (' + canaryId + ') on port ' + port);
 
-    // 2. N repeated spawn shots, identical params, one browser.
+    // 2. N repeated spawn shots, identical params, browser relaunched every
+    //    freshEvery shots so load-time skew is represented in the sample.
     const files = [];
     for (let i = 1; i <= n; i++) {
+      if (freshEvery > 0 && i > 1 && (i - 1) % freshEvery === 0) {
+        await browser.close();
+        browser = await puppeteer.launch({ headless: 'new', args: ['--window-size=1280,720', '--mute-audio'] });
+      }
       const r = await shot({ name: 'calib-' + i, query: QUERY, waitMs, port, browser, dir: SHOTS_DIR });
       files.push(r.file);
       if (r.errors.length) console.log('  calib-' + i + ' console/page errors: ' + r.errors.length);
     }
-    console.log('captured ' + n + ' shots (query="' + QUERY + '", waitMs=' + waitMs + ')');
+    console.log('captured ' + n + ' shots (query="' + QUERY + '", waitMs=' + waitMs + ', freshBrowserEvery=' + freshEvery + ')');
 
     // 3. Decode.
     const imgs = await Promise.all(files.map(f => toRGBA(sharp, f)));
