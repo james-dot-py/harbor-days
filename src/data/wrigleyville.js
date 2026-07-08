@@ -62,14 +62,15 @@ export const STADIUM_W = {
   marquee : { x: -284.5, z: -409.5, ry: Math.PI * 0.75 },  // faces the corner
   homePlate: [-262, -424],
   centerField: [-214, -476],
-  scoreboard: { x: -212, z: -480, topY: 20.5 },
+  scoreboard: { x: -212, z: -480, topY: 26.5 },    // top 87 ft; board base lands at 18.3 (60 ft)
   gates: {
     marquee  : { x: -283, z: -409 },
     gallagher: { x: -272, z: -462 },               // on the plaza
     bleacher : { x: -198, z: -492 },               // Sheffield & Waveland
   },
   knothole: { x: -196, z0: -450, z1: -444 },       // screened opening, RF wall
-  wallH: 4.2, facadeH: 9.5, rimH: 15.5, towerH: 20,
+  // true 1:1 verticals (scoreboard base 60 ft / top 87 ft published)
+  wallH: 4.2, facadeH: 16.5, rimH: 23, towerH: 29,
 };
 
 // -------------------- rooftops & buildings (lots) ---------------------

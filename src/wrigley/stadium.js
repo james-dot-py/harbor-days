@@ -143,7 +143,8 @@ function buildFacades() {
     const a = POLY[i], b = POLY[(i + 1) % POLY.length];
     edges.push({ a, b, len: Math.hypot(b[0] - a[0], b[1] - a[1]) });
   }
-  const H = [9.5, 8.0, 6.5, 9.5, 9.5, 9.5];   // Waveland lower (bleacher wall)
+  const FH = S.facadeH;                        // true 4-storey streetwall (16.5)
+  const H = [FH, 12, 6.5, FH, FH, FH];         // Waveland stays low (rooftop sightlines)
   edges.forEach((e, i) => {
     const dx = e.b[0] - e.a[0], dz = e.b[1] - e.a[1];
     const yaw = Math.atan2(dx, dz), nx = dz / e.len, nz = -dx / e.len;  // inward
@@ -169,8 +170,11 @@ function buildFacades() {
     mk(cornice, 1.6, 0.5, e.len + 0.4, 0, h + 0.25);           // cap
     mk(terra, 1.4, 0.28, e.len + 0.2, 0, h + 0.64);            // terracotta strip
     if (i !== 2) mk(grille, 0.5, 1.1, e.len * 0.9, -0.45, h - 1.2); // green grill band
-    // upper mass set back behind the grandstand sides
-    if (i === 0 || i === 3 || i === 4 || i === 5) mk(pale, 1.4, 3.6, e.len * 0.86, 2.4, h + 2.3);
+    // pressbox band set back behind the grandstand sides, up to the rim
+    if (i === 0 || i === 3 || i === 4 || i === 5) {
+      mk(pale, 1.6, 5.4, e.len * 0.86, 2.6, h + 3.1);          // ~16.9–22.3
+      mk(cornice, 1.8, 0.4, e.len * 0.8, 2.6, h + 5.9);        // rim cap ~22.5
+    }
   });
   wrigleyRoot.add(new THREE.Mesh(mergeGeos(pale), toon(PALE)));
   wrigleyRoot.add(new THREE.Mesh(mergeGeos(brick), toon(BRICK)));
@@ -196,7 +200,9 @@ function buildFacades() {
       const t = (k + 0.7) / (n + 0.4), tw = (k + 0.2) / (n + 0.4);   // windows off the arch axis
       const x = e.a[0] + dx * t - nx * 0.12, z = e.a[1] + dz * t - nz * 0.12;   // proud of the face
       arches.push({ pos: [x, 0, z], yaw });
-      wins.push({ pos: [e.a[0] + dx * tw - nx * 0.12, 5.4, e.a[1] + dz * tw - nz * 0.12], yaw });
+      const wx = e.a[0] + dx * tw - nx * 0.12, wz = e.a[1] + dz * tw - nz * 0.12;
+      wins.push({ pos: [wx, 5.4, wz], yaw });                        // second storey
+      if (H[i] > 13) wins.push({ pos: [wx, 10.6, wz], yaw });        // third storey on the tall faces
     }
   });
   inst(archGeo, toon(0x2a4438), arches);
@@ -333,7 +339,7 @@ function buildBowl() {
     }
   };
   addArc(lowRows, 12.5, 1.1, 0.62, 1.35);
-  addArc(upRows, 16.5, 7.6, 0.7, 1.3);
+  addArc(upRows, 16.5, 10.2, 0.78, 1.3);      // upper deck rides the taller shell
   inst(new THREE.BoxGeometry(1.5, 0.5, 1), toon(0x2f5544), seats);
   // upper-deck fascia + roof ring (instanced arc slabs)
   const fascia = [], roof = [];
@@ -341,9 +347,9 @@ function buildBowl() {
     for (let k = 0; k <= n; k++) {
       const a = BACK - 2.0 + (k / n) * 4.0;
       const fx = HP[0] + Math.sin(a) * 16.2, fz = HP[1] + Math.cos(a) * 16.2;
-      if (insidePoly(fx, fz, 2)) fascia.push({ pos: [fx, 6.8, fz], yaw: a, scale: [1, 1, 2.9] });
+      if (insidePoly(fx, fz, 2)) fascia.push({ pos: [fx, 9.3, fz], yaw: a, scale: [1, 1, 2.9] });
       const rxp = HP[0] + Math.sin(a) * 20.5, rzp = HP[1] + Math.cos(a) * 20.5;
-      if (insidePoly(rxp, rzp, 1)) roof.push({ pos: [rxp, 13.4, rzp], yaw: a, rx: 0.16, scale: [1, 1, 3.7] });
+      if (insidePoly(rxp, rzp, 1)) roof.push({ pos: [rxp, 19.5, rzp], yaw: a, rx: 0.16, scale: [1, 1, 3.7] });
     }
   }
   inst(new THREE.BoxGeometry(0.4, 1.5, 1), toon(0x24443a), fascia);
@@ -405,14 +411,18 @@ export function raiseW(t = 1) {
 function buildScoreboard() {
   const B = S.scoreboard, yaw = BACK;               // face looks back at home plate
   const grp = new THREE.Group();
-  const W = 14.5, H = 7.0, topY = B.topY;           // 27x75 ft, gently compressed
+  const W = 15, H = 8.2, topY = B.topY;             // true 27 ft board; base lands at 18.3 (60 ft)
   const body = new THREE.Mesh(new THREE.BoxGeometry(W, H, 1.6), toon(GREEN));
   body.position.y = topY - H / 2; grp.add(body);
   const face = new THREE.Mesh(new THREE.PlaneGeometry(W - 0.6, H - 0.5), bmat(0xffffff, { map: scoreboardTex() }));
   face.position.set(0, topY - H / 2, 0.85); grp.add(face);
-  // lattice legs down to the bleacher crown
-  const legs = new THREE.Mesh(new THREE.BoxGeometry(W - 2, 3.4, 1.1), toon(0x173a2c));
-  legs.position.y = topY - H - 1.7; grp.add(legs);
+  // lattice legs down to the bleacher crown (~8.1 → 18.3)
+  const legs = new THREE.Mesh(new THREE.BoxGeometry(W - 4, 10.4, 1.1), toon(0x173a2c));
+  legs.position.y = topY - H - 5.2; grp.add(legs);
+  for (const lx of [-(W - 3) / 2, (W - 3) / 2]) {                  // edge columns
+    const col = new THREE.Mesh(new THREE.BoxGeometry(0.5, 10.4, 0.5), toon(0x14352a));
+    col.position.set(lx, topY - H - 5.2, 0); grp.add(col);
+  }
   // three pennant masts
   const mastG = new THREE.CylinderGeometry(0.07, 0.09, 5.4, 6);
   const masts = [-4.6, 0, 4.6].map(mx => ({ pos: [mx, topY + 2.7, 0] }));
@@ -445,23 +455,26 @@ function buildTowers() {
   for (const da of [-1.35, -0.9, -0.35, 0.35, 1.1, 1.7]) {
     const a = BACK + da, r = 18.5;
     const x = HP[0] + Math.sin(a) * r, z = HP[1] + Math.cos(a) * r;
-    if (insidePoly(x, z, 1.5)) towers.push({ x, z, base: 13.6, yaw: a - Math.PI });
+    if (insidePoly(x, z, 1.5)) towers.push({ x, z, base: 20, yaw: a - Math.PI });   // on the raised roof
   }
   for (const da of [-0.52, 0.52]) {
     const a = AXIS + da, r = 63;
     const x = HP[0] + Math.sin(a) * r, z = HP[1] + Math.cos(a) * r;
-    if (insidePoly(x, z, 1)) towers.push({ x, z, base: 8.6, yaw: a - Math.PI });
+    if (insidePoly(x, z, 1)) towers.push({ x, z, base: 8.6, mast: 12, yaw: a - Math.PI });  // bleacher wings reach higher
   }
-  const mastG = new THREE.CylinderGeometry(0.16, 0.3, 5.6, 6).translate(0, 2.8, 0);
-  const headG = new THREE.BoxGeometry(3.4, 1.5, 0.5).translate(0, 6.2, 0);
-  inst(mastG, toon(0xdad5c8), towers.map(t => ({ pos: [t.x, t.base, t.z], yaw: t.yaw })));
-  inst(headG, toon(0xc9c4b6), towers.map(t => ({ pos: [t.x, t.base, t.z], yaw: t.yaw })));
+  const mastG = new THREE.CylinderGeometry(0.2, 0.38, 7.6, 6).translate(0, 3.8, 0);
+  const wingMastG = new THREE.CylinderGeometry(0.24, 0.46, 12, 6).translate(0, 6, 0);
+  const headG = new THREE.BoxGeometry(3.4, 1.5, 0.5);
+  inst(mastG, toon(0xdad5c8), towers.filter(t => !t.mast).map(t => ({ pos: [t.x, t.base, t.z], yaw: t.yaw })));
+  inst(wingMastG, toon(0xdad5c8), towers.filter(t => t.mast).map(t => ({ pos: [t.x, t.base, t.z], yaw: t.yaw })));
+  inst(headG, toon(0xc9c4b6), towers.map(t => ({ pos: [t.x, t.base + (t.mast || 7.6) + 0.6, t.z], yaw: t.yaw })));
   // glow banks
   const pts = [];
   towers.forEach(t => {
+    const hy = t.base + (t.mast || 7.6) + 0.6;
     for (let i = -1; i <= 1; i++) {
       const ox = Math.cos(t.yaw) * i * 1.05, oz = -Math.sin(t.yaw) * i * 1.05;
-      pts.push([t.x + ox, t.base + 6.2, t.z + oz]);
+      pts.push([t.x + ox, hy, t.z + oz]);
     }
   });
   const gp = new Float32Array(pts.length * 3), aC = new Float32Array(pts.length * 3), aS = new Float32Array(pts.length);
