@@ -22,7 +22,7 @@
 //  curved terraces + corner lawn, plus instanced props only:
 //  corner-books(1) blankets(1) coolers(1) food(1) towels(1) dog(5) = ~10.
 // =====================================================================
-import { onWorldReady, registerUpdate, createChibi } from '../framework.js';
+import { onWorldReady, registerUpdate, createChibi, registerBumpable } from '../framework.js';
 import * as THREE from 'three';
 import { scene, camera, toon, bmat, curveMat, WATER_Y } from '../core.js';
 import { coastQuery, tierAt } from '../coast.js';
@@ -89,24 +89,12 @@ const LINES_ANGLER = ["shhh — you'll scare the perch","they're bitin' today"];
 const LINES_VOLLEY = ["ope — heads up!","little help?"];
 const LINES_CORNER = ["there's the Hancock","ope — take a seat, plenty of room"];
 
-// Every posed chibi registers here so the player can bump it for a line, the
-// way framework's makeNPC does. These figures are ALL static (never moved in
-// the update loop), so we precompute a fixed world-space head anchor ONCE at
-// registration: seated poses drop the group + keep the head upright, but the
-// LYING pose tips the whole group -90° about x, so the head part sits off the
-// group origin in -z, not +y. Reading parts.head's actual world position (not a
-// scalar y-offset) gets the bubble above the body for every pose. The +0.56*sc
-// crown lift mirrors makeNPC's 2.78-vs-2.22 head-radius offset.
-//   bumpable: {group, anchor:Vector3, lines, armed}
-const bumpables = [];
-const _hwv = new THREE.Vector3();               // build-time scratch (not per-frame)
-function registerBump(group, parts, lines){
-  group.updateWorldMatrix(true, true);
-  parts.head.getWorldPosition(_hwv);
-  const sc = group.scale.x || 1;
-  bumpables.push({ group, anchor:new THREE.Vector3(_hwv.x, _hwv.y + 0.56*sc, _hwv.z), lines, armed:true });
-}
-
+// Every posed chibi registers as a framework bumpable so the player can bump it
+// for a line (registerBumpable, promoted from this pack). Passing the parts lets
+// the shared system read parts.head's actual world position — so the bubble sits
+// above the body for the LYING pose (group tipped -90° about x, head off-origin
+// in -z) just as for the seated/standing poses; the +0.56*scale crown lift is
+// applied by the framework.
 function makeChibi(x,z,ry,pal,scale=CITIZEN){
   const {group,parts} = createChibi(Object.assign({scale}, pal));
   group.position.set(x,0,z); group.rotation.y = ry; scene.add(group);
@@ -166,7 +154,7 @@ onWorldReady(() => {
       const sx=p.x+ox, sz=p.z+oz, ry=Math.atan2(p.x-sx,p.z-sz);
       const {group,parts}=makeChibi(sx,sz,ry,nextPal());
       poseSeated(group,parts,0);
-      registerBump(group,parts,LINES_PICNIC);
+      registerBumpable(group,parts,LINES_PICNIC);
     }
     // cooler + a couple of food props on the blanket
     coolerSpots.push({x:p.x+1.25, z:p.z-0.9});
@@ -224,7 +212,7 @@ onWorldReady(() => {
 
     const {group,parts} = makeChibi(su.x, su.z, 0, nextPal());
     poseLying(group,parts,y);
-    registerBump(group,parts,LINES_SUN);
+    registerBumpable(group,parts,LINES_SUN);
 
     if(su.glasses) glassSpots.push({x:su.x, y:y+0.30+0.4, z:su.z-1.6});  // over the (upturned) face
     if(su.book){
@@ -263,7 +251,7 @@ onWorldReady(() => {
     parts.armR.rotation.x = -1.15; parts.armR.rotation.z = 0.1;        // rod arm up & out
     parts.armL.rotation.x = -0.75; parts.armL.rotation.z = -0.1;
     parts.body.rotation.x = 0.05;
-    registerBump(group,parts,LINES_ANGLER);
+    registerBumpable(group,parts,LINES_ANGLER);
     // rod: base near the hands, angled up & out over the water (east = +x)
     E.set(0,0,-0.85); Q.setFromEuler(E);              // tilt the y-cylinder forward
     M.compose(V.set(a.x+0.55, y+1.5, a.z), Q, S.set(1,1,1));
@@ -281,7 +269,7 @@ onWorldReady(() => {
   kf.parts.armR.rotation.x = -2.7;  kf.parts.armR.rotation.z = -0.15;   // right arm up on the line
   kf.parts.armL.rotation.x = -0.5;
   kf.parts.body.rotation.x = -0.18;                                     // lean back, watching aloft
-  registerBump(kf.group, kf.parts, LINES_KITE);
+  registerBumpable(kf.group, kf.parts, LINES_KITE);
 
   // hand anchor for the string (arm is static → compute once)
   kf.group.updateWorldMatrix(true, true);
@@ -335,7 +323,7 @@ onWorldReady(() => {
       const y = groundY(x,z);
       const {group,parts} = makeChibi(x,z,seawardYaw(x,z),nextPal());
       poseSeated(group,parts,y);
-      registerBump(group,parts,LINES_STEP);
+      registerBumpable(group,parts,LINES_STEP);
     }
     function pointer(x,z){                          // "there's the skyline" — arm up out at the lake
       const y = groundY(x,z);
@@ -344,7 +332,7 @@ onWorldReady(() => {
       parts.armR.rotation.x = -2.35; parts.armR.rotation.z = -0.18;   // arm up, pointing seaward at the skyline
       parts.armL.rotation.x = -0.12;
       parts.body.rotation.x = -0.06; parts.head.rotation.x = -0.18;    // chin up toward the skyline
-      registerBump(group,parts,LINES_CORNER);
+      registerBumpable(group,parts,LINES_CORNER);
     }
     sitter(154.0,252);  sitter(155.5,252);   // couple 1 (adjacent steps)
     sitter(157.0,268);  sitter(158.5,268);   // couple 2
@@ -393,7 +381,7 @@ onWorldReady(() => {
       if(opt.book) bookSpots.push({x:p.x+p.n.x*0.34,y:y+0.6,z:p.z+p.n.z*0.34,ry,tilt:-0.6});
       if(opt.point){ parts.armR.rotation.x=-2.15; parts.armR.rotation.z=-0.15;   // pointing out at the boats
                      parts.armL.rotation.x=-0.2; parts.head.rotation.x=-0.12; }
-      registerBump(group,parts, opt.point ? LINES_CORNER : LINES_STEP);
+      registerBumpable(group,parts, opt.point ? LINES_CORNER : LINES_STEP);
       return p;
     }
     // seeds track the shore arc (east-facing z~330 -> south-facing z~394);
@@ -430,7 +418,7 @@ onWorldReady(() => {
         const sx=p.x+ox, sz=p.z+oz, ry=Math.atan2(p.x-sx,p.z-sz);
         const {group,parts}=makeChibi(sx,sz,ry,nextPal());
         poseSeated(group,parts,groundY(sx,sz));
-        registerBump(group,parts,LINES_PICNIC);
+        registerBumpable(group,parts,LINES_PICNIC);
       }
       coolSpots.push({x:p.x+1.2, z:p.z-0.85});
       foodSpots2.push({x:p.x+0.25,y:0.12,z:p.z+0.1,c:0xf2c45a});           // roll
@@ -453,11 +441,11 @@ onWorldReady(() => {
         poseSeated(group,parts,y);
         bookSpots.push({x:su.x+Math.sin(ry)*0.34,y:y+0.6,z:su.z+Math.cos(ry)*0.34,ry,tilt:-0.6});
         towelSpots.push({x:su.x,z:su.z,ry,col:su.col});
-        registerBump(group,parts,LINES_STEP);
+        registerBumpable(group,parts,LINES_STEP);
       } else {
         poseLying(group,parts,y);                                          // lies head-north (like the rocks sunbathers)
         towelSpots.push({x:su.x,z:su.z,ry:0,col:su.col});
-        registerBump(group,parts,LINES_SUN);
+        registerBumpable(group,parts,LINES_SUN);
       }
     }
 
@@ -497,7 +485,7 @@ onWorldReady(() => {
       parts.armR.rotation.x=-2.6; parts.armR.rotation.z=-0.25;             // wound up mid-throw
       parts.armL.rotation.x=-0.55; parts.body.rotation.x=-0.14;
       parts.legR.rotation.x=0.25;                                          // slight stride
-      registerBump(group,parts,LINES_CORNER);
+      registerBumpable(group,parts,LINES_CORNER);
 
       const dgx=os.x+4.6, dgz=os.z-1.0, dgy=groundY(dgx,dgz);
       const dog=new THREE.Group(), dm=toon(0xe6c98c);
@@ -557,18 +545,13 @@ onWorldReady(() => {
     [[95,213.0,1],[95,217.0,1],[90.5,212.0,0],[99.5,218.0,0]].forEach(([x,z,up])=>{
       const {group,parts}=makeChibi(x,z,faceNet(x,z),nextPal());
       (up?armsUp:ready)(parts);
-      registerBump(group,parts,LINES_VOLLEY);
+      registerBumpable(group,parts,LINES_VOLLEY);
     });
   }
 
   // ---- hoisted per-frame scratch (NO allocation in the loop) ----
   const _kv=new THREE.Vector3(), _tm=new THREE.Matrix4(), _ts=new THREE.Vector3(1,1,1);
   const _identQ=new THREE.Quaternion();
-
-  // ---- posed-chibi bump "ope" bubble: ONE reusable div, mirrors makeNPC ----
-  const npcBubble=document.createElement('div'); npcBubble.className='npcbubble'; document.body.appendChild(npcBubble);
-  const _bv=new THREE.Vector3();                    // hoisted head-projection scratch
-  let bumpSpeaker=null, bumpT=0, bumpScan=0;        // current speaker, bubble life (s), scan throttle (s)
 
   registerUpdate((dt,t,player) => {
     // --- kite figure-8 + wind rhythm ---
@@ -613,34 +596,5 @@ onWorldReady(() => {
     }
     bobRed.instanceMatrix.needsUpdate = true;
     bobWht.instanceMatrix.needsUpdate = true;
-
-    // --- posed-chibi "ope" bumps (throttled scan + one shared bubble) ---
-    bumpScan -= dt;
-    if(bumpScan<=0){                                   // ~5 Hz: cheap enough for ~40 static figures
-      bumpScan=0.2;
-      let near=null, nd2=1.3225;                       // trigger radius 1.15m^2 (also the nearest-so-far)
-      for(let i=0;i<bumpables.length;i++){
-        const b=bumpables[i], dx=player.x-b.group.position.x, dz=player.z-b.group.position.z, d2=dx*dx+dz*dz;
-        if(b.armed){ if(d2<nd2){ nd2=d2; near=b; } }
-        else if(d2>6.76) b.armed=true;                 // re-arm once the player leaves 2.6m
-      }
-      if(near){                                        // nearest armed figure within reach says a line, then disarms
-        near.armed=false; bumpSpeaker=near; bumpT=3;
-        npcBubble.textContent=near.lines[(Math.random()*near.lines.length)|0];
-      }
-    }
-    // project the live bubble to the speaker's head every frame (mirror makeNPC's math)
-    if(bumpT>0 && bumpSpeaker){
-      bumpT-=dt;
-      if(bumpT<=0){ npcBubble.style.display='none'; bumpSpeaker=null; }
-      else{
-        _bv.copy(bumpSpeaker.anchor);
-        const dcam=_bv.distanceTo(camera.position); _bv.project(camera);
-        if(_bv.z>1 || dcam>30) npcBubble.style.display='none';           // behind camera / too far
-        else{ npcBubble.style.display='block';
-          npcBubble.style.left=((_bv.x*0.5+0.5)*innerWidth).toFixed(0)+'px';
-          npcBubble.style.top =((-_bv.y*0.5+0.5)*innerHeight).toFixed(0)+'px'; }
-      }
-    }
   });
 });

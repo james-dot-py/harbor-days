@@ -330,6 +330,32 @@ function runStart(){
     ?'left stick walk · drag to look · ⬆️ jump · ✋ interact · 📖 journal · ✨ type · 🎆 launch'
     :'WASD move · SPACE jump · Z/C orbit · SHIFT run · E interact · J journal · 1–4 firework · F launch';
   setTimeout(()=>h.classList.add('hide'),9000);
+  $('btnHelp').style.display='flex';   // the hint auto-hides; the "?" button is the permanent way back
+}
+
+// ---- "?" controls card: always-discoverable version of the hint bar ----
+{
+  const card=$('ctl'),body=$('ctlBody'),btn=$('btnHelp');
+  const row=(k,v)=>`<div class="ctlrow"><b>${k}</b><span>${v}</span></div>`;
+  function fill(){
+    body.innerHTML=(document.body.classList.contains('touch')
+      ? row('left stick','walk')+row('drag','look around')+row('⬆️','jump')+row('✋','interact')
+        +row('📖','journal')+row('✨','pick firework')+row('🎆','launch firework')
+        +row('🔔','Divvy bell / radio (riding)')
+      : row('W A S D','walk')+row('SHIFT','run')+row('SPACE','jump')+row('E','interact')
+        +row('J','journal')+row('1–4','pick firework')+row('F','launch firework')
+        +row('R','Divvy bell / radio station')+row('Z / C · wheel','orbit · zoom'))
+      +'<div class="ctlnote">🌊 <b>jetski</b> — wade in past your knees and jump on; ride up to any low step to hop off.'
+      +'<br>🚲 <b>Divvy</b> — interact at a dock to borrow a bike; drop it back at any dock.</div>';
+  }
+  const close=()=>card.classList.remove('show');
+  btn.addEventListener('click',()=>{if(card.classList.contains('show'))close();else{fill();card.classList.add('show')}});
+  $('ctlClose').addEventListener('click',close);
+  card.addEventListener('click',e=>{if(e.target===card)close()});
+  addEventListener('keydown',e=>{
+    if(e.key==='Escape')close();
+    else if(e.key==='?'){if(card.classList.contains('show'))close();else{fill();card.classList.add('show')}}
+  });
 }
 $('start').addEventListener('click',()=>{initAudio();runStart();});
 addEventListener('resize',()=>{

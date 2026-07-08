@@ -53,6 +53,10 @@ export function buildPaths(){
   ribbonOn(curveOf(CH.TRAIL_LOOP),st.loop.width,st.loop.color,st.loop.y,0);
   // paved connector: (moved) Belmont underpass mouth -> AIDS-garden loop west edge
   ribbonOn(curveOf(CH.TRAIL_CONNECTOR),st.loop.width,st.loop.color,st.loop.y,0);
+  // Bird Sanctuary interior walking LOOP (crushed limestone) — the hero room's
+  // winding path. Built here (not in structures) so ribbonOn registers it in
+  // pathSamples: trees/props/lawnlife all keep off it automatically.
+  ribbonOn(curveOf(CH.sanctuaryLoop()),CH.SANCTUARY.path.width,CH.SANCTUARY.path.color,CH.SANCTUARY.path.y,0);
   // yellow center dashes on the paved BIKE path + the SPUR (not the walkway)
   {
     const dashes=[];

@@ -22,11 +22,11 @@
 //  for a one-line usage note.
 // =====================================================================
 import * as THREE from 'three';
-import { renderer, scene, camera, toon, curveMat, clamp, lerp, lerpAngle, $, game } from './core.js';
+import { renderer, scene, camera, amb, sun, toon, curveMat, clamp, lerp, lerpAngle, $, game } from './core.js';
 import { cam, keys, joy } from './input.js';
 import { mayor, mparts, createChibi } from './character.js';
 import { fw } from './fx.js';
-import { getAudioCtx } from './audio.js';
+import { getAudioCtx, setAmbienceGrade } from './audio.js';
 import * as CH from './data/chicago.js';
 
 export { createChibi };                 // re-export the chibi builder for packs
@@ -250,6 +250,158 @@ function updateNPC(npc,dt,t,player){
   }
 }
 
+// ---------------------------- bumpable figures -------------------------
+// Promoted from parklife so ANY pack can register a POSED or MOVING figure:
+// bumping it pops ONE shared projected "ope" speech bubble for ~3s, then the
+// figure disarms until the player leaves. Same look as makeNPC's bubble (the
+// .npcbubble class + head-projection math), but for figures that are NOT
+// framework NPCs (raw createChibi rigs, instanced dogs, floaters, …).
+//
+// registerBumpable(group, anchorOffsetYOrParts, lines, radius=1.15) -> handle
+//   group  — an Object3D (or any object exposing a live .position{x,y,z} in
+//            WORLD space) whose position tracks the figure each frame.
+//   anchorOffsetYOrParts —
+//     • a parts object (has .head): the bubble rides the head. The head's
+//       offset in the group's LOCAL frame is captured ONCE, then re-applied
+//       through the group's world matrix every display frame — so lying /
+//       reclined poses AND moving / spinning rigs both float the bubble
+//       correctly. Crown lift = 0.56 * (group.scale.x||1), matching makeNPC.
+//     • a number: the bubble floats that many metres above group.position in
+//       world Y (simple upright figures with no head Object3D, e.g. the fetch
+//       dogs, which are instanced meshes).
+//   lines  — line pool; a random line shows on bump (Math.random — NEVER the
+//            shared world rng).
+//   radius — bump trigger radius in metres (default 1.15 = parklife's). Re-arm
+//            distance = radius + 1.45 (parklife: 1.15 -> 2.6m).
+const _bumpables=[];
+let _bumpBubble=null;
+function bumpBubbleEl(){
+  if(!_bumpBubble){
+    _bumpBubble=document.createElement('div');_bumpBubble.className='npcbubble';
+    _bumpBubble.style.display='none';document.body.appendChild(_bumpBubble);
+  }
+  return _bumpBubble;
+}
+export function registerBumpable(group,anchorOffsetYOrParts,lines,radius=1.15){
+  const rearm=radius+1.45;                      // parklife: 1.15 -> 2.6m re-arm
+  const b={group,lines,armed:true,r2:radius*radius,rearm2:rearm*rearm,
+           local:null,lift:0,offsetY:0};
+  if(typeof anchorOffsetYOrParts==='number'){
+    b.offsetY=anchorOffsetYOrParts;             // world-Y offset above group.position
+  }else{
+    const parts=anchorOffsetYOrParts;           // ride the head (handles posed/nested rigs)
+    group.updateWorldMatrix(true,true);
+    b.local=new THREE.Vector3();
+    parts.head.getWorldPosition(b.local);       // head world pos
+    group.worldToLocal(b.local);                // -> group-local (constant while the pose holds)
+    b.lift=0.56*(group.scale.x||1);             // crown lift above the head (world Y)
+  }
+  _bumpables.push(b);
+  bumpBubbleEl();
+  return {remove(){const i=_bumpables.indexOf(b);if(i>=0)_bumpables.splice(i,1);}};
+}
+// hoisted per-frame scratch (module scope — no per-frame allocation)
+const _bumpV=new THREE.Vector3();
+let _bumpSpeaker=null,_bumpT=0,_bumpScan=0;
+function updateBumpables(dt,player){
+  if(!_bumpables.length)return;
+  const bub=_bumpBubble;
+  // throttled proximity scan (~5 Hz): nearest ARMED figure within its radius speaks
+  _bumpScan-=dt;
+  if(_bumpScan<=0){
+    _bumpScan=0.2;
+    let near=null,nd2=Infinity;
+    for(let i=0;i<_bumpables.length;i++){
+      const b=_bumpables[i];
+      const dx=player.x-b.group.position.x,dz=player.z-b.group.position.z,d2=dx*dx+dz*dz;
+      if(b.armed){ if(d2<b.r2&&d2<nd2){nd2=d2;near=b;} }
+      else if(d2>b.rearm2) b.armed=true;        // re-arm once the player leaves
+      // piggyback DISTANCE CULLING: posed-chibi groups are exactly the
+      // uncull-ed figures (makeNPC has its own); same hysteresis band as
+      // NPC_CULL. Position-proxy holders (instanced dogs) have no .visible
+      // that matters — setting it is harmless. Keeps the phone draw budget
+      // safe as lawnlife/badminton/golfer chibis pile up.
+      if(b.group.visible!==false){ if(d2>NPC_CULL_HIDE2)b.group.visible=false; }
+      else if(d2<NPC_CULL_SHOW2)b.group.visible=true;
+    }
+    if(near){ near.armed=false;_bumpSpeaker=near;_bumpT=3;
+      bub.textContent=near.lines[(Math.random()*near.lines.length)|0]; }
+  }
+  // project the live bubble to the speaker's head anchor every frame
+  if(_bumpT>0&&_bumpSpeaker){
+    _bumpT-=dt;
+    if(_bumpT<=0){ bub.style.display='none';_bumpSpeaker=null; }
+    else{
+      const b=_bumpSpeaker;
+      if(b.local){ b.group.updateWorldMatrix(true,false);            // moving rigs: follow the head
+        _bumpV.copy(b.local).applyMatrix4(b.group.matrixWorld);_bumpV.y+=b.lift; }
+      else{ _bumpV.set(b.group.position.x,b.group.position.y+b.offsetY,b.group.position.z); }
+      const dcam=_bumpV.distanceTo(camera.position);_bumpV.project(camera);
+      if(_bumpV.z>1||dcam>30) bub.style.display='none';             // behind camera / too far
+      else{ bub.style.display='block';
+        bub.style.left=((_bumpV.x*0.5+0.5)*innerWidth).toFixed(0)+'px';
+        bub.style.top =((-_bumpV.y*0.5+0.5)*innerHeight).toFixed(0)+'px'; }
+    }
+  }
+}
+
+// ------------------------------- places (cells) ------------------------
+// definePlace: a named sub-place of the world that feels like WALKING INTO A
+// ROOM. While the player is inside `contains(x,z)`, the world GRADE lerps
+// toward the place's fog/light targets and the ambience mix re-balances —
+// then lerps back out on exit. This is the shared CELL pattern:
+//   * the Bird Sanctuary uses it as a graded open-world room (same scene);
+//   * WRIGLEYVILLE (see WRIGLEYVILLE.md) can use the same machinery for its
+//     whole neighborhood cell — containment tracking + graded transition are
+//     shared here; cell-specific work (mesh-set visibility swaps, clamp +
+//     minimap switches, arrival scripting) hangs off onEnter/onExit, which is
+//     the intended extension point. One pattern, not two.
+//
+// definePlace({
+//   name,                      // label (zone banners stay ZONES' job)
+//   contains(x,z) -> bool,     // point-in-place test (cheap; called ~5 Hz)
+//   fadeS = 1.8,               // seconds for the grade to breathe in/out
+//   grade: { fogColor, fogNear, fogFar,          // linear-fog targets
+//            ambSky, ambGround, ambI, sunI },    // hemisphere/sun targets (all optional)
+//   amb: { ext, bird },        // ambience mix targets (audio.js grade)
+//   onEnter(), onExit(),       // cell hooks (fire at the threshold crossing)
+// }) -> handle
+const _places=[];
+let _placeCur=null,_gradePlace=null,_placeF=0,_placeScan=0;
+const _pBase={cap:false,fogC:new THREE.Color(),fogN:0,fogF:0,ambS:new THREE.Color(),ambG:new THREE.Color(),ambI:0,sunI:0};
+const _pcA=new THREE.Color(),_pcB=new THREE.Color();
+export function definePlace(p){_places.push(p);return p;}
+function updatePlaces(dt,player){
+  if(!_places.length)return;
+  if(!_pBase.cap){_pBase.cap=true;
+    _pBase.fogC.copy(scene.fog.color);_pBase.fogN=scene.fog.near;_pBase.fogF=scene.fog.far;
+    _pBase.ambS.copy(amb.color);_pBase.ambG.copy(amb.groundColor);_pBase.ambI=amb.intensity;_pBase.sunI=sun.intensity;}
+  _placeScan-=dt;
+  if(_placeScan<=0){_placeScan=0.2;
+    let inside=null;
+    for(let i=0;i<_places.length;i++)if(_places[i].contains(player.x,player.z)){inside=_places[i];break}
+    if(inside!==_placeCur){
+      if(_placeCur&&_placeCur.onExit)_placeCur.onExit();
+      _placeCur=inside;
+      if(inside){_gradePlace=inside;if(inside.onEnter)inside.onEnter();}
+    }
+  }
+  if(!_gradePlace)return;
+  const fadeS=_gradePlace.fadeS||1.8;
+  _placeF=clamp(_placeF+(_placeCur===_gradePlace?1:-1)*dt/fadeS,0,1);
+  const f=_placeF,g=_gradePlace.grade||{};
+  if(g.fogColor!==undefined)scene.fog.color.copy(_pBase.fogC).lerp(_pcA.set(g.fogColor),f);
+  if(g.fogNear !==undefined)scene.fog.near=_pBase.fogN+(g.fogNear-_pBase.fogN)*f;
+  if(g.fogFar  !==undefined)scene.fog.far =_pBase.fogF+(g.fogFar -_pBase.fogF)*f;
+  if(g.ambSky  !==undefined)amb.color.copy(_pBase.ambS).lerp(_pcA.set(g.ambSky),f);
+  if(g.ambGround!==undefined)amb.groundColor.copy(_pBase.ambG).lerp(_pcB.set(g.ambGround),f);
+  if(g.ambI    !==undefined)amb.intensity=_pBase.ambI+(g.ambI-_pBase.ambI)*f;
+  if(g.sunI    !==undefined)sun.intensity=_pBase.sunI+(g.sunI-_pBase.sunI)*f;
+  const am=_gradePlace.amb;
+  if(am)setAmbienceGrade(1+((am.ext??1)-1)*f,1+((am.bird??1)-1)*f);
+  if(f<=0)_gradePlace=null;                 // fully outside — release the grade
+}
+
 // --------------------------------- toast -------------------------------
 // toast(main, sub?) : gold banner, auto-hides after 3s, queues if busy.
 const _toastQ=[];let _toastBusy=false;
@@ -310,7 +462,7 @@ export const screenFx={
 const SIT_LIFT=0.34;
 let _sit=null;
 function sitOnBench(b,player){
-  _sit={x:b.x,z:b.z,y:SIT_LIFT,ry:b.ry};
+  _sit={x:b.x,z:b.z,y:SIT_LIFT+(b.y||0),ry:b.ry};   // b.y: base height for elevated seats (decks)
   player.vx=player.vz=0;player.x=b.x;player.z=b.z;
   hidePrompt();
   toast('taking a load off','settle in — move to stand');
@@ -387,6 +539,12 @@ export function runUpdates(dt,t,player){
 
   // --- pack updates ---
   for(let i=0;i<_updates.length;i++){try{_updates[i](dt,t,player);}catch(e){console.warn('[framework] update error',e);}}
+
+  // --- bumpable figures: shared "ope" bubble (after packs move their rigs) ---
+  updateBumpables(dt,player);
+
+  // --- places (cells): graded room transitions ---
+  updatePlaces(dt,player);
 }
 
 // ---------------------- built-in world-ready setup ---------------------
@@ -400,6 +558,11 @@ journalSection('harbor-days','Harbor Days',()=>`
 onWorldReady(()=>{
   for(const b of CH.BENCHES)addInteraction({x:b.x,z:b.z,r:2.2,label:'sit for a bit',onUse:pl=>sitOnBench(b,pl)});
 });
+// pack-facing sit API: register a sittable spot anywhere (benches use the same
+// mechanism internally). s = {x,z,ry, y? (base height, e.g. a deck), r?, label?}
+export function addSitSpot(s){
+  return addInteraction({x:s.x,z:s.z,r:s.r||2.2,label:s.label||'sit for a bit',onUse:pl=>sitOnBench(s,pl)});
+}
 
 // wire the DOM once (index.html is fully parsed before any module runs).
 initDom();

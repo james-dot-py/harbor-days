@@ -125,6 +125,26 @@
   .jrow{display:flex;justify-content:space-between;gap:16px;padding:5px 0;border-bottom:1px dashed #e3d3b4;
     color:var(--ink);font-size:14px}
   .jrow b{color:#c4622f}
+
+  /* ---------- controls help: pinned "?" button + card ---------- */
+  #btnHelp{position:fixed;left:14px;bottom:12px;width:34px;height:34px;border:none;border-radius:50%;cursor:pointer;
+    z-index:21;background:rgba(253,246,230,.92);color:var(--ink);font-size:17px;font-weight:700;line-height:1;
+    box-shadow:0 3px 0 rgba(122,62,44,.22);display:none;align-items:center;justify-content:center;padding:0}
+  body.touch #btnHelp{left:auto;right:14px;top:284px;bottom:auto;width:44px;height:44px;font-size:20px}
+  #ctl{position:fixed;inset:0;z-index:27;display:none;align-items:center;justify-content:center;
+    background:rgba(74,59,47,.38)}
+  #ctl.show{display:flex}
+  .ctlcard{position:relative;background:var(--cream);color:var(--ink);border-radius:22px;
+    padding:22px 26px 18px;width:min(420px,86vw);max-height:78vh;overflow-y:auto;
+    box-shadow:0 10px 0 rgba(122,62,44,.28),0 24px 50px rgba(122,62,44,.25)}
+  .ctlcard h1{font-size:16px;letter-spacing:.22em;margin:0 0 12px;text-align:center;color:var(--ink);
+    text-shadow:0 2px 0 #f3d9a7}
+  .ctlrow{display:flex;align-items:baseline;gap:12px;margin:7px 0;font-size:13.5px;letter-spacing:.03em}
+  .ctlrow b{flex:0 0 118px;text-align:right;font-weight:700;color:#c4622f;white-space:nowrap}
+  .ctlnote{margin-top:12px;padding-top:10px;border-top:1px dashed #e3d3b4;font-size:12px;
+    line-height:1.6;color:rgba(74,59,47,.9)}
+  #ctlClose{position:absolute;top:12px;right:14px;width:30px;height:30px;border:none;border-radius:50%;cursor:pointer;
+    background:#e0766a;color:#fff;font-size:16px;line-height:1;box-shadow:0 2px 0 rgba(122,62,44,.3);padding:0}
   #btnAct,#btnJournal{display:none}
   body.touch #btnAct{display:none;position:fixed;right:110px;bottom:26px;width:70px;height:70px;border-radius:50%;
     align-items:center;justify-content:center;font-size:30px;z-index:16;background:rgba(253,246,230,.9);
@@ -161,6 +181,8 @@
 <div id="pwrmeter"><div id="pwrfill"></div></div>
 <div id="toast"><span class="tsp">&#10024;</span><div class="ttext"><div id="toastMain"></div><div id="toastSub"></div></div></div>
 <div id="journal"><div class="jcard"><button id="journalClose">&times;</button><h1 class="jtitle">Journal</h1><div id="journalBody"></div></div></div>
+<button id="btnHelp">?</button>
+<div id="ctl"><div class="ctlcard"><button id="ctlClose">&times;</button><h1>CONTROLS</h1><div id="ctlBody"></div></div></div>
 
 <script type="module" src="/src/main.js"></script>
 </body>

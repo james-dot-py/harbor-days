@@ -30,6 +30,11 @@ export function tierProfile(zc){
       const w=R.w.slice();w[w.length-1]=R.w[w.length-1]+(R.cornerPromW-R.w[w.length-1])*f;
       return {w,step:R.step};                                  // f=0 at the z340 join (promenade 6.0, flush w/ the straight rocks)
     }
+    if(zc<R.mouthZ0){                                         // mouth taper: pinch the wide rocks field to the default
+      const f=clamp((R.mouthZ0-zc)/(R.mouthZ0-R.mouthZ1),0,1); // 12.2 m total at zMin so the hand-off at the harbor-mouth
+      const w=R.w.map((v,i)=>v+(R.mouthW[i]-v)*f);             // junction is flush (was a 10.5 m width cliff — the
+      return {w,step:R.step};                                  // 'jagged edge at the mouth' tear). Same call counts.
+    }
     return {w:R.w,step:R.step};
   }
   return {w:CH.TIER_DEFAULT.w,step:CH.TIER_DEFAULT.step};
@@ -189,6 +194,24 @@ function livingWaterMat(baseHex){
 }
 
 export function buildCoast(){
+  // Junction-WELDED vertex tangents. Each coast piece smooths its own vertex
+  // tangents but clamps at its endpoints, so two pieces meeting at a corner
+  // disagreed about the tangent there — slabs/piles tore at the seams (the
+  // harbor-mouth join ~[151,16], the peninsula-tip join ~[196,-25]). Averaging
+  // the shared-endpoint tangents makes both fans rotate through the same
+  // bisector, so the terraces wrap the corner instead of tearing. Pure
+  // geometry — no rng, and every rand()/rng() call count below is unchanged.
+  const VTS=COAST_SEGS.map(vertexTangents);
+  const VT_TIP=vertexTangents(TIP_SEGS);
+  const weld=(VA,ia,VB,ib)=>{
+    const x=VA[ia][0]+VB[ib][0],z=VA[ia][1]+VB[ib][1],l=Math.hypot(x,z)||1;
+    VA[ia]=VB[ib]=[x/l,z/l];
+  };
+  weld(VTS[0],VTS[0].length-1,VTS[3],0);   // rocks north tip -> mouth shore
+  weld(VTS[4],VTS[4].length-1,VTS[0],0);   // corner SE join -> rocks south end
+  weld(VT_TIP,VT_TIP.length-1,VTS[1],0);   // tip SE arc -> peninsula lake edge
+  const openRuns=[...COAST_SEGS.map((s,i)=>[s,VTS[i]]),[TIP_SEGS,VT_TIP]];
+
   // terrace blocks — instanced, jittered for the uneven limestone look.
   // Warm-GRAY concrete family (the real Belmont revetment is a warm gray, not the
   // old cream/beige) — desaturated a touch, still cozy/toon. Box ORIENTATION and
@@ -202,8 +225,8 @@ export function buildCoast(){
   {
     const cols=[0xc7ccb8,0xbcc1ad,0xb1b6a1,0xa6ab95,0x999e86].map(c=>new THREE.Color(c));
     const boxes=[];
-    for(const segs of COAST_SEGS){
-      const VT=vertexTangents(segs);
+    for(let ci=0;ci<COAST_SEGS.length;ci++){
+      const segs=COAST_SEGS[ci],VT=VTS[ci];   // junction-welded tangents (see top of buildCoast)
       for(let j=0;j<segs.length;j++){
         const s=segs[j],a=VT[j],b=VT[j+1];
         const turn=Math.acos(clamp(a[0]*b[0]+a[1]*b[1],-1,1));   // arc this segment sweeps
@@ -222,7 +245,11 @@ export function buildCoast(){
             const box={
               x:bx, z:bz,
               y:-i*p.step-0.4+rand(-0.03,0.03),
-              l:2.4+xtra+rand(-0.25,0.45), w,
+              // On a convex arc the OUTER tiers sweep a longer arc than the coast
+              // line the samples walk, so fixed-length slabs gap out there (the
+              // torn tip/mouth steps). Scale the turn-fatten by the tier's seaward
+              // offset — same rand() count, purely deterministic.
+              l:2.4+xtra*(1+off*0.14)+rand(-0.25,0.45), w,
               rot:srot+rand(-0.035,0.035),
               c:cols[i<2?(rng()*3|0):(2+(rng()*3|0))]
             };
@@ -254,11 +281,11 @@ export function buildCoast(){
     const jr=()=>{h^=h<<13;h>>>=0;h^=h>>>17;h^=h<<5;h>>>=0;return h/4294967296;};
     const jit=a=>(jr()*2-1)*a;
     const boxes=[];
-    const VT=vertexTangents(TIP_SEGS);
+    const VT=VT_TIP;   // junction-welded with COAST_PEN (see top of buildCoast)
     for(let j=0;j<TIP_SEGS.length;j++){
       const s=TIP_SEGS[j],a=VT[j],b=VT[j+1];
       const turn=Math.acos(clamp(a[0]*b[0]+a[1]*b[1],-1,1)),xtra=Math.min(1.3,turn*3.0);   // smooth the horseshoe
-      for(let t=0;t<s.len;t+=2.2){
+      for(let t=0;t<s.len;t+=1.7){   // denser than the straight coasts: the horseshoe's outer tiers need the coverage (own jitter rng — shared-rng order untouched)
         const u=t/s.len;let tgx=a[0]+(b[0]-a[0])*u,tgz=a[1]+(b[1]-a[1])*u;const tl=Math.hypot(tgx,tgz)||1;tgx/=tl;tgz/=tl;
         const nsx=-tgz,nsz=tgx,srot=Math.atan2(tgx,tgz);
         const cx=s.ax+s.tx*t,cz=s.az+s.tz*t;
@@ -267,7 +294,7 @@ export function buildCoast(){
           const w=p.w[i]+jit(0.25);
           const off=acc+p.w[i]/2+jit(0.12);
           boxes.push({x:cx+nsx*off, z:cz+nsz*off,
-            y:-i*p.step-0.4+jit(0.03), l:2.4+xtra+jit(0.35), w,
+            y:-i*p.step-0.4+jit(0.03), l:2.4+xtra*(1+off*0.14)+jit(0.35), w,
             rot:srot+jit(0.035),
             c:cols[i<2?(jr()*3|0):(2+(jr()*3|0))]});
           acc+=p.w[i];
@@ -287,21 +314,24 @@ export function buildCoast(){
   // skipped in the pier slip. Sits flush on the promenade (y≈-1.9) covering its outer ~1.7 m.
   {
     const band=[];
-    for(const C of [...COAST_SEGS,TIP_SEGS]){
-      for(const s of C){
+    for(const[C,VT]of openRuns){
+      for(let j=0;j<C.length;j++){
+        const s=C[j],a=VT[j],b=VT[j+1];
         for(let t=0;t<s.len;t+=1.9){
+          const u=t/s.len;
+          let tgx=a[0]+(b[0]-a[0])*u,tgz=a[1]+(b[1]-a[1])*u;const tl=Math.hypot(tgx,tgz)||1;tgx/=tl;tgz/=tl;
           const cx=s.ax+s.tx*t,cz=s.az+s.tz*t;
-          const p=tierProfile(cz),tot=profileTotal(cz),lat=tot-1.25;   // outer band of the promenade, up to the water edge
-          const bx=cx+s.nx*lat,bz=cz+s.nz*lat;
+          const p=tierProfile(cz),tot=profileTotal(cz),lat=tot-1.35;   // outer band of the promenade, FLUSH inside the slab edge (no overhang past the piles)
+          const bx=cx+(-tgz)*lat,bz=cz+tgx*lat;
           if(inPierChannel(bx,bz))continue;
-          band.push({x:bx,z:bz,y:-(p.w.length-1)*p.step+0.07,rot:Math.atan2(s.tx,s.tz)});
+          band.push({x:bx,z:bz,y:-(p.w.length-1)*p.step+0.06,rot:Math.atan2(tgx,tgz)});
         }
       }
     }
     const inst=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),band.length);
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3(),E=new THREE.Euler();
     const wet=new THREE.Color(0x7a7b64);
-    band.forEach((b,i)=>{E.set(0,b.rot,0);Q.setFromEuler(E);M.compose(V.set(b.x,b.y,b.z),Q,S.set(2.6,0.08,2.5));inst.setMatrixAt(i,M);inst.setColorAt(i,wet);});
+    band.forEach((b,i)=>{E.set(0,b.rot,0);Q.setFromEuler(E);M.compose(V.set(b.x,b.y,b.z),Q,S.set(2.6,0.06,2.5));inst.setMatrixAt(i,M);inst.setColorAt(i,wet);});
     inst.instanceMatrix.needsUpdate=true;inst.instanceColor.needsUpdate=true;
     scene.add(inst);
   }
@@ -332,19 +362,23 @@ export function buildCoast(){
       }
     }
   }
-  // along every open-lake revetment, at the outer edge of the bottom tier
-  for(const[pts,segs]of[[COAST_MAIN,0],[COAST_PEN,0],[COAST_GOLF,0],[COAST_MOUTH,0],[COAST_CORNER,0],[COAST_TIP,0]]){
-    const S2=buildSegs(pts);
-    for(const s of S2){
+  // along every open-lake revetment, at the outer edge of the bottom tier —
+  // offset along the junction-welded interpolated tangent so the pile row
+  // sweeps the corners with the slabs instead of tearing at piece seams
+  for(const[S2,VT]of openRuns){
+    for(let j=0;j<S2.length;j++){
+      const s=S2[j],a=VT[j],b=VT[j+1];
       for(let t=0;t<s.len;t+=1.15){
+        const u=t/s.len;
+        let tgx=a[0]+(b[0]-a[0])*u,tgz=a[1]+(b[1]-a[1])*u;const tl=Math.hypot(tgx,tgz)||1;tgx/=tl;tgz/=tl;
         const cx=s.ax+s.tx*t,cz=s.az+s.tz*t;
         const p=tierProfile(cz),tot=profileTotal(cz);
         const topY=-(p.w.length-1)*p.step+0.06;
         const k=pileData.length,jut=(k%2?0.26:-0.04);
-        const px=cx+s.nx*(tot+jut),pz=cz+s.nz*(tot+jut);
+        const px=cx+(-tgz)*(tot+jut),pz=cz+tgx*(tot+jut);
         if(inPierChannel(px,pz))continue;                       // pier slip opens to the lake — no wall across it
         pileData.push({x:px,z:pz,
-          y:(topY-3.1)/2,h:topY+3.1,rot:Math.atan2(s.tx,s.tz),dark:k%2});
+          y:(topY-3.1)/2,h:topY+3.1,rot:Math.atan2(tgx,tgz),dark:k%2});
       }
     }
   }
@@ -362,6 +396,54 @@ export function buildCoast(){
       inst.setMatrixAt(i,M);inst.setColorAt(i,p.dark?c2:c1);
     });
     inst.instanceMatrix.needsUpdate=true;inst.instanceColor.needsUpdate=true;
+    scene.add(inst);
+  }
+
+  // continuous WALL FACES — an opaque concrete strip directly behind every
+  // pile line, from the promenade/seawall top down to below the waterline.
+  // The piles alone are ribs with ~0.65 m gaps between them; from the water
+  // you could see grass/sky straight through (the 'transparent seawall' bug).
+  // The strip closes every gap so all walls read opaque from every angle.
+  // One InstancedMesh, fully deterministic (no shared rng).
+  {
+    const faces=[];
+    // open-lake revetments: tucked just inside the bottom-tier slab edge, top
+    // kept below the promenade surface so it never pokes through the walkway
+    for(const[S2,VT]of openRuns){
+      for(let j=0;j<S2.length;j++){
+        const s=S2[j],a=VT[j],b=VT[j+1];
+        for(let t=0;t<s.len;t+=2.0){
+          const u=t/s.len;
+          let tgx=a[0]+(b[0]-a[0])*u,tgz=a[1]+(b[1]-a[1])*u;const tl=Math.hypot(tgx,tgz)||1;tgx/=tl;tgz/=tl;
+          const cx=s.ax+s.tx*t,cz=s.az+s.tz*t;
+          const p=tierProfile(cz),tot=profileTotal(cz);
+          const topY=-(p.w.length-1)*p.step-0.06;
+          const fx=cx+(-tgz)*(tot-0.42),fz=cz+tgx*(tot-0.42);
+          if(inPierChannel(fx,fz))continue;
+          faces.push({x:fx,z:fz,top:topY,bot:-3.2,rot:Math.atan2(tgx,tgz)});
+        }
+      }
+    }
+    // basin + mouth seawalls: directly behind the wallLine pile ribs, full height
+    for(const pts of CH.seawallLines({P_START,BASIN_W})){
+      const S2=buildSegs(pts);
+      for(const s of S2){
+        for(let t=0;t<s.len;t+=2.0){
+          const cx=s.ax+s.tx*t,cz=s.az+s.tz*t;
+          faces.push({x:cx-s.nx*0.38,z:cz-s.nz*0.38,top:CH.SEAWALL_Y.top,bot:CH.SEAWALL_Y.bot,rot:Math.atan2(s.tx,s.tz)});
+        }
+      }
+    }
+    const inst=new THREE.InstancedMesh(
+      new THREE.BoxGeometry(0.45,1,2.45),
+      curveMat(new THREE.MeshToonMaterial({color:0x8f8e79,gradientMap:gmap})),faces.length);
+    const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3(),E=new THREE.Euler();
+    faces.forEach((f,i)=>{
+      E.set(0,f.rot,0);Q.setFromEuler(E);
+      M.compose(V.set(f.x,(f.top+f.bot)/2,f.z),Q,S.set(1,f.top-f.bot,1));
+      inst.setMatrixAt(i,M);
+    });
+    inst.instanceMatrix.needsUpdate=true;
     scene.add(inst);
   }
 
@@ -388,10 +470,42 @@ export function buildCoast(){
     const cx=CH.DOG_BEACH.mesh.cx,cz=CH.DOG_BEACH.mesh.cz,pos=g.attributes.position;
     for(let i=0;i<pos.count;i++){
       const wx=pos.getX(i)+cx,wz=pos.getZ(i)+cz;
-      const h=beachH(wx,wz);pos.setY(i,h===null?0:h+0.03);
+      const h=beachH(wx,wz);
+      // outside the cove bounds: the NORTH fringe meets the lawn at 0, but the
+      // SOUTH (waterline) fringe must keep dipping BELOW the water — snapping
+      // it to 0 built a phantom sand wall at the beach foot that the player
+      // could walk straight through (the user's cove-seam bug).
+      pos.setY(i,h===null?(wz>CH.DOG_BEACH.bounds.z1?CH.DOG_BEACH.slope.depth-0.3:0):h+0.03);
     }
     g.computeVertexNormals();
     const m=new THREE.Mesh(g,toon(0xf0e2bd,{}));m.position.set(cx,0,cz);scene.add(m);
+
+    // cove SKIRT: a vertical ribbon down the cove's landward arc (the LAND
+    // polygon's own points) sealing the y=0 land edge to the dipping sand and
+    // closing the see-through gaps at the seawall junctions on both sides.
+    // DoubleSide per the opaque-from-every-angle rule. Deterministic, 1 mesh.
+    {
+      const arc=[[85,-327],[88,-333],[90,-339],[95,-341],[105,-341],[110,-339],[112,-333],[113,-330]];
+      const spos=[],sidx=[];
+      arc.forEach(([ax,az],i)=>{
+        spos.push(ax,0.02,az, ax,-2.6,az);
+        if(i<arc.length-1){const a=i*2;sidx.push(a,a+1,a+2, a+1,a+3,a+2);}
+      });
+      const sg=new THREE.BufferGeometry();
+      sg.setAttribute('position',new THREE.Float32BufferAttribute(spos,3));
+      sg.setIndex(sidx);sg.computeVertexNormals();
+      scene.add(new THREE.Mesh(sg,toon(0xe6d8b4,{mat:{side:THREE.DoubleSide}})));
+    }
+
+    // seawall-junction PATCHES: the LAND cove arc spans x 85..113 but the sand
+    // mesh/bounds span x 88..112 — the leftover notches beside the gates were
+    // open water reaching the fence. Fill each with a wet-sand shelf just
+    // above the waterline (visual only; walkability untouched).
+    for(const[px0,px1]of[[83.6,88.4],[111.6,113.8]]){
+      const pg=new THREE.PlaneGeometry(px1-px0,8.5);pg.rotateX(-Math.PI/2);
+      const pm=new THREE.Mesh(pg,toon(0xe6d8b4,{mat:{side:THREE.DoubleSide}}));
+      pm.position.set((px0+px1)/2,-2.05,-330.5);scene.add(pm);
+    }
   }
 
   // mottled grass patches (instanced — one draw call). Reject any placement

@@ -181,22 +181,30 @@ function sWavelet(vol){if(!actx)return;const t=actx.currentTime;
 
 // ---- ambience (per frame): gulls / crickets / wave-lap gain ----
 // (legacy sClink retired — the richer sHalyard below covers the basin)
+// AMBIENCE GRADE (place/cell rooms — e.g. inside the Bird Sanctuary):
+// ext scales the EXTERIOR events (gulls/halyards/wavelets/wave lap) toward
+// silence; bird boosts birdsong volume + frequency. framework.js definePlace
+// lerps these on enter/exit so the transition breathes.
+let ambExt=1,ambBird=1;
+export function setAmbienceGrade(ext,bird){ambExt=ext;ambBird=bird;}
 let gullT=6,cricketT=7;
 let halyardT=3,windT=12,birdT=4,waveletT=6;
 export function updateAmbience(dt,t,player){
   if(actx&&game.running){
     gullT-=dt;cricketT-=dt;
-    if(gullT<=0){if(player.x>60)sGull();gullT=9+Math.random()*8}
-    if(cricketT<=0){if(player.z>60&&player.x<130)sCricket();cricketT=7+Math.random()*6}
+    if(gullT<=0){if(player.x>60&&Math.random()<ambExt)sGull();gullT=9+Math.random()*8}
+    if(cricketT<=0){if(player.z>60&&player.x<130&&Math.random()<ambExt)sCricket();cricketT=7+Math.random()*6}
     // halyard clinks — Belmont Harbor basin (122,−170), audible within ~45 m
     halyardT-=dt;windT-=dt;birdT-=dt;waveletT-=dt;
     if(halyardT<=0){const dx=player.x-122,dz=player.z+170,d2=dx*dx+dz*dz;
-      if(d2<45*45)sHalyard(clamp(1-Math.sqrt(d2)/45,0,1));halyardT=2+Math.random()*5}
+      if(d2<45*45)sHalyard(clamp(1-Math.sqrt(d2)/45,0,1)*ambExt);halyardT=2+Math.random()*5}
     // wind gusts — anywhere on the map
     if(windT<=0){sWindGust();windT=18+Math.random()*22}
-    // sanctuary birdsong — within ~35 m of (x87,z−388)
+    // sanctuary birdsong — within ~35 m of (x87,z−388); the place grade
+    // boosts volume and shortens the interval when inside the sanctuary room
     if(birdT<=0){const dx=player.x-87,dz=player.z+388,d2=dx*dx+dz*dz;
-      if(d2<35*35)sBirdsong(clamp(1-Math.sqrt(d2)/35,0,1));birdT=3+Math.random()*6}
+      if(d2<35*35)sBirdsong(clamp(1-Math.sqrt(d2)/35,0,1)*Math.min(1.5,ambBird));
+      birdT=(3+Math.random()*6)/Math.max(0.001,ambBird)}
     // rock wavelets — Belmont Rocks band (x>140, z20–290) within ~30 m of the waterline (x≈150)
     if(waveletT<=0){const cz=clamp(player.z,20,290),
       dx=player.x-150,dz=player.z-cz,d2=dx*dx+dz*dz;
@@ -209,7 +217,7 @@ export function updateAmbience(dt,t,player){
       if(player.z<-20&&player.z>-328&&player.x>72&&player.x<90)
         prox=Math.max(prox,clamp(1-Math.abs(85-player.x)/14,0,1)*0.55);
       const tgt=prox*(0.045+0.05*(0.6+0.4*Math.sin(t*0.9)+0.2*Math.sin(t*1.7)));
-      waveG.gain.value+=(tgt-waveG.gain.value)*Math.min(1,dt*3);
+      waveG.gain.value+=(tgt*ambExt-waveG.gain.value)*Math.min(1,dt*3);
     }
   }
 }
