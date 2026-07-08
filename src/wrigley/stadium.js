@@ -524,6 +524,6 @@ export function buildStadium() {
   gateAt(S.gates.marquee.x, -407.4, 0, 'MARQUEE GATE');          // south face
   gateAt(plazaX(-462) + 0.42, -462.12, gYaw, 'GALLAGHER WAY GATE');
   gateAt(S.gates.bleacher.x, -493.6, Math.PI, 'BLEACHERS', 5.2); // faces Waveland
-  ticketBooth(S.gates.marquee.x + 4.4, -406.1, 0);
+  // marquee-side booth now lives in wrigley-vendors.js (the ticket queue owns it)
   ticketBooth(plazaX(-457.4) - 1.06, -457.1, gYaw);
 }

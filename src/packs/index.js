@@ -25,3 +25,7 @@ import './wrigleyville.js';   // neighborhood two — the Wrigleyville cell
 import './wrigley-ride.js';   // the Red Line ride (Belmont ⇄ Addison)
 import './wrigley-gameday.js';   // the Wrigleyville game-day event cycle
 import './wrigley-npcs.js';   // Wrigleyville street-life NPCs
+import './wrigley-sluggers.js';   // the Sluggers batting-cage minigame
+import '../wrigley/deepcuts.js';   // Wrigleyville "deep cuts" signage layer
+import './wrigley-toys.js';   // Wrigleyville live props — rooftop binoculars + throwable ball
+import './wrigley-vendors.js';   // Wrigleyville street-festival — vendors, ticket queue, fan streams, splash pad

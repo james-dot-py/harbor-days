@@ -333,7 +333,9 @@ onWorldReady(() => {
     <div class="jrow"><span>Homers chased</span><b>${state.wrigleyHomers || 0}</b></div>
     <div class="jrow"><span>Balls caught</span><b>${state.wrigleyBallsCaught || 0}</b></div>
     <div class="jrow"><span>Stretches sung</span><b>${state.stretchesSung || 0}</b></div>
-    <div class="jrow"><span>Cubs wins seen</span><b>${state.cubsWinsSeen || 0}</b></div>`);
+    <div class="jrow"><span>Cubs wins seen</span><b>${state.cubsWinsSeen || 0}</b></div>
+    <div class="jrow"><span>Fast-pitch best</span><b>${state.sluggersBest != null ? state.sluggersBest + ' / 5' : '—'}</b></div>
+    <div class="jrow"><span>Peanut bags</span><b>${state.peanutBags || 0}</b></div>`);
 
   const gd = new URLSearchParams(location.search).get('gd');
   if (gd === 'stretch') jumpTo(T_STRETCH);
