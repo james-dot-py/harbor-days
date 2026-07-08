@@ -101,7 +101,10 @@ function buildPrompt(taskFile, planner) {
 
 function turnBudget(taskFile, planner) {
   if (planner) return 80;
-  return (frontmatter(taskFile).type === 'build') ? 120 : 80;
+  const fm = frontmatter(taskFile);
+  const explicit = parseInt(fm.turns, 10);          // per-task override in frontmatter
+  if (explicit > 0) return explicit;
+  return (fm.type === 'build') ? 120 : 80;
 }
 
 // ---- failcounts -----------------------------------------------------------
@@ -146,7 +149,7 @@ function runClaude({ prompt, maxTurns, resume }) {
     mkdirSync(LOGS, { recursive: true });
     const streamLog = join(LOGS, 'session-' + new Date().toISOString().replace(/[:.]/g, '-') + '.jsonl');
     log({ event: 'stream-log', msg: streamLog });
-    let sessionId = resume || null, buf = '', limitText = null, resultText = null, sawResult = false;
+    let sessionId = resume || null, buf = '', limitText = null, resultText = null, sawResult = false, maxTurnsHit = false;
     child.stdout.on('data', d => {
       buf += d.toString();
       let idx;
@@ -163,18 +166,26 @@ function runClaude({ prompt, maxTurns, resume }) {
       // limit detection ONLY on error-ish events — an assistant message that merely
       // MENTIONS "rate limit" (e.g. building retry logic) must not trigger a sleep
       const blob = JSON.stringify(ev);
-      if (ev.type === 'result') { sawResult = true; resultText = ev.result || blob; if (ev.is_error || /error/i.test(ev.subtype || '')) { if (looksLikeLimit(blob)) limitText = blob; } }
+      if (ev.type === 'result') { sawResult = true; resultText = ev.result || blob; if (ev.subtype === 'error_max_turns') maxTurnsHit = true; if (ev.is_error || /error/i.test(ev.subtype || '')) { if (looksLikeLimit(blob)) limitText = blob; } }
       else if (ev.type === 'error' || ev.is_error) { if (looksLikeLimit(blob)) limitText = blob; }
     }
-    child.on('exit', code => resolve({ sessionId, code, limitText, resultText, sawResult }));
-    child.on('error', err => resolve({ sessionId, code: -1, limitText: looksLikeLimit(err.message) ? err.message : null, resultText: null, sawResult: false, spawnError: err.message }));
+    child.on('exit', code => resolve({ sessionId, code, limitText, resultText, sawResult, maxTurnsHit }));
+    child.on('error', err => resolve({ sessionId, code: -1, limitText: looksLikeLimit(err.message) ? err.message : null, resultText: null, sawResult: false, maxTurnsHit: false, spawnError: err.message }));
   });
 }
 
 // Run one task's claude session, transparently sleeping through limit errors and
-// resuming the SAME session (never restart blind).
+// resuming the SAME session (never restart blind). A session that exhausts its
+// turn budget mid-task gets ONE resume with a top-up — turn exhaustion with
+// full context is resumable work, not a failure (learned on task 002: the
+// read-every-PNG doctrine eats turns fast).
 async function runWithLimitResilience({ prompt, maxTurns }) {
   let attempt = await runClaude({ prompt, maxTurns });
+  if (attempt.maxTurnsHit && attempt.sessionId) {
+    log({ event: 'turns-topup', msg: 'resuming ' + attempt.sessionId + ' with +' + maxTurns + ' turns' });
+    await notify('Harbor Days autopilot: turn top-up', 'Session ' + attempt.sessionId + ' ran out of turns mid-task; resuming once with +' + maxTurns + '.', { priority: 'default' });
+    attempt = await runClaude({ prompt: 'continue the task', maxTurns, resume: attempt.sessionId });
+  }
   let backoff = START_BACKOFF_MS;
   while (attempt.limitText) {
     const parsed = parseResetMs(attempt.limitText);
