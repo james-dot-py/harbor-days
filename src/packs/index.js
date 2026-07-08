@@ -29,3 +29,4 @@ import './wrigley-sluggers.js';   // the Sluggers batting-cage minigame
 import '../wrigley/deepcuts.js';   // Wrigleyville "deep cuts" signage layer
 import './wrigley-toys.js';   // Wrigleyville live props — rooftop binoculars + throwable ball
 import './wrigley-vendors.js';   // Wrigleyville street-festival — vendors, ticket queue, fan streams, splash pad
+import './about.js';   // About / credits — OpenStreetMap ODbL attribution

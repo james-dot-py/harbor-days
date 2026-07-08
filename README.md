@@ -32,3 +32,13 @@ joystick, right-side drag, on-screen buttons.
 
 See `CLAUDE.md` for architecture, constraints, and the roadmap (bigger map,
 ridable L, more cities).
+
+## Credits & data
+
+Map layout is derived from OpenStreetMap data.
+© OpenStreetMap contributors — https://www.openstreetmap.org/copyright —
+available under the Open Database License (ODbL).
+OSM geometry is used as reference only; all in-game geometry is hand-modeled.
+
+Photographic reference (Wikimedia Commons, Mapillary, owner-supplied) is
+credited per-image in each `refs/<poi>/manifest.json`.
