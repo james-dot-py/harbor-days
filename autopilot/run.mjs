@@ -128,7 +128,18 @@ function saveFailcounts(fc) { try { mkdirSync(LOGS, { recursive: true }); writeF
 
 // ---- limit / reset parsing ------------------------------------------------
 const LIMIT_RE = /rate limit|usage limit|session limit|too many requests|limit reached|limit exceeded|resets? at|please try again later/i;
+// monthly spend limits do NOT reset on a sleep — they need the owner. Detect
+// them separately: halt the loop without striking the task. (Learned 2026-07-08:
+// a spend-limit cutoff cascaded into 1-turn sessions that parked two good tasks.)
+const SPEND_RE = /spend limit|monthly limit|credit balance|out of credits|insufficient credits|settings\/usage/i;
 function looksLikeLimit(text) { return !!text && LIMIT_RE.test(text); }
+function classifyLimit(attempt) {
+  const texts = [attempt.limitText, attempt.resultText].filter(Boolean);
+  if (texts.some(t => SPEND_RE.test(t))) return 'spend';
+  if (attempt.limitText) return 'limit';
+  if (texts.some(t => LIMIT_RE.test(t))) { attempt.limitText = attempt.resultText; return 'limit'; }
+  return null;
+}
 function parseResetMs(text) {
   if (!text) return null;
   // explicit ISO timestamp
@@ -196,13 +207,15 @@ function runClaude({ prompt, maxTurns, resume }) {
 // read-every-PNG doctrine eats turns fast).
 async function runWithLimitResilience({ prompt, maxTurns }) {
   let attempt = await runClaude({ prompt, maxTurns });
+  if (classifyLimit(attempt) === 'spend') { attempt.spendLimit = true; return attempt; }
   if (attempt.maxTurnsHit && attempt.sessionId) {
     log({ event: 'turns-topup', msg: 'resuming ' + attempt.sessionId + ' with +' + maxTurns + ' turns' });
     await notify('Harbor Days autopilot: turn top-up', 'Session ' + attempt.sessionId + ' ran out of turns mid-task; resuming once with +' + maxTurns + '.', { priority: 'default' });
     attempt = await runClaude({ prompt: 'continue the task', maxTurns, resume: attempt.sessionId });
+    if (classifyLimit(attempt) === 'spend') { attempt.spendLimit = true; return attempt; }
   }
   let backoff = START_BACKOFF_MS;
-  while (attempt.limitText) {
+  while (classifyLimit(attempt) === 'limit') {
     const parsed = parseResetMs(attempt.limitText);
     const waitMs = parsed != null ? parsed : backoff;
     const until = new Date(Date.now() + waitMs).toISOString();
@@ -214,6 +227,7 @@ async function runWithLimitResilience({ prompt, maxTurns }) {
     await notify('Harbor Days autopilot resuming', 'Resuming session ' + (attempt.sessionId || '?'), { priority: 'default' });
     if (!attempt.sessionId) { log({ event: 'resume-failed', msg: 'no session_id captured; cannot resume' }); break; }
     attempt = await runClaude({ prompt: 'continue the task', maxTurns, resume: attempt.sessionId });
+    if (classifyLimit(attempt) === 'spend') { attempt.spendLimit = true; return attempt; }
   }
   return attempt;
 }
@@ -279,6 +293,13 @@ async function iterationOnce() {
       [result.summary || '', result.commit ? 'commit ' + result.commit : '', result.contactSheet ? 'sheet ' + result.contactSheet : ''].filter(Boolean).join(' · '),
       { priority: 'default' });
     return { halt: false };
+  }
+
+  // monthly spend limit: the task didn't get a fair run — halt WITHOUT a strike
+  if (res.spendLimit) {
+    log({ event: 'spend-limit-halt', msg: taskId });
+    await notify('Harbor Days autopilot HALTED — monthly spend limit', 'Hit the Claude monthly spend limit during ' + taskId + '. No fail strike recorded. Raise the limit at claude.ai/settings/usage, then press Start on the panel.', { priority: 'high' });
+    return { halt: true };
   }
 
   // failed (or no fresh result)
