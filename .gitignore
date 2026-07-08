@@ -6,3 +6,4 @@ tools/shots/run-*
 autopilot/.env
 autopilot/logs/
 autopilot/session-state.json
+refs/_anchor-cache.json
