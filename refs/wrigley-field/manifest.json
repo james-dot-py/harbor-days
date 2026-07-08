@@ -90,6 +90,14 @@
       "description": "Wrigley Field, Chicago, Illinois",
       "fetchDate": "2026-07-08T04:02:21.317Z",
       "bytes": 942610
+    },
+    {
+      "file": "marquee-owner-reference.png",
+      "source": "owner",
+      "author": "owner-supplied",
+      "license": "owner reference only",
+      "fetchDate": "2026-07-08T23:51:42.617Z",
+      "note": "THE marquee look: arched crown, arc-set WRIGLEY FIELD, art-deco side scrolls, white pinstripe trim, dot-matrix message board"
     }
   ]
 }
