@@ -33,10 +33,16 @@ export async function notify(title, message, opts = {}) {
   }
   const priority = opts.priority || 'default';
   try {
-    const res = await fetch('https://ntfy.sh/' + encodeURIComponent(topic), {
+    // JSON publish endpoint: fetch() headers must be ISO-8859-1, so a Title
+    // header with an em-dash throws — the JSON body is fully UTF-8-safe.
+    const res = await fetch('https://ntfy.sh/', {
       method: 'POST',
-      body: String(message ?? ''),
-      headers: { 'Title': String(title ?? '').replace(/[\r\n]+/g, ' '), 'Priority': priority },
+      body: JSON.stringify({
+        topic,
+        title: String(title ?? '').replace(/[\r\n]+/g, ' '),
+        message: String(message ?? ''),
+        priority: priority === 'high' ? 4 : 3,
+      }),
     });
     if (!res.ok) { console.warn('[notify] ntfy responded ' + res.status); return { ok: false, status: res.status }; }
     return { ok: true };
