@@ -63,11 +63,13 @@ export function buildFieldplay() {
     g.position.set(HP[0] + Math.sin(a) * r, 0.22, HP[1] + Math.cos(a) * r);
     g.rotation.y = a - Math.PI;                               // face home
     g.userData.sway = R() * 6.28;
+    g.userData.live = true;                                   // the update() sways/rotates this — exempt from the cell merge
     wrigleyRoot.add(g);
     fielders.push(g);
   }
   pitchBall = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 7), bmat(0xf4f2ec));
-  pitchBall.visible = false; wrigleyRoot.add(pitchBall);
+  pitchBall.visible = false; pitchBall.userData.live = true;   // the update() flies this around — exempt from the cell merge
+  wrigleyRoot.add(pitchBall);
   registerUpdate(update);
 }
 const fielders = [];

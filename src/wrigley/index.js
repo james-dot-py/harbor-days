@@ -7,7 +7,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { scene, toon, mulberry32 } from '../core.js';
-import { registerCell } from '../cells.js';
+import { registerCell, mergeCellStatic } from '../cells.js';
 import * as WV from '../data/wrigleyville.js';
 import { buildStreets } from './streets.js';
 import { buildStation } from './station.js';
@@ -123,6 +123,7 @@ export function buildWrigleyville() {
   buildRooftops();
   buildVillage();
   buildFieldplay();
+  mergeCellStatic(wrigleyRoot);   // collapse Wrigleyville's static builder meshes → fewer draw calls
   scene.add(wrigleyRoot);
   registerCell({
     id: WV.CELL_ID, root: wrigleyRoot,

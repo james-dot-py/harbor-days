@@ -16,7 +16,7 @@ const Z_N = -578, Z_S = -312;                     // embankment span
 const CRUISE = 16, DECEL = 40;
 
 function buildRake(x) {
-  const grp = new THREE.Group(); grp.visible = false;
+  const grp = new THREE.Group(); grp.visible = false; grp.userData.live = true;   // a pack moves this via updateTrains — exempt from the cell merge
   const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), S = new THREE.Vector3(1, 1, 1), V = new THREE.Vector3(), E = new THREE.Euler();
   const pitch = 14.2, carLen = 13, nCar = 4, off = (nCar - 1) / 2;
   const bodies = new THREE.InstancedMesh(new THREE.BoxGeometry(2.6, 3.0, carLen), toon(0xc4c8ce), nCar);

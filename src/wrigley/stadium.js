@@ -443,6 +443,7 @@ function buildScoreboard() {
   wFlag = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 1.25).translate(0.85, 0, 0),
     bmat(0xffffff, { map: wFlagTex(), side: THREE.DoubleSide }));
   wFlag.position.set(0.07, wMast.base, 0); wFlag.visible = false;
+  wFlag.userData.live = true;                       // raiseW() hoists this (gameday WIN) — exempt from the cell merge
   grp.add(wFlag);
   grp.position.set(B.x, 0, B.z); grp.rotation.y = yaw;
   wrigleyRoot.add(grp);

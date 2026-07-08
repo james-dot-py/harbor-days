@@ -22,7 +22,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { onWorldReady, registerUpdate, addInteraction, toast, makeNPC, state,
-         getAudioCtx, createChibi } from '../framework.js';
+         getAudioCtx, createChibi, tintChibiLimb } from '../framework.js';
 import { toon, bmat, mulberry32, clamp, lerpAngle, game } from '../core.js';
 import { activeCell } from '../cells.js';
 import { wrigleyRoot } from '../wrigley/index.js';
@@ -197,9 +197,9 @@ onWorldReady(player => {
   ];
   QPAL.forEach(p => { p.suitMat = toon(p.suit, {}); p.pantMat = toon(p.pants, {}); });
   function applyPal(parts, p) {
-    parts.body.material = p.suitMat;
-    parts.armL.material = parts.armR.material = p.suitMat;
-    parts.legL.material = parts.legR.material = p.pantMat;
+    parts.body.material = p.suitMat;                                  // body is still its own plain mesh
+    tintChibiLimb(parts.armL, 'arm', p.suit); tintChibiLimb(parts.armR, 'arm', p.suit);   // recolor only the sleeve, not the baked skin hand
+    tintChibiLimb(parts.legL, 'leg', p.pants); tintChibiLimb(parts.legR, 'leg', p.pants); // recolor only the pants, not the baked shoe
   }
   const slotXZ = i => [-280.0 - i * 1.1, -405.4];    // slot 0 = front (nearest booth), west along the sidewalk
 

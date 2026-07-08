@@ -12,7 +12,7 @@ import { cam, keys, joy, jump, initInput } from './input.js';
 import { mmInit, mmDraw, initMinimapToggle } from './minimap.js';
 import * as CH from './data/chicago.js';
 import { worldReady, runUpdates, state } from './framework.js';
-import { beginCellCapture, endCellCapture, cellWalk, cellSurf, cellClamp } from './cells.js';
+import { beginCellCapture, endCellCapture, mergeCellStatic, getCell, cellWalk, cellSurf, cellClamp } from './cells.js';
 import './packs/index.js';   // content packs (side-effect); loaded before world build
 
 // ---- dev/debug URL params (harmless in prod build) ----
@@ -35,7 +35,32 @@ const errRing=[];   // last 50 of console.error / window.onerror / unhandledreje
   addEventListener('unhandledrejection',e=>push('unhandledrejection: '+((e.reason&&e.reason.message)||e.reason)));
 }
 const perfS={fps:0,n:0,mark:0};   // fps sampled over 60-frame windows (advisory; headless may be SwiftShader)
-window.__hd={errs:errRing,perf:()=>({drawCalls:renderer.info.render.calls,fps:Math.round(perfS.fps*10)/10})};
+// census(): attribute would-be draw calls at the CURRENT camera by replicating
+// the renderer's frustum cull (r128 culls InstancedMesh by geometry sphere too).
+// Debug-only — used by tools/ to find draw-call offenders per view.
+function census(top=60){
+  camera.updateMatrixWorld();
+  const fr=new THREE.Frustum(),M=new THREE.Matrix4(),S=new THREE.Sphere();
+  fr.setFromProjectionMatrix(M.multiplyMatrices(camera.projectionMatrix,camera.matrixWorldInverse));
+  const tally={};let total=0;
+  scene.traverseVisible(o=>{
+    if(!(o.isMesh||o.isPoints||o.isLine||o.isSprite))return;
+    if(o.frustumCulled&&o.geometry){
+      if(!o.geometry.boundingSphere)o.geometry.computeBoundingSphere();
+      S.copy(o.geometry.boundingSphere).applyMatrix4(o.matrixWorld);
+      if(!fr.intersectsSphere(S))return;
+    }
+    const mats=Array.isArray(o.material)?o.material:[o.material];
+    total+=mats.length;
+    const chain=[];let p=o;
+    while(p&&p!==scene){if(p.name)chain.unshift(p.name);p=p.parent}
+    const col=mats[0]&&mats[0].color?'#'+mats[0].color.getHexString():(mats[0]?mats[0].type:'?');
+    const key=(chain.join('/')||'(unnamed)')+' | '+(o.geometry?o.geometry.type:o.type)+' '+col+(o.isInstancedMesh?' [inst '+o.count+']':'');
+    tally[key]=(tally[key]||0)+mats.length;
+  });
+  return {total,rows:Object.entries(tally).sort((a,b)=>b[1]-a[1]).slice(0,top)};
+}
+window.__hd={errs:errRing,perf:()=>({drawCalls:renderer.info.render.calls,fps:Math.round(perfS.fps*10)/10}),census};
 
 // ---- build the world (order matters: single shared rng, top-to-bottom) ----
 buildSky();
@@ -45,6 +70,7 @@ buildPaths();
 buildProps();
 buildStructures();
 endCellCapture();
+mergeCellStatic(getCell('lakefront').root);   // collapse the lakefront cell's static builder meshes → fewer draw calls
 buildMayor();
 
 // ------------------------ walkability + surface ------------------------

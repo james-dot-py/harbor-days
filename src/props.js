@@ -62,14 +62,14 @@ function makeBoat(x,z,ry,hullC,sailC,scale=1){
   const sail=new THREE.Mesh(new THREE.ShapeGeometry(sailShape),curveMat(new THREE.MeshToonMaterial({color:sailC,gradientMap:gmap,side:THREE.DoubleSide})));
   sail.position.set(0.06,0.95,0);sail.rotation.y=Math.PI/2;grp.add(sail);
   grp.position.set(x,WATER_Y+0.24,z);grp.rotation.y=ry;grp.scale.setScalar(scale*2.1);
-  grp.userData={by:WATER_Y+0.24,ph:rand(0,9)};scene.add(grp);bobbers.push(grp);
+  grp.userData={by:WATER_Y+0.24,ph:rand(0,9),live:true};scene.add(grp);bobbers.push(grp);   // live: bobs/drifts in the main loop — exempt from the cell merge
   return grp;
 }
 function makeBuoy(x,z,c){
   const grp=new THREE.Group();
   const body=new THREE.Mesh(new THREE.ConeGeometry(0.5,1.3,8),toon(c));body.position.y=0.5;grp.add(body);
   const tip=new THREE.Mesh(new THREE.SphereGeometry(0.16,7,6),toon(0xfdf6e6));tip.position.y=1.25;grp.add(tip);
-  grp.position.set(x,WATER_Y+0.1,z);grp.userData={by:WATER_Y+0.1,ph:rand(0,9)};scene.add(grp);bobbers.push(grp);
+  grp.position.set(x,WATER_Y+0.1,z);grp.userData={by:WATER_Y+0.1,ph:rand(0,9),live:true};scene.add(grp);bobbers.push(grp);   // live bobber — exempt from the cell merge
 }
 
 export function buildProps(){
@@ -462,7 +462,7 @@ export function buildProps(){
     const hd=new THREE.Mesh(new THREE.SphereGeometry(0.2,8,7),toon(0xfdf6e6));hd.position.set(0,1.28,0.92);swan.add(hd);
     const beak=new THREE.Mesh(new THREE.ConeGeometry(0.09,0.28,6),toon(0xf5a04c));beak.rotation.x=Math.PI/2;beak.position.set(0,1.26,1.14);swan.add(beak);
     swan.position.set(SW.x,WATER_Y+SW.yOff,SW.z);swan.rotation.y=rand(SW.ryRange[0],SW.ryRange[1]);
-    swan.userData={by:WATER_Y+SW.yOff,ph:SW.ph};scene.add(swan);bobbers.push(swan);
+    swan.userData={by:WATER_Y+SW.yOff,ph:SW.ph,live:true};scene.add(swan);bobbers.push(swan);   // live bobber — exempt from the cell merge
   }
 
   // ---- signs / lamps / benches ----
@@ -617,6 +617,7 @@ export function buildProps(){
     dogTail=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.08,0.5,6),dm);dogTail.geometry.translate(0,0.25,0);
     dogTail.position.set(0,0.62,-0.5);dogTail.rotation.x=-0.9;dog.add(dogTail);
     for(const s of[-1,1])for(const f of[0.3,-0.28]){const leg=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.4,6),dm);leg.position.set(s*0.2,0.2,f);dog.add(leg)}
+    dog.userData.live=true;   // the tail (dogTail) wags in the main loop — keep the whole rig live, exempt from the cell merge
     const dz=DP.dog.z;dog.position.set(DP.dog.x,bh(dz),dz);dog.rotation.y=DP.dog.ry;scene.add(dog);collide(DP.dog.x,dz,DP.dog.collide);
   }
 

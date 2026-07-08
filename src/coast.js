@@ -138,6 +138,7 @@ export let water=null;
 // uTime contract main.js ticks. No shared rng, no geometry change, no textures.
 function livingWaterMat(baseHex){
   const m=new THREE.MeshToonMaterial({color:baseHex,gradientMap:gmap});
+  m.userData.timeAnim=true;              // shader-time swell keyed on LOCAL position -> never bake/merge this
   m.onBeforeCompile=sh=>{
     sh.uniforms.uCurv={value:CURV};
     sh.uniforms.uTime={value:0};
@@ -462,6 +463,7 @@ export function buildCoast(){
     wgeo.setAttribute('aShore',new THREE.BufferAttribute(aShore,1));
   }
   water=new THREE.Mesh(wgeo,livingWaterMat(0x2fa3b5));
+  water.userData.live=true;              // animated (uTime) + local-position swell — exempt from the cell merge
   water.position.set(CH.WATER.cx,WATER_Y,CH.WATER.cz);scene.add(water);   // centered on the tall map so the lake never runs out
 
   // dog beach — sloped sand down to the basin water

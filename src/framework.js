@@ -29,7 +29,7 @@ import { fw } from './fx.js';
 import { getAudioCtx, setAmbienceGrade } from './audio.js';
 import * as CH from './data/chicago.js';
 
-export { createChibi };                 // re-export the chibi builder for packs
+export { createChibi, tintChibiLimb } from './character.js';   // re-export chibi builder + limb recolor for packs
 // getAudioCtx() -> {actx,sfxBus,musicBus,noiseBuf,mf,noiseHit} (actx null until audio starts)
 export { getAudioCtx };
 

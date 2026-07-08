@@ -42,6 +42,7 @@ sun.position.set(-60,80,40);scene.add(sun);
 
 // ------------------------- material helpers ---------------------------
 export function curveMat(m,opts={}){
+  if(opts.time)m.userData.timeAnim=true;   // flag at CREATION (onBeforeCompile is too late for the build-time cell-merge check)
   m.onBeforeCompile=sh=>{
     sh.uniforms.uCurv={value:CURV};
     let head='#include <common>\nuniform float uCurv;';

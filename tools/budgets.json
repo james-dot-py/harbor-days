@@ -1,6 +1,6 @@
 {
-  "drawCalls": 1350,
+  "drawCalls": 1050,
   "target": 480,
-  "note": "OPERATIONAL budget for gate.mjs/walkthrough, set just above the measured worst case of the CURRENT world (first-ever per-waypoint measurement, 2026-07-07, run-mrbjrqz2: max 1298 at wv-marquee/scoreboard views; 59/144 framings over the 480 CLAUDE.md target — a pre-autopilot condition, see autopilot/issues/000-draw-call-budget.md). Queue task 004 does the instancing/bucketing work; every time the measured max drops, RATCHET this number down toward target. Never raise it.",
-  "measured": { "date": "2026-07-07", "runId": "mrbjmwnw/mrbjrqz2", "maxDrawCalls": 1298, "overTargetFramings": 59, "totalFramings": 144 }
+  "note": "OPERATIONAL budget for gate.mjs/walkthrough, ratcheted after draw-call pass 1 (task 004, 2026-07-08): mergeCellStatic per-cell static merges + chibi rig consolidation took the full-map max from 1298 to 964 (deck-1-f1). Set ~9% above the measured max to absorb NPC-wander frustum variance between runs. RATCHET DOWN toward target 480 every time the measured max drops (queue task 007 carries the next levers: chibi eyes/hair/shadow merges, pack-added statics, statue chibis). Never raise it.",
+  "measured": { "date": "2026-07-08", "runId": "mrci9ngq+mrcj5sjw (split across a harness restart; 48/48 waypoints covered)", "maxDrawCalls": 964, "maxView": "deck-1-f1", "prevMax": 1298 }
 }
