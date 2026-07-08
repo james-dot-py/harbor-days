@@ -33,22 +33,30 @@ down-the-length shots — use axis-aligned framings for interiors).
 ## Steps
 1. **Read the context.** The task file (appended below), `GEOGRAPHY.md`, the relevant
    `src/data/*.js` modules, and `PITFALLS.md`.
-2. **Reference first.** Read all of `refs/<poi>/`; check `refs/inbox/`; fetch more if
+2. **Owner feedback.** Read every pending note in `autopilot/feedback/` (skip
+   `processed/`). These are the owner's playtest observations — the human
+   perspective the loop lacks; treat them as high-signal direction that outranks
+   your own taste. If a note bears on THIS task, fold it in. Otherwise author a
+   new queue task capturing it (`autopilot/queue/NNN-feedback-<slug>.md` with
+   honest acceptance criteria; pick the next free NNN). Either way move each
+   handled note to `autopilot/feedback/processed/` and include the move in your
+   close-out commit.
+3. **Reference first.** Read all of `refs/<poi>/`; check `refs/inbox/`; fetch more if
    the references are thin.
-3. **Plan.** For any geography work the law is **GEOGRAPHY.md FIRST, then the data
+4. **Plan.** For any geography work the law is **GEOGRAPHY.md FIRST, then the data
    modules**, citing the game coordinates from `refs/<poi>/osm.json`. OSM geometry is
    reference only — hand-model in the house toon style; never import/extrude it.
-4. **Implement.** Delegate independent, well-specified chunks to executor subagents
+5. **Implement.** Delegate independent, well-specified chunks to executor subagents
    (≤4, exclusive file ownership). Pack integration is ONE import line in
    `src/packs/index.js` (re-read immediately before editing, retry on conflict).
-5. **Walkability.** Every new walkable surface gets walkprobe rules + expects, and the
+6. **Walkability.** Every new walkable surface gets walkprobe rules + expects, and the
    walkability definition lives in the **data module shared by the engine and
    `tools/walkprobe.mjs`** (never fork the two — that is a known pitfall).
-6. **Verify.** Run `/verify`, then `node tools/walkthrough.mjs --ids <affected>` (or
+7. **Verify.** Run `/verify`, then `node tools/walkthrough.mjs --ids <affected>` (or
    `--area <area>`). READ every new PNG and judge each against its expectation string,
    the `/art-director` skill, and the refs. Draw calls ≤ budget at every waypoint;
    zero console/page errors; canary must echo.
-7. **Close out.**
+8. **Close out.**
    - **Green** (every expectation met, gate clean): commit and
      `git push origin autopilot` (an explicit refspec — bare `git push` is denied by
      the guard) with the trailer

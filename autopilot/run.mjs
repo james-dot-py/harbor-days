@@ -19,7 +19,7 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync, renameSync, mkdirSync, statSync, appendFileSync } from 'fs';
 import { dirname, join, basename } from 'path';
 import { fileURLToPath } from 'url';
-import { spawn } from 'child_process';
+import { spawn, spawnSync } from 'child_process';
 import { notify } from './notify.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));   // autopilot/
@@ -87,7 +87,7 @@ function anySignoff() {
   return null;
 }
 
-const PLANNER_INSTRUCTIONS = `\n\n---\nPLANNER TASK (queue empty, current location signed off — §5.3 site selection):\nThe queue is empty and the current location has a SIGNOFF.md. Select exactly ONE next\nfamous Chicago site from LOCATIONS.md (contents below). Selection criteria in order:\n(1) recognizability, (2) connectivity — prefer extending the contiguous 1:2 world;\ndistant sites become hard cells reached via the ridable L (never a third place layer),\n(3) variety vs what is shipped, (4) feasibility inside perf + single-file constraints.\nGenerate its full SCOUT → LAYOUT → BUILD → DELIGHT → POLISH → SIGNOFF pipeline as\nautopilot/queue/NNN-slug.md task files (frontmatter: id, area, type, acceptance, refs,\noptional turns). SIZE TASKS TO FIT ~80 turns of work — the read-every-PNG doctrine\neats turns fast, so split broad tasks (many waypoints, many buildings) into narrow\nones rather than authoring one sprawling task (task 002 took 3 sessions; don't).\nYour FIRST commit IS the proposal: update LOCATIONS.md (move the pick to "In progress")\nplus the new queue tasks, push to autopilot, and write autopilot/result.json\n{status:"green", ...}. The notification names the pick.\n\n--- LOCATIONS.md ---\n`;
+const PLANNER_INSTRUCTIONS = `\n\n---\nPLANNER TASK (queue empty, current location signed off — §5.3 site selection):\nThe queue is empty and the current location has a SIGNOFF.md. FIRST read any pending\nowner feedback in autopilot/feedback/ (skip processed/) — playtest notes from the\nowner outrank the default selection criteria when they name desires. Then select\nexactly ONE next famous Chicago site from LOCATIONS.md (contents below). Selection criteria in order:\n(1) recognizability, (2) connectivity — prefer extending the contiguous 1:2 world;\ndistant sites become hard cells reached via the ridable L (never a third place layer),\n(3) variety vs what is shipped, (4) feasibility inside perf + single-file constraints.\nGenerate its full SCOUT → LAYOUT → BUILD → DELIGHT → POLISH → SIGNOFF pipeline as\nautopilot/queue/NNN-slug.md task files (frontmatter: id, area, type, acceptance, refs,\noptional turns). SIZE TASKS TO FIT ~80 turns of work — the read-every-PNG doctrine\neats turns fast, so split broad tasks (many waypoints, many buildings) into narrow\nones rather than authoring one sprawling task (task 002 took 3 sessions; don't).\nYour FIRST commit IS the proposal: update LOCATIONS.md (move the pick to "In progress")\nplus the new queue tasks, push to autopilot, and write autopilot/result.json\n{status:"green", ...}. The notification names the pick.\n\n--- LOCATIONS.md ---\n`;
 
 function buildPrompt(taskFile, planner) {
   const iter = readFileSync(ITER_FILE, 'utf8');
@@ -105,6 +105,21 @@ function turnBudget(taskFile, planner) {
   const explicit = parseInt(fm.turns, 10);          // per-task override in frontmatter
   if (explicit > 0) return explicit;
   return (fm.type === 'build') ? 120 : 80;
+}
+
+// ---- bookkeeping durability -------------------------------------------------
+// Queue moves, issue files, and owner feedback must not sit local-only: commit
+// and push them between iterations (sessions commit their own code work).
+const BOOK_PATHS = ['autopilot/queue', 'autopilot/issues', 'autopilot/feedback'];
+function commitBookkeeping(reason) {
+  try {
+    spawnSync('git', ['add', '--', ...BOOK_PATHS], { cwd: ROOT });
+    const st = spawnSync('git', ['status', '--porcelain', '--', ...BOOK_PATHS], { cwd: ROOT, encoding: 'utf8' });
+    if (!(st.stdout || '').trim()) return;
+    spawnSync('git', ['commit', '-m', 'Autopilot bookkeeping: ' + reason + '\n\nCo-Authored-By: Claude Fable 5 <noreply@anthropic.com>'], { cwd: ROOT });
+    spawnSync('git', ['push', 'origin', 'autopilot'], { cwd: ROOT });
+    log({ event: 'bookkeeping', msg: reason });
+  } catch (e) { log({ event: 'bookkeeping-failed', msg: e && e.message ? e.message : String(e) }); }
 }
 
 // ---- failcounts -----------------------------------------------------------
@@ -259,6 +274,7 @@ async function iterationOnce() {
     }
     delete fc[taskId]; saveFailcounts(fc);
     log({ event: 'green', msg: taskId + ' commit=' + (result.commit || '?') });
+    commitBookkeeping(taskId + ' green -> done/');
     await notify('Harbor Days ' + (planner ? 'planner: scouted next site' : 'task green: ' + taskId),
       [result.summary || '', result.commit ? 'commit ' + result.commit : '', result.contactSheet ? 'sheet ' + result.contactSheet : ''].filter(Boolean).join(' · '),
       { priority: 'default' });
@@ -276,8 +292,10 @@ async function iterationOnce() {
     try { renameSync(taskFile, join(PARKED, task.name)); } catch (e) { log({ event: 'move-failed', msg: e.message }); }
     delete fc[taskId]; saveFailcounts(fc);
     log({ event: 'parked', msg: taskId });
+    commitBookkeeping(taskId + ' parked after 3 failures');
     await notify('Harbor Days autopilot PARKED ' + taskId, 'Task failed 3× — moved to queue/parked/. Needs a human.', { priority: 'high' });
   } else {
+    commitBookkeeping(taskId + ' failed (attempt ' + fc[taskId] + '/3) — issues/feedback sync');
     await notify('Harbor Days task failed: ' + taskId, (status === 'failed' ? 'Filed an issue' : 'No fresh result.json') + ' (attempt ' + fc[taskId] + '/3).', { priority: 'default' });
   }
   return { halt: false };
