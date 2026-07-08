@@ -97,6 +97,15 @@ async function main() {
     } catch { /* fall through to checks */ }
   }
 
+  // a session that changed code may not end without a verdict: result.json
+  // (green or failed) fresher than sessionStart. Without this, a session that
+  // backgrounds its walkthrough and ends its turn "to wait" dies silently
+  // green-by-gate with no result — the loop then counts a no-result failure
+  // (exactly how task 005 attempt 1 was lost).
+  if (!existsSync(RESULT) || statSync(RESULT).mtimeMs < sessionStart) {
+    failures.push('no fresh autopilot/result.json — you are a one-shot headless session: ending your turn ENDS THE SESSION (there are no background-completion notifications). Run verification synchronously (foreground), then write result.json {status:"green"|"failed"} before ending.');
+  }
+
   // ---- 1. walkprobe --------------------------------------------------------
   try {
     const wp = spawnSync(process.execPath, [path.join(TOOLS, 'walkprobe.mjs')], { cwd: ROOT, encoding: 'utf8' });

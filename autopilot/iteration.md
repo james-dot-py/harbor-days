@@ -6,6 +6,12 @@ issue. Never mark a task done to satisfy the gate — the gate exists to catch e
 that. Follow the steps below in order.
 
 ## Doctrine (non-negotiable)
+- **You are a ONE-SHOT headless session: ending your turn ends the session.**
+  There are no background-completion notifications and no next user message.
+  NEVER run walkthrough/build/verification in the background intending to
+  "wait" — run them synchronously in the foreground and read the output in the
+  same turn. Subagents: wait for them synchronously. The gate blocks any stop
+  without a fresh result.json verdict.
 - **Reference photos BEFORE building.** Read everything in `refs/<poi>/` first
   (fetch via `node tools/refs-fetch.mjs` / `node tools/osm-fetch.mjs` if thin).
   **Check `refs/inbox/` every task** — the owner drops highest-fidelity photos
