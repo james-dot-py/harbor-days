@@ -2,6 +2,7 @@
 id: 005
 area: wrigleyville
 type: feedback
+turns: 140
 title: Wrigley Field fidelity — rounded marquee corner, truer Gallagher Way placement
 acceptance: >
   Owner feedback (2026-07-08): "make the corner of wrigley with the sign on it
@@ -34,3 +35,13 @@ Owner's playtest direction — treat as high-signal. The marquee corner is the
 postcard shot of the whole cell; the curve is what makes it read as Wrigley.
 Scope honestly: geometry fidelity first, set dressing second; split into more
 tasks if the "whole area" pass grows.
+
+
+## PROGRESS (supervisor note, 2026-07-08 ~23:00Z)
+Attempts 1-2 died to turn exhaustion while CONVERGING, not failing: the code
+rework is complete and sits UNCOMMITTED in the working tree (GEOGRAPHY.md,
+src/data/wrigleyville.js, src/main.js, src/wrigley/stadium.js, village.js —
+rounded marquee corner, Gallagher office block, plaza rework; Sports Corner
+sign verified fixed). Remaining work: ONE scoped walkthrough, READ its PNGs,
+judge expectations, commit + push + result.json. Do NOT redo the rework; do
+NOT read prior runs' PNGs (only your own session's).
