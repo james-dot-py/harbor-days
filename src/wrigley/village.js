@@ -320,11 +320,12 @@ function buildBars() {
   VILLAGE_W.clarkBars.forEach((bar, i) => {
     const zc = (bar.z0 + bar.z1) / 2, H = Hs[i];
     const gx = clarkX(zc) - 16, gz = zc, dep = 12, wid = (bar.z1 - bar.z0);
-    const g = new THREE.Group(); g.position.set(gx, 0, gz); g.rotation.y = clarkYaw; add(g);
+    const g = new THREE.Group(); g.position.set(gx, 0, gz); g.rotation.y = clarkYaw;
     g.add(M(new THREE.BoxGeometry(dep, H, wid, 2, 4, 2), toon(facades[i]), 0, H / 2, 0));
     g.add(M(new THREE.BoxGeometry(dep + 0.2, 0.45, wid + 0.02), toon(0x2c2620), 0, H - 0.22, 0));   // parapet
     const sgn = new THREE.Mesh(new THREE.PlaneGeometry(wid - 3, 2.2), bmat(0xffffff, { map: neonTex(neons[i].t, neons[i].c, neons[i].icon) }));
     sgn.position.set(dep / 2 + 0.05, H - 2.0, 0); sgn.rotation.y = Math.PI / 2; g.add(sgn);        // street-facing (+x local)
+    add(g);   // add() snapshots the group's meshes NOW — must come after every g.add
     const [ax, az] = yrot(dep / 2 + 0.7, 0, clarkYaw);
     awning(gx + ax, 3.4, gz + az, clarkYaw + Math.PI / 2, 1.5, wid - 2);
     for (const lz of [-3.5, 3.5]) { const [dx, dz] = yrot(dep / 2 + 0.05, lz, clarkYaw); A.win.push({ pos: [gx + dx, H - 3.4, gz + dz], yaw: clarkYaw + Math.PI / 2, scale: [1.3, 1.7, 1] }); }
@@ -391,13 +392,14 @@ function buildStands() {
   const capGeo = new THREE.SphereGeometry(0.16, 8, 6);
   VILLAGE_W.standStalls.forEach(s => {
     const ry = s.ry || 0;   // front (customer side) = -z local; pegboard/back = +z local
-    const g = new THREE.Group(); g.position.set(s.x, 0, s.z); g.rotation.y = ry; add(g);
+    const g = new THREE.Group(); g.position.set(s.x, 0, s.z); g.rotation.y = ry;
     g.add(M(new THREE.BoxGeometry(3.0, 0.1, 1.0), toon(0x9a9088), 0, 0.95, -0.5));             // folding table (front)
     for (const sx of [-1.3, 1.3]) for (const sz of [-0.1, -0.9]) g.add(M(new THREE.BoxGeometry(0.08, 0.95, 0.08), toon(0x555555), sx, 0.48, sz));
     g.add(M(new THREE.BoxGeometry(3.0, 1.7, 0.1), toon(0xcbb488), 0, 1.6, 0.55));              // pegboard back
     g.add(M(new THREE.BoxGeometry(3.3, 0.1, 1.85), canopyMat, 0, 2.55, -0.05));               // striped canopy
     for (const sx of [-1.45, 1.45]) g.add(M(new THREE.CylinderGeometry(0.05, 0.05, 2.5, 6), toon(0x777777), sx, 1.3, 0.5));   // back poles
     for (const sx of [-1.45, 1.45]) g.add(M(new THREE.CylinderGeometry(0.05, 0.05, 1.0, 6), toon(0x777777), sx, 0.5, -0.7));  // front poles
+    add(g);   // add() snapshots the group's meshes NOW — must come after every g.add
     for (let r = 0; r < 3; r++) for (let c = -2; c <= 2; c++) {                                // caps on the pegboard front
       const [dx, dz] = yrot(c * 0.55, 0.48, ry);
       A.cap.push({ pos: [s.x + dx, 1.15 + r * 0.38, s.z + dz], color: (r + c) % 2 ? 0x0e4c92 : 0xc0392b });

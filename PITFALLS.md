@@ -22,3 +22,7 @@ few turns to find; keep each to one line of symptom + fix.
 - Displaced hard cells have cell-local x-frames (Wrigleyville: x = −140 −
   (Waddr − 950), true projection ≈ −600): never validate a cell's x against the
   true projection; record per-area offsets in osm.json provenance.
+- village.js add() SNAPSHOTS a Group's meshes into the static merge pool at
+  call time: add(g) BEFORE populating g renders nothing (bar facades/neon and
+  stall structures were invisible for two full runs — only their instanced/
+  direct-add parts showed, floating against the backdrop band).

@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-08T03:57:48.485Z",
+ "generated": "2026-07-08T14:19:00.386Z",
  "count": 48,
  "waypoints": [
   {
@@ -152,23 +152,23 @@
    "id": "zone-yacht-club",
    "area": "lakefront",
    "cell": "lakefront",
-   "x": 70,
+   "x": 79,
    "z": -180,
    "framings": [
     {
-     "yaw": 0.8,
-     "pitch": 0.2,
-     "dist": 11
-    },
-    {
-     "yaw": 2.9,
-     "pitch": 0.2,
-     "dist": 11
-    },
-    {
-     "yaw": -1.3,
-     "pitch": 0.28,
+     "yaw": -1.57,
+     "pitch": 0.14,
      "dist": 13
+    },
+    {
+     "yaw": -1.12,
+     "pitch": 0.14,
+     "dist": 17
+    },
+    {
+     "yaw": -2.02,
+     "pitch": 0.24,
+     "dist": 10
     }
    ],
    "expectation": "The yacht club on the west shore lawn: clubhouse building with a burgee pole facing the water, docks nearby."
@@ -202,23 +202,23 @@
    "id": "zone-kwanusila",
    "area": "lakefront",
    "cell": "lakefront",
-   "x": 30,
+   "x": 38,
    "z": -370,
    "framings": [
     {
-     "yaw": 0.8,
-     "pitch": 0.2,
-     "dist": 11
+     "yaw": -1.57,
+     "pitch": -0.2,
+     "dist": 12
     },
     {
-     "yaw": 2.9,
-     "pitch": 0.2,
-     "dist": 11
+     "yaw": -1.12,
+     "pitch": -0.2,
+     "dist": 16
     },
     {
-     "yaw": -1.3,
-     "pitch": 0.28,
-     "dist": 13
+     "yaw": -2.02,
+     "pitch": -0.1,
+     "dist": 9
     }
    ],
    "expectation": "The Kwanusila totem pole on the inner lawn: a tall carved pole with painted figures and spread wings near the top, lawn and trees around it."
@@ -252,23 +252,23 @@
    "id": "zone-waveland-fieldhouse",
    "area": "lakefront",
    "cell": "lakefront",
-   "x": 186,
-   "z": -478,
+   "x": 200,
+   "z": -467,
    "framings": [
     {
-     "yaw": 0.8,
-     "pitch": 0.2,
-     "dist": 11
+     "yaw": -2.24,
+     "pitch": -0.22,
+     "dist": 14
     },
     {
-     "yaw": 2.9,
-     "pitch": 0.2,
-     "dist": 11
+     "yaw": -1.79,
+     "pitch": -0.22,
+     "dist": 18
     },
     {
-     "yaw": -1.3,
-     "pitch": 0.28,
-     "dist": 13
+     "yaw": -2.69,
+     "pitch": -0.12,
+     "dist": 11
     }
    ],
    "expectation": "The Waveland fieldhouse with its landmark clock tower — pitched-roof brick fieldhouse, square tower with clock faces — just inside the golf course's SE corner by the trail."
@@ -602,23 +602,23 @@
    "id": "landmark-0",
    "area": "lakefront",
    "cell": "lakefront",
-   "x": 60,
+   "x": 51,
    "z": -100,
    "framings": [
     {
-     "yaw": 0.8,
-     "pitch": 0.2,
-     "dist": 10
+     "yaw": 1.57,
+     "pitch": 0.16,
+     "dist": 14
     },
     {
-     "yaw": 2.9,
-     "pitch": 0.2,
-     "dist": 10
-    },
-    {
-     "yaw": -1.3,
-     "pitch": 0.28,
+     "yaw": 1.12,
+     "pitch": 0.16,
      "dist": 12
+    },
+    {
+     "yaw": 2.02,
+     "pitch": 0.24,
+     "dist": 16
     }
    ],
    "expectation": "The harbor house: a small red-roofed harbor office building on the inner-park side of the basin."
@@ -677,23 +677,23 @@
    "id": "wv-scoreboard",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -196,
-   "z": -480,
+   "x": -186,
+   "z": -500,
    "framings": [
     {
-     "yaw": -1.57,
-     "pitch": 0.38,
-     "dist": 18
+     "yaw": -0.92,
+     "pitch": -0.35,
+     "dist": 12
     },
     {
-     "yaw": -0.97,
-     "pitch": 0.38,
-     "dist": 15
+     "yaw": -0.52,
+     "pitch": -0.35,
+     "dist": 12
     },
     {
-     "yaw": -2.17,
-     "pitch": 0.46,
-     "dist": 20
+     "yaw": -1.32,
+     "pitch": -0.35,
+     "dist": 12
     }
    ],
    "expectation": "The hand-turned green centerfield scoreboard high atop the bleachers (base ~18, top ~26.5): line-score grid, pennants above, no video boards (classic postcard Wrigley)."
@@ -707,18 +707,18 @@
    "framings": [
     {
      "yaw": 3.14,
-     "pitch": 0.22,
-     "dist": 11
+     "pitch": 0.14,
+     "dist": 16
     },
     {
-     "yaw": 3.74,
-     "pitch": 0.22,
-     "dist": 8
+     "yaw": 3.54,
+     "pitch": 0.14,
+     "dist": 16
     },
     {
-     "yaw": 2.54,
-     "pitch": 0.3,
-     "dist": 13
+     "yaw": 2.74,
+     "pitch": 0.14,
+     "dist": 16
     }
    ],
    "expectation": "The Marquee Gate at Clark & Addison: red-brick arches under the marquee corner, crowd/turnstile dressing."
@@ -732,18 +732,18 @@
    "framings": [
     {
      "yaw": 1.18,
-     "pitch": 0.22,
-     "dist": 11
+     "pitch": 0.14,
+     "dist": 15
     },
     {
-     "yaw": 1.78,
-     "pitch": 0.22,
-     "dist": 8
+     "yaw": 1.58,
+     "pitch": 0.14,
+     "dist": 15
     },
     {
-     "yaw": 0.58,
-     "pitch": 0.3,
-     "dist": 13
+     "yaw": 0.78,
+     "pitch": 0.14,
+     "dist": 15
     }
    ],
    "expectation": "The Gallagher Way gate on the plaza's east side: brick facade arches opening onto the plaza."
@@ -752,23 +752,23 @@
    "id": "wv-gate-bleacher",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -194.46,
-   "z": -488.46,
+   "x": -190,
+   "z": -500,
    "framings": [
     {
-     "yaw": -2.36,
-     "pitch": 0.22,
-     "dist": 11
+     "yaw": -0.79,
+     "pitch": 0.12,
+     "dist": 14
     },
     {
-     "yaw": -1.76,
-     "pitch": 0.22,
-     "dist": 8
+     "yaw": -0.39,
+     "pitch": 0.12,
+     "dist": 14
     },
     {
-     "yaw": -2.96,
-     "pitch": 0.3,
-     "dist": 13
+     "yaw": -1.19,
+     "pitch": 0.12,
+     "dist": 14
     }
    ],
    "expectation": "The Bleacher Gate at Sheffield & Waveland: brick corner entrance below the bleachers; Murphy's across the street."
@@ -803,22 +803,22 @@
    "area": "wrigleyville",
    "cell": "wrigleyville",
    "x": -140,
-   "z": -402,
+   "z": -396.5,
    "framings": [
     {
-     "yaw": 0.01,
-     "pitch": 0.2,
-     "dist": 10
+     "yaw": 3.14,
+     "pitch": 0.06,
+     "dist": 11
     },
     {
-     "yaw": 0.61,
-     "pitch": 0.2,
-     "dist": 7
+     "yaw": 3.54,
+     "pitch": 0.06,
+     "dist": 11
     },
     {
-     "yaw": -0.59,
-     "pitch": 0.28,
-     "dist": 12
+     "yaw": 2.74,
+     "pitch": 0.06,
+     "dist": 11
     }
    ],
    "expectation": "The station stair doorway on Addison under the girder rail bridge: solid green embankment mass, stair door, bridge overhead with the street passing beneath."
@@ -902,23 +902,23 @@
    "id": "wv-bar-sluggers",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -320.4,
-   "z": -480,
+   "x": -318.24,
+   "z": -482.84,
    "framings": [
     {
-     "yaw": -1.57,
-     "pitch": 0.18,
-     "dist": 11
+     "yaw": -1.3,
+     "pitch": -0.3,
+     "dist": 14
     },
     {
-     "yaw": -0.97,
-     "pitch": 0.18,
-     "dist": 8
+     "yaw": -0.9,
+     "pitch": -0.3,
+     "dist": 14
     },
     {
-     "yaw": -2.17,
-     "pitch": 0.26,
-     "dist": 13
+     "yaw": -1.7,
+     "pitch": -0.3,
+     "dist": 14
     }
    ],
    "expectation": "SLUGGERS bar front on the west side of Clark: neon signage readable; part of the glowing bar row."
@@ -927,23 +927,23 @@
    "id": "wv-bar-sports-corner",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -315.36,
-   "z": -462,
+   "x": -313.2,
+   "z": -464.84,
    "framings": [
     {
-     "yaw": -1.57,
-     "pitch": 0.18,
-     "dist": 11
+     "yaw": -1.3,
+     "pitch": -0.3,
+     "dist": 14
     },
     {
-     "yaw": -0.97,
-     "pitch": 0.18,
-     "dist": 8
+     "yaw": -0.9,
+     "pitch": -0.3,
+     "dist": 14
     },
     {
-     "yaw": -2.17,
-     "pitch": 0.26,
-     "dist": 13
+     "yaw": -1.7,
+     "pitch": -0.3,
+     "dist": 14
     }
    ],
    "expectation": "SPORTS CORNER bar front on the west side of Clark: neon signage readable in the bar row."
@@ -952,23 +952,23 @@
    "id": "wv-bar-casey-s",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -310.32,
-   "z": -444,
+   "x": -308.16,
+   "z": -446.84,
    "framings": [
     {
-     "yaw": -1.57,
-     "pitch": 0.18,
-     "dist": 11
+     "yaw": -1.3,
+     "pitch": -0.3,
+     "dist": 14
     },
     {
-     "yaw": -0.97,
-     "pitch": 0.18,
-     "dist": 8
+     "yaw": -0.9,
+     "pitch": -0.3,
+     "dist": 14
     },
     {
-     "yaw": -2.17,
-     "pitch": 0.26,
-     "dist": 13
+     "yaw": -1.7,
+     "pitch": -0.3,
+     "dist": 14
     }
    ],
    "expectation": "CASEY'S bar front on the west side of Clark: neon signage readable in the bar row."
@@ -977,23 +977,23 @@
    "id": "wv-bar-the-dugout",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -305.28,
-   "z": -426,
+   "x": -303.12,
+   "z": -428.84,
    "framings": [
     {
-     "yaw": -1.57,
-     "pitch": 0.18,
-     "dist": 11
+     "yaw": -1.3,
+     "pitch": -0.3,
+     "dist": 14
     },
     {
-     "yaw": -0.97,
-     "pitch": 0.18,
-     "dist": 8
+     "yaw": -0.9,
+     "pitch": -0.3,
+     "dist": 14
     },
     {
-     "yaw": -2.17,
-     "pitch": 0.26,
-     "dist": 13
+     "yaw": -1.3,
+     "pitch": -0.3,
+     "dist": 9.8
     }
    ],
    "expectation": "THE DUGOUT bar front on the west side of Clark: neon signage readable in the bar row."
@@ -1052,23 +1052,23 @@
    "id": "wv-stall-2",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -193,
-   "z": -488,
+   "x": -189,
+   "z": -482.5,
    "framings": [
     {
-     "yaw": 0.01,
-     "pitch": 0.15,
-     "dist": 8
+     "yaw": -2.91,
+     "pitch": 0.1,
+     "dist": 9
     },
     {
-     "yaw": 0.61,
-     "pitch": 0.15,
-     "dist": 7
+     "yaw": -2.51,
+     "pitch": 0.1,
+     "dist": 6.3
     },
     {
-     "yaw": -0.59,
-     "pitch": 0.23,
-     "dist": 10
+     "yaw": -3.26,
+     "pitch": 0.16,
+     "dist": 7.65
     }
    ],
    "expectation": "A souvenir/cap stand on Sheffield at Waveland near the bleacher corner."
@@ -1102,23 +1102,23 @@
    "id": "wv-caray-statue",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -194.6,
-   "z": -489.5,
+   "x": -192.5,
+   "z": -494,
    "framings": [
     {
-     "yaw": 0.01,
-     "pitch": 0.15,
+     "yaw": -0.44,
+     "pitch": -0.12,
      "dist": 8
     },
     {
-     "yaw": 0.61,
-     "pitch": 0.15,
-     "dist": 7
+     "yaw": -0.04,
+     "pitch": -0.12,
+     "dist": 8
     },
     {
-     "yaw": -0.59,
-     "pitch": 0.23,
-     "dist": 10
+     "yaw": -0.84,
+     "pitch": -0.12,
+     "dist": 8
     }
    ],
    "expectation": "The Harry Caray statue on the west sidewalk outside the Bleacher Gate: exuberant pose with glasses; second Caray honor in the game, like Chicago does."
