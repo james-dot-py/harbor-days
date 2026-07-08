@@ -253,8 +253,10 @@ a low-rise Lakeview backdrop band (BACKDROP_W).
 ### Standing liberties (deliberate, keep)
 - The cell sits ~x −140 rather than the true ~x −800 (1.6 km inland) — the L
   ride is a scripted transition, not literal track distance.
-- Stadium at land-scale footprint (1:2), 1:1-ish verticals — same rule as the
-  harbor basin ("a REAL harbor").
+- Stadium at land-scale footprint (1:2) with TRUE 1:1 verticals (v2, Wave 4):
+  facade 16.5, rim ~23, towers ~29, scoreboard base 18.3 / top 26.5 — the
+  published 60 ft / 87 ft. The NE bleacher crown stays ~8.1 on purpose: any
+  higher blinds the Waveland rooftop views (the 2015-videoboard effect).
 - **Classic postcard Wrigley: no 2015+ video boards**, so the rooftop views
   work. Hand-turned scoreboard only.
 - Perpetual game day (crowd inside, barricades out, bars loud). The lakefront's
