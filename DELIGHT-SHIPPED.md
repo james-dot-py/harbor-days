@@ -20,4 +20,5 @@ cut becomes a revert task.
 
 ## Autopilot-shipped
 
-- (none yet)
+- Cornhole boards with an ongoing NPC match (bags arc, occasional "bago!") —
+  south lawn (130,272), Chicago-flag star boards — 164546c

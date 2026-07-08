@@ -28,8 +28,6 @@ doors · Wrigley's Spearmint ad inside the L car.
   (seed: harbor-new.md)
 - Guitar strummer with a small audience — lakefront lawns — every Chicago
   summer lawn has one. (seed: harbor-new.md)
-- Cornhole boards with an ongoing NPC match (bags arc, occasional "bago!") —
-  lakefront lawns — the Midwest yard game. (seed: harbor-new.md)
 - Toddler chasing the geese, goose event tie-in — lakefront lawns — the geese
   always win. (seed: harbor-new.md)
 - Farmers-market-style cart (corn, elotes?) on a trail edge — lakefront —
