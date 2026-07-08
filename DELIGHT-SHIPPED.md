@@ -22,3 +22,5 @@ cut becomes a revert task.
 
 - Cornhole boards with an ongoing NPC match (bags arc, occasional "bago!") —
   south lawn (130,272), Chicago-flag star boards — 164546c
+- Rounded art-deco marquee corner: the Clark & Addison postcard view, curved
+  wall + marquee on the apex, crowd at the gates — Wrigleyville — 4063791
