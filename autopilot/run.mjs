@@ -141,15 +141,21 @@ function runClaude({ prompt, maxTurns, resume }) {
   return new Promise((resolve) => {
     const args = claudeArgs({ prompt, maxTurns, resume });
     const child = spawn('claude', args, { cwd: ROOT });
+    // persist the RAW stream — without this, diagnosing a dead session means
+    // spelunking ~/.claude transcripts (learned in the first Phase 5 dry run)
+    mkdirSync(LOGS, { recursive: true });
+    const streamLog = join(LOGS, 'session-' + new Date().toISOString().replace(/[:.]/g, '-') + '.jsonl');
+    log({ event: 'stream-log', msg: streamLog });
     let sessionId = resume || null, buf = '', limitText = null, resultText = null, sawResult = false;
     child.stdout.on('data', d => {
       buf += d.toString();
       let idx;
       while ((idx = buf.indexOf('\n')) >= 0) { const line = buf.slice(0, idx); buf = buf.slice(idx + 1); handle(line); }
     });
-    child.stderr.on('data', d => { const s = d.toString(); if (looksLikeLimit(s)) limitText = s; });
+    child.stderr.on('data', d => { const s = d.toString(); try { appendFileSync(streamLog, JSON.stringify({ stderr: s }) + '\n'); } catch { } if (looksLikeLimit(s)) limitText = s; });
     function handle(line) {
       if (!line.trim()) return;
+      try { appendFileSync(streamLog, line + '\n'); } catch { }
       let ev; try { ev = JSON.parse(line); } catch { if (looksLikeLimit(line)) limitText = line; return; }
       if (ev.session_id && !sessionId) sessionId = ev.session_id;
       if (ev.type === 'system' && ev.subtype === 'init' && ev.session_id) sessionId = ev.session_id;
