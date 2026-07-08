@@ -1,0 +1,6 @@
+{
+  "drawCalls": 1350,
+  "target": 480,
+  "note": "OPERATIONAL budget for gate.mjs/walkthrough, set just above the measured worst case of the CURRENT world (first-ever per-waypoint measurement, 2026-07-07, run-mrbjrqz2: max 1298 at wv-marquee/scoreboard views; 59/144 framings over the 480 CLAUDE.md target — a pre-autopilot condition, see autopilot/issues/000-draw-call-budget.md). Queue task 004 does the instancing/bucketing work; every time the measured max drops, RATCHET this number down toward target. Never raise it.",
+  "measured": { "date": "2026-07-07", "runId": "mrbjmwnw/mrbjrqz2", "maxDrawCalls": 1298, "overTargetFramings": 59, "totalFramings": 144 }
+}

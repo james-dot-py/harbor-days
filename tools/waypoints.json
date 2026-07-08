@@ -1,0 +1,1202 @@
+{
+ "generated": "2026-07-08T03:57:48.485Z",
+ "count": 48,
+ "waypoints": [
+  {
+   "id": "spawn",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 150,
+   "z": 150,
+   "framings": [
+    {},
+    {
+     "yaw": -1.57,
+     "pitch": 0.2,
+     "dist": 12
+    },
+    {
+     "yaw": 3.14,
+     "pitch": 0.25,
+     "dist": 14
+    }
+   ],
+   "expectation": "The canonical Belmont Rocks spawn: the chibi mayor on green lawn atop stepped tan revetment terraces, beach towels/umbrellas/coolers scattered on the steps, dusk-peach sky and blue lake with floaties, minimap top-right. Must match baseline.png composition."
+  },
+  {
+   "id": "zone-aids-garden-chicago",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 95,
+   "z": 120,
+   "framings": [
+    {
+     "yaw": 0.8,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": 2.9,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": -1.3,
+     "pitch": 0.28,
+     "dist": 13
+    }
+   ],
+   "expectation": "AIDS Garden Chicago: colorful flower beds around a circular plaza loop, with the 30-ft green Keith Haring figure sculpture dominating the scene. Lawn setting west of the rocks."
+  },
+  {
+   "id": "zone-the-belmont-rocks",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 150,
+   "z": 150,
+   "framings": [
+    {
+     "yaw": 0.8,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": 2.9,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": -1.3,
+     "pitch": 0.28,
+     "dist": 13
+    }
+   ],
+   "expectation": "The Belmont Rocks hangout: stepped revetment terraces stepping down to the lake, dotted with colorful towels, tilted umbrellas and coolers; open blue water east."
+  },
+  {
+   "id": "zone-diversey-point",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 100,
+   "z": 378,
+   "framings": [
+    {
+     "yaw": 0.8,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": 2.9,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": -1.3,
+     "pitch": 0.28,
+     "dist": 13
+    }
+   ],
+   "expectation": "Diversey Point, the map's south corner: the 7-step terraced revetment curving from east-facing to south-facing, big south lawn behind, blue Chevron sculpture and/or corner pier nearby; skyline may read to the south."
+  },
+  {
+   "id": "zone-belmont-harbor",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 120,
+   "z": -170,
+   "framings": [
+    {
+     "yaw": 0.8,
+     "pitch": 0.2,
+     "dist": 15
+    },
+    {
+     "yaw": 2.9,
+     "pitch": 0.2,
+     "dist": 15
+    },
+    {
+     "yaw": -1.3,
+     "pitch": 0.28,
+     "dist": 17
+    }
+   ],
+   "expectation": "Belmont Harbor basin: calm water with rows of moored sailboats (mooring cans), west-shore finger docks with boats, the treed spit peninsula east across the water."
+  },
+  {
+   "id": "zone-harbor-pier",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 205,
+   "z": -105,
+   "framings": [
+    {
+     "yaw": 0.8,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": 2.9,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": -1.3,
+     "pitch": 0.28,
+     "dist": 13
+    }
+   ],
+   "expectation": "The harbor pier deck: wooden planks over water at the basin edge, rails/lamp, boats and harbor water around it."
+  },
+  {
+   "id": "zone-yacht-club",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 70,
+   "z": -180,
+   "framings": [
+    {
+     "yaw": 0.8,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": 2.9,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": -1.3,
+     "pitch": 0.28,
+     "dist": 13
+    }
+   ],
+   "expectation": "The yacht club on the west shore lawn: clubhouse building with a burgee pole facing the water, docks nearby."
+  },
+  {
+   "id": "zone-dog-beach",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 100,
+   "z": -336,
+   "framings": [
+    {
+     "yaw": 0.8,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": 2.9,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": -1.3,
+     "pitch": 0.28,
+     "dist": 13
+    }
+   ],
+   "expectation": "The dog beach cove: a small rounded sand cove with fence and gates, dogs/fetch play on the sand, harbor water beyond; the trail passes north of the cove, never crossing the sand."
+  },
+  {
+   "id": "zone-kwanusila",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 30,
+   "z": -370,
+   "framings": [
+    {
+     "yaw": 0.8,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": 2.9,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": -1.3,
+     "pitch": 0.28,
+     "dist": 13
+    }
+   ],
+   "expectation": "The Kwanusila totem pole on the inner lawn: a tall carved pole with painted figures and spread wings near the top, lawn and trees around it."
+  },
+  {
+   "id": "zone-bird-sanctuary",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 150,
+   "z": -388,
+   "framings": [
+    {
+     "yaw": 0.8,
+     "pitch": 0.2,
+     "dist": 15
+    },
+    {
+     "yaw": 2.9,
+     "pitch": 0.2,
+     "dist": 15
+    },
+    {
+     "yaw": -1.3,
+     "pitch": 0.28,
+     "dist": 17
+    }
+   ],
+   "expectation": "Bill Jarvis Bird Sanctuary: a dense dark woodland grove wrapped by an organic fence loop; inside are a winding limestone path, layered wildflowers and an elevated wooden viewing deck. Reads like a secret garden room."
+  },
+  {
+   "id": "zone-waveland-fieldhouse",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 186,
+   "z": -478,
+   "framings": [
+    {
+     "yaw": 0.8,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": 2.9,
+     "pitch": 0.2,
+     "dist": 11
+    },
+    {
+     "yaw": -1.3,
+     "pitch": 0.28,
+     "dist": 13
+    }
+   ],
+   "expectation": "The Waveland fieldhouse with its landmark clock tower — pitched-roof brick fieldhouse, square tower with clock faces — just inside the golf course's SE corner by the trail."
+  },
+  {
+   "id": "zone-marovitz-golf-course",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 150,
+   "z": -610,
+   "framings": [
+    {
+     "yaw": 0.8,
+     "pitch": 0.2,
+     "dist": 15
+    },
+    {
+     "yaw": 2.9,
+     "pitch": 0.2,
+     "dist": 15
+    },
+    {
+     "yaw": -1.3,
+     "pitch": 0.28,
+     "dist": 17
+    }
+   ],
+   "expectation": "Sydney R. Marovitz golf course: fenced rolling fairways with greens, flags and bunkers stretching north; tee/green dressing, no buildings dominating."
+  },
+  {
+   "id": "sign-aids-garden",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 95,
+   "z": 60,
+   "framings": [
+    {
+     "yaw": 3.54,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 0.4,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 4.44,
+     "pitch": 0.2,
+     "dist": 10
+    }
+   ],
+   "expectation": "Wooden 'AIDS GARDEN' sign readable in frame, garden beds/lawn behind it."
+  },
+  {
+   "id": "sign-belmont-harbor",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 78,
+   "z": -30,
+   "framings": [
+    {
+     "yaw": 4.71,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 1.57,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 5.61,
+     "pitch": 0.2,
+     "dist": 10
+    }
+   ],
+   "expectation": "Wooden 'BELMONT HARBOR' sign readable, harbor water/docks context behind."
+  },
+  {
+   "id": "sign-dog-beach",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 103,
+   "z": -343,
+   "framings": [
+    {
+     "yaw": 6.14,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 3,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 7.04,
+     "pitch": 0.2,
+     "dist": 10
+    }
+   ],
+   "expectation": "Wooden 'DOG BEACH' sign readable, standing on GRASS north of the sand cove (not in the sand), facing the trail."
+  },
+  {
+   "id": "sign-bird-sanctuary",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 98,
+   "z": -386,
+   "framings": [
+    {
+     "yaw": 1.74,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": -1.4,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 2.64,
+     "pitch": 0.2,
+     "dist": 10
+    }
+   ],
+   "expectation": "Wooden 'BIRD SANCTUARY' sign readable by the sanctuary's west gate, dense grove behind."
+  },
+  {
+   "id": "sign-waveland-fieldhouse",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 202,
+   "z": -470,
+   "framings": [
+    {
+     "yaw": 4.44,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 1.3,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 5.34,
+     "pitch": 0.2,
+     "dist": 10
+    }
+   ],
+   "expectation": "Wooden 'WAVELAND FIELDHOUSE' sign readable on the trail side; clock tower visible behind."
+  },
+  {
+   "id": "sign-yacht-club",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 70,
+   "z": -168,
+   "framings": [
+    {
+     "yaw": 2.54,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": -0.6,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 3.44,
+     "pitch": 0.2,
+     "dist": 10
+    }
+   ],
+   "expectation": "Wooden 'YACHT CLUB' sign readable near the clubhouse lawn."
+  },
+  {
+   "id": "sign-waveland-tennis-courts",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 83,
+   "z": -403,
+   "framings": [
+    {
+     "yaw": 1.24,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": -1.9,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 2.14,
+     "pitch": 0.2,
+     "dist": 10
+    }
+   ],
+   "expectation": "Wooden 'WAVELAND TENNIS COURTS' sign readable at the SE corner of the fenced 2x2 court block: green slabs, painted lines, sagging nets."
+  },
+  {
+   "id": "sign-diversey-range-mini-golf",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 30,
+   "z": 285,
+   "framings": [
+    {
+     "yaw": 3.64,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 0.5,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 4.54,
+     "pitch": 0.2,
+     "dist": 10
+    }
+   ],
+   "expectation": "Wooden 'DIVERSEY RANGE & MINI GOLF' sign readable SW of the range; two-tier driving-range bays and/or the tall perimeter net behind."
+  },
+  {
+   "id": "sign-future-entrance",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 15,
+   "z": 113,
+   "framings": [
+    {
+     "yaw": 1.57,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": -1.57,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 2.47,
+     "pitch": 0.2,
+     "dist": 10
+    }
+   ],
+   "expectation": "Wooden 'FUTURE ENTRANCE →' gag sign beside the Belmont underpass mouth in the LSD berm; short tunnel/fenced door visible."
+  },
+  {
+   "id": "sign-future-entrance-2",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 16,
+   "z": -394,
+   "framings": [
+    {
+     "yaw": 1.57,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": -1.57,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 2.47,
+     "pitch": 0.2,
+     "dist": 10
+    }
+   ],
+   "expectation": "Wooden 'FUTURE ENTRANCE →' gag sign at the Addison underpass in the LSD berm."
+  },
+  {
+   "id": "sign-future-entrance-3",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 16,
+   "z": -794,
+   "framings": [
+    {
+     "yaw": 1.57,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": -1.57,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 2.47,
+     "pitch": 0.2,
+     "dist": 10
+    }
+   ],
+   "expectation": "Wooden 'FUTURE ENTRANCE →' gag sign at the Irving Park underpass in the LSD berm, far north."
+  },
+  {
+   "id": "deck-1",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 121,
+   "z": 389.5,
+   "framings": [
+    {
+     "yaw": 0,
+     "pitch": 0.22,
+     "dist": 12
+    },
+    {
+     "yaw": 3.14,
+     "pitch": 0.22,
+     "dist": 12
+    },
+    {
+     "yaw": 1.57,
+     "pitch": 0.3,
+     "dist": 14
+    }
+   ],
+   "expectation": "The corner pier: a plank deck jutting SOUTH over open water from the corner-wrap revetment, lamp at its tip; skyline backdrop to the south, water under the rails."
+  },
+  {
+   "id": "landmark-0",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 60,
+   "z": -100,
+   "framings": [
+    {
+     "yaw": 0.8,
+     "pitch": 0.2,
+     "dist": 10
+    },
+    {
+     "yaw": 2.9,
+     "pitch": 0.2,
+     "dist": 10
+    },
+    {
+     "yaw": -1.3,
+     "pitch": 0.28,
+     "dist": 12
+    }
+   ],
+   "expectation": "The harbor house: a small red-roofed harbor office building on the inner-park side of the basin."
+  },
+  {
+   "id": "wv-spawn",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -140,
+   "z": -435,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.15,
+     "dist": 9
+    },
+    {
+     "yaw": 0,
+     "pitch": 0.15,
+     "dist": 9
+    },
+    {
+     "yaw": -1.57,
+     "pitch": 0.3,
+     "dist": 13
+    }
+   ],
+   "expectation": "Arrival on the elevated Addison Red Line island platform (y 7.6): platform furniture/signage, twin tracks alongside, Wrigleyville streets below; down-the-platform framing, not clipped into walls."
+  },
+  {
+   "id": "wv-marquee",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -284.5,
+   "z": -404.5,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.25,
+     "dist": 13
+    },
+    {
+     "yaw": 3.74,
+     "pitch": 0.25,
+     "dist": 10
+    },
+    {
+     "yaw": 2.54,
+     "pitch": 0.33,
+     "dist": 15
+    }
+   ],
+   "expectation": "THE shot: the red Wrigley Field marquee ('WRIGLEY FIELD — HOME OF CHICAGO CUBS' with a message line) at the Clark & Addison corner, red-brick stadium facade behind. A Chicagoan should recognize it instantly."
+  },
+  {
+   "id": "wv-scoreboard",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -196,
+   "z": -480,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.38,
+     "dist": 18
+    },
+    {
+     "yaw": -0.97,
+     "pitch": 0.38,
+     "dist": 15
+    },
+    {
+     "yaw": -2.17,
+     "pitch": 0.46,
+     "dist": 20
+    }
+   ],
+   "expectation": "The hand-turned green centerfield scoreboard high atop the bleachers (base ~18, top ~26.5): line-score grid, pennants above, no video boards (classic postcard Wrigley)."
+  },
+  {
+   "id": "wv-gate-marquee",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -283,
+   "z": -404,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.22,
+     "dist": 11
+    },
+    {
+     "yaw": 3.74,
+     "pitch": 0.22,
+     "dist": 8
+    },
+    {
+     "yaw": 2.54,
+     "pitch": 0.3,
+     "dist": 13
+    }
+   ],
+   "expectation": "The Marquee Gate at Clark & Addison: red-brick arches under the marquee corner, crowd/turnstile dressing."
+  },
+  {
+   "id": "wv-gate-gallagher",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -276.62,
+   "z": -463.91,
+   "framings": [
+    {
+     "yaw": 1.18,
+     "pitch": 0.22,
+     "dist": 11
+    },
+    {
+     "yaw": 1.78,
+     "pitch": 0.22,
+     "dist": 8
+    },
+    {
+     "yaw": 0.58,
+     "pitch": 0.3,
+     "dist": 13
+    }
+   ],
+   "expectation": "The Gallagher Way gate on the plaza's east side: brick facade arches opening onto the plaza."
+  },
+  {
+   "id": "wv-gate-bleacher",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -194.46,
+   "z": -488.46,
+   "framings": [
+    {
+     "yaw": -2.36,
+     "pitch": 0.22,
+     "dist": 11
+    },
+    {
+     "yaw": -1.76,
+     "pitch": 0.22,
+     "dist": 8
+    },
+    {
+     "yaw": -2.96,
+     "pitch": 0.3,
+     "dist": 13
+    }
+   ],
+   "expectation": "The Bleacher Gate at Sheffield & Waveland: brick corner entrance below the bleachers; Murphy's across the street."
+  },
+  {
+   "id": "wv-knothole",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -196,
+   "z": -447,
+   "framings": [
+    {
+     "yaw": 0.01,
+     "pitch": 0.15,
+     "dist": 8
+    },
+    {
+     "yaw": 0.61,
+     "pitch": 0.15,
+     "dist": 7
+    },
+    {
+     "yaw": -0.59,
+     "pitch": 0.23,
+     "dist": 10
+    }
+   ],
+   "expectation": "The knothole: a screened opening in the right-field wall on Sheffield where you can peek at the field inside."
+  },
+  {
+   "id": "wv-station-door",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -140,
+   "z": -402,
+   "framings": [
+    {
+     "yaw": 0.01,
+     "pitch": 0.2,
+     "dist": 10
+    },
+    {
+     "yaw": 0.61,
+     "pitch": 0.2,
+     "dist": 7
+    },
+    {
+     "yaw": -0.59,
+     "pitch": 0.28,
+     "dist": 12
+    }
+   ],
+   "expectation": "The station stair doorway on Addison under the girder rail bridge: solid green embankment mass, stair door, bridge overhead with the street passing beneath."
+  },
+  {
+   "id": "wv-murphys",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -184,
+   "z": -487,
+   "framings": [
+    {
+     "yaw": 1.57,
+     "pitch": 0.2,
+     "dist": 12
+    },
+    {
+     "yaw": 2.17,
+     "pitch": 0.2,
+     "dist": 9
+    },
+    {
+     "yaw": 0.97,
+     "pitch": 0.28,
+     "dist": 14
+    }
+   ],
+   "expectation": "Murphy's Bleachers bar at the SE corner of Sheffield & Waveland: low bar building with signage/neon, across from the bleacher wall."
+  },
+  {
+   "id": "wv-engine78",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -242,
+   "z": -504,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.2,
+     "dist": 12
+    },
+    {
+     "yaw": 3.74,
+     "pitch": 0.2,
+     "dist": 9
+    },
+    {
+     "yaw": 2.54,
+     "pitch": 0.28,
+     "dist": 14
+    }
+   ],
+   "expectation": "Engine 78 firehouse on Waveland: red-doored fire station beside the park (1052 W Waveland)."
+  },
+  {
+   "id": "wv-cubby-bear",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -298.94,
+   "z": -393.39,
+   "framings": [
+    {
+     "yaw": -0.39,
+     "pitch": 0.2,
+     "dist": 12
+    },
+    {
+     "yaw": 0.21,
+     "pitch": 0.2,
+     "dist": 9
+    },
+    {
+     "yaw": -0.99,
+     "pitch": 0.28,
+     "dist": 14
+    }
+   ],
+   "expectation": "The Cubby Bear bar opposite the marquee corner: bar front with neon signage facing Clark & Addison."
+  },
+  {
+   "id": "wv-bar-sluggers",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -320.4,
+   "z": -480,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.18,
+     "dist": 11
+    },
+    {
+     "yaw": -0.97,
+     "pitch": 0.18,
+     "dist": 8
+    },
+    {
+     "yaw": -2.17,
+     "pitch": 0.26,
+     "dist": 13
+    }
+   ],
+   "expectation": "SLUGGERS bar front on the west side of Clark: neon signage readable; part of the glowing bar row."
+  },
+  {
+   "id": "wv-bar-sports-corner",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -315.36,
+   "z": -462,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.18,
+     "dist": 11
+    },
+    {
+     "yaw": -0.97,
+     "pitch": 0.18,
+     "dist": 8
+    },
+    {
+     "yaw": -2.17,
+     "pitch": 0.26,
+     "dist": 13
+    }
+   ],
+   "expectation": "SPORTS CORNER bar front on the west side of Clark: neon signage readable in the bar row."
+  },
+  {
+   "id": "wv-bar-casey-s",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -310.32,
+   "z": -444,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.18,
+     "dist": 11
+    },
+    {
+     "yaw": -0.97,
+     "pitch": 0.18,
+     "dist": 8
+    },
+    {
+     "yaw": -2.17,
+     "pitch": 0.26,
+     "dist": 13
+    }
+   ],
+   "expectation": "CASEY'S bar front on the west side of Clark: neon signage readable in the bar row."
+  },
+  {
+   "id": "wv-bar-the-dugout",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -305.28,
+   "z": -426,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.18,
+     "dist": 11
+    },
+    {
+     "yaw": -0.97,
+     "pitch": 0.18,
+     "dist": 8
+    },
+    {
+     "yaw": -2.17,
+     "pitch": 0.26,
+     "dist": 13
+    }
+   ],
+   "expectation": "THE DUGOUT bar front on the west side of Clark: neon signage readable in the bar row."
+  },
+  {
+   "id": "wv-stall-0",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -160,
+   "z": -396,
+   "framings": [
+    {
+     "yaw": 0.01,
+     "pitch": 0.15,
+     "dist": 8
+    },
+    {
+     "yaw": 0.61,
+     "pitch": 0.15,
+     "dist": 7
+    },
+    {
+     "yaw": -0.59,
+     "pitch": 0.23,
+     "dist": 10
+    }
+   ],
+   "expectation": "A souvenir/cap stand on Addison by the station: caps, W flags, Cubs-blue merchandise on display."
+  },
+  {
+   "id": "wv-stall-1",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -212,
+   "z": -397,
+   "framings": [
+    {
+     "yaw": 0.01,
+     "pitch": 0.15,
+     "dist": 8
+    },
+    {
+     "yaw": 0.61,
+     "pitch": 0.15,
+     "dist": 7
+    },
+    {
+     "yaw": -0.59,
+     "pitch": 0.23,
+     "dist": 10
+    }
+   ],
+   "expectation": "A souvenir/cap stand mid-block on Addison, stadium facade context behind."
+  },
+  {
+   "id": "wv-stall-2",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -193,
+   "z": -488,
+   "framings": [
+    {
+     "yaw": 0.01,
+     "pitch": 0.15,
+     "dist": 8
+    },
+    {
+     "yaw": 0.61,
+     "pitch": 0.15,
+     "dist": 7
+    },
+    {
+     "yaw": -0.59,
+     "pitch": 0.23,
+     "dist": 10
+    }
+   ],
+   "expectation": "A souvenir/cap stand on Sheffield at Waveland near the bleacher corner."
+  },
+  {
+   "id": "wv-statue-row",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -308,
+   "z": -491,
+   "framings": [
+    {
+     "yaw": 0.01,
+     "pitch": 0.15,
+     "dist": 9
+    },
+    {
+     "yaw": 0.61,
+     "pitch": 0.15,
+     "dist": 7
+    },
+    {
+     "yaw": -0.59,
+     "pitch": 0.23,
+     "dist": 11
+    }
+   ],
+   "expectation": "Statue Row at Gallagher Way's north edge: a line of statues on pedestals (Ernie Banks first), plaza around them."
+  },
+  {
+   "id": "wv-caray-statue",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -194.6,
+   "z": -489.5,
+   "framings": [
+    {
+     "yaw": 0.01,
+     "pitch": 0.15,
+     "dist": 8
+    },
+    {
+     "yaw": 0.61,
+     "pitch": 0.15,
+     "dist": 7
+    },
+    {
+     "yaw": -0.59,
+     "pitch": 0.23,
+     "dist": 10
+    }
+   ],
+   "expectation": "The Harry Caray statue on the west sidewalk outside the Bleacher Gate: exuberant pose with glasses; second Caray honor in the game, like Chicago does."
+  },
+  {
+   "id": "wv-gallagher-way",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -287.36,
+   "z": -462,
+   "framings": [
+    {
+     "yaw": 1.57,
+     "pitch": 0.25,
+     "dist": 13
+    },
+    {
+     "yaw": 2.17,
+     "pitch": 0.25,
+     "dist": 10
+    },
+    {
+     "yaw": 0.97,
+     "pitch": 0.33,
+     "dist": 15
+    }
+   ],
+   "expectation": "Gallagher Way plaza: open paved plaza east of Clark against the stadium's west stands; statues at the north edge, plaza life (fans, festival props)."
+  },
+  {
+   "id": "wv-rooftop-view",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -212.5,
+   "z": -515,
+   "framings": [
+    {
+     "yaw": 0.01,
+     "pitch": 0.15,
+     "dist": 10
+    },
+    {
+     "yaw": 0.61,
+     "pitch": 0.15,
+     "dist": 7
+    },
+    {
+     "yaw": -0.59,
+     "pitch": 0.23,
+     "dist": 12
+    }
+   ],
+   "expectation": "From THE climbable Waveland rooftop (y 9.6): rooftop bleacher rows looking over Waveland INTO the park — outfield, scoreboard and light towers visible over the LF wall; EAMUS CATULI building nearby."
+  },
+  {
+   "id": "wv-barricade-addison-e",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -134,
+   "z": -400,
+   "framings": [
+    {
+     "yaw": 1.57,
+     "pitch": 0.15,
+     "dist": 9
+    },
+    {
+     "yaw": 2.17,
+     "pitch": 0.15,
+     "dist": 7
+    },
+    {
+     "yaw": 0.97,
+     "pitch": 0.23,
+     "dist": 11
+    }
+   ],
+   "expectation": "A CPD street closure: blue wooden A-frame barricades ('POLICE LINE') with an officer NPC closing Addison east past the station; Lakeview backdrop buildings continue beyond — diegetic wall, not a void."
+  }
+ ]
+}
