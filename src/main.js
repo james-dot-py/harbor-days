@@ -367,6 +367,7 @@ function frame(now){
 function runStart(){
   game.running=true;
   if(DBG.get('play')!=='1'){introT=1;camPos.set(player.x+20,22,player.z+16)}   // swoop in from over the lake
+  else camCtl.snap=true;   // debug/shot starts must not depend on startup duration (settle lerp vs fixed waitMs)
   $('title').classList.add('hide');
   $('pill').style.display='flex';setType(0);
   $('mini').style.display='block';

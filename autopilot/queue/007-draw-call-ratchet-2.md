@@ -43,3 +43,12 @@ at deck-1 = ~350 draws):
    statues built via createChibi are fully static — safe to bake each whole
    statue into 1-2 meshes (they are exempted from mergeCellStatic only by the
    'chibi' name guard; give statues a dedicated static build path or rename).
+4. **Startup cost of the pass-1 merges** (found by gate check 4 after pass 1):
+   mergeCellStatic + per-chibi rig merges add ~1.5-2.5 s to world build
+   (SwiftShader measurement; the merge work is CPU-bound so real hardware pays
+   most of it too). Shots are insulated now (?play=1 snaps the camera to rest,
+   main.js runStart), but players still wait. Levers: run the cell merges in
+   requestIdleCallback after first paint, reuse merged geometry across chibis
+   (the rig merges rebuild identical limb geometry per NPC), or cache by
+   geometry signature. Measure before/after with performance.now around the
+   merge calls; keep first-frame time in the note here.

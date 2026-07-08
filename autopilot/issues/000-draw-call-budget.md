@@ -38,3 +38,11 @@ deck-1-f1 / zone-diversey-point-f1 ≈ 900–970):
 - statue chibis (cell-*/chibi rows) are fully static but exempted by the
   'chibi' name guard.
 Queue task 007-draw-call-ratchet-2.md carries these levers.
+
+Side effect found by gate check 4: the build-time merges (mergeCellStatic +
+per-chibi rig merges) add roughly 1.5–2.5 s to world startup under SwiftShader
+— at the gate's fixed 3.5 s wait the camera settle-lerp was caught mid-flight
+(36.7% spawn diff; at 6 s / 9 s waits the view is pixel-identical to baseline,
+so no visual regression). Fixed the shot-stability half by snapping the camera
+to its rest position on ?play=1 starts (main.js runStart, existing camCtl.snap
+mechanism). The startup cost itself is a 007 lever: cache or defer the merges.
