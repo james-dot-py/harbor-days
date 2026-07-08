@@ -20,6 +20,19 @@ import './packs/index.js';   // content packs (side-effect); loaded before world
 const DBG=new URLSearchParams(location.search);
 const dbgNum=k=>DBG.has(k)?parseFloat(DBG.get(k)):null;
 
+// ---- autopilot instrumentation: canary echo, error ring, perf probe ----
+if(DBG.get('canary'))console.log('[canary] '+DBG.get('canary'));
+const errRing=[];   // last 50 of console.error / window.onerror / unhandledrejection
+{
+  const push=v=>{errRing.push(String(v).slice(0,300));if(errRing.length>50)errRing.shift()};
+  const ce=console.error.bind(console);
+  console.error=(...a)=>{push(a.map(x=>(x&&x.stack)||x).join(' '));ce(...a)};
+  addEventListener('error',e=>push(e.message||'window.onerror'));
+  addEventListener('unhandledrejection',e=>push('unhandledrejection: '+((e.reason&&e.reason.message)||e.reason)));
+}
+const perfS={fps:0,n:0,mark:0};   // fps sampled over 60-frame windows (advisory; headless may be SwiftShader)
+window.__hd={errs:errRing,perf:()=>({drawCalls:renderer.info.render.calls,fps:Math.round(perfS.fps*10)/10})};
+
 // ---- build the world (order matters: single shared rng, top-to-bottom) ----
 buildSky();
 beginCellCapture();   // lakefront world → one cell root (cells.js); sky + mayor stay global
@@ -316,6 +329,7 @@ function frame(now){
 
   mmDraw(dt,player);
   renderer.render(scene,camera);
+  perfS.n++;if(perfS.n>=60){if(perfS.mark)perfS.fps=perfS.n*1000/(now-perfS.mark);perfS.mark=now;perfS.n=0}
 }
 
 // ------------------------------ start ----------------------------------
