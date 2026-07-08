@@ -23,6 +23,7 @@ import { toon, bmat, mulberry32, pointsMat, clamp, game } from '../core.js';
 import { activeCell } from '../cells.js';
 import { wrigleyRoot } from '../wrigley/index.js';
 import { marqueeSetText, raiseW } from '../wrigley/stadium.js';
+import { swing, PLATE } from '../wrigley/fieldplay.js';
 import { clarkX } from '../data/wrigleyville.js';
 
 // -------------------------- determinism --------------------------------
@@ -71,6 +72,7 @@ function roar(dur, peak) {
   src.connect(f); f.connect(g); g.connect(A.sfxBus); src.start(t); src.stop(t + dur + 0.1);
 }
 function crack(vol, bigRoar) {
+  swing();                                                   // the bat connects on the field (fieldplay)
   const A = getAudioCtx(); if (!A.actx) return; const t = A.actx.currentTime;
   // sharp bat crack — quick high noise transient
   const src = A.actx.createBufferSource(); src.buffer = A.noiseBuf;
@@ -234,9 +236,9 @@ function startHomer() {
   crack(1, true);
   toast('HOMER!', 'onto Waveland — get the ball!');
   state.wrigleyHomers = (state.wrigleyHomers || 0) + 1;
-  const sx = -231, sy = 12, sz = -486;                       // launch from inside the park, near the LF wall
+  const sx = PLATE.x, sy = PLATE.y, sz = PLATE.z;            // off the bat at the plate (fieldplay)
   const tx = -225 + rr(-2, 2), tz = -498 + rr(-1.5, 1.5);    // deterministic Waveland target
-  const T = 1.5;
+  const T = 2.6;                                             // longer arc — clears wall + bleachers (apex ~17.5)
   ball.x = sx; ball.y = sy; ball.z = sz;
   ball.vx = (tx - sx) / T; ball.vz = (tz - sz) / T;
   ball.vy = (BALL_GROUND - sy + 0.5 * BALL_G * T * T) / T;

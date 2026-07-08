@@ -14,6 +14,7 @@ import { buildStation } from './station.js';
 import { buildStadium } from './stadium.js';
 import { buildRooftops } from './rooftops.js';
 import { buildVillage } from './village.js';
+import { buildFieldplay } from './fieldplay.js';
 
 const _r = mulberry32(WV.SEED_W);
 export const wrand = (a = 0, b = 1) => a + (b - a) * _r();
@@ -121,6 +122,7 @@ export function buildWrigleyville() {
   buildStadium();
   buildRooftops();
   buildVillage();
+  buildFieldplay();
   scene.add(wrigleyRoot);
   registerCell({
     id: WV.CELL_ID, root: wrigleyRoot,
