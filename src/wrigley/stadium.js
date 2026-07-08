@@ -8,7 +8,7 @@ import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtil
 import { toon, bmat, mulberry32, pointsMat, pip } from '../core.js';
 import { collide } from '../props.js';
 import { wrigleyRoot } from './index.js';
-import { STADIUM_W } from '../data/wrigleyville.js';
+import { STADIUM_W, CORNER_ARC } from '../data/wrigleyville.js';
 
 const R = mulberry32(1914);
 const rr = (a, b) => a + (b - a) * R();
@@ -137,24 +137,29 @@ function wFlagTex() {
 // ---------------------------- facade ring ------------------------------
 function buildFacades() {
   const pale = [], brick = [], cornice = [], grille = [], terra = [];
-  // per-edge heights: [S(Addison), E(Sheffield), N(Waveland), plazaE, notchS, ClarkW]
+  // per-edge kind drives height/dressing (parallel to the poly edges): the
+  // first 8 are the rounded Marquee corner ('arc'), then the flat faces.
+  const KINDS = S.edgeKinds;
   const edges = [];
   for (let i = 0; i < POLY.length; i++) {
     const a = POLY[i], b = POLY[(i + 1) % POLY.length];
     edges.push({ a, b, len: Math.hypot(b[0] - a[0], b[1] - a[1]) });
   }
   const FH = S.facadeH;                        // true 4-storey streetwall (16.5)
-  const H = [FH, 12, 6.5, FH, FH, FH];         // Waveland stays low (rooftop sightlines)
+  const HMAP = { addison: FH, sheffield: 12, waveland: 6.5, plazaE: FH, notchS: FH, clark: FH, arc: FH };
+  const hasBand = k => k === 'addison' || k === 'plazaE' || k === 'notchS' || k === 'clark' || k === 'arc';
   edges.forEach((e, i) => {
+    const kind = KINDS[i], isArc = kind === 'arc';
+    const ext = isArc ? 0.35 : 0;              // overlap neighbouring arc chords → seamless curve, no slits
     const dx = e.b[0] - e.a[0], dz = e.b[1] - e.a[1];
     const yaw = Math.atan2(dx, dz), nx = dz / e.len, nz = -dx / e.len;  // inward
     const cx = (e.a[0] + e.b[0]) / 2 + nx * 0.6, cz = (e.a[1] + e.b[1]) / 2 + nz * 0.6;
-    const h = H[i];
+    const h = HMAP[kind];
     const mk = (arr, w, hh, d, ox, oy) => {                    // ox: inward offset
       const g = new THREE.BoxGeometry(w, hh, d);
       g.rotateY(yaw); g.translate(cx + nx * ox, oy, cz + nz * ox); arr.push(g);
     };
-    if (i === 1) {                                             // Sheffield wall — knothole gap
+    if (kind === 'sheffield') {                               // Sheffield wall — knothole gap
       const K = S.knothole, zA = e.a[1], segs = [[zA, K.z1], [K.z0, e.b[1]]];
       for (const [z0, z1] of segs) {
         const L = Math.abs(z1 - z0), c = (z0 + z1) / 2;
@@ -164,16 +169,23 @@ function buildFacades() {
       const lint = new THREE.BoxGeometry(1.2, h - 3.4, Math.abs(K.z0 - K.z1)); // above the opening
       lint.translate(cx, 3.4 + (h - 3.4) / 2, (K.z0 + K.z1) / 2); pale.push(lint);
     } else {
-      mk(pale, 1.2, h - 2.5, e.len, 0, 2.5 + (h - 2.5) / 2);
-      mk(brick, 1.3, 2.5, e.len, 0, 1.25);
+      mk(pale, 1.2, h - 2.5, e.len + ext, 0, 2.5 + (h - 2.5) / 2);
+      mk(brick, 1.3, 2.5, e.len + ext, 0, 1.25);
     }
-    mk(cornice, 1.6, 0.5, e.len + 0.4, 0, h + 0.25);           // cap
-    mk(terra, 1.4, 0.28, e.len + 0.2, 0, h + 0.64);            // terracotta strip
-    if (i !== 2) mk(grille, 0.5, 1.1, e.len * 0.9, -0.45, h - 1.2); // green grill band
-    // pressbox band set back behind the grandstand sides, up to the rim
-    if (i === 0 || i === 3 || i === 4 || i === 5) {
-      mk(pale, 1.6, 5.4, e.len * 0.86, 2.6, h + 3.1);          // ~16.9–22.3
-      mk(cornice, 1.8, 0.4, e.len * 0.8, 2.6, h + 5.9);        // rim cap ~22.5
+    mk(cornice, 1.6, 0.5, e.len + 0.4 + ext, 0, h + 0.25);     // cap
+    mk(terra, 1.4, 0.28, e.len + 0.2 + ext, 0, h + 0.64);      // terracotta strip
+    if (kind !== 'waveland') mk(grille, 0.5, 1.1, (isArc ? e.len + ext : e.len * 0.9), -0.45, h - 1.2); // green grill band
+    // pressbox band set back behind the grandstand sides, up to the rim.
+    // On the curve, full-length chords (no 0.86/0.9 shrink) → one continuous crown.
+    if (hasBand(kind)) {
+      mk(pale, 1.6, 5.4, (isArc ? e.len + ext : e.len * 0.86), 2.6, h + 3.1);   // ~16.9–22.3
+      mk(cornice, 1.8, 0.4, (isArc ? e.len + ext : e.len * 0.8), 2.6, h + 5.9); // rim cap ~22.5
+    }
+    if (isArc) {                                               // terracotta pent eyebrow over the corner ticket gates
+      const aw = new THREE.BoxGeometry(0.9, 0.16, e.len + 0.3);
+      aw.rotateZ(0.45); aw.rotateY(yaw);                       // droop the outer edge (red-tile pent tilt)
+      aw.translate(cx + nx * -1.1, 4.7, cz + nz * -1.1);       // ~0.5 m proud of the wall face
+      terra.push(aw);
     }
   });
   wrigleyRoot.add(new THREE.Mesh(mergeGeos(pale), toon(PALE)));
@@ -192,8 +204,10 @@ function buildFacades() {
     new THREE.CylinderGeometry(0.65, 0.65, 0.24, 10, 1, false, 0, Math.PI).rotateZ(Math.PI / 2).rotateY(Math.PI / 2).translate(0, 1.9, 0),
   ]);
   const arches = [], wins = [];
-  [0, 3, 4, 5].forEach(i => {
-    const e = edges[i], dx = e.b[0] - e.a[0], dz = e.b[1] - e.a[1];
+  edges.forEach((e, i) => {
+    const kind = KINDS[i];
+    if (!(kind === 'addison' || kind === 'plazaE' || kind === 'notchS' || kind === 'clark')) return;
+    const dx = e.b[0] - e.a[0], dz = e.b[1] - e.a[1];
     const yaw = Math.atan2(dx, dz), nx = dz / e.len, nz = -dx / e.len;
     const n = Math.floor(e.len / 6.5);
     for (let k = 0; k < n; k++) {
@@ -202,23 +216,45 @@ function buildFacades() {
       arches.push({ pos: [x, 0, z], yaw });
       const wx = e.a[0] + dx * tw - nx * 0.12, wz = e.a[1] + dz * tw - nz * 0.12;
       wins.push({ pos: [wx, 5.4, wz], yaw });                        // second storey
-      if (H[i] > 13) wins.push({ pos: [wx, 10.6, wz], yaw });        // third storey on the tall faces
+      if (HMAP[kind] > 13) wins.push({ pos: [wx, 10.6, wz], yaw });  // third storey on the tall faces
     }
   });
+  // the rounded Marquee corner: too short per-chord (floor(2.3/6.5)=0), so
+  // dress the whole quarter-round as ONE virtual edge swept along CORNER_ARC.
+  { const A = CORNER_ARC, rp = A.r + 0.12, sweep = A.a1 - A.a0;      // rp: features ~0.1 proud of the curved face
+    const px = a => A.cx + rp * Math.cos(a), pz = a => A.cz + rp * Math.sin(a);
+    const oyaw = a => Math.atan2(Math.cos(a), Math.sin(a));          // a +z-facing plane → faces radially outward
+    for (const f of [0.22, 0.78]) {                                 // 2 ground arches; APEX KEPT CLEAR (the gate goes there)
+      const a = A.a0 + sweep * f; arches.push({ pos: [px(a), 0, pz(a)], yaw: oyaw(a) });
+    }
+    for (let k = 0; k < 5; k++) {                                   // 5 upper window columns, two storeys
+      const a = A.a0 + sweep * (k + 0.5) / 5;
+      wins.push({ pos: [px(a), 5.4, pz(a)], yaw: oyaw(a) });
+      wins.push({ pos: [px(a), 10.6, pz(a)], yaw: oyaw(a) });
+    }
+  }
   inst(archGeo, toon(0x2a4438), arches);
   inst(winGeo, toon(0x33503f), wins);
 
-  // red-white-blue bunting swags under the cornice (S + plaza faces)
+  // red-white-blue bunting swags under the cornice (S + plaza faces + the curve)
   const bunt = [];
-  [0, 3].forEach(i => {
-    const e = edges[i], dx = e.b[0] - e.a[0], dz = e.b[1] - e.a[1];
+  edges.forEach((e, i) => {
+    const kind = KINDS[i];
+    if (!(kind === 'addison' || kind === 'plazaE')) return;
+    const dx = e.b[0] - e.a[0], dz = e.b[1] - e.a[1];
     const yaw = Math.atan2(dx, dz), nx = dz / e.len, nz = -dx / e.len;
     const n = Math.floor(e.len / 6.5);
     for (let k = 0; k < n; k++) {
       const t = (k + 0.2) / (n + 0.4);
-      bunt.push({ pos: [e.a[0] + dx * t - nx * 0.28, H[i] - 0.6, e.a[1] + dz * t - nz * 0.28], yaw });
+      bunt.push({ pos: [e.a[0] + dx * t - nx * 0.28, HMAP[kind] - 0.6, e.a[1] + dz * t - nz * 0.28], yaw });
     }
   });
+  { const A = CORNER_ARC, rb = A.r + 0.28, sweep = A.a1 - A.a0;      // 4 swags wrapping the curved cornice
+    for (let k = 0; k < 4; k++) {
+      const a = A.a0 + sweep * (k + 0.5) / 4;
+      bunt.push({ pos: [A.cx + rb * Math.cos(a), FH - 0.6, A.cz + rb * Math.sin(a)], yaw: Math.atan2(Math.cos(a), Math.sin(a)) });
+    }
+  }
   const bcv = document.createElement('canvas'); bcv.width = 96; bcv.height = 48;
   const bg = bcv.getContext('2d');
   bg.fillStyle = '#b03a2e'; bg.beginPath(); bg.ellipse(48, 0, 48, 46, 0, 0, Math.PI); bg.fill();
@@ -291,29 +327,34 @@ function buildMarquee() {
   pg.setAttribute('aColor', new THREE.BufferAttribute(aC, 3));
   pg.setAttribute('aSize', new THREE.BufferAttribute(aS, 1));
   grp.add(new THREE.Points(pg, pointsMat()));
-  // mount proud of the SW corner, facing the Clark/Addison intersection
-  // (data M.x/M.z are the logical spot; the corner bisector is the truth)
-  grp.position.set(-284.85, 0, -405.85);
-  grp.rotation.y = Math.atan2(-0.605, 0.797);
+  // mount on the rounded corner apex, proud of the curve, facing the
+  // Clark/Addison intersection (position + heading come from the data)
+  grp.position.set(M.x, 0, M.z);
+  grp.rotation.y = M.ry;
   wrigleyRoot.add(grp);
 }
 
 // --------------------------- interior bowl -----------------------------
 function buildBowl() {
-  // field — a textured fan clipped to the footprint (a big plane would
-  // poke through the Addison facade: HP is only ~17 m off the street)
+  // field — the footprint polygon itself, earcut-triangulated (a center FAN
+  // speared across the notch's reflex corner: triangles with both endpoints
+  // inside still crossed the plaza, floating a dirt sliver at y 0.22 over the
+  // Gallagher lawn. Earcut respects the reflex corner; UVs stay the affine
+  // HP-centered map, so linear interpolation is exact.)
   {
     const ux = Math.sin(AXIS), uz = Math.cos(AXIS), vx = uz, vz = -ux;
-    const C = [HP[0] - ux * 10, HP[1] - uz * 10];
-    const N = 30, pos = [C[0], 0.22, C[1]], uv = [0.5, 0.5 - 10 / 120], idx = [];
-    for (let k = 0; k <= N; k++) {
-      const a = AXIS - 0.85 + (k / N) * 1.7;
-      let x = C[0] + Math.sin(a) * 72, z = C[1] + Math.cos(a) * 72;
-      for (let s = 0; s < 24 && !pip(x, z, POLY); s++) { x = C[0] + (x - C[0]) * 0.93; z = C[1] + (z - C[1]) * 0.93; }
+    const pos = [], uv = [], idx = [];
+    for (const [x, z] of POLY) {
       pos.push(x, 0.22, z);
       const dx = x - HP[0], dz = z - HP[1];
       uv.push(0.5 + (dx * vx + dz * vz) / 120, 0.5 + (dx * ux + dz * uz) / 120);
-      if (k) idx.push(0, k, k + 1);
+    }
+    const tris = THREE.ShapeUtils.triangulateShape(POLY.map(p => new THREE.Vector2(p[0], p[1])), []);
+    for (const [a, b, c] of tris) {
+      // enforce +Y winding regardless of earcut's output orientation
+      const crossY = (POLY[b][1] - POLY[a][1]) * (POLY[c][0] - POLY[a][0])
+                   - (POLY[b][0] - POLY[a][0]) * (POLY[c][1] - POLY[a][1]);
+      idx.push(a, crossY > 0 ? b : c, crossY > 0 ? c : b);
     }
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
@@ -522,7 +563,7 @@ export function buildStadium() {
   // (−284.3,−494)→(−266.4,−430); outward normal (−0.963, 0.269).
   const plazaX = z => -284.3 + 17.9 * (z + 494) / 64;
   const gYaw = Math.atan2(-0.963, 0.269);                        // faces the plaza
-  gateAt(S.gates.marquee.x, -407.4, 0, 'MARQUEE GATE');          // south face
+  gateAt(S.gates.marquee.x, S.gates.marquee.z, S.gates.marquee.yaw, 'MARQUEE GATE'); // on the curve apex
   gateAt(plazaX(-462) + 0.42, -462.12, gYaw, 'GALLAGHER WAY GATE');
   gateAt(S.gates.bleacher.x, -493.6, Math.PI, 'BLEACHERS', 5.2); // faces Waveland
   // marquee-side booth now lives in wrigley-vendors.js (the ticket queue owns it)

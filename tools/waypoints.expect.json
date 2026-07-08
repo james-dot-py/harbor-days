@@ -25,9 +25,9 @@
   "deck-1": "The corner pier: a plank deck jutting SOUTH over open water from the corner-wrap revetment, lamp at its tip; skyline backdrop to the south, water under the rails.",
   "landmark-0": "The harbor house: a small red-roofed harbor office building on the inner-park side of the basin.",
   "wv-spawn": "Arrival on the elevated Addison Red Line island platform (y 7.6): platform furniture/signage, twin tracks alongside, Wrigleyville streets below; down-the-platform framing, not clipped into walls.",
-  "wv-marquee": "THE shot: the red Wrigley Field marquee ('WRIGLEY FIELD — HOME OF CHICAGO CUBS' with a message line) at the Clark & Addison corner, red-brick stadium facade behind. A Chicagoan should recognize it instantly.",
+  "wv-marquee": "THE shot: the red Wrigley Field marquee ('WRIGLEY FIELD — HOME OF CHICAGO CUBS' with a message line) hanging on the ROUNDED Clark & Addison corner — the cream facade visibly curves around behind it (art-deco fillet, not a box edge). A Chicagoan should recognize it instantly.",
   "wv-scoreboard": "The hand-turned green centerfield scoreboard high atop the bleachers (base ~18, top ~26.5): line-score grid, pennants above, no video boards (classic postcard Wrigley).",
-  "wv-gate-marquee": "The Marquee Gate at Clark & Addison: red-brick arches under the marquee corner, crowd/turnstile dressing.",
+  "wv-gate-marquee": "The Marquee Gate ON the rounded corner's apex under the marquee: gate recess in the curved cream facade with a walkable sidewalk apron in front, crowd/turnstile dressing.",
   "wv-gate-gallagher": "The Gallagher Way gate on the plaza's east side: brick facade arches opening onto the plaza.",
   "wv-gate-bleacher": "The Bleacher Gate at Sheffield & Waveland: brick corner entrance below the bleachers; Murphy's across the street.",
   "wv-knothole": "The knothole: a screened opening in the right-field wall on Sheffield where you can peek at the field inside.",
@@ -42,9 +42,9 @@
   "wv-stall-0": "A souvenir/cap stand on Addison by the station: caps, W flags, Cubs-blue merchandise on display.",
   "wv-stall-1": "A souvenir/cap stand mid-block on Addison, stadium facade context behind.",
   "wv-stall-2": "A souvenir/cap stand on Sheffield at Waveland near the bleacher corner.",
-  "wv-statue-row": "Statue Row at Gallagher Way's north edge: a line of statues on pedestals (Ernie Banks first), plaza around them.",
+  "wv-statue-row": "Statue Row on Gallagher Way's north edge fronting the Gallagher office block: four bronze statues on limestone pedestals (Ernie Banks first), the office mass closing the plaza behind them.",
   "wv-caray-statue": "The Harry Caray statue on the west sidewalk outside the Bleacher Gate: exuberant pose with glasses; second Caray honor in the game, like Chicago does.",
-  "wv-gallagher-way": "Gallagher Way plaza: open paved plaza east of Clark against the stadium's west stands; statues at the north edge, plaza life (fans, festival props).",
+  "wv-gallagher-way": "Gallagher Way plaza hugging the stadium's WEST stands along Clark: lawn/pavers, splash pad, planters, plaza life; the Gallagher office block closes its north end (the plaza no longer reaches Waveland).",
   "wv-rooftop-view": "From THE climbable Waveland rooftop (y 9.6): rooftop bleacher rows looking over Waveland INTO the park — outfield, scoreboard and light towers visible over the LF wall; EAMUS CATULI building nearby.",
   "wv-barricade-addison-e": "A CPD street closure: blue wooden A-frame barricades ('POLICE LINE') with an officer NPC closing Addison east past the station; Lakeview backdrop buildings continue beyond — diegetic wall, not a void."
 }

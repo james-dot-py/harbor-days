@@ -232,10 +232,12 @@ clamp/minimap). Data: `src/data/wrigleyville.js`; builders: `src/wrigley/*`.
 | Sheffield Ave | x −190 (corridor −196…−184) |
 | Kenmore Ave stub | x −230, z −544…−494 (ball-hawk corner) |
 | Stadium block | Clark/Addison/Waveland/Sheffield; footprint poly in STADIUM_W |
-| Marquee | (−284.5, −409.5) facing the Clark & Addison corner |
+| **The marquee corner is ROUND** | the Clark & Addison corner is the real art-deco curve: fillet r 14 about (−273.36, −421), tangent to the Clark wall at (−286.85, −417.25) and the Addison wall at (−273.36, −407); curve apex (−281.83, −409.85). The fillet opens a walkable sidewalk APRON (triangle Clark-edge/Addison-edge minus the circle) — the corner entry court |
+| Marquee | on the curve apex, proud of the wall: (−282.7, −408.7), facing the Clark & Addison intersection (2026-07-08 fidelity pass; owner feedback — was a box corner at (−284.5, −409.5)) |
 | Home plate → center field | (−262,−424) → (−214,−476); LF wall on Waveland, RF on Sheffield |
-| Scoreboard | (−212, −480), top y 20.5, atop the CF bleachers |
-| Gallagher Way plaza | east of Clark, z −494…−430 (Statue Row at its north edge) |
+| Scoreboard | (−212, −480), top y 26.5 (published 87 ft), atop the CF bleachers |
+| Gallagher Way plaza | east of Clark, **z −466…−430** — hugs the WEST stands, north of the Addison corner, and does NOT reach Waveland: its north bound is the Gallagher office block (per refs/wrigleyville/osm.json: plaza true z −433…−470, office 1101 W Waveland true z −469…−496). Statue Row + video board at its north edge |
+| Gallagher office block | the notch's north end, z −492…−467.5, Clark corridor → west-stands wall (the office/hotel mass at Waveland & Clark that bounds the real plaza) |
 | Murphy's Bleachers | SE corner Sheffield & Waveland (x −184…−168, z −494…−480) |
 | Engine 78 | 1052 W Waveland → x −250…−234, z −524…−508 |
 | Rooftop brownstones | N of Waveland x −226…−199 (middle one climbable, roof y 9.6) + E of Sheffield z −478…−430 |
@@ -245,8 +247,9 @@ clamp/minimap). Data: `src/data/wrigleyville.js`; builders: `src/wrigley/*`.
 Walkable = corridor quads only (WALK_W in wrigleyville.js — the single
 definition, shared verbatim by main.js and walkprobe): Addison (station→Clark),
 Waveland (Sheffield→Clark + Kenmore stub), Sheffield (Addison→Waveland), Clark
-(Addison→Waveland), Gallagher Way, the station platform + stair, one climbable
-rooftop + its outdoor stair. Every corridor mouth ends at a **CPD blue wooden
+(Addison→Waveland), Gallagher Way (z −466…−430), the marquee-corner apron
+(the crescent the rounded corner opens at Clark & Addison), the station
+platform + stair, one climbable rooftop + its outdoor stair. Every corridor mouth ends at a **CPD blue wooden
 barricade** (BARRICADES_W) with an officer NPC; streets visually continue into
 a low-rise Lakeview backdrop band (BACKDROP_W).
 

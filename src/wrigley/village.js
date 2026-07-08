@@ -13,7 +13,7 @@ import { toon, bmat, mulberry32, pointsMat } from '../core.js';
 import { collide } from '../props.js';
 import { createChibi } from '../framework.js';
 import { wrigleyRoot } from './index.js';
-import { VILLAGE_W, GALLAGHER_W, clarkX } from '../data/wrigleyville.js';
+import { VILLAGE_W, GALLAGHER_W, OFFICE_W, clarkX } from '../data/wrigleyville.js';
 
 const R = mulberry32(1060);                       // OWN seed — never core rng/wrand
 const rr = (a, b) => a + (b - a) * R();
@@ -203,6 +203,14 @@ function boardTex() {                                // Gallagher Way video boar
   g.shadowColor = '#ffd24a'; g.shadowBlur = 18; g.fillText('CUBS 3–2', 256, 58); g.shadowBlur = 0;
   g.font = '700 34px "Trebuchet MS",Arial,sans-serif'; g.fillStyle = '#ffe08a';
   g.fillText('GAME IN PROGRESS', 256, 108);
+  return tx(cv);
+}
+function gallagherSignTex() {                        // GALLAGHER WAY — cream lettering on Cubs green (house-sign style)
+  const [cv, g] = cvTex(512, 128);
+  g.fillStyle = '#123f2a'; g.fillRect(0, 0, 512, 128);
+  g.strokeStyle = '#f3ead2'; g.lineWidth = 7; g.strokeRect(9, 9, 494, 110);
+  g.fillStyle = '#f6efdc'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '800 60px "Trebuchet MS",Arial,sans-serif'; g.fillText('GALLAGHER WAY', 256, 66);
   return tx(cv);
 }
 function plaqueTex(name, sub) {                      // pedestal plaque
@@ -423,20 +431,51 @@ function pennants(x, z, ry) {
 }
 
 // =====================================================================
+//  6a. GALLAGHER OFFICE BLOCK  (1101 W Waveland — the modern office/hotel
+//  mass at Waveland & Clark that closes the plaza's north end; light
+//  limestone facade, warm window grid, GALLAGHER WAY crown over the plaza)
+// =====================================================================
+function buildGallagherOffice() {
+  const O = OFFICE_W, zc = (O.z0 + O.z1) / 2, cx = clarkX(zc) + 20;   // Clark-sheared frame, off-centred at 20
+  const H = 14, dep = 22, wid = 23;                  // dep = off-depth (kept inset of off 8…32), wid = frontage along Clark
+  const lime = toon(0x9a948b), stone = toon(0xe6ddc8);   // stone reuses Engine 78's limestone material (no new draw call)
+  const g = new THREE.Group(); g.position.set(cx, 0, zc); g.rotation.y = clarkYaw;
+  g.add(M(new THREE.BoxGeometry(dep, H, wid, 2, 4, 2), lime, 0, H / 2, 0));            // main mass
+  g.add(M(new THREE.BoxGeometry(dep + 0.3, 0.5, wid + 0.3), stone, 0, H - 0.25, 0));   // thin limestone parapet/cornice
+  // readable GALLAGHER WAY sign crowning the SOUTH face (+z local), over the top window band, facing the plaza
+  const sgn = new THREE.Mesh(new THREE.PlaneGeometry(13.5, 3.4), bmat(0xffffff, { map: gallagherSignTex() }));
+  sgn.position.set(0, 12.2, wid / 2 + 0.06); g.add(sgn);
+  add(g);   // add() snapshots the group's meshes NOW — must come after every g.add
+  A.base.push({ pos: [cx, 0.4, zc], scale: [dep + 0.2, 0.8, wid + 0.2], color: 0x2c211d });   // dark base band (shares Cubby's bucket)
+  // warm window GRID: three storeys on the SOUTH face (plaza) and WEST face (Clark), baked to world via yrot
+  for (const y of [3.2, 6.4, 9.6]) {
+    for (const lx of [-8, -4, 0, 4, 8]) {            // SOUTH face columns (local +z)
+      const [dx, dz] = yrot(lx, wid / 2 + 0.06, clarkYaw);
+      A.win.push({ pos: [cx + dx, y, zc + dz], yaw: clarkYaw, scale: [1.4, 1.9, 1] });
+    }
+    for (const lz of [-8, -4, 0, 4, 8]) {            // WEST face columns (local −x, toward Clark)
+      const [dx, dz] = yrot(-dep / 2 - 0.06, lz, clarkYaw);
+      A.win.push({ pos: [cx + dx, y, zc + dz], yaw: clarkYaw - Math.PI / 2, scale: [1.4, 1.9, 1] });
+    }
+  }
+  collide(cx, zc, 11);
+}
+
+// =====================================================================
 //  6. GALLAGHER WAY  (lawn, video board, splash pad, cornhole, planters)
 // =====================================================================
 function buildGallagher() {
   const G = GALLAGHER_W;
   add(paraStrip(G.off0 + 2, G.off1 - 2, G.z0 + 2, G.z1 - 2, 0.03, toon(0x57964f)));   // inset lawn
-  // freestanding VIDEO BOARD near the north end, east side, faces south (the plaza)
-  { const bzc = -486, bx = clarkX(bzc) + 28;
+  // freestanding VIDEO BOARD at the plaza's NE north edge, east of the statue row, faces south (the plaza)
+  { const bzc = -464, bx = clarkX(bzc) + 27;
     add(M(new THREE.BoxGeometry(0.5, 5.0, 0.5), toon(0x2a2d33), bx - 3, 3.2, bzc));
     add(M(new THREE.BoxGeometry(0.5, 5.0, 0.5), toon(0x2a2d33), bx + 3, 3.2, bzc));
     add(M(new THREE.BoxGeometry(7.2, 4.2, 0.5), toon(0x22242a), bx, 7.3, bzc));                 // frame
     add(M(new THREE.PlaneGeometry(6.4, 3.5), bmat(0xffffff, { map: boardTex() }), bx, 7.3, bzc + 0.28));
     collide(bx, bzc, 3.6); }
-  // splash pad (off-centre so the plaza middle stays open)
-  { const sz = -462, sx = clarkX(sz) + 15;
+  // splash pad (off-centre so the plaza middle stays open, clear of the statue row)
+  { const sz = -452, sx = clarkX(sz) + 15;
     add(M(new THREE.CylinderGeometry(2.6, 2.6, 0.06, 24), toon(0xb9b3a6), sx, 0.05, sz));
     add(M(new THREE.RingGeometry(1.0, 1.7, 24), bmat(0x7f9096), sx, 0.08, sz, -Math.PI / 2, 0, 0));   // wet ring
     const jets = [];
@@ -451,7 +490,7 @@ function buildGallagher() {
     instMesh(new THREE.BoxGeometry(1, 1, 1), toon(0x6b4a30), pz);
     instMesh(new THREE.BoxGeometry(1, 1, 1), toon(0x3f7a44), pf); }
   // scattered lawn chairs (east edge) + a cornhole pair (south, clear of centre)
-  for (const [oz, ooff] of [[-476, 27], [-468, 26], [-450, 28], [-440, 27]]) chairLike(clarkX(oz) + ooff, oz);
+  for (const [oz, ooff] of [[-461, 27], [-456, 26], [-449, 28], [-440, 27]]) chairLike(clarkX(oz) + ooff, oz);
   cornhole(clarkX(-442) + 14, -442, clarkX(-450) + 14, -450);
 }
 function chairLike(x, z) {
@@ -579,6 +618,7 @@ export function buildVillage() {
   buildBars();
   buildEngine();
   buildStands();
+  buildGallagherOffice();
   buildGallagher();
   buildStatues();
   // ---- emit cross-building instanced batches (one draw call each) ----

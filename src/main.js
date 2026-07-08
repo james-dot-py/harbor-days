@@ -60,7 +60,10 @@ function census(top=60){
   });
   return {total,rows:Object.entries(tally).sort((a,b)=>b[1]-a[1]).slice(0,top)};
 }
-window.__hd={errs:errRing,perf:()=>({drawCalls:renderer.info.render.calls,fps:Math.round(perfS.fps*10)/10}),census};
+window.__hd={errs:errRing,perf:()=>({drawCalls:renderer.info.render.calls,fps:Math.round(perfS.fps*10)/10}),census,
+  // debug-only scene access for tools/ (raycast attribution — census() names merged
+  // meshes but can't localize a face; a ray can)
+  scene,camera,THREE};
 
 // ---- build the world (order matters: single shared rng, top-to-bottom) ----
 buildSky();

@@ -59,6 +59,17 @@ const VOLS_W = [];
     VOLS_W.push({ x0: c - 27, x1: c - 5, z0: b.z0, z1: b.z1, yMax: 9 });
   }
   for (const b of W.BACKDROP_W.bands) vol(b, 14);
+  { // Gallagher office block (para on clarkX — cover both z extremes' x span)
+    const o = W.OFFICE_W;
+    VOLS_W.push({ x0: W.clarkX(o.z0) + o.off0, x1: W.clarkX(o.z1) + o.off1, z0: o.z0, z1: o.z1, yMax: 16 });
+  }
+  { // statue row + video board on the plaza north edge (mrcn4gsg: gallagher-gate
+    // spread cameras parked inside a bronze statue — props block cameras too)
+    const s = W.VILLAGE_W.statueRow, xs = s.xs;
+    VOLS_W.push({ x0: Math.min(...xs) - 1.2, x1: Math.max(...xs) + 1.2, z0: s.z - 1.5, z1: s.z + 1.5, yMax: 4.5 });
+    const bx = W.clarkX(-464) + 27;                    // village.js buildGallagher board
+    VOLS_W.push({ x0: bx - 3.8, x1: bx + 3.8, z0: -465.5, z1: -462.5, yMax: 9.6 });
+  }
   const e = W.STATION_W.embank, br = W.STATION_W.bridge;   // embankment, minus the Addison underpass
   VOLS_W.push({ x0: e.x0, x1: e.x1, z0: e.z0, z1: br.z0, yMax: e.topY + 2.5 });
   VOLS_W.push({ x0: e.x0, x1: e.x1, z0: br.z1, z1: e.z1, yMax: e.topY + 2.5 });
@@ -182,7 +193,11 @@ const featW = (id, fx, fz, { stand, pitch = 0.22, dist = 12 } = {}) => {
 add('wv-spawn', 'wrigleyville', 'wrigleyville', W.SPAWN_W.x, W.SPAWN_W.z,
   [{ yaw: 3.14, pitch: 0.15, dist: 9 }, { yaw: 0, pitch: 0.15, dist: 9 }, { yaw: -1.57, pitch: 0.3, dist: 13 }]);
 
-feat('wv-marquee', ST.marquee.x, ST.marquee.z, 0.25, 13);
+// marquee: the corner is now a rounded curve and the apex sidewalk (the
+// apron) is walkable, so the default snap stands ON the marquee (degenerate
+// yaw → camera behind the curved wall). Stand across the intersection SW,
+// square to the marquee face — the postcard angle showing the curve.
+featW('wv-marquee', ST.marquee.x, ST.marquee.z, { stand: [-286, -402], pitch: 0.25, dist: 14 });
 // scoreboard: its base is ~18 m up — stand at the Waveland/Sheffield corner
 // and TILT UP (negative pitch raises the look-target ~tan(|p|)·dist·1.35).
 // The default snap walked the camera into the Waveland rooftop row and a
@@ -192,8 +207,12 @@ featW('wv-scoreboard', ST.scoreboard.x, ST.scoreboard.z, { stand: [-186, -500], 
 // bleacher corner also needs the intersection stand — its default snap sent
 // spread cameras into the Sheffield rooftop brownstones.
 const GATE_VIEW = {
-  marquee:   { pitch: 0.14, dist: 16 },
-  gallagher: { pitch: 0.14, dist: 15 },
+  // marquee gate sits ON the walkable corner apron now — explicit stand
+  marquee:   { stand: [-283, -403], pitch: 0.14, dist: 16 },
+  // gallagher gate: the default snap stands AT the wall and the westward spread
+  // cameras parked inside the relocated statue row (mrcn4gsg f0/f2) — stand
+  // mid-lawn SW of the gate, clear of the booth/statues/board sightlines
+  gallagher: { stand: [-282, -455], pitch: 0.14, dist: 13 },
   bleacher:  { stand: [-190, -500], pitch: 0.12, dist: 14 },
 };
 for (const [g, p] of Object.entries(ST.gates)) featW('wv-gate-' + g, p.x, p.z, GATE_VIEW[g]);
@@ -205,7 +224,10 @@ featW('wv-station-door', -140, W.STATION_W.landing.z1 - 0.5, { stand: [-140, -39
 
 const rectC = r => [(r.x0 + r.x1) / 2, (r.z0 + r.z1) / 2];
 feat('wv-murphys', ...rectC(V.murphys), 0.2, 12);
-feat('wv-engine78', ...rectC(V.engine78), 0.2, 12);
+// engine78: the default snap's f0 spread put the camera inside the firehouse
+// mass (blank frame, runs mrcn4gsg + mrcoeciv) — feat() does not clearance-
+// filter. Stand on Waveland SE of the house, clearance-picked framings.
+featW('wv-engine78', ...rectC(V.engine78), { stand: [-235, -504.5], pitch: 0.16, dist: 12 });
 feat('wv-cubby-bear', ...rectC(V.cubbyBear), 0.2, 12);
 V.clarkBars.forEach(b => {
   // the neon board is HIGH on the facade (sign centre y ~6.6–9) and parallel
@@ -226,7 +248,12 @@ V.standStalls.forEach((s, i) => i === 2
   // and the spread cameras enter Murphy's — view it from the SE, low
   ? featW('wv-stall-' + i, s.x, s.z, { stand: [-189, -482.5], pitch: 0.1, dist: 9 })
   : feat('wv-stall-' + i, s.x, s.z, 0.15, 8));
-feat('wv-statue-row', V.statueRow.xs[V.statueRow.xs.length - 1], V.statueRow.z, 0.15, 9);
+// statue row fronts the Gallagher office block on the plaza's north edge:
+// stand SOUTH of the row on the open plaza looking north (the row point
+// itself is walkable → default snap degenerates; north cameras would sit
+// inside the office mass).
+featW('wv-statue-row', (V.statueRow.xs[0] + V.statueRow.xs[V.statueRow.xs.length - 1]) / 2, V.statueRow.z,
+  { stand: [-292, -458], pitch: 0.15, dist: 9 });
 // Caray: the statue stands ~1 m off the Bleacher Gate wall, so a stand
 // against the wall points every surviving camera AT the gate with the statue
 // behind it (mrc4q9nx). Stand on Sheffield just NORTH of the statue and look

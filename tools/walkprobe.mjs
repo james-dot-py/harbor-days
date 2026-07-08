@@ -427,6 +427,17 @@ console.log('\n--- Wrigleyville: Gallagher Way plaza hugs the Clark diagonal ---
 expect('plaza @ z-460 (clark+20) walkable',WV.walkableW(WV.clarkX(-460)+20,-460),true);
 expect('east of plaza @ z-460 (clark+36) NOT walkable (stadium)',WV.walkableW(WV.clarkX(-460)+36,-460),false);
 expect('plaza does not extend south of z-430 (clark+20,z-420) NOT walkable',WV.walkableW(WV.clarkX(-420)+20,-420),false);
+expect('plaza north edge @ z-462 (clark+20) walkable',WV.walkableW(WV.clarkX(-462)+20,-462),true);
+expect('Gallagher office block @ z-480 (clark+20) NOT walkable (plaza stops at -466)',WV.walkableW(WV.clarkX(-480)+20,-480),false);
+expect('statue row spot (-290,-464) walkable',WV.walkableW(-290,-464),true);
+
+console.log('\n--- Wrigleyville: the rounded marquee corner + its sidewalk apron ---');
+expect('apron inside the crescent (-283.5,-409.5) walkable',WV.walkableW(-283.5,-409.5),true);
+expect('apron at street level',WV.surfaceYW(-283.5,-409.5),0);
+expect('old sharp corner spot (-284.2,-407.8) now walkable apron',WV.walkableW(-284.2,-407.8),true);
+expect('behind the curve (-278,-412) NOT walkable (inside the stadium fillet)',WV.walkableW(-278,-412),false);
+expect('marquee gate apex (-281.83,-409.85) on the arc edge NOT past the wall (-280,-411)',WV.walkableW(-280,-411),false);
+expect('apron does not leak north of the Clark tangent (-286,-420) NOT walkable',WV.walkableW(-286,-420),false);
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 process.exit(fail?1:0);

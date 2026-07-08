@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-08T21:00:24.708Z",
+ "generated": "2026-07-08T23:51:54.090Z",
  "count": 48,
  "waypoints": [
   {
@@ -652,26 +652,26 @@
    "id": "wv-marquee",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -284.5,
-   "z": -404.5,
+   "x": -286,
+   "z": -402,
    "framings": [
     {
-     "yaw": 3.14,
+     "yaw": 2.68,
      "pitch": 0.25,
-     "dist": 13
+     "dist": 14
     },
     {
-     "yaw": 3.74,
+     "yaw": 3.08,
      "pitch": 0.25,
-     "dist": 10
+     "dist": 14
     },
     {
-     "yaw": 2.54,
-     "pitch": 0.33,
-     "dist": 15
+     "yaw": 2.68,
+     "pitch": 0.25,
+     "dist": 9.8
     }
    ],
-   "expectation": "THE shot: the red Wrigley Field marquee ('WRIGLEY FIELD — HOME OF CHICAGO CUBS' with a message line) at the Clark & Addison corner, red-brick stadium facade behind. A Chicagoan should recognize it instantly."
+   "expectation": "THE shot: the red Wrigley Field marquee ('WRIGLEY FIELD — HOME OF CHICAGO CUBS' with a message line) hanging on the ROUNDED Clark & Addison corner — the cream facade visibly curves around behind it (art-deco fillet, not a box edge). A Chicagoan should recognize it instantly."
   },
   {
    "id": "wv-scoreboard",
@@ -703,47 +703,47 @@
    "area": "wrigleyville",
    "cell": "wrigleyville",
    "x": -283,
-   "z": -404,
+   "z": -403,
    "framings": [
     {
-     "yaw": 3.14,
+     "yaw": 2.97,
      "pitch": 0.14,
      "dist": 16
     },
     {
-     "yaw": 3.54,
+     "yaw": 3.37,
      "pitch": 0.14,
      "dist": 16
     },
     {
-     "yaw": 2.74,
+     "yaw": 2.57,
      "pitch": 0.14,
      "dist": 16
     }
    ],
-   "expectation": "The Marquee Gate at Clark & Addison: red-brick arches under the marquee corner, crowd/turnstile dressing."
+   "expectation": "The Marquee Gate ON the rounded corner's apex under the marquee: gate recess in the curved cream facade with a walkable sidewalk apron in front, crowd/turnstile dressing."
   },
   {
    "id": "wv-gate-gallagher",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -276.62,
-   "z": -463.91,
+   "x": -282,
+   "z": -455,
    "framings": [
     {
-     "yaw": 1.18,
+     "yaw": 2.18,
      "pitch": 0.14,
-     "dist": 15
+     "dist": 13
     },
     {
-     "yaw": 1.58,
+     "yaw": 2.58,
      "pitch": 0.14,
-     "dist": 15
+     "dist": 13
     },
     {
-     "yaw": 0.78,
+     "yaw": 1.78,
      "pitch": 0.14,
-     "dist": 15
+     "dist": 13
     }
    ],
    "expectation": "The Gallagher Way gate on the plaza's east side: brick facade arches opening onto the plaza."
@@ -852,23 +852,23 @@
    "id": "wv-engine78",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -242,
-   "z": -504,
+   "x": -235,
+   "z": -504.5,
    "framings": [
     {
-     "yaw": 3.14,
-     "pitch": 0.2,
+     "yaw": -2.59,
+     "pitch": 0.16,
      "dist": 12
     },
     {
-     "yaw": 3.74,
-     "pitch": 0.2,
-     "dist": 9
+     "yaw": -2.19,
+     "pitch": 0.16,
+     "dist": 12
     },
     {
-     "yaw": 2.54,
-     "pitch": 0.28,
-     "dist": 14
+     "yaw": -2.59,
+     "pitch": 0.16,
+     "dist": 8.4
     }
    ],
    "expectation": "Engine 78 firehouse on Waveland: red-doored fire station beside the park (1052 W Waveland)."
@@ -906,17 +906,17 @@
    "z": -482.84,
    "framings": [
     {
-     "yaw": -1.3,
-     "pitch": -0.3,
-     "dist": 14
+     "yaw": -0.55,
+     "pitch": -0.24,
+     "dist": 11.9
     },
     {
      "yaw": -0.9,
      "pitch": -0.3,
-     "dist": 14
+     "dist": 19
     },
     {
-     "yaw": -1.7,
+     "yaw": -1.3,
      "pitch": -0.3,
      "dist": 14
     }
@@ -931,17 +931,17 @@
    "z": -464.84,
    "framings": [
     {
+     "yaw": -2.05,
+     "pitch": -0.24,
+     "dist": 11.9
+    },
+    {
      "yaw": -1.3,
      "pitch": -0.3,
      "dist": 14
     },
     {
      "yaw": -0.9,
-     "pitch": -0.3,
-     "dist": 14
-    },
-    {
-     "yaw": -1.7,
      "pitch": -0.3,
      "dist": 14
     }
@@ -1077,26 +1077,26 @@
    "id": "wv-statue-row",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -308,
-   "z": -491,
+   "x": -292,
+   "z": -458,
    "framings": [
     {
-     "yaw": 0.01,
+     "yaw": 3.14,
      "pitch": 0.15,
      "dist": 9
     },
     {
-     "yaw": 0.61,
+     "yaw": 3.54,
      "pitch": 0.15,
-     "dist": 7
+     "dist": 9
     },
     {
-     "yaw": -0.59,
-     "pitch": 0.23,
-     "dist": 11
+     "yaw": 2.74,
+     "pitch": 0.15,
+     "dist": 9
     }
    ],
-   "expectation": "Statue Row at Gallagher Way's north edge: a line of statues on pedestals (Ernie Banks first), plaza around them."
+   "expectation": "Statue Row on Gallagher Way's north edge fronting the Gallagher office block: four bronze statues on limestone pedestals (Ernie Banks first), the office mass closing the plaza behind them."
   },
   {
    "id": "wv-caray-statue",
@@ -1127,26 +1127,26 @@
    "id": "wv-gallagher-way",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -287.36,
-   "z": -462,
+   "x": -283.44,
+   "z": -448,
    "framings": [
     {
-     "yaw": 1.57,
+     "yaw": 2.46,
      "pitch": 0.25,
      "dist": 13
     },
     {
-     "yaw": 2.17,
+     "yaw": 3.06,
      "pitch": 0.25,
      "dist": 10
     },
     {
-     "yaw": 0.97,
+     "yaw": 1.86,
      "pitch": 0.33,
      "dist": 15
     }
    ],
-   "expectation": "Gallagher Way plaza: open paved plaza east of Clark against the stadium's west stands; statues at the north edge, plaza life (fans, festival props)."
+   "expectation": "Gallagher Way plaza hugging the stadium's WEST stands along Clark: lawn/pavers, splash pad, planters, plaza life; the Gallagher office block closes its north end (the plaza no longer reaches Waveland)."
   },
   {
    "id": "wv-rooftop-view",

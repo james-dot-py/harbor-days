@@ -26,3 +26,6 @@ few turns to find; keep each to one line of symptom + fix.
   call time: add(g) BEFORE populating g renders nothing (bar facades/neon and
   stall structures were invisible for two full runs — only their instanced/
   direct-add parts showed, floating against the backdrop band).
+- Stale-cache variant of the 5173 trap: a long-lived dev server serves stale
+  HMR-cached module transforms (main.js missing freshly added exports while
+  world content looked current) — probe tools must spawn their own vite.
