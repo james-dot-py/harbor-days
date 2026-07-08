@@ -2,3 +2,7 @@ node_modules/
 dist/
 tools/shots/*.png
 !tools/shots/baseline.png
+tools/shots/run-*
+autopilot/.env
+autopilot/logs/
+autopilot/session-state.json
