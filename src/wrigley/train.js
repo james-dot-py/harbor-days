@@ -41,7 +41,7 @@ function buildRake(x) {
   const half = off * pitch + carLen / 2;
   const lights = new THREE.InstancedMesh(new THREE.BoxGeometry(0.32, 0.32, 0.24), bmat(0xff2a2a), 4);
   let li = 0;
-  for (const ez of [half, -half]) for (const dx of [-0.85, 0.85]) { M.compose(V.set(dx, -0.7, ez), Q.identity(), S); lights.setMatrixAt(li++, M); }
+  for (const ez of [half + 0.06, -half - 0.06]) for (const dx of [-0.85, 0.85]) { M.compose(V.set(dx, -0.7, ez), Q.identity(), S); lights.setMatrixAt(li++, M); }   // proud of the belt ends (z-fight)
   lights.instanceMatrix.needsUpdate = true; grp.add(lights);
   wrigleyRoot.add(grp);
   return { grp, x, z: Z_N, dir: 1, phase: 'idle', wait: 4 + R() * 6, dwellT: 0, sp: 0, clackT: 0 };

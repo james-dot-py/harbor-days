@@ -97,3 +97,15 @@ All waves landed + origin/main (sanctuary-room era) merged back in.
 - Verified: walkprobe 206/206 · single-file build 928 kB · baseline
   pixel-stable · every screenshot read. Geography: GEOGRAPHY.md
   WRIGLEY_GEOGRAPHY (true latitude, Clark diagonal 0.28).
+
+## WAVE 4 (2026-07-07): the "awesome" pass
+Stadium at TRUE IRL height (facade 16.5 / towers 29 / scoreboard 18.3-26.5
+per published 60/87 ft) · visible Red Line trains serving Addison (ride
+fades sync to real dwells) · the GAME on the field (battery + fielders,
+swings on every crack, homers launch off the bat) · EAMUS CATULI! + AC
+counter, 1060 W. ADDISON, rooftop W flags on wins, lamp pennants, HIT IT
+HERE · street festival (peanut-vendor soapbox + call, program hawker,
+ticket queue, fan streams, splash pad) · rooftop binoculars view ·
+throwable souvenir ball · SLUGGERS fast-pitch cage minigame (5 balls,
+0.22s window, journal best). Verified: walkprobe 206/206, build 960 kB,
+baseline stable, ride round-trip green, every PNG read.
