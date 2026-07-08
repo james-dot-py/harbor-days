@@ -7,3 +7,4 @@ autopilot/.env
 autopilot/logs/
 autopilot/session-state.json
 refs/_anchor-cache.json
+autopilot/result.json
