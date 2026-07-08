@@ -18,6 +18,7 @@ import * as THREE from 'three';
 import { scene, toon, bmat, curveMat, glowTex, rng, rand, clamp, hexRGB, WATER_Y, game } from '../core.js';
 import { burst, DUST, scheduled } from '../fx.js';
 import * as CH from '../data/chicago.js';
+import { activeCell } from '../cells.js';
 
 // ---- fixed track geometry (world coords) ----
 const TRACK_X = -8;           // centre of the elevated structure, just W of the LSD berm (outside the world clamp)
@@ -27,7 +28,7 @@ const PLATFORM_Z = 105;       // Belmont platform stub, aligned with the Belmont
 const Z_N = -846, Z_S = 316;  // north / south ends — the full map z range (matches the LSD berm)
 
 // ---- module runtime handles (built in onWorldReady) ----
-let TRAIN = null, JETS = null, WRIG = null;
+let TRAIN = null, JETS = null, WRIG = null, WRIG_GRP = null;
 let audio = null;             // persistent train-rumble nodes (built lazily)
 
 // =====================================================================
@@ -204,7 +205,7 @@ function nextTrainWait(){return TRAIN._fast?8+rng()*4:75+rng()*45;}
 //  2) WRIGLEY — light towers, skyglow, CUBS WIN events, 'W' flag
 // =====================================================================
 function buildWrigley(){
-  const grp=new THREE.Group();scene.add(grp);
+  const grp=new THREE.Group();scene.add(grp);WRIG_GRP=grp;   // hidden while the real Wrigleyville cell is active
   const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(1,1,1),V=new THREE.Vector3(),E=new THREE.Euler();
   const poleSpots=[[-57,-426,34],[-66,-430,39],[-75,-417,37],[-84,-422,33],[-62,-411,40],[-80,-409,36]]; // x,z,h — NW backdrop (~ -70,-420, W of Addison)
   const poles=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.45,0.6,1,7),toon(0x4a4f57),poleSpots.length);
@@ -243,6 +244,11 @@ function cubsWin(player){
 }
 function updWrig(dt,t,player){
   const W=WRIG;
+  // the gag backdrop is the FAKE Wrigley — hide it (and pause its events)
+  // while the player is in the real Wrigleyville cell
+  const away=activeCell()!=='lakefront';
+  if(WRIG_GRP)WRIG_GRP.visible=!away;
+  if(away)return;
   W.winT-=dt;
   if(W.winT<=0){cubsWin(player);W.winT=W._fast?25+rng()*20:240+rng()*180;}
   else{W.roarT-=dt;if(W.roarT<=0){roar(2.6,0.045);W.roarT=90+rng()*40;}}

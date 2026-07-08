@@ -73,3 +73,27 @@ shared engine files + all reviews; Opus executes well-specified parallel work.
 - Determinism: packs use Math.random/local m32 only; world-builder rng-order
   changes need explicit acknowledgment + baseline regen. Commit + push after
   each verified chunk. Keep GEOGRAPHY.md truthful when boundaries move.
+
+---
+## STATUS: BUILT (2026-07-07, wrigleyville branch)
+All waves landed + origin/main (sanctuary-room era) merged back in.
+- CELL PATTERN: src/cells.js (separate places: root visibility + per-cell
+  walkable/surfaceY/clamp/minimap/spawn) — complementary to main's
+  definePlace (atmosphere grading); the train interior is a third cell.
+- THE RIDE: Belmont stop cluster pylon → train-car pocket cell (strip-map
+  minimap, scrolling window lights, synth rumble/chime, 'This is Addison.')
+  → Addison island platform. Round-trip, act.mjs-verified.
+- THE PLACE: stadium (marquee w/ live message line, facade ring, ivy bowl
+  + crowd, hand-turned scoreboard + raiseW rig, knothole, gates, towers) ·
+  Addison station (embankment/girder bridge/canopy) · streets w/ CPD
+  barricades + Lakeview backdrop · 6 rooftop brownstones (1 climbable) ·
+  Murphy's/Cubby Bear/Clark neon row/Engine 78/souvenir stands/Gallagher
+  Way + Statue Row + Caray.
+- THE LIFE: 450s game-day cycle (crowd bed, 7th-inning stretch singalong,
+  homers onto Waveland w/ ball-hawk Gus race, CUBS WIN w/ W-flag hoist +
+  Go Cubs Go from bar doorways, marquee easter eggs, ivy gag) · 24 NPCs ·
+  journal 'wrigleyville' · radio station #4 'WGN · GO CUBS GO' (R key) ·
+  fake lakefront Wrigley backdrop auto-hides in-cell.
+- Verified: walkprobe 206/206 · single-file build 928 kB · baseline
+  pixel-stable · every screenshot read. Geography: GEOGRAPHY.md
+  WRIGLEY_GEOGRAPHY (true latitude, Clark diagonal 0.28).

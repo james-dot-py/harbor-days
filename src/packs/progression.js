@@ -367,6 +367,7 @@ const STATION_META=[
   {name:'📻 LOFI',            flavor:'the harbor score'},
   {name:"WBMX · HOUSE",       flavor:'warehouse, 122 BPM'},
   {name:'CHECKERBOARD · BLUES',flavor:'a slow shuffle in E'},
+  {name:'WGN · GO CUBS GO',   flavor:'Steve Goodman, on a loop since 1984'},
   {name:'RADIO OFF',          flavor:'just the lake now'},
 ];
 const radio={station:0,carrying:false,timer:null,next:0,step:0,stepDur:0,bus:null,pulse:0,walkBeat:0,speakers:[],box:null};
@@ -419,7 +420,7 @@ function radioReturn(){
     mb.linearRampToValueAtTime(MB_BASE!=null?MB_BASE:0.16,now+0.4); }
   radio.station=0; radio.carrying=false; radio.pulse=0;
 }
-function cycleStation(){ radioSetStation((radio.station+1)%4); }
+function cycleStation(){ radioSetStation((radio.station+1)%5); }
 function radioSetStation(sTo){
   const ctx=getAudioCtx(); radio.station=sTo;
   newRadioBus(); staticBlip();
@@ -430,7 +431,7 @@ function radioSetStation(sTo){
     const mb=ctx.musicBus.gain;
     mb.cancelScheduledValues(now); mb.setValueAtTime(mb.value,now);
     mb.linearRampToValueAtTime(sTo===0?(MB_BASE!=null?MB_BASE:0.16):0.0001, now+0.4);
-    if(sTo===1||sTo===2){ radio.stepDur = sTo===1 ? (60/122/4) : (60/92/3);
+    if(sTo>=1&&sTo<=3){ radio.stepDur = sTo===1 ? (60/122/4) : sTo===2 ? (60/92/3) : (60/126/2);
       radio.bus.gain.cancelScheduledValues(now); radio.bus.gain.setValueAtTime(0.0001,now);
       radio.bus.gain.linearRampToValueAtTime(0.5,now+0.1); }
   }
@@ -438,17 +439,18 @@ function radioSetStation(sTo){
 }
 function radioTick(){
   const ctx=getAudioCtx(); if(!ctx.actx)return;
-  if(radio.station!==1 && radio.station!==2)return;                    // only HOUSE/BLUES synthesize
+  if(radio.station<1||radio.station>3)return;                          // HOUSE/BLUES/CUBS synthesize
   if(radio.next<ctx.actx.currentTime) radio.next=ctx.actx.currentTime+0.05;
   while(radio.next<ctx.actx.currentTime+0.5){
-    if(radio.station===1) houseStep(radio.step,radio.next);
-    else                  bluesStep(radio.step,radio.next);
+    if(radio.station===1)      houseStep(radio.step,radio.next);
+    else if(radio.station===2) bluesStep(radio.step,radio.next);
+    else                       cubsStep(radio.step,radio.next);
     radio.next+=radio.stepDur; radio.step++;
   }
 }
 function updateRadio(dt){
   radio.pulse*=Math.exp(-6*dt);
-  const playing=(radio.station===1||radio.station===2);
+  const playing=(radio.station>=1&&radio.station<=3);
   const sc=playing?1+radio.pulse*0.4:1;
   for(const s of radio.speakers) s.scale.set(sc,sc,1);
 }
@@ -466,6 +468,36 @@ function houseStep(step,t){
   if(beatPos===2) subBass(root-24,t,radio.stepDur*1.6);
   if(s%8===6) stab(HOUSE_CH[bar],t);
 }
+// ---------------- WGN — 'GO CUBS GO' chorus, 126 BPM march ------------ //
+// 64 8th-note steps = 8 bars in C: the chant hook twice, the answer
+// phrase, then an instrumental turnaround. Public domain spirit, synth body.
+const CUBS_MEL={                                        // step -> [midi, dur-in-steps]
+  0:[67,2],2:[67,2],4:[64,4],                           // "go, Cubs, go"
+  8:[67,2],10:[67,2],12:[64,4],                         // "go, Cubs, go"
+  16:[64,1],17:[64,1],18:[62,2],20:[60,2],22:[62,2],24:[64,2],26:[67,5],  // "hey Chicago, what do you say"
+  32:[67,2],34:[64,2],36:[62,2],38:[60,6],              // "the Cubs are gonna win today"
+  48:[60,2],52:[65,2],56:[67,2],60:[60,3],              // turnaround roots
+};
+const CUBS_BASS=[48,48,53,48,55,53,48,55];              // C C F C G F C G, per bar
+function cubsLead(m,t,dur){ const c=getAudioCtx(),bus=radio.bus,mf=actxMf(); if(!c.actx||!bus)return;
+  const g=c.actx.createGain(); g.gain.setValueAtTime(0.0001,t);
+  g.gain.linearRampToValueAtTime(0.26,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  g.connect(bus);
+  for(const [type,det,amp] of [['triangle',0,1],['square',6,0.22]]){
+    const o=c.actx.createOscillator(),g2=c.actx.createGain();
+    o.type=type; o.frequency.value=mf(m); o.detune.value=det; g2.gain.value=amp;
+    o.connect(g2); g2.connect(g); o.start(t); o.stop(t+dur+0.05);
+  }
+}
+function cubsStep(step,t){
+  const s=step%64, bar=(s/8)|0;
+  if(s%8===0){ kick(t); radio.pulse=1; subBass(CUBS_BASS[bar]-12,t,radio.stepDur*3); }
+  if(s%8===4){ clap(t); subBass(CUBS_BASS[bar]-12,t,radio.stepDur*1.8); }
+  if(s%2===0) hat(t,0.028);
+  const n=CUBS_MEL[s]; if(n) cubsLead(n[0],t,radio.stepDur*n[1]);
+  if(s===28||s===44||s===62) stab([60,64,67],t);        // crowd-chord answers
+}
+
 // ---------------- BLUES (CHECKERBOARD) — shuffle in E ----------------- //
 const BLUES_WALK=[40,43,45,46,47,46,45,43];                            // E G A A# B walk
 function bluesStep(step,t){
