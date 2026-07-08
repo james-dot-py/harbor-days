@@ -9,6 +9,7 @@ import { registerCell, setActiveCell, getCell, activeCell } from '../cells.js';
 import { camCtl } from '../main.js';
 import { cam } from '../input.js';
 import { SPAWN_W } from '../data/wrigleyville.js';
+import { buildAddisonTrains, updateTrains, forceDwell, forceApproach } from '../wrigley/train.js';
 
 const R = mulberry32(90210 + 1947);
 const CAR = { x: -250, z: -650, y: 0.25 };          // pocket set, outside all clamps
@@ -194,9 +195,13 @@ function rideTo(dest, player) {
     : { cell: 'lakefront', x: 20, z: 105, y: 0, yaw: 1.35, name: 'This is Belmont.' };
   const fade = ms => screenFx.filter('brightness(0)', ms);
   chime();
+  // boarding AT Addison: a real train pulls in first; the fade covers boarding
+  const preRoll = dest === 'lakefront' ? 2.6 : 0;
+  if (preRoll) forceApproach();
+  const P = preRoll;                              // every step waits for the pull-in
   runSeq([
-    { at: 0.05, fn: () => fade(1500) },
-    { at: 0.7, fn: () => {
+    { at: P + 0.05, fn: () => fade(1500) },
+    { at: P + 0.7, fn: () => {
       setActiveCell('redline-car');
       player.x = CAR.x; player.z = CAR.z + 2; player.y = CAR.y; player.vx = player.vz = 0;
       // look down the car's length, slightly angled at the west windows —
@@ -205,17 +210,18 @@ function rideTo(dest, player) {
       rumbleOn();
       toast('RED LINE — HOWARD BOUND', dest === 'wrigleyville' ? 'next stop: Addison' : 'next stop: Belmont');
     } },
-    { at: 2.2, fn: () => rider.say(dest === 'wrigleyville' ? "ope — my stop too. go cubs, go!" : 'ope — heading back to the lake?') },
-    { at: 6.2, fn: () => say(spot.name) },
-    { at: 7.2, fn: () => chime() },
-    { at: 8.0, fn: () => fade(1500) },
-    { at: 8.7, fn: () => {
+    { at: P + 2.2, fn: () => rider.say(dest === 'wrigleyville' ? "ope — my stop too. go cubs, go!" : 'ope — heading back to the lake?') },
+    { at: P + 6.2, fn: () => say(spot.name) },
+    { at: P + 7.2, fn: () => chime() },
+    { at: P + 8.0, fn: () => fade(1500) },
+    { at: P + 8.7, fn: () => {
       setActiveCell(spot.cell);
       player.x = spot.x; player.z = spot.z; player.y = spot.y; player.vx = player.vz = 0;
       cam.yaw = spot.yaw; cam.pitch = 0.12; cam.dist = 6; camCtl.snap = true;
       rumbleOff();
+      if (dest === 'wrigleyville') forceDwell(4);  // "that was my train" — it departs behind you
     } },
-    { at: 9.4, fn: () => {
+    { at: P + 9.4, fn: () => {
       if (dest === 'wrigleyville') {
         organSting();
         if (!state.wrigleyVisited) {
@@ -232,6 +238,7 @@ let rider = null;
 onWorldReady((player) => {
   registerCell(buildCar());
   buildPylon();
+  buildAddisonTrains();
   // the rider NPC lives in the car (framework NPC culling hides it elsewhere)
   rider = makeNPC({
     x: CAR.x + 1.15, z: CAR.z - 3.4, ry: -Math.PI / 2, name: 'red line regular',
@@ -253,6 +260,7 @@ onWorldReady((player) => {
       seqT += dt;
       for (const s of seq) if (!s.done && seqT >= s.at) { s.done = true; s.fn(); }
     }
+    if (activeCell() === 'wrigleyville') updateTrains(dt, p, { chime, clack });
     if (activeCell() === 'redline-car') {
       // window lights stream past + car sway + clacks
       for (const pts of winLights) {
