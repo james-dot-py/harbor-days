@@ -69,3 +69,9 @@ refs place the real knothole on Sheffield (right field) — the owner chooses
 Waveland; record it under standing liberties. Update STADIUM_W.knothole,
 the builder, walkprobe expects if any, and the wv-knothole waypoint will
 follow the data automatically (gen-waypoints reads it).
+
+## Amendment (owner playtest 2026-07-09)
+(10) Fix issue 003: the Gallagher splash pad flashes when walked past (likely
+decal z-fight; possibly stuck proximity trigger). 009 repaved the plaza without
+touching the pad — check its grade on the new surface, rebuild the wet-ring
+flush, add trigger hysteresis, verify with an act.mjs walk-past.
