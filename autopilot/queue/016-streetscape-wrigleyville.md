@@ -38,3 +38,11 @@ makes Wrigleyville pass it. Editorial bar: stand at any midblock point and
 slowly orbit — everywhere you look should be SOMETHING with intent: a door, a
 meter, a cornice line, a parked Honda with a Cubs sticker. That last one is
 allowed.
+
+## Amendment (owner playtest 2026-07-09, post-010 — issue 004)
+The hero bars are IN scope for two things (their likeness signs remain 010's
+design): (a) SIGNAGE DEDUPE — one dominant sign per building plus at most one
+blade/neon accent; remove redundant same-name plates (Sluggers currently
+wears three); (b) WINDOW/DOOR VARIETY — per-lot recipes apply to the bar row
+too; no two adjacent buildings share the same upper-window or storefront
+composition. Owner screenshot in refs/inbox is the anti-pattern reference.
