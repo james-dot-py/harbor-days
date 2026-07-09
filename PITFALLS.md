@@ -44,3 +44,23 @@ few turns to find; keep each to one line of symptom + fix.
   textures hide it, and a dark retexture surfaces it (Addison platform signs,
   task 010). Free-standing signs = back-to-back FrontSide pairs (village.js
   twoSided(); pairs inside one InstancedMesh cost no extra draw).
+- Hand-authored waypoint framings bypass gen-waypoints' camBlockedW clearance
+  filter: to shoot a Waveland ROOFTOP the follow-cam sits `dist` SOUTH of the
+  player, which parks the camera INSIDE the stadium (its cream Waveland face
+  fills the frame). Stand NORTH near the brownstones (z≈−566, not −550) so the
+  camera clears the stadium, then tilt up (task 011). Prefer featW/pickW.
+- A wall-mounted QR inside the L car cannot be shot head-on by the follow-cam:
+  the mayor is pinned to frame-centre (occludes a centred QR) and the centre
+  grab-pole column blocks any off-centre head-on line. jsQR also FLAKES at ~20°
+  oblique in the toon+world-curve render (identical configs decoded then didn't,
+  run to run — the mayor's idle sway tips a marginal QR). Fix that shipped
+  (task 011): a big QR (canvas mod ≥12), the camera just NORTH of the pole row
+  so poles fall behind the lens, SIX framings, and a MULTI-SCALE decoder
+  (tools/decode-qr.mjs resizes 0.5–2× — jsQR scans the whole frame and misses a
+  small QR at native res). A billboard framed near-normal decodes trivially;
+  reserve the fight for interiors.
+- Any HUD addition shifts the canonical spawn (baseline.png): the task-011 ♥
+  button adds ~0.12%, under the 0.68% gate, but regen anyway with a
+  canary-verified OWN-vite shot (never the foreign :5173 server — it served a
+  stale "harbor days · v0.9" build with no ♥) + commit [baseline-regen] +
+  the baseline.png change so future diffs stay clean.

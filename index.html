@@ -39,6 +39,12 @@
     transition:transform .14s ease,box-shadow .14s ease,background .14s ease;}
   #start:hover{transform:translateY(-2px);box-shadow:0 8px 0 #3f8a4d;background:#65ba74}
   #start:active{transform:translateY(4px);box-shadow:0 2px 0 #3f8a4d}
+  /* small "Support development ♥" line under the start button (own tab; never
+     part of the start gesture) */
+  .card .kofilink{display:inline-block;margin-top:16px;color:#c07a4a;font-size:13px;letter-spacing:.06em;
+    text-decoration:none;border-bottom:1px dotted #d8b48a;padding-bottom:1px;transition:color .15s ease}
+  .card .kofilink:hover{color:#e0766a}
+  .card .kofilink .kh{color:#e0766a}
   /* soft warm vignette over the 3D view (under all HUD) */
   #vig{position:fixed;inset:0;z-index:10;pointer-events:none;
     background:radial-gradient(130% 105% at 50% 42%, rgba(0,0,0,0) 58%, rgba(84,44,58,.16) 82%, rgba(60,28,44,.32) 100%);}
@@ -131,6 +137,11 @@
     z-index:21;background:rgba(253,246,230,.92);color:var(--ink);font-size:17px;font-weight:700;line-height:1;
     box-shadow:0 3px 0 rgba(122,62,44,.22);display:none;align-items:center;justify-content:center;padding:0}
   body.touch #btnHelp{left:auto;right:14px;top:284px;bottom:auto;width:44px;height:44px;font-size:20px}
+  /* ♥ support button beside the "?" help button (same HUD styling family) */
+  #btnKofi{position:fixed;left:54px;bottom:12px;width:34px;height:34px;border:none;border-radius:50%;cursor:pointer;
+    z-index:21;background:rgba(253,246,230,.92);color:#e0766a;font-size:16px;line-height:1;text-decoration:none;
+    box-shadow:0 3px 0 rgba(122,62,44,.22);display:none;align-items:center;justify-content:center;padding:0}
+  body.touch #btnKofi{left:auto;right:14px;top:334px;bottom:auto;width:44px;height:44px;font-size:20px}
   #ctl{position:fixed;inset:0;z-index:27;display:none;align-items:center;justify-content:center;
     background:rgba(74,59,47,.38)}
   #ctl.show{display:flex}
@@ -161,6 +172,7 @@
     <div class="sub">a north side stroll &mdash; the rocks, the harbor, the skyline</div>
     <div class="tiny">v0.9 &middot; the place itself &middot; belmont harbor, chicago</div>
     <button id="start">let's walk</button>
+    <a class="kofilink" href="https://ko-fi.com/jimbobuildsope" target="_blank" rel="noopener">Support development <span class="kh">&hearts;</span></a>
   </div>
 </div>
 <div id="vig"></div>
@@ -182,6 +194,7 @@
 <div id="toast"><span class="tsp">&#10024;</span><div class="ttext"><div id="toastMain"></div><div id="toastSub"></div></div></div>
 <div id="journal"><div class="jcard"><button id="journalClose">&times;</button><h1 class="jtitle">Journal</h1><div id="journalBody"></div></div></div>
 <button id="btnHelp">?</button>
+<a id="btnKofi" href="https://ko-fi.com/jimbobuildsope" target="_blank" rel="noopener" aria-label="Support development on Ko-fi" title="Support development">&hearts;</a>
 <div id="ctl"><div class="ctlcard"><button id="ctlClose">&times;</button><h1>CONTROLS</h1><div id="ctlBody"></div></div></div>
 
 <script type="module" src="/src/main.js"></script>

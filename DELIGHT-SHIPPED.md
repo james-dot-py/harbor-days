@@ -51,3 +51,11 @@ cut becomes a revert task.
 - Stepping off the Red Line you face the actual CTA sign — dark band, white
   Helvetica "Addison", "3600 N / 940 W", red Elevator tab, Cubs bullseye —
   on a limestone head-house portal under the tracks — Addison stop — task 010
+- Support the game from inside the game: a period-plausible ROOFTOP AD BOARD
+  atop a Waveland brownstone — weathered cream, oxblood "SUPPORT DEVELOPMENT ♥
+  · a harbor days production", and a real scannable QR to the Ko-fi page — riding
+  over the rooftop bleachers like the real Wrigley boards — Waveland rooftops — task 011
+- The Wrigley's Spearmint card in the Red Line car got a neighbor: a
+  "SUPPORT DEVELOPMENT ♥ · scan to support" transit placard with a scannable
+  Ko-fi QR on the end wall — the ask lives in the world, never a popup —
+  redline-car — task 011

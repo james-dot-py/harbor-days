@@ -344,6 +344,39 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-196, -550]
   corner('wv-x-clark-waveland', W.clarkX(T.waveland.z), T.waveland.z);
 }
 
+/* ---- Ko-fi support surfaces (task 011) — the two DIEGETIC placements. Their
+   screenshots feed the mechanical QR oracle (tools/decode-qr.mjs), so framings
+   are chosen for a decodable, near-head-on QR, not just a pretty read. The
+   title-card + HUD ♥ are DOM (shot separately), not waypoints. ---- */
+{
+  // rooftop billboard atop the WEST Waveland brownstone (ROOFTOPS_W.waveland[0],
+  // NOT the EAMUS row). Stand on Waveland aligned with the QR panel (the board's
+  // right third, ~2.3 m E of centre) and TILT UP; the board angles down toward
+  // the street so the QR keystone stays shallow. Look straight N (no yaw skew).
+  // Stand NORTH on Waveland (near the brownstones): the follow-cam sits `dist`
+  // SOUTH of the player, so a southerly stand parks the camera INSIDE the
+  // stadium (its cream Waveland face then fills the frame). From z −566 the
+  // camera stays north of the stadium and looks up at the rooftop board.
+  add('wv-kofi-billboard', 'wrigleyville', 'wrigleyville', -220, -566, [
+    { yaw: 3.14, pitch: -0.36, dist: 13 },
+    { yaw: 3.14, pitch: -0.32, dist: 11 },
+    { yaw: 3.14, pitch: -0.42, dist: 15 },
+  ]);
+  // in-car Ko-fi placard on the redline-car north end wall. The dev-spawn hook
+  // in wrigley-ride.js activates the pocket cell for x,z in the car box. Stand
+  // just south of the card (north of the grab-pole column, so poles fall behind
+  // the lens) and slightly WEST of centre, looking N — the card lands beside the
+  // mayor, big and pole-free, at a shallow angle jsQR decodes.
+  add('kofi-lcar', 'wrigleyville', 'redline-car', -251.0, -656.2, [
+    { yaw: 3.14, pitch: 0.03, dist: 2.0 },
+    { yaw: 3.14, pitch: 0.06, dist: 2.0 },
+    { yaw: 3.14, pitch: 0.09, dist: 2.1 },
+    { yaw: 3.14, pitch: 0.00, dist: 1.9 },
+    { yaw: 3.14, pitch: 0.05, dist: 1.95 },
+    { yaw: 3.14, pitch: 0.08, dist: 2.05 },
+  ]);
+}
+
 /* --------------------------- expectations ---------------------------- */
 let expect = {};
 try { expect = JSON.parse(readFileSync(EXPECT, 'utf8')); } catch { /* none authored yet */ }

@@ -31,3 +31,4 @@ import '../wrigley/deepcuts.js';   // Wrigleyville "deep cuts" signage layer
 import './wrigley-toys.js';   // Wrigleyville live props — rooftop binoculars + throwable ball
 import './wrigley-vendors.js';   // Wrigleyville street-festival — vendors, ticket queue, fan streams, splash pad
 import './about.js';   // About / credits — OpenStreetMap ODbL attribution
+import './kofi.js';   // Ko-fi support — diegetic rooftop billboard (task 011)

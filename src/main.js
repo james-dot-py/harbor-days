@@ -393,6 +393,7 @@ function runStart(){
     setTimeout(()=>h.classList.add('hide'),9000);
   }
   $('btnHelp').style.display='flex';   // the hint auto-hides; the "?" button is the permanent way back
+  $('btnKofi').style.display='flex';   // ♥ Ko-fi support button, beside "?"
 }
 
 // ---- "?" controls card: always-discoverable version of the hint bar ----

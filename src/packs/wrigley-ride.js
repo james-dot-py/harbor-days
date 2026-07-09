@@ -4,6 +4,7 @@
 // Boarding pylon at the Belmont underpass mouth; return from the platform.
 import * as THREE from 'three';
 import { scene, toon, bmat, mulberry32, pointsMat } from '../core.js';
+import { drawQR, KOFI_URL } from '../qr.js';
 import { onWorldReady, registerUpdate, addInteraction, makeNPC, toast, state, getAudioCtx, screenFx } from '../framework.js';
 import { registerCell, setActiveCell, getCell, activeCell } from '../cells.js';
 import { camCtl } from '../main.js';
@@ -111,6 +112,32 @@ function buildCar() {
     c2.font = '700 13px Georgia,serif'; c2.fillText('— THE PERFECT GUM —', 128, 40);
     const ad = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 0.36), bmat(0xffffff, { map: new THREE.CanvasTexture(cv) }));
     ad.position.set(C.x - 1.62, 2.52, C.z + 2.5); ad.rotation.y = Math.PI / 2; add(ad);
+  }
+  { // Ko-fi support placard on the NORTH end wall — the transit-car ad precedent
+    // (task 011). "SUPPORT DEVELOPMENT ♥" header over the scannable QR, big and
+    // centred on the wall. The walkthrough reads it from very close (camera just
+    // north of the grab-pole column, so the poles fall behind the lens), looking
+    // slightly off-axis so the mayor sits beside it. Same QR matrix as the
+    // rooftop billboard (src/qr.js). Faces +z (down the car).
+    const cs = 720;                                                            // hi-res square card
+    const cv = document.createElement('canvas'); cv.width = cs; cv.height = cs;
+    const g = cv.getContext('2d');
+    g.fillStyle = '#fdf6e6'; g.fillRect(0, 0, cs, cs);                         // cream card
+    g.strokeStyle = '#b8442f'; g.lineWidth = 12; g.strokeRect(12, 12, cs - 24, cs - 24);
+    g.fillStyle = '#b8442f'; g.textAlign = 'center';
+    let fs = 52; g.font = `800 ${fs}px "Trebuchet MS",Arial,sans-serif`;       // header shrink-to-fit
+    while (g.measureText('SUPPORT DEVELOPMENT ♥').width > cs - 70 && fs > 18) { fs -= 2; g.font = `800 ${fs}px "Trebuchet MS",Arial,sans-serif`; }
+    g.fillText('SUPPORT DEVELOPMENT ♥', cs / 2, 60);
+    drawQR(g, (cs - 37 * 12) / 2, 92, 12);                                     // 37 modules × 12 px = 444, upper-centre
+    g.fillStyle = '#b8442f'; g.font = 'italic 700 32px Georgia,serif';
+    g.fillText('scan to support ♥', cs / 2, 600);
+    g.fillStyle = '#6b4d1e'; g.font = '700 26px "Trebuchet MS",Arial,sans-serif';
+    g.fillText(KOFI_URL.replace(/^https?:\/\//, ''), cs / 2, 646);
+    const tex = new THREE.CanvasTexture(cv);
+    tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
+    const card = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.5),
+      bmat(0xffffff, { map: tex, fog: false }));
+    card.position.set(C.x, 1.9, C.z - 6.55); add(card);                       // centred on the end wall, faces +z
   }
   // scrolling city lights outside both window bands (animated in update)
   for (const side of [-1, 1]) {
@@ -239,6 +266,15 @@ onWorldReady((player) => {
   registerCell(buildCar());
   buildPylon();
   buildAddisonTrains();
+  // dev spawn INSIDE the car pocket → activate the ride cell (walkthrough shots
+  // of the in-car ad). Runs after wrigleyville.js already switched to its cell
+  // for x<-100, so this override wins. The pocket sits far below all real z.
+  if (player.x < CAR.x + 3 && player.x > CAR.x - 3 && player.z < CAR.z + 7 && player.z > CAR.z - 7) {
+    setActiveCell('redline-car');
+    player.x = Math.min(Math.max(player.x, CAR.x - 1.5), CAR.x + 1.5);
+    player.z = Math.min(Math.max(player.z, CAR.z - 6.3), CAR.z + 6.3);
+    player.y = CAR.y;
+  }
   // the rider NPC lives in the car (framework NPC culling hides it elsewhere)
   rider = makeNPC({
     x: CAR.x + 1.15, z: CAR.z - 3.4, ry: -Math.PI / 2, name: 'red line regular',

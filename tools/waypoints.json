@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-09T18:29:19.936Z",
- "count": 58,
+ "generated": "2026-07-09T19:36:11.071Z",
+ "count": 60,
  "waypoints": [
   {
    "id": "spawn",
@@ -1467,6 +1467,71 @@
     }
    ],
    "expectation": "Clark & Waveland: stadium NW corner treatment on one side, brownstone/bar fabric across Clark and along Waveland toward Engine 78 — corners read as a real neighborhood junction, not backdrop."
+  },
+  {
+   "id": "wv-kofi-billboard",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -220,
+   "z": -566,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": -0.36,
+     "dist": 13
+    },
+    {
+     "yaw": 3.14,
+     "pitch": -0.32,
+     "dist": 11
+    },
+    {
+     "yaw": 3.14,
+     "pitch": -0.42,
+     "dist": 15
+    }
+   ],
+   "expectation": "A period-plausible painted ROOFTOP AD BOARD atop the west Waveland brownstone (the one WITHOUT the EAMUS CATULI banner), above its rooftop bleachers on a steel-leg frame, angled down toward the street: weathered-cream board reading 'SUPPORT DEVELOPMENT ♥' in oxblood serif on the left with a crisp black-on-white QR panel on the right. Reads as a real Wrigley rooftop billboard, not a UI popup; the QR must be sharp and undistorted enough to scan (mechanically decoded to the Ko-fi URL by tools/decode-qr.mjs)."
+  },
+  {
+   "id": "kofi-lcar",
+   "area": "wrigleyville",
+   "cell": "redline-car",
+   "x": -251,
+   "z": -656.2,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.03,
+     "dist": 2
+    },
+    {
+     "yaw": 3.14,
+     "pitch": 0.06,
+     "dist": 2
+    },
+    {
+     "yaw": 3.14,
+     "pitch": 0.09,
+     "dist": 2.1
+    },
+    {
+     "yaw": 3.14,
+     "pitch": 0,
+     "dist": 1.9
+    },
+    {
+     "yaw": 3.14,
+     "pitch": 0.05,
+     "dist": 1.95
+    },
+    {
+     "yaw": 3.14,
+     "pitch": 0.08,
+     "dist": 2.05
+    }
+   ],
+   "expectation": "Inside the Red Line car, the 'SUPPORT DEVELOPMENT ♥' ad placard on the north end wall (the transit-car ad precedent, like the Wrigley's Spearmint card): a cream poster with red frame, the header over a large crisp black-on-white QR and the ko-fi.com/jimbobuildsope caption, read head-on down the car's length and clear of the grab poles. The QR must be sharp enough to scan (mechanically decoded to the Ko-fi URL by tools/decode-qr.mjs)."
   }
  ]
 }
