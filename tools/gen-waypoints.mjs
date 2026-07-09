@@ -325,6 +325,23 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-196, -550]
   canyon('wv-street-sheffield', T.sheffield.x + 3, -450, 3.14, 0);  // N-S: look N / look S
   canyon('wv-street-waveland', -260, T.waveland.z, -1.57, 1.57);
   canyon('wv-street-clark', W.clarkX(-460), -460, 2.87, -0.27);     // along the diagonal
+
+  /* ---- intersection-corner waypoints (owner playtest 2026-07-09): every
+     corner of every intersection should hold its REAL occupant — Sheffield &
+     Addison had "nothing except the field". Stand at the intersection center,
+     one framing per diagonal corner; expectations name the occupants. Coords
+     derive from the data module so they follow layout reworks. ---- */
+  const corner = (id, x, z) => {
+    const [px, pz] = snapW(x, z);
+    add(id, 'wrigleyville', 'wrigleyville', px, pz, [
+      { yaw: 0.79, pitch: 0.1, dist: 13 }, { yaw: 2.36, pitch: 0.1, dist: 13 },
+      { yaw: -2.36, pitch: 0.1, dist: 13 }, { yaw: -0.79, pitch: 0.1, dist: 13 },
+    ]);
+  };
+  corner('wv-x-clark-addison', W.clarkX(T.addison.z), T.addison.z);
+  corner('wv-x-sheffield-addison', T.sheffield.x, T.addison.z);
+  corner('wv-x-sheffield-waveland', T.sheffield.x, T.waveland.z);
+  corner('wv-x-clark-waveland', W.clarkX(T.waveland.z), T.waveland.z);
 }
 
 /* --------------------------- expectations ---------------------------- */
