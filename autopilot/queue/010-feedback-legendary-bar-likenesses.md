@@ -38,3 +38,9 @@ full reference-first treatment per building instead of a rushed generic pass.
 Budget note: facade detail should ride the existing instanced batches
 (A.win/A.awn/A.base buckets and the cell static merge) — new per-building
 one-off meshes are the draw-call trap that 004/007 are ratcheting down.
+
+## Amendment (owner playtest 2026-07-09)
+The existing bar-row awning/bulb assemblies FLOAT (issue 002 + screenshot in
+refs/inbox). Rebuild them as part of the facade work: attached to the wall,
+bulbs flush to the awning fascia, continuous per storefront. No floating
+geometry survives this task.
