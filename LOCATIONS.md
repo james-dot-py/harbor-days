@@ -17,7 +17,8 @@ feasibility inside perf + single-file constraints.
   Bill Jarvis sanctuary, Marovitz golf, Diversey range, Waveland clock tower.
 - **Wrigleyville** — hard cell via the ridable Red Line (Belmont → Addison):
   stadium, marquee, scoreboard, rooftops, Gallagher Way, Clark St fabric,
-  game-day cycle. (Merged to main at 02aa933.)
+  game-day cycle. (Merged to main at 02aa933. **SIGNED OFF** 2026-07-09 —
+  refs/wrigleyville/SIGNOFF.md; polish continues in queue 007/009/010/012.)
 
 ## In progress
 

@@ -29,3 +29,8 @@ few turns to find; keep each to one line of symptom + fix.
 - Stale-cache variant of the 5173 trap: a long-lived dev server serves stale
   HMR-cached module transforms (main.js missing freshly added exports while
   world content looked current) — probe tools must spawn their own vite.
+- TWO Claude sessions can share this worktree (a resumed prior-task session
+  overlapping the next task's session): files change under your executors,
+  commits/pushes/result.json land mid-task, and each session attributes the
+  work to itself. Before close-out, re-check git log + result.json provenance
+  and re-verify tree state against what you actually reviewed.
