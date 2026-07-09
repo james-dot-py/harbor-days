@@ -281,6 +281,24 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-192.5, -49
     spread(yawTo(px, pz, mx, mz), 0.15, 9));
 }
 
+/* ---- street-canyon waypoints (owner playtest 2026-07-09): the loop only
+   judged SUBJECTS (signs, gates) and never the STREET AROUND them, so blocks
+   read as bare prisms. Midblock, low pitch, down the canyon BOTH ways —
+   their expectations judge ENCLOSURE (doors, glazing, cornices, furniture
+   rhythm), not landmarks. ---- */
+{
+  const T = W.STREETS_W;
+  const canyon = (id, x, z, yawA, yawB) => add(id, 'wrigleyville', 'wrigleyville', R(x), R(z), [
+    { yaw: R(yawA), pitch: 0.06, dist: 13 },
+    { yaw: R(yawB), pitch: 0.06, dist: 13 },
+    { yaw: R(yawA + 0.35), pitch: 0.14, dist: 10 },
+  ]);
+  canyon('wv-street-addison', -230, T.addison.z, -1.57, 1.57);      // E-W: look W / look E
+  canyon('wv-street-sheffield', T.sheffield.x + 3, -450, 3.14, 0);  // N-S: look N / look S
+  canyon('wv-street-waveland', -260, T.waveland.z, -1.57, 1.57);
+  canyon('wv-street-clark', W.clarkX(-460), -460, 2.87, -0.27);     // along the diagonal
+}
+
 /* --------------------------- expectations ---------------------------- */
 let expect = {};
 try { expect = JSON.parse(readFileSync(EXPECT, 'utf8')); } catch { /* none authored yet */ }

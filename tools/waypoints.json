@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-09T00:46:01.854Z",
- "count": 48,
+ "generated": "2026-07-09T01:32:04.329Z",
+ "count": 52,
  "waypoints": [
   {
    "id": "spawn",
@@ -1197,6 +1197,106 @@
     }
    ],
    "expectation": "A CPD street closure: blue wooden A-frame barricades ('POLICE LINE') with an officer NPC closing Addison east past the station; Lakeview backdrop buildings continue beyond — diegetic wall, not a void."
+  },
+  {
+   "id": "wv-street-addison",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -230,
+   "z": -400,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.06,
+     "dist": 13
+    },
+    {
+     "yaw": 1.57,
+     "pitch": 0.06,
+     "dist": 13
+    },
+    {
+     "yaw": -1.22,
+     "pitch": 0.14,
+     "dist": 10
+    }
+   ],
+   "expectation": "Addison midblock street canyon: game-day street enclosed on BOTH sides — station embankment/stalls one way, stadium facade and storefronts the other. Every commercial ground floor shows a DOOR and glazing; lamp posts and street furniture (meters/hydrant/newsboxes) set a rhythm; no blank single-color wall longer than ~8 m; crosswalks and signals read at the corners."
+  },
+  {
+   "id": "wv-street-sheffield",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -187,
+   "z": -450,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.06,
+     "dist": 13
+    },
+    {
+     "yaw": 0,
+     "pitch": 0.06,
+     "dist": 13
+    },
+    {
+     "yaw": 3.49,
+     "pitch": 0.14,
+     "dist": 10
+    }
+   ],
+   "expectation": "Sheffield midblock canyon: bleacher wall + knothole on one side, rooftop-brownstone fronts (stoops, bay windows, doors) on the other. Furniture rhythm on the sidewalk; parked cars plausible; no bare prism walls."
+  },
+  {
+   "id": "wv-street-waveland",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -260,
+   "z": -500,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.06,
+     "dist": 13
+    },
+    {
+     "yaw": 1.57,
+     "pitch": 0.06,
+     "dist": 13
+    },
+    {
+     "yaw": -1.22,
+     "pitch": 0.14,
+     "dist": 10
+    }
+   ],
+   "expectation": "Waveland midblock canyon: brownstone fronts with stoops/doors/cornices facing the LF wall and Engine 78; rooftop bleachers visible above; street furniture rhythm; no blank walls."
+  },
+  {
+   "id": "wv-street-clark",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -306.8,
+   "z": -460,
+   "framings": [
+    {
+     "yaw": 2.87,
+     "pitch": 0.06,
+     "dist": 13
+    },
+    {
+     "yaw": -0.27,
+     "pitch": 0.06,
+     "dist": 13
+    },
+    {
+     "yaw": 3.22,
+     "pitch": 0.14,
+     "dist": 10
+    }
+   ],
+   "expectation": "Clark St diagonal canyon: continuous bar-row storefronts (doors, glazing, awnings, neon at storefront height) on the west side, Gallagher Way/stadium on the east; pennant strings overhead attach to real anchors; furniture + signal presence; the street feels SURROUNDED, not like boxes beside a plane."
   }
  ]
 }

@@ -26,6 +26,16 @@ palette, landmark relationship) and how to fix it. Vagueness fails.
   texture (housing era/style, plausible businesses) correct. No relocated landmarks, no
   anywhere-filler that could be any city.
 
+## Street canyons (owner mandate, 2026-07-09)
+Streets are not open walkspace — features must SURROUND the player. For any
+street-level shot ask: does every commercial ground floor have a DOOR, glazing
+and an awning/transom? Is there a blank single-color wall longer than ~8 m
+(fail it — cornice, windows, AC units, downspouts, murals break it up)? Is
+there furniture rhythm (lamp posts, meters, hydrants, newsboxes, bike racks,
+tree grates, parked cars) on the sidewalk? Do intersections have signals and
+crosswalks? Backdrop-grade boxes are ONLY acceptable beyond the barricades —
+never on a face the player walks past.
+
 ## Camera sanity
 If a shot is framed badly (camera inside a canopy/building, an interior shot looking
 across the short axis of a room, a landmark cut off), say so and suggest a better
