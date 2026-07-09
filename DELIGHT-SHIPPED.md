@@ -24,3 +24,6 @@ cut becomes a revert task.
   south lawn (130,272), Chicago-flag star boards — 164546c
 - Rounded art-deco marquee corner: the Clark & Addison postcard view, curved
   wall + marquee on the apex, crowd at the gates — Wrigleyville — 4063791
+- THE sign: cambered marquee crown with WRIGLEY FIELD set along the arc,
+  shoulder volutes, pinstripes, and a live 5x7 dot-matrix message board
+  (GAME IN PROGRESS / CUBS WIN!) — Clark & Addison — 3ddbe70
