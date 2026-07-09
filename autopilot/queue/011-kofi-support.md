@@ -4,7 +4,7 @@ area: global
 type: build
 turns: 120
 title: Ko-fi support integration — "Support development ♥" (title card, HUD, diegetic billboards with QR)
-kofi_url: (OWNER TO FILL — e.g. https://ko-fi.com/<handle>; move this file to queue/ once filled)
+kofi_url: https://ko-fi.com/jimbobuildsope
 acceptance: >
   Three surfaces, all using the EXACT kofi_url above. (1) Title card: a small
   "Support development ♥" line that opens the Ko-fi page in a new tab; must not
