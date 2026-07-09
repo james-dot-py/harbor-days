@@ -1,0 +1,82 @@
+{
+  "images": [
+    {
+      "source": "wikimedia-commons",
+      "file": "CTA_Addison_060723.jpg",
+      "title": "File:CTA Addison 060723.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:CTA_Addison_060723.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/df/CTA_Addison_060723.jpg",
+      "author": "User:JeremyA",
+      "license": "CC BY-SA 2.5",
+      "credit": "Own work",
+      "description": "View of Wrigley Field from Addison Station on the CTA red line.",
+      "fetchDate": "2026-07-09T15:04:55.197Z",
+      "bytes": 332057
+    },
+    {
+      "source": "wikimedia-commons",
+      "file": "Gerald_Farinas_Addison_CTA.jpg",
+      "title": "File:Gerald Farinas Addison CTA.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gerald_Farinas_Addison_CTA.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Gerald_Farinas_Addison_CTA.jpg/1920px-Gerald_Farinas_Addison_CTA.jpg",
+      "author": "User Gerald Farinas on en.wikipedia",
+      "license": "CC BY 2.5",
+      "credit": "From en.wikipedia; description page is (was) here",
+      "description": "Photo by Gerald Farinas of the Addison train station of the Chicago Transit Authority with Wrigley Field in the background, taken on July 8, 2006. 03:04, 9 July 2006 . . Gerald Farinas . .2048 x 1536 (890,016 bytes)",
+      "fetchDate": "2026-07-09T15:05:06.016Z",
+      "bytes": 523103
+    },
+    {
+      "source": "wikimedia-commons",
+      "file": "From_the_Addison_red_line_stop_-_Wildcat_Way_-_a_street_festival_set_up_on_Sheffield_(5196842256).jpg",
+      "title": "File:From the Addison red line stop - Wildcat Way - a street festival set up on Sheffield (5196842256).jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:From_the_Addison_red_line_stop_-_Wildcat_Way_-_a_street_festival_set_up_on_Sheffield_(5196842256).jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/From_the_Addison_red_line_stop_-_Wildcat_Way_-_a_street_festival_set_up_on_Sheffield_%285196842256%29.jpg/1920px-From_the_Addison_red_line_stop_-_Wildcat_Way_-_a_street_festival_set_up_on_Sheffield_%285196842256%29.jpg",
+      "author": "subbu arumugam from chicago, united states",
+      "license": "CC BY-SA 2.0",
+      "credit": "From the Addison red line stop - Wildcat Way - a street festival set up on Sheffield",
+      "description": "From the Addison red line stop - Wildcat Way - a street festival set up on Sheffield",
+      "fetchDate": "2026-07-09T15:05:18.741Z",
+      "bytes": 584071
+    },
+    {
+      "source": "wikimedia-commons",
+      "file": "Addison_(Red).jpg",
+      "title": "File:Addison (Red).jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Addison_(Red).jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/41/Addison_%28Red%29.jpg",
+      "author": "Chicago Transit Authority",
+      "license": "Public domain",
+      "credit": "http://www.ctagifts.com//page/choose-your-station",
+      "description": "Signage for CTA Addison station",
+      "fetchDate": "2026-07-09T15:05:29.468Z",
+      "bytes": 9486
+    },
+    {
+      "source": "wikimedia-commons",
+      "file": "Addison__L__Station.jpg",
+      "title": "File:Addison \"L\" Station.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Addison_%22L%22_Station.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Addison_%22L%22_Station.jpg/1920px-Addison_%22L%22_Station.jpg",
+      "author": "Sea Cow",
+      "license": "CC BY-SA 4.0",
+      "credit": "Own work",
+      "description": "The Addison \"L\" Station.",
+      "fetchDate": "2026-07-09T15:05:40.320Z",
+      "bytes": 837279
+    },
+    {
+      "source": "wikimedia-commons",
+      "file": "CTA_L_5506_at_Addison_station_on_Red_Line.jpeg",
+      "title": "File:CTA L 5506 at Addison station on Red Line.jpeg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:CTA_L_5506_at_Addison_station_on_Red_Line.jpeg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/CTA_L_5506_at_Addison_station_on_Red_Line.jpeg/1920px-CTA_L_5506_at_Addison_station_on_Red_Line.jpeg",
+      "author": "Dough4872",
+      "license": "CC BY-SA 4.0",
+      "credit": "Own work",
+      "description": "CTA 5000-series L car 5506 leads a Red Line train bound for 95th/Dan Ryan station into Addison station in Chicago, Illinois",
+      "fetchDate": "2026-07-09T15:05:51.191Z",
+      "bytes": 823678
+    }
+  ]
+}

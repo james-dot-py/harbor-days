@@ -126,13 +126,74 @@ function bladeTex() {                                // vertical MURPHY'S blade
   g.font = '800 52px "Arial Black",Arial,sans-serif'; g.fillText("MURPHY'S", 0, 0); g.restore();
   return tx(cv);
 }
-function cubbyTex() {                                // white on black
-  const [cv, g] = cvTex(512, 192);
-  g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, 512, 192);
-  g.strokeStyle = '#f4f4f2'; g.lineWidth = 7; g.strokeRect(9, 9, 494, 174);
+function murphyBandTex() {                           // verdigris bronze annex sign band
+  const [cv, g] = cvTex(512, 128);
+  g.fillStyle = '#4e7a68'; g.fillRect(0, 0, 512, 128);                        // weathered copper-green
+  g.fillStyle = 'rgba(112,152,132,.45)'; for (let i = 0; i < 60; i++) g.fillRect((i * 97) % 512, (i * 53) % 128, 11, 6);
+  g.fillStyle = 'rgba(58,92,78,.40)';   for (let i = 0; i < 42; i++) g.fillRect((i * 131) % 512, (i * 71) % 128, 8, 5);
+  g.fillStyle = '#6b4a30'; for (let x = 6; x < 512; x += 22) g.fillRect(x, 4, 12, 11);   // dentil strip
+  g.fillStyle = '#3d3020';                                                    // bronze player reliefs
+  const player = px => { g.save(); g.translate(px, 82); g.beginPath(); g.arc(0, -30, 8, 0, 7); g.fill();
+    g.fillRect(-7, -22, 14, 26); g.fillRect(-7, 4, 6, 18); g.fillRect(1, 4, 6, 18); g.fillRect(-21, -18, 15, 6); g.restore(); };
+  player(66); player(446);
+  g.fillStyle = '#f6f3ea'; g.beginPath(); g.arc(256, 64, 46, 0, 7); g.fill();  // baseball disc
+  g.strokeStyle = '#b6392c'; g.lineWidth = 2.5;
+  g.beginPath(); g.arc(230, 64, 60, -0.5, 0.5); g.stroke();
+  g.beginPath(); g.arc(282, 64, 60, Math.PI - 0.5, Math.PI + 0.5); g.stroke();
+  g.lineWidth = 1.6; for (let i = -3; i <= 3; i++) { const yy = 64 + i * 7;
+    g.beginPath(); g.moveTo(236, yy - 2); g.lineTo(242, yy + 2); g.stroke();
+    g.beginPath(); g.moveTo(270, yy - 2); g.lineTo(276, yy + 2); g.stroke(); }
+  g.fillStyle = '#3a6b8c'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = 'italic 14px "Comic Sans MS",cursive'; g.fillText('believe', 256, 64);
+  g.fillStyle = '#caa24a'; g.strokeStyle = '#5a4420'; g.lineWidth = 2;
+  g.font = '800 40px Georgia,serif'; g.strokeText("MURPHY'S", 256, 44); g.fillText("MURPHY'S", 256, 44);
+  g.fillStyle = '#e6ddc8'; g.fillRect(196, 96, 120, 22);
+  g.fillStyle = '#3d3020'; g.font = '700 20px Georgia,serif'; g.fillText('BLEACHERS', 256, 107);
+  return tx(cv);
+}
+function murphyMarqueeTex() {                        // changeable-letter marquee board
+  const [cv, g] = cvTex(256, 320);
+  g.fillStyle = '#123f2a'; g.fillRect(0, 0, 256, 320);
+  g.strokeStyle = '#e6ddc8'; g.lineWidth = 5; g.strokeRect(8, 8, 240, 304);
+  g.fillStyle = '#f6f3ea'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '800 42px "Arial Black",Arial,sans-serif';
+  g.fillText('NEXT', 128, 58); g.fillText('YEAR', 128, 104); g.fillText('IS NOW', 128, 154);
+  g.fillStyle = '#ffd24a'; g.font = '700 22px "Trebuchet MS",Arial,sans-serif'; g.fillText('BAR TRIVIA @8', 128, 206);
+  g.fillStyle = '#b6392c'; g.fillRect(20, 248, 216, 52);
+  g.fillStyle = '#f6f3ea'; g.font = '800 22px "Trebuchet MS",Arial,sans-serif'; g.fillText('BUDWEISER', 128, 264);
+  g.fillStyle = '#8fb7e2'; g.font = '700 17px "Trebuchet MS",Arial,sans-serif'; g.fillText('· BUD LIGHT ·', 128, 288);
+  return tx(cv);
+}
+function cubbyTex() {                                // single-line white-on-black storefront plate
+  const [cv, g] = cvTex(512, 96);
+  g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, 512, 96);
+  g.strokeStyle = '#f4f4f2'; g.lineWidth = 6; g.strokeRect(8, 8, 496, 80);
   g.fillStyle = '#f7f7f4'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = '800 84px "Arial Black",Arial,sans-serif'; g.fillText('CUBBY', 256, 66);
-  g.fillText('BEAR', 256, 140);
+  g.font = '800 54px "Arial Black",Arial,sans-serif'; g.fillText('CUBBY BEAR', 256, 52);
+  return tx(cv);
+}
+function cubbyDiamondTex() {                         // navy diamond crest (alpha)
+  const [cv, g] = cvTex(256, 256);
+  g.clearRect(0, 0, 256, 256);
+  g.save(); g.translate(128, 128); g.rotate(Math.PI / 4);
+  g.fillStyle = '#0e2f66'; g.fillRect(-84, -84, 168, 168);
+  g.strokeStyle = '#c0392b'; g.lineWidth = 8; g.strokeRect(-84, -84, 168, 168);
+  g.restore();
+  g.fillStyle = '#f6f6f2'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '700 24px "Trebuchet MS",Arial,sans-serif'; g.fillText('THE', 128, 82);
+  g.font = '800 42px "Arial Black",Arial,sans-serif';
+  g.fillText('CUBBY', 128, 120); g.fillText('BEAR', 128, 160);
+  g.font = '700 22px "Trebuchet MS",Arial,sans-serif'; g.fillText('CHICAGO', 128, 194);
+  return tx(cv);
+}
+function cubbyBillboardTex() {                       // rooftop truss ad
+  const [cv, g] = cvTex(512, 144);
+  g.fillStyle = '#15181d'; g.fillRect(0, 0, 512, 144);
+  g.fillStyle = '#c0392b'; g.beginPath(); g.arc(74, 72, 48, 0, 7); g.fill();       // Old Style-ish roundel
+  g.strokeStyle = '#f6efdc'; g.lineWidth = 4; g.beginPath(); g.arc(74, 72, 48, 0, 7); g.stroke();
+  g.fillStyle = '#f6efdc'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '700 17px "Trebuchet MS",Arial,sans-serif'; g.fillText('OLD', 74, 60); g.fillText('STYLE', 74, 84);
+  g.fillStyle = '#ffffff'; g.font = '800 78px "Arial Black",Arial,sans-serif'; g.fillText('GO CUBS', 306, 76);
   return tx(cv);
 }
 function bearTex() {                                 // round bear-face logo disc
@@ -157,12 +218,34 @@ function beerTex(word, hex) {                        // tiny window neon
   g.font = '700 30px "Trebuchet MS",Arial,sans-serif'; g.fillText(word, 64, 34); g.fillText(word, 64, 34);
   return tx(cv);
 }
-function lintelTex() {                               // ENGINE CO. 78 limestone lintel
+function lintelTex() {                               // carved-limestone frieze over the bay
   const [cv, g] = cvTex(512, 96);
   g.fillStyle = '#e6ddc8'; g.fillRect(0, 0, 512, 96);
   g.strokeStyle = '#c3b697'; g.lineWidth = 6; g.strokeRect(5, 5, 502, 86);
   g.fillStyle = '#4a4033'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = '700 46px Georgia,"Times New Roman",serif'; g.fillText('ENGINE CO. 78', 256, 52);
+  const txt = 'CITY OF CHICAGO FIRE DEPARTMENT';
+  let fs = 40; g.font = `700 ${fs}px Georgia,"Times New Roman",serif`;
+  while (g.measureText(txt).width > 484 && fs > 18) { fs -= 2; g.font = `700 ${fs}px Georgia,"Times New Roman",serif`; }
+  g.fillText(txt, 256, 52);
+  return tx(cv);
+}
+function enginePlaqueTex() {                         // ENGINE CO. 78 · EST. 1915 side plaque
+  const [cv, g] = cvTex(256, 96);
+  g.fillStyle = '#e6ddc8'; g.fillRect(0, 0, 256, 96);
+  g.strokeStyle = '#c3b697'; g.lineWidth = 5; g.strokeRect(5, 5, 246, 86);
+  g.fillStyle = '#4a4033'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '700 26px Georgia,serif'; g.fillText('ENGINE CO. 78', 128, 36);
+  g.font = 'italic 19px Georgia,serif'; g.fillText('EST. 1915', 128, 68);
+  return tx(cv);
+}
+function chicagoFlagTex() {                          // Chicago municipal flag (alpha)
+  const [cv, g] = cvTex(112, 72);
+  g.clearRect(0, 0, 112, 72);
+  g.fillStyle = '#f6f6f2'; g.fillRect(0, 0, 112, 72);
+  g.fillStyle = '#5aa6dc'; g.fillRect(0, 14, 112, 10); g.fillRect(0, 48, 112, 10);   // light-blue stripes
+  g.fillStyle = '#c0392b';                                                            // four red 6-pointed stars
+  const star = (sx, sy, r) => { g.beginPath(); for (let i = 0; i < 12; i++) { const a = -Math.PI / 2 + i * Math.PI / 6, rad = i % 2 ? r * 0.42 : r; g.lineTo(sx + Math.cos(a) * rad, sy + Math.sin(a) * rad); } g.closePath(); g.fill(); };
+  for (const sx of [20, 46, 70, 94]) star(sx, 36, 9);
   return tx(cv);
 }
 function capSignTex() {                              // hand-lettered CUBS HATS $10
@@ -244,6 +327,69 @@ function aBoardTex() {
   g.fillStyle = '#f4c542'; g.font = '800 22px "Trebuchet MS",Arial,sans-serif'; g.fillText('COLD BEER', 64, 140);
   return tx(cv);
 }
+function storefrontTex(frame, warm) {               // drawn ground-floor glazing (per-bar tint)
+  const [cv, g] = cvTex(384, 128);
+  g.fillStyle = frame; g.fillRect(0, 0, 384, 128);
+  const win = (x, wd) => {
+    g.fillStyle = '#15110d'; g.fillRect(x, 16, wd, 82);
+    g.fillStyle = warm; g.fillRect(x + 5, 22, wd - 10, 54);
+    g.strokeStyle = '#0c0a09'; g.lineWidth = 3; g.strokeRect(x, 16, wd, 82);
+    g.beginPath(); g.moveTo(x + wd / 2, 16); g.lineTo(x + wd / 2, 98); g.stroke();
+  };
+  win(12, 108); win(264, 108);
+  g.fillStyle = '#0e0b08'; g.fillRect(150, 10, 84, 106);                      // recessed door
+  g.fillStyle = '#1b1712'; g.fillRect(158, 16, 68, 68);
+  g.fillStyle = warm; g.fillRect(162, 20, 60, 40);
+  g.fillStyle = '#c9a86a'; g.fillRect(224, 60, 5, 14);                        // handle
+  g.fillStyle = '#0c0a09'; g.fillRect(0, 104, 384, 24);                       // kickplate
+  return tx(cv);
+}
+function sluggersBandTex() {                         // yellow/red primary sign
+  const [cv, g] = cvTex(512, 112);
+  g.fillStyle = '#f4c81e'; g.fillRect(0, 0, 512, 112);
+  g.strokeStyle = '#c0392b'; g.lineWidth = 6; g.strokeRect(6, 6, 500, 100);
+  g.fillStyle = '#c0392b'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '800 56px "Arial Black",Arial,sans-serif'; g.fillText('SLUGGERS', 256, 42);
+  g.fillStyle = '#1c4e8a'; g.font = 'italic 700 26px Georgia,serif'; g.fillText('World Class Sports Bar', 256, 86);
+  return tx(cv);
+}
+function sportsBladeTex() {                          // vertical navy blade, gold border
+  const [cv, g] = cvTex(96, 448);
+  g.fillStyle = '#0e2f66'; g.fillRect(0, 0, 96, 448);
+  g.strokeStyle = '#d9a441'; g.lineWidth = 6; g.strokeRect(6, 6, 84, 436);
+  g.fillStyle = '#f4c81e'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '800 30px "Arial Black",Arial,sans-serif';
+  const s = 'SPORTS CORNER', top = 26, step = (422 - top) / (s.length - 1);
+  for (let i = 0; i < s.length; i++) if (s[i] !== ' ') g.fillText(s[i], 48, top + i * step);
+  return tx(cv);
+}
+function caseysBandTex() {                           // dark-green gold-serif band
+  const [cv, g] = cvTex(512, 112);
+  g.fillStyle = '#123f2a'; g.fillRect(0, 0, 512, 112);
+  g.strokeStyle = '#d9a441'; g.lineWidth = 5; g.strokeRect(8, 8, 496, 96);
+  g.fillStyle = '#e9c766'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '800 52px Georgia,serif'; g.fillText("CASEY MORAN'S", 256, 60);
+  return tx(cv);
+}
+function archWinTex() {                              // arched warm window + limestone surround
+  const [cv, g] = cvTex(128, 160);
+  g.fillStyle = '#e6ddc8'; g.fillRect(0, 0, 128, 160);
+  g.fillStyle = '#2a2320'; g.beginPath(); g.moveTo(24, 150); g.lineTo(24, 62); g.arc(64, 62, 40, Math.PI, 0); g.lineTo(104, 150); g.closePath(); g.fill();
+  g.fillStyle = '#ffd98a'; g.beginPath(); g.moveTo(30, 146); g.lineTo(30, 62); g.arc(64, 62, 34, Math.PI, 0); g.lineTo(98, 146); g.closePath(); g.fill();
+  g.strokeStyle = '#6b4f2e'; g.lineWidth = 4;
+  g.beginPath(); g.moveTo(64, 26); g.lineTo(64, 146); g.moveTo(30, 92); g.lineTo(98, 92); g.stroke();
+  return tx(cv);
+}
+function dugoutTex() {                               // hand-lettered white on black, wobbly baseline
+  const [cv, g] = cvTex(384, 112);
+  g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, 384, 112);
+  g.fillStyle = '#f6f6f2'; g.textBaseline = 'middle';
+  const word = 'THE DUGOUT';
+  g.font = '800 46px "Comic Sans MS","Marker Felt",cursive';
+  g.textAlign = 'left'; let x = 192 - g.measureText(word).width / 2;
+  for (let i = 0; i < word.length; i++) { g.fillText(word[i], x, 56 + Math.sin(i * 1.3) * 6); x += g.measureText(word[i]).width; }
+  return tx(cv);
+}
 
 // shared textures/materials built once
 let SH = null;
@@ -319,29 +465,109 @@ function signPlane(tex, x, y, z, ry, w, h) {
   const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bmat(0xffffff, { map: tex }));
   m.position.set(x, y, z); m.rotation.y = ry; atlasPlane(m, false); return m;   // -> shared opaque atlas
 }
+// ISSUE 001 — clamp a plate's [w,h] so its edges stay >= m inside the face it is
+// mounted on. `ca,cu` = the plate centre along the face's across / up axes;
+// `a0,a1` / `u0,u1` = the face bounds on those axes. Returns the shrunk [w,h].
+function fitSign(w, h, a0, a1, u0, u1, ca, cu, m = 0.3) {
+  const aw = 2 * Math.min(ca - a0, a1 - ca) - 2 * m;
+  const uh = 2 * Math.min(cu - u0, u1 - cu) - 2 * m;
+  return [Math.min(w, aw), Math.min(h, uh)];
+}
+// MIRRORED-TEXT — a free-standing sign as TWO opaque back-to-back atlas planes
+// 0.06 m apart, each facing outward with the SAME texture, so neither side shows
+// mirrored text (the near opaque plane occludes the far plane's DoubleSide back).
+function twoSided(tex, x, y, z, ry, w, h) {
+  const nx = Math.sin(ry), nz = Math.cos(ry);      // outward normal of the ry-facing plane
+  signPlane(tex, x + nx * 0.03, y, z + nz * 0.03, ry, w, h);
+  signPlane(tex, x - nx * 0.03, y, z - nz * 0.03, ry + Math.PI, w, h);
+}
 
 // =====================================================================
 //  1. MURPHY'S BLEACHERS  (SE corner Sheffield & Waveland, faces WEST)
 // =====================================================================
 function buildMurphys() {
-  const b = VILLAGE_W.murphys, cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2;
-  const w = b.x1 - b.x0, d = b.z1 - b.z0, H = 8.6;
+  // (a) MAIN MASS — 2-storey blonde brick, light base, thin dark-green cornice
+  const b = VILLAGE_W.murphysBld, cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2;
+  const w = b.x1 - b.x0, d = b.z1 - b.z0, H = b.h;
   const brick = toon(0xc2a370), grn = toon(0x1f5136);
   add(M(new THREE.BoxGeometry(w, H, d, 2, 4, 2), brick, cx, H / 2, cz));
-  add(M(new THREE.BoxGeometry(w + 0.3, 0.5, d + 0.3), grn, cx, H - 0.25, cz));                 // cornice band
+  add(M(new THREE.BoxGeometry(w + 0.3, 0.5, d + 0.3), grn, cx, H - 0.25, cz));                 // dark-green cornice
   A.base.push({ pos: [cx, 0.35, cz], scale: [w + 0.2, 0.7, d + 0.2], color: 0xd8cdb4 });
-  signPlane(murphyTex(), b.x0 - 0.06, 4.7, cz, -Math.PI / 2, 12, 3);                            // west facade sign
-  // corner blade at the NW corner (faces the Sheffield/Waveland corner)
+  // (b) CREAM FASCIA / big red letters — main mass WEST + NORTH upper storey
+  { const [fw, fh] = fitSign(10, 2.0, b.z0, b.z1, 0, H, cz, 7.0);                               // WEST (across = z)
+    signPlane(murphyTex(), b.x0 - 0.06, 7.0, cz, -Math.PI / 2, fw, fh); }
+  { const [fw, fh] = fitSign(8, 2.0, b.x0, b.x1, 0, H, cx, 7.0);                                // NORTH (across = x)
+    signPlane(murphyTex(), cx, 7.0, b.z0 - 0.06, Math.PI, fw, fh); }
+  for (const wz of [cz - 4, cz, cz + 4]) A.win.push({ pos: [b.x0 - 0.05, 5.0, wz], yaw: -Math.PI / 2, scale: [1.2, 1.7, 1] });  // west upper windows
+  for (const wx of [cx - 3, cx + 3]) A.win.push({ pos: [wx, 5.0, b.z0 - 0.05], yaw: Math.PI, scale: [1.2, 1.7, 1] });          // north upper windows
+  rooftopPatio(cx, cz, w, d, H);                                                                // signature rooftop deck
+  // corner blade at the NW corner — rebuilt back-to-back (mirrored-text rule)
   const bx = b.x0 + 0.2, bz = b.z0 + 0.2;
   add(M(new THREE.CylinderGeometry(0.07, 0.07, 4.4, 6), toon(0x2a2a2e), bx, H + 0.6, bz));
-  const bl = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 5.2), bmat(0xffffff, { map: bladeTex(), side: THREE.DoubleSide }));
-  bl.position.set(bx - 0.75, H + 0.4, bz - 0.75); bl.rotation.y = -Math.PI / 2.3; atlasPlane(bl, false);
-  awning(b.x0 - 0.7, 3.5, cz, 0, 1.5, d - 2);                                                   // west storefront awning
-  for (const wy of [3.0, 6.0]) for (const wz of [cz - 4, cz, cz + 4])
-    A.win.push({ pos: [b.x0 - 0.05, wy, wz], yaw: -Math.PI / 2, scale: [1.2, 1.7, 1] });
-  rooftopPatio(cx, cz, w, d, H);
+  twoSided(bladeTex(), bx - 0.75, H + 0.4, bz - 0.75, -Math.PI / 2.3, 1.3, 5.2);
   aBoard(b.x0 - 2.4, cz + 4.2, -Math.PI / 2);
   collide(cx, cz, 8);
+
+  // (c) CORNER ANNEX — 1-storey red brick, limestone coping, verdigris band
+  const an = VILLAGE_W.murphysAnnex, acx = (an.x0 + an.x1) / 2, acz = (an.z0 + an.z1) / 2;
+  const aw = an.x1 - an.x0, ad = an.z1 - an.z0, AH = an.h;
+  add(M(new THREE.BoxGeometry(aw, AH, ad, 2, 3, 2), toon(0x94402f), acx, AH / 2, acz));
+  add(M(new THREE.BoxGeometry(aw + 0.25, 0.3, ad + 0.25), toon(0xe6ddc8), acx, AH - 0.05, acz));  // limestone coping
+  const bandTex = murphyBandTex();                                                              // ONE canvas reused on both faces
+  { const [bw, bh] = fitSign(8, 1.3, an.z0, an.z1, 0, AH, acz, 3.7);
+    signPlane(bandTex, an.x0 - 0.06, 3.7, acz, -Math.PI / 2, bw, bh); }                          // WEST band
+  { const [bw, bh] = fitSign(8.5, 1.3, an.x0, an.x1, 0, AH, acx, 3.7);
+    signPlane(bandTex, acx, 3.7, an.z0 - 0.06, Math.PI, bw, bh); }                               // NORTH band
+  // (d) sage-green awnings below the band, both annex faces
+  awning(an.x0 - 0.7, 2.5, acz, 0, 1.4, ad - 1.5);                                              // west
+  awning(acx, 2.5, an.z0 - 0.7, Math.PI / 2, 1.4, aw - 1.5);                                    // north
+  collide(-173, -543.5, 5);
+
+  // (e) MARQUEE LETTER-BOARD on a pole at the annex SW corner, facing west
+  add(M(new THREE.CylinderGeometry(0.08, 0.08, 5.4, 6), toon(0x2a2a2e), -176.8, 2.7, -538.2));
+  twoSided(murphyMarqueeTex(), -177.4, 3.6, -538.2, -Math.PI / 2, 2.0, 2.6);
+  collide(-176.8, -538.2, 0.5);
+
+  murphysGarden();                                                                              // (f) sidewalk beer garden
+}
+function murphysGarden() {
+  const gd = VILLAGE_W.murphysGarden, wood = toon(0x6b4a30);
+  const corners = [[gd.x0, gd.z0], [gd.x1, gd.z0], [gd.x1, gd.z1], [gd.x0, gd.z1]];
+  for (let e = 0; e < 4; e++) {                                                                 // low dark-wood picket fence (no gate)
+    const [ax, az] = corners[e], [bx2, bz2] = corners[(e + 1) % 4];
+    const len = Math.hypot(bx2 - ax, bz2 - az), n = Math.max(2, Math.round(len / 0.32)), yaw = Math.atan2(bx2 - ax, bz2 - az);
+    for (let k = 0; k <= n; k++) { const t = k / n; add(M(new THREE.BoxGeometry(0.05, 0.9, 0.07), wood, ax + (bx2 - ax) * t, 0.45, az + (bz2 - az) * t, 0, yaw, 0)); }
+    add(M(new THREE.BoxGeometry(0.06, 0.06, len), wood, (ax + bx2) / 2, 0.86, (az + bz2) / 2, 0, yaw, 0));   // top rail
+    const nc = Math.max(1, Math.ceil(len / 1.5)); for (let k = 0; k <= nc; k++) { const t = k / nc; collide(ax + (bx2 - ax) * t, az + (bz2 - az) * t, 0.4); }
+  }
+  const table = (x, z) => {                                                                     // round cafe tables
+    add(M(new THREE.CylinderGeometry(0.5, 0.5, 0.08, 16), toon(0x9a9088), x, 0.95, z));
+    add(M(new THREE.CylinderGeometry(0.06, 0.06, 0.9, 8), toon(0x555555), x, 0.47, z));
+    add(M(new THREE.CylinderGeometry(0.24, 0.24, 0.05, 12), toon(0x555555), x, 0.05, z));
+    collide(x, z, 0.5);
+  };
+  const chair = (x, z) => {                                                                     // chairLike pattern, rr()-varied
+    const c = rr(0, 1) > 0.5 ? 0x2f6bb0 : 0xc0392b, m = toon(c);
+    const cg = new THREE.Group(); cg.position.set(x, 0, z); cg.rotation.y = rr(0, 6.28);
+    cg.add(M(new THREE.BoxGeometry(0.5, 0.07, 0.5), m, 0, 0.42, 0));
+    cg.add(M(new THREE.BoxGeometry(0.5, 0.5, 0.07), m, 0, 0.68, -0.23));
+    for (const sx of [-0.2, 0.2]) for (const sz of [-0.2, 0.2]) cg.add(M(new THREE.CylinderGeometry(0.025, 0.025, 0.42, 5), toon(0x555555), sx, 0.21, sz));
+    add(cg);
+  };
+  const umbrella = (x, z, col) => {                                                             // pole + cone canopy (plain meshes, NOT instMesh)
+    add(M(new THREE.CylinderGeometry(0.04, 0.04, 2.4, 6), toon(0x777777), x, 1.2, z));
+    add(M(new THREE.ConeGeometry(1.0, 0.6, 12), toon(col), x, 2.5, z));
+  };
+  const planter = (x, z) => {                                                                   // wood box + shrub + flower dots
+    add(M(new THREE.BoxGeometry(0.7, 0.5, 0.7), wood, x, 0.25, z));
+    add(M(new THREE.BoxGeometry(0.66, 0.3, 0.66), toon(0x3f7a44), x, 0.62, z));
+    for (const [ox, oz] of [[-0.2, 0.1], [0.15, -0.15], [0, 0.2]]) add(M(new THREE.SphereGeometry(0.06, 6, 5), toon(0xc0392b), x + ox, 0.8, z + oz));
+    collide(x, z, 0.45);
+  };
+  table(-176.8, -537.4); table(-175.3, -535.4);
+  chair(-177.6, -537.4); chair(-176.0, -537.7); chair(-174.5, -535.4); chair(-175.6, -534.6);
+  umbrella(-176.8, -537.4, 0xc0392b); umbrella(-175.3, -535.4, 0x2f6bb0);
+  planter(-177.9, -534.7); planter(-174.5, -538.4);
 }
 
 // =====================================================================
@@ -350,56 +576,138 @@ function buildMurphys() {
 function buildCubby() {
   const b = VILLAGE_W.cubbyBear, cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2;
   const w = b.x1 - b.x0, d = b.z1 - b.z0, H = 8.4;
-  add(M(new THREE.BoxGeometry(w, H, d, 2, 4, 2), toon(0x4e3a34), cx, H / 2, cz));
-  add(M(new THREE.BoxGeometry(w + 0.3, 0.5, d + 0.3), toon(0x2c211d), cx, H - 0.25, cz));
-  A.base.push({ pos: [cx, 0.3, cz], scale: [w + 0.2, 0.6, d + 0.2], color: 0x2c211d });
-  // giant white-on-black sign on the north face (faces -z toward the intersection)
-  signPlane(cubbyTex(), cx, H - 1.3, b.z0 - 0.06, Math.PI, w - 1.5, 3.2);
-  // round bear disc on the NE corner, facing NE
-  const ne = 2.356;
-  const disc = new THREE.Mesh(new THREE.CircleGeometry(1.6, 24), bmat(0xffffff, { map: bearTex(), transparent: true }));
-  disc.position.set(b.x1 - 0.3, 4.4, b.z0 - 0.25); disc.rotation.y = ne; atlasPlane(disc, true);
-  // neon beer signs in ground-floor windows + warm upper windows
   const sh = shared();
-  const beerAt = (x, z, yaw, mi) => { const q = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.65), sh.beerMats[mi]); const [dx, dz] = yrot(0, 0.05, yaw); q.position.set(x + dx, 2.4, z + dz); q.rotation.y = yaw; atlasPlane(q, false); };
-  beerAt(cx - 3.5, b.z0, Math.PI, 0); beerAt(cx + 3.5, b.z0, Math.PI, 2);   // north face
-  beerAt(b.x1, cz + 3, Math.PI / 2, 1);                                     // east face (toward Clark)
-  for (const wx of [cx - 4, cx + 4]) A.win.push({ pos: [wx, 5.6, b.z0 - 0.05], yaw: Math.PI, scale: [1.2, 1.6, 1] });
-  for (const wz of [cz - 3, cz + 3]) A.win.push({ pos: [b.x1 + 0.05, 5.6, wz], yaw: Math.PI / 2, scale: [1.2, 1.6, 1] });
+  // (a) blonde-brick body on the existing dark base
+  add(M(new THREE.BoxGeometry(w, H, d, 2, 4, 2), toon(0xc2a370), cx, H / 2, cz));
+  A.base.push({ pos: [cx, 0.3, cz], scale: [w + 0.2, 0.6, d + 0.2], color: 0x2c211d });
+  // (b) dark-green heavy cornice (proud box)
+  add(M(new THREE.BoxGeometry(w + 0.35, 0.7, d + 0.35), toon(0x1f5136), cx, H - 0.35, cz));
+  // (c) BLACK STOREFRONT FASCIA on N + E faces (proud band y 0.6..3.0)
+  add(M(new THREE.BoxGeometry(w + 0.12, 2.4, 0.12), toon(0x0c0a09), cx, 1.8, b.z0 - 0.06));
+  add(M(new THREE.BoxGeometry(0.12, 2.4, d + 0.12), toon(0x0c0a09), b.x1 + 0.06, 1.8, cz));
+  for (const wx of [cx - 5, cx + 5]) A.win.push({ pos: [wx, 1.7, b.z0 - 0.14], yaw: Math.PI, scale: [1.6, 1.4, 1] });      // ground windows
+  for (const wz of [cz - 4, cz + 4]) A.win.push({ pos: [b.x1 + 0.14, 1.7, wz], yaw: Math.PI / 2, scale: [1.6, 1.4, 1] });
+  const beerAt = (x, z, yaw, mi) => { const q = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.65), sh.beerMats[mi]); const [dx, dz] = yrot(0, 0.05, yaw); q.position.set(x + dx, 2.2, z + dz); q.rotation.y = yaw; atlasPlane(q, false); };
+  beerAt(cx - 6, b.z0 - 0.06, Math.PI, 0); beerAt(cx + 6, b.z0 - 0.06, Math.PI, 2);      // >= 0.5 m from every face edge
+  beerAt(b.x1 + 0.06, cz + 3, Math.PI / 2, 1);
+  // gooseneck-lamp hints lighting the sign above the fascia
+  for (const wx of [cx - 5, cx, cx + 5]) add(M(new THREE.CylinderGeometry(0.05, 0.05, 0.5, 6), toon(0x2a2a2e), wx, 4.9, b.z0 - 0.25, Math.PI / 2.4, 0, 0));
+  for (const wz of [cz - 4, cz + 4]) add(M(new THREE.CylinderGeometry(0.05, 0.05, 0.5, 6), toon(0x2a2a2e), b.x1 + 0.25, 4.9, wz, 0, 0, Math.PI / 2.4));
+  // (d) CUBBY BEAR plate on the blonde brick above the fascia, clamped below the parapet
+  { const [sw, s2] = fitSign(9, 1.6, b.x0, b.x1, 0, 7.7, cx, 3.8); signPlane(cubbyTex(), cx, 3.8, b.z0 - 0.08, Math.PI, sw, s2); }
+  { const [sw, s2] = fitSign(5.5, 1.4, b.z0, b.z1, 0, 7.7, cz, 3.8); signPlane(cubbyTex(), b.x1 + 0.08, 3.8, cz, Math.PI / 2, sw, s2); }
+  // (e) DIAMOND LOGO crest — N + E faces
+  const diaTex = cubbyDiamondTex();
+  const dN = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.2), bmat(0xffffff, { map: diaTex, transparent: true }));
+  dN.position.set(cx, 6.0, b.z0 - 0.09); dN.rotation.y = Math.PI; atlasPlane(dN, true);
+  const dE = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 2.2), bmat(0xffffff, { map: diaTex, transparent: true }));
+  dE.position.set(b.x1 + 0.09, 6.0, cz); dE.rotation.y = Math.PI / 2; atlasPlane(dE, true);
+  // (f) MAROON CORNER DOOR — 45° across the NE corner, small dark surround
+  const ne = 2.356;
+  add(M(new THREE.BoxGeometry(0.25, 3.4, 2.2), toon(0x2c2620), b.x1 - 0.55, 1.7, b.z0 + 0.55, 0, ne, 0));
+  add(M(new THREE.BoxGeometry(0.12, 3.0, 1.6), toon(0x5c3a34), b.x1 - 0.42, 1.5, b.z0 + 0.42, 0, ne, 0));
+  // (g) upper windows + shallow segmental arch heads (limestone)
+  for (const wx of [cx - 4, cx + 4]) { A.win.push({ pos: [wx, 6.0, b.z0 - 0.05], yaw: Math.PI, scale: [1.2, 1.6, 1] });
+    add(M(new THREE.BoxGeometry(1.5, 0.18, 0.16), toon(0xcbb488), wx, 6.95, b.z0 - 0.08));
+    for (const s of [-1, 1]) add(M(new THREE.BoxGeometry(0.22, 0.4, 0.16), toon(0xcbb488), wx + s * 0.66, 6.65, b.z0 - 0.08)); }
+  for (const wz of [cz - 3, cz + 3]) { A.win.push({ pos: [b.x1 + 0.05, 6.0, wz], yaw: Math.PI / 2, scale: [1.2, 1.6, 1] });
+    add(M(new THREE.BoxGeometry(0.16, 0.18, 1.5), toon(0xcbb488), b.x1 + 0.08, 6.95, wz));
+    for (const s of [-1, 1]) add(M(new THREE.BoxGeometry(0.16, 0.4, 0.22), toon(0xcbb488), b.x1 + 0.08, 6.65, wz + s * 0.66)); }
+  // (h) ROOFTOP BILLBOARD TRUSS facing NE toward Clark & Addison
+  cubbyBillboard(b.x1 - 3, b.z0 + 3, H, ne);
   collide(cx, cz, 8);
+}
+function cubbyBillboard(x, z, roof, ry) {
+  const post = toon(0x2c2620);
+  const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry;
+  for (const lx of [-4.6, -1.6, 1.6, 4.6]) g.add(M(new THREE.BoxGeometry(0.16, 2.2, 0.16), post, lx, roof + 1.1, 0));
+  for (const lx of [-3.1, 0, 3.1]) { const xb = M(new THREE.BoxGeometry(3.0, 0.09, 0.09), post, lx, roof + 1.1, 0); xb.rotation.z = 0.62; g.add(xb); }   // X-brace hints
+  g.add(M(new THREE.BoxGeometry(9.6, 2.7, 0.16), toon(0x22242a), 0, roof + 3.0, 0));
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(9.2, 2.4), bmat(0xffffff, { map: cubbyBillboardTex() }));
+  face.position.set(0, roof + 3.0, 0.1); g.add(face);
+  g.updateMatrixWorld(true); atlasPlane(face, false);
+  add(g);
 }
 
 // =====================================================================
 //  3. CLARK BAR ROW  (west side of Clark, four attached storefronts)
 // =====================================================================
 function buildBars() {
-  const facades = [0x7a6f63, 0x8a5a4a, 0x566a58, 0x6a6472];
+  const facades = [0xe6ddc8, 0xcbb488, 0xd8cdb4, 0x94402f];   // i0 cream · i1 buff · i2 white · i3 dark-red brick
   const neons = [
     { t: 'SLUGGERS', c: 0xff5545, icon: bats },
     { t: 'SPORTS CORNER', c: 0xffb43a },
-    { t: "CASEY'S", c: 0x4ad06a, icon: shamrock },
+    { t: "CASEY MORAN'S", c: 0x4ad06a, icon: shamrock },
     { t: 'THE DUGOUT', c: 0x5aa8ff },
   ];
   // clarkBars[0] ('SLUGGERS') is LOWERED to a 2-storey bar: its roof is the
   // batting-cage destination (task 009 — buildSluggersRoof adds the stair/deck).
   const Hs = [SLUGGERS_W.roofY, 11.0, 8.6, 10.2];
+  const nP = [[5.0, 1.4, 3.9, -4.2], [13, 2.2, 9.0, 0], [12, 1.4, 3.7, 0], [13, 2.2, 8.4, 0]];   // neon w,h,y,z
+  const sfF = ['#3a2c1e', '#2e2820', '#30291f', '#1a120e'];   // storefront frame tints
+  const sfW = ['#ffd07a', '#ffd98a', '#ffcf8f', '#ffbf6a'];   // warm glow tints
   VILLAGE_W.clarkBars.forEach((bar, i) => {
     const zc = (bar.z0 + bar.z1) / 2, H = Hs[i];
     const gx = clarkX(zc) - 22, gz = zc, dep = 12, wid = (bar.z1 - bar.z0);
     const g = new THREE.Group(); g.position.set(gx, 0, gz); g.rotation.y = clarkYaw;
     g.add(M(new THREE.BoxGeometry(dep, H, wid, 2, 4, 2), toon(facades[i]), 0, H / 2, 0));
     g.add(M(new THREE.BoxGeometry(dep + 0.2, 0.45, wid + 0.02), toon(0x2c2620), 0, H - 0.22, 0));   // parapet
-    // Sluggers (i=0): its sign shifts to the low SOUTH end of the front, clear
-    // of the rooftop stair that climbs the north half.
-    const sgnW = i === 0 ? 7.5 : wid - 3, sgnZ = i === 0 ? -4.2 : 0;
-    const sgn = new THREE.Mesh(new THREE.PlaneGeometry(sgnW, 2.2), bmat(0xffffff, { map: neonTex(neons[i].t, neons[i].c, neons[i].icon) }));
-    sgn.position.set(dep / 2 + 0.05, H - 2.0, sgnZ); sgn.rotation.y = Math.PI / 2; g.add(sgn);        // street-facing (+x local)
-    g.updateMatrixWorld(true); atlasPlane(sgn, false);   // bake the neon sign into the shared atlas (detaches it from g)
-    add(g);   // add() snapshots the group's remaining meshes NOW — must come after every g.add
-    if (i !== 0) {   // Sluggers (i=0): the rooftop stair replaces the awning; the roof carries the flag + cage
-      const [ax, az] = yrot(dep / 2 + 0.7, 0, clarkYaw);
-      awning(gx + ax, 3.4, gz + az, clarkYaw + Math.PI / 2, 1.5, wid - 2);
-      for (const lz of [-3.5, 3.5]) { const [dx, dz] = yrot(dep / 2 + 0.05, lz, clarkYaw); A.win.push({ pos: [gx + dx, H - 3.4, gz + dz], yaw: clarkYaw + Math.PI / 2, scale: [1.3, 1.7, 1] }); }
+    const planes = [];   // in-group atlas planes — baked after ONE updateMatrixWorld, before add(g)
+    // ground-floor storefront glazing (street face +x local)
+    const sfY = i === 3 ? 1.4 : 1.7, sfH = i === 3 ? 2.4 : 3.0;
+    { const [sw, s2] = fitSign(wid - 2, sfH, -wid / 2, wid / 2, 0, H, 0, sfY);
+      const sf = new THREE.Mesh(new THREE.PlaneGeometry(sw, s2), bmat(0xffffff, { map: storefrontTex(sfF[i], sfW[i]) }));
+      sf.position.set(dep / 2 + 0.05, sfY, 0); sf.rotation.y = Math.PI / 2; g.add(sf); planes.push(sf); }
+    // neon sign (clamped)
+    { const [nw, nh] = fitSign(nP[i][0], nP[i][1], -wid / 2, wid / 2, 0, H, nP[i][3], nP[i][2]);
+      const sgn = new THREE.Mesh(new THREE.PlaneGeometry(nw, nh), bmat(0xffffff, { map: neonTex(neons[i].t, neons[i].c, neons[i].icon) }));
+      sgn.position.set(dep / 2 + 0.05, nP[i][2], nP[i][3]); sgn.rotation.y = Math.PI / 2; g.add(sgn); planes.push(sgn); }
+    // ---- per-bar re-skin (in-group elements) ----
+    if (i === 0) {   // SLUGGERS yellow/red band (primary), south half clear of the stair
+      const [bw, bh] = fitSign(6.5, 1.3, -wid / 2, wid / 2, 0, H, -4.2, 5.4);
+      const bnd = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), bmat(0xffffff, { map: sluggersBandTex() }));
+      bnd.position.set(dep / 2 + 0.05, 5.4, -4.2); bnd.rotation.y = Math.PI / 2; g.add(bnd); planes.push(bnd);
+    }
+    if (i === 1) {   // SPORTS CORNER navy awning + roof-deck railing
+      g.add(M(new THREE.BoxGeometry(1.4, 0.14, wid - 2), toon(0x0e4c92), dep / 2 + 0.7, 3.4, 0));
+      const rn = Math.round((wid - 2) / 0.8);
+      for (let k = 0; k < rn; k++) { const off = -(wid - 2) / 2 + (k + 0.5) * (wid - 2) / rn; g.add(M(new THREE.BoxGeometry(0.12, 0.42, (wid - 2) / rn * 0.55), toon(0x0e4c92), dep / 2 + 1.35, 3.18, off)); }
+      for (let lz = -wid / 2 + 1; lz <= wid / 2 - 1; lz += 1.6) g.add(M(new THREE.BoxGeometry(0.09, 0.9, 0.09), toon(0x2c2620), dep / 2 - 0.2, H + 0.4, lz));   // rail posts
+      g.add(M(new THREE.BoxGeometry(0.1, 0.1, wid - 1.5), toon(0x2c2620), dep / 2 - 0.2, H + 0.85, 0));   // top rail
+    }
+    if (i === 2) {   // CASEY'S green band + limestone pilasters + pergola
+      const [bw, bh] = fitSign(wid - 3, 1.1, -wid / 2, wid / 2, 0, H, 0, 7.3);
+      const bnd = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), bmat(0xffffff, { map: caseysBandTex() }));
+      bnd.position.set(dep / 2 + 0.05, 7.3, 0); bnd.rotation.y = Math.PI / 2; g.add(bnd); planes.push(bnd);
+      for (const lz of [-wid / 2 + 1.4, wid / 2 - 1.4]) g.add(M(new THREE.BoxGeometry(0.6, 3.0, 0.5), toon(0xe6ddc8), dep / 2 + 0.15, 1.5, lz));   // pilasters
+      for (const lz of [-3, 3]) for (const lx of [dep / 2 - 3, dep / 2 - 0.5]) g.add(M(new THREE.BoxGeometry(0.16, 1.0, 0.16), toon(0x6b4a30), lx, H + 0.5, lz));   // pergola posts
+      for (const lz of [-3, 3]) g.add(M(new THREE.BoxGeometry(3.0, 0.14, 0.16), toon(0x6b4a30), dep / 2 - 1.75, H + 1.0, lz));   // pergola beams
+    }
+    if (i === 3) {   // THE DUGOUT black band + hand-lettered + wood door
+      g.add(M(new THREE.BoxGeometry(0.1, 1.9, wid - 1.5), toon(0x0c0a09), dep / 2 + 0.08, 3.4, 0));   // black band proud
+      const [hw, hh] = fitSign(wid - 4, 1.5, -wid / 2, wid / 2, 0, H, 0, 3.4);
+      const hl = new THREE.Mesh(new THREE.PlaneGeometry(hw, hh), bmat(0xffffff, { map: dugoutTex() }));
+      hl.position.set(dep / 2 + 0.16, 3.4, 0); hl.rotation.y = Math.PI / 2; g.add(hl); planes.push(hl);
+      g.add(M(new THREE.BoxGeometry(0.12, 2.4, 1.1), toon(0x6b4a30), dep / 2 + 0.12, 1.3, -3));   // wood door
+      const bn = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.65), shared().beerMats[0]);        // OLD STYLE neon in the storefront
+      bn.position.set(dep / 2 + 0.18, 1.9, 3.5); bn.rotation.y = Math.PI / 2; g.add(bn); planes.push(bn);
+    }
+    g.updateMatrixWorld(true);
+    for (const p of planes) atlasPlane(p, false);
+    add(g);   // snapshot the group's remaining solids (after every g.add + after detaching planes)
+    // ---- out-of-group elements ----
+    if (i === 3) { const [ax, az] = yrot(dep / 2 + 0.7, 0, clarkYaw); awning(gx + ax, 2.7, gz + az, clarkYaw + Math.PI / 2, 1.5, wid - 2); }   // Dugout green awning
+    if (i === 1) for (const lz of [-4, 0, 4]) { const [dx, dz] = yrot(dep / 2 + 0.05, lz, clarkYaw); A.win.push({ pos: [gx + dx, 6.7, gz + dz], yaw: clarkYaw + Math.PI / 2, scale: [2.0, 1.9, 1] }); }   // glassy 2nd floor
+    if (i === 3) for (const lz of [-3.5, 3.5]) { const [dx, dz] = yrot(dep / 2 + 0.05, lz, clarkYaw); A.win.push({ pos: [gx + dx, 6.3, gz + dz], yaw: clarkYaw + Math.PI / 2, scale: [1.3, 1.7, 1] }); }
+    if (i === 2) for (const lz of [-4, 0, 4]) { const [dx, dz] = yrot(dep / 2 + 0.06, lz, clarkYaw);   // arched 2nd-floor windows
+      const p = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 1.9), bmat(0xffffff, { map: archWinTex() })); p.position.set(gx + dx, 5.6, gz + dz); p.rotation.y = clarkYaw + Math.PI / 2; atlasPlane(p, false); }
+    if (i === 1) {   // SPORTS CORNER vertical blade sign (free-standing, back-to-back)
+      const [px, pz] = yrot(dep / 2 + 0.5, 2, clarkYaw);
+      add(M(new THREE.CylinderGeometry(0.06, 0.06, 5.4, 6), toon(0x2a2a2e), gx + px, 7.0, gz + pz));
+      const [bx2, bz2] = yrot(dep / 2 + 1.2, 2, clarkYaw);
+      twoSided(sportsBladeTex(), gx + bx2, 7.5, gz + bz2, clarkYaw, 1.3, 4.2);
+    }
+    if (i !== 0) {   // flag poles kept exactly as-is
       const [fx, fz] = yrot(dep / 2 - 1, wid / 2 - 1.5, clarkYaw);
       A.pole.push({ pos: [gx + fx, H, gz + fz] });
       A.flag.push({ pos: [gx + fx + 0.55, H + 1.05, gz + fz], yaw: clarkYaw });
@@ -480,29 +788,55 @@ function buildSluggersRoof() {
 // =====================================================================
 function buildEngine() {
   const b = VILLAGE_W.engine78, cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2;
-  const w = b.x1 - b.x0, d = b.z1 - b.z0, H = 10.2, fz = b.z1;   // south face
-  const brick = toon(0x94402f), stone = toon(0xe6ddc8);
-  add(M(new THREE.BoxGeometry(w, H, d, 2, 5, 2), brick, cx, H / 2, cz));
+  const w = b.x1 - b.x0, d = b.z1 - b.z0, H = 10.2, fz = b.z1;   // south face at +z (fronts Waveland)
+  const brick = toon(0x63594e), stone = toon(0xe6ddc8), red = toon(0xb42a22);
+  add(M(new THREE.BoxGeometry(w, H, d, 2, 5, 2), brick, cx, H / 2, cz));                       // (a) olive-brown brick
   A.base.push({ pos: [cx, 0.4, cz], scale: [w + 0.2, 0.8, d + 0.2], color: 0xd8cdb4 });
   for (const px of [cx - w / 2 + 0.5, cx - 2.2, cx + 2.2, cx + w / 2 - 0.5])                   // limestone pilaster strips
     add(M(new THREE.BoxGeometry(0.7, H - 0.6, 0.35), stone, px, (H - 0.6) / 2, fz + 0.03));
   add(M(new THREE.BoxGeometry(w + 0.1, 0.35, d + 0.1), stone, cx, 6.2, cz));                   // string course
   add(M(new THREE.BoxGeometry(w + 0.5, 0.6, d + 0.5), stone, cx, H + 0.05, cz));               // cornice
-  // ONE wide apparatus bay, door OPEN -> dark opening framed by limestone, engine nosing out
+  // (b) apparatus bay — dark opening + stone jambs + RED painted frame, engine nosing out
   const bayW = 5.2, bayH = 4.4;
-  add(M(new THREE.BoxGeometry(bayW, bayH, 0.08), toon(0x0c0a09), cx, bayH / 2 + 0.1, fz + 0.05));      // dark open bay
-  for (const s of [-1, 1]) add(M(new THREE.BoxGeometry(0.5, bayH + 0.7, 0.4), stone, cx + s * (bayW / 2 + 0.25), (bayH + 0.7) / 2, fz + 0.12));  // jambs
-  add(M(new THREE.BoxGeometry(bayW + 1.0, 0.55, 0.45), stone, cx, bayH + 0.45, fz + 0.12));            // limestone lintel band
-  fireEngineNose(cx, fz + 0.5);                                                                         // engine nosing out of the bay
+  add(M(new THREE.BoxGeometry(bayW, bayH, 0.08), toon(0x0c0a09), cx, bayH / 2 + 0.1, fz + 0.05));
+  for (const s of [-1, 1]) { add(M(new THREE.BoxGeometry(0.5, bayH + 0.7, 0.4), stone, cx + s * (bayW / 2 + 0.25), (bayH + 0.7) / 2, fz + 0.12));  // jambs
+    add(M(new THREE.BoxGeometry(0.14, bayH + 0.2, 0.16), red, cx + s * (bayW / 2 - 0.05), (bayH + 0.2) / 2 + 0.1, fz + 0.2)); }                     // red frame lining
+  add(M(new THREE.BoxGeometry(bayW - 0.1, 0.18, 0.16), red, cx, bayH + 0.2, fz + 0.2));        // red header strip
+  add(M(new THREE.BoxGeometry(bayW + 1.0, 0.55, 0.45), stone, cx, bayH + 0.45, fz + 0.12));    // limestone lintel band
+  fireEngineNose(cx, fz + 0.5);
   collide(cx, fz + 0.3, 2.0);
-  signPlane(lintelTex(), cx, 5.5, fz + 0.18, 0, 5.6, 1.05);                                    // 'ENGINE CO. 78' lintel
+  // (c) carved frieze + company-number plaque
+  signPlane(lintelTex(), cx, 5.5, fz + 0.18, 0, 5.6, 1.05);                                    // CITY OF CHICAGO FIRE DEPARTMENT
+  signPlane(enginePlaqueTex(), cx - bayW / 2 - 2.0, 2.2, fz + 0.16, 0, 2.4, 0.9);              // ENGINE CO. 78 · EST. 1915
   for (const sx of [cx - 4, cx, cx + 4]) {                                                     // three upper windows + surrounds
     add(M(new THREE.BoxGeometry(1.5, 2.1, 0.28), stone, sx, 7.9, fz + 0.02));
     A.win.push({ pos: [sx, 7.9, fz + 0.12], yaw: 0, scale: [1.05, 1.65, 1] });
   }
+  // (d) limestone cartouche crowning the parapet centre
+  add(M(new THREE.BoxGeometry(1.4, 1.2, 0.3), stone, cx, 10.4, fz + 0.12));
+  for (const s of [-1, 1]) add(M(new THREE.BoxGeometry(0.5, 0.6, 0.28), stone, cx + s * 0.95, 10.3, fz + 0.12));   // scroll ears
+  add(M(new THREE.BoxGeometry(0.7, 0.4, 0.28), stone, cx, 11.15, fz + 0.12));                                     // scroll cap
+  // (e) 2nd-floor red awning over the centre window (plain boxes, NOT A.awn)
+  add(M(new THREE.BoxGeometry(2.0, 0.14, 1.1), red, cx, 6.9, fz + 0.6));
+  for (let k = 0; k < 4; k++) add(M(new THREE.BoxGeometry(2.0 / 4 * 0.55, 0.4, 0.12), red, cx - 1.0 + (k + 0.5) * 2.0 / 4, 6.68, fz + 1.14));
+  // (f) apron furniture on the house frontage (props between face z−574 and corridor edge z−572)
+  add(M(new THREE.BoxGeometry(1.1, 2.4, 0.12), red, cx + 5.4, 1.2, fz + 0.08));                // red side door, right of the bay
+  const planterTub = x => { add(M(new THREE.CylinderGeometry(0.42, 0.5, 0.7, 12), red, x, 0.35, fz + 0.6));
+    add(M(new THREE.SphereGeometry(0.5, 8, 6), toon(0x3f7a44), x, 0.95, fz + 0.6)); collide(x, fz + 0.6, 0.45); };
+  planterTub(cx - bayW / 2 - 1.4); planterTub(cx + bayW / 2 + 1.4);                            // flanking the bay
+  add(M(new THREE.CylinderGeometry(0.18, 0.2, 0.7, 10), red, cx - 6.2, 0.35, fz + 1.2));       // red hydrant
+  add(M(new THREE.SphereGeometry(0.2, 8, 6), red, cx - 6.2, 0.72, fz + 1.2));
+  for (const s of [-1, 1]) add(M(new THREE.CylinderGeometry(0.08, 0.08, 0.16, 8), red, cx - 6.2 + s * 0.22, 0.5, fz + 1.2, 0, 0, Math.PI / 2));
+  collide(cx - 6.2, fz + 1.2, 0.4);
+  add(M(new THREE.BoxGeometry(1.6, 0.1, 0.5), toon(0x6b4a30), cx + 6.6, 0.5, fz + 1.0));       // bench right of the door
+  add(M(new THREE.BoxGeometry(1.6, 0.5, 0.1), toon(0x6b4a30), cx + 6.6, 0.75, fz + 0.78));
+  for (const s of [-1, 1]) add(M(new THREE.BoxGeometry(0.1, 0.5, 0.4), toon(0x2c2620), cx + 6.6 + s * 0.7, 0.25, fz + 1.0));
+  collide(cx + 6.6, fz + 1.0, 0.5);
+  // (g) flags — US flag kept, Chicago flag added below it
   const pole = M(new THREE.CylinderGeometry(0.05, 0.05, 3.2, 6), toon(0xcabfa5), cx + w / 2 - 0.6, 6.9, fz + 0.2);
   pole.rotation.x = 0.5; add(pole);
   atlasPlane(M(new THREE.PlaneGeometry(1.2, 0.72), bmat(0xffffff, { map: usFlagTex(), side: THREE.DoubleSide }), cx + w / 2 + 0.2, 8.3, fz + 1.0), false);
+  atlasPlane(M(new THREE.PlaneGeometry(1.1, 0.7), bmat(0xffffff, { map: chicagoFlagTex(), transparent: true, side: THREE.DoubleSide }), cx + w / 2 + 0.15, 7.4, fz + 0.85), true);
   collide(cx, cz, 8);
 }
 function fireEngineNose(x, z) {

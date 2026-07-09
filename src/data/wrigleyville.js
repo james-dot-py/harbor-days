@@ -160,7 +160,14 @@ export const SLUGGERS_W = {
 };
 
 export const VILLAGE_W = {
-  murphys : { x0: -178, x1: -162, z0: -548, z1: -534 },  // SE cnr Sheffield/Waveland
+  murphys : { x0: -178, x1: -162, z0: -548, z1: -534 },  // SE cnr Sheffield/Waveland (lot)
+  // Murphy's likeness sub-lots (task 010, refs/murphys-bleachers/): the 2-storey
+  // blonde main mass, the 1-storey red-brick corner annex carrying the verdigris
+  // sign band, and the fenced sidewalk beer garden (decorative — NOT walkable,
+  // colliders only; pokes 0.6 m into the Sheffield corridor like a real patio).
+  murphysBld  : { x0: -172, x1: -162, z0: -548, z1: -534, h: 8.6 },
+  murphysAnnex: { x0: -178, x1: -168, z0: -548, z1: -539, h: 4.8 },
+  murphysGarden:{ x0: -178.6, x1: -174, z0: -539, z1: -534 },
   engine78: { x0: -250, x1: -234, z0: -590, z1: -574 },  // 1052 W Waveland
   cubbyBear:{ x0: -316, x1: -300, z0: -386, z1: -372 },  // opposite the marquee
   clarkBars: [                                     // west side of Clark, neon row

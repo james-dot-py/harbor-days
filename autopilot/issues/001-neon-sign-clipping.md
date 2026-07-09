@@ -12,3 +12,13 @@
   face-normal framing.
 - route: fold into task 010 (bar likenesses) or 015 (streetscape application),
   whichever touches the Cubby Bear first.
+
+## RESOLVED — task 010 (2026-07-09)
+
+Fixed in village.js by the `fitSign(w,h,a0,a1,u0,u1,ca,cu,m)` helper: every
+wall-mounted plate is clamped so its edges stay ≥0.3 m inside the mounting
+face (the Cubby fascia plate that poked past the roof now sits on the
+storefront band; every beer neon carries an explicit ≥0.5 m corner margin).
+Verified in run mrdp6mgz: wv-cubby-bear f0–f2 read clean from the owner's
+walking angle — no plate crosses a face edge anywhere in the bar row.
+Remaining sign work owned by 016 (streetscape) applies the same helper.

@@ -40,3 +40,7 @@ few turns to find; keep each to one line of symptom + fix.
 - insidePoly(x,z,inset) tests the point MOVED inset toward home plate: a big
   inset (3.0) accepts points ~inset outside the wall (the RF foul pole landed
   in the Sheffield sidewalk). Bound placement overshoot with inset ≤ 0.5.
+- A lone DoubleSide canvas plane shows MIRRORED text from behind; light
+  textures hide it, and a dark retexture surfaces it (Addison platform signs,
+  task 010). Free-standing signs = back-to-back FrontSide pairs (village.js
+  twoSided(); pairs inside one InstancedMesh cost no extra draw).

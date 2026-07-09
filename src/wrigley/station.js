@@ -72,14 +72,15 @@ function girderTex() {                                   // white on maroon
     g.font = F(60); g.fillText('ADDISON', 256, 58);
   });
 }
-function stationTex() {                                  // hanging CTA sign
+function stationTex() {                                  // CTA identity band: charcoal, white Addison + address
   return canvasTex(512, 184, g => {
-    g.fillStyle = '#f7f4ee'; g.fillRect(0, 0, 512, 184);
-    g.strokeStyle = '#d7cfbf'; g.lineWidth = 5; g.strokeRect(4, 4, 504, 176);
-    g.fillStyle = '#141414'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.font = F(76); g.fillText('ADDISON', 256, 62);
-    g.fillStyle = '#c0271f'; g.fillRect(26, 120, 460, 46);
-    g.fillStyle = '#ffffff'; g.font = F(30); g.fillText('RED LINE', 256, 144);
+    g.fillStyle = '#2d2d2d'; g.fillRect(0, 0, 512, 184);
+    g.fillStyle = '#ffffff'; g.textAlign = 'left'; g.textBaseline = 'middle';
+    g.font = F(80); g.fillText('Addison', 28, 82);
+    g.textAlign = 'right'; g.font = F(30);
+    g.fillText('3600 N', 486, 60); g.fillText('940 W', 486, 104);
+    g.strokeStyle = '#ffffff'; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(28, 142); g.lineTo(486, 142); g.stroke();
   });
 }
 function lintelTex() {
@@ -91,13 +92,41 @@ function lintelTex() {
     g.fillStyle = '#c0271f'; g.font = F(28); g.fillText('RED LINE', 256, 90);
   });
 }
-function roundelTex() {                                  // transparent CTA red circle
+function bandTex() {                                     // street head-house identity band (wider aspect)
+  return canvasTex(768, 130, g => {
+    g.fillStyle = '#2d2d2d'; g.fillRect(0, 0, 768, 130);
+    g.fillStyle = '#ffffff'; g.textAlign = 'left'; g.textBaseline = 'middle';
+    g.font = F(70); g.fillText('Addison', 26, 62);
+    g.textAlign = 'right'; g.font = F(30);
+    g.fillText('3600 N', 742, 44); g.fillText('940 W', 742, 84);
+    g.strokeStyle = '#ffffff'; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(430, 108); g.lineTo(742, 108); g.stroke();
+  });
+}
+function elevTex() {                                      // red Elevator tab: arrow + wheelchair glyph + label
+  return canvasTex(180, 128, g => {
+    g.fillStyle = '#c0271f'; g.fillRect(0, 0, 180, 128);
+    g.strokeStyle = '#ffffff'; g.fillStyle = '#ffffff'; g.lineCap = 'round';
+    g.lineWidth = 6;                                      // left-right arrow across the top
+    g.beginPath(); g.moveTo(28, 24); g.lineTo(152, 24); g.stroke();
+    g.beginPath(); g.moveTo(28, 24); g.lineTo(42, 14); g.moveTo(28, 24); g.lineTo(42, 34); g.stroke();
+    g.beginPath(); g.moveTo(152, 24); g.lineTo(138, 14); g.moveTo(152, 24); g.lineTo(138, 34); g.stroke();
+    g.lineWidth = 5;                                      // wheelchair glyph (wheel ring + seated figure)
+    g.beginPath(); g.arc(90, 66, 19, 0, 7); g.stroke();
+    g.beginPath(); g.arc(90, 46, 5, 0, 7); g.fill();
+    g.beginPath(); g.moveTo(90, 52); g.lineTo(90, 66); g.lineTo(104, 66); g.moveTo(90, 60); g.lineTo(103, 60); g.stroke();
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = F(24); g.fillText('Elevator', 90, 110);
+  });
+}
+function cubsTex() {                                      // white panel, Cubs bullseye (blue ring, red circle, white C)
   return canvasTex(128, 128, g => {
-    g.clearRect(0, 0, 128, 128);
-    g.fillStyle = '#c0271f'; g.beginPath(); g.arc(64, 64, 56, 0, 7); g.fill();
-    g.lineWidth = 9; g.strokeStyle = '#f4efe6'; g.beginPath(); g.arc(64, 64, 56, 0, 7); g.stroke();
-    g.fillStyle = '#f4efe6'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.font = F(52); g.fillText('L', 64, 68);
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, 128, 128);
+    g.fillStyle = '#0e4c92'; g.beginPath(); g.arc(64, 64, 54, 0, 7); g.fill();   // blue ring
+    g.fillStyle = '#ffffff'; g.beginPath(); g.arc(64, 64, 46, 0, 7); g.fill();
+    g.fillStyle = '#cc3433'; g.beginPath(); g.arc(64, 64, 40, 0, 7); g.fill();   // red inner circle
+    g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.font = '900 64px Georgia,"Times New Roman",serif'; g.fillText('C', 64, 68);
   });
 }
 
@@ -252,12 +281,19 @@ export function buildStation() {
     posts.instanceMatrix.needsUpdate = true; wrigleyRoot.add(posts);
   }
   {                                                       // hanging + post-mounted station signs
-    const mat = bmat(0xffffff, { map: stationTex(), side: THREE.DoubleSide });
-    const mesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), mat, 3);
+    // back-to-back FrontSide pairs (one InstancedMesh — same single draw): a lone
+    // DoubleSide plane shows MIRRORED text from behind, and the dark retexture
+    // made that read down the whole platform. Each partner faces outward; the
+    // near opaque plane occludes the far one.
+    const mat = bmat(0xffffff, { map: stationTex() });
+    const mesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), mat, 6);
     const items = [
-      { x: CX, y: 9.6, z: -448.5, sx: 3.2, sy: 0.9, ry: Math.PI },        // faces north
-      { x: CX, y: 9.6, z: -435.5, sx: 3.2, sy: 0.9, ry: 0 },              // faces south
-      { x: -139.7, y: 9.2, z: -442, sx: 2.1, sy: 0.72, ry: Math.PI / 2 }, // post blade
+      { x: CX, y: 9.6, z: -448.53, sx: 3.2, sy: 0.9, ry: Math.PI },        // faces north
+      { x: CX, y: 9.6, z: -448.47, sx: 3.2, sy: 0.9, ry: 0 },              // partner faces south
+      { x: CX, y: 9.6, z: -435.47, sx: 3.2, sy: 0.9, ry: 0 },              // faces south
+      { x: CX, y: 9.6, z: -435.53, sx: 3.2, sy: 0.9, ry: Math.PI },        // partner faces north
+      { x: -139.73, y: 9.2, z: -442, sx: 2.1, sy: 0.72, ry: Math.PI / 2 }, // post blade (faces east)
+      { x: -139.67, y: 9.2, z: -442, sx: 2.1, sy: 0.72, ry: -Math.PI / 2 },// partner faces west
     ];
     items.forEach((it, i) => {
       E.set(0, it.ry, 0); Q.setFromEuler(E);
@@ -289,15 +325,31 @@ export function buildStation() {
     walls.instanceMatrix.needsUpdate = true; rails.instanceMatrix.needsUpdate = true;
     wrigleyRoot.add(walls, rails);
   }
-  {                                                       // arched doorway in the abutment face
+  {                                                       // arched doorway + limestone head-house portal (street level, under the tracks)
     const arch = new THREE.Mesh(new THREE.TorusGeometry(2.1, 0.26, 6, 16, Math.PI), toon(VOUS));
     arch.position.set(CX, 2.6, -413.85); wrigleyRoot.add(arch);
     const lintel = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 0.6),
       bmat(0xffffff, { map: lintelTex(), side: THREE.DoubleSide }));
     lintel.position.set(CX, 3.15, -413.8); atlasPlane(lintel, false);   // 'ADDISON' lintel -> shared wrigley atlas
-    const roundel = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9),
-      bmat(0xffffff, { map: roundelTex(), transparent: true, side: THREE.DoubleSide }));
-    roundel.position.set(CX, 4.9, -413.8); atlasPlane(roundel, true);   // transparent CTA roundel -> shared ALPHA atlas
+    // (former CTA roundel dropped: at y6.1 it would embed in the bridge deck underside (y5.6), and the
+    //  new header fills its old y4.9 slot; the real 942-W-Addison portal carries the band + tabs, no roundel)
+    // limestone portal frame proud ~0.9 m — plain toon(VOUS) meshes merge into the arch's static bucket (no new draw)
+    const vm = toon(VOUS), jamb = new THREE.BoxGeometry(1.2, 4.4, 0.9);
+    for (const jx of [-142.8, -137.2]) {                 // two jamb piers flanking the x-142..-138 walk gap (kept clear)
+      const p = new THREE.Mesh(jamb, vm); p.position.set(jx, 2.2, -413.55); wrigleyRoot.add(p);
+    }
+    const hdr = new THREE.Mesh(new THREE.BoxGeometry(6.8, 0.8, 0.9), vm);
+    hdr.position.set(CX, 4.8, -413.55); wrigleyRoot.add(hdr);            // header beam spanning the piers (overhead, clears the deck at y5.6)
+    // sign band on the header front + red Elevator tab (left) + white Cubs bullseye panel (right); all atlas'd (no new draw)
+    const band = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 0.78),
+      bmat(0xffffff, { map: bandTex(), side: THREE.DoubleSide }));
+    band.position.set(CX, 4.8, -413.05); atlasPlane(band, false);       // 0.05 proud of the header front (z-413.1)
+    const elev = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.78),
+      bmat(0xffffff, { map: elevTex(), side: THREE.DoubleSide }));
+    elev.position.set(-142.6, 4.8, -413.0); atlasPlane(elev, false);    // left end, 0.05 proud of the band
+    const cubs = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.8),
+      bmat(0xffffff, { map: cubsTex(), side: THREE.DoubleSide }));
+    cubs.position.set(-137.3, 4.8, -413.0); atlasPlane(cubs, false);    // right end, opaque panel, 0.05 proud of the band
   }
   instBoxes([                                             // non-blocking turnstile hint (no collider)
     { x: -139, y: 0.7, z: -416, sx: 0.14, sy: 1.4, sz: 0.14 },
@@ -310,6 +362,8 @@ export function buildStation() {
   // =====================================================================
   // north bridge abutment — solid wall flanking the doorway gap (x-142..-138)
   for (const x of [-147, -145, -143, -137, -135, -133]) collide(x, -414.5, 1.1);
+  // head-house portal jamb piers (flank the doorway; NOTHING inside x-142..-138)
+  collide(-142.8, -413.6, 0.55); collide(-137.2, -413.6, 0.55);
   // south bridge abutment — full wall
   for (const x of [-147, -145, -143, -141, -139, -137, -135, -133]) collide(x, -385.5, 1.1);
   // platform edges facing the track beds

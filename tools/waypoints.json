@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-09T14:52:31.502Z",
+ "generated": "2026-07-09T18:09:16.928Z",
  "count": 54,
  "waypoints": [
   {
@@ -821,7 +821,7 @@
      "dist": 9
     }
    ],
-   "expectation": "The station stair doorway on Addison under the girder rail bridge: solid green embankment mass, stair door, bridge overhead with the street passing beneath."
+   "expectation": "The Addison stair doorway under the girder bridge now reads as the station head-house (refs/addison-station/): limestone portal frame proud of the abutment around the door, crowned by the real dark CTA sign band 'Addison 3600 N / 940 W' with the red Elevator tab and white Cubs-logo square; street passes beneath the bridge."
   },
   {
    "id": "wv-murphys",
@@ -846,7 +846,7 @@
      "dist": 14
     }
    ],
-   "expectation": "Murphy's Bleachers bar at the SE corner of Sheffield & Waveland: low bar building with signage/neon, across from the bleacher wall."
+   "expectation": "Murphy's Bleachers at the SE corner of Sheffield & Waveland reads as THE real bar (refs/murphys-bleachers/): a 2-storey blonde-brick mass with a cream fascia carrying big red MURPHY'S BLEACHERS letters and a rooftop deck, a 1-storey red-brick corner annex with the verdigris bronze sign band (baseball disc + MURPHY'S) and sage-green awning, a changeable-letter marquee board on a pole, and a fenced sidewalk beer garden with tables/umbrellas along Sheffield."
   },
   {
    "id": "wv-engine78",
@@ -871,7 +871,7 @@
      "dist": 12
     }
    ],
-   "expectation": "Engine 78 firehouse on Waveland: red-doored fire station beside the park (1052 W Waveland)."
+   "expectation": "Engine 78 firehouse on Waveland reads as THE real 1915 house (refs/engine-78/): tan/olive-brown brick with limestone pilasters, string course, cornice and crown cartouche; ONE red-framed apparatus bay with the engine nosing out under a carved CITY OF CHICAGO FIRE DEPARTMENT lintel; red 2nd-floor awning; red side door; red planters, red hydrant and a bench on the apron; US + Chicago flags."
   },
   {
    "id": "wv-cubby-bear",
@@ -896,7 +896,7 @@
      "dist": 14
     }
    ],
-   "expectation": "The Cubby Bear bar opposite the marquee corner: bar front with neon signage facing Clark & Addison."
+   "expectation": "The Cubby Bear opposite the marquee corner reads as THE real bar (refs/cubby-bear/): blonde/tan-brick 2-storey corner block, black storefront fascia with window neon (no sign clipping past any face edge — issue 001), maroon corner door toward Clark & Addison, diamond THE CUBBY BEAR logo on both street faces, dark-green cornice, rooftop billboard on a steel truss above."
   },
   {
    "id": "wv-bar-sluggers",
@@ -921,7 +921,7 @@
      "dist": 14
     }
    ],
-   "expectation": "SLUGGERS bar front on the west side of Clark: neon signage + crossed bats readable. It is now a LOW 2-storey bar carrying the rooftop batting cage (task 009) — the exterior stair and cage read above the storefront; part of the glowing bar row."
+   "expectation": "SLUGGERS on the west side of Clark: cream party-wall storefront with the yellow/red SLUGGERS sign band (+ WORLD CLASS SPORTS BAR script) and a FAST PITCH BATTING CAGES banner; the task-009 exterior stair and rooftop cage still read above the storefront; part of the glowing bar row."
   },
   {
    "id": "wv-bar-sports-corner",
@@ -946,7 +946,7 @@
      "dist": 14
     }
    ],
-   "expectation": "SPORTS CORNER bar front on the west side of Clark: neon signage readable in the bar row."
+   "expectation": "SPORTS CORNER in the Clark bar row reads to type (refs/sports-corner/): cream/buff 3-storey front, vertical blue SPORTS CORNER blade sign readable from the street, navy awnings over a glassy ground floor, big glassy 2nd-floor windows, roof-deck railing on top."
   },
   {
    "id": "wv-bar-casey-s",
@@ -971,7 +971,7 @@
      "dist": 14
     }
    ],
-   "expectation": "CASEY'S bar front on the west side of Clark: neon signage readable in the bar row."
+   "expectation": "CASEY MORAN'S in the Clark bar row: white/cream classical facade with arched 2nd-floor windows, dark-green sign band with gold CASEY MORAN'S lettering (shamrock neon kept), rooftop pergola/deck hint above."
   },
   {
    "id": "wv-bar-the-dugout",
@@ -996,7 +996,7 @@
      "dist": 14
     }
    ],
-   "expectation": "THE DUGOUT bar front on the west side of Clark: neon signage readable in the bar row."
+   "expectation": "THE DUGOUT in the Clark bar row: dark-brick 2-storey dive with a black storefront band, white hand-lettered THE DUGOUT sign, beer neon in the window, green awning."
   },
   {
    "id": "wv-stall-0",

@@ -35,3 +35,19 @@ cut becomes a revert task.
   sidewalk onto the ROOF of a lowered Sluggers bar, reached by walking up an
   exterior stair off Clark ("BATTING CAGES UPSTAIRS ↑") — a destination with an
   approach, matching the real Sluggers' claim to fame — Wrigleyville — task 009
+- Murphy's Bleachers wears its real bronze: the verdigris sign band with the
+  relief ballplayers, the white "believe" baseball disc and MURPHY'S in bronze
+  serif, over sage-green scalloped awnings — plus the changeable-letter
+  marquee board out front ("NEXT YEAR IS NOW · BAR TRIVIA @8") and a picket-
+  fenced sidewalk beer garden with umbrellas — Sheffield & Waveland — task 010
+- The Cubby Bear got its blonde brick back: black storefront, gooseneck lamps,
+  window neon, the navy diamond THE CUBBY BEAR crest on both faces, a maroon
+  door cut across the corner, and a GO CUBS billboard on a steel truss over
+  the roof, facing the marquee — Clark & Addison — task 010
+- Engine 78 is the real 1915 house now: olive-tan brick, limestone cartouche,
+  red-framed bay under a carved CITY OF CHICAGO FIRE DEPARTMENT lintel, red
+  planters and hydrant, and the CHICAGO CITY FLAG flying under the stars and
+  stripes — 1052 W Waveland — task 010
+- Stepping off the Red Line you face the actual CTA sign — dark band, white
+  Helvetica "Addison", "3600 N / 940 W", red Elevator tab, Cubs bullseye —
+  on a limestone head-house portal under the tracks — Addison stop — task 010
