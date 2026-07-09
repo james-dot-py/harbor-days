@@ -72,6 +72,10 @@ down-the-length shots — use axis-aligned framings for interiors).
    - **Not green** after honest attempts: file `autopilot/issues/<id>.md` (waypoint
      id, shot path, expected vs observed, severity), write `autopilot/result.json`
      with `"status": "failed"`, and stop. Do NOT fake green.
+   - **If your failure filed NEW prerequisite tasks** (e.g. a sign-off finding
+     polish gaps): `git mv` YOUR task file to the next free NNN after them, so
+     the loop runs the fixes before retrying you — the queue executes in number
+     order and a failed task otherwise retries first, futilely.
 
 ## Reminders
 - No Google data in any form (denied mechanically). No localStorage. No third place

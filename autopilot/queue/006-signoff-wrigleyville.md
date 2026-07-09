@@ -30,3 +30,8 @@ planner (queue-empty → pick next site) stays locked until one exists. This
 task formalizes what's already built, at the §5.2 bar, honestly: if the
 walkthrough or evocation review finds real gaps, file polish tasks and fail
 rather than rubber-stamping.
+
+## Retry sequencing (supervisor note)
+If you fail and file polish tasks: git mv THIS file to the next free NNN after
+them so the fixes run before the sign-off retries (queue executes in number
+order).
