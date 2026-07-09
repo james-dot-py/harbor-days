@@ -61,6 +61,48 @@ const DRY = process.argv.includes('--dry-run');
 const MAX_BACKOFF_MS = 2 * 60 * 60 * 1000; // 2 h cap
 const START_BACKOFF_MS = 15 * 60 * 1000;   // 15 min
 
+// ---- usage governor (owner ask, 2026-07-09): leave headroom for mobile -----
+// There is no API for "percent of Max window used", so the governor SELF-
+// CALIBRATES: it accumulates weighted tokens per ~5h window (fable ×2, cache
+// reads ×0.1 — mirroring billing weights); the first time a window limit
+// actually fires, the accumulated figure becomes the calibrated cap. From
+// then on the loop pauses BETWEEN iterations at (100 − reservePct)% of cap
+// and sleeps to the window reset — the reserve is the owner's phone slice.
+// Approximate by design; raise reservePct in usage-governor.json for margin.
+const GOV_FILE = join(HERE, 'usage-governor.json');
+const WINDOW_MS = 5 * 60 * 60 * 1000;
+const MODEL_WEIGHT = m => /fable|mythos/i.test(m || '') ? 2 : 1;
+function govLoad() {
+  let g = {};
+  try { g = JSON.parse(readFileSync(GOV_FILE, 'utf8')); } catch { }
+  return { reservePct: 2, windowStart: 0, windowWeighted: 0, calibratedCap: null, ...g };
+}
+function govSave(g) { try { writeFileSync(GOV_FILE, JSON.stringify(g, null, 2)); } catch { } }
+function govRoll(g) {
+  if (!g.windowStart || Date.now() - g.windowStart > WINDOW_MS) { g.windowStart = Date.now(); g.windowWeighted = 0; }
+  return g;
+}
+function govRecord(usage, model) {
+  if (!usage) return;
+  const g = govRoll(govLoad());
+  const w = MODEL_WEIGHT(model) * (
+    (usage.input_tokens || 0) + (usage.output_tokens || 0) * 5 +
+    (usage.cache_creation_input_tokens || 0) * 1.25 + (usage.cache_read_input_tokens || 0) * 0.1);
+  g.windowWeighted += Math.round(w);
+  govSave(g);
+}
+function govCalibrate() {   // a real window limit fired: current tally ≈ the cap
+  const g = govRoll(govLoad());
+  if (g.windowWeighted > 0) { g.calibratedCap = g.windowWeighted; govSave(g); log({ event: 'governor-calibrated', msg: 'window cap ≈ ' + g.windowWeighted + ' weighted tokens' }); }
+}
+function govShouldPause() {
+  const g = govRoll(govLoad()); govSave(g);
+  if (!g.calibratedCap) return null;
+  const threshold = g.calibratedCap * (1 - (g.reservePct || 2) / 100);
+  if (g.windowWeighted < threshold) return null;
+  return { until: g.windowStart + WINDOW_MS, used: g.windowWeighted, cap: g.calibratedCap, reservePct: g.reservePct || 2 };
+}
+
 // ---- logging --------------------------------------------------------------
 function log(event) {
   try {
@@ -228,7 +270,7 @@ function runClaude({ prompt, maxTurns, resume, model }) {
       // limit detection ONLY on error-ish events — an assistant message that merely
       // MENTIONS "rate limit" (e.g. building retry logic) must not trigger a sleep
       const blob = JSON.stringify(ev);
-      if (ev.type === 'result') { sawResult = true; resultText = ev.result || blob; if (ev.subtype === 'error_max_turns') maxTurnsHit = true; if (ev.is_error || /error/i.test(ev.subtype || '')) { if (looksLikeLimit(blob)) limitText = blob; } }
+      if (ev.type === 'result') { sawResult = true; try { govRecord(ev.usage, model); } catch { } resultText = ev.result || blob; if (ev.subtype === 'error_max_turns') maxTurnsHit = true; if (ev.is_error || /error/i.test(ev.subtype || '')) { if (looksLikeLimit(blob)) limitText = blob; } }
       else if (ev.type === 'error' || ev.is_error) { if (looksLikeLimit(blob)) limitText = blob; }
     }
     child.on('exit', code => resolve({ sessionId, code, limitText, resultText, sawResult, maxTurnsHit }));
@@ -255,6 +297,7 @@ async function runWithLimitResilience({ prompt, maxTurns, model }) {
     const parsed = parseResetMs(attempt.limitText);
     const waitMs = parsed != null ? parsed : backoff;
     const until = new Date(Date.now() + waitMs).toISOString();
+    govCalibrate();
     log({ event: 'limit-sleep-begin', msg: 'until ' + until, waitMs });
     await notify('Harbor Days autopilot sleeping', 'Hit a limit; sleeping until ' + until + ' then resuming session ' + (attempt.sessionId || '?'), { priority: 'default' });
     await sleep(waitMs);
@@ -275,6 +318,15 @@ async function iterationOnce() {
     log({ event: 'stop-sentinel' });
     await notify('Harbor Days autopilot STOPPED', 'STOP sentinel present — exiting cleanly.', { priority: 'default' });
     return { halt: true };
+  }
+
+  // 1b. usage governor: reserve headroom for the owner's personal use
+  const pause = govShouldPause();
+  if (pause) {
+    const untilIso = new Date(pause.until).toISOString();
+    log({ event: 'governor-pause', msg: pause.used + '/' + pause.cap + ' weighted (' + pause.reservePct + '% reserved) — sleeping until ' + untilIso });
+    await notify('Harbor Days autopilot: usage reserve reached', 'Pausing to leave ~' + pause.reservePct + '% of the window for your personal Claude use. Resuming ~' + untilIso + '.', { priority: 'default' });
+    await sleep(Math.max(60000, pause.until - Date.now()));
   }
 
   // 2. pick task (or planner)
