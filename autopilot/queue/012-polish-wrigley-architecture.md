@@ -2,6 +2,7 @@
 id: 012
 area: wrigleyville
 type: polish
+model: fable
 title: Wrigley architecture polish — the STRUCTURES as recognizable as the signage
 acceptance: >
   From the 006 sign-off evocation review (PASS, but picky list): the signage

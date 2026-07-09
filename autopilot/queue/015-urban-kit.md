@@ -2,6 +2,7 @@
 id: 015
 area: global
 type: build
+model: fable
 turns: 120
 title: Urban streetscape kit — the vocabulary for streets that surround you
 acceptance: >

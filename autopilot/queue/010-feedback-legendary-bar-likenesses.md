@@ -2,6 +2,7 @@
 id: 010
 area: wrigleyville
 type: feedback
+model: fable
 title: Legendary Wrigleyville bars/spots get their real-building likenesses
 acceptance: >
   Owner feedback (2026-07-08): "More detail on the buildings -- they're all

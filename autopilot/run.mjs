@@ -107,7 +107,7 @@ function anySignoff() {
   return null;
 }
 
-const PLANNER_INSTRUCTIONS = `\n\n---\nPLANNER TASK (queue empty, current location signed off — §5.3 site selection):\nThe queue is empty and the current location has a SIGNOFF.md. FIRST read any pending\nowner feedback in autopilot/feedback/ (skip processed/) — playtest notes from the\nowner outrank the default selection criteria when they name desires. Then select\nexactly ONE next famous Chicago site from LOCATIONS.md (contents below). Selection criteria in order:\n(1) recognizability, (2) connectivity — prefer extending the contiguous 1:2 world;\ndistant sites become hard cells reached via the ridable L (never a third place layer),\n(3) variety vs what is shipped, (4) feasibility inside perf + single-file constraints.\nGenerate its full SCOUT → LAYOUT → BUILD → DELIGHT → POLISH → SIGNOFF pipeline as\nautopilot/queue/NNN-slug.md task files (frontmatter: id, area, type, acceptance, refs,\noptional turns). SIZE TASKS TO FIT ~80 turns of work — the read-every-PNG doctrine\neats turns fast, so split broad tasks (many waypoints, many buildings) into narrow\nones rather than authoring one sprawling task (task 002 took 3 sessions; don't).\nYour FIRST commit IS the proposal: update LOCATIONS.md (move the pick to "In progress")\nplus the new queue tasks, push to autopilot, and write autopilot/result.json\n{status:"green", ...}. The notification names the pick.\n\n--- LOCATIONS.md ---\n`;
+const PLANNER_INSTRUCTIONS = `\n\n---\nPLANNER TASK (queue empty, current location signed off — §5.3 site selection):\nThe queue is empty and the current location has a SIGNOFF.md. FIRST read any pending\nowner feedback in autopilot/feedback/ (skip processed/) — playtest notes from the\nowner outrank the default selection criteria when they name desires. Then select\nexactly ONE next famous Chicago site from LOCATIONS.md (contents below). Selection criteria in order:\n(1) recognizability, (2) connectivity — prefer extending the contiguous 1:2 world;\ndistant sites become hard cells reached via the ridable L (never a third place layer),\n(3) variety vs what is shipped, (4) feasibility inside perf + single-file constraints.\nGenerate its full SCOUT → LAYOUT → BUILD → DELIGHT → POLISH → SIGNOFF pipeline as\nautopilot/queue/NNN-slug.md task files (frontmatter: id, area, type, acceptance, refs,\noptional turns, optional model). MODEL ALLOCATION: tag scout/layout tasks and the\nsignature-landmark hero build 'model: fable'; mechanical work (application,\nverification-heavy polish, delight packs) defaults to opus — Fable tokens are\nscarce and reserved for judgment. SIZE TASKS TO FIT ~80 turns of work — the read-every-PNG doctrine\neats turns fast, so split broad tasks (many waypoints, many buildings) into narrow\nones rather than authoring one sprawling task (task 002 took 3 sessions; don't).\nYour FIRST commit IS the proposal: update LOCATIONS.md (move the pick to "In progress")\nplus the new queue tasks, push to autopilot, and write autopilot/result.json\n{status:"green", ...}. The notification names the pick.\n\n--- LOCATIONS.md ---\n`;
 
 function buildPrompt(taskFile, planner) {
   const iter = readFileSync(ITER_FILE, 'utf8');
@@ -125,6 +125,21 @@ function turnBudget(taskFile, planner) {
   const explicit = parseInt(fm.turns, 10);          // per-task override in frontmatter
   if (explicit > 0) return explicit;
   return (fm.type === 'build') ? 120 : 80;
+}
+
+// ---- model allocation (owner decision, 2026-07-09) --------------------------
+// Fable's remaining allowance goes to judgment-heavy work; the grind runs on
+// Opus at roughly half the usage burn. Task frontmatter `model:` overrides;
+// otherwise: sign-offs + planner picks (rare, taste-critical) get Fable,
+// everything else Opus. Values accept aliases 'fable' / 'opus'.
+const MODEL_IDS = { fable: 'claude-fable-5', opus: 'claude-opus-4-8' };
+function taskModel(taskFile, planner) {
+  if (planner) return MODEL_IDS.fable;
+  const fm = frontmatter(taskFile);
+  const m = (fm.model || '').trim().toLowerCase();
+  if (MODEL_IDS[m]) return MODEL_IDS[m];
+  if (m) return fm.model.trim();                     // explicit full model id
+  return (fm.type === 'signoff') ? MODEL_IDS.fable : MODEL_IDS.opus;
 }
 
 // ---- bookkeeping durability -------------------------------------------------
@@ -179,16 +194,17 @@ function parseResetMs(text) {
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // ---- claude spawn ---------------------------------------------------------
-function claudeArgs({ prompt, maxTurns, resume }) {
+function claudeArgs({ prompt, maxTurns, resume, model }) {
   const a = ['-p', '--output-format', 'stream-json', '--verbose', '--max-turns', String(maxTurns)];
+  if (model) a.push('--model', model);
   if (resume) a.push('--resume', resume);
   a.push(prompt);
   return a;
 }
 
-function runClaude({ prompt, maxTurns, resume }) {
+function runClaude({ prompt, maxTurns, resume, model }) {
   return new Promise((resolve) => {
-    const args = claudeArgs({ prompt, maxTurns, resume });
+    const args = claudeArgs({ prompt, maxTurns, resume, model });
     const child = spawn('claude', args, { cwd: ROOT });
     // persist the RAW stream — without this, diagnosing a dead session means
     // spelunking ~/.claude transcripts (learned in the first Phase 5 dry run)
@@ -225,13 +241,13 @@ function runClaude({ prompt, maxTurns, resume }) {
 // turn budget mid-task gets ONE resume with a top-up — turn exhaustion with
 // full context is resumable work, not a failure (learned on task 002: the
 // read-every-PNG doctrine eats turns fast).
-async function runWithLimitResilience({ prompt, maxTurns }) {
-  let attempt = await runClaude({ prompt, maxTurns });
+async function runWithLimitResilience({ prompt, maxTurns, model }) {
+  let attempt = await runClaude({ prompt, maxTurns, model });
   if (classifyLimit(attempt) === 'spend') { attempt.spendLimit = true; return attempt; }
   if (attempt.maxTurnsHit && attempt.sessionId) {
     log({ event: 'turns-topup', msg: 'resuming ' + attempt.sessionId + ' with +' + maxTurns + ' turns' });
     await notify('Harbor Days autopilot: turn top-up', 'Session ' + attempt.sessionId + ' ran out of turns mid-task; resuming once with +' + maxTurns + '.', { priority: 'default' });
-    attempt = await runClaude({ prompt: 'continue the task', maxTurns, resume: attempt.sessionId });
+    attempt = await runClaude({ prompt: 'continue the task', maxTurns, resume: attempt.sessionId, model });
     if (classifyLimit(attempt) === 'spend') { attempt.spendLimit = true; return attempt; }
   }
   let backoff = START_BACKOFF_MS;
@@ -246,7 +262,7 @@ async function runWithLimitResilience({ prompt, maxTurns }) {
     log({ event: 'limit-sleep-end', msg: 'resuming ' + (attempt.sessionId || '?') });
     await notify('Harbor Days autopilot resuming', 'Resuming session ' + (attempt.sessionId || '?'), { priority: 'default' });
     if (!attempt.sessionId) { log({ event: 'resume-failed', msg: 'no session_id captured; cannot resume' }); break; }
-    attempt = await runClaude({ prompt: 'continue the task', maxTurns, resume: attempt.sessionId });
+    attempt = await runClaude({ prompt: 'continue the task', maxTurns, resume: attempt.sessionId, model });
     if (classifyLimit(attempt) === 'spend') { attempt.spendLimit = true; return attempt; }
   }
   return attempt;
@@ -277,21 +293,22 @@ async function iterationOnce() {
   const taskFile = planner ? null : task.file;
   const taskId = planner ? 'planner' : (frontmatter(taskFile).id || task.name.replace(/\.md$/i, ''));
   const maxTurns = turnBudget(taskFile, planner);
+  const model = taskModel(taskFile, planner);
   const prompt = buildPrompt(taskFile, planner);
 
   if (DRY) {
-    const args = claudeArgs({ prompt, maxTurns });
+    const args = claudeArgs({ prompt, maxTurns, model });
     console.log('[dry-run] would spawn (cwd=' + ROOT + '):');
     console.log('  claude ' + args.slice(0, -1).join(' ') + ' "<prompt ' + prompt.length + ' chars>"');
-    console.log('  task: ' + (planner ? 'PLANNER' : task.name) + '  maxTurns: ' + maxTurns);
+    console.log('  task: ' + (planner ? 'PLANNER' : task.name) + '  maxTurns: ' + maxTurns + '  model: ' + model);
     log({ event: 'dry-run', msg: (planner ? 'planner' : task.name) + ' promptChars=' + prompt.length + ' maxTurns=' + maxTurns });
     return { halt: true };
   }
 
   // 3-4. spawn + limit resilience
   const spawnTime = Date.now();
-  log({ event: 'spawn', msg: (planner ? 'planner' : task.name) + ' maxTurns=' + maxTurns });
-  const res = await runWithLimitResilience({ prompt, maxTurns });
+  log({ event: 'spawn', msg: (planner ? 'planner' : task.name) + ' maxTurns=' + maxTurns + ' model=' + model });
+  const res = await runWithLimitResilience({ prompt, maxTurns, model });
   log({ event: 'session-done', msg: 'code=' + res.code + ' session=' + (res.sessionId || '?') });
 
   // 5. read result.json — must postdate the spawn (ignore stale ones)

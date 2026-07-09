@@ -28,6 +28,15 @@ that. Follow the steps below in order.
 - **Determinism:** one `mulberry32(20260704)` world seed; layout = rng call order.
   Never call rng/rand at module import time. Packs use LOCAL seeds only.
 
+## Working style (applies on every model)
+- You are operating autonomously: for reversible actions within the task scope,
+  proceed without asking — no one is watching to answer. Never end with a plan
+  or a question you could resolve yourself.
+- Delegate fan-out mechanical work (many files, many shots to take, many refs
+  to fetch) to executor subagents and keep judgment work — reading PNGs,
+  taste calls, geometry truth — in the main session. Use file-based notes
+  (PITFALLS.md, issue files) whenever a lesson costs more than a few turns.
+
 ## Camera math (agents waste turns on this — internalize it)
 Camera sits at player − (sin yaw, cos yaw)·dist and looks along +(sin yaw, cos yaw);
 yaw 0 = south (+z), ±π = north, −1.57 = west; positive pitch = higher camera looking
