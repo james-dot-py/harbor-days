@@ -30,4 +30,4 @@ cut becomes a revert task.
 - The game is named "Ope!" — the title-card wordmark leans into the running
   gag: a warm-red O and a blue bobbing ! bracket the lowercase "pe", the same
   midwestern "ope" the NPCs blurt when you bump them — title card / journal /
-  watermark — PENDING_HASH
+  watermark — 979ba50
