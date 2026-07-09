@@ -40,11 +40,11 @@ const rnd = () => _r();
 const faceTo = (x, z, tx, tz) => Math.atan2(tx - x, tz - z);
 
 // ------------------------------ landmarks ------------------------------
-const PV = { x: -288, z: -406 };                    // peanut soapbox (Addison, below the marquee)
-const HK = { x: -192, z: -396 };                    // program hawker (Sheffield/Addison corner)
-const BOOTH = { x: -278.6, z: -406.1 };             // marquee-gate ticket booth
-const GATE = { x: -283, z: -409 };                  // marquee gate (queue exits here)
-const SPLASH = { x: clarkX(-462) + 15, z: -462 };   // Gallagher Way splash pad center (village.js)
+const PV = { x: -286, z: -410 };                    // peanut soapbox (Addison, below the marquee)
+const HK = { x: -192, z: -389 };                    // program hawker (Sheffield/Addison corner)
+const BOOTH = { x: -272.5, z: -412.5 };             // marquee-gate ticket booth
+const GATE = { x: -277.6, z: -416.9 };              // marquee gate (queue exits here)
+const SPLASH = { x: clarkX(-470) + 20, z: -470 };   // Gallagher Way splash pad center (village.js)
 
 const SKINS = [0xe0a878, 0xc98a5a, 0x8a5a3c, 0xf0c8a0, 0xb07a50, 0x6e4632];
 const HAIRS = [0x2a2018, 0x1a140e, 0x4a3a24, 0x8a8580, 0x241a12, 0x5a4a3a];
@@ -201,7 +201,7 @@ onWorldReady(player => {
     tintChibiLimb(parts.armL, 'arm', p.suit); tintChibiLimb(parts.armR, 'arm', p.suit);   // recolor only the sleeve, not the baked skin hand
     tintChibiLimb(parts.legL, 'leg', p.pants); tintChibiLimb(parts.legR, 'leg', p.pants); // recolor only the pants, not the baked shoe
   }
-  const slotXZ = i => [-280.0 - i * 1.1, -405.4];    // slot 0 = front (nearest booth), west along the sidewalk
+  const slotXZ = i => [-275.0 - i * 1.1, -411.6];    // slot 0 = front (nearest booth), west along the sidewalk
 
   const qRoot = new THREE.Group(); wrigleyRoot.add(qRoot);
   const queue = [];
@@ -282,9 +282,9 @@ onWorldReady(player => {
     skin: pick(SKINS), hair: pick(HAIRS),
   }));
   const streamA = makeStream(                        // Addison east barricade -> marquee corner -> gate
-    [{ x: -126, z: -401 }, { x: -283, z: -401 }, { x: -283, z: -408.5 }], jerseyPals());
+    [{ x: -126, z: -401 }, { x: -280, z: -401 }, { x: -278, z: -413 }], jerseyPals());
   const streamB = makeStream(                        // Waveland west barricade -> Sheffield -> Bleacher Gate
-    [{ x: -328, z: -502 }, { x: -190, z: -502 }, { x: -196, z: -494 }], jerseyPals());
+    [{ x: -348, z: -562 }, { x: -184, z: -562 }, { x: -190, z: -552 }], jerseyPals());
   // moverLod: the framework owns group/twin visibility (it swaps in a 1-draw twin
   // past 90m). We drive PRESENCE via n._lodActive (walk=on, wait/done=off) and keep
   // updating the live position each frame — even while hidden — so the mid-range

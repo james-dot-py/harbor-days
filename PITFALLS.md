@@ -34,3 +34,9 @@ few turns to find; keep each to one line of symptom + fix.
   commits/pushes/result.json land mid-task, and each session attributes the
   work to itself. Before close-out, re-check git log + result.json provenance
   and re-verify tree state against what you actually reviewed.
+- gen-waypoints feat() does NOT clearance-filter: a feature ON a corridor edge
+  (knothole, wall signs) snaps the stand onto itself and parks cameras inside
+  the wall — use featW with an explicit stand out in the street.
+- insidePoly(x,z,inset) tests the point MOVED inset toward home plate: a big
+  inset (3.0) accepts points ~inset outside the wall (the RF foul pole landed
+  in the Sheffield sidewalk). Bound placement overshoot with inset ≤ 0.5.

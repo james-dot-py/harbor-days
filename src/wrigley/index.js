@@ -45,8 +45,8 @@ function paraStrip(off0, off1, z0, z1, y, color, step = 6) {
 const ASPHALT = 0x4a4a52, GROUND = 0x63594e;
 
 function buildGround() {
-  const g = flatGrid(300, 300, 40, 40, -0.04, GROUND);
-  g.position.set(-240, -0.04, -445);
+  const g = flatGrid(320, 430, 42, 56, -0.04, GROUND);
+  g.position.set(-240, -0.04, -470);
   wrigleyRoot.add(g);
   // street asphalt (base layer; streets.js adds curbs/markings/furniture)
   const T = WV.STREETS_W;
@@ -107,8 +107,8 @@ function buildMinimapBase() {
   const dot = (x, z, c, r = 5) => { const [mx, my] = wm(x, z); g.fillStyle = c; g.beginPath(); g.arc(mx, my, r, 0, 7); g.fill(); };
   dot(WV.STADIUM_W.marquee.x, WV.STADIUM_W.marquee.z, '#e0574a', 6);   // marquee
   dot(-140, WV.STATION_W.signZ, '#c62828', 5);                         // Addison stop
-  dot(-176, -487, '#e8b64c', 4);                                       // Murphy's
-  dot(-242, -516, '#d05a3a', 4);                                       // Engine 78
+  dot(-170, -541, '#e8b64c', 4);                                       // Murphy's
+  dot(-242, -582, '#d05a3a', 4);                                       // Engine 78
   return cv;
 }
 

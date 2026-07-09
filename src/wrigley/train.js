@@ -12,7 +12,7 @@ import { STATION_W } from '../data/wrigleyville.js';
 const R = mulberry32(3155);
 const CAR_Y = STATION_W.tracks.y + 1.54;         // body top 10.64 — clears the canopy shell (10.68)
 const PLAT_Z = (STATION_W.platform.z0 + STATION_W.platform.z1) / 2;
-const Z_N = -578, Z_S = -312;                     // embankment span
+const Z_N = -585, Z_S = -312;                     // embankment span
 const CRUISE = 16, DECEL = 40;
 
 function buildRake(x) {

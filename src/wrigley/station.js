@@ -10,8 +10,8 @@ import { collide } from '../props.js';
 import { wrigleyRoot } from './index.js';
 import { atlasPlane } from './village.js';   // shared static-plane atlas (buildVillage emits it, last)
 // Geometry follows STATION_W (../data/wrigleyville.js): embank x-148..-132 topY7.0;
-// bridge z-407..-393 clearY5.6; platform x-143..-137 z-444..-426 y7.6; stair
-// z-426..-410; landing z-410..-404; track centers x-145.5/-134.5.
+// bridge z-414..-386 clearY5.6; platform x-143..-137 z-451..-433 y7.6; stair
+// z-433..-417; landing z-417..-411; track centers x-145.5/-134.5.
 
 const R = mulberry32(940);
 
@@ -103,25 +103,25 @@ function roundelTex() {                                  // transparent CTA red 
 
 export function buildStation() {
   const CX = -140;                                       // embankment centerline x
-  const ZN0 = -580, ZN1 = -407;                          // north mass z-span
-  const ZS0 = -393, ZS1 = -310;                          // south mass z-span
-  const nCz = (ZN0 + ZN1) / 2, nLen = ZN1 - ZN0;         // -493.5, 173
-  const sCz = (ZS0 + ZS1) / 2, sLen = ZS1 - ZS0;         // -351.5, 83
+  const ZN0 = -587, ZN1 = -414;                          // north mass z-span
+  const ZS0 = -386, ZS1 = -310;                          // south mass z-span
+  const nCz = (ZN0 + ZN1) / 2, nLen = ZN1 - ZN0;         // -500.5, 173
+  const sCz = (ZS0 + ZS1) / 2, sLen = ZS1 - ZS0;         // -348, 76
   const WX = -145.5, EXX = -134.5;                       // track centers
-  const trkZc = -445, trkLen = 266;                      // -578..-312 continuous run
+  const trkZc = -448.5, trkLen = 273;                    // -585..-312 continuous run
   const bZ = -400;                                       // Addison bridge center
 
   // =====================================================================
   // 1) EMBANKMENT MASSES  (north split around the stair channel + doorway)
   // =====================================================================
   instBoxes([
-    // south mass (solid) — its north face is the south bridge abutment (z-393)
+    // south mass (solid) — its north face is the south bridge abutment (z-386)
     { x: CX, y: 3.5, z: sCz, sx: 16, sy: 7, sz: sLen },
     // north mass, split so the stair channel (x-142..-138) stays open to sky:
     { x: -145, y: 3.5, z: nCz, sx: 6, sy: 7, sz: nLen },      // west block
     { x: -135, y: 3.5, z: nCz, sx: 6, sy: 7, sz: nLen },      // east block
-    { x: CX,  y: 3.5, z: -503, sx: 4, sy: 7, sz: 154 },       // center, N of the stair
-    { x: CX,  y: 4.9, z: -407.75, sx: 4, sy: 4.2, sz: 1.5 },  // lintel wall over the doorway (front flush z-407)
+    { x: CX,  y: 3.5, z: -510, sx: 4, sy: 7, sz: 154 },       // center, N of the stair
+    { x: CX,  y: 4.9, z: -414.75, sx: 4, sy: 4.2, sz: 1.5 },  // lintel wall over the doorway (front flush z-414)
   ], CONC, 48);
 
   // battered base course + coped tops along the outer faces (both masses)
@@ -157,12 +157,12 @@ export function buildStation() {
   // 2) BRIDGE over Addison (plate girder; underside clear >= y 5.6)
   // =====================================================================
   {                                                       // deck (bottom 5.6, top flush 7.0)
-    const deck = new THREE.Mesh(new THREE.BoxGeometry(13.6, 1.4, 14, 1, 1, 5), toon(DECKC));
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(13.6, 1.4, 28, 1, 1, 5), toon(DECKC));
     deck.position.set(CX, 6.3, bZ); wrigleyRoot.add(deck);
   }
   instBoxes([                                             // two deep side girders
-    { x: -147.3, y: 6.55, z: bZ, sx: 0.4, sy: 1.9, sz: 14 },
-    { x: -132.7, y: 6.55, z: bZ, sx: 0.4, sy: 1.9, sz: 14 },
+    { x: -147.3, y: 6.55, z: bZ, sx: 0.4, sy: 1.9, sz: 28 },
+    { x: -132.7, y: 6.55, z: bZ, sx: 0.4, sy: 1.9, sz: 28 },
   ], MAROON, 4);
   {                                                       // 'ADDISON' plate on each outward face
     const mat = bmat(0xffffff, { map: girderTex(), side: THREE.DoubleSide });
@@ -183,7 +183,7 @@ export function buildStation() {
   ], BALLAST, 66);
   {                                                       // ties
     const zs = [];
-    for (let z = -578; z <= -312; z += 0.62) zs.push(z);
+    for (let z = -585; z <= -312; z += 0.62) zs.push(z);
     const mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(2.6, 0.16, 0.28), toon(TIE), zs.length * 2);
     let i = 0;
     for (const z of zs) for (const cx of [WX, EXX]) {
@@ -208,24 +208,24 @@ export function buildStation() {
   // =====================================================================
   {
     const slab = new THREE.Mesh(new THREE.BoxGeometry(6, 0.25, 18, 1, 1, 6), toon(SLAB));
-    slab.position.set(CX, 7.475, -435); wrigleyRoot.add(slab);
+    slab.position.set(CX, 7.475, -442); wrigleyRoot.add(slab);
   }
   {                                                       // yellow tactile warning strips
     const mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.34, 0.06, 18, 1, 1, 6), bmat(YEL), 2);
     [-142.85, -137.15].forEach((x, i) => {
-      M.compose(V.set(x, 7.63, -435), Q.identity(), S.set(1, 1, 1)); mesh.setMatrixAt(i, M);
+      M.compose(V.set(x, 7.63, -442), Q.identity(), S.set(1, 1, 1)); mesh.setMatrixAt(i, M);
     });
     mesh.instanceMatrix.needsUpdate = true; wrigleyRoot.add(mesh);
   }
   {                                                       // short railing at the north end
     const posts = new THREE.InstancedMesh(new THREE.BoxGeometry(0.08, 1.0, 0.08), toon(RAILM), 4);
     [-142.5, -140.83, -139.17, -137.5].forEach((x, i) => {
-      M.compose(V.set(x, 8.1, -444), Q.identity(), S.set(1, 1, 1)); posts.setMatrixAt(i, M);
+      M.compose(V.set(x, 8.1, -451), Q.identity(), S.set(1, 1, 1)); posts.setMatrixAt(i, M);
     });
     posts.instanceMatrix.needsUpdate = true; wrigleyRoot.add(posts);
     const bars = new THREE.InstancedMesh(new THREE.BoxGeometry(5.4, 0.06, 0.06), toon(RAILM), 2);
     [8.5, 8.05].forEach((y, i) => {
-      M.compose(V.set(CX, y, -444), Q.identity(), S.set(1, 1, 1)); bars.setMatrixAt(i, M);
+      M.compose(V.set(CX, y, -451), Q.identity(), S.set(1, 1, 1)); bars.setMatrixAt(i, M);
     });
     bars.instanceMatrix.needsUpdate = true; wrigleyRoot.add(bars);
   }
@@ -238,15 +238,15 @@ export function buildStation() {
     const under = new THREE.Mesh(
       new THREE.CylinderGeometry(22, 22, 14, 6, 8, true, -0.23, 0.46),
       toon(CANU, { mat: { side: THREE.DoubleSide } }));
-    under.rotation.x = -Math.PI / 2; under.position.set(CX, yAxis, -435); wrigleyRoot.add(under);
+    under.rotation.x = -Math.PI / 2; under.position.set(CX, yAxis, -442); wrigleyRoot.add(under);
     const top = new THREE.Mesh(
       new THREE.CylinderGeometry(22.22, 22.22, 14.4, 6, 8, true, -0.26, 0.52),
       toon(CANT, { mat: { side: THREE.DoubleSide } }));
-    top.rotation.x = -Math.PI / 2; top.position.set(CX, yAxis, -435); wrigleyRoot.add(top);
+    top.rotation.x = -Math.PI / 2; top.position.set(CX, yAxis, -442); wrigleyRoot.add(top);
   }
   {                                                       // centre row of white steel posts
     const posts = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.13, 0.13, 3.4, 8), toon(STEEL), 4);
-    [-441, -437, -433, -429].forEach((z, i) => {
+    [-448, -444, -440, -436].forEach((z, i) => {
       M.compose(V.set(CX, 9.3, z), Q.identity(), S.set(1, 1, 1)); posts.setMatrixAt(i, M);
     });
     posts.instanceMatrix.needsUpdate = true; wrigleyRoot.add(posts);
@@ -255,9 +255,9 @@ export function buildStation() {
     const mat = bmat(0xffffff, { map: stationTex(), side: THREE.DoubleSide });
     const mesh = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), mat, 3);
     const items = [
-      { x: CX, y: 9.6, z: -441.5, sx: 3.2, sy: 0.9, ry: Math.PI },        // faces north
-      { x: CX, y: 9.6, z: -428.5, sx: 3.2, sy: 0.9, ry: 0 },              // faces south
-      { x: -139.7, y: 9.2, z: -435, sx: 2.1, sy: 0.72, ry: Math.PI / 2 }, // post blade
+      { x: CX, y: 9.6, z: -448.5, sx: 3.2, sy: 0.9, ry: Math.PI },        // faces north
+      { x: CX, y: 9.6, z: -435.5, sx: 3.2, sy: 0.9, ry: 0 },              // faces south
+      { x: -139.7, y: 9.2, z: -442, sx: 2.1, sy: 0.72, ry: Math.PI / 2 }, // post blade
     ];
     items.forEach((it, i) => {
       E.set(0, it.ry, 0); Q.setFromEuler(E);
@@ -273,7 +273,7 @@ export function buildStation() {
   {                                                       // ~12 visible treads down the ramp
     const treads = new THREE.InstancedMesh(new THREE.BoxGeometry(4, 0.16, 1.35), toon(SLAB), 12);
     for (let i = 0; i < 12; i++) {
-      const t = (i + 0.5) / 12, z = -426 + t * 16, y = 7.6 - t * 6.7;
+      const t = (i + 0.5) / 12, z = -433 + t * 16, y = 7.6 - t * 6.7;
       M.compose(V.set(CX, y - 0.08, z), Q.identity(), S.set(1, 1, 1)); treads.setMatrixAt(i, M);
     }
     treads.instanceMatrix.needsUpdate = true; wrigleyRoot.add(treads);
@@ -283,25 +283,25 @@ export function buildStation() {
     const rails = new THREE.InstancedMesh(new THREE.BoxGeometry(0.06, 0.06, 17.6), toon(RAILM), 2);
     E.set(rampPhi, 0, 0); Q.setFromEuler(E);
     [-142.5, -137.5].forEach((x, i) => {
-      M.compose(V.set(x, 4.5, -418), Q, S.set(1, 1, 1)); walls.setMatrixAt(i, M);
-      M.compose(V.set(x, 5.4, -418), Q, S.set(1, 1, 1)); rails.setMatrixAt(i, M);
+      M.compose(V.set(x, 4.5, -425), Q, S.set(1, 1, 1)); walls.setMatrixAt(i, M);
+      M.compose(V.set(x, 5.4, -425), Q, S.set(1, 1, 1)); rails.setMatrixAt(i, M);
     });
     walls.instanceMatrix.needsUpdate = true; rails.instanceMatrix.needsUpdate = true;
     wrigleyRoot.add(walls, rails);
   }
   {                                                       // arched doorway in the abutment face
     const arch = new THREE.Mesh(new THREE.TorusGeometry(2.1, 0.26, 6, 16, Math.PI), toon(VOUS));
-    arch.position.set(CX, 2.6, -406.85); wrigleyRoot.add(arch);
+    arch.position.set(CX, 2.6, -413.85); wrigleyRoot.add(arch);
     const lintel = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 0.6),
       bmat(0xffffff, { map: lintelTex(), side: THREE.DoubleSide }));
-    lintel.position.set(CX, 3.15, -406.8); atlasPlane(lintel, false);   // 'ADDISON' lintel -> shared wrigley atlas
+    lintel.position.set(CX, 3.15, -413.8); atlasPlane(lintel, false);   // 'ADDISON' lintel -> shared wrigley atlas
     const roundel = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9),
       bmat(0xffffff, { map: roundelTex(), transparent: true, side: THREE.DoubleSide }));
-    roundel.position.set(CX, 4.9, -406.8); atlasPlane(roundel, true);   // transparent CTA roundel -> shared ALPHA atlas
+    roundel.position.set(CX, 4.9, -413.8); atlasPlane(roundel, true);   // transparent CTA roundel -> shared ALPHA atlas
   }
   instBoxes([                                             // non-blocking turnstile hint (no collider)
-    { x: -139, y: 0.7, z: -409, sx: 0.14, sy: 1.4, sz: 0.14 },
-    { x: -140, y: 1.0, z: -409, sx: 1.6, sy: 0.12, sz: 0.12 },
+    { x: -139, y: 0.7, z: -416, sx: 0.14, sy: 1.4, sz: 0.14 },
+    { x: -140, y: 1.0, z: -416, sx: 1.6, sy: 0.12, sz: 0.12 },
   ], RAILM, 1);
 
   // =====================================================================
@@ -309,11 +309,11 @@ export function buildStation() {
   //    under-bridge street clear; never let the player reach the tracks)
   // =====================================================================
   // north bridge abutment — solid wall flanking the doorway gap (x-142..-138)
-  for (const x of [-147, -145, -143, -137, -135, -133]) collide(x, -407.5, 1.1);
+  for (const x of [-147, -145, -143, -137, -135, -133]) collide(x, -414.5, 1.1);
   // south bridge abutment — full wall
-  for (const x of [-147, -145, -143, -141, -139, -137, -135, -133]) collide(x, -392.5, 1.1);
+  for (const x of [-147, -145, -143, -141, -139, -137, -135, -133]) collide(x, -385.5, 1.1);
   // platform edges facing the track beds
-  for (let z = -444; z <= -426; z += 3) { collide(-143.4, z, 0.4); collide(-136.6, z, 0.4); }
-  // stair channel side walls (skip z-426: the stair mouth stays open)
-  for (let z = -423; z <= -410; z += 3.2) { collide(-142.6, z, 0.35); collide(-137.4, z, 0.35); }
+  for (let z = -451; z <= -433; z += 3) { collide(-143.4, z, 0.4); collide(-136.6, z, 0.4); }
+  // stair channel side walls (skip z-433: the stair mouth stays open)
+  for (let z = -430; z <= -417; z += 3.2) { collide(-142.6, z, 0.35); collide(-137.4, z, 0.35); }
 }

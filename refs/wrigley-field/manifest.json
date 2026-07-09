@@ -106,6 +106,14 @@
       "license": "owner reference only",
       "fetchDate": "2026-07-09T13:35:34.348Z",
       "note": "THE Caray statue setting: red-brick plaza apron, statue set off the street, green bleacher gate + CHICAGO CUBS pennant drum behind"
+    },
+    {
+      "file": "owner-verdict-bleacher-corner-cramped.png",
+      "source": "owner",
+      "author": "owner-supplied",
+      "license": "owner reference only",
+      "fetchDate": "2026-07-09T00:00:00.000Z",
+      "note": "Owner playtest verdict ('Several issues with this', 2026-07-09, drove task 009): the pre-rework Bleacher corner — Caray statue crammed on the sidewalk through-line, game stall against it, gate flush with the walk, streets too narrow"
     }
   ]
 }

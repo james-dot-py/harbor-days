@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-09T13:43:24.944Z",
+ "generated": "2026-07-09T14:52:31.502Z",
  "count": 54,
  "waypoints": [
   {
@@ -628,7 +628,7 @@
    "area": "wrigleyville",
    "cell": "wrigleyville",
    "x": -140,
-   "z": -435,
+   "z": -442,
    "framings": [
     {
      "yaw": 3.14,
@@ -652,23 +652,23 @@
    "id": "wv-marquee",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -286,
-   "z": -402,
+   "x": -288,
+   "z": -401,
    "framings": [
     {
-     "yaw": 2.68,
+     "yaw": 2.57,
      "pitch": 0.25,
-     "dist": 14
+     "dist": 15
     },
     {
-     "yaw": 3.08,
+     "yaw": 2.97,
      "pitch": 0.25,
-     "dist": 14
+     "dist": 15
     },
     {
-     "yaw": 2.68,
+     "yaw": 2.17,
      "pitch": 0.25,
-     "dist": 9.8
+     "dist": 15
     }
    ],
    "expectation": "THE shot: the red Wrigley Field marquee on the ROUNDED Clark & Addison corner, reading like the real sign per the owner ref: arched crown with 'WRIGLEY FIELD' set along the arc, small 'HOME OF' over large 'CHICAGO CUBS', art-deco scroll shoulders, white pinstripe trim, and a black rounded message board with DOT-MATRIX lettering (live message line). The cream facade visibly curves behind it. A Chicagoan should recognize THIS sign instantly."
@@ -677,21 +677,21 @@
    "id": "wv-scoreboard",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -186,
-   "z": -500,
+   "x": -185,
+   "z": -554,
    "framings": [
     {
-     "yaw": -0.92,
+     "yaw": -0.98,
      "pitch": -0.35,
      "dist": 12
     },
     {
-     "yaw": -0.52,
+     "yaw": -0.58,
      "pitch": -0.35,
      "dist": 12
     },
     {
-     "yaw": -1.32,
+     "yaw": -1.38,
      "pitch": -0.35,
      "dist": 12
     }
@@ -702,98 +702,98 @@
    "id": "wv-gate-marquee",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -283,
-   "z": -403,
+   "x": -286,
+   "z": -401,
    "framings": [
     {
-     "yaw": 2.97,
+     "yaw": 2.65,
      "pitch": 0.14,
      "dist": 16
     },
     {
-     "yaw": 3.37,
+     "yaw": 3.05,
      "pitch": 0.14,
      "dist": 16
     },
     {
-     "yaw": 2.57,
+     "yaw": 2.25,
      "pitch": 0.14,
      "dist": 16
     }
    ],
-   "expectation": "The Marquee Gate ON the rounded corner's apex under the marquee: gate recess in the curved cream facade with a walkable sidewalk apron in front, crowd/turnstile dressing."
+   "expectation": "The Marquee Gate ON the rounded corner's apex under the marquee: gate recess in the curved cream facade, with the RED-BRICK corner apron paving the ground in front (the 009 signature Wrigley ground treatment), crowd/turnstile dressing."
   },
   {
    "id": "wv-gate-gallagher",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -282,
-   "z": -455,
+   "x": -286,
+   "z": -483,
    "framings": [
     {
-     "yaw": 2.18,
+     "yaw": 2.15,
      "pitch": 0.14,
      "dist": 13
     },
     {
-     "yaw": 2.58,
+     "yaw": 2.55,
      "pitch": 0.14,
      "dist": 13
     },
     {
-     "yaw": 1.78,
+     "yaw": 1.75,
      "pitch": 0.14,
      "dist": 13
     }
    ],
-   "expectation": "The Gallagher Way gate on the plaza's east side: brick facade arches opening onto the plaza."
+   "expectation": "The Gallagher Way gate on the plaza's east side: gate recess in the west-stands facade with a red-brick pad on the plaza in front of it."
   },
   {
    "id": "wv-gate-bleacher",
    "area": "wrigleyville",
    "cell": "wrigleyville",
    "x": -190,
-   "z": -500,
+   "z": -553,
    "framings": [
     {
-     "yaw": -0.79,
+     "yaw": -0.97,
      "pitch": 0.12,
      "dist": 14
     },
     {
-     "yaw": -0.39,
+     "yaw": -0.57,
      "pitch": 0.12,
      "dist": 14
     },
     {
-     "yaw": -1.19,
+     "yaw": -1.37,
      "pitch": 0.12,
      "dist": 14
     }
    ],
-   "expectation": "The Bleacher Gate at Sheffield & Waveland: brick corner entrance below the bleachers; Murphy's across the street."
+   "expectation": "The Bleacher Gate on the CHAMFERED Sheffield & Waveland corner (009 rework): the gate faces the intersection at 45 degrees with its green BLEACHERS sign, fronted by a generous RED-BRICK plaza apron carrying the Harry Caray statue centered and OFF the sidewalk through-line, gate behind the statue per the owner reference; the green scoreboard rides above/behind the corner; Murphy's across the street."
   },
   {
    "id": "wv-knothole",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -196,
-   "z": -447,
+   "x": -197.5,
+   "z": -469,
    "framings": [
     {
-     "yaw": 0.01,
-     "pitch": 0.15,
-     "dist": 8
-    },
-    {
-     "yaw": 0.61,
-     "pitch": 0.15,
+     "yaw": -1.57,
+     "pitch": 0.12,
      "dist": 7
     },
     {
-     "yaw": -0.59,
-     "pitch": 0.23,
-     "dist": 10
+     "yaw": -1.17,
+     "pitch": 0.12,
+     "dist": 7
+    },
+    {
+     "yaw": -1.97,
+     "pitch": 0.12,
+     "dist": 7
     }
    ],
    "expectation": "The knothole: a screened opening in the right-field wall on Sheffield where you can peek at the field inside."
@@ -803,22 +803,22 @@
    "area": "wrigleyville",
    "cell": "wrigleyville",
    "x": -140,
-   "z": -396.5,
+   "z": -398,
    "framings": [
     {
      "yaw": 3.14,
      "pitch": 0.06,
-     "dist": 11
+     "dist": 9
     },
     {
      "yaw": 3.54,
      "pitch": 0.06,
-     "dist": 11
+     "dist": 9
     },
     {
      "yaw": 2.74,
      "pitch": 0.06,
-     "dist": 11
+     "dist": 9
     }
    ],
    "expectation": "The station stair doorway on Addison under the girder rail bridge: solid green embankment mass, stair door, bridge overhead with the street passing beneath."
@@ -827,8 +827,8 @@
    "id": "wv-murphys",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -184,
-   "z": -487,
+   "x": -178,
+   "z": -541,
    "framings": [
     {
      "yaw": 1.57,
@@ -852,23 +852,23 @@
    "id": "wv-engine78",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -235,
-   "z": -504.5,
+   "x": -230,
+   "z": -564,
    "framings": [
     {
-     "yaw": -2.59,
+     "yaw": -2.55,
      "pitch": 0.16,
      "dist": 12
     },
     {
-     "yaw": -2.19,
+     "yaw": -2.15,
      "pitch": 0.16,
      "dist": 12
     },
     {
-     "yaw": -2.59,
+     "yaw": -2.95,
      "pitch": 0.16,
-     "dist": 8.4
+     "dist": 12
     }
    ],
    "expectation": "Engine 78 firehouse on Waveland: red-doored fire station beside the park (1052 W Waveland)."
@@ -877,8 +877,8 @@
    "id": "wv-cubby-bear",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -298.94,
-   "z": -393.39,
+   "x": -304.94,
+   "z": -386.39,
    "framings": [
     {
      "yaw": -0.39,
@@ -902,21 +902,21 @@
    "id": "wv-bar-sluggers",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -318.24,
+   "x": -324.24,
    "z": -482.84,
    "framings": [
     {
-     "yaw": -0.55,
-     "pitch": -0.24,
-     "dist": 11.9
+     "yaw": -1.3,
+     "pitch": -0.3,
+     "dist": 14
     },
     {
      "yaw": -0.9,
      "pitch": -0.3,
-     "dist": 19
+     "dist": 14
     },
     {
-     "yaw": -1.3,
+     "yaw": -1.7,
      "pitch": -0.3,
      "dist": 14
     }
@@ -927,14 +927,9 @@
    "id": "wv-bar-sports-corner",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -313.2,
+   "x": -319.2,
    "z": -464.84,
    "framings": [
-    {
-     "yaw": -2.05,
-     "pitch": -0.24,
-     "dist": 11.9
-    },
     {
      "yaw": -1.3,
      "pitch": -0.3,
@@ -942,6 +937,11 @@
     },
     {
      "yaw": -0.9,
+     "pitch": -0.3,
+     "dist": 14
+    },
+    {
+     "yaw": -1.7,
      "pitch": -0.3,
      "dist": 14
     }
@@ -952,7 +952,7 @@
    "id": "wv-bar-casey-s",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -308.16,
+   "x": -314.16,
    "z": -446.84,
    "framings": [
     {
@@ -977,7 +977,7 @@
    "id": "wv-bar-the-dugout",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -303.12,
+   "x": -309.12,
    "z": -428.84,
    "framings": [
     {
@@ -991,9 +991,9 @@
      "dist": 14
     },
     {
-     "yaw": -1.3,
+     "yaw": -1.7,
      "pitch": -0.3,
-     "dist": 9.8
+     "dist": 14
     }
    ],
    "expectation": "THE DUGOUT bar front on the west side of Clark: neon signage readable in the bar row."
@@ -1003,7 +1003,7 @@
    "area": "wrigleyville",
    "cell": "wrigleyville",
    "x": -160,
-   "z": -396,
+   "z": -389,
    "framings": [
     {
      "yaw": 0.01,
@@ -1028,57 +1028,57 @@
    "area": "wrigleyville",
    "cell": "wrigleyville",
    "x": -212,
-   "z": -397,
+   "z": -402,
    "framings": [
     {
-     "yaw": 0.01,
+     "yaw": 3.14,
      "pitch": 0.15,
      "dist": 8
     },
     {
-     "yaw": 0.61,
+     "yaw": 3.54,
      "pitch": 0.15,
-     "dist": 7
+     "dist": 8
     },
     {
-     "yaw": -0.59,
-     "pitch": 0.23,
-     "dist": 10
+     "yaw": 2.74,
+     "pitch": 0.15,
+     "dist": 8
     }
    ],
-   "expectation": "A souvenir/cap stand mid-block on Addison, stadium facade context behind."
+   "expectation": "A souvenir/cap stand on the Addison NORTH sidewalk mid-block, the stadium facade rising directly behind it."
   },
   {
    "id": "wv-stall-2",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -189,
-   "z": -482.5,
+   "x": -193,
+   "z": -522,
    "framings": [
     {
-     "yaw": -2.91,
+     "yaw": -2.5,
      "pitch": 0.1,
      "dist": 9
     },
     {
-     "yaw": -2.51,
+     "yaw": -2.1,
      "pitch": 0.1,
-     "dist": 6.3
+     "dist": 9
     },
     {
-     "yaw": -3.26,
-     "pitch": 0.16,
-     "dist": 7.65
+     "yaw": -2.9,
+     "pitch": 0.1,
+     "dist": 9
     }
    ],
-   "expectation": "A souvenir/cap stand on Sheffield at Waveland near the bleacher corner."
+   "expectation": "A souvenir/cap stand on the Sheffield west sidewalk south of the Caray plaza, near the bleacher corner."
   },
   {
    "id": "wv-statue-row",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -292,
-   "z": -458,
+   "x": -299,
+   "z": -508,
    "framings": [
     {
      "yaw": 3.14,
@@ -1102,71 +1102,71 @@
    "id": "wv-caray-statue",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -192.5,
-   "z": -494,
+   "x": -196,
+   "z": -550,
    "framings": [
     {
-     "yaw": -0.44,
+     "yaw": -1.02,
      "pitch": -0.12,
      "dist": 8
     },
     {
-     "yaw": -0.04,
+     "yaw": -0.62,
      "pitch": -0.12,
      "dist": 8
     },
     {
-     "yaw": -0.84,
+     "yaw": -1.42,
      "pitch": -0.12,
      "dist": 8
     }
    ],
-   "expectation": "The Harry Caray statue on the west sidewalk outside the Bleacher Gate: exuberant pose with glasses; second Caray honor in the game, like Chicago does."
+   "expectation": "The Harry Caray statue CENTERED on the red-brick Caray plaza in front of the chamfered Bleacher Gate (009, per the owner reference): exuberant mic-aloft pose with glasses on a limestone pedestal, brick paving underfoot, the gate and its BLEACHERS sign behind, clear of the sidewalk through-lines."
   },
   {
    "id": "wv-gallagher-way",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -283.44,
-   "z": -448,
+   "x": -286.24,
+   "z": -483,
    "framings": [
     {
-     "yaw": 2.46,
+     "yaw": 2.14,
      "pitch": 0.25,
      "dist": 13
     },
     {
-     "yaw": 3.06,
+     "yaw": 2.74,
      "pitch": 0.25,
      "dist": 10
     },
     {
-     "yaw": 1.86,
+     "yaw": 1.54,
      "pitch": 0.33,
      "dist": 15
     }
    ],
-   "expectation": "Gallagher Way plaza hugging the stadium's WEST stands along Clark: lawn/pavers, splash pad, planters, plaza life; the Gallagher office block closes its north end (the plaza no longer reaches Waveland)."
+   "expectation": "Gallagher Way plaza hugging the stadium's WEST stands along Clark — much larger after the 009 rework: lawn/pavers, splash pad, planters, plaza life; statue row + video board at the north edge; the Gallagher office block closes its north end (the plaza does not reach Waveland)."
   },
   {
    "id": "wv-rooftop-view",
    "area": "wrigleyville",
    "cell": "wrigleyville",
    "x": -212.5,
-   "z": -515,
+   "z": -581,
    "framings": [
     {
-     "yaw": 0.01,
+     "yaw": -0.07,
      "pitch": 0.15,
      "dist": 10
     },
     {
-     "yaw": 0.61,
+     "yaw": 0.53,
      "pitch": 0.15,
      "dist": 7
     },
     {
-     "yaw": -0.59,
+     "yaw": -0.67,
      "pitch": 0.23,
      "dist": 12
     }
@@ -1177,7 +1177,7 @@
    "id": "wv-sluggers-cage",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -328.4,
+   "x": -334.4,
    "z": -480,
    "framings": [
     {
@@ -1202,7 +1202,7 @@
    "id": "wv-sluggers-stair",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -317.81,
+   "x": -323.81,
    "z": -482.97,
    "framings": [
     {
@@ -1271,7 +1271,7 @@
      "dist": 10
     }
    ],
-   "expectation": "Addison midblock street canyon: game-day street enclosed on BOTH sides — station embankment/stalls one way, stadium facade and storefronts the other. Every commercial ground floor shows a DOOR and glazing; lamp posts and street furniture (meters/hydrant/newsboxes) set a rhythm; no blank single-color wall longer than ~8 m; crosswalks and signals read at the corners."
+   "expectation": "Addison midblock street canyon (double-wide game-day scale after 009): street enclosed on BOTH sides — station embankment/stalls one way, stadium facade and storefronts the other. Every commercial ground floor shows a DOOR and glazing; lamp posts and street furniture (meters/hydrant/newsboxes) set a rhythm; no blank single-color wall longer than ~8 m; crosswalks and signals read at the corners."
   },
   {
    "id": "wv-street-sheffield",
@@ -1296,14 +1296,14 @@
      "dist": 10
     }
    ],
-   "expectation": "Sheffield midblock canyon: bleacher wall + knothole on one side, rooftop-brownstone fronts (stoops, bay windows, doors) on the other. Furniture rhythm on the sidewalk; parked cars plausible; no bare prism walls."
+   "expectation": "Sheffield midblock canyon (double-wide after 009): bleacher wall + knothole on one side, rooftop-brownstone fronts (stoops, bay windows, doors) on the other. Furniture rhythm on the sidewalk; parked cars plausible; no bare prism walls."
   },
   {
    "id": "wv-street-waveland",
    "area": "wrigleyville",
    "cell": "wrigleyville",
    "x": -260,
-   "z": -500,
+   "z": -560,
    "framings": [
     {
      "yaw": -1.57,
@@ -1321,7 +1321,7 @@
      "dist": 10
     }
    ],
-   "expectation": "Waveland midblock canyon: brownstone fronts with stoops/doors/cornices facing the LF wall and Engine 78; rooftop bleachers visible above; street furniture rhythm; no blank walls."
+   "expectation": "Waveland midblock canyon (double-wide after 009): brownstone fronts with stoops/doors/cornices facing the LF wall and Engine 78; rooftop bleachers visible above; street furniture rhythm; no blank walls."
   },
   {
    "id": "wv-street-clark",
@@ -1346,7 +1346,7 @@
      "dist": 10
     }
    ],
-   "expectation": "Clark St diagonal canyon: continuous bar-row storefronts (doors, glazing, awnings, neon at storefront height) on the west side, Gallagher Way/stadium on the east; pennant strings overhead attach to real anchors; furniture + signal presence; the street feels SURROUNDED, not like boxes beside a plane."
+   "expectation": "Clark St diagonal canyon (double-wide after 009): continuous bar-row storefronts (doors, glazing, awnings, neon at storefront height) on the west side, Gallagher Way/stadium on the east; pennant strings overhead attach to real anchors; furniture + signal presence; the street feels SURROUNDED, not like boxes beside a plane."
   }
  ]
 }

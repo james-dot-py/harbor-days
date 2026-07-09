@@ -36,11 +36,11 @@ const BALL_G = 20, BALL_GROUND = 0.18;
 
 // ---- the coin-op binocular stand (from wrigley/rooftops.js buildClimbable:
 //      cx = -212.5 (W1 center), bx = cx + 1.4, bz = b.z1 - 0.9) ----
-const STAND = { x: -211.1, z: -508.9 };
-const SCOREBOARD = { x: -212, z: -480 };            // aim target (data/wrigleyville scoreboard)
+const STAND = { x: -211.1, z: -574.9 };
+const SCOREBOARD = { x: -216, z: -533 };            // aim target (data/wrigleyville scoreboard)
 
-// ---- Gallagher Way toss zone (x = clarkX(z)+8..+32, z -494..-430) ----
-const LAWN_CZ = -462;                               // mid of z -494..-430
+// ---- Gallagher Way toss zone (x = clarkX(z)+14..+40, z -520..-446) ----
+const LAWN_CZ = -483;                               // mid of z -520..-446
 const LAWN = { x: clarkX(LAWN_CZ) + 20, z: LAWN_CZ, r: 30 };
 
 const inCell = () => activeCell() === 'wrigleyville';

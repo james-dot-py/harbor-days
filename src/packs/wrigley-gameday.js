@@ -31,7 +31,7 @@ const R = mulberry32(1908);
 const rr = (a, b) => a + (b - a) * R();
 
 // ------------------------------ tuning ---------------------------------
-const CENTER = { x: -240, z: -450 };      // stadium center (audio distance ref)
+const CENTER = { x: -240, z: -481 };      // stadium center (audio distance ref)
 const CYCLE = 450;                        // full game-day loop (~7.5 min)
 const T_STRETCH = 120, T_HOMER = 240, T_WIN = 390;
 const BALL_G = 20, BALL_GROUND = 0.18;    // ball gravity + resting height
@@ -134,9 +134,9 @@ function organMelody() {
 // bandpassed-noise crowd singing pulsing at the note rhythm underneath.
 function goCubsGo(px, pz) {
   const A = getAudioCtx(); if (!A.actx) return; const t0 = A.actx.currentTime;
-  let barX = clarkX(-450) - 8, barZ = -450, bd = 1e9;
+  let barX = clarkX(-450) - 16, barZ = -450, bd = 1e9;
   for (const z of [-480, -460, -440, -420]) {
-    const bx = clarkX(z) - 8, d = Math.hypot(bx - px, z - pz);
+    const bx = clarkX(z) - 16, d = Math.hypot(bx - px, z - pz);
     if (d < bd) { bd = d; barX = bx; barZ = z; }
   }
   const vol = clamp(1 - bd / 70, 0.2, 1);
@@ -188,7 +188,7 @@ function buildHeldBall() {
 }
 function buildFielder() {   // posed outfielder, visible through the knothole
   const { group, parts } = createChibi({ suit: 0x2452a0, pants: 0x20242b, skin: 0xcaa07a, hair: 0x2a2018, scale: 0.9 });
-  group.position.set(-214, 0, -452); group.rotation.y = Math.PI / 2;
+  group.position.set(-212, 0, -470); group.rotation.y = Math.PI / 2;
   parts.armL.rotation.x = -2.5; parts.armR.rotation.x = -2.5;    // both arms up (shrug/appeal)
   bakeChibiRig(group, parts);                                    // static (only .visible toggles) — baked → 1 draw
   group.visible = false;
@@ -238,8 +238,8 @@ function startHomer() {
   toast('HOMER!', 'onto Waveland — get the ball!');
   state.wrigleyHomers = (state.wrigleyHomers || 0) + 1;
   const sx = PLATE.x, sy = PLATE.y, sz = PLATE.z;            // off the bat at the plate (fieldplay)
-  const tx = -225 + rr(-2, 2), tz = -498 + rr(-1.5, 1.5);    // deterministic Waveland target
-  const T = 2.6;                                             // longer arc — clears wall + bleachers (apex ~17.5)
+  const tx = -237 + rr(-2, 2), tz = -557.5 + rr(-1.5, 1.5);  // deterministic Waveland target
+  const T = 3.0;                                             // deeper bowl — arc clears the wall + bleacher crown (apex ~23)
   ball.x = sx; ball.y = sy; ball.z = sz;
   ball.vx = (tx - sx) / T; ball.vz = (tz - sz) / T;
   ball.vy = (BALL_GROUND - sy + 0.5 * BALL_G * T * T) / T;
@@ -391,7 +391,7 @@ onWorldReady(() => {
     ivyT -= dt;
     if (ivyT <= 0) {
       ivyT = 90 + rr(0, 30);
-      if (Math.hypot(pl.x + 196, pl.z + 447) < 25 || pl.y > 5) {
+      if (Math.hypot(pl.x + 200, pl.z + 469) < 25 || pl.y > 5) {
         toast('ground-rule double', 'the ivy keeps what it takes');
         if (fielder) { fielder.visible = true; ivyShrugT = 3.2; }
       }

@@ -392,36 +392,38 @@ expect(`harbor light pos (${CH.HARBOR_LIGHT.pos[0]},${CH.HARBOR_LIGHT.pos[1]}) w
 
 // ===== WRIGLEYVILLE CELL — walkableW/surfaceYW are imported from the data
 // module itself (the engine uses the SAME functions — no mirror to drift).
-console.log('\n--- Wrigleyville: street corridors walkable ---');
-for(const [x,z] of [[-200,-400],[-140,-400],[-300,-400],[-190,-450],[-250,-500],[-230,-520],[-280,-460]])
+console.log('\n--- Wrigleyville: street corridors walkable (double-wide, task 009) ---');
+for(const [x,z] of [[-200,-400],[-140,-400],[-300,-400],[-190,-450],[-250,-560],[-230,-580],[-310,-470]])
   expect(`street (${x},${z})`,WV.walkableW(x,z),true);
-expect('Clark diagonal mid-block (-304,-450) walkable',WV.walkableW(WV.clarkX(-450),-450),true);
-expect('Clark @ Waveland (-318,-500) walkable',WV.walkableW(WV.clarkX(-500),-500),true);
+expect('Clark diagonal mid-block walkable',WV.walkableW(WV.clarkX(-450),-450),true);
+expect('Clark @ Waveland (-334.8,-560) walkable',WV.walkableW(WV.clarkX(-560),-560),true);
+expect('Addison N sidewalk (-212,-410.5) walkable',WV.walkableW(-212,-410.5),true);
+expect('Sheffield W sidewalk (-199,-530) walkable',WV.walkableW(-199,-530),true);
 
 console.log('\n--- Wrigleyville: the park + lots are NOT walkable (game day) ---');
-for(const [x,z] of [[-240,-450],[-260,-425],[-210,-480],[-176,-487],[-242,-516],[-221,-540]])
-  expect(`inside a lot (${x},${z}) NOT walkable`,WV.walkableW(x,z),false);
+for(const [x,z] of [[-240,-480],[-260,-425],[-216,-534],[-170,-541],[-242,-582],[-221,-581],[-283.5,-430]])
+  expect(`inside a lot/the park (${x},${z}) NOT walkable`,WV.walkableW(x,z),false);
 
 console.log('\n--- Wrigleyville: barricade mouths end the corridors ---');
-for(const [x,z] of [[-120,-400],[-330,-400],[-334,-500],[-180,-500],[-190,-388],[-190,-510],[-230,-548],[-290,-388]])
+for(const [x,z] of [[-120,-400],[-336,-400],[-356,-560],[-174,-560],[-190,-382],[-190,-576],[-231,-608],[-290,-382]])
   expect(`beyond barricade (${x},${z}) NOT walkable`,WV.walkableW(x,z),false);
 
 console.log('\n--- Wrigleyville: Addison platform + stairs (elevated surfaces) ---');
-expect('platform center (-140,-435) walkable',WV.walkableW(-140,-435),true);
-expect('platform y = 7.6',WV.surfaceYW(-140,-435),7.6);
-expect('track bed west (-145.5,-450) NOT walkable',WV.walkableW(-145.5,-450),false);
-expect('embankment top away from platform (-140,-470) NOT walkable',WV.walkableW(-140,-470),false);
+expect('platform center (-140,-442) walkable',WV.walkableW(-140,-442),true);
+expect('platform y = 7.6',WV.surfaceYW(-140,-442),7.6);
+expect('track bed west (-145.5,-460) NOT walkable',WV.walkableW(-145.5,-460),false);
+expect('embankment top away from platform (-140,-480) NOT walkable',WV.walkableW(-140,-480),false);
 expect('under the bridge (-140,-400) walkable at street level',WV.walkableW(-140,-400)&&WV.surfaceYW(-140,-400)===0,true);
-{ const yMid=WV.surfaceYW(-140,-418);
-  expect(`station stair mid (-140,-418) between floors (${yMid.toFixed(2)})`,yMid>1&&yMid<7.5,true); }
-expect('station stair landing (-140,-406) at street',WV.surfaceYW(-140,-406),0);
+{ const yMid=WV.surfaceYW(-140,-425);
+  expect(`station stair mid (-140,-425) between floors (${yMid.toFixed(2)})`,yMid>1&&yMid<7.5,true); }
+expect('station stair landing (-140,-413) at street',WV.surfaceYW(-140,-413),0);
 
 console.log('\n--- Wrigleyville: the climbable rooftop ---');
-expect('roof center (-212.5,-515) walkable',WV.walkableW(-212.5,-515),true);
-expect('roof y = 9.6',WV.surfaceYW(-212.5,-515),9.6);
-{ const yMid=WV.surfaceYW(-206.5,-514);
-  expect(`rooftop stair mid (-206.5,-514) between floors (${yMid.toFixed(2)})`,yMid>1&&yMid<9.5,true); }
-expect('neighbor roof (-221,-515) NOT walkable (only one is open)',WV.walkableW(-221,-515),false);
+expect('roof center (-212.5,-581) walkable',WV.walkableW(-212.5,-581),true);
+expect('roof y = 9.6',WV.surfaceYW(-212.5,-581),9.6);
+{ const yMid=WV.surfaceYW(-206.5,-580);
+  expect(`rooftop stair mid (-206.5,-580) between floors (${yMid.toFixed(2)})`,yMid>1&&yMid<9.5,true); }
+expect('neighbor roof (-221,-581) NOT walkable (only one is open)',WV.walkableW(-221,-581),false);
 
 console.log('\n--- Wrigleyville: the Sluggers rooftop cage (task 009) ---');
 { const SL=WV.SLUGGERS_W, c=Math.cos(SL.th), s=Math.sin(SL.th);
@@ -448,20 +450,27 @@ console.log('\n--- Wrigleyville: the Sluggers rooftop cage (task 009) ---');
 }
 
 console.log('\n--- Wrigleyville: Gallagher Way plaza hugs the Clark diagonal ---');
-expect('plaza @ z-460 (clark+20) walkable',WV.walkableW(WV.clarkX(-460)+20,-460),true);
-expect('east of plaza @ z-460 (clark+36) NOT walkable (stadium)',WV.walkableW(WV.clarkX(-460)+36,-460),false);
-expect('plaza does not extend south of z-430 (clark+20,z-420) NOT walkable',WV.walkableW(WV.clarkX(-420)+20,-420),false);
-expect('plaza north edge @ z-462 (clark+20) walkable',WV.walkableW(WV.clarkX(-462)+20,-462),true);
-expect('Gallagher office block @ z-480 (clark+20) NOT walkable (plaza stops at -466)',WV.walkableW(WV.clarkX(-480)+20,-480),false);
-expect('statue row spot (-290,-464) walkable',WV.walkableW(-290,-464),true);
+expect('plaza @ z-480 (clark+25) walkable',WV.walkableW(WV.clarkX(-480)+25,-480),true);
+expect('east of plaza @ z-480 (clark+44) NOT walkable (stadium)',WV.walkableW(WV.clarkX(-480)+44,-480),false);
+expect('plaza does not extend south of z-446 (clark+20,z-440) NOT walkable',WV.walkableW(WV.clarkX(-440)+20,-440),false);
+expect('plaza north edge @ z-518 (clark+20) walkable',WV.walkableW(WV.clarkX(-518)+20,-518),true);
+expect('Gallagher office block @ z-530 (clark+20) NOT walkable (plaza stops at -520)',WV.walkableW(WV.clarkX(-530)+20,-530),false);
+expect('statue row spot (-297,-516.5) walkable',WV.walkableW(-297,-516.5),true);
 
-console.log('\n--- Wrigleyville: the rounded marquee corner + its sidewalk apron ---');
-expect('apron inside the crescent (-283.5,-409.5) walkable',WV.walkableW(-283.5,-409.5),true);
-expect('apron at street level',WV.surfaceYW(-283.5,-409.5),0);
-expect('old sharp corner spot (-284.2,-407.8) now walkable apron',WV.walkableW(-284.2,-407.8),true);
-expect('behind the curve (-278,-412) NOT walkable (inside the stadium fillet)',WV.walkableW(-278,-412),false);
-expect('marquee gate apex (-281.83,-409.85) on the arc edge NOT past the wall (-280,-411)',WV.walkableW(-280,-411),false);
-expect('apron does not leak north of the Clark tangent (-286,-420) NOT walkable',WV.walkableW(-286,-420),false);
+console.log('\n--- Wrigleyville: the rounded marquee corner + its red-brick apron ---');
+expect('apron inside the crescent (-278.5,-416.5) walkable',WV.walkableW(-278.5,-416.5),true);
+expect('apron at street level',WV.surfaceYW(-278.5,-416.5),0);
+expect('apron mid-crescent (-281,-419) walkable',WV.walkableW(-281,-419),true);
+expect('behind the curve (-272,-420) NOT walkable (inside the stadium fillet)',WV.walkableW(-272,-420),false);
+expect('inside the fillet near the apex (-274,-421) NOT walkable',WV.walkableW(-274,-421),false);
+
+console.log('\n--- Wrigleyville: the Caray plaza apron at the chamfered Bleacher Gate (task 009) ---');
+expect('Caray statue spot (-206.5,-543.5) walkable',WV.walkableW(-206.5,-543.5),true);
+expect('Caray plaza at street level',WV.surfaceYW(-206.5,-543.5),0);
+expect('apron in front of the gate (-209,-541) walkable',WV.walkableW(-209,-541),true);
+expect('apron corner by the crosswalks (-203,-547) walkable',WV.walkableW(-203,-547),true);
+expect('apron meets the Sheffield sidewalk (-202.5,-540) walkable',WV.walkableW(-202.5,-540),true);
+expect('past the chamfer wall (-216,-534) NOT walkable (inside the park)',WV.walkableW(-216,-534),false);
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 process.exit(fail?1:0);

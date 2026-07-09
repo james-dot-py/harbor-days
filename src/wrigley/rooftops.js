@@ -36,7 +36,7 @@ const COL = {
 const ROOF_Y = ROOFTOPS_W.roofY;                        // 9.6 — walkable deck top
 const BODY_H = 9.5;
 const FLOORS = [1.9, 4.6, 7.3];                         // 3 storeys
-const ST = ROOFTOPS_W.stair;                            // x -208..-205, z -520(top)..-508(bottom)
+const ST = ROOFTOPS_W.stair;                            // x -208..-205, z -586(top)..-574(bottom)
 const rampY = z => ST.yTop + (ST.yBot - ST.yTop) * (z - ST.z0) / (ST.z1 - ST.z0);
 
 // --------------------- shared geometry primitives ---------------------
@@ -166,12 +166,12 @@ function wallColliders(b, h) {
 //   brick : red 3-flat with a full-height projecting bay-window stack
 //   brown : brown-brick with a raised limestone stoop
 const BLD = [
-  { x0: -226, x1: -217, z0: -522, z1: -508, face: 'S', arch: 'brick', cap: ['S', 'N', 'W'] },              // W0
-  { x0: -217, x1: -208, z0: -522, z1: -508, face: 'S', arch: 'grey', cap: ['S', 'N'], climb: true },       // W1 — climbable
-  { x0: -208, x1: -199, z0: -522, z1: -508, face: 'S', arch: 'brown', cap: ['S', 'N', 'E'] },              // W2
-  { x0: -184, x1: -170, z0: -478, z1: -462, face: 'W', arch: 'grey', cap: ['W', 'E', 'N'] },               // S0
-  { x0: -184, x1: -170, z0: -462, z1: -446, face: 'W', arch: 'brick', cap: ['W', 'E'] },                   // S1
-  { x0: -184, x1: -170, z0: -446, z1: -430, face: 'W', arch: 'brown', cap: ['W', 'E', 'S'] },              // S2
+  { x0: -226, x1: -217, z0: -588, z1: -574, face: 'S', arch: 'brick', cap: ['S', 'N', 'W'] },              // W0
+  { x0: -217, x1: -208, z0: -588, z1: -574, face: 'S', arch: 'grey', cap: ['S', 'N'], climb: true },       // W1 — climbable
+  { x0: -208, x1: -199, z0: -588, z1: -574, face: 'S', arch: 'brown', cap: ['S', 'N', 'E'] },              // W2
+  { x0: -178, x1: -164, z0: -534, z1: -518, face: 'W', arch: 'grey', cap: ['W', 'E', 'N'] },               // S0
+  { x0: -178, x1: -164, z0: -518, z1: -502, face: 'W', arch: 'brick', cap: ['W', 'E'] },                   // S1
+  { x0: -178, x1: -164, z0: -502, z1: -486, face: 'W', arch: 'brown', cap: ['W', 'E', 'S'] },              // S2
 ];
 const bodyColor = a => a === 'grey' ? COL.grey : a === 'brick' ? COL.brick : COL.brown;
 
@@ -286,7 +286,7 @@ function umbrella(x, z) {
 function buildClimbable(b) {
   const cx = (b.x0 + b.x1) / 2, e = 0.25;
   const xIn = ST.x0 + 0.3, xOut = ST.x1 - 0.3, mid = (ST.x0 + ST.x1) / 2;   // -207.7, -205.3, -206.5
-  const zTop = ST.z0, zBot = ST.z1;                                          // -520, -508
+  const zTop = ST.z0, zBot = ST.z1;                                          // -586, -574
 
   // --- external steel stair (2 stringers + 14 treads + risers) ---
   seg(xIn, ST.yBot, zBot, xIn, ST.yTop, zTop, 0.22, COL.steel);
@@ -350,7 +350,7 @@ function buildClimbable(b) {
   strand(b.x0 + 0.4, 10.5, b.z0 + 0.35, b.x1 - 0.4, 10.5, b.z0 + 0.35, 7, 0.22);
 
   // --- sandwich board at the sidewalk stair gate ---
-  const sX = -204, sZ = -506.4;
+  const sX = -204, sZ = -572.4;
   const panel = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.66), bmat(0xffffff, { map: sandwichTex(), side: THREE.DoubleSide }));
   panel.position.set(sX, 0.62, sZ); panel.rotation.x = 0.1; atlasPlane(panel, false);   // sandwich board -> shared wrigley atlas
   seg(sX - 0.34, 0.98, sZ - 0.02, sX - 0.4, 0, sZ + 0.28, 0.05, COL.dark);
@@ -363,10 +363,10 @@ export function buildRooftops() {
   for (const b of BLD) buildBuilding(b);
 
   // end-face windows on the four exposed row-ends
-  endWindows((u, y) => [-226.06, y, -515 + u], -Math.PI / 2);   // W0 west
-  endWindows((u, y) => [-198.94, y, -515 + u], Math.PI / 2);    // W2 east
-  endWindows((u, y) => [-177 + u, y, -478.06], Math.PI);        // S0 north
-  endWindows((u, y) => [-177 + u, y, -429.94], 0);              // S2 south
+  endWindows((u, y) => [-226.06, y, -581 + u], -Math.PI / 2);   // W0 west
+  endWindows((u, y) => [-198.94, y, -581 + u], Math.PI / 2);    // W2 east
+  endWindows((u, y) => [-171 + u, y, -534.06], Math.PI);        // S0 north
+  endWindows((u, y) => [-171 + u, y, -485.94], 0);              // S2 south
 
   for (const b of BLD) {
     if (b.climb) { buildClimbable(b); continue; }

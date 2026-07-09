@@ -385,7 +385,7 @@ function buildBars() {
   const Hs = [SLUGGERS_W.roofY, 11.0, 8.6, 10.2];
   VILLAGE_W.clarkBars.forEach((bar, i) => {
     const zc = (bar.z0 + bar.z1) / 2, H = Hs[i];
-    const gx = clarkX(zc) - 16, gz = zc, dep = 12, wid = (bar.z1 - bar.z0);
+    const gx = clarkX(zc) - 22, gz = zc, dep = 12, wid = (bar.z1 - bar.z0);
     const g = new THREE.Group(); g.position.set(gx, 0, gz); g.rotation.y = clarkYaw;
     g.add(M(new THREE.BoxGeometry(dep, H, wid, 2, 4, 2), toon(facades[i]), 0, H / 2, 0));
     g.add(M(new THREE.BoxGeometry(dep + 0.2, 0.45, wid + 0.02), toon(0x2c2620), 0, H - 0.22, 0));   // parapet
@@ -411,7 +411,7 @@ function buildBars() {
   // red/white/blue bunting strung along the whole row front (Clark is linear -> straight strip)
   const z0 = -486, z1 = -420, zm = (z0 + z1) / 2, len = Math.hypot(clarkX(z1) - clarkX(z0), z1 - z0);
   const bg = new THREE.Mesh(new THREE.PlaneGeometry(len, 0.8), bmat(0xffffff, { map: buntingTex(), transparent: true, side: THREE.DoubleSide }));
-  const [bx, bz] = yrot(6.4, 0, clarkYaw); bg.position.set(clarkX(zm) - 16 + bx, 7.0, zm + bz);
+  const [bx, bz] = yrot(6.4, 0, clarkYaw); bg.position.set(clarkX(zm) - 22 + bx, 7.0, zm + bz);
   bg.rotation.y = clarkYaw + Math.PI / 2; atlasPlane(bg, true);
 }
 
@@ -562,8 +562,8 @@ function pennants(x, z, ry) {
 //  limestone facade, warm window grid, GALLAGHER WAY crown over the plaza)
 // =====================================================================
 function buildGallagherOffice() {
-  const O = OFFICE_W, zc = (O.z0 + O.z1) / 2, cx = clarkX(zc) + 20;   // Clark-sheared frame, off-centred at 20
-  const H = 14, dep = 22, wid = 23;                  // dep = off-depth (kept inset of off 8…32), wid = frontage along Clark
+  const O = OFFICE_W, zc = (O.z0 + O.z1) / 2, cx = clarkX(zc) + 27;   // Clark-sheared frame, off-centred at 27
+  const H = 14, dep = 24, wid = 24;                  // dep = off-depth (kept inset of off 15…39), wid = frontage along Clark
   const lime = toon(0x9a948b), stone = toon(0xe6ddc8);   // stone reuses Engine 78's limestone material (no new draw call)
   const g = new THREE.Group(); g.position.set(cx, 0, zc); g.rotation.y = clarkYaw;
   g.add(M(new THREE.BoxGeometry(dep, H, wid, 2, 4, 2), lime, 0, H / 2, 0));            // main mass
@@ -595,14 +595,14 @@ function buildGallagher() {
   const G = GALLAGHER_W;
   add(paraStrip(G.off0 + 2, G.off1 - 2, G.z0 + 2, G.z1 - 2, 0.03, toon(0x57964f)));   // inset lawn
   // freestanding VIDEO BOARD at the plaza's NE north edge, east of the statue row, faces south (the plaza)
-  { const bzc = -464, bx = clarkX(bzc) + 27;
+  { const bzc = -516, bx = clarkX(bzc) + 36.5;
     add(M(new THREE.BoxGeometry(0.5, 5.0, 0.5), toon(0x2a2d33), bx - 3, 3.2, bzc));
     add(M(new THREE.BoxGeometry(0.5, 5.0, 0.5), toon(0x2a2d33), bx + 3, 3.2, bzc));
     add(M(new THREE.BoxGeometry(7.2, 4.2, 0.5), toon(0x22242a), bx, 7.3, bzc));                 // frame
     atlasPlane(M(new THREE.PlaneGeometry(6.4, 3.5), bmat(0xffffff, { map: boardTex() }), bx, 7.3, bzc + 0.28), false);   // static (drawn once, never redrawn)
     collide(bx, bzc, 3.6); }
   // splash pad (off-centre so the plaza middle stays open, clear of the statue row)
-  { const sz = -452, sx = clarkX(sz) + 15;
+  { const sz = -470, sx = clarkX(sz) + 20;
     add(M(new THREE.CylinderGeometry(2.6, 2.6, 0.06, 24), toon(0xb9b3a6), sx, 0.05, sz));
     add(M(new THREE.RingGeometry(1.0, 1.7, 24), bmat(0x7f9096), sx, 0.08, sz, -Math.PI / 2, 0, 0));   // wet ring
     const jets = [];
@@ -617,8 +617,8 @@ function buildGallagher() {
     instMesh(new THREE.BoxGeometry(1, 1, 1), toon(0x6b4a30), pz);
     instMesh(new THREE.BoxGeometry(1, 1, 1), toon(0x3f7a44), pf); }
   // scattered lawn chairs (east edge) + a cornhole pair (south, clear of centre)
-  for (const [oz, ooff] of [[-461, 27], [-456, 26], [-449, 28], [-440, 27]]) chairLike(clarkX(oz) + ooff, oz);
-  cornhole(clarkX(-442) + 14, -442, clarkX(-450) + 14, -450);
+  for (const [oz, ooff] of [[-505, 33], [-498, 32], [-488, 34], [-476, 33]]) chairLike(clarkX(oz) + ooff, oz);
+  cornhole(clarkX(-455) + 20, -455, clarkX(-463) + 20, -463);
 }
 function chairLike(x, z) {
   const c = rr(0, 1) > 0.5 ? 0x2f6bb0 : 0xc0392b, m = toon(c);
@@ -669,7 +669,7 @@ function buildStatues() {
   ];
   row.xs.forEach((x, i) => placeStatue(x, row.z, 0, poses[defs[i].pose], defs[i].name, defs[i].sub));
   const cs = VILLAGE_W.carayStatue;
-  placeStatue(cs.x, cs.z, -2.36, poses.caray, 'HARRY CARAY', '"HOLY COW!"');
+  placeStatue(cs.x, cs.z, cs.ry, poses.caray, 'HARRY CARAY', '"HOLY COW!"');
   instMesh(new THREE.BoxGeometry(1, 1, 1), toon(0xd8cdb4), A.ped);   // one limestone pedestal instance for all five
 }
 function placeStatue(x, z, ry, pose, name, sub) {

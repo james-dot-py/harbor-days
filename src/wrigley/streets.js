@@ -95,23 +95,23 @@ export function buildStreets() {
     }
   }
   const A = STREETS_W.addison, W = STREETS_W.waveland, SH = STREETS_W.sheffield, K = STREETS_W.kenmore;
-  straightWalk(A.x0, A.x1, A.z0, A.z0 + 3); straightWalk(A.x0, A.x1, A.z1 - 3, A.z1);   // Addison N/S
-  straightWalk(W.x0, W.x1, W.z0, W.z0 + 3); straightWalk(W.x0, W.x1, W.z1 - 3, W.z1);   // Waveland N/S
-  straightWalk(SH.x0, SH.x0 + 3, SH.z0, SH.z1); straightWalk(SH.x1 - 3, SH.x1, SH.z0, SH.z1); // Sheffield W/E
-  straightWalk(K.x0, K.x0 + 1, K.z0, K.z1); straightWalk(K.x1 - 1, K.x1, K.z0, K.z1);   // Kenmore W/E
-  paraWalk(-6.5, 3); paraWalk(6.5, 3);                                                  // Clark W/E
+  straightWalk(A.x0, A.x1, A.z0, A.z0 + 6); straightWalk(A.x0, A.x1, A.z1 - 6, A.z1);   // Addison N/S
+  straightWalk(W.x0, W.x1, W.z0, W.z0 + 6); straightWalk(W.x0, W.x1, W.z1 - 6, W.z1);   // Waveland N/S
+  straightWalk(SH.x0, SH.x0 + 6, SH.z0, SH.z1); straightWalk(SH.x1 - 6, SH.x1, SH.z0, SH.z1); // Sheffield W/E
+  straightWalk(K.x0, K.x0 + 2, K.z0, K.z1); straightWalk(K.x1 - 2, K.x1, K.z0, K.z1);   // Kenmore W/E
+  paraWalk(-11, 6); paraWalk(11, 6);                                                    // Clark W/E
   instMesh(new THREE.BoxGeometry(1, 1, 1), toon(0xffffff, { mat: { map: slabTex() } }), slabs);
 
   // ------------------------- 2. CURBS ----------------------------------
   const curbs = [
-    { pos: [-225, 0.065, -404], scale: [202, 0.13, 0.3] }, { pos: [-225, 0.065, -396], scale: [202, 0.13, 0.3] },   // Addison
-    { pos: [-257, 0.065, -503], scale: [146, 0.13, 0.3] }, { pos: [-257, 0.065, -497], scale: [146, 0.13, 0.3] },   // Waveland
-    { pos: [-193, 0.065, -449.5], scale: [0.3, 0.13, 113] }, { pos: [-187, 0.065, -449.5], scale: [0.3, 0.13, 113] }, // Sheffield
-    { pos: [-232, 0.065, -519], scale: [0.3, 0.13, 50] }, { pos: [-228, 0.065, -519], scale: [0.3, 0.13, 50] },     // Kenmore
+    { pos: [-228, 0.065, -408], scale: [208, 0.13, 0.3] }, { pos: [-228, 0.065, -392], scale: [208, 0.13, 0.3] },   // Addison
+    { pos: [-265, 0.065, -566], scale: [174, 0.13, 0.3] }, { pos: [-265, 0.065, -554], scale: [174, 0.13, 0.3] },   // Waveland
+    { pos: [-196, 0.065, -479], scale: [0.3, 0.13, 186] }, { pos: [-184, 0.065, -479], scale: [0.3, 0.13, 186] },   // Sheffield
+    { pos: [-235, 0.065, -576], scale: [0.3, 0.13, 56] }, { pos: [-227, 0.065, -576], scale: [0.3, 0.13, 56] },     // Kenmore
   ];
-  { const zc = -449.5, xw = clarkX(zc);                                                 // Clark sheared road edges
-    curbs.push({ pos: [xw - 5, 0.065, zc], yaw: clarkYaw, scale: [0.3, 0.13, 117.5] });
-    curbs.push({ pos: [xw + 5, 0.065, zc], yaw: clarkYaw, scale: [0.3, 0.13, 117.5] }); }
+  { const zc = -479, xw = clarkX(zc);                                                   // Clark sheared road edges
+    curbs.push({ pos: [xw - 8, 0.065, zc], yaw: clarkYaw, scale: [0.3, 0.13, 193.1] });
+    curbs.push({ pos: [xw + 8, 0.065, zc], yaw: clarkYaw, scale: [0.3, 0.13, 193.1] }); }
   instMesh(new THREE.BoxGeometry(1, 1, 1), toon(0x9c968a), curbs);
 
   // ------------------------- 3. ROAD PAINT -----------------------------
@@ -120,27 +120,27 @@ export function buildStreets() {
   for (let x = A.x0 + 4; x <= A.x1 - 4; x += 5) if (!nearX(x, clarkX(-400), -190))       // Addison centre dashes
     yellow.push({ pos: [x, 0.025, -400], scale: [2.2, 0.02, 0.16] });
   for (let z = STREETS_W.clark.z0 + 4; z <= STREETS_W.clark.z1 - 4; z += 5)              // Clark centre dashes
-    if (Math.abs(z + 400) > 4 && Math.abs(z + 500) > 4)
+    if (Math.abs(z + 400) > 4 && Math.abs(z + 560) > 6)
       yellow.push({ pos: [clarkX(z), 0.025, z], yaw: clarkYaw, scale: [0.16, 0.02, 2.2] });
   function crosswalk(cx, cz, roadHalf) {                                                 // zebra across an E–W road
-    const barLen = roadHalf * 2 - 0.6, span = 3.4, n = 6;
+    const barLen = roadHalf * 2 - 0.6, span = 4.6, n = 8;
     for (let k = 0; k < n; k++) white.push({ pos: [cx - span / 2 + span * k / (n - 1), 0.03, cz], scale: [0.42, 0.02, barLen] });
   }
-  crosswalk(clarkX(-400), -400, 4);   // Addison / Clark
-  crosswalk(-190, -400, 4);           // Addison / Sheffield
-  crosswalk(-190, -500, 3);           // Waveland / Sheffield
-  crosswalk(clarkX(-500), -500, 3);   // Waveland / Clark
+  crosswalk(clarkX(-400), -400, 8);   // Addison / Clark
+  crosswalk(-190, -400, 8);           // Addison / Sheffield
+  crosswalk(-190, -560, 6);           // Waveland / Sheffield
+  crosswalk(clarkX(-560), -560, 6);   // Waveland / Clark
   instMesh(new THREE.BoxGeometry(1, 1, 1), bmat(0xf3d24a), yellow);
   instMesh(new THREE.BoxGeometry(1, 1, 1), bmat(0xeef0ee), white);
 
   // ------------------------- 4. STREET LAMPS ---------------------------
   const lamps = [];
   let li = 0; const side = (a, b) => (li++ % 2 === 0 ? a : b);
-  for (let x = A.x0 + 8; x <= A.x1 - 8; x += 18) side(() => lamps.push({ px: x, pz: -406.2, yaw: 0 }), () => lamps.push({ px: x, pz: -393.8, yaw: Math.PI }))();
-  li = 0; for (let x = W.x0 + 8; x <= W.x1 - 8; x += 18) side(() => lamps.push({ px: x, pz: -505.2, yaw: 0 }), () => lamps.push({ px: x, pz: -494.8, yaw: Math.PI }))();
-  li = 0; for (let z = SH.z0 + 8; z <= SH.z1 - 8; z += 18) side(() => lamps.push({ px: -195.2, pz: z, yaw: Math.PI / 2 }), () => lamps.push({ px: -184.8, pz: z, yaw: -Math.PI / 2 }))();
-  li = 0; for (let z = K.z0 + 8; z <= K.z1 - 8; z += 18) side(() => lamps.push({ px: -232.2, pz: z, yaw: Math.PI / 2 }), () => lamps.push({ px: -227.8, pz: z, yaw: -Math.PI / 2 }))();
-  li = 0; for (let z = STREETS_W.clark.z0 + 8; z <= STREETS_W.clark.z1 - 8; z += 17.3) side(() => lamps.push({ px: clarkX(z) - 7.2, pz: z, yaw: Math.PI / 2 }), () => lamps.push({ px: clarkX(z) + 7.2, pz: z, yaw: -Math.PI / 2 }))();
+  for (let x = A.x0 + 8; x <= A.x1 - 8; x += 18) side(() => lamps.push({ px: x, pz: -413.2, yaw: 0 }), () => lamps.push({ px: x, pz: -386.8, yaw: Math.PI }))();
+  li = 0; for (let x = W.x0 + 8; x <= W.x1 - 8; x += 18) side(() => lamps.push({ px: x, pz: -571.2, yaw: 0 }), () => lamps.push({ px: x, pz: -548.8, yaw: Math.PI }))();
+  li = 0; for (let z = SH.z0 + 8; z <= SH.z1 - 8; z += 18) side(() => lamps.push({ px: -201.2, pz: z, yaw: Math.PI / 2 }), () => lamps.push({ px: -178.8, pz: z, yaw: -Math.PI / 2 }))();
+  li = 0; for (let z = K.z0 + 8; z <= K.z1 - 8; z += 18) side(() => lamps.push({ px: -236.2, pz: z, yaw: Math.PI / 2 }), () => lamps.push({ px: -225.8, pz: z, yaw: -Math.PI / 2 }))();
+  li = 0; for (let z = STREETS_W.clark.z0 + 8; z <= STREETS_W.clark.z1 - 8; z += 17.3) side(() => lamps.push({ px: clarkX(z) - 13.2, pz: z, yaw: Math.PI / 2 }), () => lamps.push({ px: clarkX(z) + 13.2, pz: z, yaw: -Math.PI / 2 }))();
   // pole+arm archetype (grey), head baked-offset (warm), one glow point each
   const poleG = new THREE.CylinderGeometry(0.09, 0.12, 7, 7); poleG.translate(0, 3.5, 0);
   const armG = new THREE.BoxGeometry(0.12, 0.12, 2.6); armG.translate(0, 6.85, 1.3);
@@ -159,7 +159,7 @@ export function buildStreets() {
     wrigleyRoot.add(new THREE.Points(g, pointsMat())); }
 
   // ------------------------- 5. BLADE SIGNS ----------------------------
-  const bladePoles = [[-298, -394], [-194, -496], [-231, -497]];
+  const bladePoles = [[-303, -387.6], [-200.8, -549.2], [-238.5, -571]];
   const poleGeo = new THREE.CylinderGeometry(0.06, 0.06, 3.1, 6); poleGeo.translate(0, 1.55, 0);
   instMesh(poleGeo, toon(0x2b2b30), bladePoles.map(p => ({ pos: [p[0], 0, p[1]] })));
   bladePoles.forEach(p => collide(p[0], p[1], 0.3));
@@ -168,11 +168,11 @@ export function buildStreets() {
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bmat(0xffffff, { map: bladeTex(text), side: THREE.DoubleSide }));
     m.position.set(cx, cy, cz); m.rotation.y = yaw; atlasPlane(m, false);   // blade sign -> shared wrigley atlas
   }
-  blade('ADDISON 3600 N', -298.9, 2.62, -394, 0, 1.9);
-  blade('CLARK 1100 W', -297.7, 2.98, -393.13, clarkYaw, 1.7);
-  blade('WAVELAND 3700 N', -194.9, 2.62, -496, 0, 1.9);
-  blade('SHEFFIELD 1000 W', -194, 2.98, -496.9, Math.PI / 2, 1.8);
-  blade('KENMORE 1040 W', -231, 2.62, -497.9, Math.PI / 2, 1.7);
+  blade('ADDISON 3600 N', -303.9, 2.62, -387.6, 0, 1.9);
+  blade('CLARK 1100 W', -302.7, 2.98, -386.73, clarkYaw, 1.7);
+  blade('WAVELAND 3700 N', -201.7, 2.62, -549.2, 0, 1.9);
+  blade('SHEFFIELD 1000 W', -200.8, 2.98, -550.1, Math.PI / 2, 1.8);
+  blade('KENMORE 1040 W', -238.5, 2.62, -571.9, Math.PI / 2, 1.7);
 
   // ------------------------- 6. FLAVOR ---------------------------------
   {  // hydrants (merged archetype, red)
@@ -182,7 +182,7 @@ export function buildStreets() {
     const nzL = new THREE.CylinderGeometry(0.05, 0.05, 0.14, 6); nzL.rotateZ(Math.PI / 2); nzL.translate(-0.16, 0.32, 0);
     const nzF = new THREE.CylinderGeometry(0.055, 0.055, 0.14, 6); nzF.rotateX(Math.PI / 2); nzF.translate(0, 0.3, 0.16);
     const hydG = mergeGeos([body, dome, cap, nzL, nzF]);
-    const spots = [[-250, -405], [-200, -405], [-309, -395.5], [-195.3, -450], [-300, -504.5], [-230, -505]];
+    const spots = [[-250, -411.3], [-200, -411.3], [-313, -388.3], [-179.7, -470], [-310, -570.6], [-242, -549.4]];
     instMesh(hydG, toon(0xc0392b), spots.map(s => ({ pos: [s[0], 0, s[1]], yaw: rr(0, 6.28) })));
     spots.forEach(s => collide(s[0], s[1], 0.4));
   }
@@ -191,7 +191,7 @@ export function buildStreets() {
     const base = new THREE.BoxGeometry(0.46, 0.12, 0.44); base.translate(0, 0.14, 0);
     const win = new THREE.BoxGeometry(0.3, 0.28, 0.02); win.translate(0, 0.68, 0.21);
     const newsG = mergeGeos([boxB, base, win]);
-    const spots = [[-158, -395, 0x2b5aa0], [-300, -394.5, 0xb03a2e], [-200, -495.5, 0x2f7d46]];
+    const spots = [[-158, -390.5, 0x2b5aa0], [-306, -388, 0xb03a2e], [-204, -549.6, 0x2f7d46]];
     instMesh(newsG, toon(0xffffff), spots.map(s => ({ pos: [s[0], 0, s[1]], yaw: rr(0, 6.28), color: s[2] })), true);
     spots.forEach(s => collide(s[0], s[1], 0.4));
   }
@@ -225,7 +225,7 @@ export function buildStreets() {
   }
 
   // ------------------------- 8. BACKDROP BAND --------------------------
-  const bandDir = [[1, 0], [0, 1], [0, 1], [-1, 0], [0, -1], [-1, 0], [0, 1]];
+  const bandDir = [[1, 0], [0, 1], [0, 1], [-1, 0], [0, -1], [-1, 0], [-1, 0]];
   const palette = [0x7a4a38, 0x8a5a44, 0x9a948b, 0x88837a, 0xa8946f, 0xb3a480, 0x6f5240];
   const buildings = [], windows = [];
   BACKDROP_W.bands.forEach((b, bi) => {

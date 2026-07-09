@@ -27,8 +27,9 @@ refs:
   - autopilot/queue/015-urban-kit.md (the vocabulary — MUST land first; if 015
     is not in done/, fail honestly and resequence behind it)
   - tools/waypoints.expect.json wv-street-* entries (the bar being judged)
-  - refs/inbox owner screenshots ("sad.png", "sad and unremarkable.png",
-    "neon sign cut off.png" verdicts)
+  - refs/wrigleyville owner screenshots (owner-verdict-clark-marquee-sad.png,
+    owner-verdict-clark-bars-unremarkable.png,
+    owner-verdict-cubby-neon-cutoff.png — filed from refs/inbox by task 009)
   - .claude/commands/art-director.md street-canyon checklist
 ---
 

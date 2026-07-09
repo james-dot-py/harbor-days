@@ -214,51 +214,77 @@ L backdrop, reached only by riding the Red Line from the Belmont stop cluster.
 Cells are mutually invisible (root-group visibility swap + per-cell walkability/
 clamp/minimap). Data: `src/data/wrigleyville.js`; builders: `src/wrigley/*`.
 
-### Anchors (Chicago grid carries over, true latitude)
-- Same z-scale as the lakefront: **Addison = z −400, Waveland = z −500** — the
-  cell sits at its real latitude (the lakefront's Addison underpass stays an
-  honest future on-foot gate). The ride Belmont (z +105) → Addison (z −400)
-  matches the real northbound Red Line.
+### Anchors (Chicago grid carries over — with ONE deliberate stretch)
+- **Addison = z −400** (true latitude — the station, the ride arrival and the
+  lakefront's Addison underpass gate all anchor here).
+- **Waveland = z −560 (STANDING LIBERTY, 2026-07-09 owner layout rework, task
+  009): true latitude is −500, but the cell is STRETCHED ×1.6 north–south
+  between Addison and Waveland.** Double-wide game-day streets + a
+  big-league stadium bowl + set-back gate plazas cannot fit the true 100 m
+  block; the owner's priority is the SPACE. The ride is a scripted
+  transition and the cell is reached no other way, so nothing else depends
+  on true cell latitude. Everything north of Waveland rides with it.
 - E–W: 1 W-address unit = 1 game unit, anchored so the Red Line embankment
-  (real ~950 W) is **x −140**: `x = −140 − (Waddr − 950)`.
+  (real ~950 W) is **x −140**: `x = −140 − (Waddr − 950)` (the x frame was
+  already a standing liberty).
 - **Clark St diagonal**: centerline `x = −290 + 0.28·(z + 400)` (x −290 at
-  Addison → x −318 at Waveland, the real ~16° cant).
-- Cell bounds ~x −390…−110, z −590…−300; clamp x −365…−115, z −580…−310.
+  Addison → x −334.8 at Waveland, the real ~16° cant).
+- Cell bounds ~x −400…−100, z −660…−250; clamp x −365…−115, z −615…−310.
+
+### Streets (game-day corridors, DOUBLE-WIDE per owner directive 2026-07-09)
+Corridor = road + both sidewalks, walkable curb to curb.
+
+| Street | Centerline | Road | Corridor |
+|---|---|---|---|
+| Addison | z −400 | 16 m (z −408…−392) | z −414…−386, x −332…−124 |
+| Waveland | z −560 | 12 m (z −566…−554) | z −572…−548, x −352…−178 |
+| Sheffield | x −190 | 12 m (x −196…−184) | x −202…−178, z −572…−386 |
+| Kenmore stub | x −231 | 8 m (x −235…−227) | x −237…−225, z −604…−548 |
+| Clark | clarkX(z) | 16 m (±8) | ±14 off clarkX, z −572…−386 |
 
 | Feature | Position |
 |---|---|
-| Red Line embankment | x −148…−132 (solid berm, N–S full cell; bridge over Addison z −407…−393) |
-| Addison island platform | x −143…−137, z −444…−426, y 7.6; stair inside the north mass to the Addison sidewalk |
-| Sheffield Ave | x −190 (corridor −196…−184) |
-| Kenmore Ave stub | x −230, z −544…−494 (ball-hawk corner) |
-| Stadium block | Clark/Addison/Waveland/Sheffield; footprint poly in STADIUM_W |
-| **The marquee corner is ROUND** | the Clark & Addison corner is the real art-deco curve: fillet r 14 about (−273.36, −421), tangent to the Clark wall at (−286.85, −417.25) and the Addison wall at (−273.36, −407); curve apex (−281.83, −409.85). The fillet opens a walkable sidewalk APRON (triangle Clark-edge/Addison-edge minus the circle) — the corner entry court |
-| Marquee | on the curve apex, proud of the wall: (−282.7, −408.7), facing the Clark & Addison intersection (2026-07-08 fidelity pass; owner feedback — was a box corner at (−284.5, −409.5)) |
-| Home plate → center field | (−262,−424) → (−214,−476); LF wall on Waveland, RF on Sheffield |
-| Scoreboard | (−212, −480), top y 26.5 (published 87 ft), atop the CF bleachers |
-| Gallagher Way plaza | east of Clark, **z −466…−430** — hugs the WEST stands, north of the Addison corner, and does NOT reach Waveland: its north bound is the Gallagher office block (per refs/wrigleyville/osm.json: plaza true z −433…−470, office 1101 W Waveland true z −469…−496). Statue Row + video board at its north edge |
-| Gallagher office block | the notch's north end, z −492…−467.5, Clark corridor → west-stands wall (the office/hotel mass at Waveland & Clark that bounds the real plaza) |
-| Murphy's Bleachers | SE corner Sheffield & Waveland (x −184…−168, z −494…−480) |
-| Engine 78 | 1052 W Waveland → x −250…−234, z −524…−508 |
-| Rooftop brownstones | N of Waveland x −226…−199 (middle one climbable, roof y 9.6) + E of Sheffield z −478…−430 |
-| Cubby Bear + Clark bar row | opposite the marquee + west of Clark z −488…−418 |
+| Red Line embankment | x −148…−132 (solid berm, N–S full cell; bridge over Addison z −414…−386) |
+| Addison island platform | x −143…−137, z −451…−433, y 7.6; stair (z −433…−417) inside the north mass to the Addison sidewalk (landing z −417…−411) |
+| Stadium block | Clark/Addison/Waveland/Sheffield; footprint poly in STADIUM_W; faces on Addison z −414, Sheffield x −202, Waveland z −548 |
+| **The marquee corner is ROUND** | the Clark & Addison corner is the real art-deco curve: fillet **r 18** about (−266.27, −432), tangent to the Clark wall at (−283.60, −427.15) and the Addison wall at (−266.27, −414); curve apex (−277.09, −417.62). The fillet opens the marquee-corner APRON (triangle Clark-edge/Addison-edge minus the circle) — RED BRICK, the corner entry court |
+| Marquee | on the curve apex, proud of the wall: (−277.94, −416.50), facing the Clark & Addison intersection |
+| **Bleacher Gate corner is CHAMFERED** | the NE (Sheffield & Waveland) corner is cut 45°: chamfer from (−202, −528) on the Sheffield face to (−222, −548) on the Waveland face; the BLEACHERS gate sits on the chamfer mid (−212, −538) facing the intersection. The triangle it opens is the **CARAY PLAZA apron** — red brick, walkable, statue centered at (−206.5, −543.5) OFF the sidewalk through-lines, gate behind (per refs/wrigley-field/caray-owner-reference.jpg) |
+| Gate aprons pave in RED BRICK | marquee crescent, Caray plaza triangle, and a brick pad on Gallagher Way in front of its gate (z −496…−484, off 33…40) — the signature Wrigley ground treatment (APRONS_W) |
+| Home plate → center field | (−252,−444) → (−218,−526), HP→CF 88.8 m (grown from 70.8 so the bowl reads big-league); LF wall on Waveland, RF on Sheffield |
+| Scoreboard | (−216, −533), top y 26.5 (published 87 ft), atop the CF bleachers directly behind/above the Bleacher Gate (as in the owner ref) |
+| Gallagher Way plaza | east of Clark, **z −520…−446**, off +14…+40 from clarkX — hugs the WEST stands, north of the Addison corner; its north bound is the Gallagher office block. Statue Row (z −516.5, xs −293…−305) + video board at its north edge |
+| Gallagher office block | the notch's north end, z −546…−520, Clark corridor → west-stands wall (off 14…40) |
+| Murphy's Bleachers | SE corner Sheffield & Waveland (x −178…−162, z −548…−534) |
+| Engine 78 | 1052 W Waveland → x −250…−234, z −590…−574 |
+| Rooftop brownstones | N of Waveland x −226…−199, z −588…−574 (middle one climbable, roof y 9.6) + E of Sheffield x −178…−164, z −534…−486 |
+| Cubby Bear + Clark bar row | Cubby x −316…−300, z −386…−372 (SW corner, opposite the marquee) + bar row west of Clark z −488…−418 (lots at clarkX−22…−10) |
 | Sluggers rooftop cage | clarkBars[0] ('SLUGGERS', z −488…−472) is a LOW 2-storey bar (roof y 6.8) whose ROOF is the batting-cage destination (owner note 2026-07-08 → task 009): an exterior stair up the street (east) face → a rooftop deck holding the fast-pitch cage. Anchors + walkability in SLUGGERS_W (rotated-rect quads in the building's LOCAL frame, shared by the engine + walkprobe) |
 
 ### Walkability (game-day street closure = the clamp, diegetically)
 Walkable = corridor quads only (WALK_W in wrigleyville.js — the single
 definition, shared verbatim by main.js and walkprobe): Addison (station→Clark),
 Waveland (Sheffield→Clark + Kenmore stub), Sheffield (Addison→Waveland), Clark
-(Addison→Waveland), Gallagher Way (z −466…−430), the marquee-corner apron
-(the crescent the rounded corner opens at Clark & Addison), the station
-platform + stair, one climbable Waveland rooftop + its outdoor stair, and the
-Sluggers rooftop cage (exterior stair + deck, SLUGGERS_W). Every corridor mouth ends at a **CPD blue wooden
-barricade** (BARRICADES_W) with an officer NPC; streets visually continue into
-a low-rise Lakeview backdrop band (BACKDROP_W).
+(Addison→Waveland), Gallagher Way (z −520…−446), the marquee-corner apron
+(the crescent the rounded corner opens at Clark & Addison), the Caray plaza
+apron (the triangle the chamfered Bleacher-Gate corner opens at Sheffield &
+Waveland), the station platform + stair, one climbable Waveland rooftop + its
+outdoor stair, and the Sluggers rooftop cage (exterior stair + deck,
+SLUGGERS_W). Every corridor mouth ends at a **CPD blue wooden barricade**
+(BARRICADES_W) with an officer NPC; streets visually continue into a low-rise
+Lakeview backdrop band (BACKDROP_W).
 
 ### Standing liberties (deliberate, keep)
 - The cell sits ~x −140 rather than the true ~x −800 (1.6 km inland) — the L
   ride is a scripted transition, not literal track distance.
-- Stadium at land-scale footprint (1:2) with TRUE 1:1 verticals (v2, Wave 4):
+- **The cell-local z frame is STRETCHED ×1.6 between Addison (z −400, true)
+  and Waveland (z −560, true −500)** — owner layout rework 2026-07-09 (task
+  009): the space for double-wide streets, the big-league bowl and the gate
+  plazas outranks true block depth. Addison keeps its true latitude; never
+  validate anything north of Addison in this cell against true latitude.
+- Stadium at a GENEROUS footprint (HP→CF 88.8 m ≈ 0.73:1 of the real 122 m —
+  deliberately larger than the 1:2 land scale so the bowl reads big-league
+  from the street; owner rework 2026-07-09) with TRUE 1:1 verticals:
   facade 16.5, rim ~23, towers ~29, scoreboard base 18.3 / top 26.5 — the
   published 60 ft / 87 ft. The NE bleacher crown stays ~8.1 on purpose: any
   higher blinds the Waveland rooftop views (the 2015-videoboard effect).

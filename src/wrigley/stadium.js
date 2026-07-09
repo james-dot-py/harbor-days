@@ -8,7 +8,7 @@ import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtil
 import { toon, bmat, mulberry32, pointsMat, pip } from '../core.js';
 import { collide } from '../props.js';
 import { wrigleyRoot } from './index.js';
-import { STADIUM_W, CORNER_ARC } from '../data/wrigleyville.js';
+import { STADIUM_W, CORNER_ARC, APRONS_W, clarkX } from '../data/wrigleyville.js';
 import { atlasPlane } from './village.js';   // shared static-plane atlas (buildVillage emits it, last)
 
 const R = mulberry32(1914);
@@ -204,11 +204,11 @@ function ivyTex() {
 }
 function fieldTex() {
   const cv = document.createElement('canvas'); cv.width = 512; cv.height = 512;
-  const g = cv.getContext('2d');                               // 512px = 120 m
-  const M = 512 / 120;                                          // m → px, HP at (256,256)
+  const g = cv.getContext('2d');                               // 512px = 160 m
+  const M = 512 / 160;                                          // m → px, HP at (256,256)
   g.fillStyle = '#3f7d46'; g.fillRect(0, 0, 512, 512);
   g.strokeStyle = 'rgba(255,255,255,0.05)'; g.lineWidth = 14;   // mow arcs
-  for (let r = 12; r < 78; r += 8) { g.beginPath(); g.arc(256, 256, r * M, -Math.PI * 0.75, -Math.PI * 0.25); g.stroke(); }
+  for (let r = 12; r < 96; r += 10) { g.beginPath(); g.arc(256, 256, r * M, -Math.PI * 0.75, -Math.PI * 0.25); g.stroke(); }
   g.fillStyle = '#b98a52';                                      // infield dirt (diamond up)
   g.save(); g.translate(256, 256); g.rotate(Math.PI / 4);
   g.fillRect(-2 * M, -29 * M, 31 * M, 31 * M); g.restore();
@@ -217,10 +217,10 @@ function fieldTex() {
   g.fillStyle = '#b98a52'; g.beginPath(); g.arc(256, 256 - 12.9 * M, 2.8 * M, 0, 7); g.fill(); // mound
   g.fillStyle = '#c9985e'; g.beginPath(); g.arc(256, 256, 4 * M, 0, 7); g.fill();              // plate circle
   g.strokeStyle = '#f2ece0'; g.lineWidth = 3;                   // foul lines (up = CF)
-  g.beginPath(); g.moveTo(256, 256); g.lineTo(256 - 57 * M * 0.7071, 256 - 57 * M * 0.7071); g.stroke();
-  g.beginPath(); g.moveTo(256, 256); g.lineTo(256 + 57 * M * 0.7071, 256 - 57 * M * 0.7071); g.stroke();
+  g.beginPath(); g.moveTo(256, 256); g.lineTo(256 - 75 * M * 0.7071, 256 - 75 * M * 0.7071); g.stroke();
+  g.beginPath(); g.moveTo(256, 256); g.lineTo(256 + 75 * M * 0.7071, 256 - 75 * M * 0.7071); g.stroke();
   g.strokeStyle = '#a8794a'; g.lineWidth = 4.5 * M;             // warning track arc
-  g.beginPath(); g.arc(256, 256, 53.5 * M, -Math.PI * 0.83, -Math.PI * 0.17); g.stroke();
+  g.beginPath(); g.arc(256, 256, 71.5 * M, -Math.PI * 0.83, -Math.PI * 0.17); g.stroke();
   const t = new THREE.CanvasTexture(cv); return t;
 }
 function scoreboardTex() {
@@ -271,7 +271,7 @@ function buildFacades() {
     edges.push({ a, b, len: Math.hypot(b[0] - a[0], b[1] - a[1]) });
   }
   const FH = S.facadeH;                        // true 4-storey streetwall (16.5)
-  const HMAP = { addison: FH, sheffield: 12, waveland: 6.5, plazaE: FH, notchS: FH, clark: FH, arc: FH };
+  const HMAP = { addison: FH, sheffield: 12, waveland: 6.5, gate: 8.2, plazaE: FH, notchS: FH, clark: FH, arc: FH };
   const hasBand = k => k === 'addison' || k === 'plazaE' || k === 'notchS' || k === 'clark' || k === 'arc';
   edges.forEach((e, i) => {
     const kind = KINDS[i], isArc = kind === 'arc';
@@ -293,13 +293,16 @@ function buildFacades() {
       }
       const lint = new THREE.BoxGeometry(1.2, h - 3.4, Math.abs(K.z0 - K.z1)); // above the opening
       lint.translate(cx, 3.4 + (h - 3.4) / 2, (K.z0 + K.z1) / 2); pale.push(lint);
+    } else if (kind === 'gate') {                            // Bleacher Gate chamfer — deep brick base carries the scoreboard above
+      mk(pale, 1.2, h - 3.2, e.len + ext, 0, 3.2 + (h - 3.2) / 2);
+      mk(brick, 1.3, 3.2, e.len + ext, 0, 1.6);
     } else {
       mk(pale, 1.2, h - 2.5, e.len + ext, 0, 2.5 + (h - 2.5) / 2);
       mk(brick, 1.3, 2.5, e.len + ext, 0, 1.25);
     }
     mk(cornice, 1.6, 0.5, e.len + 0.4 + ext, 0, h + 0.25);     // cap
     mk(terra, 1.4, 0.28, e.len + 0.2 + ext, 0, h + 0.64);      // terracotta strip
-    if (kind !== 'waveland') mk(grille, 0.5, 1.1, (isArc ? e.len + ext : e.len * 0.9), -0.45, h - 1.2); // green grill band
+    if (kind !== 'waveland' && kind !== 'gate') mk(grille, 0.5, 1.1, (isArc ? e.len + ext : e.len * 0.9), -0.45, h - 1.2); // green grill band
     // pressbox band set back behind the grandstand sides, up to the rim.
     // On the curve, full-length chords (no 0.86/0.9 shrink) → one continuous crown.
     if (hasBand(kind)) {
@@ -477,7 +480,7 @@ function buildBowl() {
     for (const [x, z] of POLY) {
       pos.push(x, 0.22, z);
       const dx = x - HP[0], dz = z - HP[1];
-      uv.push(0.5 + (dx * vx + dz * vz) / 120, 0.5 + (dx * ux + dz * uz) / 120);
+      uv.push(0.5 + (dx * vx + dz * vz) / 160, 0.5 + (dx * ux + dz * uz) / 160);
     }
     const tris = THREE.ShapeUtils.triangulateShape(POLY.map(p => new THREE.Vector2(p[0], p[1])), []);
     for (const [a, b, c] of tris) {
@@ -494,7 +497,7 @@ function buildBowl() {
   }
 
   // grandstand: two stepped tiers wrapping BACK ±2.0 rad, pip-clipped
-  const lowRows = 7, upRows = 5, seats = [], crowd = [];
+  const lowRows = 8, upRows = 6, seats = [], crowd = [];
   const addArc = (rows, r0, y0, dy, dr) => {
     for (let ri = 0; ri < rows; ri++) {
       const r = r0 + ri * dr, y = y0 + ri * dy;
@@ -509,17 +512,17 @@ function buildBowl() {
       }
     }
   };
-  addArc(lowRows, 12.5, 1.1, 0.62, 1.35);
-  addArc(upRows, 16.5, 10.2, 0.78, 1.3);      // upper deck rides the taller shell
+  addArc(lowRows, 13, 1.1, 0.62, 1.4);
+  addArc(upRows, 18.5, 10.2, 0.78, 1.35);     // upper deck rides the taller shell
   inst(new THREE.BoxGeometry(1.5, 0.5, 1), toon(0x2f5544), seats);
   // upper-deck fascia + roof ring (instanced arc slabs)
   const fascia = [], roof = [];
-  { const n = 40;
+  { const n = 48;
     for (let k = 0; k <= n; k++) {
       const a = BACK - 2.0 + (k / n) * 4.0;
-      const fx = HP[0] + Math.sin(a) * 16.2, fz = HP[1] + Math.cos(a) * 16.2;
+      const fx = HP[0] + Math.sin(a) * 17.8, fz = HP[1] + Math.cos(a) * 17.8;
       if (insidePoly(fx, fz, 2)) fascia.push({ pos: [fx, 9.3, fz], yaw: a, scale: [1, 1, 2.9] });
-      const rxp = HP[0] + Math.sin(a) * 20.5, rzp = HP[1] + Math.cos(a) * 20.5;
+      const rxp = HP[0] + Math.sin(a) * 23, rzp = HP[1] + Math.cos(a) * 23;
       if (insidePoly(rxp, rzp, 1)) roof.push({ pos: [rxp, 19.5, rzp], yaw: a, rx: 0.16, scale: [1, 1, 3.7] });
     }
   }
@@ -529,10 +532,10 @@ function buildBowl() {
   // ivy outfield wall: arc r 56 about HP, ±0.72 rad around AXIS
   const ivy = ivyTex();
   const wallSegs = [], caps = [];
-  { const n = 26;
+  { const n = 34;
     for (let k = 0; k < n; k++) {
       const a = AXIS - 0.72 + ((k + 0.5) / n) * 1.44;
-      const x = HP[0] + Math.sin(a) * 56, z = HP[1] + Math.cos(a) * 56;
+      const x = HP[0] + Math.sin(a) * 74, z = HP[1] + Math.cos(a) * 74;
       if (!pip(x, z, POLY)) continue;
       wallSegs.push({ pos: [x, 1.75, z], yaw: a + Math.PI / 2, scale: [1, 1, 1] });
       caps.push({ pos: [x, 3.62, z], yaw: a + Math.PI / 2, scale: [1, 1, 1] });
@@ -540,18 +543,23 @@ function buildBowl() {
   }
   inst(new THREE.BoxGeometry(4.3, 3.5, 0.8), toon(0xffffff, { mat: { map: ivy } }), wallSegs);   // overlap: arc fans the edges open
   inst(new THREE.BoxGeometry(4.35, 0.24, 0.9), toon(0x6b7d5a), caps);
-  // foul poles (yellow) where the wall arc meets the foul lines
+  // foul poles (yellow) — probe each foul line out to the wall so the RF pole
+  // lands on the near Sheffield face (short RF) while LF reaches the deep
+  // corner. Inset 0.5 keeps the pole ITSELF at the wall (a 3.0 inset let the
+  // RF pole overshoot ~2.5 m into the Sheffield sidewalk — run mrdlw8gt).
   const fp = [];
   for (const da of [-0.72, 0.72]) {
-    const a = AXIS + da;
-    fp.push({ pos: [HP[0] + Math.sin(a) * 55.4, 5.5, HP[1] + Math.cos(a) * 55.4] });
+    const a = AXIS + da, sx = Math.sin(a), cz = Math.cos(a);
+    let r = 40, last = 40;
+    while (r <= 73.4 && insidePoly(HP[0] + sx * r, HP[1] + cz * r, 0.5)) { last = r; r += 0.5; }
+    fp.push({ pos: [HP[0] + sx * last, 5.5, HP[1] + cz * last] });
   }
   inst(new THREE.CylinderGeometry(0.12, 0.14, 11, 7), toon(0xd8bb2f), fp);
 
   // bleachers behind the ivy: rising arcs r 57.5 → 68
   const bl = [];
   for (let ri = 0; ri < 7; ri++) {
-    const r = 57.5 + ri * 1.5, y = 3.9 + ri * 0.62;
+    const r = 75.5 + ri * 1.75, y = 3.9 + ri * 0.62;
     const n = Math.round(r * 1.44 / 3.0);
     for (let k = 0; k <= n; k++) {
       const a = AXIS - 0.66 + (k / n) * 1.32;
@@ -626,12 +634,12 @@ function buildTowers() {
   const towers = [];
   // across the grandstand roof arc (plaza notch clips the WNW candidates)
   for (const da of [-1.35, -0.9, -0.35, 0.35, 1.1, 1.7]) {
-    const a = BACK + da, r = 18.5;
+    const a = BACK + da, r = 21;
     const x = HP[0] + Math.sin(a) * r, z = HP[1] + Math.cos(a) * r;
     if (insidePoly(x, z, 1.5)) towers.push({ x, z, base: 20, yaw: a - Math.PI });   // on the raised roof
   }
   for (const da of [-0.52, 0.52]) {
-    const a = AXIS + da, r = 63;
+    const a = AXIS + da, r = 78;
     const x = HP[0] + Math.sin(a) * r, z = HP[1] + Math.cos(a) * r;
     if (insidePoly(x, z, 1)) towers.push({ x, z, base: 8.6, mast: 12, yaw: a - Math.PI });  // bleacher wings reach higher
   }
@@ -681,22 +689,87 @@ function buildKnothole() {
   atlasPlane(sign, false);   // knothole sign -> shared wrigley atlas
 }
 
+// ---------------------------- gate aprons ------------------------------
+// The signature Wrigley red-brick ground treatment the gates open onto:
+// the marquee-corner crescent, the Caray plaza, and the Gallagher pad.
+// ONE brick material, ONE merged mesh (+1 draw call — walkability is the
+// data's job; these are visual). Running-bond canvas, world-metre UVs.
+function brickTex() {
+  const cv = document.createElement('canvas'); cv.width = 128; cv.height = 128;
+  const g = cv.getContext('2d');
+  const BR = mulberry32(20090709);                             // DEDICATED rng — never touches the file's R
+  const pal = ['#8a4436', '#7d3b2f', '#96503c', '#83452f'];    // warm brick palette
+  g.fillStyle = '#c9b49a'; g.fillRect(0, 0, 128, 128);         // mortar bed
+  const bw = 32, bh = 16, gap = 1.5;                           // 8 courses × 16px; half-brick running bond
+  for (let row = 0; row < 8; row++) {
+    const oy = row * bh, off = (row % 2) * (bw / 2);
+    for (let bx = -bw; bx < 128 + bw; bx += bw) {
+      const x = bx + off;
+      g.fillStyle = pal[BR() * pal.length | 0];
+      g.fillRect(x + gap, oy + gap, bw - gap * 2, bh - gap * 2);
+      g.fillStyle = `rgba(0,0,0,${BR() * 0.12})`;              // slight per-brick tone jitter
+      g.fillRect(x + gap, oy + gap, bw - gap * 2, bh - gap * 2);
+    }
+  }
+  const tex = new THREE.CanvasTexture(cv);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = 4;
+  tex.repeat.set(1 / 2.4, 1 / 2.4);                            // one tile = 2.4 m (UVs are world metres)
+  return tex;
+}
+function buildAprons() {
+  const A = CORNER_ARC, geos = [];
+  // shapes live in the (x, −z) plane so rotateX(−90°) maps (px,py) → (px,0,−py)
+  // with the normal +y; wound CCW so the up-face survives front-side culling.
+  // a. marquee crescent — the fillet triangle MINUS the corner-arc circle
+  { const t = APRONS_W.marquee.tri, s = new THREE.Shape();
+    s.moveTo(t[0][0], -t[0][1]);
+    s.lineTo(t[1][0], -t[1][1]);
+    s.lineTo(t[2][0], -t[2][1]);
+    for (let i = 1; i <= 12; i++) {                            // close back along the arc a1 → a0 (the concave bite)
+      const a = A.a1 + (A.a0 - A.a1) * i / 12;
+      s.lineTo(A.cx + A.r * Math.cos(a), -(A.cz + A.r * Math.sin(a)));
+    }
+    s.closePath(); geos.push(new THREE.ShapeGeometry(s));
+  }
+  // b. Caray plaza — the Bleacher-Gate chamfer triangle
+  { const t = APRONS_W.bleacher.tri, s = new THREE.Shape();
+    s.moveTo(t[0][0], -t[0][1]);
+    s.lineTo(t[1][0], -t[1][1]);
+    s.lineTo(t[2][0], -t[2][1]);
+    s.closePath(); geos.push(new THREE.ShapeGeometry(s));
+  }
+  // c. Gallagher pad — the plaza para quad (z0..z1, off0..off1 off clarkX)
+  { const P = APRONS_W.gallagher, s = new THREE.Shape();
+    s.moveTo(clarkX(P.z1) + P.off0, -P.z1);                    // wound CCW: NW → NE → SE → SW
+    s.lineTo(clarkX(P.z1) + P.off1, -P.z1);
+    s.lineTo(clarkX(P.z0) + P.off1, -P.z0);
+    s.lineTo(clarkX(P.z0) + P.off0, -P.z0);
+    s.closePath(); geos.push(new THREE.ShapeGeometry(s));
+  }
+  const geo = mergeGeos(geos); geo.rotateX(-Math.PI / 2);      // ShapeGeometry UVs stay world metres for tex.repeat
+  const mesh = new THREE.Mesh(geo, toon(0xffffff, { mat: { map: brickTex() } }));
+  mesh.position.y = 0.06;                                      // flush-proud of the 0.055 sidewalk slab tops
+  wrigleyRoot.add(mesh);
+}
+
 // ------------------------------- build ---------------------------------
 export function buildStadium() {
   buildFacades();
+  buildAprons();
   buildMarquee();
   buildBowl();
   buildScoreboard();
   buildTowers();
   buildKnothole();
   // gates sit ON the wall plane (data points are logical spots; the wall
-  // face is what the street sees). Plaza-east wall line interpolates
-  // (−284.3,−494)→(−266.4,−430); outward normal (−0.963, 0.269).
-  const plazaX = z => -284.3 + 17.9 * (z + 494) / 64;
+  // face is what the street sees). Plaza-east wall line is x = clarkX(z) + 40;
+  // outward normal (−0.963, 0.269) faces the plaza (the cant is unchanged).
+  const plazaX = z => clarkX(z) + 40;
   const gYaw = Math.atan2(-0.963, 0.269);                        // faces the plaza
   gateAt(S.gates.marquee.x, S.gates.marquee.z, S.gates.marquee.yaw, 'MARQUEE GATE'); // on the curve apex
-  gateAt(plazaX(-462) + 0.42, -462.12, gYaw, 'GALLAGHER WAY GATE');
-  gateAt(S.gates.bleacher.x, -493.6, Math.PI, 'BLEACHERS', 5.2); // faces Waveland
+  gateAt(plazaX(-490) + 0.42, -490.12, gYaw, 'GALLAGHER WAY GATE');
+  gateAt(-212.28, -537.72, S.gates.bleacher.yaw, 'BLEACHERS', 7); // hero gate on the chamfer, Caray plaza in front
   // marquee-side booth now lives in wrigley-vendors.js (the ticket queue owns it)
-  ticketBooth(plazaX(-457.4) - 1.06, -457.1, gYaw);
+  ticketBooth(plazaX(-487) - 1.06, -486.9, gYaw);
 }

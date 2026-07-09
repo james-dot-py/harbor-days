@@ -133,9 +133,9 @@ function board(w, h, x, y, z, yaw, tex) {                 // one textured plane 
 let flagMesh = null;
 const FLAG_BASE_Y = 9.95, FLAG_TOP_Y = 11.35;
 const flagData = [
-  { px: -221.5, pz: -508.4, yaw: 0 },            // waveland[0], faces the park (south)
-  { px: -205.5, pz: -508.4, yaw: 0 },            // waveland[2]
-  { px: -184.4, pz: -470.0, yaw: -Math.PI / 2 }, // sheffield[0], faces the park (west)
+  { px: -221.5, pz: -574.4, yaw: 0 },            // waveland[0], faces the park (south)
+  { px: -205.5, pz: -574.4, yaw: 0 },            // waveland[2]
+  { px: -178.4, pz: -526.0, yaw: -Math.PI / 2 }, // sheffield[0], faces the park (west)
 ];
 function setFlags(f) {
   if (!flagMesh) return;
@@ -166,18 +166,18 @@ function update(dt) {
 // =====================================================================
 export function buildDeepcuts() {
   // ---- 1. EAMUS CATULI! + AC counter on ROOFTOPS_W.sheffield[1], facing W ----
-  const eLotZ = -454, eFaceX = -184.6, eYaw = -Math.PI / 2;
+  const eLotZ = -510, eFaceX = -178.6, eYaw = -Math.PI / 2;
   board(7.0, 1.1, eFaceX, 11.70, eLotZ, eYaw, eamusTex());      // main banner
   board(3.4, 0.85, eFaceX - 0.02, 10.50, eLotZ, eYaw, acTex()); // AC drought counter below
 
   // ---- 2. 1060 W. ADDISON limestone plate, S wall just E of the Marquee ----
-  board(1.6, 0.5, -279.5, 3.2, -406.93, 0, addressTex());
+  board(1.6, 0.5, -273, 3.2, -413.93, 0, addressTex());
 
   // ---- 3 + EAMUS posts: one InstancedMesh of vertical poles (dark metal) ----
   const CYL = new THREE.CylinderGeometry(0.5, 0.5, 1, 8);
   instMesh(CYL, toon(0x3a3a40), [
-    { pos: [-184.25, 11.05, -450.7], scale: [0.14, 2.9, 0.14] },  // EAMUS post
-    { pos: [-184.25, 11.05, -457.3], scale: [0.14, 2.9, 0.14] },  // EAMUS post
+    { pos: [-178.25, 11.05, -506.7], scale: [0.14, 2.9, 0.14] },  // EAMUS post
+    { pos: [-178.25, 11.05, -513.3], scale: [0.14, 2.9, 0.14] },  // EAMUS post
     { pos: [flagData[0].px, 10.7, flagData[0].pz], scale: [0.12, 2.2, 0.12] },  // flag poles
     { pos: [flagData[1].px, 10.7, flagData[1].pz], scale: [0.12, 2.2, 0.12] },
     { pos: [flagData[2].px, 10.7, flagData[2].pz], scale: [0.12, 2.2, 0.12] },
@@ -195,11 +195,11 @@ export function buildDeepcuts() {
   let li = 0; const side = (a, b) => (li++ % 2 === 0 ? a : b);
   // Addison — pennant face runs along the E–W street (yaw PI/2), DoubleSide reads both ways
   for (let x = A.x0 + 8; x <= A.x1 - 8; x += 18)
-    side(() => lamps.push({ px: x, pz: -406.2 }), () => lamps.push({ px: x, pz: -393.8 }))();
+    side(() => lamps.push({ px: x, pz: -413.2 }), () => lamps.push({ px: x, pz: -386.8 }))();
   const nAddison = lamps.length;
   // Clark — pennant face runs along the diagonal (yaw = clark cant)
   li = 0; for (let z = CK.z0 + 8; z <= CK.z1 - 8; z += 17.3)
-    side(() => lamps.push({ px: clarkX(z) - 7.2, pz: z }), () => lamps.push({ px: clarkX(z) + 7.2, pz: z }))();
+    side(() => lamps.push({ px: clarkX(z) - 13.2, pz: z }), () => lamps.push({ px: clarkX(z) + 13.2, pz: z }))();
   const pennGeo = new THREE.BufferGeometry();
   pennGeo.setAttribute('position', new THREE.Float32BufferAttribute([-0.35, 0, 0, 0.35, 0, 0, 0, -1.1, 0], 3));
   pennGeo.setAttribute('uv', new THREE.Float32BufferAttribute([0, 1, 1, 1, 0.5, 0], 2));
@@ -209,7 +209,7 @@ export function buildDeepcuts() {
 
   // ---- 5. HIT IT HERE bullseye on waveland[2]'s Waveland-facing parapet ----
   const bull = new THREE.Mesh(new THREE.CircleGeometry(0.7, 32), bmat(0xffffff, { map: bullseyeTex(), side: THREE.DoubleSide }));
-  bull.position.set(-201.5, 11.0, -508.4); wrigleyRoot.add(bull);
+  bull.position.set(-201.5, 11.0, -574.4); wrigleyRoot.add(bull);
 
   // self-registered hoist update (cell-gated inside update)
   lastSeen = state.cubsWinsSeen || 0;

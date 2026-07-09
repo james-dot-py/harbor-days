@@ -1,0 +1,28 @@
+{
+  "images": [
+    {
+      "file": "owner-verdict-clark-marquee-sad.png",
+      "source": "owner",
+      "author": "owner-supplied",
+      "license": "owner reference only",
+      "fetchDate": "2026-07-09T00:00:00.000Z",
+      "note": "Owner playtest verdict ('sad', 2026-07-09): Clark/Addison intersection reads empty and flat — backdrop-grade walls on faces the player walks past, no streetscape rhythm. Judged by task 016 (streetscape) + 010 (bar likenesses)."
+    },
+    {
+      "file": "owner-verdict-clark-bars-unremarkable.png",
+      "source": "owner",
+      "author": "owner-supplied",
+      "license": "owner reference only",
+      "fetchDate": "2026-07-09T00:00:00.000Z",
+      "note": "Owner playtest verdict ('sad and unremarkable', 2026-07-09): the Clark bar row is gray prisms with small signs — no doors, glazing, awnings or furniture. Judged by tasks 016 + 010."
+    },
+    {
+      "file": "owner-verdict-cubby-neon-cutoff.png",
+      "source": "owner",
+      "author": "owner-supplied",
+      "license": "owner reference only",
+      "fetchDate": "2026-07-09T00:00:00.000Z",
+      "note": "Owner playtest verdict ('neon sign cut off', 2026-07-09): the CUBBY BEAR fascia sign clips past the building top; Budweiser window neon also clips its plate edge. Sign plates must clamp to face bounds (issue 001). Judged by tasks 010 + 016."
+    }
+  ]
+}

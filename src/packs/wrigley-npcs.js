@@ -119,14 +119,14 @@ onWorldReady(player => {
   // ================================================================== //
   const OFFICERS = [
     { x: -126, z: -400, ry: Math.PI / 2 },   // Addison E (past the station) — face east
-    { x: -324, z: -400, ry: -Math.PI / 2 },  // Addison W (past Clark)       — face west
-    { x: -328, z: -500, ry: -Math.PI / 2 },  // Waveland W                    — face west
-    { x: -186, z: -500, ry: Math.PI / 2 },   // Waveland E (past Sheffield)   — face east
-    { x: -190, z: -394, ry: 0 },             // Sheffield S of Addison        — face south
-    { x: -190, z: -505, ry: Math.PI },       // Sheffield N of Waveland       — face north
-    { x: -290, z: -394, ry: 0 },             // Clark S of Addison            — face south
-    { x: -318, z: -505, ry: Math.PI },       // Clark N of Waveland           — face north
-    { x: -230, z: -543, ry: Math.PI },       // Kenmore dead end              — face north
+    { x: -330, z: -400, ry: -Math.PI / 2 },  // Addison W (past Clark)       — face west
+    { x: -350, z: -560, ry: -Math.PI / 2 },  // Waveland W                    — face west
+    { x: -180, z: -560, ry: Math.PI / 2 },   // Waveland E (past Sheffield)   — face east
+    { x: -190, z: -388, ry: 0 },             // Sheffield S of Addison        — face south
+    { x: -190, z: -570, ry: Math.PI },       // Sheffield N of Waveland       — face north
+    { x: -286.5, z: -388, ry: 0 },           // Clark S of Addison            — face south
+    { x: -337.5, z: -570, ry: Math.PI },     // Clark N of Waveland           — face north
+    { x: -231, z: -602, ry: Math.PI },       // Kenmore dead end              — face north
   ];
   const SKINS = [0xe0a878, 0xc98a5a, 0x8a5a3c, 0xf0c8a0, 0xb07a50, 0x6e4632];
   const HAIRS = [0x2a2018, 0x1a140e, 0x4a3a24, 0x8a8580, 0x241a12, 0x5a4a3a];
@@ -142,7 +142,7 @@ onWorldReady(player => {
   // ================================================================== //
   //  2) BALL-HAWK GUS — Waveland at the Kenmore corner
   // ================================================================== //
-  const GUS_HOME = { x: -228, z: -498 };
+  const GUS_HOME = { x: -228, z: -562 };
   const gus = makeNPC({ x: GUS_HOME.x, z: GUS_HOME.z, ry: 0, wander: 0, moverLod: true, name: 'gus',
     palette: { suit: 0x6a6f62, pants: 0x3a3d38, skin: 0xd8a878, hair: 0xb8b4ac },
     lines: ["62 career balls. year 41 of waiting.", "when it clears the wall, it's MINE, ope",
@@ -198,7 +198,7 @@ onWorldReady(player => {
   // ================================================================== //
   //  3) SCORECARD VENDOR — the marquee corner sidewalk
   // ================================================================== //
-  const MARQUEE = { x: -284.5, z: -409.5 };
+  const MARQUEE = { x: -278, z: -414 };
   const SC = { x: -288, z: -396 };
   const scVendor = makeNPC({ x: SC.x, z: SC.z, ry: faceTo(SC.x, SC.z, MARQUEE.x, MARQUEE.z), wander: 0, staticLod: true, name: 'scorecards',
     palette: { suit: 0x3a5a8a, pants: 0x2a2e36, skin: 0xcaa070, hair: 0x2a2018, face: true },   // setFace at runtime → keep live eyes
@@ -217,7 +217,7 @@ onWorldReady(player => {
   // ================================================================== //
   //  4) HOT-DOG CART REPRISE — Addison/Sheffield corner (npcs.js twin)
   // ================================================================== //
-  const CX = -186, CZ = -396.5;                        // cart centre (north sidewalk; sign faces the street +z)
+  const CX = -186, CZ = -389.5;                        // cart centre (south sidewalk; sign faces the street +z)
   const body = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.9, 1.0), toon(0xcdd2d7)); body.position.set(CX, 0.75, CZ); wrigleyRoot.add(body);
   const counter = new THREE.Mesh(new THREE.BoxGeometry(2.14, 0.12, 1.12), toon(0x9aa0a6)); counter.position.set(CX, 1.24, CZ); wrigleyRoot.add(counter);
   const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.22, 12), toon(0x6a7078)); pot.position.set(CX, 1.4, CZ); wrigleyRoot.add(pot);
@@ -259,7 +259,7 @@ onWorldReady(player => {
   // ================================================================== //
   //  5) BLEACHER BUMS x3 — clustered on Waveland at the Bleacher Gate
   // ================================================================== //
-  const bum1 = makeNPC({ x: -196, z: -498, ry: 0, wander: 0, staticLod: true, name: 'bum',
+  const bum1 = makeNPC({ x: -196, z: -564, ry: 0, wander: 0, staticLod: true, name: 'bum',
     palette: { suit: 0x2a52a8, pants: 0x2a2e36, skin: 0xd8a878, hair: 0x3a2a1c },
     lines: ["threw it back — wasn't ours, ope", "the bleachers are the only true seats", "fly the W, baby"] });
   { const flag = new THREE.Group();
@@ -268,24 +268,24 @@ onWorldReady(player => {
     cloth.position.set(0.3, 1.12, 0); flag.add(cloth);
     flag.position.set(0.5, 1.0, 0.2); bum1.group.add(flag); }
   rePose.push(() => { bum1.parts.armR.rotation.x = -0.35; bum1.parts.armR.rotation.z = -0.5; });
-  const bum2 = makeNPC({ x: -201, z: -497, ry: 0, wander: 0, staticLod: true, name: 'bum',
+  const bum2 = makeNPC({ x: -201, z: -563, ry: 0, wander: 0, staticLod: true, name: 'bum',
     palette: { suit: 0xb5322c, pants: 0x2a2e36, skin: 0xc98a5a, hair: 0x1a140e },
     lines: ["ope, watch the ivy — ball's lost in there", "'69 still stings, don't get me started", "day games only, the way God intended"] });
   addBinoculars(bum2.parts.head);
   rePose.push(() => { bum2.parts.armL.rotation.x = -2.3; bum2.parts.armR.rotation.x = -2.3; bum2.parts.armL.rotation.z = 0.15; bum2.parts.armR.rotation.z = -0.15; });
-  makeNPC({ x: -205, z: -499, ry: 0, wander: 0, staticLod: true, name: 'bum',
+  makeNPC({ x: -205, z: -565, ry: 0, wander: 0, staticLod: true, name: 'bum',
     palette: { suit: 0xe8e6df, pants: 0x394b57, skin: 0x8a5a3c, hair: 0x241a12 },
     lines: ["Waveland's where the legends land, ope", "been in these bleachers since the Bartman days", "sweet home, Wrigley Field"] });
 
   // ================================================================== //
   //  6) ROOFTOP WATCHERS x2 — on the climbable roof (y 9.6)
   // ================================================================== //
-  const w1 = makeNPC({ x: -214, z: -514, ry: 0, wander: 0, staticLod: true, name: 'rooftop',
+  const w1 = makeNPC({ x: -214, z: -580, ry: 0, wander: 0, staticLod: true, name: 'rooftop',
     palette: { suit: 0x4a7a5a, pants: 0x2f3540, skin: 0xe0a878, hair: 0x3a2a1c },
     lines: ["best seats in baseball, ope", "no video boards blockin' us up here"] });
   w1.group.position.y = 9.6; addBinoculars(w1.parts.head);
   rePose.push(() => { w1.parts.armL.rotation.x = -2.3; w1.parts.armR.rotation.x = -2.3; w1.parts.armL.rotation.z = 0.15; w1.parts.armR.rotation.z = -0.15; });
-  const w2 = makeNPC({ x: -211, z: -515, ry: 0, wander: 0, staticLod: true, name: 'rooftop',
+  const w2 = makeNPC({ x: -211, z: -581, ry: 0, wander: 0, staticLod: true, name: 'rooftop',
     palette: { suit: 0xc06a3a, pants: 0x2a3340, skin: 0xc98a5a, hair: 0x241a12 },
     lines: ["you can smell the hot dogs from up here, ope", "we can see the whole infield — go Cubs"] });
   w2.group.position.y = 9.6;
@@ -310,21 +310,21 @@ onWorldReady(player => {
   // ================================================================== //
   //  8) GALLAGHER WAY — a kid pair chasing (wander) + a parent watching
   // ================================================================== //
-  makeNPC({ x: -287, z: -455, ry: 0, wander: 2.5, scale: 0.55, name: 'kid',
+  makeNPC({ x: -296, z: -490, ry: 0, wander: 2.5, scale: 0.55, name: 'kid',
     palette: { suit: 0xf0a02a, pants: 0x394b57, skin: 0xe0a878, hair: 0x241a12 },
     lines: ["tag, you're it! ope", "I'm gonna play for the Cubs someday", "race ya to the splash pad!"] });
-  const kid2 = makeNPC({ x: -289, z: -457, ry: 0, wander: 2.5, scale: 0.55, name: 'kid',
+  const kid2 = makeNPC({ x: -298, z: -492, ry: 0, wander: 2.5, scale: 0.55, name: 'kid',
     palette: { suit: 0x3ac06a, pants: 0x2a3340, skin: 0xc98a5a, hair: 0x3a2a1c },
     lines: ["ope, sorry! didn't see ya", "my glove's bigger than yours", "go Cubbies!"] });
   { const kg = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.22, 0.1), toon(0x8a4a26)); kg.position.set(0, -0.05, 0.05); kid2.parts.handR.add(kg); }
-  const parent = makeNPC({ x: -283, z: -458, ry: faceTo(-283, -458, -288, -456), wander: 0, staticLod: true, name: 'parent',
+  const parent = makeNPC({ x: -292, z: -493, ry: faceTo(-292, -493, -297, -491), wander: 0, staticLod: true, name: 'parent',
     palette: { suit: 0x6a5a8a, pants: 0x2a2e36, skin: 0xf0c8a0, hair: 0x2a2018 },
     lines: ["ope — careful you two", "grab a spot on the lawn, game's on", "first game's always here at Gallagher Way"] });
 
   // ================================================================== //
   //  9) MURPHY'S DOORMAN — outside Murphy's, folded arms
   // ================================================================== //
-  const door = makeNPC({ x: -186, z: -487, ry: -Math.PI / 2, wander: 0, staticLod: true, name: 'doorman',
+  const door = makeNPC({ x: -180, z: -541, ry: -Math.PI / 2, wander: 0, staticLod: true, name: 'doorman',
     palette: { suit: 0x1a1a20, pants: 0x1a1a20, skin: 0x6e4632, hair: 0x140f0a },
     lines: ["rooftop's full — street's the party anyway", "ope — cash only upstairs",
       "Murphy's since before you were born, kid", "we pour a cold one every Cubs win"] });
@@ -336,7 +336,7 @@ onWorldReady(player => {
   // ================================================================== //
   //  10) KNOTHOLE REGULAR — face pressed to the RF-wall screen
   // ================================================================== //
-  const knot = makeNPC({ x: -194.5, z: -447, ry: -Math.PI / 2, wander: 0, staticLod: true, name: 'knothole',
+  const knot = makeNPC({ x: -200.5, z: -469, ry: -Math.PI / 2, wander: 0, staticLod: true, name: 'knothole',
     palette: { suit: 0x7a4a3a, pants: 0x3a3d38, skin: 0xe0a878, hair: 0x3a2a1c },
     lines: ["shh — 2 strikes", "best free seat in the majors, ope", "you can watch the whole game through this knothole"] });
   rePose.push(() => {                                  // lean in, hands cupped to the screen
