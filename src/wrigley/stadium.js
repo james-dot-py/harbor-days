@@ -48,19 +48,143 @@ function inst(geo, mat, items) {
 
 // ---------------------------- canvases ---------------------------------
 let marqueeCtx = null, marqueeTex = null;
+
+// The real Wrigley marquee: a cambered (arched) crown carrying WRIGLEY FIELD
+// set ALONG the arc, art-deco stepped scroll shoulders, a rectangular body with
+// HOME OF / CHICAGO CUBS, a cream pinstripe frame (doubled along the bottom),
+// and a black dot-matrix message board. Canvas is 1024x512.
+//
+// ONE outline drives both the drawn red face and the extruded backing, so the
+// dark-red body never pokes past the arched crown. Outline in canvas px; pad>0
+// gives the inset pinstripe path.
+const MQW = 1024, MQH = 512;
+function mqOutline(pad) {
+  const L = 44 + pad, R = 980 - pad, Bot = 498 - pad;
+  const m1 = 88 + pad, sL = 140 + pad, sR = 884 - pad, mr1 = 936 - pad;   // stepped art-deco shoulders
+  const y1 = 214 - pad * 0.3, y2 = 182 + pad * 0.3, springY = 150 + pad, apexY = 28 + pad, cx = 512;
+  const a = sL - cx;                                    // circular camber through the two springs + apex
+  const cy = (a * a + springY * springY - apexY * apexY) / (2 * (springY - apexY));
+  const r = cy - apexY;
+  const p = [[L, Bot], [L, y1], [m1, y1], [m1, y2], [sL, y2], [sL, springY]];
+  const N = 22;
+  for (let i = 1; i < N; i++) { const x = sL + (sR - sL) * i / N; p.push([x, cy - Math.sqrt(Math.max(0, r * r - (x - cx) * (x - cx)))]); }
+  p.push([sR, springY], [sR, y2], [mr1, y2], [mr1, y1], [R, y1], [R, Bot]);
+  return p;
+}
+const MQ_OUT = mqOutline(0), MQ_IN = mqOutline(17);
+// canvas px -> group-local metres (face plane 7.6 x 3.8, centred at y 6.4, facing +z)
+const mqMX = px => (px / MQW - 0.5) * 7.6;
+const mqMY = py => 8.3 - (py / MQH) * 3.8;
+
+// 5x7 dot-matrix font — covers every glyph the live gameday messages use
+const DFONT = {
+  ' ': ['     ', '     ', '     ', '     ', '     ', '     ', '     '],
+  A: [' ### ', '#   #', '#   #', '#####', '#   #', '#   #', '#   #'],
+  B: ['#### ', '#   #', '#   #', '#### ', '#   #', '#   #', '#### '],
+  C: [' ####', '#    ', '#    ', '#    ', '#    ', '#    ', ' ####'],
+  D: ['#### ', '#   #', '#   #', '#   #', '#   #', '#   #', '#### '],
+  E: ['#####', '#    ', '#    ', '#### ', '#    ', '#    ', '#####'],
+  F: ['#####', '#    ', '#    ', '#### ', '#    ', '#    ', '#    '],
+  G: [' ####', '#    ', '#    ', '#  ##', '#   #', '#   #', ' ####'],
+  H: ['#   #', '#   #', '#   #', '#####', '#   #', '#   #', '#   #'],
+  I: ['#####', '  #  ', '  #  ', '  #  ', '  #  ', '  #  ', '#####'],
+  J: ['  ###', '   # ', '   # ', '   # ', '#  # ', '#  # ', ' ##  '],
+  K: ['#   #', '#  # ', '# #  ', '##   ', '# #  ', '#  # ', '#   #'],
+  L: ['#    ', '#    ', '#    ', '#    ', '#    ', '#    ', '#####'],
+  M: ['#   #', '## ##', '# # #', '# # #', '#   #', '#   #', '#   #'],
+  N: ['#   #', '##  #', '# # #', '# # #', '#  ##', '#   #', '#   #'],
+  O: [' ### ', '#   #', '#   #', '#   #', '#   #', '#   #', ' ### '],
+  P: ['#### ', '#   #', '#   #', '#### ', '#    ', '#    ', '#    '],
+  Q: [' ### ', '#   #', '#   #', '#   #', '# # #', '#  # ', ' ## #'],
+  R: ['#### ', '#   #', '#   #', '#### ', '# #  ', '#  # ', '#   #'],
+  S: [' ####', '#    ', '#    ', ' ### ', '    #', '    #', '#### '],
+  T: ['#####', '  #  ', '  #  ', '  #  ', '  #  ', '  #  ', '  #  '],
+  U: ['#   #', '#   #', '#   #', '#   #', '#   #', '#   #', ' ### '],
+  V: ['#   #', '#   #', '#   #', '#   #', '#   #', ' # # ', '  #  '],
+  W: ['#   #', '#   #', '#   #', '# # #', '# # #', '## ##', '#   #'],
+  X: ['#   #', '#   #', ' # # ', '  #  ', ' # # ', '#   #', '#   #'],
+  Y: ['#   #', '#   #', ' # # ', '  #  ', '  #  ', '  #  ', '  #  '],
+  Z: ['#####', '    #', '   # ', '  #  ', ' #   ', '#    ', '#####'],
+  0: [' ### ', '#   #', '#  ##', '# # #', '##  #', '#   #', ' ### '],
+  1: ['  #  ', ' ##  ', '  #  ', '  #  ', '  #  ', '  #  ', ' ### '],
+  2: [' ### ', '#   #', '    #', '   # ', '  #  ', ' #   ', '#####'],
+  3: ['#####', '   # ', '  #  ', '   # ', '    #', '#   #', ' ### '],
+  4: ['   # ', '  ## ', ' # # ', '#  # ', '#####', '   # ', '   # '],
+  5: ['#####', '#    ', '#### ', '    #', '    #', '#   #', ' ### '],
+  6: [' ### ', '#    ', '#    ', '#### ', '#   #', '#   #', ' ### '],
+  7: ['#####', '    #', '   # ', '  #  ', ' #   ', ' #   ', ' #   '],
+  8: [' ### ', '#   #', '#   #', ' ### ', '#   #', '#   #', ' ### '],
+  9: [' ### ', '#   #', '#   #', ' ####', '    #', '    #', ' ### '],
+  '!': ['  #  ', '  #  ', '  #  ', '  #  ', '  #  ', '     ', '  #  '],
+  '·': ['     ', '     ', '  #  ', ' ### ', '  #  ', '     ', '     '],
+  '.': ['     ', '     ', '     ', '     ', '     ', ' ##  ', ' ##  '],
+  '-': ['     ', '     ', '     ', '#####', '     ', '     ', '     '],
+  "'": ['  #  ', '  #  ', '  #  ', '     ', '     ', '     ', '     '],
+  '&': [' ##  ', '#  # ', '#  # ', ' ##  ', '#  # ', '#  # ', ' ## #'],
+};
+
+function mqPath(g, pts) { g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) g.lineTo(pts[i][0], pts[i][1]); g.closePath(); }
+
+// art-deco spiral volute nestled in the stepped shoulder (dir = -1 mirrors)
+function mqScroll(g, x, y, dir) {
+  g.save(); g.translate(x, y); g.scale(dir, 1);
+  g.strokeStyle = '#f4efe2'; g.lineWidth = 6; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.beginPath();
+  for (let i = 0; i <= 60; i++) { const t = i / 60, ang = t * 8.8, rad = 21 * (1 - 0.72 * t), px = Math.cos(ang) * rad, py = Math.sin(ang) * rad; if (i === 0) g.moveTo(px, py); else g.lineTo(px, py); }
+  g.stroke();
+  g.beginPath(); g.arc(0, 0, 3.4, 0, 6.2832); g.fillStyle = '#f4efe2'; g.fill();   // volute eye
+  g.restore();
+}
+
+// WRIGLEY FIELD set along the camber — per-glyph translate+rotate on the arc
+function mqArchText(g, text) {
+  const cx = 512, Rt = 560, cyT = Rt + 96;             // circle centre below the crown
+  let fs = 76; g.font = `800 ${fs}px Georgia,serif`;
+  const total = () => [...text].reduce((s, c) => s + g.measureText(c).width, 0);
+  while (total() > 664 && fs > 40) { fs -= 2; g.font = `800 ${fs}px Georgia,serif`; }
+  const chars = [...text], w = chars.map(c => g.measureText(c).width), tot = w.reduce((s, v) => s + v, 0);
+  g.fillStyle = '#f6f1e6'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  let ang = -(tot / 2) / Rt;
+  for (let i = 0; i < chars.length; i++) {
+    const aa = ang + (w[i] / 2) / Rt;
+    g.save(); g.translate(cx + Math.sin(aa) * Rt, cyT - Math.cos(aa) * Rt); g.rotate(aa);
+    g.fillText(chars[i], 0, 0); g.restore();
+    ang += w[i] / Rt;
+  }
+}
+
+// black rounded message board with a warm incandescent dot-matrix message
+function mqDots(g, msg, bx, by, bw, bh) {
+  const r = 16;
+  g.beginPath();
+  g.moveTo(bx + r, by); g.arcTo(bx + bw, by, bx + bw, by + bh, r); g.arcTo(bx + bw, by + bh, bx, by + bh, r);
+  g.arcTo(bx, by + bh, bx, by, r); g.arcTo(bx, by, bx + bw, by, r); g.closePath();
+  g.fillStyle = '#0a0806'; g.fill();
+  const chars = [...msg], cols = Math.max(1, chars.length * 6 - 1), padX = 22, padY = 16;
+  const pitch = Math.min((bh - padY * 2) / 7, (bw - padX * 2) / cols), dr = pitch * 0.38;
+  const blockW = cols * pitch, ox = bx + bw / 2 - blockW / 2, oy = by + bh / 2 - 3.5 * pitch;
+  const dot = (cc, rw, col) => { g.beginPath(); g.arc(ox + cc * pitch + pitch / 2, oy + rw * pitch + pitch / 2, dr, 0, 6.2832); g.fillStyle = col; g.fill(); };
+  for (let c = 0; c < cols; c++) for (let rw = 0; rw < 7; rw++) dot(c, rw, '#241c15');   // faint full grid
+  for (let ci = 0; ci < chars.length; ci++) {                                            // lit message glyphs
+    const rows = DFONT[chars[ci]] || DFONT[' '];
+    for (let rw = 0; rw < 7; rw++) for (let cc = 0; cc < 5; cc++) if (rows[rw][cc] === '#') dot(ci * 6 + cc, rw, '#ffe3ad');
+  }
+}
+
 function drawMarquee(msg) {
   const g = marqueeCtx; if (!g) return;
-  g.fillStyle = '#a91f2e'; g.fillRect(0, 0, 512, 256);
-  g.strokeStyle = '#f2ece0'; g.lineWidth = 7; g.strokeRect(10, 10, 492, 236);
-  g.fillStyle = '#f6f1e6'; g.textAlign = 'center';
-  let fs = 64; g.font = `700 ${fs}px Georgia,serif`;
-  while (g.measureText('WRIGLEY FIELD').width > 464 && fs > 30) { fs -= 2; g.font = `700 ${fs}px Georgia,serif`; }
-  g.fillText('WRIGLEY FIELD', 256, 78);
-  g.font = '700 30px Georgia,serif';
-  g.fillText('HOME OF', 256, 120); g.fillText('CHICAGO CUBS', 256, 156);
-  g.fillStyle = '#26221e'; g.fillRect(26, 176, 460, 56);
-  g.fillStyle = '#ffd9a0'; g.font = '700 34px "Courier New",monospace';
-  g.fillText(msg, 256, 214);
+  g.clearRect(0, 0, MQW, MQH);
+  mqPath(g, MQ_OUT); g.fillStyle = '#c11f2c'; g.fill();                 // red face silhouette
+  mqPath(g, MQ_IN); g.strokeStyle = '#f4efe2'; g.lineJoin = 'round'; g.lineWidth = 5; g.stroke();  // pinstripe frame
+  g.beginPath(); g.moveTo(72, 470); g.lineTo(952, 470); g.lineWidth = 4; g.stroke();               // doubled bottom line
+  mqScroll(g, 126, 206, 1); mqScroll(g, 898, 206, -1);                  // art-deco shoulder volutes
+  mqArchText(g, 'WRIGLEY FIELD');                                       // text on the arc
+  g.fillStyle = '#f6f1e6'; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+  g.font = '800 30px Georgia,serif'; g.fillText('HOME OF', 512, 206);
+  let fs = 78; g.font = `800 ${fs}px Georgia,serif`;
+  while (g.measureText('CHICAGO CUBS').width > 812 && fs > 44) { fs -= 2; g.font = `800 ${fs}px Georgia,serif`; }
+  g.fillText('CHICAGO CUBS', 512, 292);
+  mqDots(g, msg, 80, 314, 864, 140);
   marqueeTex.needsUpdate = true;
 }
 export function marqueeSetText(line) { drawMarquee(String(line).toUpperCase().slice(0, 24)); }
@@ -302,26 +426,30 @@ function ticketBooth(x, z, yaw) {
 function buildMarquee() {
   const M = S.marquee;
   const grp = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.BoxGeometry(7.4, 3.6, 0.7), toon(0xa91f2e));
-  body.position.y = 6.2; grp.add(body);
-  const capT = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.36, 0.9), toon(0x7d1622));
-  capT.position.y = 8.15; grp.add(capT);
-  const capB = new THREE.Mesh(new THREE.BoxGeometry(7.8, 0.36, 0.9), toon(0x7d1622));
-  capB.position.y = 4.25; grp.add(capB);
-  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256;
+  // dark-red extruded backing whose outline exactly matches the drawn red face
+  const shape = new THREE.Shape();
+  shape.moveTo(mqMX(MQ_OUT[0][0]), mqMY(MQ_OUT[0][1]));
+  for (let i = 1; i < MQ_OUT.length; i++) shape.lineTo(mqMX(MQ_OUT[i][0]), mqMY(MQ_OUT[i][1]));
+  shape.closePath();
+  const backing = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: 0.6, bevelEnabled: false }), toon(0x7d1622));
+  backing.position.z = -0.3; grp.add(backing);
+  // live canvas face on a slightly-proud plane (transparent outside the silhouette)
+  const cv = document.createElement('canvas'); cv.width = MQW; cv.height = MQH;
   marqueeCtx = cv.getContext('2d');
   marqueeTex = new THREE.CanvasTexture(cv);
   drawMarquee('GAME IN PROGRESS');
-  const face = new THREE.Mesh(new THREE.PlaneGeometry(7.0, 3.5), bmat(0xffffff, { map: marqueeTex }));
-  face.position.set(0, 6.2, 0.38); grp.add(face);
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(7.6, 3.8),
+    bmat(0xffffff, { map: marqueeTex, transparent: true, alphaTest: 0.5 }));
+  face.position.set(0, 6.4, 0.33); grp.add(face);
   // two struts back to the corner wall
-  for (const sx of [-2.6, 2.6]) {
+  for (const sx of [-2.7, 2.7]) {
     const strut = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.22, 2.6), toon(0x5a1a20));
     strut.position.set(sx, 7.4, -1.2); grp.add(strut);
   }
-  // warm glow dots along the top cap
-  const n = 9, gp = new Float32Array(n * 3), aC = new Float32Array(n * 3), aS = new Float32Array(n);
-  for (let i = 0; i < n; i++) { gp.set([-3.4 + i * 0.85, 8.35, 0.42], i * 3); aC.set([1, 0.65, 0.5], i * 3); aS[i] = 3.2; }
+  // warm glow bulbs following the arched crown (every other camber sample)
+  const arc = MQ_OUT.filter(p => p[1] < 172).filter((_, i) => i % 2 === 0);   // springs + camber, incl. apex
+  const n = arc.length, gp = new Float32Array(n * 3), aC = new Float32Array(n * 3), aS = new Float32Array(n);
+  for (let i = 0; i < n; i++) { gp.set([mqMX(arc[i][0]), mqMY(arc[i][1]) + 0.06, 0.36], i * 3); aC.set([1, 0.72, 0.5], i * 3); aS[i] = 2.7; }
   const pg = new THREE.BufferGeometry();
   pg.setAttribute('position', new THREE.BufferAttribute(gp, 3));
   pg.setAttribute('aColor', new THREE.BufferAttribute(aC, 3));
