@@ -7,7 +7,7 @@
 // Pause = the STOP sentinel: graceful, honored BETWEEN iterations — the current
 // task always finishes (or fails honestly) first.
 import http from 'http';
-import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdirSync, unlinkSync, openSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdirSync, unlinkSync, openSync, readSync, closeSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
@@ -39,6 +39,51 @@ function events() {
 }
 function mdList(dir) { try { return readdirSync(dir).filter(f => f.endsWith('.md')).sort(); } catch { return []; } }
 
+/* ---- deep activity feed: tail the live session stream ------------------
+   run.mjs persists every raw stream line to logs/session-*.jsonl. Parse the
+   tail of the newest one into a human digest — what the session is actually
+   doing right now (narration + tool calls), one level deeper than the
+   milestone feed. Display-only; ntfy stays milestone-only. */
+function latestSessionLog() {
+  try {
+    return readdirSync(LOGS).filter(f => /^session-.*\.jsonl$/.test(f))
+      .map(f => join(LOGS, f)).sort((a, b) => statSync(b).mtimeMs - statSync(a).mtimeMs)[0] || null;
+  } catch { return null; }
+}
+function tailText(file, bytes = 65536) {
+  try {
+    const size = statSync(file).size;
+    const start = Math.max(0, size - bytes);
+    const fd = openSync(file, 'r');
+    const buf = Buffer.alloc(size - start);
+    readSync(fd, buf, 0, buf.length, start);
+    closeSync(fd);
+    const s = buf.toString('utf8');
+    return start > 0 ? s.slice(s.indexOf('\n') + 1) : s;   // drop partial first line
+  } catch { return ''; }
+}
+const short = (s, n = 150) => { s = String(s).replace(/\s+/g, ' ').trim(); return s.length > n ? s.slice(0, n - 1) + '…' : s; };
+function activity() {
+  const f = latestSessionLog();
+  if (!f) return { live: false, items: [] };
+  const fresh = (Date.now() - statSync(f).mtimeMs) < 180000;
+  const items = [];
+  for (const line of tailText(f).split('\n')) {
+    let ev; try { ev = JSON.parse(line); } catch { continue; }
+    const c = ev.message && ev.message.content;
+    if (ev.type !== 'assistant' || !Array.isArray(c)) continue;
+    for (const b of c) {
+      if (b.type === 'text' && b.text && b.text.trim()) items.push({ kind: 'say', text: short(b.text) });
+      else if (b.type === 'tool_use') {
+        const i = b.input || {};
+        const detail = i.description || (i.file_path && i.file_path.split(/[\\/]/).pop()) || (i.command && short(i.command, 90)) || (i.pattern) || (i.prompt && short(i.prompt, 90)) || '';
+        items.push({ kind: 'tool', text: b.name + (detail ? ' · ' + detail : '') });
+      }
+    }
+  }
+  return { live: fresh, items: items.slice(-14).reverse() };
+}
+
 function state() {
   const pid = pidAlive(), stop = existsSync(STOP);
   const ev = events();
@@ -56,6 +101,7 @@ function state() {
     queue: { pending: mdList(QUEUE), done: mdList(join(QUEUE, 'done')), parked: mdList(join(QUEUE, 'parked')) },
     feedback: { pending: mdList(FEEDBACK).length, processed: mdList(PROCESSED).length },
     events: ev,
+    activity: activity(),
     ntfyTopic: ntfyTopic(),
   };
 }
@@ -108,6 +154,10 @@ const HTML = `<!doctype html><html><head><meta charset="utf-8"><title>Harbor Day
   .go{background:#0e3386;color:#fff}.pause{background:#463016;color:#e8c15a}
   .send{background:#0e3386;color:#fff;margin-top:8px}
   #events{list-style:none;margin:0;padding:0;max-height:340px;overflow-y:auto}
+  #activity{list-style:none;margin:0;padding:0;max-height:230px;overflow-y:auto}
+  #activity li{padding:4px 0;border-bottom:1px solid #22222c;font-size:13px}
+  #activity .tool{color:#7db3ff;font-family:Consolas,monospace;font-size:12px}
+  #activity .say{color:#c9c6d0}
   #events li{padding:5px 0;border-bottom:1px solid #22222c;font-size:13px}
   #events .t{color:#6f6c7a;font-size:11px;margin-right:8px}
   .ev-green{color:#5fd97e}.ev-failed,.ev-parked,.ev-loop-crash,.ev-halt{color:#e8825a}
@@ -130,6 +180,10 @@ const HTML = `<!doctype html><html><head><meta charset="utf-8"><title>Harbor Day
       <button id="start" class="go">▶ Start</button>
       <button id="pauseBtn" class="pause">⏸ Pause after current task</button>
       <div class="msg" id="ctlmsg"></div>
+    </div>
+    <div class="card" style="margin-top:18px">
+      <h2>Working on <span id="livedot" style="text-transform:none;letter-spacing:0"></span></h2>
+      <ul id="activity"></ul>
     </div>
     <div class="card" style="margin-top:18px">
       <h2>Updates <span style="text-transform:none;letter-spacing:0">(also on your ntfy phone feed)</span></h2>
@@ -164,7 +218,7 @@ async function refresh(){
     $('start').disabled=(s.status==='running');
     $('start').textContent=(s.status==='pausing'||s.status==='paused')?'▶ Resume':'▶ Start';
     $('pauseBtn').disabled=(s.status!=='running');
-    $('events').innerHTML=s.events.map(e=>'<li><span class="t">'+e.t.slice(11,19)+'</span><span class="ev-'+e.event+'">'+e.event+'</span>'+(e.msg?' — '+e.msg:'')+'</li>').join('');
+    const act=s.activity||{items:[]};$('livedot').textContent=act.live?'· LIVE':'(idle)';$('activity').innerHTML=act.items.map(a=>'<li class="'+a.kind+'">'+(a.kind==='tool'?'⚙ ':'💬 ')+a.text.replace(/</g,'&lt;')+'</li>').join('')||'<li style="color:#6f6c7a">(no live session)</li>';$('events').innerHTML=s.events.map(e=>'<li><span class="t">'+e.t.slice(11,19)+'</span><span class="ev-'+e.event+'">'+e.event+'</span>'+(e.msg?' — '+e.msg:'')+'</li>').join('');
     $('qpending').innerHTML=s.queue.pending.map(f=>'<li>◻ '+f+'</li>').join('')||'<li style="color:#6f6c7a">(queue empty)</li>';
     $('qdone').innerHTML=s.queue.done.map(f=>'<li class="done">✓ '+f+'</li>').join('');
     $('qparked').innerHTML=s.queue.parked.map(f=>'<li class="parked">⚠ '+f+' (parked)</li>').join('');
