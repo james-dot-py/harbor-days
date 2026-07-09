@@ -5,8 +5,9 @@ type: delight
 turns: 60
 title: Gate teaser signs — hint that the inside of the ballpark is coming
 acceptance: >
-  Small canvas-texture signs at the stadium's actual door recesses (the
-  Marquee Gate primarily; optionally echo at the Bleacher Gate) hinting the
+  Small canvas-texture signs at the stadium's actual door recesses (the WEST
+  Clark/Gallagher doors and the SOUTH Addison doors, per the owner placement
+  correction in 012; optionally echo at the bleacher corner) hinting the
   interior will open someday — same family as the lakefront's FUTURE ENTRANCE
   gag but in ballpark voice. Owner directive: hint, don't promise a date;
   the interior gets designed later. Wording is the session's call at the
