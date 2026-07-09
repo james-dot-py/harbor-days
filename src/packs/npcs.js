@@ -206,7 +206,7 @@ onWorldReady(player=>{
   const sign=new THREE.Mesh(new THREE.PlaneGeometry(1.15,0.5),bmat(0xffffff,{map:hotsTex(),side:THREE.DoubleSide,transparent:true}));
   sign.position.set(CX,1.72,CZ+0.62);scene.add(sign);
 
-  const vendor=makeNPC({x:CX,z:CZ-1.6,ry:0,palette:{suit:0xe8e2d0,pants:0x333a44,skin:0xe0a878,hair:0x2a2018},
+  const vendor=makeNPC({x:CX,z:CZ-1.6,ry:0,palette:{suit:0xe8e2d0,pants:0x333a44,skin:0xe0a878,hair:0x2a2018,face:true},   // setFace at runtime → keep live eyes
     name:'vendor',lines:["encased meats, my friend","steamed, never boiled","get 'em while they're hot","no ketchup — house rules","you want the works, dontcha"]});
 
   const hotdog=buildHotDog(); const HD_SCALE=0.85;
@@ -455,7 +455,7 @@ onWorldReady(player=>{
   //  4) THE CHICAGO HANDSHAKE  (upper terrace at the rocks)
   // ================================================================== //
   const HX=150,HZ=195;                                // Belmont Rocks (top terrace, h~0; nudged from 152 so NPC+cooler sit on ground)
-  const hsNPC=makeNPC({x:HX,z:HZ,ry:0,palette:{suit:0x18b8a0,pants:0xf2c94c,skin:0xd8a070,hair:0x241a12},
+  const hsNPC=makeNPC({x:HX,z:HZ,ry:0,palette:{suit:0x18b8a0,pants:0xf2c94c,skin:0xd8a070,hair:0x241a12,face:true},   // setFace at runtime → keep live eyes
     name:'regular',lines:["pull up a rock","beautiful day for it, eh","you ever had Malört?","welcome to the rocks"]});
   const cooler=new THREE.Mesh(new THREE.BoxGeometry(0.72,0.46,0.52),toon(0xd0392f));cooler.position.set(HX+1.3,0.23,HZ+0.4);scene.add(cooler);
   const coolerLid=new THREE.Mesh(new THREE.BoxGeometry(0.76,0.1,0.56),toon(0xeceae2));coolerLid.position.set(HX+1.3,0.51,HZ+0.4);scene.add(coolerLid);

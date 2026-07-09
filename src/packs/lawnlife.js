@@ -29,7 +29,7 @@
 //  registerUpdate drives all motion from hoisted scratch (zero per-frame alloc).
 // =====================================================================
 import * as THREE from 'three';
-import { onWorldReady, registerUpdate, createChibi, registerBumpable, getAudioCtx } from '../framework.js';
+import { onWorldReady, registerUpdate, createChibi, registerBumpable, bakeChibiRig, getAudioCtx } from '../framework.js';
 import { scene, camera, toon, bmat, curveMat, clamp, lerp, smooth } from '../core.js';
 import { coastQuery, tierAt } from '../coast.js';
 import { pathSamples } from '../paths.js';
@@ -159,6 +159,7 @@ onWorldReady((player) => {
       const {group,parts}=makeChibi(sx,sz,sry,nextPal());
       poseSeated(group,parts,gy);
       registerBumpable(group,parts,lines);
+      bakeChibiRig(group,parts);               // static seated eater — baked → 1 draw
     }
     coolerSpots.push({x:cx+1.25,z:cz-0.9});
     foodSpots.push({x:cx+0.3, y:gy+0.12, z:cz+0.15, c:FOODC[0]});
@@ -248,7 +249,7 @@ onWorldReady((player) => {
     const OFF=[[-1.05,-0.35],[0.0,-1.15],[1.05,-0.35]];
     OFF.forEach((o,i)=>{
       const sx=c.x+o[0], sz=c.z+o[1], sry=Math.atan2(c.x-sx,c.z-sz);
-      const {group,parts}=makeChibi(sx,sz,sry,nextPal());
+      const {group,parts}=makeChibi(sx,sz,sry,{...nextPal(),face:true});   // face:true → the setup squint scales a real eyes mesh (then bakeChibiRig folds it in → still 1 draw)
       poseSeated(group,parts,gy);
       parts.eyeL.scale.set(1,0.6,1); parts.eyeR.scale.set(1,0.6,1);       // happy squint
       if(i===1){                                                          // holding a slice up to the hand
@@ -258,6 +259,7 @@ onWorldReady((player) => {
         scene.add(wedge);
       }
       registerBumpable(group,parts,LINES_PEQUOD);
+      bakeChibiRig(group,parts);        // seated + squint + slice pose set once (squint bakes in; the slice is a separate mesh) — baked → 1 draw
     });
     coolerSpots.push({x:c.x+1.3,z:c.z+0.6});
   }
@@ -305,6 +307,7 @@ onWorldReady((player) => {
       // a little book held out in front of the hands
       bookSpots.push({x:sx+Math.sin(sry)*0.42, y:gy+0.62, z:sz+Math.cos(sry)*0.42, ry:sry, tilt:-0.55});
       registerBumpable(group,parts,LINES_READING);
+      bakeChibiRig(group,parts);        // reader arm is posed once at setup (no interaction re-pose); book is a separate prop — baked → 1 draw
     }
   }
 
@@ -385,6 +388,7 @@ onWorldReady((player) => {
     par.parts.armL.rotation.z=0.55; par.parts.armR.rotation.z=-0.55;      // reaching, watchful
     par.parts.armL.rotation.x=-0.2; par.parts.armR.rotation.x=-0.2;
     registerBumpable(par.group,par.parts,LINES_PARENT);
+    bakeChibiRig(par.group,par.parts);   // the PARENT is static (only the toddler's limbs animate below) — baked → 1 draw
     // the toddler — small, chases a wandering point within (46..60, -126..-110)
     const t=makeChibi(52,-118,0,nextPal(),0.5);
     registerBumpable(t.group,t.parts,LINES_TODDLER);
@@ -421,9 +425,11 @@ onWorldReady((player) => {
     const ven=makeChibi(c.x,c.z-0.85,0,nextPal());
     ven.group.position.y=gy; ven.parts.armR.rotation.x=-0.5; ven.parts.armL.rotation.x=-0.4;
     registerBumpable(ven.group,ven.parts,LINES_MARKET);
+    bakeChibiRig(ven.group,ven.parts);   // static vendor pose — baked → 1 draw
     const bro=makeChibi(c.x+0.4,c.z+1.5,Math.PI,nextPal());
     bro.group.position.y=gy; bro.parts.body.rotation.x=0.14; bro.parts.head.rotation.x=0.1;  // leaning in to look
     registerBumpable(bro.group,bro.parts,LINES_MARKET);
+    bakeChibiRig(bro.group,bro.parts);   // static leaning browser — baked → 1 draw
   }
 
   // ================================================================= //

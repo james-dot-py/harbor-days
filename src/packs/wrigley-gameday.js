@@ -18,7 +18,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { onWorldReady, registerUpdate, addInteraction, toast, journalSection,
-         state, screenFx, holdItem, getAudioCtx, createChibi } from '../framework.js';
+         state, screenFx, holdItem, getAudioCtx, createChibi, bakeChibiRig } from '../framework.js';
 import { toon, bmat, mulberry32, pointsMat, clamp, game } from '../core.js';
 import { activeCell } from '../cells.js';
 import { wrigleyRoot } from '../wrigley/index.js';
@@ -190,6 +190,7 @@ function buildFielder() {   // posed outfielder, visible through the knothole
   const { group, parts } = createChibi({ suit: 0x2452a0, pants: 0x20242b, skin: 0xcaa07a, hair: 0x2a2018, scale: 0.9 });
   group.position.set(-214, 0, -452); group.rotation.y = Math.PI / 2;
   parts.armL.rotation.x = -2.5; parts.armR.rotation.x = -2.5;    // both arms up (shrug/appeal)
+  bakeChibiRig(group, parts);                                    // static (only .visible toggles) — baked → 1 draw
   group.visible = false;
   wrigleyRoot.add(group);
   fielder = group;

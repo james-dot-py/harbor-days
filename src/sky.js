@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { scene, rng, rand, gmap, glowTex, mulberry32, curveMat, bmat } from './core.js';
 import * as CH from './data/chicago.js';
 
@@ -32,10 +33,17 @@ export function buildSky(){
     const cm=new THREE.MeshToonMaterial({color:0xffd9c4,gradientMap:gmap,fog:false});
     for(let i=0;i<7;i++){
       const g=new THREE.Group(),n=3+(rng()*3|0);
+      // merge this cloud's lobes into ONE mesh (all share cm, so it's exact).
+      // EXACT same rand() call order/count as before — world layout is rng
+      // order (hard constraint #1): per lobe draw radius then x,y,z, and bake
+      // scale.y=0.5 + the lobe offset straight into the geometry.
+      const lobes=[];
       for(let k=0;k<n;k++){
-        const s=new THREE.Mesh(new THREE.SphereGeometry(rand(5,9),12,10),cm);
-        s.scale.y=0.5;s.position.set(rand(-8,8),rand(-1,1.5),rand(-4,4));g.add(s);
+        const geo=new THREE.SphereGeometry(rand(5,9),12,10);
+        const px=rand(-8,8),py=rand(-1,1.5),pz=rand(-4,4);
+        geo.scale(1,0.5,1);geo.translate(px,py,pz);lobes.push(geo);
       }
+      g.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(lobes,false),cm));
       g.position.set(rand(-200,200),rand(55,95),rand(-260,260));
       scene.add(g);clouds.push(g);
     }

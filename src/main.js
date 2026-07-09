@@ -5,7 +5,8 @@ import { buildCoast, water, coastQuery, profileTotal, tierAt, beachH, LAND } fro
 import { buildPaths } from './paths.js';
 import { buildProps, colliders, walkRects, bobbers, drifter, dogTail, foam, fireflies } from './props.js';
 import { buildStructures } from './structures.js';
-import { mayor, mparts, buildMayor, updateCharacter } from './character.js';
+import { mayor, mparts, buildMayor, updateCharacter, updateChibiShadows } from './character.js';
+import { updateFogCull, fogCullStats } from './fogcull.js';
 import { FX, DUST, PASTELS, fw, rockets, scheduled, boomLights, setType, updateFireworks } from './fx.js';
 import { initAudio, sStep, sChime, sPop, updateAmbience } from './audio.js';
 import { cam, keys, joy, jump, initInput } from './input.js';
@@ -60,12 +61,15 @@ function census(top=60){
   });
   return {total,rows:Object.entries(tally).sort((a,b)=>b[1]-a[1]).slice(0,top)};
 }
-window.__hd={errs:errRing,perf:()=>({drawCalls:renderer.info.render.calls,fps:Math.round(perfS.fps*10)/10}),census,
+window.__hd={errs:errRing,perf:()=>({drawCalls:renderer.info.render.calls,fps:Math.round(perfS.fps*10)/10,buildMs:window.__hd.buildMs}),census,
+  fogcull:fogCullStats,   // {managed,hidden} — fog-distance culling introspection
   // debug-only scene access for tools/ (raycast attribution — census() names merged
   // meshes but can't localize a face; a ray can)
   scene,camera,THREE};
 
 // ---- build the world (order matters: single shared rng, top-to-bottom) ----
+// timed (task 007): __hd.buildMs reports where world-build start-up cost goes.
+const _tb0=performance.now();
 buildSky();
 beginCellCapture();   // lakefront world → one cell root (cells.js); sky + mayor stay global
 buildCoast();
@@ -73,7 +77,9 @@ buildPaths();
 buildProps();
 buildStructures();
 endCellCapture();
+const _tm0=performance.now();
 mergeCellStatic(getCell('lakefront').root);   // collapse the lakefront cell's static builder meshes → fewer draw calls
+const _tm1=performance.now();
 buildMayor();
 
 // ------------------------ walkability + surface ------------------------
@@ -148,7 +154,10 @@ initInput();
 initMinimapToggle();
 
 // ---- framework: run queued pack setup now the world exists ----
+const _tp0=performance.now();
 worldReady(player);
+window.__hd.buildMs={build:Math.round(_tm0-_tb0),merge:Math.round(_tm1-_tm0),packs:Math.round(performance.now()-_tp0)};
+console.log('[perf] world build '+window.__hd.buildMs.build+'ms · mergeCellStatic '+window.__hd.buildMs.merge+'ms · packs '+window.__hd.buildMs.packs+'ms');
 
 // ------------------------------ main loop ------------------------------
 const camPos=new THREE.Vector3(CH.SPAWN.camera.x,CH.SPAWN.camera.y,CH.SPAWN.camera.z);
@@ -357,6 +366,8 @@ function frame(now){
 
   // ---- framework per-frame (interactions, NPCs, tracking, pack updates) ----
   runUpdates(dt,t,player);
+  updateChibiShadows();   // after runUpdates: rigs have moved; one InstancedMesh re-stamp
+  updateFogCull(dt);      // hide fully-fogged meshes (pixel-neutral draw-call cut)
 
   if(DBG.get('dbg')==='1'){const h=$('hint');h.style.display='block';h.classList.remove('hide');
     h.textContent=`x=${player.x.toFixed(1)} z=${player.z.toFixed(1)} y=${player.y.toFixed(2)} mag=${mag.toFixed(2)} mvx=${mvx.toFixed(2)} wadeT=${jsk.wadeT.toFixed(2)} on=${jsk.on?1:0} walk=${walkable(player.x,player.z)?1:0} iw07=${isWater(player.x+mvx*0.7,player.z+mvz*0.7)?1:0} walk07=${walkable(player.x+mvx*0.7,player.z+mvz*0.7)?1:0}`;}

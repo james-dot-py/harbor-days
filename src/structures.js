@@ -735,6 +735,7 @@ function buildDiversey(POSTS,RAILS){
   B.golfers.forEach((g,i)=>{
     const up=g.lvl===1,gy=up?y1:0,gz=up?zF+1.3:D.tees.z,p=gpose[i%4];
     const {group,parts}=createChibi(Object.assign({scale:CIT},gpal[i%4]));
+    group.name='chibi-statue';   // fully static pose (baked below, no update registered) — opt OUT of the cell-merge 'chibi' live-rig exemption so these bake into the z-band merges
     group.position.set(g.x,gy,gz);group.rotation.y=Math.PI+p.yaw;   // face NORTH, downrange
     parts.legL.rotation.z=0.14;parts.legR.rotation.z=-0.14;         // stance
     parts.armL.rotation.set(p.alx,0,p.alz);parts.armR.rotation.set(p.arx,0,p.arz);

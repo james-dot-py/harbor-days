@@ -123,7 +123,7 @@ export function buildWrigleyville() {
   buildRooftops();
   buildVillage();
   buildFieldplay();
-  mergeCellStatic(wrigleyRoot);   // collapse Wrigleyville's static builder meshes → fewer draw calls
+  mergeCellStatic(wrigleyRoot, 1e6);   // collapse static builder meshes; ONE z-band — the cell is ~200 m deep, always fully inside the fog bubble, and invisible from elsewhere
   scene.add(wrigleyRoot);
   registerCell({
     id: WV.CELL_ID, root: wrigleyRoot,

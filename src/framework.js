@@ -24,12 +24,12 @@
 import * as THREE from 'three';
 import { renderer, scene, camera, amb, sun, toon, curveMat, clamp, lerp, lerpAngle, $, game } from './core.js';
 import { cam, keys, joy } from './input.js';
-import { mayor, mparts, createChibi } from './character.js';
+import { mayor, mparts, createChibi, bakeChibiRig } from './character.js';
 import { fw } from './fx.js';
 import { getAudioCtx, setAmbienceGrade } from './audio.js';
 import * as CH from './data/chicago.js';
 
-export { createChibi, tintChibiLimb } from './character.js';   // re-export chibi builder + limb recolor for packs
+export { createChibi, tintChibiLimb, bakeChibiRig } from './character.js';   // re-export chibi builder + limb recolor + static-rig baker for packs
 // getAudioCtx() -> {actx,sfxBus,musicBus,noiseBuf,mf,noiseHit} (actx null until audio starts)
 export { getAudioCtx };
 
@@ -183,27 +183,56 @@ const BUMP_LINES=[
 // past the fog. Bucketed (~0.3s) with hysteresis so NPCs never flicker at the
 // boundary: hide beyond 145m, re-show within 135m.
 const NPC_CULL_HIDE2=145*145, NPC_CULL_SHOW2=135*135;
+// static-crowd LOD (staticLod NPCs only): near (<58m) = the live 6-7-draw rig;
+// mid (62..145m) = a 1-draw baked twin; far (>145m, NPC_CULL) = both hidden.
+// The idle breathing/sway a live rig animates is subpixel past ~60m, so the frozen
+// twin is indistinguishable there while costing one draw instead of six.
+const LOD_NEAR2=58*58, LOD_FAR2=62*62;
+// moverLod: same twin, but for rigs that MOVE. Swap at 90m (hysteresis 87/93) —
+// past there a 0.3s position step (<=~0.4m) and the frozen limb-swing are subpixel
+// — and the twin's position + rotation.y are re-synced from the live rig every
+// cull tick (not just on swap). Far band stays NPC_CULL (135/145). A pack that
+// hides its rig itself (fan streams) sets npc._lodActive=false instead of
+// group.visible, so the framework stays the sole owner of group/twin visibility.
+const MOVER_NEAR2=87*87, MOVER_FAR2=93*93;
 
-// makeNPC({x,z,ry?,palette,name?,lines?,wander?,scale?}) -> npc
-//   palette:{suit,pants,skin,hair,shoe?,hairStyle?}
+// makeNPC({x,z,ry?,palette,name?,lines?,wander?,scale?,staticLod?,moverLod?}) -> npc
+//   palette:{suit,pants,skin,hair,shoe?,hairStyle?,face?}
 //   npc.say(text,secs?)  npc.setFace(expr)  npc.remove()
 //   Idle breathing + subtle sway; optional small wander radius (metres) reuses
 //   the walk swing. Bump lines auto-fire when the player first comes within
 //   ~1.1m (re-arms after leaving 2.5m). Speech bubbles project from the head.
+//   staticLod:true — swap to a 1-draw baked twin past 60m (non-wandering rigs).
+//   moverLod:true  — same past 90m, re-synced to the live pose each cull tick, so
+//     it works for movers; a pack that hides its own rig sets npc._lodActive=false
+//     (not group.visible) to stay out of the framework's visibility ownership.
 const CITIZEN=0.74;   // canonical citizen scale — matches the mayor (scale:1 here = mayor-sized)
-export function makeNPC({x,z,ry=0,palette,name='',lines,wander=0,scale=1}){
+export function makeNPC({x,z,ry=0,palette,name='',lines,wander=0,scale=1,staticLod=false,moverLod=false}){
   scale*=CITIZEN;
   const {group,parts}=createChibi(Object.assign({scale},palette));
   group.position.set(x,0,z);group.rotation.y=ry;scene.add(group);
+  // LOD twin: a 1-draw baked rig shown at MID range (see the cull pass). staticLod
+  // freezes it (only for non-wandering rigs); moverLod re-syncs it to the live pose
+  // every tick, so it works for movers too. Built at creation in the DEFAULT pose
+  // (no worn props) — an accepted distance LOD: past the swap the detail is a few px.
+  // Consumes no rng.
+  let twin=null;
+  if(staticLod&&!moverLod&&wander!==0)console.warn('[framework] makeNPC staticLod ignored on a wandering rig:',name);
+  if(moverLod||(staticLod&&wander===0)){
+    const tw=createChibi(Object.assign({scale},palette));
+    bakeChibiRig(tw.group,tw.parts);
+    tw.group.position.set(x,0,z);tw.group.rotation.y=ry;tw.group.visible=false;scene.add(tw.group);
+    twin=tw.group;
+  }
   const bubble=document.createElement('div');bubble.className='npcbubble';document.body.appendChild(bubble);
-  const npc={group,parts,name,lines:lines||BUMP_LINES,scale,wander,
+  const npc={group,parts,name,lines:lines||BUMP_LINES,scale,wander,twin,moverLod:!!moverLod,_lod:'near',
     home:{x,z},walkT:0,idle:Math.random()*Math.PI*2,tgt:null,waitT:1+Math.random()*2,sp:0,
     _bubbleEl:bubble,_bubbleT:0,_lastSay:-9,_armed:true,
     say(text,secs=3){ if(game.tNow-npc._lastSay<0.5)return; npc._lastSay=game.tNow;
       bubble.textContent=text;npc._bubbleT=secs; },
     setFace(expr){ const{eyeL,eyeR}=parts;const sc=expr==='happy'?[1,0.55,1]:expr==='surprised'?[1.3,1.3,1.3]:[1,1,1];
       eyeL.scale.set(sc[0],sc[1],sc[2]);eyeR.scale.set(sc[0],sc[1],sc[2]); },
-    remove(){ scene.remove(group);bubble.remove();const i=_npcs.indexOf(npc);if(i>=0)_npcs.splice(i,1); }};
+    remove(){ scene.remove(group);if(npc.twin)scene.remove(npc.twin);bubble.remove();const i=_npcs.indexOf(npc);if(i>=0)_npcs.splice(i,1); }};
   _npcs.push(npc);
   return npc;
 }
@@ -227,7 +256,7 @@ function updateNPC(npc,dt,t,player){
   p.legL.rotation.x=sw*0.85;p.legR.rotation.x=-sw*0.85;
   p.armL.rotation.x=-sw*0.75;p.armR.rotation.x=sw*0.75;
   const bob=Math.abs(Math.sin(npc.walkT))*0.06*amt;
-  p.body.position.y=1.18+bob;p.head.position.y=2.22+bob*1.1;p.hair.position.y=2.4+bob*1.1;
+  p.body.position.y=1.18+bob;p.head.position.y=2.22+bob*1.1;   // hair baked into head — rides the head bob
   p.body.rotation.x=0.09*amt;
   if(amt<0.05){p.body.scale.y=1.12+Math.sin(t*2+npc.idle)*0.012;g.rotation.z=Math.sin(t*0.8+npc.idle)*0.015;}
   else g.rotation.z=0;
@@ -529,7 +558,22 @@ export function runUpdates(dt,t,player){
     _npcCullAcc=0.3;
     for(const npc of _npcs){
       const dx=player.x-npc.group.position.x,dz=player.z-npc.group.position.z,d2=dx*dx+dz*dz;
-      if(npc.group.visible){
+      if(npc.twin){
+        // 3-zone LOD (hysteresis): near=live rig, mid=baked twin, far=neither.
+        // Movers swap at 90m and re-sync the twin each tick; static swaps at 60m.
+        const near2=npc.moverLod?MOVER_NEAR2:LOD_NEAR2, far2=npc.moverLod?MOVER_FAR2:LOD_FAR2;
+        let z=npc._lod;
+        if(z==='near'){ if(d2>NPC_CULL_HIDE2)z='far'; else if(d2>far2)z='mid'; }
+        else if(z==='mid'){ if(d2<near2)z='near'; else if(d2>NPC_CULL_HIDE2)z='far'; }
+        else{ if(d2<near2)z='near'; else if(d2<NPC_CULL_SHOW2)z='mid'; }
+        npc._lod=z;
+        const active=npc._lodActive!==false, live=active&&z==='near', mid=active&&z==='mid';
+        if(mid&&(npc.moverLod||!npc.twin.visible)){        // movers re-sync every tick; static once, on the swap in
+          npc.twin.position.copy(npc.group.position); npc.twin.rotation.y=npc.group.rotation.y;
+        }
+        npc.group.visible=live; npc.twin.visible=mid;
+        if(!live){npc._bubbleT=0;npc._bubbleEl.style.display='none';}
+      }else if(npc.group.visible){
         if(d2>NPC_CULL_HIDE2){npc.group.visible=false;npc._bubbleT=0;npc._bubbleEl.style.display='none';}
       }else if(d2<NPC_CULL_SHOW2){npc.group.visible=true;}
     }

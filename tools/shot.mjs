@@ -32,7 +32,7 @@ export async function shot({ name = 'shot', query = '', waitMs = 3500, port = pr
   page.on('response', r => { if (r.status() >= 400 && !r.url().includes('favicon')) errors.push('[http ' + r.status() + '] ' + r.url()); });
 
   const url = 'http://localhost:' + port + '/' + (query ? '?' + query : '');
-  await page.goto(url, { waitUntil: 'networkidle0', timeout: 20000 });
+  await page.goto(url, { waitUntil: 'networkidle0', timeout: 60000 });   // 60s: SwiftShader first paint under parallel load flaked at 20s
 
   // Start the game if the title screen is up (debug ?play=1 may already skip it).
   const started = await page.evaluate(() => {

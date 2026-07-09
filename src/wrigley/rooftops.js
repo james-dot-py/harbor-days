@@ -14,6 +14,7 @@ import { toon, bmat, mulberry32, pointsMat } from '../core.js';
 import { collide } from '../props.js';
 import { wrigleyRoot } from './index.js';
 import { ROOFTOPS_W } from '../data/wrigleyville.js';
+import { atlasPlane } from './village.js';   // shared static-plane atlas (buildVillage emits it, last)
 
 const R = mulberry32(3700);
 const rr = (a, b) => a + (b - a) * R();
@@ -351,7 +352,7 @@ function buildClimbable(b) {
   // --- sandwich board at the sidewalk stair gate ---
   const sX = -204, sZ = -506.4;
   const panel = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.66), bmat(0xffffff, { map: sandwichTex(), side: THREE.DoubleSide }));
-  panel.position.set(sX, 0.62, sZ); panel.rotation.x = 0.1; wrigleyRoot.add(panel);
+  panel.position.set(sX, 0.62, sZ); panel.rotation.x = 0.1; atlasPlane(panel, false);   // sandwich board -> shared wrigley atlas
   seg(sX - 0.34, 0.98, sZ - 0.02, sX - 0.4, 0, sZ + 0.28, 0.05, COL.dark);
   seg(sX + 0.34, 0.98, sZ - 0.02, sX + 0.4, 0, sZ + 0.28, 0.05, COL.dark);
   collide(sX, sZ, 0.45);

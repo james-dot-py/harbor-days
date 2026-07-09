@@ -46,3 +46,42 @@ per-chibi rig merges) add roughly 1.5–2.5 s to world startup under SwiftShader
 so no visual regression). Fixed the shot-stability half by snapping the camera
 to its rest position on ?play=1 starts (main.js runStart, existing camCtl.snap
 mechanism). The startup cost itself is a 007 lever: cache or defer the merges.
+
+## Ratchet pass 2 (task 007, 2026-07-09) — CLOSED at target
+
+Max dropped 964 → 477 (wv-gate-bleacher-f1; run-mrcywh3s, 156 shots, 0 errors,
+0 framings over 480). budgets.json now says 480 == target. Levers, in order of
+effect:
+- chibi rig 10 → 6 draws (src/character.js): eyes + hair fold into the head
+  mesh, leg+shoe / arm+hand / head+cheeks share one white vertex-colored toon
+  material; geometry templates cached per hairStyle|bigEyes|face so a rig is a
+  clone + color stamp. `face:true` keeps a live eye mesh (7 draws) for
+  setFace/squint users (mayor, vendors). Shadows: one global 256-cap
+  InstancedMesh (updateChibiShadows) — 0 draws per rig.
+- bakeChibiRig(): rigs that never re-pose after setup collapse to ONE mesh
+  (69 pack rigs across watertoys/parklife/lawnlife/wrigley-gameday; statue
+  chibis get baked despite the 'chibi' merge guard).
+- LOD twins (src/framework.js makeNPC): staticLod (swap at 58/62 m) and
+  moverLod (87/93 m, position/rotation synced per tick) give distant NPCs a
+  1-draw baked twin; 21 standers + 7 movers in Wrigleyville. Packs hide rigs
+  via npc._lodActive so visibility writes don't fight the swap.
+- fog-depth culling (src/fogcull.js, new): linear fog ends at ~210 m, so any
+  mesh whose whole bounding sphere sits past fog.far+8 m in view depth is pure
+  fog color — hidden pixel-neutrally. Exempt: fog:false materials, additive
+  blending, InstancedMesh, chibi subtrees, userData.noFogCull.
+- wrigley sign atlas (village.js atlasPlane/emitAtlas): 34 canvas-texture
+  planes → 1 opaque + 1 alpha mesh; runtime-redrawn textures (marquee, W flag)
+  excluded.
+- misc: per-cloud lobe merges in sky.js (27→~6), skip-stone piles instanced,
+  merge bands widened 120→240 m (fog culling made fine bands useless; the
+  wrigley cell merges as a single band).
+
+Startup cost (the pass-1 concern): template caching + fewer meshes to merge
+eliminated it. run-mrcywh3s first framing reports buildMs = { build: 155,
+merge: 12, packs: 225 } — ~0.4 s total vs pass-1's 1.5–2.5 s. window.__hd.perf()
+now includes buildMs so future runs keep measuring it.
+
+Accepted visual deltas (all reviewed in the 158-PNG read of run-mrcywh3s):
+eyes ride the head bob mid-gait (was: fixed offset), distant LOD twins are
+prop-less default-pose (invisible in stills beyond 58/90 m), and face:true
+rigs read slightly wider-eyed at close range.

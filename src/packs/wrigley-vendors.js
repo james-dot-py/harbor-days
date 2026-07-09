@@ -132,7 +132,7 @@ onWorldReady(player => {
   }
   // the vendor — stands ON the crate (lift the whole group)
   const peanut = makeNPC({ x: PV.x, z: PV.z, ry: 0, wander: 0, name: 'peanut vendor',
-    palette: { suit: 0xb2352c, pants: 0x2a2e36, skin: pick(SKINS), hair: pick(HAIRS) },
+    palette: { suit: 0xb2352c, pants: 0x2a2e36, skin: pick(SKINS), hair: pick(HAIRS), face: true },   // setFace at runtime → keep live eyes
     lines: ["pea-NUTS! get ya pea-nuts!", "shells on the ground, that's the good stuff, ope",
       "red hots down the block — I got the pea-nuts", "on the house today, mayor"] });
   peanut.group.position.y = 0.45;
@@ -269,7 +269,7 @@ onWorldReady(player => {
     const path = makePath(pts, 1.25, 25);
     const startD = [0, 2.6, 5.2];
     const npcs = palettes.map((pal, i) => {
-      const n = makeNPC({ x: pts[0].x, z: pts[0].z, ry: 0, wander: 0, name: 'fan', palette: pal,
+      const n = makeNPC({ x: pts[0].x, z: pts[0].z, ry: 0, wander: 0, moverLod: true, name: 'fan', palette: pal,
         lines: ['go cubs go!', 'ope — this way to the gate', "hurry, it's almost first pitch"] });
       n.group.position.x = pts[0].x; n.group.position.z = pts[0].z;
       return n;
@@ -285,9 +285,14 @@ onWorldReady(player => {
     [{ x: -126, z: -401 }, { x: -283, z: -401 }, { x: -283, z: -408.5 }], jerseyPals());
   const streamB = makeStream(                        // Waveland west barricade -> Sheffield -> Bleacher Gate
     [{ x: -328, z: -502 }, { x: -190, z: -502 }, { x: -196, z: -494 }], jerseyPals());
+  // moverLod: the framework owns group/twin visibility (it swaps in a 1-draw twin
+  // past 90m). We drive PRESENCE via n._lodActive (walk=on, wait/done=off) and keep
+  // updating the live position each frame — even while hidden — so the mid-range
+  // twin can re-sync to it every cull tick.
+  const hideFan = n => { n._lodActive = false; n.group.visible = false; if (n.twin) n.twin.visible = false; };  // present=off + crisp hide now
   function updStream(gr, dt, t) {
     if (gr.state === 'wait') {
-      for (const n of gr.npcs) n.group.visible = false;
+      for (const n of gr.npcs) hideFan(n);
       gr.timer -= dt; if (gr.timer <= 0) { gr.state = 'walk'; for (let i = 0; i < gr.d.length; i++) gr.d[i] = gr.startD[i]; }
       return;
     }
@@ -296,12 +301,12 @@ onWorldReady(player => {
       gr.d[i] += gr.path.v * dt;
       const n = gr.npcs[i];
       if (gr.d[i] < gr.path.L) {
-        allDone = false; n.group.visible = true;
+        allDone = false; n._lodActive = true;                              // walking: framework owns the near/mid swap
         const p = posAt(gr.path, gr.d[i]);
         n.group.position.x = p.x; n.group.position.z = p.z;
         n.group.position.y = Math.abs(Math.sin(t * 4 + i * 1.3)) * 0.05;   // tiny bob (not the limb rig)
         n.group.rotation.y = lerpAngle(n.group.rotation.y, p.hy, 1 - Math.exp(-8 * dt));
-      } else n.group.visible = false;
+      } else hideFan(n);
     }
     if (allDone) { gr.state = 'wait'; gr.timer = gr.path.respawn; }
   }

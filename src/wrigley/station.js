@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { toon, bmat, mulberry32 } from '../core.js';
 import { collide } from '../props.js';
 import { wrigleyRoot } from './index.js';
+import { atlasPlane } from './village.js';   // shared static-plane atlas (buildVillage emits it, last)
 // Geometry follows STATION_W (../data/wrigleyville.js): embank x-148..-132 topY7.0;
 // bridge z-407..-393 clearY5.6; platform x-143..-137 z-444..-426 y7.6; stair
 // z-426..-410; landing z-410..-404; track centers x-145.5/-134.5.
@@ -293,10 +294,10 @@ export function buildStation() {
     arch.position.set(CX, 2.6, -406.85); wrigleyRoot.add(arch);
     const lintel = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 0.6),
       bmat(0xffffff, { map: lintelTex(), side: THREE.DoubleSide }));
-    lintel.position.set(CX, 3.15, -406.8); wrigleyRoot.add(lintel);
+    lintel.position.set(CX, 3.15, -406.8); atlasPlane(lintel, false);   // 'ADDISON' lintel -> shared wrigley atlas
     const roundel = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9),
       bmat(0xffffff, { map: roundelTex(), transparent: true, side: THREE.DoubleSide }));
-    roundel.position.set(CX, 4.9, -406.8); wrigleyRoot.add(roundel);
+    roundel.position.set(CX, 4.9, -406.8); atlasPlane(roundel, true);   // transparent CTA roundel -> shared ALPHA atlas
   }
   instBoxes([                                             // non-blocking turnstile hint (no collider)
     { x: -139, y: 0.7, z: -409, sx: 0.14, sy: 1.4, sz: 0.14 },

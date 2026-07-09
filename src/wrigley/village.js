@@ -259,9 +259,65 @@ function shared() {
   };
   return SH;
 }
+
+// =====================================================================
+//  STATIC TEXTURED-PLANE ATLAS
+//  Each canvas-textured sign/plaque/poster needs its own CanvasTexture, so
+//  mergeCellStatic can never bucket them (unique material each). We pack the
+//  static ones into ONE atlas canvas + ONE merged mesh (opaque), plus ONE for
+//  the transparent-textured planes. World transforms are baked into geometry
+//  (like the SOLID pool) so the world-curve shader renders identically; each
+//  plane's UVs are remapped into its atlas region (½-texel inset + 2 px gutter,
+//  no bleed). Both atlas meshes are DoubleSide (backs sit against building
+//  bodies — never seen). Excludes anything live/redrawn (none here: the video
+//  board is drawn once and never .needsUpdate'd). Consumes NO rng.
+// =====================================================================
+// Shared across ALL wrigley builders (streets/station/stadium/rooftops import
+// atlasPlane): they run before buildVillage, so they push here and buildVillage
+// (last) emits. ATLAS is a module singleton, so every builder feeds one atlas.
+const ATLAS = { opaque: [], alpha: [] };
+export function atlasPlane(mesh, alpha) {          // collect a finished textured plane; it is NEVER added individually
+  if (!mesh.parent) mesh.updateMatrixWorld(true);  // cat-A (no parent): world = local. cat-B callers pre-update the group.
+  ATLAS[alpha ? 'alpha' : 'opaque'].push({ cv: mesh.material.map.image, geo: mesh.geometry, world: mesh.matrixWorld.clone() });
+  if (mesh.parent) mesh.parent.remove(mesh);       // cat-B: detach from its group so add(g) won't double-bake it
+}
+export function emitAtlas(list, alpha) {
+  if (!list.length) return;
+  const PAD = 2, MAXW = 1024;
+  const order = list.slice().sort((a, b) => b.cv.height - a.cv.height);   // tallest-first shelf pack
+  let x = PAD, y = PAD, shelfH = 0, usedW = 0;
+  for (const it of order) {
+    const w = it.cv.width, h = it.cv.height;
+    if (x + w + PAD > MAXW && x > PAD) { y += shelfH + PAD; x = PAD; shelfH = 0; }
+    it.rx = x; it.ry = y; it.rw = w; it.rh = h;
+    x += w + PAD; usedW = Math.max(usedW, x); shelfH = Math.max(shelfH, h);
+  }
+  const AW = usedW, AH = y + shelfH + PAD;
+  const cv = document.createElement('canvas'); cv.width = AW; cv.height = AH;
+  const ctx = cv.getContext('2d');
+  for (const it of order) ctx.drawImage(it.cv, it.rx, it.ry);            // native size -> pixel density preserved
+  const tex = new THREE.CanvasTexture(cv);
+  tex.anisotropy = 4; tex.generateMipmaps = false;                      // NPOT-safe (linear, clamp, no mips)
+  tex.minFilter = tex.magFilter = THREE.LinearFilter;
+  tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping;
+  const geos = [];
+  for (const it of order) {
+    const geo = it.geo.index ? it.geo.toNonIndexed() : it.geo.clone();
+    geo.applyMatrix4(it.world);                                          // bake world transform (position + normals)
+    const uv = geo.attributes.uv;
+    for (let i = 0; i < uv.count; i++) {
+      const u = uv.getX(i), v = uv.getY(i);                              // remap [0,1] plane UV -> atlas region (½-texel inset)
+      uv.setXY(i, (it.rx + 0.5 + u * (it.rw - 1)) / AW, (AH - it.ry - it.rh + 0.5 + v * (it.rh - 1)) / AH);
+    }
+    geos.push(geo);
+  }
+  const opts = alpha ? { map: tex, transparent: true, side: THREE.DoubleSide } : { map: tex, side: THREE.DoubleSide };
+  wrigleyRoot.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(geos, false), bmat(0xffffff, opts)));
+}
+
 function signPlane(tex, x, y, z, ry, w, h) {
   const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bmat(0xffffff, { map: tex }));
-  m.position.set(x, y, z); m.rotation.y = ry; add(m); return m;
+  m.position.set(x, y, z); m.rotation.y = ry; atlasPlane(m, false); return m;   // -> shared opaque atlas
 }
 
 // =====================================================================
@@ -279,7 +335,7 @@ function buildMurphys() {
   const bx = b.x0 + 0.2, bz = b.z0 + 0.2;
   add(M(new THREE.CylinderGeometry(0.07, 0.07, 4.4, 6), toon(0x2a2a2e), bx, H + 0.6, bz));
   const bl = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 5.2), bmat(0xffffff, { map: bladeTex(), side: THREE.DoubleSide }));
-  bl.position.set(bx - 0.75, H + 0.4, bz - 0.75); bl.rotation.y = -Math.PI / 2.3; add(bl);
+  bl.position.set(bx - 0.75, H + 0.4, bz - 0.75); bl.rotation.y = -Math.PI / 2.3; atlasPlane(bl, false);
   awning(b.x0 - 0.7, 3.5, cz, 0, 1.5, d - 2);                                                   // west storefront awning
   for (const wy of [3.0, 6.0]) for (const wz of [cz - 4, cz, cz + 4])
     A.win.push({ pos: [b.x0 - 0.05, wy, wz], yaw: -Math.PI / 2, scale: [1.2, 1.7, 1] });
@@ -302,10 +358,10 @@ function buildCubby() {
   // round bear disc on the NE corner, facing NE
   const ne = 2.356;
   const disc = new THREE.Mesh(new THREE.CircleGeometry(1.6, 24), bmat(0xffffff, { map: bearTex(), transparent: true }));
-  disc.position.set(b.x1 - 0.3, 4.4, b.z0 - 0.25); disc.rotation.y = ne; add(disc);
+  disc.position.set(b.x1 - 0.3, 4.4, b.z0 - 0.25); disc.rotation.y = ne; atlasPlane(disc, true);
   // neon beer signs in ground-floor windows + warm upper windows
   const sh = shared();
-  const beerAt = (x, z, yaw, mi) => { const q = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.65), sh.beerMats[mi]); const [dx, dz] = yrot(0, 0.05, yaw); q.position.set(x + dx, 2.4, z + dz); q.rotation.y = yaw; add(q); };
+  const beerAt = (x, z, yaw, mi) => { const q = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.65), sh.beerMats[mi]); const [dx, dz] = yrot(0, 0.05, yaw); q.position.set(x + dx, 2.4, z + dz); q.rotation.y = yaw; atlasPlane(q, false); };
   beerAt(cx - 3.5, b.z0, Math.PI, 0); beerAt(cx + 3.5, b.z0, Math.PI, 2);   // north face
   beerAt(b.x1, cz + 3, Math.PI / 2, 1);                                     // east face (toward Clark)
   for (const wx of [cx - 4, cx + 4]) A.win.push({ pos: [wx, 5.6, b.z0 - 0.05], yaw: Math.PI, scale: [1.2, 1.6, 1] });
@@ -333,7 +389,8 @@ function buildBars() {
     g.add(M(new THREE.BoxGeometry(dep + 0.2, 0.45, wid + 0.02), toon(0x2c2620), 0, H - 0.22, 0));   // parapet
     const sgn = new THREE.Mesh(new THREE.PlaneGeometry(wid - 3, 2.2), bmat(0xffffff, { map: neonTex(neons[i].t, neons[i].c, neons[i].icon) }));
     sgn.position.set(dep / 2 + 0.05, H - 2.0, 0); sgn.rotation.y = Math.PI / 2; g.add(sgn);        // street-facing (+x local)
-    add(g);   // add() snapshots the group's meshes NOW — must come after every g.add
+    g.updateMatrixWorld(true); atlasPlane(sgn, false);   // bake the neon sign into the shared atlas (detaches it from g)
+    add(g);   // add() snapshots the group's remaining meshes NOW — must come after every g.add
     const [ax, az] = yrot(dep / 2 + 0.7, 0, clarkYaw);
     awning(gx + ax, 3.4, gz + az, clarkYaw + Math.PI / 2, 1.5, wid - 2);
     for (const lz of [-3.5, 3.5]) { const [dx, dz] = yrot(dep / 2 + 0.05, lz, clarkYaw); A.win.push({ pos: [gx + dx, H - 3.4, gz + dz], yaw: clarkYaw + Math.PI / 2, scale: [1.3, 1.7, 1] }); }
@@ -346,7 +403,7 @@ function buildBars() {
   const z0 = -486, z1 = -420, zm = (z0 + z1) / 2, len = Math.hypot(clarkX(z1) - clarkX(z0), z1 - z0);
   const bg = new THREE.Mesh(new THREE.PlaneGeometry(len, 0.8), bmat(0xffffff, { map: buntingTex(), transparent: true, side: THREE.DoubleSide }));
   const [bx, bz] = yrot(6.4, 0, clarkYaw); bg.position.set(clarkX(zm) - 16 + bx, 7.0, zm + bz);
-  bg.rotation.y = clarkYaw + Math.PI / 2; add(bg);
+  bg.rotation.y = clarkYaw + Math.PI / 2; atlasPlane(bg, true);
 }
 
 // =====================================================================
@@ -376,7 +433,7 @@ function buildEngine() {
   }
   const pole = M(new THREE.CylinderGeometry(0.05, 0.05, 3.2, 6), toon(0xcabfa5), cx + w / 2 - 0.6, 6.9, fz + 0.2);
   pole.rotation.x = 0.5; add(pole);
-  add(M(new THREE.PlaneGeometry(1.2, 0.72), bmat(0xffffff, { map: usFlagTex(), side: THREE.DoubleSide }), cx + w / 2 + 0.2, 8.3, fz + 1.0));
+  atlasPlane(M(new THREE.PlaneGeometry(1.2, 0.72), bmat(0xffffff, { map: usFlagTex(), side: THREE.DoubleSide }), cx + w / 2 + 0.2, 8.3, fz + 1.0), false);
   collide(cx, cz, 8);
 }
 function fireEngineNose(x, z) {
@@ -445,7 +502,8 @@ function buildGallagherOffice() {
   // readable GALLAGHER WAY sign crowning the SOUTH face (+z local), over the top window band, facing the plaza
   const sgn = new THREE.Mesh(new THREE.PlaneGeometry(13.5, 3.4), bmat(0xffffff, { map: gallagherSignTex() }));
   sgn.position.set(0, 12.2, wid / 2 + 0.06); g.add(sgn);
-  add(g);   // add() snapshots the group's meshes NOW — must come after every g.add
+  g.updateMatrixWorld(true); atlasPlane(sgn, false);   // bake the GALLAGHER WAY crown into the shared atlas (detaches it from g)
+  add(g);   // add() snapshots the group's remaining meshes NOW — must come after every g.add
   A.base.push({ pos: [cx, 0.4, zc], scale: [dep + 0.2, 0.8, wid + 0.2], color: 0x2c211d });   // dark base band (shares Cubby's bucket)
   // warm window GRID: three storeys on the SOUTH face (plaza) and WEST face (Clark), baked to world via yrot
   for (const y of [3.2, 6.4, 9.6]) {
@@ -472,7 +530,7 @@ function buildGallagher() {
     add(M(new THREE.BoxGeometry(0.5, 5.0, 0.5), toon(0x2a2d33), bx - 3, 3.2, bzc));
     add(M(new THREE.BoxGeometry(0.5, 5.0, 0.5), toon(0x2a2d33), bx + 3, 3.2, bzc));
     add(M(new THREE.BoxGeometry(7.2, 4.2, 0.5), toon(0x22242a), bx, 7.3, bzc));                 // frame
-    add(M(new THREE.PlaneGeometry(6.4, 3.5), bmat(0xffffff, { map: boardTex() }), bx, 7.3, bzc + 0.28));
+    atlasPlane(M(new THREE.PlaneGeometry(6.4, 3.5), bmat(0xffffff, { map: boardTex() }), bx, 7.3, bzc + 0.28), false);   // static (drawn once, never redrawn)
     collide(bx, bzc, 3.6); }
   // splash pad (off-centre so the plaza middle stays open, clear of the statue row)
   { const sz = -452, sx = clarkX(sz) + 15;
@@ -515,6 +573,7 @@ function cornhole(x0, z0, x1, z1) {
 const BRONZE = 0x8a6d3f;
 function bronzeStatue(pose) {                          // uniform bronze -> the merge pool collapses all 5 to bronze + dark-eye
   const { group, parts } = createChibi({ suit: BRONZE, pants: BRONZE, skin: BRONZE, hair: BRONZE, shoe: BRONZE, cheek: BRONZE, scale: 1.1 });
+  group.name = 'chibi-statue';                          // fully static pose — drop the live-rig 'chibi' name so any chibi-aware merge exemption (cells.js) treats it as bakeable static
   group.remove(parts.shadow);                          // no ground disc on a pedestal
   pose(parts, group);
   return group;
@@ -549,7 +608,7 @@ function placeStatue(x, z, ry, pose, name, sub) {
   A.ped.push({ pos: [x, pedH / 2, z], yaw: ry, scale: [1.5, pedH, 1.5] });
   const [px, pz] = yrot(0, 0.78, ry);                 // plaque on the front (+z local) face
   const pl = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.55), bmat(0xffffff, { map: plaqueTex(name, sub) }));
-  pl.position.set(x + px, 1.0, z + pz); pl.rotation.y = ry; add(pl);
+  pl.position.set(x + px, 1.0, z + pz); pl.rotation.y = ry; atlasPlane(pl, false);
   const st = bronzeStatue(pose); st.position.set(x, pedH, z); st.rotation.y = ry; add(st);
   collide(x, z, 0.9, 3);
 }
@@ -629,4 +688,6 @@ export function buildVillage() {
   instMesh(new THREE.PlaneGeometry(1.0, 0.68), shared().flagMat, A.flag);
   instColored(new THREE.BoxGeometry(1, 1, 1), A.base);
   emitStatic();   // merge every marked solid mesh into one draw call per material
+  emitAtlas(ATLAS.opaque, false);   // all static opaque signs/plaques/boards -> ONE atlas mesh
+  emitAtlas(ATLAS.alpha, true);     // transparent-textured planes (bunting swags, bear disc) -> ONE atlas mesh
 }

@@ -26,7 +26,7 @@
 //  Draw calls added: solid tubes(1) striped tube(1) sunglasses(1) drink(1)
 //  board(1) paddle-shaft(1) paddle-blade(1) = 7.
 // =====================================================================
-import { onWorldReady, registerUpdate, createChibi, registerBumpable } from '../framework.js';
+import { onWorldReady, registerUpdate, createChibi, registerBumpable, bakeChibiRig } from '../framework.js';
 import * as THREE from 'three';
 import { scene, toon, bmat, WATER_Y, clamp } from '../core.js';
 import { coastQuery, profileTotal } from '../coast.js';
@@ -149,6 +149,9 @@ onWorldReady(() => {
     // bumpable: the rig drifts/bobs/spins, so the shared system re-derives the
     // head anchor from the rig's live world matrix each frame (parts = head).
     registerBumpable(rig, parts, LINES_TUBER);
+    // tuber pose + props are set once and never re-posed (the loop only moves the
+    // rig group), so collapse the chibi to one mesh — baked → 1 draw (glasses/cup fold in)
+    bakeChibiRig(cg, parts);
 
     const solidIdx = cfg.striped ? -1 : si++;
     if(!cfg.striped){ solidTubes.setColorAt(solidIdx, _col.setHex(cfg.col)); }

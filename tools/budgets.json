@@ -1,6 +1,6 @@
 {
-  "drawCalls": 1050,
+  "drawCalls": 480,
   "target": 480,
-  "note": "OPERATIONAL budget for gate.mjs/walkthrough, ratcheted after draw-call pass 1 (task 004, 2026-07-08): mergeCellStatic per-cell static merges + chibi rig consolidation took the full-map max from 1298 to 964 (deck-1-f1). Set ~9% above the measured max to absorb NPC-wander frustum variance between runs. RATCHET DOWN toward target 480 every time the measured max drops (queue task 007 carries the next levers: chibi eyes/hair/shadow merges, pack-added statics, statue chibis). Never raise it.",
-  "measured": { "date": "2026-07-08", "runId": "mrci9ngq+mrcj5sjw (split across a harness restart; 48/48 waypoints covered)", "maxDrawCalls": 964, "maxView": "deck-1-f1", "prevMax": 1298 }
+  "note": "OPERATIONAL budget for gate.mjs/walkthrough. Ratchet pass 2 (task 007, 2026-07-09) hit the target: chibi rig 10->6 draws (eyes+hair fold into head, instanced shadow manager), bakeChibiRig for never-reposed rigs (69 pack rigs -> 1 draw each), staticLod/moverLod baked twins for distant NPCs, fog-depth culling (src/fogcull.js), wrigley sign atlas (34 planes -> 2 meshes), per-cloud lobe merges, 240m merge bands. Max 964 -> 477 (wv-gate-bleacher-f1). Budget == target; headroom is 3 calls, so any regression trips the gate immediately. Never raise it.",
+  "measured": { "date": "2026-07-09", "runId": "mrcywh3s", "maxDrawCalls": 477, "maxView": "wv-gate-bleacher-f1", "prevMax": 964 }
 }

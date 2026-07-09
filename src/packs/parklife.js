@@ -22,7 +22,7 @@
 //  curved terraces + corner lawn, plus instanced props only:
 //  corner-books(1) blankets(1) coolers(1) food(1) towels(1) dog(5) = ~10.
 // =====================================================================
-import { onWorldReady, registerUpdate, createChibi, registerBumpable } from '../framework.js';
+import { onWorldReady, registerUpdate, createChibi, registerBumpable, bakeChibiRig } from '../framework.js';
 import * as THREE from 'three';
 import { scene, camera, toon, bmat, curveMat, WATER_Y } from '../core.js';
 import { coastQuery, tierAt } from '../coast.js';
@@ -155,6 +155,7 @@ onWorldReady(() => {
       const {group,parts}=makeChibi(sx,sz,ry,nextPal());
       poseSeated(group,parts,0);
       registerBumpable(group,parts,LINES_PICNIC);
+      bakeChibiRig(group,parts);                 // static seated pose — baked → 1 draw
     }
     // cooler + a couple of food props on the blanket
     coolerSpots.push({x:p.x+1.25, z:p.z-0.9});
@@ -213,6 +214,7 @@ onWorldReady(() => {
     const {group,parts} = makeChibi(su.x, su.z, 0, nextPal());
     poseLying(group,parts,y);
     registerBumpable(group,parts,LINES_SUN);
+    bakeChibiRig(group,parts);                 // static lying pose — baked → 1 draw
 
     if(su.glasses) glassSpots.push({x:su.x, y:y+0.30+0.4, z:su.z-1.6});  // over the (upturned) face
     if(su.book){
@@ -252,6 +254,7 @@ onWorldReady(() => {
     parts.armL.rotation.x = -0.75; parts.armL.rotation.z = -0.1;
     parts.body.rotation.x = 0.05;
     registerBumpable(group,parts,LINES_ANGLER);
+    bakeChibiRig(group,parts);                        // arm/rod posed once (rod is a static instanced mesh) — baked → 1 draw
     // rod: base near the hands, angled up & out over the water (east = +x)
     E.set(0,0,-0.85); Q.setFromEuler(E);              // tilt the y-cylinder forward
     M.compose(V.set(a.x+0.55, y+1.5, a.z), Q, S.set(1,1,1));
@@ -275,6 +278,7 @@ onWorldReady(() => {
   kf.group.updateWorldMatrix(true, true);
   const HAND = new THREE.Vector3();
   kf.parts.handR.getWorldPosition(HAND);
+  bakeChibiRig(kf.group, kf.parts);        // flyer is static (HAND captured above; kite/string/tail stay live) — baked → 1 draw
 
   // the diamond kite (classic long-tailed kite shape)
   const KSCALE = 1.15;
@@ -324,6 +328,7 @@ onWorldReady(() => {
       const {group,parts} = makeChibi(x,z,seawardYaw(x,z),nextPal());
       poseSeated(group,parts,y);
       registerBumpable(group,parts,LINES_STEP);
+      bakeChibiRig(group,parts);                    // static sitter — baked → 1 draw
     }
     function pointer(x,z){                          // "there's the skyline" — arm up out at the lake
       const y = groundY(x,z);
@@ -333,6 +338,7 @@ onWorldReady(() => {
       parts.armL.rotation.x = -0.12;
       parts.body.rotation.x = -0.06; parts.head.rotation.x = -0.18;    // chin up toward the skyline
       registerBumpable(group,parts,LINES_CORNER);
+      bakeChibiRig(group,parts);                    // static pointer pose — baked → 1 draw
     }
     sitter(154.0,252);  sitter(155.5,252);   // couple 1 (adjacent steps)
     sitter(157.0,268);  sitter(158.5,268);   // couple 2
@@ -382,6 +388,7 @@ onWorldReady(() => {
       if(opt.point){ parts.armR.rotation.x=-2.15; parts.armR.rotation.z=-0.15;   // pointing out at the boats
                      parts.armL.rotation.x=-0.2; parts.head.rotation.x=-0.12; }
       registerBumpable(group,parts, opt.point ? LINES_CORNER : LINES_STEP);
+      bakeChibiRig(group,parts);                                     // static corner sitter — baked → 1 draw (book is a separate instanced prop)
       return p;
     }
     // seeds track the shore arc (east-facing z~330 -> south-facing z~394);
@@ -419,6 +426,7 @@ onWorldReady(() => {
         const {group,parts}=makeChibi(sx,sz,ry,nextPal());
         poseSeated(group,parts,groundY(sx,sz));
         registerBumpable(group,parts,LINES_PICNIC);
+        bakeChibiRig(group,parts);               // static seated pose — baked → 1 draw
       }
       coolSpots.push({x:p.x+1.2, z:p.z-0.85});
       foodSpots2.push({x:p.x+0.25,y:0.12,z:p.z+0.1,c:0xf2c45a});           // roll
@@ -447,6 +455,7 @@ onWorldReady(() => {
         towelSpots.push({x:su.x,z:su.z,ry:0,col:su.col});
         registerBumpable(group,parts,LINES_SUN);
       }
+      bakeChibiRig(group,parts);                                           // static reader/sunbather — baked → 1 draw
     }
 
     // ---- instanced props (books/blankets/coolers/food/towels) --------
@@ -486,6 +495,7 @@ onWorldReady(() => {
       parts.armL.rotation.x=-0.55; parts.body.rotation.x=-0.14;
       parts.legR.rotation.x=0.25;                                          // slight stride
       registerBumpable(group,parts,LINES_CORNER);
+      bakeChibiRig(group,parts);                                           // static mid-throw pose (the dog is a separate group) — baked → 1 draw
 
       const dgx=os.x+4.6, dgz=os.z-1.0, dgy=groundY(dgx,dgz);
       const dog=new THREE.Group(), dm=toon(0xe6c98c);
@@ -546,6 +556,7 @@ onWorldReady(() => {
       const {group,parts}=makeChibi(x,z,faceNet(x,z),nextPal());
       (up?armsUp:ready)(parts);
       registerBumpable(group,parts,LINES_VOLLEY);
+      bakeChibiRig(group,parts);               // frozen rally pose — baked → 1 draw
     });
   }
 

@@ -9,6 +9,7 @@ import { toon, bmat, mulberry32, pointsMat, pip } from '../core.js';
 import { collide } from '../props.js';
 import { wrigleyRoot } from './index.js';
 import { STADIUM_W, CORNER_ARC } from '../data/wrigleyville.js';
+import { atlasPlane } from './village.js';   // shared static-plane atlas (buildVillage emits it, last)
 
 const R = mulberry32(1914);
 const rr = (a, b) => a + (b - a) * R();
@@ -407,6 +408,7 @@ function gateAt(x, z, yaw, label, wide = 4.4) {
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(wide, wide * 40 / 256), bmat(0xffffff, { map: new THREE.CanvasTexture(cv) }));
   sign.position.set(0, 4.6, 0.62); grp.add(sign);
   grp.position.set(x, 0, z); grp.rotation.y = yaw;
+  grp.updateMatrixWorld(true); atlasPlane(sign, false);   // gate sign -> shared wrigley atlas (detaches from grp)
   wrigleyRoot.add(grp);
 }
 function ticketBooth(x, z, yaw) {
@@ -615,6 +617,7 @@ function buildScoreboard() {
   wFlag.userData.live = true;                       // raiseW() hoists this (gameday WIN) — exempt from the cell merge
   grp.add(wFlag);
   grp.position.set(B.x, 0, B.z); grp.rotation.y = yaw;
+  grp.updateMatrixWorld(true); atlasPlane(face, false);   // scoreboard face is STATIC (drawn once, never .needsUpdate'd) -> shared atlas; W flag stays live
   wrigleyRoot.add(grp);
 }
 
@@ -675,7 +678,7 @@ function buildKnothole() {
   g.fillText('KNOTHOLE — WATCH FREE, BE KIND', 128, 22);
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 0.55), bmat(0xffffff, { map: new THREE.CanvasTexture(cv) }));
   sign.rotation.y = -Math.PI / 2; sign.position.set(K.x - 0.7, 3.75, cz);
-  wrigleyRoot.add(sign);
+  atlasPlane(sign, false);   // knothole sign -> shared wrigley atlas
 }
 
 // ------------------------------- build ---------------------------------

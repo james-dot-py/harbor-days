@@ -44,6 +44,7 @@ if (process.argv[2] === 'rank') {
 // ---- census mode -----------------------------------------------------
 const puppeteer = (await import('puppeteer')).default;
 const VIEWS = [   // the historical hot framings (see autopilot/issues/000-draw-call-budget.md)
+  { id: 'wv-gate-bleacher-f2', q: 'x=-190&z=-500&yaw=-1.19&pitch=0.12&dist=14' },
   { id: 'deck-1-f1', q: 'x=121&z=389.5&yaw=3.14&pitch=0.22&dist=12' },
   { id: 'zone-diversey-point-f1', q: 'x=100&z=378&yaw=2.9&pitch=0.2&dist=11' },
   { id: 'wv-rooftop-view-f0', q: 'x=-212.5&z=-515&yaw=0.01&pitch=0.15&dist=10' },
@@ -76,17 +77,27 @@ console.log('census on port ' + port);
 const browser = await puppeteer.launch({ headless: 'new', args: ['--window-size=1280,720', '--mute-audio'] });
 try {
   for (const v of VIEWS) {
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1280, height: 720 });
-    await page.goto(`http://localhost:${port}/?play=1&quiet=1&${v.q}`, { waitUntil: 'networkidle0', timeout: 20000 });
-    await new Promise(r => setTimeout(r, 2600));
-    const res = await page.evaluate(() => ({
-      c: window.__hd && window.__hd.census ? window.__hd.census(30) : null,
-      p: window.__hd ? window.__hd.perf() : null,
-    }));
-    console.log(`\n===== ${v.id}  rendererCalls=${res.p ? res.p.drawCalls : '?'}  censusTotal=${res.c ? res.c.total : '?'} =====`);
-    if (res.c) for (const [k, n] of res.c.rows) console.log(String(n).padStart(5), k);
-    await page.close();
+    // one slow page shouldn't sink the whole census: try, retry once on a
+    // fresh page, then log a FAILED line and move on (see PITFALLS.md 5173).
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      const page = await browser.newPage();
+      try {
+        await page.setViewport({ width: 1280, height: 720 });
+        await page.goto(`http://localhost:${port}/?play=1&quiet=1&${v.q}`, { waitUntil: 'networkidle0', timeout: 60000 });
+        await new Promise(r => setTimeout(r, 2600));
+        const res = await page.evaluate(() => ({
+          c: window.__hd && window.__hd.census ? window.__hd.census(300) : null,
+          p: window.__hd ? window.__hd.perf() : null,
+        }));
+        console.log(`\n===== ${v.id}  rendererCalls=${res.p ? res.p.drawCalls : '?'}  censusTotal=${res.c ? res.c.total : '?'} =====`);
+        if (res.c) for (const [k, n] of res.c.rows) console.log(String(n).padStart(5), k);
+        break;   // success — on to the next view
+      } catch (err) {
+        if (attempt === 2) console.log(`\n===== ${v.id}  FAILED after retry: ${String(err.message).split('\n')[0]} =====`);
+      } finally {
+        await page.close();
+      }
+    }
   }
 } finally {
   await browser.close();

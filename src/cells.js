@@ -47,7 +47,7 @@ export const cellClamp = () => { const c = cells[activeId]; return (c && c.clamp
 
 // ---------------------------------------------------------------------
 // STATIC-GEOMETRY MERGE PASS — collapse a cell's hundreds of small solid
-// builder meshes into merged meshes (one per material × ~120 m z-band),
+// builder meshes into merged meshes (one per material × ~240 m z-band),
 // mirroring the merge pool wrigley/village.js runs internally. ZERO visual
 // change: each mesh's world transform is baked into its geometry, so the
 // world-curve vertex shader (which works in VIEW space) renders identically.
@@ -63,7 +63,7 @@ export const cellClamp = () => { const c = cells[activeId]; return (c && c.clamp
 //     displacement (baking a world transform would shift its phase: water)
 // Only buckets with >=2 members merge; unique textured signs stay untouched.
 // ---------------------------------------------------------------------
-export function mergeCellStatic(root) {
+export function mergeCellStatic(root, bandW = 240) {
   if (!root) return;
   root.updateMatrixWorld(true);
   const rootInv = root.matrixWorld.clone().invert();
@@ -88,7 +88,12 @@ export function mergeCellStatic(root) {
     if (!g.boundingSphere) g.computeBoundingSphere();
     _c.copy(g.boundingSphere.center).applyMatrix4(o.matrixWorld);   // world-space center → z-band
     const sig = Object.keys(g.attributes).sort().join(',');
-    const key = o.material.uuid + '|' + Math.floor(_c.z / 120) + '|' + sig;
+    // 240 m z-bands (was 120): the fog cull (fogcull.js) now bounds every view
+    // to a ~220 m depth bubble, so fine bands no longer buy culling — they just
+    // leave sparse same-material props as unmerged singletons, one per band.
+    // Compact cells (Wrigleyville, ~200 m deep and invisible from elsewhere)
+    // pass a huge bandW: one bucket per material.
+    const key = o.material.uuid + '|' + Math.floor(_c.z / bandW) + '|' + sig;
     let b = buckets.get(key); if (!b) buckets.set(key, b = []);
     b.push(o);
   });

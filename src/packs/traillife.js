@@ -103,7 +103,7 @@ function runGait(p, walkT, amt, lean){
   p.legL.rotation.x = sw * 0.95;  p.legR.rotation.x = -sw * 0.95;
   p.armL.rotation.x = -sw * 0.9;  p.armR.rotation.x = sw * 0.9;
   const bob = Math.abs(Math.sin(walkT)) * 0.08 * amt;
-  p.body.position.y = 1.18 + bob; p.head.position.y = 2.22 + bob * 1.1; p.hair.position.y = 2.4 + bob * 1.1;
+  p.body.position.y = 1.18 + bob; p.head.position.y = 2.22 + bob * 1.1;   // hair baked into head — rides the head bob
   p.body.rotation.x = lean;
 }
 function pedalPose(p, ang){
@@ -112,7 +112,7 @@ function pedalPose(p, ang){
   p.armL.rotation.x = -1.02; p.armR.rotation.x = -1.02;
   p.armL.rotation.z = -0.05; p.armR.rotation.z = 0.05;
   p.body.rotation.x = 0.34;
-  p.body.position.y = 1.18; p.head.position.y = 2.22; p.hair.position.y = 2.4;
+  p.body.position.y = 1.18; p.head.position.y = 2.22;   // hair baked into head
 }
 
 // =====================================================================

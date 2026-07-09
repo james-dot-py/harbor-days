@@ -156,14 +156,22 @@ onWorldReady(player=>{
   const pebGeo=new THREE.SphereGeometry(0.17,8,6), pebMat=toon(0x6b6f76);
   const stones=[];                                   // live thrown pebbles
 
+  const PILES=[{z:130,off:7.0},{z:140,off:6.5},{z:150,off:7.5}];   // Belmont Rocks waterline ~(158,140), skip EAST
+  // pile pebbles: ONE InstancedMesh for all spots (6 per spot), matrices set
+  // once here. frustumCulled off — instance-0's tight bounds would otherwise
+  // cull the whole pile at the shallow rocks-eye angle. Shares pebGeo/pebMat
+  // with the thrown stones; jitter is local Math.random (never the world rng).
+  const pileIM=new THREE.InstancedMesh(pebGeo,pebMat,PILES.length*6);
+  pileIM.frustumCulled=false;
+  const _plM=new THREE.Matrix4(),_plP=new THREE.Vector3(),_plQ=new THREE.Quaternion(),_plS=new THREE.Vector3(),_plE=new THREE.Euler();
+  let _plN=0;
   function buildPile(spot){
     for(let k=0;k<6;k++){
       const a=Math.random()*Math.PI*2, r=Math.random()*0.4;
-      const st=new THREE.Mesh(pebGeo,pebMat);
-      st.position.set(spot.x+Math.cos(a)*r, spot.y+0.06+Math.random()*0.04, spot.z+Math.sin(a)*r);
-      st.scale.set(1.1+Math.random()*0.5, 0.34, 1.3+Math.random()*0.5);
-      st.rotation.set((Math.random()-0.5)*0.22, Math.random()*Math.PI, 0);
-      scene.add(st);
+      _plP.set(spot.x+Math.cos(a)*r, spot.y+0.06+Math.random()*0.04, spot.z+Math.sin(a)*r);
+      _plS.set(1.1+Math.random()*0.5, 0.34, 1.3+Math.random()*0.5);
+      _plE.set((Math.random()-0.5)*0.22, Math.random()*Math.PI, 0); _plQ.setFromEuler(_plE);
+      _plM.compose(_plP,_plQ,_plS); pileIM.setMatrixAt(_plN++,_plM);
     }
   }
   function finishStone(s,i,onLand){
@@ -203,7 +211,6 @@ onWorldReady(player=>{
     }
   }
 
-  const PILES=[{z:130,off:7.0},{z:140,off:6.5},{z:150,off:7.5}];   // Belmont Rocks waterline ~(158,140), skip EAST
   for(const pd of PILES){
     const spot=rockSpot(pd.z,pd.off);
     buildPile(spot);
@@ -224,6 +231,7 @@ onWorldReady(player=>{
       }});
     }});
   }
+  pileIM.instanceMatrix.needsUpdate=true; scene.add(pileIM);
 
   // ------------------------ 3. PAINT A ROCK --------------------------- //
   const rockGeo=new THREE.BoxGeometry(1.3,0.55,1.05), rockMat=toon(0xd8caa8);

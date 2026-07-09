@@ -8,6 +8,7 @@ import { toon, bmat, mulberry32, pointsMat } from '../core.js';
 import { collide } from '../props.js';
 import { wrigleyRoot } from './index.js';
 import { STREETS_W, BARRICADES_W, BACKDROP_W, clarkX } from '../data/wrigleyville.js';
+import { atlasPlane } from './village.js';   // shared static-plane atlas (buildVillage emits it, last)
 
 const R = mulberry32(3600);
 const rr = (a, b) => a + (b - a) * R();
@@ -165,7 +166,7 @@ export function buildStreets() {
   function blade(text, cx, cy, cz, yaw, w) {
     const h = w * 96 / 512;
     const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bmat(0xffffff, { map: bladeTex(text), side: THREE.DoubleSide }));
-    m.position.set(cx, cy, cz); m.rotation.y = yaw; wrigleyRoot.add(m);
+    m.position.set(cx, cy, cz); m.rotation.y = yaw; atlasPlane(m, false);   // blade sign -> shared wrigley atlas
   }
   blade('ADDISON 3600 N', -298.9, 2.62, -394, 0, 1.9);
   blade('CLARK 1100 W', -297.7, 2.98, -393.13, clarkYaw, 1.7);
