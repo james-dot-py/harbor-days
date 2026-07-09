@@ -38,6 +38,26 @@ const REFS = join(ROOT, 'refs');
 const ONCE = process.argv.includes('--once');
 const DRY = process.argv.includes('--dry-run');
 
+// ---- single-instance lock ---------------------------------------------------
+// Two concurrent loops both work the queue: duplicate task sessions racing on
+// the same working tree (it happened — a detached loop wrote no pidfile, the
+// panel showed idle, Start spawned a second loop, and task 006 ran twice).
+// run.mjs now owns the pidfile itself: refuse to start if the recorded loop
+// is still alive.
+{
+  const PIDFILE = join(LOGS, 'run.pid');
+  try {
+    const other = +readFileSync(PIDFILE, 'utf8').trim();
+    if (other && other !== process.pid) {
+      process.kill(other, 0);   // throws if dead
+      console.error('[run] another loop is already running (pid ' + other + ') — refusing to start a second. Stop it first (STOP file, or kill the pid).');
+      process.exit(3);
+    }
+  } catch { /* no pidfile or holder dead — proceed */ }
+  mkdirSync(LOGS, { recursive: true });
+  writeFileSync(PIDFILE, String(process.pid));
+}
+
 const MAX_BACKOFF_MS = 2 * 60 * 60 * 1000; // 2 h cap
 const START_BACKOFF_MS = 15 * 60 * 1000;   // 15 min
 
