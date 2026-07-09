@@ -55,3 +55,16 @@ currently absent everywhere — and retired-number pennants); and the
 street-side outfield wall on Sheffield/Waveland should read RED BRICK rather
 than smooth stucco. Same reviewer confirmed knothole-only ivy is the
 faithful choice — do NOT add exterior ivy.
+
+## OWNER PLACEMENT CORRECTIONS (2026-07-09) — apply GEOGRAPHY.md FIRST, then data
+(8) GATE DOORS read on the WEST face (Clark / Gallagher Way) and the SOUTH
+face (Addison) — the real main entries. Ensure no door/gate visuals sit on
+the east face. The NE bleacher-corner entrance (Sheffield & Waveland) is
+real-world faithful and STAYS as the bleacher gate unless a follow-up owner
+note removes it.
+(9) MOVE THE KNOTHOLE to the NORTH side (Waveland / left-field wall, near
+the ball-hawk corner) per owner directive. Note honestly in GEOGRAPHY.md:
+refs place the real knothole on Sheffield (right field) — the owner chooses
+Waveland; record it under standing liberties. Update STADIUM_W.knothole,
+the builder, walkprobe expects if any, and the wv-knothole waypoint will
+follow the data automatically (gen-waypoints reads it).
