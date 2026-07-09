@@ -423,6 +423,30 @@ expect('roof y = 9.6',WV.surfaceYW(-212.5,-515),9.6);
   expect(`rooftop stair mid (-206.5,-514) between floors (${yMid.toFixed(2)})`,yMid>1&&yMid<9.5,true); }
 expect('neighbor roof (-221,-515) NOT walkable (only one is open)',WV.walkableW(-221,-515),false);
 
+console.log('\n--- Wrigleyville: the Sluggers rooftop cage (task 009) ---');
+{ const SL=WV.SLUGGERS_W, c=Math.cos(SL.th), s=Math.sin(SL.th);
+  const w=(lx,lz)=>[SL.cx+lx*c+lz*s, SL.cz-lx*s+lz*c];   // building-local -> world (matches village.js)
+  const wk=(lx,lz)=>WV.walkableW(...w(lx,lz)), sy=(lx,lz)=>+WV.surfaceYW(...w(lx,lz)).toFixed(2);
+  expect(`deck centre walkable`,wk(0,0),true);
+  expect(`deck at roofY (${SL.roofY})`,sy(0,0),SL.roofY);
+  expect('deck NW corner walkable',wk(-4.5,6),true);
+  expect('deck SW corner walkable',wk(-4.5,-6),true);
+  { const y=sy(7.2,0); expect(`stair mid (${y}) between floors`,y>1&&y<SL.roofY-0.5,true); }
+  expect('stair base ~street level',sy(7.2,-6.8)<0.4,true);
+  expect(`stair top ~roofY`,sy(7.2,6.8),SL.roofY);
+  expect('street mouth (stair base landing) walkable',wk(7.8,-7.5),true);
+  expect('street mouth at grade',sy(7.8,-7.5),0);
+  // enclosure — off the deck footprint must NOT be walkable (no elevator surface)
+  expect('west of roof (lot) NOT walkable',wk(-8,0),false);
+  expect('north gap to Sports Corner NOT walkable',wk(0,9.5),false);
+  expect('south of the building NOT walkable',wk(0,-10),false);
+  // the gap between deck (lx<=5) and mid-stair (lx>=6) stays NON-walkable — this
+  // is the seam that stops a deck<->stair elevator except at the top bridge.
+  expect('deck/mid-stair seam NOT walkable',wk(5.5,0),false);
+  // the Clark corridor beside/below the stair is untouched
+  expect('Clark corridor @z-480 still walkable at grade',WV.walkableW(WV.clarkX(-480),-480)&&WV.surfaceYW(WV.clarkX(-480),-480)===0,true);
+}
+
 console.log('\n--- Wrigleyville: Gallagher Way plaza hugs the Clark diagonal ---');
 expect('plaza @ z-460 (clark+20) walkable',WV.walkableW(WV.clarkX(-460)+20,-460),true);
 expect('east of plaza @ z-460 (clark+36) NOT walkable (stadium)',WV.walkableW(WV.clarkX(-460)+36,-460),false);

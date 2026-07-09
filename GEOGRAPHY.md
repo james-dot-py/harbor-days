@@ -242,6 +242,7 @@ clamp/minimap). Data: `src/data/wrigleyville.js`; builders: `src/wrigley/*`.
 | Engine 78 | 1052 W Waveland → x −250…−234, z −524…−508 |
 | Rooftop brownstones | N of Waveland x −226…−199 (middle one climbable, roof y 9.6) + E of Sheffield z −478…−430 |
 | Cubby Bear + Clark bar row | opposite the marquee + west of Clark z −488…−418 |
+| Sluggers rooftop cage | clarkBars[0] ('SLUGGERS', z −488…−472) is a LOW 2-storey bar (roof y 6.8) whose ROOF is the batting-cage destination (owner note 2026-07-08 → task 009): an exterior stair up the street (east) face → a rooftop deck holding the fast-pitch cage. Anchors + walkability in SLUGGERS_W (rotated-rect quads in the building's LOCAL frame, shared by the engine + walkprobe) |
 
 ### Walkability (game-day street closure = the clamp, diegetically)
 Walkable = corridor quads only (WALK_W in wrigleyville.js — the single
@@ -249,7 +250,8 @@ definition, shared verbatim by main.js and walkprobe): Addison (station→Clark)
 Waveland (Sheffield→Clark + Kenmore stub), Sheffield (Addison→Waveland), Clark
 (Addison→Waveland), Gallagher Way (z −466…−430), the marquee-corner apron
 (the crescent the rounded corner opens at Clark & Addison), the station
-platform + stair, one climbable rooftop + its outdoor stair. Every corridor mouth ends at a **CPD blue wooden
+platform + stair, one climbable Waveland rooftop + its outdoor stair, and the
+Sluggers rooftop cage (exterior stair + deck, SLUGGERS_W). Every corridor mouth ends at a **CPD blue wooden
 barricade** (BARRICADES_W) with an officer NPC; streets visually continue into
 a low-rise Lakeview backdrop band (BACKDROP_W).
 

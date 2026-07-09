@@ -13,7 +13,7 @@ import { toon, bmat, mulberry32, pointsMat } from '../core.js';
 import { collide } from '../props.js';
 import { createChibi } from '../framework.js';
 import { wrigleyRoot } from './index.js';
-import { VILLAGE_W, GALLAGHER_W, OFFICE_W, clarkX } from '../data/wrigleyville.js';
+import { VILLAGE_W, GALLAGHER_W, OFFICE_W, SLUGGERS_W, clarkX } from '../data/wrigleyville.js';
 
 const R = mulberry32(1060);                       // OWN seed — never core rng/wrand
 const rr = (a, b) => a + (b - a) * R();
@@ -380,30 +380,99 @@ function buildBars() {
     { t: "CASEY'S", c: 0x4ad06a, icon: shamrock },
     { t: 'THE DUGOUT', c: 0x5aa8ff },
   ];
-  const Hs = [9.2, 11.0, 8.6, 10.2];
+  // clarkBars[0] ('SLUGGERS') is LOWERED to a 2-storey bar: its roof is the
+  // batting-cage destination (task 009 — buildSluggersRoof adds the stair/deck).
+  const Hs = [SLUGGERS_W.roofY, 11.0, 8.6, 10.2];
   VILLAGE_W.clarkBars.forEach((bar, i) => {
     const zc = (bar.z0 + bar.z1) / 2, H = Hs[i];
     const gx = clarkX(zc) - 16, gz = zc, dep = 12, wid = (bar.z1 - bar.z0);
     const g = new THREE.Group(); g.position.set(gx, 0, gz); g.rotation.y = clarkYaw;
     g.add(M(new THREE.BoxGeometry(dep, H, wid, 2, 4, 2), toon(facades[i]), 0, H / 2, 0));
     g.add(M(new THREE.BoxGeometry(dep + 0.2, 0.45, wid + 0.02), toon(0x2c2620), 0, H - 0.22, 0));   // parapet
-    const sgn = new THREE.Mesh(new THREE.PlaneGeometry(wid - 3, 2.2), bmat(0xffffff, { map: neonTex(neons[i].t, neons[i].c, neons[i].icon) }));
-    sgn.position.set(dep / 2 + 0.05, H - 2.0, 0); sgn.rotation.y = Math.PI / 2; g.add(sgn);        // street-facing (+x local)
+    // Sluggers (i=0): its sign shifts to the low SOUTH end of the front, clear
+    // of the rooftop stair that climbs the north half.
+    const sgnW = i === 0 ? 7.5 : wid - 3, sgnZ = i === 0 ? -4.2 : 0;
+    const sgn = new THREE.Mesh(new THREE.PlaneGeometry(sgnW, 2.2), bmat(0xffffff, { map: neonTex(neons[i].t, neons[i].c, neons[i].icon) }));
+    sgn.position.set(dep / 2 + 0.05, H - 2.0, sgnZ); sgn.rotation.y = Math.PI / 2; g.add(sgn);        // street-facing (+x local)
     g.updateMatrixWorld(true); atlasPlane(sgn, false);   // bake the neon sign into the shared atlas (detaches it from g)
     add(g);   // add() snapshots the group's remaining meshes NOW — must come after every g.add
-    const [ax, az] = yrot(dep / 2 + 0.7, 0, clarkYaw);
-    awning(gx + ax, 3.4, gz + az, clarkYaw + Math.PI / 2, 1.5, wid - 2);
-    for (const lz of [-3.5, 3.5]) { const [dx, dz] = yrot(dep / 2 + 0.05, lz, clarkYaw); A.win.push({ pos: [gx + dx, H - 3.4, gz + dz], yaw: clarkYaw + Math.PI / 2, scale: [1.3, 1.7, 1] }); }
-    const [fx, fz] = yrot(dep / 2 - 1, wid / 2 - 1.5, clarkYaw);
-    A.pole.push({ pos: [gx + fx, H, gz + fz] });
-    A.flag.push({ pos: [gx + fx + 0.55, H + 1.05, gz + fz], yaw: clarkYaw });
-    collide(gx, gz, 6.5);
+    if (i !== 0) {   // Sluggers (i=0): the rooftop stair replaces the awning; the roof carries the flag + cage
+      const [ax, az] = yrot(dep / 2 + 0.7, 0, clarkYaw);
+      awning(gx + ax, 3.4, gz + az, clarkYaw + Math.PI / 2, 1.5, wid - 2);
+      for (const lz of [-3.5, 3.5]) { const [dx, dz] = yrot(dep / 2 + 0.05, lz, clarkYaw); A.win.push({ pos: [gx + dx, H - 3.4, gz + dz], yaw: clarkYaw + Math.PI / 2, scale: [1.3, 1.7, 1] }); }
+      const [fx, fz] = yrot(dep / 2 - 1, wid / 2 - 1.5, clarkYaw);
+      A.pole.push({ pos: [gx + fx, H, gz + fz] });
+      A.flag.push({ pos: [gx + fx + 0.55, H + 1.05, gz + fz], yaw: clarkYaw });
+    }
+    // Sluggers roof is walkable: cap the body collider BELOW the deck so the
+    // player can stand up there (collide is ignored once player.y > h).
+    collide(gx, gz, 6.5, i === 0 ? Hs[0] - 0.2 : Infinity);
   });
   // red/white/blue bunting strung along the whole row front (Clark is linear -> straight strip)
   const z0 = -486, z1 = -420, zm = (z0 + z1) / 2, len = Math.hypot(clarkX(z1) - clarkX(z0), z1 - z0);
   const bg = new THREE.Mesh(new THREE.PlaneGeometry(len, 0.8), bmat(0xffffff, { map: buntingTex(), transparent: true, side: THREE.DoubleSide }));
   const [bx, bz] = yrot(6.4, 0, clarkYaw); bg.position.set(clarkX(zm) - 16 + bx, 7.0, zm + bz);
   bg.rotation.y = clarkYaw + Math.PI / 2; atlasPlane(bg, true);
+}
+
+// =====================================================================
+//  3b. SLUGGERS ROOFTOP  (task 009 — the batting-cage destination)
+//  clarkBars[0] is a low bar; an exterior stair up its street (east) face
+//  climbs to a rooftop deck that carries the fast-pitch cage. Walk data is
+//  SLUGGERS_W (shared with the engine + walkprobe); this builds only meshes
+//  + the stair-edge railing colliders, in the SAME local frame (origin
+//  cx/cz, rotation th) so the drawn steps line up with the ramp exactly.
+//  Colours reuse existing village materials (office-limestone deck, parapet
+//  dark steel) so the static merge pool adds no new draw calls.
+// =====================================================================
+function cageSignTex() {                            // street-level "cages upstairs" arrow board
+  const [cv, g] = cvTex(256, 128);
+  g.fillStyle = '#0e0b13'; g.fillRect(0, 0, 256, 128);
+  g.strokeStyle = 'rgba(255,255,255,.12)'; g.lineWidth = 4; g.strokeRect(6, 6, 244, 116);
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.shadowColor = '#ff5545'; g.shadowBlur = 16; g.fillStyle = '#ff5545';
+  g.font = '800 30px "Trebuchet MS",Arial,sans-serif'; g.fillText('BATTING CAGES', 128, 40); g.fillText('BATTING CAGES', 128, 40);
+  g.shadowBlur = 0; g.fillStyle = '#ffd24a';
+  g.font = '800 30px "Trebuchet MS",Arial,sans-serif'; g.fillText('UPSTAIRS  ↑', 128, 90);
+  return tx(cv);
+}
+function buildSluggersRoof() {
+  const SL = SLUGGERS_W, c = Math.cos(SL.th), sn = Math.sin(SL.th), rf = SL.roofY, S = SL.stair, hz = S.hz;
+  const deckMat = toon(0x9a948b), steel = toon(0x2c2620);   // reuse office-lime + parapet-dark → no new draw
+  const w2 = (lx, lz) => [SL.cx + lx * c + lz * sn, SL.cz - lx * sn + lz * c];
+  const yAt = lz => rf * (lz + hz) / (2 * hz);
+  const g = new THREE.Group(); g.position.set(SL.cx, 0, SL.cz); g.rotation.y = SL.th;
+  // deck surface + stair-top landing (slabs a hair proud of the building top)
+  g.add(M(new THREE.BoxGeometry(SL.deck.hx * 2, 0.14, SL.deck.hz * 2), deckMat, SL.deck.lx, rf + 0.03, SL.deck.lz));
+  g.add(M(new THREE.BoxGeometry(SL.bridge.hx * 2, 0.14, SL.bridge.hz * 2), deckMat, SL.bridge.lx, rf + 0.03, SL.bridge.lz));
+  // exterior stair — treads + risers climbing lz −hz (y0) → +hz (y rf). Steps
+  // are the light steel (deckMat); the tilt is NEGATIVE so the +z (north) end
+  // rises with the treads (a positive tilt sends the stringers the wrong way,
+  // crossing the treads as an X over the sign).
+  const tilt = -Math.atan2(rf, 2 * hz), nT = 15, step = 2 * hz / nT;
+  for (let i = 0; i < nT; i++) {
+    const lz = -hz + (i + 0.5) * step, y = yAt(lz);
+    g.add(M(new THREE.BoxGeometry(S.hx * 2 - 0.2, 0.13, step + 0.28), deckMat, S.lx, y, lz));                 // tread
+    g.add(M(new THREE.BoxGeometry(S.hx * 2 - 0.2, rf / nT + 0.12, 0.1), deckMat, S.lx, y - rf / nT / 2, lz - step / 2));  // riser
+  }
+  for (const sx of [S.lx - S.hx + 0.12, S.lx + S.hx - 0.12]) {                                              // side stringers
+    const st = M(new THREE.BoxGeometry(0.14, 0.38, 2 * hz + 0.6), deckMat, sx, rf / 2, S.lz);
+    st.rotation.x = tilt; g.add(st);
+  }
+  // stair OUTER-edge railing (posts + sloped top rail, dark for contrast) — the elevator seal
+  const railE = S.lx + S.hx;
+  for (let lz = -hz + 1; lz <= hz; lz += 1.2) g.add(M(new THREE.BoxGeometry(0.09, 1.0, 0.09), steel, railE, yAt(lz) + 0.5, lz));
+  { const rl = M(new THREE.BoxGeometry(0.1, 0.1, 2 * hz + 0.2), steel, railE, rf / 2 + 1.0, S.lz); rl.rotation.x = tilt; g.add(rl); }
+  // deck-edge posts on the WEST + NORTH (park) sides, low rail — believable roof edge
+  for (let lz = -SL.deck.hz + 1; lz <= SL.deck.hz - 0.5; lz += 1.6) g.add(M(new THREE.BoxGeometry(0.09, 0.95, 0.09), steel, -SL.deck.hx, rf + 0.5, lz));
+  for (let lx = -SL.deck.hx + 1; lx <= SL.deck.hx - 0.5; lx += 1.6) g.add(M(new THREE.BoxGeometry(0.09, 0.95, 0.09), steel, lx, rf + 0.5, SL.deck.hz));
+  add(g);
+  // street sign on the front face pointing up the stair
+  const [sgx, sgz] = w2(S.lx + S.hx + 0.06, -hz + 2.2);
+  signPlane(cageSignTex(), sgx, 2.5, sgz, SL.th + Math.PI / 2, 2.2, 1.1);
+  // railing COLLIDERS (world): seal the stair's street edge; the base (lz < −hz+2)
+  // is the walk-on mouth from the sidewalk, left open.
+  for (let lz = -hz + 2; lz <= hz; lz += 1.05) { const [wx, wz] = w2(railE, lz); collide(wx, wz, 0.3, 12); }
 }
 
 // =====================================================================
@@ -675,6 +744,7 @@ export function buildVillage() {
   buildMurphys();
   buildCubby();
   buildBars();
+  buildSluggersRoof();
   buildEngine();
   buildStands();
   buildGallagherOffice();

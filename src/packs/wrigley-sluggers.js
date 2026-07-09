@@ -22,7 +22,7 @@ import { toon, bmat, mulberry32, lerp, clamp } from '../core.js';
 import { keys, joy } from '../input.js';
 import { activeCell } from '../cells.js';
 import { wrigleyRoot } from '../wrigley/index.js';
-import { clarkX } from '../data/wrigleyville.js';
+import { SLUGGERS_W } from '../data/wrigleyville.js';
 import { collide } from '../props.js';
 
 // -------------------------- determinism --------------------------------
@@ -30,16 +30,19 @@ const R = mulberry32(1985);
 const rr = (a, b) => a + (b - a) * R();
 
 // ------------------------------ geometry -------------------------------
-const TH = Math.atan(0.28);                         // Clark diagonal heading
+// The playable cage now lives on the SLUGGERS ROOFTOP (task 009): reached by
+// the exterior stair the village builds. The tunnel is aligned across the
+// deck (rotation th+90°) so the batter faces the PARK (east) — a hit fires
+// the ball toward Wrigley. Origin = deck centre, lifted to the roof height.
+const TH = SLUGGERS_W.th + Math.PI / 2;             // tunnel runs across the deck, hits point east (park)
 const CS = Math.cos(TH), SN = Math.sin(TH);
-const CAGE_X = clarkX(-480) - 8.5;                  // tunnel centre, just west of the curb
-const CAGE_Z = -480;
-// local(lx,lz) under the cage's Y-rotation -> world [x,z]
+const CAGE_X = SLUGGERS_W.cx, CAGE_Y = SLUGGERS_W.roofY, CAGE_Z = SLUGGERS_W.cz;
+// local(lx,lz) under the cage's Y-rotation -> world [x,z] (y adds CAGE_Y)
 const L2W = (lx, lz) => [CAGE_X + lx * CS + lz * SN, CAGE_Z - lx * SN + lz * CS];
 
 // ball lane (local): from the machine muzzle to the plate
 const MACH = [1.0, 1.15, 2.35], PLATE = [1.0, 1.05, -1.6];
-const PAD = L2W(1.0, -1.8);                         // where the mayor stands (offset ≈ clarkX−7.46)
+const PAD = L2W(1.0, -1.8);                         // where the mayor stands, on the deck
 
 // ------------------------------ tuning ---------------------------------
 const N_PITCH = 5;
@@ -236,7 +239,7 @@ onWorldReady(() => {
   state.sluggersRounds = state.sluggersRounds || 0;
 
   const grp = new THREE.Group();
-  grp.position.set(CAGE_X, 0, CAGE_Z); grp.rotation.y = TH;
+  grp.position.set(CAGE_X, CAGE_Y, CAGE_Z); grp.rotation.y = TH;   // lifted onto the rooftop deck
   wrigleyRoot.add(grp);
 
   const dark = toon(0x1e1f24);
@@ -305,9 +308,9 @@ onWorldReady(() => {
 
   // ------------------------------ per frame --------------------------- //
   registerUpdate((dt, t, pl) => {
+    if (dt < 0) dt = 0;
     if (activeCell() !== 'wrigleyville') { if (round.on) endRound(); return; }
     if (!round.on) return;
-    if (dt < 0) dt = 0;
 
     const eDown = keys.has('e');
     const eEdge = eDown && !round.prevE;

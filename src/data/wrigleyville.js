@@ -113,6 +113,23 @@ export const ROOFTOPS_W = {
   stairLanding: { x0: -208, x1: -205, z0: -508, z1: -505 },
 };
 
+// -------------------- Sluggers rooftop batting cage (task 009) --------
+// clarkBars[0] ('SLUGGERS') is a LOW 2-storey bar whose ROOF is a real
+// destination: an exterior stair up the street (east) face climbs to a
+// rooftop deck holding the fast-pitch cage (bat toward the park). Geometry
+// AND walkability share this one anchor set — buildBars builds clarkBars[0]
+// as a Group at origin (cx,0,cz), rotation th; every quad below is a ROTATED
+// rect in that local frame, so the walk grid and the meshes never drift.
+//   local frame: +x = toward the street (east), +z = north along Clark.
+//   the building body is local x −6..6, z −8..8; roofY = its height (Hs[0]).
+export const SLUGGERS_W = {
+  cx: clarkX(-480) - 16, cz: -480, th: Math.atan(0.28), roofY: 6.8,
+  deck   : { lx: 0,   lz: 0,    hx: 5,   hz: 7 },     // rooftop deck (y roofY)
+  bridge : { lx: 6.4, lz: 6.5,  hx: 2.0, hz: 1.0 },   // stair-top landing → deck (y roofY)
+  stair  : { lx: 7.2, lz: 0,    hx: 1.2, hz: 7 },     // exterior ramp: lz −7 (y0) → +7 (y roofY)
+  landBot: { lx: 7.5, lz: -7.5, hx: 1.6, hz: 1.1 },   // Clark sidewalk → stair base (y0)
+};
+
 export const VILLAGE_W = {
   murphys : { x0: -184, x1: -168, z0: -494, z1: -480 },  // SE cnr Sheffield/Waveland
   engine78: { x0: -250, x1: -234, z0: -524, z1: -508 },  // 1052 W Waveland
@@ -173,7 +190,22 @@ export const BACKDROP_W = {
 //   crescent the rounded marquee corner opens at Clark & Addison)
 const S = STATION_W, R = ROOFTOPS_W, G = GALLAGHER_W, T = STREETS_W;
 const rampY = (q, z) => q.yTop + (q.yBot - q.yTop) * (z - q.z0) / (q.z1 - q.z0);
+// rotated-rect quad on the Sluggers building's local frame (see SLUGGERS_W).
+// A sub-quad {lx,lz,hx,hz} is a rect centred at building-local (lx,lz); we bake
+// its WORLD centre once and carry the shared cos/sin so inQuad/surfaceYW can
+// project any point into the (unchanged) local axes. ramp = y lerps along the
+// local +z axis (lz −hz → yBot, +hz → yTop), matching the drawn steps exactly.
+const SLc = Math.cos(SLUGGERS_W.th), SLs = Math.sin(SLUGGERS_W.th);
+const slQuad = (sub, extra) => ({
+  rot: true, c: SLc, s: SLs, hx: sub.hx, hz: sub.hz,
+  wcx: SLUGGERS_W.cx + sub.lx * SLc + sub.lz * SLs,
+  wcz: SLUGGERS_W.cz - sub.lx * SLs + sub.lz * SLc, ...extra,
+});
 export const WALK_W = [
+  slQuad(SLUGGERS_W.deck,    { y: SLUGGERS_W.roofY }),               // Sluggers rooftop deck
+  slQuad(SLUGGERS_W.bridge,  { y: SLUGGERS_W.roofY }),               // stair-top landing
+  slQuad(SLUGGERS_W.stair,   { ramp: true, yBot: 0, yTop: SLUGGERS_W.roofY }),  // exterior stair
+  slQuad(SLUGGERS_W.landBot, { y: 0 }),                             // street-level stair base
   { ...S.stair, ramp: true },                                        // station stair
   { x0: S.platform.x0, x1: S.platform.x1, z0: S.platform.z0, z1: S.platform.z1, y: S.platform.y },
   { ...R.stair, ramp: true },                                        // rooftop stair
@@ -199,6 +231,10 @@ function inTri(t, x, z) {
   return ins;
 }
 function inQuad(q, x, z) {
+  if (q.rot) {                                    // rotated rect (Sluggers roof/stair)
+    const dx = x - q.wcx, dz = z - q.wcz;
+    return Math.abs(dx * q.c - dz * q.s) <= q.hx && Math.abs(dx * q.s + dz * q.c) <= q.hz;
+  }
   if (z < q.z0 || z > q.z1) return false;
   if (q.apron) {
     const dx = x - CORNER_ARC.cx, dz = z - CORNER_ARC.cz;
@@ -212,7 +248,14 @@ export function walkableW(x, z) {
   return false;
 }
 export function surfaceYW(x, z) {
-  for (const q of WALK_W) if (inQuad(q, x, z)) return q.ramp ? rampY(q, z) : q.y;
+  for (const q of WALK_W) if (inQuad(q, x, z)) {
+    if (q.rot) {
+      if (!q.ramp) return q.y;
+      const lz = (x - q.wcx) * q.s + (z - q.wcz) * q.c;    // local +z along the stair run
+      return q.yBot + (q.yTop - q.yBot) * (lz + q.hz) / (2 * q.hz);
+    }
+    return q.ramp ? rampY(q, z) : q.y;
+  }
   return 0;
 }
 

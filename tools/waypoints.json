@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-09T03:49:09.398Z",
- "count": 52,
+ "generated": "2026-07-09T13:43:24.944Z",
+ "count": 54,
  "waypoints": [
   {
    "id": "spawn",
@@ -921,7 +921,7 @@
      "dist": 14
     }
    ],
-   "expectation": "SLUGGERS bar front on the west side of Clark: neon signage readable; part of the glowing bar row."
+   "expectation": "SLUGGERS bar front on the west side of Clark: neon signage + crossed bats readable. It is now a LOW 2-storey bar carrying the rooftop batting cage (task 009) — the exterior stair and cage read above the storefront; part of the glowing bar row."
   },
   {
    "id": "wv-bar-sports-corner",
@@ -1172,6 +1172,56 @@
     }
    ],
    "expectation": "From THE climbable Waveland rooftop (y 9.6): rooftop bleacher rows looking over Waveland INTO the park — outfield, scoreboard and light towers visible over the LF wall; EAMUS CATULI building nearby."
+  },
+  {
+   "id": "wv-sluggers-cage",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -328.4,
+   "z": -480,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.2,
+     "dist": 10
+    },
+    {
+     "yaw": -1.15,
+     "pitch": 0.16,
+     "dist": 9
+    },
+    {
+     "yaw": -2,
+     "pitch": 0.26,
+     "dist": 11
+    }
+   ],
+   "expectation": "THE Sluggers rooftop batting cage (task 009): atop the lowered SLUGGERS bar, reachable by the exterior stair, a netted fast-pitch tunnel with the pitching machine and home plate sits on a rooftop deck the mayor can stand on. Reads as a real upstairs destination — not a street hut. The batter faces the park (east)."
+  },
+  {
+   "id": "wv-sluggers-stair",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -317.81,
+   "z": -482.97,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.06,
+     "dist": 12
+    },
+    {
+     "yaw": -1.2,
+     "pitch": 0.1,
+     "dist": 12
+    },
+    {
+     "yaw": -1.95,
+     "pitch": 0.14,
+     "dist": 13
+    }
+   ],
+   "expectation": "The street approach to Sluggers on Clark: the low 2-storey bar with a visible exterior stair climbing its street face to the rooftop batting cage above, and a 'BATTING CAGES UPSTAIRS ↑' sign at the base. The cage is a destination you walk up to, not furniture on the sidewalk."
   },
   {
    "id": "wv-barricade-addison-e",

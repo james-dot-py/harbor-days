@@ -31,3 +31,7 @@ cut becomes a revert task.
   gag: a warm-red O and a blue bobbing ! bracket the lowercase "pe", the same
   midwestern "ope" the NPCs blurt when you bump them — title card / journal /
   watermark — 979ba50
+- Sluggers' UPSTAIRS batting cages are real: the fast-pitch cage moved off the
+  sidewalk onto the ROOF of a lowered Sluggers bar, reached by walking up an
+  exterior stair off Clark ("BATTING CAGES UPSTAIRS ↑") — a destination with an
+  approach, matching the real Sluggers' claim to fame — Wrigleyville — task 009

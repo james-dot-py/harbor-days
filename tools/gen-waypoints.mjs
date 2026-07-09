@@ -274,6 +274,27 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-192.5, -49
   add('wv-rooftop-view', 'wrigleyville', 'wrigleyville', R(xc), R(zc),
     spread(yawTo(xc, zc, ST.scoreboard.x, ST.scoreboard.z), 0.15, 10));
 }
+{ // THE Sluggers rooftop batting cage (task 009). Stand ON the deck; the west
+  // backdrop band blocks east-facing cameras, so shoot from the EAST (camera
+  // out over open Clark), down the deck at the cage — an elevated small space,
+  // axis-ish framings only (cross-body cameras exit small rooftops).
+  const SL = W.SLUGGERS_W;
+  add('wv-sluggers-cage', 'wrigleyville', 'wrigleyville', R(SL.cx), R(SL.cz), [
+    { yaw: -1.57, pitch: 0.2,  dist: 10 },
+    { yaw: -1.15, pitch: 0.16, dist: 9 },
+    { yaw: -2.0,  pitch: 0.26, dist: 11 },
+  ]);
+}
+{ // the STREET approach: stand on Clark east of Sluggers, look WEST at the low
+  // bar, its exterior stair and the rooftop cage above (the destination read).
+  const SL = W.SLUGGERS_W, c = Math.cos(SL.th), s = Math.sin(SL.th);
+  const sx = SL.cx + 11 * c, sz = SL.cz - 11 * s;    // out on the Clark sidewalk, east of the front
+  add('wv-sluggers-stair', 'wrigleyville', 'wrigleyville', R(sx), R(sz), [
+    { yaw: -1.57, pitch: 0.06, dist: 12 },
+    { yaw: -1.2,  pitch: 0.1,  dist: 12 },
+    { yaw: -1.95, pitch: 0.14, dist: 13 },
+  ]);
+}
 { // one representative CPD barricade line (Addison east, by the station)
   const b = W.BARRICADES_W[0], mx = (b.a[0] + b.b[0]) / 2, mz = (b.a[1] + b.b[1]) / 2;
   const [px, pz] = snapW(mx - 10, mz);
