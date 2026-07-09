@@ -12,3 +12,8 @@
   merged into slab); jets trigger with hysteresis.
 - route: task 012 (Wrigley architecture polish — already touches the Gallagher
   plaza view). Verify with an act.mjs walk-past.
+
+## Evidence update (2026-07-09)
+Owner screenshot refs/inbox/"bag toss looks bad and spot is not solid
+color.png" shows the wet-ring DITHERING in a still frame — confirms surface
+z-fight, not just animation flicker.
