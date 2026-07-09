@@ -593,7 +593,7 @@ export function runUpdates(dt,t,player){
 
 // ---------------------- built-in world-ready setup ---------------------
 // Built-in journal section (registered immediately; renders live state).
-journalSection('harbor-days','Harbor Days',()=>`
+journalSection('harbor-days','Ope!',()=>`
   <div class="jrow"><span>Fireworks launched</span><b>${state.fireworksLaunched}</b></div>
   <div class="jrow"><span>Distance walked</span><b>${state.distanceWalked.toFixed(0)} m</b></div>
   <div class="jrow"><span>Zones visited</span><b>${state.zonesVisited.size} / ${CH.ZONES.length}</b></div>`);

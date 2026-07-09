@@ -6,7 +6,7 @@ import { onWorldReady, journalSection } from '../framework.js';
 
 onWorldReady(() => {
   journalSection('about', 'About', () => `
-    <p>Harbor Days — a toy Chicago lakefront.</p>
+    <p>Ope! — a toy Chicago lakefront.</p>
     <p>Map layout derived from <b>OpenStreetMap</b> data,
        © OpenStreetMap contributors, under the
        <b>Open Database License (ODbL)</b> —
