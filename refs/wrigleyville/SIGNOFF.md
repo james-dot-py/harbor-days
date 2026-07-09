@@ -85,3 +85,33 @@ Hazard recorded in PITFALLS.md.
 
 **Wrigleyville is signed off. This file unlocks §5.3 planner self-expansion once the
 queue (007–012) drains.**
+
+## Independent corroboration (duplicate 006 session, same evening)
+
+The two-session worktree hazard (PITFALLS.md, provenance note above) struck task 006
+itself: a second orchestrator session ran the full sign-off concurrently, unaware of
+this file until close-out. Recorded here because it independently reproduces every
+verdict — it is corroborating evidence, not the sign-off of record.
+
+- Second fresh full walkthrough: run `mrcsulf4` (own vite, canary echoed) —
+  **69 shots, 0 console/page errors, 0 canary misses, max 778 draws**
+  (wv-rooftop-view-f0) vs 777 in the run of record. Contact sheet:
+  `tools/shots/run-mrcsulf4/contact-sheet.png`. All 23 expectations independently
+  judged MET from personally-Read PNGs, agreeing with the table above, including the
+  same notes (mirrored back-face sign text; wv-stall-1 facade-context clause not in
+  frame — now item (7) of queue 012).
+- **Scoreboard face verified visually**, strengthening verdict #3 above (which relied
+  on code inspection): supplemental in-park framings `tools/shots/sb-face-a.png` /
+  `sb-face-b.png` show the field-facing line-score grid (VISITORS/CUBS innings grid,
+  R-H-E), the clock, pennant masts, and the live dot-matrix status line
+  ("BATTING PRACTICE IS OVER — GAME IN PROGRESS · AT BAT 44 · … · INNING 7").
+- **Evocation review re-run at a stricter bar** and passed both phases:
+  phase 1 gave a fresh-eyes agent ONLY an anonymized-label contact sheet
+  (labels `shot-NN`; waypoint ids like `wv-caray-statue` leak the answer — sheet
+  built with `tools/evoc-prep.mjs`, recommended for future sign-offs) and NO refs:
+  it named "Chicago — Wrigleyville (Lakeview), Wrigley Field at Clark & Addison"
+  with high confidence from diegetic evidence alone. Phase 2 (refs/wrigley-field/
+  comparison) verdict: *"Yes — a Chicagoan would recognize it instantly."* Its
+  faithful list matches the run of record; its picky list (grandstand vertical bulk,
+  rooftop flag ring incl. the Chicago city flag, brick street-side outfield wall)
+  is folded into queue 012.
