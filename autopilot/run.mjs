@@ -201,6 +201,22 @@ function commitBookkeeping(reason) {
   } catch (e) { log({ event: 'bookkeeping-failed', msg: e && e.message ? e.message : String(e) }); }
 }
 
+// ---- auto-deploy (owner decision, 2026-07-10) -------------------------------
+// Every green syncs main to autopilot (fast-forward push) — pushing main IS the
+// playope.com deploy (Pages workflow). Tasks are small enough to ship as they
+// land (owner's call). Drop a HOLD-DEPLOY file in autopilot/ to pause releases
+// without pausing the loop.
+const HOLD_DEPLOY = join(HERE, 'HOLD-DEPLOY');
+async function syncMainDeploy(taskId) {
+  if (existsSync(HOLD_DEPLOY)) { log({ event: 'deploy-hold', msg: taskId + ' not deployed (HOLD-DEPLOY present)' }); return; }
+  const r = spawnSync('git', ['push', 'origin', 'autopilot:main'], { cwd: ROOT, encoding: 'utf8' });
+  if (r.status === 0) log({ event: 'deploy', msg: taskId + ' -> main -> playope.com' });
+  else {
+    log({ event: 'deploy-failed', msg: ((r.stderr || '') + (r.stdout || '')).trim().slice(-300) });
+    await notify('Ope! deploy failed after ' + taskId, 'git push origin autopilot:main was rejected (diverged main?). Deploy by hand.', { priority: 'high' });
+  }
+}
+
 // ---- failcounts -----------------------------------------------------------
 function loadFailcounts() { try { return JSON.parse(readFileSync(FAILCOUNTS, 'utf8')); } catch { return {}; } }
 function saveFailcounts(fc) { try { mkdirSync(LOGS, { recursive: true }); writeFileSync(FAILCOUNTS, JSON.stringify(fc, null, 2)); } catch { } }
@@ -380,6 +396,7 @@ async function iterationOnce() {
     delete fc[taskId]; saveFailcounts(fc);
     log({ event: 'green', msg: taskId + ' commit=' + (result.commit || '?') });
     commitBookkeeping(taskId + ' green -> done/');
+    await syncMainDeploy(taskId);
     await notify('Harbor Days ' + (planner ? 'planner: scouted next site' : 'task green: ' + taskId),
       [result.summary || '', result.commit ? 'commit ' + result.commit : '', result.contactSheet ? 'sheet ' + result.contactSheet : ''].filter(Boolean).join(' · '),
       { priority: 'default' });
