@@ -34,12 +34,34 @@ export const STREETS_W = {
   clark   : { halfW: 14, z0: -572, z1: -386 },  // parallelogram on clarkX(z)
 };
 
-// Gallagher Way plaza: east of Clark, hugging the WEST stands north of the
-// Addison corner. It does NOT reach Waveland — the Gallagher office block
-// (1101 W Waveland) closes its north end. Stretched frame (task 009).
-export const GALLAGHER_W = { z0: -520, z1: -446, off0: 14, off1: 40 }; // x: cx+off
+// Gallagher Way plaza: the triangular WEDGE east of Clark (owner directive
+// 2026-07-09, task 019; real outline: osm.json park 1265774541). West edge =
+// the Clark sidewalk line (off0); east edge = the west-stands BOWL WALL, a
+// near-N–S polyline bulging gently west (wall[], north→south) — so the plaza
+// is WIDE at the north (26 m at the office) and narrows south to 10 m at the
+// ticket-office/box-office mass that closes the south end at z1. It does NOT
+// reach Waveland — the Gallagher office block (1101 W Waveland) closes the
+// north. board = the freestanding video board anchor (village.js + the
+// gen-waypoints camera-clearance volume both derive from it).
+export const GALLAGHER_W = {
+  z0: -520, z1: -446, off0: 14,
+  wall: [[-283.6, -520], [-283.0, -500], [-282.4, -478], [-280.6, -458], [-278.9, -446]],
+  board: { z: -516, off: 35 },                       // x: cx+off
+};
+// x(z) of the bowl wall (piecewise-linear through GALLAGHER_W.wall) — THE
+// plaza east bound, shared by walkability, builders, minimap and waypoints.
+export function gallagherWallX(z) {
+  const w = GALLAGHER_W.wall;
+  if (z <= w[0][1]) return w[0][0];
+  for (let i = 1; i < w.length; i++) if (z <= w[i][1]) {
+    const [xa, za] = w[i - 1], [xb, zb] = w[i];
+    return xa + (xb - xa) * (z - za) / (zb - za);
+  }
+  return w[w.length - 1][0];
+}
 // Gallagher office block: fills the notch from the plaza's north edge to the
-// Waveland sidewalk, Clark corridor to the west-stands wall (off 40).
+// Waveland sidewalk, Clark corridor to the west-stands lot line (off 40) —
+// its east face is COPLANAR with the stadium's plazaN wall, one lot.
 export const OFFICE_W = { z0: -546, z1: -520, off0: 14, off1: 40 };    // x: cx+off
 
 // ------------------------- station (Addison, Red Line) ----------------
@@ -85,14 +107,21 @@ export const STADIUM_W = {
     [-202,   -414],            // SE (Addison side)
     [-202,   -528],            // chamfer start (Sheffield face)
     [-222,   -548],            // chamfer end (Waveland face) — Bleacher Gate corner
-    [-291.44,-548],            // NW (plaza east edge at Waveland)
-    [-262.88,-446],            // plaza east edge, south end
-    [-288.88,-446],            // out to Clark east edge
+    [-291.44,-548],            // NW (Waveland at the office lot line)
+    [-283.6, -520],            // plazaN: behind the office (coplanar with its east face)
+    [-283.0, -500],            // the wedge's BOWL WALL (GALLAGHER_W.wall, N→S):
+    [-282.4, -478],            //   near-N–S, bulging gently west — the bowl
+    [-280.6, -458],            //   curving over the plaza (task 019)
+    [-278.9, -446],            // wedge south tip (plaza narrows to 10 m here)
+    [-288.88,-446],            // box-office north face → out to Clark east edge
   ],
   // per-edge kind, same order/length as poly edges (edge i = poly[i]→poly[i+1])
+  // notchS + clark = the TICKET-OFFICE/BOX-OFFICE mass closing the wedge's
+  // south end (full-height brick, distinct dressing — stadium.js).
   edgeKinds: [
     ...Array(CORNER_ARC.n).fill('arc'),            // arc chords P1→P2
-    'addison', 'sheffield', 'gate', 'waveland', 'plazaE', 'notchS', 'clark',
+    'addison', 'sheffield', 'gate', 'waveland', 'plazaN',
+    'plazaE', 'plazaE', 'plazaE', 'plazaE', 'notchS', 'clark',
   ],
   // marquee proud of the apex along the outward radial (the old 1.4 m stand-off)
   marquee : { x: _apex[0] + 1.4 * Math.cos(_apexA), z: _apex[1] + 1.4 * Math.sin(_apexA), ry: _apexYaw },
@@ -101,7 +130,7 @@ export const STADIUM_W = {
   scoreboard: { x: -216, z: -533, topY: 26.5 },    // top 87 ft; base 18.3 (60 ft) — rides above the Bleacher Gate like the ref
   gates: {
     marquee  : { x: _apex[0], z: _apex[1], yaw: _apexYaw },        // ON the curve apex
-    gallagher: { x: clarkX(-490) + 40, z: -490 },                  // on the plaza east wall
+    gallagher: { x: gallagherWallX(-490), z: -490 },               // on the wedge's bowl wall
     addison  : { x: -234, z: -414, yaw: 0 },                       // south face, mid-block (owner: doors on the real main entries — Clark/Gallagher + Addison)
     bleacher : { x: -212, z: -538, yaw: Math.atan2(0.7071, -0.7071) }, // chamfer mid, faces the Sheffield/Waveland corner
   },
@@ -120,12 +149,13 @@ export const STADIUM_W = {
 //   marquee : the fillet crescent (triangle minus the CORNER_ARC circle)
 //   bleacher: the CARAY PLAZA — the chamfer triangle at Sheffield&Waveland,
 //             statue centered, off the sidewalk through-lines, gate behind
-//   gallagher: a brick pad on the plaza in front of the Gallagher gate
-//             (visual only — the plaza para quad already walks it)
+//   gallagher: a brick pad on the plaza in front of the Gallagher gate —
+//             an axis-aligned rect tucked under the near-vertical wedge
+//             wall (visual only — the plaza wedge quad already walks it)
 export const APRONS_W = {
   marquee : { tri: [[-283.60, -427.15], [-279.92, -414], [-266.27, -414]], z0: -427.15, z1: -414 },
   bleacher: { tri: [[-202, -528], [-202, -548], [-222, -548]], z0: -548, z1: -528 },
-  gallagher: { z0: -496, z1: -484, off0: 33, off1: 40 },   // x: cx+off (para)
+  gallagher: { x0: -289.9, x1: -282.4, z0: -496, z1: -484 },
 };
 
 // -------------------- rooftops & buildings (lots) ---------------------
@@ -266,6 +296,7 @@ export const BACKDROP_W = {
 // Ordered quads; FIRST hit wins for walkable + surfaceY. Ramps/elevated
 // surfaces come before flat streets. Equal-height overlaps only.
 //   rect: {x0,x1,z0,z1, y}         para: x measured from clarkX(z)+off
+//   wedge: the Gallagher plaza — clarkX(z)+off0 → gallagherWallX(z)
 //   ramp: y lerps yTop→yBot along z (z0 = yTop end)
 //   apron: point-in-triangle MINUS the corner-arc circle (the sidewalk
 //   crescent the rounded marquee corner opens at Clark & Addison)
@@ -299,7 +330,7 @@ export const WALK_W = [
   { x0: T.sheffield.x0,x1: T.sheffield.x1,z0: T.sheffield.z0,z1: T.sheffield.z1,y: 0 },
   { x0: T.kenmore.x0,  x1: T.kenmore.x1,  z0: T.kenmore.z0,  z1: T.kenmore.z1,  y: 0 },
   { para: true, off0: -T.clark.halfW, off1: T.clark.halfW, z0: T.clark.z0, z1: T.clark.z1, y: 0 },
-  { para: true, off0: G.off0, off1: G.off1, z0: G.z0, z1: G.z1, y: 0 },   // Gallagher Way
+  { wedge: true, off0: G.off0, z0: G.z0, z1: G.z1, y: 0 },   // Gallagher Way: Clark curb → bowl wall
   { apron: true,                                                     // marquee-corner apron (red brick)
     tri: APRONS_W.marquee.tri, z0: APRONS_W.marquee.z0, z1: APRONS_W.marquee.z1, y: 0 },
   { tri: APRONS_W.bleacher.tri,                                      // Caray plaza apron (red brick)
@@ -324,6 +355,7 @@ function inQuad(q, x, z) {
     return inTri(q.tri, x, z) && dx * dx + dz * dz > CORNER_ARC.r * CORNER_ARC.r;
   }
   if (q.tri) return inTri(q.tri, x, z);
+  if (q.wedge) return x >= clarkX(z) + q.off0 && x <= gallagherWallX(z);
   if (q.para) { const c = clarkX(z); return x >= c + q.off0 && x <= c + q.off1; }
   return x >= q.x0 && x <= q.x1;
 }

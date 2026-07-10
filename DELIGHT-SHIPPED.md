@@ -103,3 +103,11 @@ cut becomes a revert task.
   · climb up · — so a fan who wants 'the bleachers' is pointed up the stair to a
   row of benches that really overlook the ivy, scoreboard and field — Waveland
   rooftop — task 018
+- Gallagher Way is the real triangular WEDGE now: wide lawn at Waveland
+  narrowing along the grandstand's brick-and-stringcourse gallery wall to the
+  WRIGLEY FIELD TICKET OFFICE mass that closes Addison (atlas signs, TICKETS
+  window on the diagonal), paver banding panels and tree planters off the
+  Wikimedia refs, three bistro sets, and a proper cornhole pair — angled decks
+  on legs, blue vs cream, raised hole-ends leaning toward each other per the
+  owner's house rules — replacing the flat blue slabs and the orphaned chair
+  (issue 005) — Gallagher Way — task 019

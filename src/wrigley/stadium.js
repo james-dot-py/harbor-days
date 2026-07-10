@@ -8,7 +8,7 @@ import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtil
 import { toon, bmat, mulberry32, pointsMat, pip } from '../core.js';
 import { collide } from '../props.js';
 import { wrigleyRoot } from './index.js';
-import { STADIUM_W, CORNER_ARC, APRONS_W, clarkX } from '../data/wrigleyville.js';
+import { STADIUM_W, CORNER_ARC, APRONS_W, clarkX, gallagherWallX } from '../data/wrigleyville.js';
 import { atlasPlane } from './village.js';   // shared static-plane atlas (buildVillage emits it, last)
 
 const R = mulberry32(1914);
@@ -302,7 +302,7 @@ function backScoreTex() {
 
 // ---------------------------- facade ring ------------------------------
 function buildFacades() {
-  const pale = [], brick = [], cornice = [], grille = [], terra = [];
+  const pale = [], brick = [], cornice = [], grille = [], terra = [], stone = [];
   // per-edge kind drives height/dressing (parallel to the poly edges): the
   // first 8 are the rounded Marquee corner ('arc'), then the flat faces.
   const KINDS = S.edgeKinds;
@@ -312,8 +312,10 @@ function buildFacades() {
     edges.push({ a, b, len: Math.hypot(b[0] - a[0], b[1] - a[1]) });
   }
   const FH = S.facadeH;                        // true 4-storey streetwall (16.5)
-  const HMAP = { addison: FH, sheffield: 12, waveland: 6.5, gate: 8.2, plazaE: FH, notchS: FH, clark: FH, arc: FH };
-  const hasBand = k => k === 'addison' || k === 'plazaE' || k === 'notchS' || k === 'clark' || k === 'arc';
+  const HMAP = { addison: FH, sheffield: 12, waveland: 6.5, gate: 8.2, plazaN: FH, plazaE: FH, notchS: FH, clark: FH, arc: FH };
+  // plazaN rides with plazaE (grandstand skin); notchS + clark are the BOX-OFFICE
+  // mass (own dressing below) so they drop OUT of the grandstand band.
+  const hasBand = k => k === 'addison' || k === 'plazaN' || k === 'plazaE' || k === 'arc';
   edges.forEach((e, i) => {
     const kind = KINDS[i], isArc = kind === 'arc';
     const ext = isArc ? 0.35 : 0;              // overlap neighbouring arc chords → seamless curve, no slits
@@ -335,13 +337,16 @@ function buildFacades() {
       lint.translate((K.x0 + K.x1) / 2, 3.4 + (h - 3.4) / 2, cz); brick.push(lint);
     } else if (kind === 'sheffield' || kind === 'gate') {    // street-side outfield walls read RED BRICK, full height
       mk(brick, 1.3, h, e.len + ext, 0, h / 2);
+    } else if (kind === 'notchS' || kind === 'clark') {      // BOX OFFICE — full-height red brick (a distinct mass, not pale streetwall)
+      mk(brick, 1.3, h, e.len, 0, h / 2);
+      mk(stone, 1.35, 0.35, e.len + 0.2, 0, 4.75);           // one limestone stringcourse belting the ticket lobby
     } else {
       mk(pale, 1.2, h - 2.5, e.len + ext, 0, 2.5 + (h - 2.5) / 2);
       mk(brick, 1.3, 2.5, e.len + ext, 0, 1.25);
     }
     mk(cornice, 1.6, 0.5, e.len + 0.4 + ext, 0, h + 0.25);     // cap
     mk(terra, 1.4, 0.28, e.len + 0.2 + ext, 0, h + 0.64);      // terracotta strip
-    if (kind !== 'waveland' && kind !== 'gate') mk(grille, 0.5, 1.1, (isArc ? e.len + ext : e.len * 0.9), -0.45, h - 1.2); // green grill band
+    if (kind !== 'waveland' && kind !== 'gate' && kind !== 'notchS' && kind !== 'clark') mk(grille, 0.5, 1.1, (isArc ? e.len + ext : e.len * 0.9), -0.45, h - 1.2); // green grill band (box office skips it)
     // grandstand skin (IMG_2333/2339): proud brick band + green steel columns + X-lattice + continuous crown
     if (hasBand(kind)) {
       mk(brick, 1.3, 1.4, e.len + ext, -0.05, 3.9);           // (a) red brick band y 3.2–4.6, slightly proud
@@ -354,7 +359,7 @@ function buildFacades() {
           grille.push(col);
         }
       }
-      if (kind === 'addison' || kind === 'clark') {           // (d) subtle green X-lattice at the pressbox-band level
+      if (kind === 'addison') {                               // (d) subtle green X-lattice at the pressbox-band level
         const nl = Math.floor(e.len / 6.5);
         for (let k = 0; k < nl - 1; k++) {
           const t = (k + 0.95) / (nl + 0.4), px = e.a[0] + dx * t, pz = e.a[1] + dz * t;
@@ -369,7 +374,7 @@ function buildFacades() {
       mk(pale, 1.6, 5.4, e.len + (isArc ? ext : 0.6), 2.6, h + 3.1);   // (e) pressbox band — FULL length (+overlap) → continuous crown
       mk(cornice, 1.8, 0.4, e.len + (isArc ? ext : 0.6), 2.6, h + 5.9); // rim cap ~22.5, continuous
     }
-    if (kind === 'clark' || kind === 'plazaE') {              // (b) red-tile pent roof over the ground floor
+    if (kind === 'clark' || kind === 'plazaE' || kind === 'plazaN') {  // (b) red-tile pent roof (clark = ticket-arcade shelter; plazaN hidden behind the office)
       const aw = new THREE.BoxGeometry(1.0, 0.16, e.len + ext);
       aw.rotateZ(0.45); aw.rotateY(yaw);
       aw.translate(cx + nx * -1.05, 4.7, cz + nz * -1.05);
@@ -414,6 +419,7 @@ function buildFacades() {
   wrigleyRoot.add(new THREE.Mesh(mergeGeos(cornice), toon(0xbfb7a6)));
   wrigleyRoot.add(new THREE.Mesh(mergeGeos(terra), toon(TERRA)));
   wrigleyRoot.add(new THREE.Mesh(mergeGeos(grille), toon(GREEN)));
+  if (stone.length) wrigleyRoot.add(new THREE.Mesh(mergeGeos(stone), toon(0xe6ddc8)));  // box-office limestone (office-parapet bucket → +0 draws)
 
   // street-level arches + upper windows (instanced dark-green recesses)
   const archGeo = mergeGeos([
@@ -491,6 +497,38 @@ function buildFacades() {
   bg.fillStyle = '#1c3f6e'; bg.beginPath(); bg.ellipse(48, 0, 48, 20, 0, 0, Math.PI); bg.fill();
   inst(new THREE.PlaneGeometry(3.4, 1.5).translate(0, -0.75, 0),
     bmat(0xffffff, { map: new THREE.CanvasTexture(bcv), transparent: true, side: THREE.DoubleSide }), bunt);
+}
+
+// -------------------------- box-office signage -------------------------
+// The ticket-office mass closing the wedge's south end names itself in the
+// ballpark house style (Cubs-green field, cream double pinstripe — same recipe
+// as teaserTex / the real GATES boards): 'WRIGLEY FIELD / TICKET OFFICE' on the
+// plaza face, 'TICKETS' on the Clark face. Both static → baked into the shared
+// wrigley atlas by atlasPlane (+0 draw calls).
+function boxSignTex(w, h, big, sub) {
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#1c4a35'; g.fillRect(0, 0, w, h);                                       // Cubs-green field
+  const m = h * 0.055;
+  g.strokeStyle = '#f2ece0'; g.lineWidth = h * 0.028; g.strokeRect(m, m, w - 2 * m, h - 2 * m);            // cream pinstripe frame
+  g.lineWidth = h * 0.011; g.strokeRect(m * 1.9, m * 1.9, w - 3.8 * m, h - 3.8 * m);                       // doubled inner line
+  g.fillStyle = '#f6f1e6'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  const fit = (t, y, cap, maxw) => { let fs = cap; g.font = `800 ${fs}px Georgia,serif`; while (g.measureText(t).width > maxw && fs > 12) { fs -= 2; g.font = `800 ${fs}px Georgia,serif`; } g.fillText(t, w / 2, y); };
+  if (sub) { fit(big, h * 0.42, h * 0.4, w * 0.84); fit(sub, h * 0.76, h * 0.22, w * 0.66); }   // WRIGLEY FIELD over TICKET OFFICE
+  else fit(big, h * 0.54, h * 0.5, w * 0.8);                                                    // single line (TICKETS)
+  return new THREE.CanvasTexture(cv);
+}
+function boxOfficeSigns() {
+  // a) plaza (notchS) face — outer wall face sits at z≈−446.05; 0.09 proud, faces north
+  const a = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 1.8),
+    bmat(0xffffff, { map: boxSignTex(768, 192, 'WRIGLEY FIELD', 'TICKET OFFICE') }));
+  a.position.set(-283.9, 7.0, -446.14); a.rotation.y = Math.PI;
+  atlasPlane(a, false);
+  // b) Clark (clark) face — mid-edge, 0.75 m proud along the outward (west) normal
+  const b = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 1.2),
+    bmat(0xffffff, { map: boxSignTex(384, 128, 'TICKETS', null) }));
+  b.position.set(-286.96, 5.6, -436.38); b.rotation.y = Math.atan2(-0.9627, 0.2699);
+  atlasPlane(b, false);
 }
 
 // ------------------------------ gates ----------------------------------
@@ -923,12 +961,12 @@ function buildAprons() {
     s.lineTo(t[2][0], -t[2][1]);
     s.closePath(); geos.push(new THREE.ShapeGeometry(s));
   }
-  // c. Gallagher pad — the plaza para quad (z0..z1, off0..off1 off clarkX)
+  // c. Gallagher pad — the plaza rect (axis-aligned, tucked under the wedge wall)
   { const P = APRONS_W.gallagher, s = new THREE.Shape();
-    s.moveTo(clarkX(P.z1) + P.off0, -P.z1);                    // wound CCW: NW → NE → SE → SW
-    s.lineTo(clarkX(P.z1) + P.off1, -P.z1);
-    s.lineTo(clarkX(P.z0) + P.off1, -P.z0);
-    s.lineTo(clarkX(P.z0) + P.off0, -P.z0);
+    s.moveTo(P.x0, -P.z1);                                     // wound CCW: NW → NE → SE → SW
+    s.lineTo(P.x1, -P.z1);
+    s.lineTo(P.x1, -P.z0);
+    s.lineTo(P.x0, -P.z0);
     s.closePath(); geos.push(new THREE.ShapeGeometry(s));
   }
   const geo = mergeGeos(geos); geo.rotateX(-Math.PI / 2);      // ShapeGeometry UVs stay world metres for tex.repeat
@@ -1014,14 +1052,16 @@ export function buildStadium() {
   buildScoreboard();
   buildTowers();
   buildKnothole();
+  boxOfficeSigns();                                              // ticket-office marquee signs on the wedge's box-office mass
   // gates sit ON the wall plane (data points are logical spots; the wall
-  // face is what the street sees). Plaza-east wall line is x = clarkX(z) + 40;
-  // outward normal (−0.963, 0.269) faces the plaza (the cant is unchanged).
-  const plazaX = z => clarkX(z) + 40;
-  const gYaw = Math.atan2(-0.963, 0.269);                        // faces the plaza
+  // face is what the street sees). The Gallagher gate rides the wedge's BOWL
+  // WALL: at z −490 the wall runs (−283.0,−500)→(−282.4,−478); its outward
+  // (west, toward the plaza) unit normal is (−0.99963, 0.02726).
+  const gx = S.gates.gallagher.x, gz = S.gates.gallagher.z;
+  const gnx = -0.99963, gnz = 0.02726, gYaw = Math.atan2(gnx, gnz);   // faces the plaza
   gateAt(S.gates.marquee.x, S.gates.marquee.z, S.gates.marquee.yaw, 'MARQUEE GATE', 4.4, // on the curve apex
     { big: ['STEP INSIDE', 'THE CONFINES'], wink: 'the gates open someday' });
-  gateAt(plazaX(-490) + 0.42, -490.12, gYaw, 'GALLAGHER WAY GATE', 4.4,
+  gateAt(gx - gnx * 0.42, gz - gnz * 0.42, gYaw, 'GALLAGHER WAY GATE', 4.4, // recessed 0.42 into the bowl wall
     { big: ['WALK THE', 'WARNING TRACK'], wink: "when the ivy's ready" });
   gateAt(-212.28, -537.72, S.gates.bleacher.yaw, 'BLEACHERS', 7, // hero gate on the chamfer, Caray plaza in front
     { big: ['TAKE YOUR SEAT', 'IN THE BLEACHERS'], wink: 'save us a spot' });
@@ -1030,5 +1070,5 @@ export function buildStadium() {
   friendlyConfinesBanner();                                       // green banner band over the Addison gate
   buildFlagRing();                                                // rooftop flag ring above the marquee
   // marquee-side booth now lives in wrigley-vendors.js (the ticket queue owns it)
-  ticketBooth(plazaX(-487) - 1.06, -486.9, gYaw);
+  ticketBooth(gallagherWallX(-487) + gnx * 1.06, -487 + gnz * 1.06, gYaw);
 }

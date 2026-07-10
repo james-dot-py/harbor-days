@@ -13,7 +13,7 @@ import { toon, bmat, mulberry32, pointsMat } from '../core.js';
 import { collide } from '../props.js';
 import { createChibi } from '../framework.js';
 import { wrigleyRoot } from './index.js';
-import { VILLAGE_W, GALLAGHER_W, OFFICE_W, SLUGGERS_W, clarkX } from '../data/wrigleyville.js';
+import { VILLAGE_W, GALLAGHER_W, OFFICE_W, SLUGGERS_W, clarkX, gallagherWallX } from '../data/wrigleyville.js';
 
 const R = mulberry32(1060);                       // OWN seed — never core rng/wrand
 const rr = (a, b) => a + (b - a) * R();
@@ -532,7 +532,7 @@ function murphysGarden() {
     add(M(new THREE.CylinderGeometry(0.24, 0.24, 0.05, 12), toon(0x555555), x, 0.05, z));
     collide(x, z, 0.5);
   };
-  const chair = (x, z) => {                                                                     // chairLike pattern, rr()-varied
+  const chair = (x, z) => {                                                                     // cafe chair, rr()-varied
     const c = rr(0, 1) > 0.5 ? 0x2f6bb0 : 0xc0392b, m = toon(c);
     const cg = new THREE.Group(); cg.position.set(x, 0, z); cg.rotation.y = rr(0, 6.28);
     cg.add(M(new THREE.BoxGeometry(0.5, 0.07, 0.5), m, 0, 0.42, 0));
@@ -913,48 +913,107 @@ function buildGallagherOffice() {
 //  6. GALLAGHER WAY  (lawn, video board, splash pad, cornhole, planters)
 // =====================================================================
 function buildGallagher() {
-  const G = GALLAGHER_W;
-  add(paraStrip(G.off0 + 2, G.off1 - 2, G.z0 + 2, G.z1 - 2, 0.03, toon(0x57964f)));   // inset lawn
-  // freestanding VIDEO BOARD at the plaza's NE north edge, east of the statue row, faces south (the plaza)
-  { const bzc = -516, bx = clarkX(bzc) + 36.5;
+  const G = GALLAGHER_W, wood = toon(0x6b4a30), band = toon(0x63594e);
+  // (a) LAWN — the real triangular wedge of grass: Clark-inset (off 18) east to just
+  //     shy of the bowl wall, carved back west of the red-brick Gallagher gate pad so
+  //     the grass never rides the brick (y 0.045 — distinct from the 0.01 pavers)
+  const carve = z => (z >= -497.5 && z <= -482.5) ? -290.6 : Infinity;
+  add(stripXZ(z => clarkX(z) + 18, z => Math.min(gallagherWallX(z) - 4, carve(z)), -512, -476, 0.045, toon(0x57964f)));
+  // (b) PAVER BANDING — the finished plaza's dark strips panel the paver field; the
+  //     bands sit 18 mm above the pavers and 17 mm below the lawn (no coplanar pairs)
+  for (const z of [-516, -512, -476, -462, -454, -448]) {                          // axis-aligned E–W bands
+    const xa = clarkX(z) + 14.3, xb = gallagherWallX(z) - 0.3;
+    add(M(new THREE.BoxGeometry(xb - xa, 0.016, 0.3), band, (xa + xb) / 2, 0.028, z));
+  }
+  add(stripXZ(z => clarkX(z) + 17.6, z => clarkX(z) + 17.9, -514, -448, 0.028, band));               // Clark-edge diagonal band
+  add(stripXZ(z => gallagherWallX(z) - 4.3, z => gallagherWallX(z) - 4.0, -518, -448, 0.028, band));  // wall-side gallery band
+  // (c) freestanding VIDEO BOARD at the plaza's north edge, faces south; anchored from data
+  { const bzc = G.board.z, bx = clarkX(bzc) + G.board.off;
     add(M(new THREE.BoxGeometry(0.5, 5.0, 0.5), toon(0x2a2d33), bx - 3, 3.2, bzc));
     add(M(new THREE.BoxGeometry(0.5, 5.0, 0.5), toon(0x2a2d33), bx + 3, 3.2, bzc));
     add(M(new THREE.BoxGeometry(7.2, 4.2, 0.5), toon(0x22242a), bx, 7.3, bzc));                 // frame
     atlasPlane(M(new THREE.PlaneGeometry(6.4, 3.5), bmat(0xffffff, { map: boardTex() }), bx, 7.3, bzc + 0.28), false);   // static (drawn once, never redrawn)
     collide(bx, bzc, 3.6); }
-  // splash pad (off-centre so the plaza middle stays open, clear of the statue row)
+  // (d) splash pad (off-centre so the plaza middle stays open, clear of the statue row;
+  //     the lawn no longer reaches it, so it reads on pavers as in the real plaza)
   { const sz = -470, sx = clarkX(sz) + 20;
     add(M(new THREE.CylinderGeometry(2.6, 2.6, 0.08, 24), toon(0xb9b3a6), sx, 0.06, sz));            // pad: bottom 0.02 under lawn (0.03), top 0.10
     add(M(new THREE.RingGeometry(1.0, 1.7, 24), bmat(0x7f9096), sx, 0.115, sz, -Math.PI / 2, 0, 0));  // wet ring 15 mm proud of pad top — no z-fight
     const jets = [];
     for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; jets.push({ pos: [sx + Math.cos(a) * 0.9, 0.35, sz + Math.sin(a) * 0.9], scale: [1, 0.9 + (i % 2) * 0.5, 1] }); }  // nozzle bases sit on the new pad top
     instMesh(new THREE.ConeGeometry(0.09, 0.5, 8), bmat(0xbfe6f5), jets); }
-  // planter boxes along the Clark (west) edge
-  { const pz = [], pf = [];
-    for (let z = G.z0 + 5; z <= G.z1 - 5; z += 9) { const px = clarkX(z) + G.off0 + 1.2;
-      pz.push({ pos: [px, 0.35, z], yaw: clarkYaw, scale: [2.4, 0.7, 1.0] });
-      pf.push({ pos: [px, 0.85, z], yaw: clarkYaw, scale: [2.2, 0.5, 0.8] });
-      collide(px, z, 1.1); }
-    instMesh(new THREE.BoxGeometry(1, 1, 1), toon(0x6b4a30), pz);
-    instMesh(new THREE.BoxGeometry(1, 1, 1), toon(0x3f7a44), pf); }
-  // scattered lawn chairs (east edge) + a cornhole pair (south, clear of centre)
-  for (const [oz, ooff] of [[-505, 33], [-498, 32], [-488, 34], [-476, 33]]) chairLike(clarkX(oz) + ooff, oz);
-  cornhole(clarkX(-455) + 20, -455, clarkX(-463) + 20, -463);
+  // (e) PLANTER TROUGHS + street trees along the Clark (west) edge — merged statics
+  //     (the two instanced planter buckets are gone); every other trough is planted
+  let pi = 0;
+  for (let z = G.z0 + 5; z <= G.z1 - 5; z += 9, pi++) {
+    const px = clarkX(z) + G.off0 + 1.2;
+    add(M(new THREE.BoxGeometry(2.4, 0.7, 1.0), wood, px, 0.35, z, 0, clarkYaw, 0));               // wood trough, parallels the curb
+    add(M(new THREE.BoxGeometry(2.2, 0.5, 0.8), toon(0x3f7a44), px, 0.85, z, 0, clarkYaw, 0));      // foliage cap
+    if (pi % 2 === 0) gallagherTree(px, z, 1.1, 0.85);                                             // alternate troughs carry a tree
+    collide(px, z, 1.1);
+  }
+  for (const [fx, fz] of [[-284.5, -452], [-287.5, -459]]) {                                       // two square planters framing the box office
+    add(M(new THREE.BoxGeometry(1.3, 0.75, 1.3), wood, fx, 0.375, fz));
+    gallagherTree(fx, fz, 0.95, 0.7);
+    collide(fx, fz, 1.0);
+  }
+  // (f) BISTRO SETS — a round table + two green chairs turned to face it (owner issue
+  //     005: no more orphaned scattered chairs)
+  bistroSet(clarkX(-506) + 16, -506, 'x');
+  bistroSet(clarkX(-488) + 16, -488, 'z');
+  bistroSet(clarkX(-452) + 18.5, -452, 'x');
+  cornhole();   // (g) the flagship pair on the lawn, raised hole-ends facing each other
 }
-function chairLike(x, z) {
-  const c = rr(0, 1) > 0.5 ? 0x2f6bb0 : 0xc0392b, m = toon(c);
-  const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = rr(0, 6.28);
+// trunk + three-lobe canopy (planter street tree); side lobes offset along clarkYaw
+function gallagherTree(x, z, cr, sr) {
+  const canopy = toon(0x2f7d46);
+  add(M(new THREE.CylinderGeometry(0.10, 0.14, 2.4, 6), toon(0x6b4a30), x, 1.9, z));
+  add(M(new THREE.SphereGeometry(cr, 7, 6), canopy, x, 3.4, z));
+  for (const s of [-1, 1]) { const [dx, dz] = yrot(s * 0.75, 0, clarkYaw); add(M(new THREE.SphereGeometry(sr, 7, 6), canopy, x + dx, 3.05, z + dz)); }
+}
+// round cafe table + two chairs, each yawed so its front (+z) faces the table centre
+function bistroSet(tx, tz, axis) {
+  add(M(new THREE.CylinderGeometry(0.04, 0.05, 0.72, 6), toon(0x2c211d), tx, 0.36, tz));   // pole
+  add(M(new THREE.CylinderGeometry(0.35, 0.35, 0.04, 10), toon(0x9c968a), tx, 0.74, tz));  // top
+  add(M(new THREE.CylinderGeometry(0.22, 0.24, 0.04, 8), toon(0x2c211d), tx, 0.02, tz));   // base disc
+  for (const s of [-1, 1]) {
+    const cx = axis === 'x' ? tx + s * 0.85 : tx, cz = axis === 'x' ? tz : tz + s * 0.85;
+    bistroChair(cx, cz, Math.atan2(tx - cx, tz - cz) + rr(-0.12, 0.12));
+  }
+  collide(tx, tz, 1.0);
+}
+// green bistro chair; the back panel at local −z lands on the side away from the table
+function bistroChair(x, z, yaw) {
+  const m = toon(0x1f5136), g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = yaw;
   g.add(M(new THREE.BoxGeometry(0.6, 0.08, 0.6), m, 0, 0.42, 0));       // seat
   g.add(M(new THREE.BoxGeometry(0.6, 0.6, 0.08), m, 0, 0.72, -0.28));   // back
   for (const sx of [-0.26, 0.26]) for (const sz of [-0.26, 0.26]) g.add(M(new THREE.CylinderGeometry(0.03, 0.03, 0.42, 5), toon(0x888888), sx, 0.21, sz));
-  add(g); collide(x, z, 0.5);
+  add(g);
 }
-function cornhole(x0, z0, x1, z1) {
-  for (const [x, z, tilt] of [[x0, z0, 0.35], [x1, z1, -0.35]]) {
-    add(M(new THREE.BoxGeometry(0.6, 0.08, 1.2), toon(0x0e4c92), x, 0.3, z, tilt, 0, 0));
-    add(M(new THREE.CircleGeometry(0.12, 16), toon(0xf2d24a), x, 0.31 + Math.sin(tilt) * 0.1, z + Math.cos(tilt) * 0.25, -Math.PI / 2 + tilt, 0, 0));
-    collide(x, z, 0.6);
+// Chicago-flag six-point star (ShapeGeometry lies in the xy-plane, like CircleGeometry)
+function starGeo(R, r) {
+  const sh = new THREE.Shape();
+  for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6, rad = (i % 2) ? r : R, x = Math.sin(a) * rad, y = Math.cos(a) * rad; i ? sh.lineTo(x, y) : sh.moveTo(x, y); }
+  sh.closePath(); return new THREE.ShapeGeometry(sh);
+}
+// the proper cornhole pair on the lawn: two flag boards leaning TOWARD each other,
+// raised hole-ends meeting in the middle (deliberately non-regulation — owner 2026-07-10)
+function cornhole() {
+  const W = 0.72, L = 1.32, DECKH = 0.07, TILT = 0.23, X = -295, LAWNY = 0.045;
+  const yBase = LAWNY + Math.sin(TILT) * L / 2 + 0.03;     // front lip kisses the grass (≈0.225)
+  // hs = +1 → raised toward +z (south), −1 → raised toward −z (north): both point at their partner
+  for (const [z, rx, deckC, hs] of [[-508, -TILT, 0x0e4c92, 1], [-500, TILT, 0xf2eee4, -1]]) {
+    const g = new THREE.Group(); g.position.set(X, yBase, z); g.rotation.x = rx;
+    g.add(M(new THREE.BoxGeometry(W, DECKH, L), toon(deckC), 0, 0, 0));                                                  // tilted plywood deck
+    g.add(M(new THREE.CircleGeometry(0.13, 14), toon(0x241f1c), 0, DECKH / 2 + 0.008, hs * 0.40, -Math.PI / 2, 0, 0));   // hole up-slope, on the high end
+    g.add(M(starGeo(0.17, 0.075), toon(0xc0392b), 0, DECKH / 2 + 0.008, -hs * 0.22, -Math.PI / 2, 0, 0));                // Chicago-flag star, down-slope of centre
+    g.add(M(new THREE.BoxGeometry(0.16, 0.055, 0.16), toon(0xc0392b), rr(-0.1, 0.1), DECKH / 2 + 0.0275, hs * 0.30, 0, rr(-0.3, 0.3), 0));   // a red bag resting by the hole
+    add(g);
+    for (const sx of [-(W / 2 - 0.08), W / 2 - 0.08])                                                                    // two legs under the raised corners
+      add(M(new THREE.CylinderGeometry(0.025, 0.025, 0.30, 6), toon(0x6b4a30), X + sx, 0.195, z + hs * (L / 2 - 0.07)));
+    collide(X, z, 0.7);
   }
+  add(M(new THREE.BoxGeometry(0.16, 0.055, 0.16), toon(0x0e4c92), -294.6, 0.075, -503.8, 0, rr(0, 6.28), 0));            // a spare navy bag on the mid-lane grass
 }
 
 // =====================================================================
@@ -1049,16 +1108,20 @@ function aBoard(x, z, ry) {
   for (const s of [-1, 1]) { const p = M(new THREE.BoxGeometry(0.9, 1.3, 0.05), shared().aBoardMat, 0, 0.72, s * 0.28); p.rotation.x = s * 0.16; g.add(p); }
   add(g); collide(x, z, 0.6);
 }
-function paraStrip(off0, off1, z0, z1, y, mat, step = 5) {   // sheared strip on clarkX (copied from index.js)
-  const pos = [], idx = [];
+// generalized sheared strip: per-row west/east x come from x0f(z)/x1f(z) (either
+// may track clarkX or the bowl wall). Returns a Mesh — pass it through add().
+function stripXZ(x0f, x1f, z0, z1, y, mat, step = 3) {
+  const pos = [], uv = [], idx = [];
   const n = Math.max(2, Math.ceil((z1 - z0) / step) + 1);
   for (let i = 0; i < n; i++) {
-    const z = z0 + (z1 - z0) * i / (n - 1), c = clarkX(z);
-    pos.push(c + off0, y, z, c + off1, y, z);
+    const z = z0 + (z1 - z0) * i / (n - 1);
+    pos.push(x0f(z), y, z, x1f(z), y, z);
+    uv.push(0, z * 0.1, 1, z * 0.1);   // uv REQUIRED: emitStatic merges by material and mixed attribute sets abort the whole bucket
     if (i) { const k = i * 2; idx.push(k - 2, k, k - 1, k, k + 1, k - 1); }
   }
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   g.setIndex(idx); g.computeVertexNormals();
   return new THREE.Mesh(g, mat);
 }

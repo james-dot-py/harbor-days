@@ -67,8 +67,9 @@ const VOLS_W = [];
     // spread cameras parked inside a bronze statue — props block cameras too)
     const s = W.VILLAGE_W.statueRow, xs = s.xs;
     VOLS_W.push({ x0: Math.min(...xs) - 1.2, x1: Math.max(...xs) + 1.2, z0: s.z - 1.5, z1: s.z + 1.5, yMax: 4.5 });
-    const bx = W.clarkX(-516) + 36.5;                  // village.js buildGallagher board
-    VOLS_W.push({ x0: bx - 3.8, x1: bx + 3.8, z0: -517.5, z1: -514.5, yMax: 9.6 });
+    const b = W.GALLAGHER_W.board;                     // derives from GALLAGHER_W.board (shared with village.js)
+    const bx = W.clarkX(b.z) + b.off;
+    VOLS_W.push({ x0: bx - 3.8, x1: bx + 3.8, z0: b.z - 1.5, z1: b.z + 1.5, yMax: 9.6 });
   }
   const e = W.STATION_W.embank, br = W.STATION_W.bridge;   // embankment, minus the Addison underpass
   VOLS_W.push({ x0: e.x0, x1: e.x1, z0: e.z0, z1: br.z0, yMax: e.topY + 2.5 });
@@ -224,9 +225,10 @@ featW('wv-scoreboard', ST.scoreboard.x, ST.scoreboard.z, { stand: [-185, -554], 
 const GATE_VIEW = {
   // marquee gate sits ON the walkable corner apron now — explicit stand
   marquee:   { stand: [-286, -401], pitch: 0.14, dist: 16 },
-  // gallagher gate: the default snap stands AT the wall and the westward spread
-  // cameras parked inside the statue row (mrcn4gsg f0/f2) — stand mid-plaza
-  // SW of the gate, clear of the booth/statues/board sightlines
+  // gallagher gate now sits ON the wedge's bowl wall (~7.5 m west of the old
+  // off-40 line); the westward spread cameras parked inside the statue row
+  // (mrcn4gsg f0/f2), so stand mid-plaza SW of the gate (still walkable),
+  // clear of the booth/statues/board sightlines
   gallagher: { stand: [-286, -483], pitch: 0.14, dist: 13 },
   // addison gate (task 012, owner placement correction): stand in the Addison
   // road south of the gate, camera pulls back toward the south sidewalk
@@ -289,7 +291,7 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-196, -550]
 
 { // Gallagher Way plaza center (x is Clark-relative)
   const zc = (W.GALLAGHER_W.z0 + W.GALLAGHER_W.z1) / 2;
-  const xc = W.clarkX(zc) + (W.GALLAGHER_W.off0 + W.GALLAGHER_W.off1) / 2;
+  const xc = (W.clarkX(zc) + W.GALLAGHER_W.off0 + W.gallagherWallX(zc)) / 2;
   add('wv-gallagher-way', 'wrigleyville', 'wrigleyville', R(xc), R(zc),
     spread(yawTo(xc, zc, ST.gates.gallagher.x, ST.gates.gallagher.z), 0.25, 13));
 }

@@ -42,6 +42,21 @@ function paraStrip(off0, off1, z0, z1, y, color, step = 6) {
   g.setIndex(idx); g.computeVertexNormals();
   return new THREE.Mesh(g, toon(color));
 }
+// wedge strip: per-row x from the Clark curb (clarkX(z)+off0) to the bowl wall
+// (gallagherWallX(z)) — the triangular Gallagher plaza floor
+function wedgeStrip(off0, z0, z1, y, color, step = 4) {
+  const pos = [], idx = [];
+  const n = Math.max(2, Math.ceil((z1 - z0) / step) + 1);
+  for (let i = 0; i < n; i++) {
+    const z = z0 + (z1 - z0) * i / (n - 1);
+    pos.push(WV.clarkX(z) + off0, y, z, WV.gallagherWallX(z), y, z);
+    if (i) { const k = i * 2; idx.push(k - 2, k, k - 1, k, k + 1, k - 1); }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx); g.computeVertexNormals();
+  return new THREE.Mesh(g, toon(color));
+}
 
 const ASPHALT = 0x4a4a52, GROUND = 0x63594e;
 
@@ -63,7 +78,7 @@ function buildGround() {
   }
   wrigleyRoot.add(paraStrip(-T.clark.halfW, T.clark.halfW, T.clark.z0, T.clark.z1, 0.0, ASPHALT));
   const G = WV.GALLAGHER_W;                        // plaza pavers, slightly warm
-  wrigleyRoot.add(paraStrip(G.off0, G.off1, G.z0, G.z1, 0.01, 0x8b7f6d));
+  wrigleyRoot.add(wedgeStrip(G.off0, G.z0, G.z1, 0.01, 0x8b7f6d));
 }
 
 // ------------------------- minimap base -------------------------------
@@ -91,11 +106,10 @@ function buildMinimapBase() {
     g.fillStyle = '#c9a36a'; g.save(); g.translate(hx, hy); g.rotate(Math.PI / 4);
     g.fillRect(-4, -4, 8, 8); g.restore();
   }
-  { // Gallagher Way lawn
+  { // Gallagher Way lawn (the WEDGE: Clark curb west, bowl wall east)
     const G = WV.GALLAGHER_W;
     g.fillStyle = '#5da06a'; g.beginPath();
-    const c0 = WV.clarkX(G.z0), c1 = WV.clarkX(G.z1);
-    const p = [[c0 + G.off0, G.z0], [c0 + G.off1, G.z0], [c1 + G.off1, G.z1], [c1 + G.off0, G.z1]];
+    const p = [[WV.clarkX(G.z0) + G.off0, G.z0], ...G.wall, [WV.clarkX(G.z1) + G.off0, G.z1]];
     p.forEach((q, i) => { const [mx, my] = wm(q[0], q[1]); i ? g.lineTo(mx, my) : g.moveTo(mx, my); });
     g.closePath(); g.fill();
   }

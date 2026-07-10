@@ -449,13 +449,20 @@ console.log('\n--- Wrigleyville: the Sluggers rooftop cage (task 009) ---');
   expect('Clark corridor @z-480 still walkable at grade',WV.walkableW(WV.clarkX(-480),-480)&&WV.surfaceYW(WV.clarkX(-480),-480)===0,true);
 }
 
-console.log('\n--- Wrigleyville: Gallagher Way plaza hugs the Clark diagonal ---');
+console.log('\n--- Wrigleyville: Gallagher Way is a WEDGE — Clark curb to the bowl wall (task 019) ---');
 expect('plaza @ z-480 (clark+25) walkable',WV.walkableW(WV.clarkX(-480)+25,-480),true);
-expect('east of plaza @ z-480 (clark+44) NOT walkable (stadium)',WV.walkableW(WV.clarkX(-480)+44,-480),false);
-expect('plaza does not extend south of z-446 (clark+20,z-440) NOT walkable',WV.walkableW(WV.clarkX(-440)+20,-440),false);
+expect('east of the bowl wall @ z-480 (clark+31) NOT walkable',WV.walkableW(WV.clarkX(-480)+31,-480),false);
+expect('WIDE north: plaza @ z-516 (clark+38) walkable',WV.walkableW(WV.clarkX(-516)+38,-516),true);
+expect('NARROW south: plaza @ z-450 (clark+22) walkable',WV.walkableW(WV.clarkX(-450)+22,-450),true);
+expect('NARROW south: @ z-450 (clark+26) NOT walkable (past the tip wall)',WV.walkableW(WV.clarkX(-450)+26,-450),false);
+{ const w=z=>WV.gallagherWallX(z)-(WV.clarkX(z)+14); const zs=[-518,-500,-478,-458,-448];
+  let mono=true; for(let i=1;i<zs.length;i++) if(w(zs[i])>w(zs[i-1])+1e-9) mono=false;
+  expect(`wedge narrows monotonically north->south (${zs.map(z=>w(z).toFixed(1)).join(' -> ')})`,mono,true); }
+expect('box office closes the south: (clark+20,z-440) NOT walkable',WV.walkableW(WV.clarkX(-440)+20,-440),false);
 expect('plaza north edge @ z-518 (clark+20) walkable',WV.walkableW(WV.clarkX(-518)+20,-518),true);
 expect('Gallagher office block @ z-530 (clark+20) NOT walkable (plaza stops at -520)',WV.walkableW(WV.clarkX(-530)+20,-530),false);
 expect('statue row spot (-297,-516.5) walkable',WV.walkableW(-297,-516.5),true);
+expect('gallagher gate sits ON the wall line',Math.abs(WV.STADIUM_W.gates.gallagher.x-WV.gallagherWallX(-490))<1e-9,true);
 
 console.log('\n--- Wrigleyville: the rounded marquee corner + its red-brick apron ---');
 expect('apron inside the crescent (-278.5,-416.5) walkable',WV.walkableW(-278.5,-416.5),true);

@@ -76,3 +76,9 @@ few turns to find; keep each to one line of symptom + fix.
   38/−290). Grep pack coords AND trail polylines before placing anything —
   task 015's demo row landed on all three before finding clear ground at
   x 48-127, z 193-220.
+- village.js emitStatic buckets by MATERIAL ONLY and mergeBufferGeometries
+  aborts the whole bucket on mixed attribute sets: a hand-built position+normal
+  BufferGeometry sharing a toon color with UV'd BoxGeometry silently dropped
+  ALL of that color's geometry (task 019 banding). Give hand-built strips a uv
+  attribute; mergeCellStatic (cells.js) is tolerant — it sub-buckets by
+  attribute signature.
