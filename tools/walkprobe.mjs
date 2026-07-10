@@ -471,6 +471,17 @@ expect('apron mid-crescent (-281,-419) walkable',WV.walkableW(-281,-419),true);
 expect('behind the curve (-272,-420) NOT walkable (inside the stadium fillet)',WV.walkableW(-272,-420),false);
 expect('inside the fillet near the apex (-274,-421) NOT walkable',WV.walkableW(-274,-421),false);
 
+console.log('\n--- Wrigleyville: the SE corner court at the angled bowl corner (task 020) ---');
+expect('court center (-212,-424) walkable',WV.walkableW(-212,-424),true);
+expect('court at street level',WV.surfaceYW(-212,-424),0);
+expect('court near the Addison end (-232,-416) walkable',WV.walkableW(-232,-416),true);
+expect('court near the Sheffield end (-204,-434) walkable',WV.walkableW(-204,-434),true);
+expect('court in front of Gate D (-214,-422) walkable',WV.walkableW(-214,-422),true);
+expect('behind the diagonal (-220,-428) NOT walkable (inside the bowl)',WV.walkableW(-220,-428),false);
+expect('deep behind the diagonal (-228,-424) NOT walkable',WV.walkableW(-228,-424),false);
+expect('court meets the Addison sidewalk (-210,-414.5) walkable',WV.walkableW(-210,-414.5),true);
+expect('court meets the Sheffield sidewalk (-202.5,-436) walkable',WV.walkableW(-202.5,-436),true);
+
 console.log('\n--- Wrigleyville: the Caray plaza apron at the chamfered Bleacher Gate (task 009) ---');
 expect('Caray statue spot (-206.5,-543.5) walkable',WV.walkableW(-206.5,-543.5),true);
 expect('Caray plaza at street level',WV.surfaceYW(-206.5,-543.5),0);

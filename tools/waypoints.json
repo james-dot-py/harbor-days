@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-10T09:07:49.327Z",
- "count": 62,
+ "generated": "2026-07-10T10:43:17.237Z",
+ "count": 63,
  "waypoints": [
   {
    "id": "spawn",
@@ -777,7 +777,7 @@
    "id": "wv-gate-addison",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -234,
+   "x": -252,
    "z": -398,
    "framings": [
     {
@@ -796,7 +796,32 @@
      "dist": 14
     }
    ],
-   "expectation": "The Addison Gate mid-block on the stadium's SOUTH face (owner placement correction): maroon gate doors in a brick-framed recess with its green gate sign, and the green 'WELCOME TO THE FRIENDLY CONFINES' banner riding above it on the facade."
+   "expectation": "The Addison Gate mid-block on the stadium's SOUTH face (owner placement correction; moved to x -252 with the 020 corner cut): maroon gate doors in a brick-framed recess with its green gate sign, and the green 'WELCOME TO THE FRIENDLY CONFINES' banner riding above it on the facade."
+  },
+  {
+   "id": "wv-gate-gateD",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -201,
+   "z": -409,
+   "framings": [
+    {
+     "yaw": -2.36,
+     "pitch": 0.14,
+     "dist": 14
+    },
+    {
+     "yaw": -1.96,
+     "pitch": 0.14,
+     "dist": 14
+    },
+    {
+     "yaw": -2.76,
+     "pitch": 0.14,
+     "dist": 14
+    }
+   ],
+   "expectation": "GATE D on the SE-corner diagonal (task 020): maroon gate doors with a green GATE D sign set in the ANGLED bowl wall, a green WRIGLEY FIELD board above, red-brick corner court in front, the grandstand crown wrapping the corner overhead — the gate faces the Sheffield & Addison intersection; the flat east (Sheffield) face beyond stays gateless red brick."
   },
   {
    "id": "wv-gate-bleacher",
@@ -1077,7 +1102,7 @@
    "id": "wv-stall-1",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -212,
+   "x": -245,
    "z": -402,
    "framings": [
     {
@@ -1426,7 +1451,7 @@
      "dist": 13
     }
    ],
-   "expectation": "Clark & Addison, all four corners occupied and right: the marquee on its rounded corner (NW of the intersection), the Cubby Bear across Addison, bar-row/hotel-scale masses up Clark, red-brick marquee apron underfoot. No bare corner, no backdrop-grade box facing the intersection."
+   "expectation": "Clark & Addison, all four corners occupied and right: the marquee on its rounded corner (NE of the intersection — the stadium block is north of Addison, east of Clark), the Cubby Bear across Addison (SW), bar-row masses up Clark (NW), storefront fabric SE. No bare corner, no backdrop-grade box facing the intersection."
   },
   {
    "id": "wv-x-sheffield-addison",

@@ -233,7 +233,7 @@ export function buildStreets() {
   }
 
   // ------------------------- 8. BACKDROP BAND --------------------------
-  const bandDir = [[1, 0], [0, 1], [0, 1], [-1, 0], [0, -1], [-1, 0], [-1, 0]];
+  const bandDir = [[1, 0], [0, 1], [0, 1], [-1, 0], [0, -1], [-1, 0], [-1, 0], [0, -1]];  // last: Sheffield S mouth (020), fronts north
   const palette = [0x7a4a38, 0x8a5a44, 0x9a948b, 0x88837a, 0xa8946f, 0xb3a480, 0x6f5240];
   const buildings = [], windows = [];
   BACKDROP_W.bands.forEach((b, bi) => {

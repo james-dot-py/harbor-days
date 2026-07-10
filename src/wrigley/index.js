@@ -15,6 +15,7 @@ import { buildStadium } from './stadium.js';
 import { buildRooftops } from './rooftops.js';
 import { buildVillage } from './village.js';
 import { buildDressing } from './dressing.js';
+import { buildCorners } from './corners.js';
 import { buildFieldplay } from './fieldplay.js';
 
 const _r = mulberry32(WV.SEED_W);
@@ -137,6 +138,7 @@ export function buildWrigleyville() {
   buildStadium();
   buildRooftops();
   buildDressing();   // streetscape fabric (task 016) — before buildVillage so its atlas signs land in the shared atlas
+  buildCorners();    // task 020 corner truth — after dressing, before village so its atlas signs land before emitAtlas
   buildVillage();
   buildFieldplay();
   mergeCellStatic(wrigleyRoot, 1e6);   // collapse static builder meshes; ONE z-band — the cell is ~200 m deep, always fully inside the fog bubble, and invisible from elsewhere

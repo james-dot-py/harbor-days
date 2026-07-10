@@ -312,13 +312,14 @@ function buildFacades() {
     edges.push({ a, b, len: Math.hypot(b[0] - a[0], b[1] - a[1]) });
   }
   const FH = S.facadeH;                        // true 4-storey streetwall (16.5)
-  const HMAP = { addison: FH, sheffield: 12, waveland: 6.5, gate: 8.2, plazaN: FH, plazaE: FH, notchS: FH, clark: FH, arc: FH };
+  const HMAP = { addison: FH, secorner: FH, sheffield: 12, waveland: 6.5, gate: 8.2, plazaN: FH, plazaE: FH, notchS: FH, clark: FH, arc: FH };
   // plazaN rides with plazaE (grandstand skin); notchS + clark are the BOX-OFFICE
-  // mass (own dressing below) so they drop OUT of the grandstand band.
-  const hasBand = k => k === 'addison' || k === 'plazaN' || k === 'plazaE' || k === 'arc';
+  // mass (own dressing below) so they drop OUT of the grandstand band. secorner
+  // (task 020) = the ANGLED SE corner: grandstand treatment so the crown wraps it.
+  const hasBand = k => k === 'addison' || k === 'secorner' || k === 'plazaN' || k === 'plazaE' || k === 'arc';
   edges.forEach((e, i) => {
-    const kind = KINDS[i], isArc = kind === 'arc';
-    const ext = isArc ? 0.35 : 0;              // overlap neighbouring arc chords → seamless curve, no slits
+    const kind = KINDS[i], isArc = kind === 'arc', isCorner = isArc || kind === 'secorner';
+    const ext = isCorner ? 0.35 : 0;           // overlap neighbouring arc/secorner chords → seamless curve, no slits
     const dx = e.b[0] - e.a[0], dz = e.b[1] - e.a[1];
     const yaw = Math.atan2(dx, dz), nx = dz / e.len, nz = -dx / e.len;  // inward
     const cx = (e.a[0] + e.b[0]) / 2 + nx * 0.6, cz = (e.a[1] + e.b[1]) / 2 + nz * 0.6;
@@ -346,7 +347,7 @@ function buildFacades() {
     }
     mk(cornice, 1.6, 0.5, e.len + 0.4 + ext, 0, h + 0.25);     // cap
     mk(terra, 1.4, 0.28, e.len + 0.2 + ext, 0, h + 0.64);      // terracotta strip
-    if (kind !== 'waveland' && kind !== 'gate' && kind !== 'notchS' && kind !== 'clark') mk(grille, 0.5, 1.1, (isArc ? e.len + ext : e.len * 0.9), -0.45, h - 1.2); // green grill band (box office skips it)
+    if (kind !== 'waveland' && kind !== 'gate' && kind !== 'notchS' && kind !== 'clark') mk(grille, 0.5, 1.1, (isCorner ? e.len + ext : e.len * 0.9), -0.45, h - 1.2); // green grill band (box office skips it)
     // grandstand skin (IMG_2333/2339): proud brick band + green steel columns + X-lattice + continuous crown
     if (hasBand(kind)) {
       mk(brick, 1.3, 1.4, e.len + ext, -0.05, 3.9);           // (a) red brick band y 3.2–4.6, slightly proud
@@ -371,8 +372,8 @@ function buildFacades() {
           }
         }
       }
-      mk(pale, 1.6, 5.4, e.len + (isArc ? ext : 0.6), 2.6, h + 3.1);   // (e) pressbox band — FULL length (+overlap) → continuous crown
-      mk(cornice, 1.8, 0.4, e.len + (isArc ? ext : 0.6), 2.6, h + 5.9); // rim cap ~22.5, continuous
+      mk(pale, 1.6, 5.4, e.len + (isCorner ? ext : 0.6), 2.6, h + 3.1);   // (e) pressbox band — FULL length (+overlap) → continuous crown
+      mk(cornice, 1.8, 0.4, e.len + (isCorner ? ext : 0.6), 2.6, h + 5.9); // rim cap ~22.5, continuous
     }
     if (kind === 'clark' || kind === 'plazaE' || kind === 'plazaN') {  // (b) red-tile pent roof (clark = ticket-arcade shelter; plazaN hidden behind the office)
       const aw = new THREE.BoxGeometry(1.0, 0.16, e.len + ext);
@@ -380,7 +381,8 @@ function buildFacades() {
       aw.translate(cx + nx * -1.05, 4.7, cz + nz * -1.05);
       terra.push(aw);
     } else if (kind === 'addison') {                          // two segments — clear window over the Addison gate for the banner
-      for (const [x0, x1] of [[e.a[0], -238.5], [-229.5, e.b[0]]]) {
+      const gxa = S.gates.addison.x;                          // pent gap straddles the gate (±4.5 m), wherever it sits
+      for (const [x0, x1] of [[e.a[0], gxa - 4.5], [gxa + 4.5, e.b[0]]]) {
         const L = Math.abs(x1 - x0), c = (x0 + x1) / 2;
         const aw = new THREE.BoxGeometry(1.0, 0.16, L);
         aw.rotateZ(0.45); aw.rotateY(yaw);
@@ -433,17 +435,21 @@ function buildFacades() {
   const arches = [], wins = [];
   edges.forEach((e, i) => {
     const kind = KINDS[i];
-    if (!(kind === 'addison' || kind === 'plazaE' || kind === 'notchS' || kind === 'clark')) return;
+    if (!(kind === 'addison' || kind === 'secorner' || kind === 'plazaE' || kind === 'notchS' || kind === 'clark')) return;
     const dx = e.b[0] - e.a[0], dz = e.b[1] - e.a[1];
     const yaw = Math.atan2(dx, dz), nx = dz / e.len, nz = -dx / e.len;
     const n = Math.floor(e.len / 6.5);
-    const nearGate = px => kind === 'addison' && Math.abs(px + 234) < 4.5;  // the Addison gate frame occupies this span
+    // skip features straddling a gate frame: the Addison gate (x span) or, on the
+    // diagonal, Gate D (radial distance — the chord is not axis-aligned)
+    const nearGate = (px, pz) =>
+      (kind === 'addison' && Math.abs(px - S.gates.addison.x) < 4.5) ||
+      (kind === 'secorner' && Math.hypot(px - S.gates.gateD.x, pz - S.gates.gateD.z) < 4.5);
     for (let k = 0; k < n; k++) {
       const t = (k + 0.7) / (n + 0.4), tw = (k + 0.2) / (n + 0.4);   // windows off the arch axis
       const x = e.a[0] + dx * t - nx * 0.12, z = e.a[1] + dz * t - nz * 0.12;   // proud of the face
-      if (!nearGate(x)) arches.push({ pos: [x, 0, z], yaw });
+      if (!nearGate(x, z)) arches.push({ pos: [x, 0, z], yaw });
       const wx = e.a[0] + dx * tw - nx * 0.12, wz = e.a[1] + dz * tw - nz * 0.12;
-      if (!nearGate(wx)) {
+      if (!nearGate(wx, wz)) {
         wins.push({ pos: [wx, 5.4, wz], yaw });                      // second storey
         if (HMAP[kind] > 13) wins.push({ pos: [wx, 10.6, wz], yaw }); // third storey on the tall faces
       }
@@ -475,7 +481,7 @@ function buildFacades() {
   const bunt = [];
   edges.forEach((e, i) => {
     const kind = KINDS[i];
-    if (!(kind === 'addison' || kind === 'plazaE')) return;
+    if (!(kind === 'addison' || kind === 'secorner' || kind === 'plazaE')) return;
     const dx = e.b[0] - e.a[0], dz = e.b[1] - e.a[1];
     const yaw = Math.atan2(dx, dz), nx = dz / e.len, nz = -dx / e.len;
     const n = Math.floor(e.len / 6.5);
@@ -529,6 +535,25 @@ function boxOfficeSigns() {
     bmat(0xffffff, { map: boxSignTex(384, 128, 'TICKETS', null) }));
   b.position.set(-286.96, 5.6, -436.38); b.rotation.y = Math.atan2(-0.9627, 0.2699);
   atlasPlane(b, false);
+}
+// SE-corner (task 020) ballpark signage so a Chicagoan reads the corner instantly:
+// a green WRIGLEY FIELD / GATE D board above Gate D on the angled diagonal, and a
+// small TICKETS board on the first diagonal chord near the Addison end. Both static
+// → baked into the shared wrigley atlas by atlasPlane (+0 draw calls).
+function seCornerSigns() {
+  const gd = S.gates.gateD, ox = Math.sin(gd.yaw), oz = Math.cos(gd.yaw);   // gate outward dir
+  const board = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 1.8),
+    bmat(0xffffff, { map: boxSignTex(768, 192, 'WRIGLEY FIELD', 'GATE D') }));
+  // 0.5 proud: the green steel columns sit ~0.12 proud with 0.55 depth — the
+  // board mounts on standoffs IN FRONT of them, else a column bisects the letters
+  board.position.set(gd.x + ox * 0.5, 6.9, gd.z + oz * 0.5); board.rotation.y = gd.yaw;
+  atlasPlane(board, false);
+  // first diagonal chord (−238,−414)→(−229,−418): outward normal (0.406, 0.914)
+  const tnx = 0.406, tnz = 0.914;
+  const tix = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 1.2),
+    bmat(0xffffff, { map: boxSignTex(384, 128, 'TICKETS', null) }));
+  tix.position.set(-233.5 + tnx * 0.12, 5.4, -415.8 + tnz * 0.12); tix.rotation.y = Math.atan2(tnx, tnz);
+  atlasPlane(tix, false);
 }
 
 // ------------------------------ gates ----------------------------------
@@ -969,6 +994,14 @@ function buildAprons() {
     s.lineTo(P.x0, -P.z0);
     s.closePath(); geos.push(new THREE.ShapeGeometry(s));
   }
+  // d. SE corner court (task 020) — the red-brick court the angled bowl opens at
+  // Sheffield & Addison. APRONS_W.secorner.poly is CW in the (x,−z) plane, so walk
+  // it in REVERSE → CCW, keeping the up-face after rotateX(−90°) (see comment above).
+  { const P = APRONS_W.secorner.poly, s = new THREE.Shape();
+    s.moveTo(P[P.length - 1][0], -P[P.length - 1][1]);
+    for (let i = P.length - 2; i >= 0; i--) s.lineTo(P[i][0], -P[i][1]);
+    s.closePath(); geos.push(new THREE.ShapeGeometry(s));
+  }
   const geo = mergeGeos(geos); geo.rotateX(-Math.PI / 2);      // ShapeGeometry UVs stay world metres for tex.repeat
   const mesh = new THREE.Mesh(geo, toon(0xffffff, { mat: { map: brickTex() } }));
   mesh.position.y = 0.06;                                      // flush-proud of the 0.055 sidewalk slab tops
@@ -1067,7 +1100,10 @@ export function buildStadium() {
     { big: ['TAKE YOUR SEAT', 'IN THE BLEACHERS'], wink: 'save us a spot' });
   gateAt(S.gates.addison.x, S.gates.addison.z, S.gates.addison.yaw, 'ADDISON GATE', 4.4, // south face, mid-block (outer face z≈−413.95)
     { big: ['BALLPARK TOURS', 'RETURN SOON'], wink: 'watch this gate' });
+  gateAt(S.gates.gateD.x, S.gates.gateD.z, S.gates.gateD.yaw, 'GATE D', 4.4, // SE-corner diagonal — the real RF corner gate, faces the Sheffield & Addison intersection (data pt sits ~0.12 m proud of the wall line)
+    { big: ['RIGHT FIELD', 'RETURNS SOON'], wink: 'ballhawks, hold your spot' });
   friendlyConfinesBanner();                                       // green banner band over the Addison gate
+  seCornerSigns();                                                // SE-corner Gate D board + TICKETS board
   buildFlagRing();                                                // rooftop flag ring above the marquee
   // marquee-side booth now lives in wrigley-vendors.js (the ticket queue owns it)
   ticketBooth(gallagherWallX(-487) + gnx * 1.06, -487 + gnz * 1.06, gYaw);

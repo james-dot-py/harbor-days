@@ -111,3 +111,12 @@ cut becomes a revert task.
   on legs, blue vs cream, raised hole-ends leaning toward each other per the
   owner's house rules — replacing the flat blue slabs and the orphaned chair
   (issue 005) — Gallagher Way — task 019
+- The right-field corner joins the teaser set with its own voice: GATE D on the
+  new angled Sheffield & Addison bowl corner wears 'RIGHT FIELD / RETURNS SOON ·
+  ballhawks, hold your spot' under a green WRIGLEY FIELD / GATE D board — the
+  wink lands exactly where real ballhawks wait for home-run balls, on a
+  red-brick court the corner cut just opened — Sheffield & Addison — task 020
+- A dark CTA blade on the new 940-W corner block points 'CTA · ADDISON →' east
+  down the street, and the view it points along now actually ends at the girder
+  bridge and head-house — wayfinding that tells the truth — Sheffield & Addison
+  — task 020

@@ -76,6 +76,13 @@ few turns to find; keep each to one line of symptom + fix.
   38/−290). Grep pack coords AND trail polylines before placing anything —
   task 015's demo row landed on all three before finding clear ground at
   x 48-127, z 193-220.
+- BACKDROP_W.bands (data) and streets.js bandDir are INDEX-COUPLED: adding a
+  band without appending its facing dir crashes buildStreets (dir undefined) —
+  change them in the same edit.
+- OSM stadium/arena footprints are often RELATIONS, not ways: osm-fetch's way
+  queries miss them silently (Wrigley Field absent from 747 fetched buildings,
+  task 020). The fetcher now pulls leisure=stadium + building relations and
+  clips outer members like water bodies.
 - village.js emitStatic buckets by MATERIAL ONLY and mergeBufferGeometries
   aborts the whole bucket on mixed attribute sets: a hand-built position+normal
   BufferGeometry sharing a toon color with UV'd BoxGeometry silently dropped

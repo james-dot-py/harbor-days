@@ -172,6 +172,10 @@ const BLD = [
   { x0: -178, x1: -164, z0: -534, z1: -518, face: 'W', arch: 'grey', cap: ['W', 'E', 'N'] },               // S0
   { x0: -178, x1: -164, z0: -518, z1: -502, face: 'W', arch: 'brick', cap: ['W', 'E'] },                   // S1
   { x0: -178, x1: -164, z0: -502, z1: -486, face: 'W', arch: 'brown', cap: ['W', 'E', 'S'] },              // S2
+  // task 020: NE Sheffield & Waveland corner house (ROOFTOPS_W.waveland[3]) —
+  // closes the bare backdrop-grade corner. APPEND-ONLY: BLD order feeds the
+  // local rng, so earlier entries' windows must keep their call order.
+  { x0: -178, x1: -163, z0: -588, z1: -574, face: 'S', arch: 'brick', cap: ['S', 'N', 'W', 'E'] },         // W3 — corner
 ];
 const bodyColor = a => a === 'grey' ? COL.grey : a === 'brick' ? COL.brick : COL.brown;
 
@@ -362,11 +366,13 @@ function buildClimbable(b) {
 export function buildRooftops() {
   for (const b of BLD) buildBuilding(b);
 
-  // end-face windows on the four exposed row-ends
+  // end-face windows on the exposed row-ends
   endWindows((u, y) => [-226.06, y, -581 + u], -Math.PI / 2);   // W0 west
   endWindows((u, y) => [-198.94, y, -581 + u], Math.PI / 2);    // W2 east
   endWindows((u, y) => [-171 + u, y, -534.06], Math.PI);        // S0 north
   endWindows((u, y) => [-171 + u, y, -485.94], 0);              // S2 south
+  endWindows((u, y) => [-178.06, y, -581 + u], -Math.PI / 2);   // W3 west — walls the closed Sheffield N mouth (020)
+  endWindows((u, y) => [-162.94, y, -581 + u], Math.PI / 2);    // W3 east
 
   for (const b of BLD) {
     if (b.climb) { buildClimbable(b); continue; }

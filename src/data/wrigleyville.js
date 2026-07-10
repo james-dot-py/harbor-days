@@ -104,8 +104,12 @@ const _apexYaw = Math.atan2(Math.cos(_apexA), Math.sin(_apexA));
 export const STADIUM_W = {
   poly: [
     ...arcPts,                 // SW — the rounded Marquee corner (Clark & Addison)
-    [-202,   -414],            // SE (Addison side)
-    [-202,   -528],            // chamfer start (Sheffield face)
+    [-238,   -414],            // Addison face ends here (osm.json rel 17379974: diagonal starts x −238.6)
+    [-229,   -418],            // SE CORNER — the ANGLED BOWL (task 020): a 4-chord
+    [-220,   -423.6],          //   convex diagonal per the real footprint (the
+    [-211,   -431],            //   grandstand wraps the corner; sagitta ~3.4 toward
+    [-202,   -440],            //   the intersection), opening the walkable corner court
+    [-202,   -528],            // chamfer start (Sheffield face, z −440…−528)
     [-222,   -548],            // chamfer end (Waveland face) — Bleacher Gate corner
     [-291.44,-548],            // NW (Waveland at the office lot line)
     [-283.6, -520],            // plazaN: behind the office (coplanar with its east face)
@@ -120,7 +124,8 @@ export const STADIUM_W = {
   // south end (full-height brick, distinct dressing — stadium.js).
   edgeKinds: [
     ...Array(CORNER_ARC.n).fill('arc'),            // arc chords P1→P2
-    'addison', 'sheffield', 'gate', 'waveland', 'plazaN',
+    'addison', 'secorner', 'secorner', 'secorner', 'secorner',
+    'sheffield', 'gate', 'waveland', 'plazaN',
     'plazaE', 'plazaE', 'plazaE', 'plazaE', 'notchS', 'clark',
   ],
   // marquee proud of the apex along the outward radial (the old 1.4 m stand-off)
@@ -131,7 +136,8 @@ export const STADIUM_W = {
   gates: {
     marquee  : { x: _apex[0], z: _apex[1], yaw: _apexYaw },        // ON the curve apex
     gallagher: { x: gallagherWallX(-490), z: -490 },               // on the wedge's bowl wall
-    addison  : { x: -234, z: -414, yaw: 0 },                       // south face, mid-block (owner: doors on the real main entries — Clark/Gallagher + Addison)
+    addison  : { x: -252, z: -414, yaw: 0 },                       // south face, mid-block (moved west when 020 shortened the face to x −238)
+    gateD    : { x: -217.5, z: -425.5, yaw: 0.66 },                // SE-corner diagonal (task 020) — the real right-field gate, faces the Sheffield & Addison intersection
     bleacher : { x: -212, z: -538, yaw: Math.atan2(0.7071, -0.7071) }, // chamfer mid, faces the Sheffield/Waveland corner
   },
   // knothole: screened opening in the WAVELAND (left-field) wall by the
@@ -156,6 +162,10 @@ export const APRONS_W = {
   marquee : { tri: [[-283.60, -427.15], [-279.92, -414], [-266.27, -414]], z0: -427.15, z1: -414 },
   bleacher: { tri: [[-202, -528], [-202, -548], [-222, -548]], z0: -548, z1: -528 },
   gallagher: { x0: -289.9, x1: -282.4, z0: -496, z1: -484 },
+  // SE CORNER COURT (task 020): the polygon the angled bowl corner opens at
+  // Sheffield & Addison — first point is the street corner, the rest walk the
+  // diagonal wall (STADIUM_W.poly secorner chords, Addison end → Sheffield end).
+  secorner: { poly: [[-202, -414], [-238, -414], [-229, -418], [-220, -423.6], [-211, -431], [-202, -440]], z0: -440, z1: -414 },
 };
 
 // -------------------- rooftops & buildings (lots) ---------------------
@@ -165,6 +175,7 @@ export const ROOFTOPS_W = {
     { x0: -226, x1: -217, z0: -588, z1: -574 },
     { x0: -217, x1: -208, z0: -588, z1: -574, access: true },  // THE rooftop
     { x0: -208, x1: -199, z0: -588, z1: -574 },
+    { x0: -178, x1: -163, z0: -588, z1: -574 },     // task 020: NE Sheffield & Waveland corner house (closes the bare corner; APPEND-ONLY — earlier indexes are load-bearing)
   ],
   sheffield: [                                      // east side, front x −178
     { x0: -178, x1: -164, z0: -534, z1: -518 },
@@ -205,6 +216,13 @@ export const VILLAGE_W = {
   murphysGarden:{ x0: -178.6, x1: -174, z0: -539, z1: -534 },
   engine78: { x0: -250, x1: -234, z0: -590, z1: -574 },  // 1052 W Waveland
   cubbyBear:{ x0: -316, x1: -300, z0: -386, z1: -372 },  // opposite the marquee
+  // task 020 corner lots (Sheffield & Addison — see GEOGRAPHY.md):
+  //   sportsWorld: SW corner souvenir store (Sports World-style likeness,
+  //   chamfered NE corner door facing the intersection, canvas signage).
+  //   stationCorner: NE corner blonde-brick block with the CTA wayfinding
+  //   blade pointing east to the Addison head-house.
+  sportsWorld  : { x0: -220, x1: -204, z0: -384, z1: -371, h: 7.6 },
+  stationCorner: { x0: -176, x1: -162, z0: -430, z1: -415, h: 10.4 },
   clarkBars: [                                     // west side of Clark, neon row
     { z0: -488, z1: -472, name: 'SLUGGERS'  },
     { z0: -470, z1: -454, name: 'SPORTS CORNER' },
@@ -213,7 +231,7 @@ export const VILLAGE_W = {
   ],                                               // lots at cx(z)−22 … cx(z)−10
   standStalls: [                                   // souvenir/cap stands
     { x: -160, z: -389,   ry: 0 },                 // Addison S sidewalk, by the station
-    { x: -212, z: -410.5, ry: Math.PI },           // Addison N sidewalk, mid-block (stadium behind)
+    { x: -245, z: -410.5, ry: Math.PI },           // Addison N sidewalk, mid-block (moved west with the 020 corner cut so the facade still rises behind it)
     { x: -199, z: -530,   ry: -Math.PI / 2 },      // Sheffield W sidewalk, S of the Caray plaza
   ],
   statueRow: { z: -516.5, xs: [-293, -297, -301, -305] }, // plaza north edge, fronting the office block (Banks first)
@@ -236,9 +254,14 @@ export const FACADES_W = {
   // x=clarkX(z)+off. yaw = direction the storefront FACES (toward the road).
   // spans = [[a,b],…] extents to fill (gaps skip the hero landmarks).
   frontages: [
-    { id: 'addison-s',  o: 'ew',    face: -384, yaw: Math.PI,               spans: [[-298, -158]] },
+    // addison-s: split around the Sports World lot (x −220…−204) + the closed
+    // Sheffield mouth (x −202…−178) — task 020 corner truth
+    { id: 'addison-s',  o: 'ew',    face: -384, yaw: Math.PI,               spans: [[-298, -224], [-176, -158]] },
     { id: 'waveland-n', o: 'ew',    face: -574, yaw: 0,                      spans: [[-348, -254], [-198, -180]] },
-    { id: 'sheffield-e',o: 'ns',    face: -176, yaw: -Math.PI / 2,          spans: [[-534, -388]] },
+    // sheffield-e: STOPS at z −432 (task 020) — the 016 span ran to −388,
+    // standing lots INSIDE the Addison corridor (z −414…−386) and walling off
+    // the view east to the station; the stationCorner lot owns the corner
+    { id: 'sheffield-e',o: 'ns',    face: -176, yaw: -Math.PI / 2,          spans: [[-534, -432]] },
     { id: 'clark-wn',   o: 'clark', off: -16,   yaw: Math.PI / 2 + clarkYaw, spans: [[-570, -492]] },
     { id: 'clark-ws',   o: 'clark', off: -16,   yaw: Math.PI / 2 + clarkYaw, spans: [[-416, -392]] },
   ],
@@ -287,7 +310,8 @@ export const BACKDROP_W = {
     { x0: -178, x1: -156, z0: -382, z1: -340 },    // SE block (S of Addison)
     { x0: -326, x1: -212, z0: -370, z1: -336 },    // S of Addison (behind Cubby)
     { x0: -122, x1: -110, z0: -560, z1: -350 },    // sliver east of the tracks
-    { x0: -178, x1: -152, z0: -480, z1: -420 },    // E of Sheffield mid-block (streetwall)
+    { x0: -178, x1: -152, z0: -480, z1: -434 },    // E of Sheffield mid-block (streetwall; z1 pulled to −434 so it clears the 020 stationCorner lot)
+    { x0: -202, x1: -178, z0: -378, z1: -340 },    // Sheffield S mouth (task 020) — the closed street continues into city, not bare ground
   ],
   floors: [2, 4],                                  // storeys range
 };
@@ -335,6 +359,12 @@ export const WALK_W = [
     tri: APRONS_W.marquee.tri, z0: APRONS_W.marquee.z0, z1: APRONS_W.marquee.z1, y: 0 },
   { tri: APRONS_W.bleacher.tri,                                      // Caray plaza apron (red brick)
     z0: APRONS_W.bleacher.z0, z1: APRONS_W.bleacher.z1, y: 0 },
+  // SE corner court (task 020): a triangle fan from the street corner across
+  // APRONS_W.secorner.poly — the diagonal wall itself is the walk boundary.
+  ...APRONS_W.secorner.poly.slice(1, -1).map((p, i) => {
+    const q = APRONS_W.secorner.poly[i + 2], c = APRONS_W.secorner.poly[0];
+    return { tri: [c, p, q], z0: Math.min(c[1], p[1], q[1]), z1: Math.max(c[1], p[1], q[1]), y: 0 };
+  }),
 ];
 function inTri(t, x, z) {
   let ins = false;

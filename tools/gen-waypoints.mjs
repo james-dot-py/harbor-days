@@ -54,6 +54,7 @@ const VOLS_W = [];
   for (const r of W.ROOFTOPS_W.waveland) vol(r, 13);
   for (const r of W.ROOFTOPS_W.sheffield) vol(r, 13);
   vol(W.VILLAGE_W.murphys, 9); vol(W.VILLAGE_W.engine78, 9); vol(W.VILLAGE_W.cubbyBear, 9);
+  vol(W.VILLAGE_W.sportsWorld, 9); vol(W.VILLAGE_W.stationCorner, 12);   // task 020 corner lots
   for (const b of W.VILLAGE_W.clarkBars) {   // lots at clarkX(z)−22…−10; slack covers the diagonal
     const c = W.clarkX((b.z0 + b.z1) / 2);
     VOLS_W.push({ x0: c - 33, x1: c - 8, z0: b.z0, z1: b.z1, yMax: 9 });
@@ -233,6 +234,9 @@ const GATE_VIEW = {
   // addison gate (task 012, owner placement correction): stand in the Addison
   // road south of the gate, camera pulls back toward the south sidewalk
   addison:   { stand: [ST.gates.addison.x, -398], pitch: 0.14, dist: 14 },
+  // gate D rides the SE-corner diagonal (task 020) — stand at the court's
+  // street corner; the pull-back cameras land in the open intersection
+  gateD:     { stand: [-201, -409], pitch: 0.14, dist: 14 },
   bleacher:  { stand: [-190, -553], pitch: 0.12, dist: 14 },
 };
 for (const [g, p] of Object.entries(ST.gates)) featW('wv-gate-' + g, p.x, p.z, GATE_VIEW[g]);
@@ -275,7 +279,7 @@ V.standStalls.forEach((s, i) => i === 2
   : i === 1
   // Addison N-sidewalk stall: stand in the road south of it looking north so
   // the stadium facade rises behind (the authored expectation's context)
-  ? featW('wv-stall-' + i, s.x, s.z, { stand: [-212, -402], pitch: 0.15, dist: 8 })
+  ? featW('wv-stall-' + i, s.x, s.z, { stand: [s.x, -402], pitch: 0.15, dist: 8 })
   : feat('wv-stall-' + i, s.x, s.z, 0.15, 8));
 // statue row fronts the Gallagher office block on the plaza's north edge:
 // stand SOUTH of the row on the open plaza looking north (the row point

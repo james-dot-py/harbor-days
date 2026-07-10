@@ -276,6 +276,9 @@ async function fetchTarget(bbox) {
   way["leisure"="pitch"](${b});
   way["highway"](${b});
   way["building"](${b});
+  way["leisure"="stadium"](${b});
+  relation["leisure"="stadium"](${b});
+  relation["building"](${b});
   node["natural"="peak"](${b});
   node["tourism"]["name"](${b});
   node["historic"]["name"](${b});
@@ -322,6 +325,15 @@ function classify(el, proj, bbox) {
             out.water.push({ id: e.id, name: t.name, role: m.role, tags: t, points: run });
         }
       }
+      // stadium / building relations (Wrigley Field is a relation, not a way):
+      // outer members carry the footprint the builders cite.
+      if (t.leisure === 'stadium' || t.building) {
+        for (const m of e.members || []) {
+          if (!m.geometry || m.role === 'inner') continue;
+          for (const run of clipRuns(m.geometry, bbox, proj))
+            out.buildings.push({ id: e.id, name: t.name, role: m.role, tags: t, points: run });
+        }
+      }
       continue;
     }
     const pts = line(e);
@@ -332,7 +344,7 @@ function classify(el, proj, bbox) {
     else if (t.waterway) out.waterways.push(rec);
     else if (t.highway) out.highways.push({ ...rec, highway: t.highway });
     else if (t.leisure === 'park' || t.leisure === 'garden') out.parks.push(rec);
-    else if (t.building) out.buildings.push(rec);
+    else if (t.building || t.leisure === 'stadium') out.buildings.push(rec);
     else out.other.push(rec);
   }
   return { features: out, ids };
