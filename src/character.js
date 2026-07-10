@@ -120,6 +120,16 @@ function hairSubGeos(style){
     g.push(vcGeo(base,0xffffff));
     for(const s of[-1,1])g.push(vcGeo(new THREE.SphereGeometry(0.15,8,7).translate(s*0.4,0.16,-0.02).translate(0,0.18,-0.16),0xffffff));
     g.push(vcGeo(new THREE.SphereGeometry(0.22,8,7).translate(0,0.10,-0.26).translate(0,0.18,-0.16),0xffffff));
+  }else if(style==='afroTex'){
+    // mayor only (task 022, owner portrait): short natural afro like 'afro' but
+    // with an IRREGULAR textured top silhouette — hand-set tufts break the smooth
+    // cap read. Same compact mass; never crosses the face plane at eye height.
+    const T=(r,x,y,z)=>vcGeo(new THREE.SphereGeometry(r,9,8).translate(x,y,z),0xffffff);
+    g.push(vcGeo(new THREE.SphereGeometry(0.42,12,11).scale(1.16,0.98,1.1).translate(0,0.50,-0.15),0xffffff));
+    g.push(T(0.155,-0.41,0.22,-0.16),T(0.155,0.41,0.22,-0.16),T(0.21,0,0.16,-0.40));   // sides + back mass
+    g.push(T(0.135,-0.20,0.82,-0.02),T(0.115,0.06,0.87,-0.16),T(0.15,0.28,0.76,-0.06), // top tufts (the silhouette)
+           T(0.10,-0.33,0.73,-0.24),T(0.12,-0.02,0.80,0.14),T(0.105,0.40,0.63,-0.26),
+           T(0.11,-0.42,0.57,-0.30),T(0.095,0.16,0.84,0.04));
   }else{                                                               // default / tall single dome
     const tall=style==='tall';
     const off=tall?0.28:0.18, sy=tall?1.08:0.82, sxz=tall?1.03:1;
@@ -127,24 +137,32 @@ function hairSubGeos(style){
   }
   return g;
 }
-function chibiTemplate(hairStyle,bigEyes,face){
-  const key=hairStyle+'|'+bigEyes+'|'+face;
+function chibiTemplate(hairStyle,bigEyes,face,detail){
+  const key=hairStyle+'|'+bigEyes+'|'+face+'|'+(detail?1:0);
   let t=_tplCache.get(key);if(t)return t;
   t={};
+  // detail (mayor only, task 022): extra fidelity sub-geos folded into the SAME
+  // merges — brows, shirt cuffs, thumbs, shoe soles — so the draw-call count is
+  // unchanged. Fixed-color pieces (cuff/sole/brow) are NOT palette ranges;
+  // stampRanges leaves them untouched, exactly like the baked eyes.
   // leg cylinder + shoe sphere -> one merged mesh (identical L/R geometry)
   {
     const legGeo=vcGeo(new THREE.CylinderGeometry(0.15,0.13,0.55,7).translate(0,-0.275,0),0xffffff);
     const shoeGeo=vcGeo(new THREE.SphereGeometry(0.17,8,7).scale(1,0.6,1.35).translate(0,-0.6,0.05),0xffffff);
+    const soles=detail?[vcGeo(new THREE.BoxGeometry(0.30,0.05,0.50).translate(0,-0.675,0.07),0x18120d)]:[];
     const lc=legGeo.attributes.position.count,sc=shoeGeo.attributes.position.count;
-    t.leg={geo:mergeVC([legGeo,shoeGeo]),vc:{leg:[0,lc],shoe:[lc,sc]},ranges:[[0,lc,'pants'],[lc,sc,'shoe']]};
+    t.leg={geo:mergeVC([legGeo,shoeGeo,...soles]),vc:{leg:[0,lc],shoe:[lc,sc]},ranges:[[0,lc,'pants'],[lc,sc,'shoe']]};
   }
   // arm cylinder + hand sphere -> merged mesh; hand offset is MIRRORED so L/R differ
   for(const s of[-1,1]){
     const hl=new THREE.Vector3(s*0.14,-0.6,0).applyAxisAngle(_zAxis,-s*0.25);   // hand offset in the arm's local frame
     const armGeo=vcGeo(new THREE.CylinderGeometry(0.12,0.11,0.6,7).translate(0,-0.3,0),0xffffff);
+    const cuffs=detail?[vcGeo(new THREE.CylinderGeometry(0.125,0.125,0.07,7).translate(0,-0.585,0),0xf2efe8)]:[];
     const handGeo=vcGeo(new THREE.SphereGeometry(0.11,7,6).translate(hl.x,hl.y,hl.z),0xffffff);
-    const ac=armGeo.attributes.position.count,hc=handGeo.attributes.position.count;
-    t['arm'+(s<0?'L':'R')]={geo:mergeVC([armGeo,handGeo]),vc:{arm:[0,ac],hand:[ac,hc]},ranges:[[0,ac,'suit'],[ac,hc,'skin']],hl};
+    const thumbs=detail?[vcGeo(new THREE.SphereGeometry(0.048,6,5).translate(hl.x-s*0.075,hl.y+0.03,hl.z+0.07),0xffffff)]:[];
+    const ac=armGeo.attributes.position.count,cc=cuffs.length?cuffs[0].attributes.position.count:0,
+          hc=handGeo.attributes.position.count+(thumbs.length?thumbs[0].attributes.position.count:0);
+    t['arm'+(s<0?'L':'R')]={geo:mergeVC([armGeo,...cuffs,handGeo,...thumbs]),vc:{arm:[0,ac],hand:[ac+cc,hc]},ranges:[[0,ac,'suit'],[ac+cc,hc,'skin']],hl};
   }
   // head + cheeks + BAKED HAIR -> one vertex-colored mesh (hair rides the head).
   // By DEFAULT the two eye spheres also fold in (colored 0x1d1712 via vertex
@@ -164,7 +182,14 @@ function chibiTemplate(hairStyle,bigEyes,face){
     const eyeGeos=face?[]:[
       vcGeo(new THREE.SphereGeometry(er,7,7).translate(-0.19,0,0).translate(0,0.06,0.5),0x1d1712),
       vcGeo(new THREE.SphereGeometry(er,7,7).translate( 0.19,0,0).translate(0,0.06,0.5),0x1d1712)];
-    t.head={geo:mergeVC([headGeo,...cheekGeos,...hairGeos,...eyeGeos]),
+    // detail: thin arched brows (outer end raised — composed, no-nonsense read).
+    // Fixed dark color appended AFTER the palette ranges, like the baked eyes.
+    const browGeos=detail?[-1,1].map(s=>{
+      const b=new THREE.SphereGeometry(0.072,8,6);b.scale(1.65,0.26,0.45);
+      b.rotateZ(s*0.15);b.translate(s*0.19,0.21,0.495);
+      return vcGeo(b,0x2b211a);
+    }):[];
+    t.head={geo:mergeVC([headGeo,...cheekGeos,...hairGeos,...eyeGeos,...browGeos]),
       ranges:[[0,headN,'skin'],[headN,cheekN,'cheek'],[headN+cheekN,hairN,'hair']]};
   }
   // eyes: BOTH pupils in one geometry (single shared toon(0x1d1712) mesh) — only
@@ -192,14 +217,17 @@ function chibiTemplate(hairStyle,bigEyes,face){
 //   face:true — KEEP a separate live eyes mesh (7 draws) for rigs that scale eyes
 //   at setup or runtime (setFace / a squint); eyeL/eyeR then === that mesh.
 //   parts.shadow is an empty stub tracked by updateChibiShadows().
-//   palette:{ suit, pants, skin, hair, shoe?, hairStyle?, scale?, bigEyes?, cheek?, face? }
+//   palette:{ suit, pants, skin, hair, shoe?, hairStyle?, scale?, bigEyes?, cheek?, face?, detail? }
+//   detail:true (mayor only) folds extra fidelity into the SAME merges (brows,
+//   cuffs, thumbs, shoe soles) — identical draw-call count; NPCs (detail:false)
+//   get byte-identical geometry to before.
 //   returns { group, parts }  (parts: legL/legR (leg+shoe), body, armL/armR
 //   (arm+hand), handL/handR (live empty nodes for held items), head (head+
 //   cheeks+hair[+eyes]), hair (=head), eyeL/eyeR (dummy, or shared eyes mesh if
 //   face:true), shadow (stub))
-export function createChibi({suit,pants,skin,hair,shoe=0x57351f,hairStyle,scale=1,bigEyes=false,cheek=0xffa1a1,face=false}){
+export function createChibi({suit,pants,skin,hair,shoe=0x57351f,hairStyle,scale=1,bigEyes=false,cheek=0xffa1a1,face=false,detail=false}){
   const group=new THREE.Group(),parts={};group.name='chibi';   // named so the static cell-merge pass can exempt live rigs
-  const suitM=toon(suit),tpl=chibiTemplate(hairStyle,bigEyes,face),pal={suit,pants,skin,hair,shoe,cheek};
+  const suitM=toon(suit),tpl=chibiTemplate(hairStyle,bigEyes,face,detail),pal={suit,pants,skin,hair,shoe,cheek};
   // shadow: an empty stub at y=0.02 tracked by the global instanced-shadow manager
   // (packs still remove it / toggle .visible; no per-rig ground disc is drawn).
   const shadow=new THREE.Object3D();shadow.position.y=0.02;group.add(shadow);parts.shadow=shadow;_shadowStubs.push(shadow);
@@ -308,14 +336,42 @@ export function bakeChibiRig(group,parts,{keepEyes=false}={}){
 export function buildMayor(){
   // build the shared chibi with the mayor's EXACT palette, then reparent its
   // parts directly onto `mayor` (keeps the historical flat hierarchy + no rng).
-  // the mayor: warm dark brown skin, small grey afro, big beady eyes
-  const {group,parts}=createChibi({suit:0x35406e,pants:0x2b3357,skin:0x6e4632,hair:0xb5aea6,hairStyle:'afro',bigEyes:true,cheek:0xa1614c,face:true});   // face:true keeps the separate eyes mesh aligned with the (non-bobbing) glints
+  // the mayor (owner portrait, task 022): warm dark brown skin, short textured
+  // grey afro, big beady eyes, thin composed brows, charcoal suit over a white
+  // collared shirt. detail:true = mayor-only template extras folded into the
+  // shared merges (zero extra draw calls; NPC output untouched).
+  const {group,parts}=createChibi({suit:0x484850,pants:0x3a3a41,skin:0x6e4632,hair:0xb5aea6,shoe:0x241b13,hairStyle:'afroTex',bigEyes:true,cheek:0xa1614c,face:true,detail:true});   // face:true keeps the separate eyes mesh aligned with the (non-bobbing) glints
   while(group.children.length)mayor.add(group.children[0]);
   Object.assign(mparts,parts);
-  // mayoral regalia — sash / star / tie (mayor-only; NPCs skip these)
-  const sash=new THREE.Mesh(new THREE.BoxGeometry(0.2,1.16,0.06),toon(0xa8dcf2));sash.position.set(0.02,1.2,0.47);sash.rotation.z=0.62;sash.rotation.x=0.12;mayor.add(sash);
-  const star=new THREE.Mesh(new THREE.OctahedronGeometry(0.09,0),toon(0xff5a5a));star.position.set(0.2,1.02,0.52);star.scale.z=0.5;mayor.add(star);
-  const tie=new THREE.Mesh(new THREE.ConeGeometry(0.09,0.3,4),toon(0xc4453b));tie.position.set(0,1.52,0.5);tie.rotation.x=0.2;mayor.add(tie);
+  // suit front (owner portrait — REPLACES the old sash/star/tie regalia): charcoal
+  // notched lapels over a white shirt V + collar, jacket buttons, small round gold
+  // pin on the wearer's-left lapel. ONE merged vertex-colored mesh under vcMat =
+  // 1 draw call (the regalia was 3). Flat-parented like the old regalia so the
+  // body sphere's breathing scale never distorts it. Pinstripes skipped: they
+  // don't read at chibi scale without texture maps (plain charcoal is right).
+  {
+    const SHIRT=0xf2efe8,LAPEL=0x37373e,BTN=0x1b1916,GOLD=0xd9a83c;
+    const g=[];
+    const shirt=new THREE.BoxGeometry(0.17,0.34,0.05);shirt.rotateX(-0.38);shirt.translate(0,1.57,0.43);
+    g.push(vcGeo(shirt,SHIRT));
+    for(const s of[-1,1]){
+      const lap=new THREE.BoxGeometry(0.13,0.38,0.05);            // lapel: top leans outward, bottom meets the button line
+      lap.rotateZ(-s*0.30);lap.rotateY(s*0.35);lap.rotateX(-0.30);lap.translate(s*0.185,1.50,0.44);
+      g.push(vcGeo(lap,LAPEL));
+      const notch=new THREE.BoxGeometry(0.115,0.075,0.05);        // notch flap, near-horizontal at the lapel top
+      notch.rotateZ(-s*1.15);notch.rotateY(s*0.35);notch.translate(s*0.26,1.70,0.38);
+      g.push(vcGeo(notch,LAPEL));
+      const col=new THREE.BoxGeometry(0.085,0.11,0.045);          // white collar point above the lapel
+      col.rotateZ(-s*0.55);col.rotateX(-0.25);col.translate(s*0.095,1.74,0.37);
+      g.push(vcGeo(col,SHIRT));
+    }
+    g.push(vcGeo(new THREE.SphereGeometry(0.032,7,6).translate(0,1.35,0.50),BTN));
+    g.push(vcGeo(new THREE.SphereGeometry(0.032,7,6).translate(0,1.22,0.515),BTN));
+    const pin=new THREE.CylinderGeometry(0.036,0.036,0.03,10);
+    pin.rotateX(Math.PI/2);pin.rotateY(0.35);pin.translate(0.245,1.60,0.43);
+    g.push(vcGeo(pin,GOLD));
+    const suitFront=new THREE.Mesh(mergeVC(g),vcMat());mayor.add(suitFront);
+  }
   mayor.scale.setScalar(0.74);
   mayor.position.set(38.5,0,58);
   scene.add(mayor);

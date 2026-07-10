@@ -153,7 +153,7 @@ onWorldReady(() => {
       const key = new THREE.Mesh(new THREE.CylinderGeometry(0.017,0.017,0.02,6), pearl);
       key.rotation.x = Math.PI/2; key.position.set(-0.045,0.18+i*0.09,0.065); saxGrp.add(key);
     }
-    saxGrp.rotation.y = Math.PI/2;               // bell -> forward, mouthpiece -> mouth
+    saxGrp.rotation.y = -Math.PI/2;              // local +X (bell side) -> +Z forward: bell out front, mouthpiece back at the mouth (issue 006: +PI/2 aimed the bell BACKWARD)
     saxGrp.rotation.x = 0.16;                     // slight lean into the horn
     saxGrp.scale.setScalar(1.12);
     saxGrp.position.set(0.05,1.22,0.6);           // out front, mouthpiece up toward the chin

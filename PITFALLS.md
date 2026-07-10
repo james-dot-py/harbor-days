@@ -89,3 +89,8 @@ few turns to find; keep each to one line of symptom + fix.
   ALL of that color's geometry (task 019 banding). Give hand-built strips a uv
   attribute; mergeCellStatic (cells.js) is tolerant — it sub-buckets by
   attribute signature.
+- Held-prop group orientation: rotation.y=+PI/2 maps local +X to -Z (BACKWARD
+  relative to a +Z-facing rig) — the sax busker's "bell -> forward" comment
+  claimed the opposite for a full version (issue 006). Never trust a builder
+  comment for a yawed prop frame; screenshot from the character's facing side
+  and LOOK.

@@ -14,3 +14,9 @@
 - expected: bell points forward-out from his hands, mouthpiece up to the
   chin/mouth, as seen from the player's approach along the Belmont connector.
 - route: task 022 (mayor fidelity + sax orientation), part B.
+- RESOLVED (task 022, 2026-07-10): confirmed by screenshot — the comment lied;
+  rotation.y=+PI/2 maps the sax's local +X (bell side) to -Z, aiming the bell
+  BACKWARD (before: tools/shots/before-sax6.png, horn flat against his chest,
+  bell at his hip). Fixed to -PI/2 (bell -> +Z forward-out, mouthpiece to the
+  chin); verified from the front and the side (tools/shots/after-sax.png,
+  after-sax-side.png, run-mrez3vx8/suggestion-box-f2.png).
