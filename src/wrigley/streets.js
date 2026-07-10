@@ -164,9 +164,17 @@ export function buildStreets() {
   instMesh(poleGeo, toon(0x2b2b30), bladePoles.map(p => ({ pos: [p[0], 0, p[1]] })));
   bladePoles.forEach(p => collide(p[0], p[1], 0.3));
   function blade(text, cx, cy, cz, yaw, w) {
-    const h = w * 96 / 512;
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bmat(0xffffff, { map: bladeTex(text), side: THREE.DoubleSide }));
-    m.position.set(cx, cy, cz); m.rotation.y = yaw; atlasPlane(m, false);   // blade sign -> shared wrigley atlas
+    // MIRRORED-TEXT rule (PITFALLS): a lone DoubleSide plane shows mirrored
+    // text from behind — build back-to-back FrontSide atlas planes instead
+    // (same texture canvas both ways; the atlas mesh costs no extra draw).
+    const h = w * 96 / 512, tex = bladeTex(text);
+    const nx = Math.sin(yaw), nz = Math.cos(yaw);
+    for (const s of [1, -1]) {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bmat(0xffffff, { map: tex }));
+      m.position.set(cx + nx * 0.03 * s, cy, cz + nz * 0.03 * s);
+      m.rotation.y = yaw + (s === 1 ? 0 : Math.PI);
+      atlasPlane(m, false);   // blade sign -> shared wrigley atlas
+    }
   }
   blade('ADDISON 3600 N', -303.9, 2.62, -387.6, 0, 1.9);
   blade('CLARK 1100 W', -302.7, 2.98, -386.73, clarkYaw, 1.7);

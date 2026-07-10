@@ -23,6 +23,38 @@
       "license": "owner reference only",
       "fetchDate": "2026-07-09T00:00:00.000Z",
       "note": "Owner playtest verdict ('neon sign cut off', 2026-07-09): the CUBBY BEAR fascia sign clips past the building top; Budweiser window neon also clips its plate edge. Sign plates must clamp to face bounds (issue 001). Judged by tasks 010 + 016."
+    },
+    {
+      "file": "owner-issue-002-floating-awnings.png",
+      "source": "owner",
+      "author": "owner-supplied",
+      "license": "owner reference only",
+      "fetchDate": "2026-07-09T00:00:00.000Z",
+      "note": "Owner playtest ('lights or awning - unsure what this is', 2026-07-09): green awning slats + white valance ribs float detached ahead of the Clark bar-row facades. Filed as issue 002; routed to the streetscape rework (016)."
+    },
+    {
+      "file": "owner-issue-003-splash-pad-flicker.png",
+      "source": "owner",
+      "author": "owner-supplied",
+      "license": "owner reference only",
+      "fetchDate": "2026-07-09T00:00:00.000Z",
+      "note": "Owner playtest ('doesn't stop flashing when you walk by it', 2026-07-09): Gallagher Way splash pad shimmered — wet-ring decal coplanar with the pad top (z-fight). Issue 003; FIXED in task 012 (ring rebuilt 15 mm proud, verified by act.mjs walk-past)."
+    },
+    {
+      "file": "owner-issue-004-double-signs-uniform-facades.png",
+      "source": "owner",
+      "author": "owner-supplied",
+      "license": "owner reference only",
+      "fetchDate": "2026-07-09T00:00:00.000Z",
+      "note": "Owner playtest ('double signs - same exact windows-doors on each', 2026-07-09): bar row shows duplicate sign pairs and copy-paste storefronts. Issue 004; routed to task 016 (dedupe + diversify)."
+    },
+    {
+      "file": "owner-issue-005-bag-toss-and-splash-dither.png",
+      "source": "owner",
+      "author": "owner-supplied",
+      "license": "owner reference only",
+      "fetchDate": "2026-07-09T00:00:00.000Z",
+      "note": "Owner playtest ('bag toss looks bad and spot is not solid color', 2026-07-09): Gallagher cornhole reads as flat slabs (issue 005 → task 019 wedge rework); the 'not solid color' spot is the splash-pad wet-ring dither (issue 003; fixed in 012)."
     }
   ]
 }

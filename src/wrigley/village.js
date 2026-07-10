@@ -937,10 +937,10 @@ function buildGallagher() {
     collide(bx, bzc, 3.6); }
   // splash pad (off-centre so the plaza middle stays open, clear of the statue row)
   { const sz = -470, sx = clarkX(sz) + 20;
-    add(M(new THREE.CylinderGeometry(2.6, 2.6, 0.06, 24), toon(0xb9b3a6), sx, 0.05, sz));
-    add(M(new THREE.RingGeometry(1.0, 1.7, 24), bmat(0x7f9096), sx, 0.08, sz, -Math.PI / 2, 0, 0));   // wet ring
+    add(M(new THREE.CylinderGeometry(2.6, 2.6, 0.08, 24), toon(0xb9b3a6), sx, 0.06, sz));            // pad: bottom 0.02 under lawn (0.03), top 0.10
+    add(M(new THREE.RingGeometry(1.0, 1.7, 24), bmat(0x7f9096), sx, 0.115, sz, -Math.PI / 2, 0, 0));  // wet ring 15 mm proud of pad top — no z-fight
     const jets = [];
-    for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; jets.push({ pos: [sx + Math.cos(a) * 0.9, 0.28, sz + Math.sin(a) * 0.9], scale: [1, 0.9 + (i % 2) * 0.5, 1] }); }
+    for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; jets.push({ pos: [sx + Math.cos(a) * 0.9, 0.35, sz + Math.sin(a) * 0.9], scale: [1, 0.9 + (i % 2) * 0.5, 1] }); }  // nozzle bases sit on the new pad top
     instMesh(new THREE.ConeGeometry(0.09, 0.5, 8), bmat(0xbfe6f5), jets); }
   // planter boxes along the Clark (west) edge
   { const pz = [], pf = [];
@@ -983,15 +983,17 @@ function bronzeStatue(pose) {                          // uniform bronze -> the 
 }
 // pose helpers (rotations only; baked statically — NO animation registration)
 const poses = {
-  banks: p => { p.armL.rotation.set(0, 0, -2.5); p.armR.rotation.set(0, 0, 2.5); },          // both arms raised
+  banks: (p, g) => { p.armR.rotation.set(-1.2, 0, 0.3); p.armL.rotation.set(-1.35, 0, 0.9);   // both hands to a grip front-right (batting stance)
+    const bat = M(new THREE.BoxGeometry(0.15, 1.8, 0.15), toon(BRONZE), 0.42, 2.02, 0.2); bat.rotation.set(-0.42, 0, -0.2); g.add(bat); }, // bat up-and-back over the right shoulder
   santo: p => { p.legR.rotation.set(-1.0, 0, 0.25); p.legL.rotation.set(0.2, 0, 0); p.armL.rotation.z = -0.9; p.armR.rotation.z = 0.9; }, // heel-click
   williams: (p, g) => { p.armR.rotation.set(-1.5, 0, 0.4);
-    const bat = M(new THREE.BoxGeometry(0.09, 1.55, 0.09), toon(BRONZE), 0.42, 2.15, -0.05); bat.rotation.set(-0.35, 0, -0.5); g.add(bat); }, // bat on shoulder
-  jenkins: p => { p.armR.rotation.set(2.4, 0, 0.25); p.armL.rotation.set(-0.9, 0, -0.25); p.legL.rotation.set(-0.5, 0, 0); }, // wind-up
-  caray: (p, g) => { p.armR.rotation.set(-2.15, 0, 0.5);
-    g.add(M(new THREE.BoxGeometry(0.1, 0.28, 0.1), toon(BRONZE), 0.5, 2.45, 0.4));            // mic body
-    g.add(M(new THREE.SphereGeometry(0.11, 8, 7), toon(BRONZE), 0.5, 2.62, 0.42));            // mic head
-    for (const s of [-1, 1]) g.add(M(new THREE.TorusGeometry(0.13, 0.03, 6, 14), toon(0x1d1712), s * 0.2, 2.28, 0.5)); }, // oversized glasses
+    const bat = M(new THREE.BoxGeometry(0.16, 1.75, 0.16), toon(BRONZE), 0.42, 2.15, -0.05); bat.rotation.set(-0.35, 0, -0.5); g.add(bat); }, // thick bat on shoulder
+  jenkins: p => { p.armR.rotation.set(2.4, 0, 0.25); p.armL.rotation.set(-0.9, 0, -0.25); p.legL.rotation.set(-0.5, 0, 0); // wind-up
+    const glove = new THREE.Mesh(new THREE.SphereGeometry(0.23, 8, 7), toon(BRONZE)); glove.scale.set(1, 0.7, 0.9); glove.position.set(0, -0.14, 0); p.handL.add(glove); }, // glove on the left hand
+  caray: (p, g) => { p.armR.rotation.set(-2.95, 0, 0.05);                                     // right arm thrust straight aloft
+    p.handR.add(M(new THREE.CylinderGeometry(0.085, 0.085, 0.42, 8), toon(BRONZE), 0, -0.26, 0));  // mic body — continues the raised arm past the hand
+    p.handR.add(M(new THREE.SphereGeometry(0.17, 8, 7), toon(BRONZE), 0, -0.54, 0));           // mic head spike above the head
+    for (const s of [-1, 1]) g.add(M(new THREE.TorusGeometry(0.15, 0.03, 6, 14), toon(0x1d1712), s * 0.2, 2.28, 0.5)); }, // oversized glasses
 };
 function buildStatues() {
   const row = VILLAGE_W.statueRow;

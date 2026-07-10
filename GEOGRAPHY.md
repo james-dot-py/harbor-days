@@ -253,6 +253,8 @@ Corridor = road + both sidewalks, walkable curb to curb.
 | Gate aprons pave in RED BRICK | marquee crescent, Caray plaza triangle, and a brick pad on Gallagher Way in front of its gate (z −496…−484, off 33…40) — the signature Wrigley ground treatment (APRONS_W) |
 | Home plate → center field | (−252,−444) → (−218,−526), HP→CF 88.8 m (grown from 70.8 so the bowl reads big-league); LF wall on Waveland, RF on Sheffield |
 | Scoreboard | (−216, −533), top y 26.5 (published 87 ft), atop the CF bleachers directly behind/above the Bleacher Gate (as in the owner ref) |
+| **Gates** | Marquee Gate on the rounded-corner apex (Clark & Addison), Gallagher Way Gate on the west-stands wall (plaza east edge), **Addison Gate on the south face (x −234, z −414)** — the real main entries face WEST (Clark/Gallagher) and SOUTH (Addison) per owner placement correction 2026-07-09; the NE Bleacher Gate (Sheffield & Waveland chamfer) is real-world faithful and stays. NO gate/door visuals on the east (Sheffield) face |
+| **Knothole** | screened opening in the WAVELAND (left-field) wall at the ball-hawk corner: **x −234…−228 at z −548**, by the Kenmore axis. OWNER DIRECTIVE 2026-07-09 — the real knothole is on Sheffield (right field); the owner chooses Waveland. Recorded under standing liberties |
 | Gallagher Way plaza | east of Clark, **z −520…−446**, off +14…+40 from clarkX — hugs the WEST stands, north of the Addison corner; its north bound is the Gallagher office block. Statue Row (z −516.5, xs −293…−305) + video board at its north edge |
 | Gallagher office block | the notch's north end, z −546…−520, Clark corridor → west-stands wall (off 14…40) |
 | Murphy's Bleachers | SE corner Sheffield & Waveland (x −178…−162, z −548…−534). Likeness (task 010, per refs/murphys-bleachers/): 2-storey blonde-brick main mass (rooftop deck) + 1-storey red-brick corner ANNEX at the NW quarter carrying the verdigris bronze MURPHY'S sign band + sage-green awnings; changeable-letter marquee board on a pole at the annex SW corner; fenced SIDEWALK BEER GARDEN strip x −178.6…−174, z −539…−534 (decorative, colliders, NOT walkable — no WALK_W change) |
@@ -290,6 +292,18 @@ Lakeview backdrop band (BACKDROP_W).
   higher blinds the Waveland rooftop views (the 2015-videoboard effect).
 - **Classic postcard Wrigley: no 2015+ video boards**, so the rooftop views
   work. Hand-turned scoreboard only.
+- **The knothole is on WAVELAND (left field), not Sheffield (right field)** —
+  owner directive 2026-07-09 (task 012). Refs place the real knothole on
+  Sheffield; the owner chooses the Waveland ball-hawk corner. Deliberate.
+- **Statue Row stays gathered on Gallagher Way** (Banks/Williams/Santo/Jenkins
+  fronting the office block) — this is the real modern (2021+) arrangement;
+  the 006 reviewer's suggestion to scatter them to their historic corners was
+  considered and declined (task 012). Caray stays at the Bleacher Gate, which
+  both arrangements agree on.
+- **Scoreboard back-face dressing** (clock + compact line-score + WRIGLEY
+  FIELD lettering, task 012): the real board's back is plain green with ad
+  boards; ours is dressed so the score reads from the Waveland rooftops —
+  legibility liberty, echoing the real back-side ad panels.
 - Perpetual game day (crowd inside, barricades out, bars loud). The lakefront's
   Wrigley-glow backdrop gag stays for the lakefront; it hides while the
   Wrigleyville cell is active (Wave-3 wiring).

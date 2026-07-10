@@ -59,3 +59,20 @@ cut becomes a revert task.
   "SUPPORT DEVELOPMENT ♥ · scan to support" transit placard with a scannable
   Ko-fi QR on the end wall — the ask lives in the world, never a popup —
   redline-car — task 011
+- The marquee finally has its building: green steel columns and lattice climb
+  a cream grandstand with a red-brick band, red-tile pent roofs and an arched
+  crown, and a flag ring leans out over the corner — ILLINOIS, the CHICAGO
+  CITY FLAG dead center, a Cubs roundel and two pennant swallowtails — Clark
+  & Addison — task 012
+- 'WELCOME TO THE FRIENDLY CONFINES' rides a green banner over the new
+  Addison Gate, straight off the real gate canopy — Addison mid-block — task 012
+- Harry Caray finally holds his mic aloft over the Bleacher Gate plaza
+  ("HOLY COW!"), and statue row got its props: Banks in his batting stance,
+  Williams' bat on the shoulder, Jenkins mid-wind-up with a glove, Santo's
+  heel-click — Gallagher Way + Sheffield & Waveland — task 012
+- The scoreboard's back now tells the street the score: round clock, compact
+  line score and WRIGLEY FIELD lettering face the Waveland rooftops, so the
+  rooftop bleacher crowd can sweat the 7th inning like the real ones do —
+  Waveland rooftops — task 012
+- The marquee message board rotates a real matchup line — 'CUBS VS SOX ·
+  7:05' — dot-matrix, like the photo — Clark & Addison — task 012

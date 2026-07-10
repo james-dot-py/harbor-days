@@ -39,7 +39,9 @@ few turns to find; keep each to one line of symptom + fix.
   the wall — use featW with an explicit stand out in the street.
 - insidePoly(x,z,inset) tests the point MOVED inset toward home plate: a big
   inset (3.0) accepts points ~inset outside the wall (the RF foul pole landed
-  in the Sheffield sidewalk). Bound placement overshoot with inset ≤ 0.5.
+  in the Sheffield sidewalk). Bound placement overshoot with inset ≤ 0.5 —
+  or better (task 012, seats floated over the Gallagher notch at inset 2.2):
+  require STRICT containment AND the clearance, pip(x,z,POLY) && insidePoly(x,z,c).
 - A lone DoubleSide canvas plane shows MIRRORED text from behind; light
   textures hide it, and a dark retexture surfaces it (Addison platform signs,
   task 010). Free-standing signs = back-to-back FrontSide pairs (village.js

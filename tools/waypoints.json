@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-09T19:36:11.071Z",
- "count": 60,
+ "generated": "2026-07-10T01:25:34.616Z",
+ "count": 61,
  "waypoints": [
   {
    "id": "spawn",
@@ -671,7 +671,7 @@
      "dist": 15
     }
    ],
-   "expectation": "THE shot: the red Wrigley Field marquee on the ROUNDED Clark & Addison corner, reading like the real sign per the owner ref: arched crown with 'WRIGLEY FIELD' set along the arc, small 'HOME OF' over large 'CHICAGO CUBS', art-deco scroll shoulders, white pinstripe trim, and a black rounded message board with DOT-MATRIX lettering (live message line). The cream facade visibly curves behind it. A Chicagoan should recognize THIS sign instantly."
+   "expectation": "THE shot: the red Wrigley Field marquee on the ROUNDED Clark & Addison corner, reading like the real sign per the owner ref: arched crown with 'WRIGLEY FIELD' set along the arc, small 'HOME OF' over large 'CHICAGO CUBS', art-deco scroll shoulders, white pinstripe trim, and a black rounded message board with DOT-MATRIX lettering (live message line). Behind it the facade reads as a looming GRANDSTAND, not a storefront (012/IMG_2333): green steel column rhythm rising to the rim, red-brick band + red-tile pent over the ground floor, arched-window band at the crown, and a flag ring (Chicago city flag among them) above the marquee. A Chicagoan should recognize THIS sign instantly."
   },
   {
    "id": "wv-scoreboard",
@@ -749,6 +749,31 @@
    "expectation": "The Gallagher Way gate on the plaza's east side: gate recess in the west-stands facade with a red-brick pad on the plaza in front of it."
   },
   {
+   "id": "wv-gate-addison",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -234,
+   "z": -398,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.14,
+     "dist": 14
+    },
+    {
+     "yaw": 3.54,
+     "pitch": 0.14,
+     "dist": 14
+    },
+    {
+     "yaw": 2.74,
+     "pitch": 0.14,
+     "dist": 14
+    }
+   ],
+   "expectation": "The Addison Gate mid-block on the stadium's SOUTH face (owner placement correction): maroon gate doors in a brick-framed recess with its green gate sign, and the green 'WELCOME TO THE FRIENDLY CONFINES' banner riding above it on the facade."
+  },
+  {
    "id": "wv-gate-bleacher",
    "area": "wrigleyville",
    "cell": "wrigleyville",
@@ -777,26 +802,26 @@
    "id": "wv-knothole",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -197.5,
-   "z": -469,
+   "x": -231,
+   "z": -553,
    "framings": [
     {
-     "yaw": -1.57,
+     "yaw": 0.01,
      "pitch": 0.12,
      "dist": 7
     },
     {
-     "yaw": -1.17,
+     "yaw": 0.41,
      "pitch": 0.12,
      "dist": 7
     },
     {
-     "yaw": -1.97,
+     "yaw": -0.39,
      "pitch": 0.12,
      "dist": 7
     }
    ],
-   "expectation": "The knothole: a screened opening in the right-field wall on Sheffield where you can peek at the field inside."
+   "expectation": "The knothole (owner directive 2026-07-09): a screened opening in the red-brick LEFT-FIELD wall on WAVELAND at the ball-hawk corner (by the Kenmore axis), green frame + KNOTHOLE sign, where you can peek at the field inside."
   },
   {
    "id": "wv-station-door",
@@ -1171,7 +1196,7 @@
      "dist": 12
     }
    ],
-   "expectation": "From THE climbable Waveland rooftop (y 9.6): rooftop bleacher rows looking over Waveland INTO the park — outfield, scoreboard and light towers visible over the LF wall; EAMUS CATULI building nearby."
+   "expectation": "From THE climbable Waveland rooftop (y 9.6): rooftop bleacher rows looking over Waveland INTO the park — outfield, scoreboard and light towers visible over the LF wall; EAMUS CATULI building nearby. The scoreboard's near (back) face is DRESSED (012 legibility liberty): round clock + compact line-score panel read from up here; ivy legible on the outfield wall; no floating roof-ring slabs over the grandstand rim."
   },
   {
    "id": "wv-sluggers-cage",
@@ -1296,7 +1321,7 @@
      "dist": 10
     }
    ],
-   "expectation": "Sheffield midblock canyon (double-wide after 009): bleacher wall + knothole on one side, rooftop-brownstone fronts (stoops, bay windows, doors) on the other. Furniture rhythm on the sidewalk; parked cars plausible; no bare prism walls."
+   "expectation": "Sheffield midblock canyon (double-wide after 009): the stadium's RED-BRICK right-field wall on one side (012 — no gate/door visuals on this east face; the knothole moved to Waveland), rooftop-brownstone fronts (stoops, bay windows, doors) on the other. Furniture rhythm on the sidewalk; parked cars plausible; no bare prism walls."
   },
   {
    "id": "wv-street-waveland",
@@ -1321,7 +1346,7 @@
      "dist": 10
     }
    ],
-   "expectation": "Waveland midblock canyon (double-wide after 009): brownstone fronts with stoops/doors/cornices facing the LF wall and Engine 78; rooftop bleachers visible above; street furniture rhythm; no blank walls."
+   "expectation": "Waveland midblock canyon (double-wide after 009): brownstone fronts with stoops/doors/cornices facing the stadium's RED-BRICK left-field wall (knothole at the ball-hawk corner after 012) and Engine 78; rooftop bleachers visible above; street furniture rhythm; no blank walls."
   },
   {
    "id": "wv-street-clark",
@@ -1406,7 +1431,7 @@
      "dist": 13
     }
    ],
-   "expectation": "Sheffield & Addison, the FIELD corner done right: the stadium SE/right-field corner reads as its real angled/rounded mass with gate + signage presence (not a bare box edge); a souvenir-store corner across Addison (Sports World-style); the station entrance relationship east; every corner holds something with intent."
+   "expectation": "Sheffield & Addison, the FIELD corner done right: the stadium SE/right-field corner reads as its real angled/rounded mass with signage presence but NO gate/door visuals on the east face (owner placement correction, 012); a souvenir-store corner across Addison (Sports World-style); the station entrance relationship east; every corner holds something with intent."
   },
   {
    "id": "wv-x-sheffield-waveland",

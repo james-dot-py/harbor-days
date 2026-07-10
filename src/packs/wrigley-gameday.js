@@ -36,6 +36,7 @@ const CYCLE = 450;                        // full game-day loop (~7.5 min)
 const T_STRETCH = 120, T_HOMER = 240, T_WIN = 390;
 const BALL_G = 20, BALL_GROUND = 0.18;    // ball gravity + resting height
 const MARQ = ['GAME IN PROGRESS', 'WELCOME MAYOR', 'THIS IS THE YEAR',
+              'CUBS VS SOX · 7:05',   // matchup line per the real board (IMG_2339), task 012
               'OPE', 'HOT DOGS · NO KETCHUP', 'FLY THE W'];
 
 // volume scale by player distance from the stadium center:

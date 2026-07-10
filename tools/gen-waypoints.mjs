@@ -214,14 +214,18 @@ const GATE_VIEW = {
   // cameras parked inside the statue row (mrcn4gsg f0/f2) — stand mid-plaza
   // SW of the gate, clear of the booth/statues/board sightlines
   gallagher: { stand: [-286, -483], pitch: 0.14, dist: 13 },
+  // addison gate (task 012, owner placement correction): stand in the Addison
+  // road south of the gate, camera pulls back toward the south sidewalk
+  addison:   { stand: [ST.gates.addison.x, -398], pitch: 0.14, dist: 14 },
   bleacher:  { stand: [-190, -553], pitch: 0.12, dist: 14 },
 };
 for (const [g, p] of Object.entries(ST.gates)) featW('wv-gate-' + g, p.x, p.z, GATE_VIEW[g]);
-// knothole: the opening sits ON the corridor edge (x −202), so the plain
-// snap stands inside the wall thickness (run mrdlw8gt f0/f1 — camera in the
-// brick band). Stand out in the Sheffield road on the opening's normal.
-featW('wv-knothole', ST.knothole.x, (ST.knothole.z0 + ST.knothole.z1) / 2,
-  { stand: [-197.5, -469], pitch: 0.12, dist: 7 });
+// knothole (task 012, owner directive): now a screened opening in the
+// WAVELAND (left-field) wall at the ball-hawk corner. The opening sits ON
+// the corridor edge (z −548) — stand out in the Waveland road on its normal
+// (feature-on-edge rule: featW with an explicit stand, never the plain snap).
+featW('wv-knothole', (ST.knothole.x0 + ST.knothole.x1) / 2, ST.knothole.z,
+  { stand: [(ST.knothole.x0 + ST.knothole.x1) / 2, ST.knothole.z - 5], pitch: 0.12, dist: 7 });
 // station door: the feature is ON the walk grid, so the old snap degenerated
 // (yaw 0.01 → camera inside the embankment). Stand on Addison south of the
 // door and aim north at the door face under the (now 28 m) bridge.

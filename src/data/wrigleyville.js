@@ -102,9 +102,14 @@ export const STADIUM_W = {
   gates: {
     marquee  : { x: _apex[0], z: _apex[1], yaw: _apexYaw },        // ON the curve apex
     gallagher: { x: clarkX(-490) + 40, z: -490 },                  // on the plaza east wall
+    addison  : { x: -234, z: -414, yaw: 0 },                       // south face, mid-block (owner: doors on the real main entries — Clark/Gallagher + Addison)
     bleacher : { x: -212, z: -538, yaw: Math.atan2(0.7071, -0.7071) }, // chamfer mid, faces the Sheffield/Waveland corner
   },
-  knothole: { x: -202, z0: -472, z1: -466 },       // screened opening, RF wall
+  // knothole: screened opening in the WAVELAND (left-field) wall by the
+  // ball-hawk corner (Kenmore axis) — OWNER DIRECTIVE 2026-07-09. The real
+  // knothole is on Sheffield (right field); recorded as a standing liberty
+  // in GEOGRAPHY.md. Opening spans x0..x1 on the z-face.
+  knothole: { z: -548, x0: -234, x1: -228 },
   // true 1:1 verticals (scoreboard base 60 ft / top 87 ft published)
   wallH: 4.2, facadeH: 16.5, rimH: 23, towerH: 29,
 };
