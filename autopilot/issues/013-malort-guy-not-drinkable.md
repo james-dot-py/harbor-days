@@ -15,5 +15,6 @@
   phones — 026 now names it as a test case.
 - expected: the Malört guy serves a drink via a standard interaction, and
   both Malört NPCs fire correctly on touch.
-- route: task 029 (drink interaction + bottle/Old Style case props); task
-  026 verifies the Handshake on touch.
+- route: task 031 (drink interaction + bottle/Old Style case props;
+  renumbered from 029 after a feedback-conversion collision); task 026
+  verifies the Handshake on touch.
