@@ -79,8 +79,8 @@ function sandwichTex() {
   g.fillStyle = '#f4efe2'; g.textAlign = 'center';
   g.font = '700 40px "Trebuchet MS",Arial,sans-serif'; g.fillText('ROOFTOP', 128, 64);
   g.strokeStyle = '#d8b24a'; g.lineWidth = 2; g.beginPath(); g.moveTo(44, 84); g.lineTo(212, 84); g.stroke();
-  g.fillStyle = '#ffe08a'; g.font = '700 46px "Trebuchet MS",Arial,sans-serif'; g.fillText('GAME DAY', 128, 136);
-  g.fillStyle = '#cfe6d0'; g.font = '16px Arial'; g.fillText('· climb up ·', 128, 166);
+  g.fillStyle = '#ffe08a'; g.font = '700 40px "Trebuchet MS",Arial,sans-serif'; g.fillText('BLEACHERS', 128, 136);
+  g.fillStyle = '#cfe6d0'; g.font = '16px Arial'; g.fillText('· game day · climb up ·', 128, 166);
   return new THREE.CanvasTexture(cv);
 }
 

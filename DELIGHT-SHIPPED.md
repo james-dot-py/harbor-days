@@ -97,3 +97,9 @@ cut becomes a revert task.
   'WALK THE / WARNING TRACK · when the ivy's ready', Addison 'BALLPARK TOURS /
   RETURN SOON · watch this gate', Bleachers 'TAKE YOUR SEAT / IN THE BLEACHERS ·
   save us a spot' — Wrigley Field gates — task 017
+- You CAN visit the bleachers after all: the stadium's Bleacher Gate teases
+  'coming soon', but the reachable rooftop bleacher deck across Waveland now
+  names itself — its sidewalk chalkboard reads ROOFTOP / BLEACHERS / · game day
+  · climb up · — so a fan who wants 'the bleachers' is pointed up the stair to a
+  row of benches that really overlook the ivy, scoreboard and field — Waveland
+  rooftop — task 018
