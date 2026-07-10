@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { scene, rng, rand, toon, bmat, curveMat, gmap, pip } from './core.js';
-import { LAND } from './coast.js';
+import { LAND, COAST_CORNER, buildSegs, tierProfile, profileTotal } from './coast.js';
 import { collide, walkRects } from './props.js';
 import { createChibi } from './character.js';
 import * as CH from './data/chicago.js';
@@ -329,31 +329,56 @@ function buildYachtClub(){
 }
 
 // ---- John Henry's 'Chevron' (blue steel sculpture, south lawn) ---------
-// A low concrete pad; 3 slender square-section columns leaning together into a
-// tripod mast; 5 flat blade arms bursting from the masthead like a windmill sail.
-// Beams are BoxGeometry whose local +Y is the length axis; setFromUnitVectors
-// aims that axis down each ray. No shared rng (determinism-safe).
+// Task-021 rework per the owner's photos (refs/diversey-corner/): TWO-TONE —
+// a tapered main BLADE mast (narrow base flaring to a beveled chisel tip),
+// pale powder blue over a darker steel-blue base — plus a second leaning
+// blade and slender square beams CROSSING the masts like pick-up sticks.
+// No shared rng (determinism-safe).
+// taperedBlade: a vertical blade through `levels` [[y,w,t],..] sliced at
+// splitY into a steel lower + pale upper mesh (the paint line). Built from a
+// height-segmented box whose vertex rows are re-mapped to the level profile.
+function taperedBlade(levels,splitY,paleM,steelM,grp,ry,lean,off=[0,0]){
+  const lerpAt=y=>{                       // width/thickness at height y
+    for(let i=0;i<levels.length-1;i++){
+      const[a,b]=[levels[i],levels[i+1]];
+      if(y<=b[0]||i===levels.length-2){
+        const f=Math.min(1,Math.max(0,(y-a[0])/(b[0]-a[0])));
+        return[a[1]+(b[1]-a[1])*f,a[2]+(b[2]-a[2])*f];
+      }
+    }
+  };
+  const piece=(y0,y1,mat)=>{
+    const rows=[y0];                      // include every level break inside the piece
+    for(const[ly]of levels)if(ly>y0+1e-4&&ly<y1-1e-4)rows.push(ly);
+    rows.push(y1);
+    const geo=new THREE.BoxGeometry(1,1,1,1,rows.length-1,1).toNonIndexed();
+    const pos=geo.attributes.position;
+    for(let i=0;i<pos.count;i++){
+      const r=Math.round((pos.getY(i)+0.5)*(rows.length-1));
+      const[w,t]=lerpAt(rows[r]);
+      pos.setXYZ(i,Math.sign(pos.getX(i))*w/2||0,rows[r],Math.sign(pos.getZ(i))*t/2||0);
+    }
+    geo.computeVertexNormals();
+    const m=new THREE.Mesh(geo,mat);
+    m.rotation.set(lean[1],ry,lean[0]);m.position.set(off[0],0,off[1]);grp.add(m);
+  };
+  piece(levels[0][0],splitY,steelM);
+  piece(splitY,levels[levels.length-1][0],paleM);
+}
 function buildChevron(){
   const C=CH.CHEVRON,grp=new THREE.Group();
-  const blue=toon(C.color),conc=toon(C.pad.color);
-  const up=new THREE.Vector3(0,1,0),dir=new THREE.Vector3(),Q=new THREE.Quaternion();
-  const apex=new THREE.Vector3(C.apex[0],C.apex[1],C.apex[2]);
+  const pale=toon(C.pale),steel=toon(C.steel),conc=toon(C.pad.color);
   // concrete pad
   const pad=new THREE.Mesh(new THREE.CylinderGeometry(C.pad.r,C.pad.r+0.16,C.pad.h,20),conc);pad.position.y=C.pad.h/2;grp.add(pad);
-  // 3 leaning columns -> tripod mast (triangle base, all meeting at the apex)
-  for(let k=0;k<3;k++){
-    const a=k/3*Math.PI*2+0.3;
-    const base=new THREE.Vector3(Math.cos(a)*C.baseSpread,C.pad.h,Math.sin(a)*C.baseSpread);
-    dir.copy(apex).sub(base);const L=dir.length();dir.normalize();Q.setFromUnitVectors(up,dir);
-    const col=new THREE.Mesh(new THREE.BoxGeometry(C.colThick,L,C.colThick),blue);
-    col.quaternion.copy(Q);col.position.copy(base).addScaledVector(dir,L/2);grp.add(col);
-  }
-  // masthead hub + 5 flat blade arms radiating asymmetrically (windmill-sail burst)
-  const hub=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.7,0.7),blue);hub.position.copy(apex);grp.add(hub);
-  for(const [dx,dy,dz,L,w] of C.arms){
-    dir.set(dx,dy,dz).normalize();Q.setFromUnitVectors(up,dir);
-    const blade=new THREE.Mesh(new THREE.BoxGeometry(w,L,0.12),blue);
-    blade.quaternion.copy(Q);blade.position.copy(apex).addScaledVector(dir,L/2);grp.add(blade);
+  // the two tapered blades (two-tone: steel base under the pale upper)
+  taperedBlade(C.mast.levels,C.mast.splitY,pale,steel,grp,C.mast.ry,C.mast.lean);
+  taperedBlade(C.blade2.levels,C.blade2.splitY,pale,steel,grp,C.blade2.ry,C.blade2.lean,C.blade2.off);
+  // slender square-section beams crossing the masts (centre + axis, both ways)
+  const up=new THREE.Vector3(0,1,0),dir=new THREE.Vector3(),Q=new THREE.Quaternion();
+  for(const a of C.arms){
+    dir.set(a.d[0],a.d[1],a.d[2]).normalize();Q.setFromUnitVectors(up,dir);
+    const beam=new THREE.Mesh(new THREE.BoxGeometry(a.t,a.L,a.t),steel);
+    beam.quaternion.copy(Q);beam.position.set(a.c[0],a.c[1],a.c[2]);grp.add(beam);
   }
   grp.position.set(C.pos[0],C.pos[1],C.pos[2]);scene.add(grp);
   collide(C.pos[0],C.pos[2],C.collide);
@@ -765,6 +790,86 @@ function buildDiversey(POSTS,RAILS){
   panelM.instanceMatrix.needsUpdate=true;scene.add(panelM);
 }
 
+// ---- Diversey-corner park dressing (task 021, refs/diversey-corner/) ----
+// White pipe railing on the revetment top lip (via the shared instanced fence
+// meshes: +0 draw calls), limestone sitting stones on the lawn, green growth
+// tufting the step joints, and a rubble riprap toe at the waterline + the
+// pier-slip lip. ZERO shared rng: a local xorshift drives every jitter, so
+// the world's rng order (towels/flowers/trees) is bit-for-bit unchanged.
+// Static toon meshes only -> they fold into the cell merge's per-material
+// z-band buckets (no new instanced global draws).
+function buildCornerPark(POSTS,RAILS){
+  const P=CH.CORNER_PARK,fx=CH.COAST_CORNER_PARAMS.fx;
+  let h=0x5eedC0DE>>>0;                     // local deterministic jitter
+  const jr=()=>{h^=h<<13;h>>>=0;h^=h>>>17;h^=h<<5;h>>>=0;return h/4294967296;};
+
+  // white pipe railing: two spans on the top lip flanking the pier, the steps
+  // between left open. Post line follows the coast data (fx - edgeInset).
+  for(const run of P.rail.runs){
+    const line=[];
+    for(let z=run.z0;z<=run.z1+0.01;z+=2.0)line.push([fx(z)-P.rail.edgeInset,z]);
+    fenceRun(line,{spacing:P.rail.spacing,postH:P.rail.postH,color:P.rail.color,collideR:1.2},POSTS,RAILS);
+  }
+
+  // limestone sitting-stone blocks in the grass (jump-over-able colliders)
+  {
+    const sm=toon(P.stone.color);
+    for(const[sx,sz,ry,sc]of P.stones){
+      const b=new THREE.Mesh(new THREE.BoxGeometry(P.stone.w*sc,P.stone.h*sc,P.stone.d*sc),sm);
+      b.position.set(sx,P.stone.h*sc/2-0.04,sz);b.rotation.y=ry;scene.add(b);
+      collide(sx,sz,0.95*sc,0.5);
+    }
+  }
+
+  // sample helper: walk the corner arc's segments (shared coast geometry)
+  const segs=buildSegs(COAST_CORNER);
+  const arcSample=(step,cb)=>{
+    for(const s of segs)for(let t=0;t<s.len;t+=step){
+      const cx=s.ax+s.tx*t,cz=s.az+s.tz*t;
+      cb(cx,cz,-s.tz,s.tx);                 // point + seaward normal
+    }
+  };
+
+  // green growth tufting the step joints (small cones on the tier treads)
+  {
+    const gm=toon(P.growth.color);
+    let n=0;
+    arcSample(1.5,(cx,cz,nx,nz)=>{
+      if(cz<P.growth.z0||cz>P.growth.z1||n>=P.growth.n)return;
+      if(jr()<0.35)return;
+      const p=tierProfile(cz),i=(jr()*6|0);
+      let acc=0;for(let k=0;k<i;k++)acc+=p.w[k];
+      const lat=acc+p.w[i]*(jr()<0.5?0.14:0.86);   // hug the joint lines
+      const gx=cx+nx*lat,gz=cz+nz*lat;
+      const gh=0.14+jr()*0.2;
+      const c=new THREE.Mesh(new THREE.ConeGeometry(0.06+jr()*0.08,gh,5),gm);
+      c.position.set(gx,-i*p.step+gh/2-0.02,gz);c.rotation.y=jr()*Math.PI;
+      scene.add(c);n++;
+    });
+  }
+
+  // rubble riprap toe at the waterline (seaward of the bottom promenade)
+  {
+    const rm=toon(P.riprap.color);
+    const rock=(rx,rz)=>{
+      const sc=0.35+jr()*0.42;
+      const r=new THREE.Mesh(new THREE.DodecahedronGeometry(1,0),rm);
+      r.position.set(rx,-2.12+jr()*0.34,rz);
+      r.rotation.set(jr()*Math.PI,jr()*Math.PI*2,jr()*Math.PI);
+      r.scale.set(sc*1.2,sc*0.75,sc*1.05);scene.add(r);
+    };
+    arcSample(P.riprap.step,(cx,cz,nx,nz)=>{
+      if(cz<P.riprap.z0||cz>P.riprap.z1)return;
+      if(jr()<0.25)return;
+      const lat=profileTotal(cz)+0.6+jr()*1.7;
+      rock(cx+nx*lat,cz+nz*lat);
+    });
+    // the pier-slip lip: rubble in the shallow cove water west of the deck
+    const S=P.riprap.slip;
+    for(let z=S.z0;z<=S.z1;z+=S.step)rock(S.x+(jr()-0.5)*1.6,z+(jr()-0.5)*1.2);
+  }
+}
+
 export function buildStructures(){
   const POSTS=[],RAILS=[];
   buildDogFence(POSTS,RAILS);
@@ -772,6 +877,7 @@ export function buildStructures(){
   buildGolf(POSTS,RAILS);
   buildTennis(POSTS,RAILS);
   buildDiversey(POSTS,RAILS);
+  buildCornerPark(POSTS,RAILS);
   emitFences(POSTS,RAILS);
   buildFieldhouse();
   buildYachtClub();

@@ -164,14 +164,30 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
   due-south, so the steps step down seaward the whole way around; a smooth tangent
   join to the vertical east-facing rocks (the parabola's vertex sits at z340).
   Behind the curve is a **big south lawn** carrying two landmarks:
-  - **John Henry's 'Chevron'** — a ~9.5 m BLUE steel sculpture (`CHEVRON`, x 96,
-    z 372): a low concrete pad, 3 slender square-section columns leaning into a
-    tripod mast, and 5 flat blade arms bursting from the masthead like a windmill
-    sail. Reads instantly against the sky from the steps to the SE.
-  - **The corner PIER** (`DECKS[1]`, plank deck x 116–126, z 373–406): juts SOUTH
-    over the water toward the skyline; its north root sits on the revetment top/
-    lawn (so it connects to walkable land), a lamp at its tip (z 406, just inside
-    the clamp). Water beyond its rails.
+  - **John Henry's 'Chevron'** — a ~9.6 m BLUE steel sculpture (`CHEVRON`, x 96,
+    z 372), reworked 2026-07-10 against the owner's on-site photo set
+    (refs/diversey-corner/, task 021): **TWO-TONE** — a tapered main BLADE mast
+    (narrow at the base, flaring to a beveled chisel tip) in pale powder blue
+    over a darker steel-blue base, a second shorter leaning blade, and five
+    slender square-section straight beams CROSSING the masts like pick-up
+    sticks (beams pass through; not a radial fan). Low concrete pad. Reads
+    instantly against the sky from the steps to the SE.
+  - **The corner PIER** (`DECKS[1]`, x 116–126, z 373–406): juts SOUTH over the
+    water toward the skyline; its north root sits on the revetment top/lawn (so
+    it connects to walkable land), a lamp at its tip (z 406, just inside the
+    clamp). **Restyled 2026-07-10 (owner photos 0395/0399): a pale CONCRETE
+    APRON deck** — white bollard posts inset along its long edges + tip, two
+    red life rings on white posts, no wooden rails; water beyond its flanks.
+  - **Corner park dressing** (`CORNER_PARK`, task 021, per IMG_0396/0398): a
+    curving pale concrete PATH sweeps the lawn from (63,392) NE to the pier
+    root, a worn dirt DESIRE PATH parallels it on the seaward side, three
+    benches sit on the path's inland edge FACING THE WATER, and limestone
+    sitting-stone blocks scatter the grass. WHITE PIPE RAILING (posts + two
+    thin rails) runs the revetment's top lip in two spans — east of the pier
+    (z 347–368) and along the SW tail (z 388–402) — leaving the steps between
+    them open for play. On the steps themselves: green GROWTH tufts in the
+    block joints (z 342–401) and a rubble RIPRAP toe at the waterline plus the
+    pier-slip lip — the cove read from steps-cove-IMG_0394.
 - **MAIN trail south section HUGS LAKE SHORE DRIVE (aerial-canonical, 2026-07-07)**:
   per `Downloads/harbor aerial.png`, the real Lakefront Trail on the whole
   Diversey→Belmont stretch runs BESIDE the Drive, not the shore. From the

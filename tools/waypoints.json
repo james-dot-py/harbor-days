@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-10T10:43:17.237Z",
- "count": 63,
+ "generated": "2026-07-10T12:53:51.042Z",
+ "count": 68,
  "waypoints": [
   {
    "id": "spawn",
@@ -621,7 +621,7 @@
      "dist": 14
     }
    ],
-   "expectation": "The corner pier: a plank deck jutting SOUTH over open water from the corner-wrap revetment, lamp at its tip; skyline backdrop to the south, water under the rails."
+   "expectation": "The corner pier: a deck jutting SOUTH over open water from the corner-wrap revetment, lamp at its tip; skyline backdrop to the south, water under its flanks."
   },
   {
    "id": "landmark-0",
@@ -647,6 +647,131 @@
     }
    ],
    "expectation": "The harbor house: a small red-roofed harbor office building on the inner-park side of the basin."
+  },
+  {
+   "id": "dv-corner-chevron",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 89,
+   "z": 363,
+   "framings": [
+    {
+     "yaw": 0.66,
+     "pitch": -0.14,
+     "dist": 13
+    },
+    {
+     "yaw": 1.16,
+     "pitch": -0.1,
+     "dist": 15
+    },
+    {
+     "yaw": 0.28,
+     "pitch": -0.18,
+     "dist": 11
+    }
+   ],
+   "expectation": "John Henry's Chevron per chevron-closeup-IMG_0389: a TWO-TONE blue steel sculpture — pale powder-blue tapered upper mast (flaring to a beveled chisel tip) over a darker steel-blue base — plus a second leaning blade and slender square-section straight arms CROSSING like pick-up sticks (beams pass through, not a radial fan from one hub); green meadow lawn around the low pad, open lake water beyond the shore edge. Reads instantly against the sky."
+  },
+  {
+   "id": "dv-corner-steps",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 145.49,
+   "z": 350,
+   "framings": [
+    {
+     "yaw": -0.75,
+     "pitch": 0.16,
+     "dist": 15
+    },
+    {
+     "yaw": -1.3,
+     "pitch": 0.3,
+     "dist": 11
+    },
+    {
+     "yaw": 2.95,
+     "pitch": 0.14,
+     "dist": 13
+    }
+   ],
+   "expectation": "The corner revetment per steps-cove-IMG_0394 / steps-to-pier-IMG_0395: broad weathered warm-gray limestone steps descending seaward toward the pier, GREEN GROWTH tufting the block joints, a rubble riprap toe at the waterline, and the cove inlet's water between the steps and the pier; lawn/Chevron above. The 7-step wrap geometry itself already reads true — judge the weathering, the toe rubble and the cove read."
+  },
+  {
+   "id": "dv-corner-furniture",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 121,
+   "z": 388.5,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.1,
+     "dist": 11
+    },
+    {
+     "yaw": 0,
+     "pitch": 0.14,
+     "dist": 10
+    },
+    {
+     "yaw": -2.5,
+     "pitch": 0.14,
+     "dist": 9
+    }
+   ],
+   "expectation": "Seawall furniture per 0395/0398/0399: from the corner pier deck, WHITE PIPE RAILING (posts + two thin horizontal rails, white) runs along the shore's top edge flanking the pier, white bollard posts line the pier deck edges, and a RED life ring on a post reads clearly on the deck; concrete apron underfoot (pale slab, not wood planks), tip lamp to the south."
+  },
+  {
+   "id": "dv-corner-lawn",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 79,
+   "z": 381,
+   "framings": [
+    {
+     "yaw": 1.7,
+     "pitch": 0.1,
+     "dist": 13
+    },
+    {
+     "yaw": 1.15,
+     "pitch": 0.08,
+     "dist": 13
+    },
+    {
+     "yaw": 2.2,
+     "pitch": 0.16,
+     "dist": 15
+    }
+   ],
+   "expectation": "The corner lawn per lawn-path-IMG_0398 + chevron-lawn-IMG_0396: a pale concrete path CURVES across the lawn toward the pier with park benches beside it FACING THE WATER, a worn brown dirt desire path parallels it on the seaward side, and scattered limestone sitting-stone blocks rest in the grass; the Chevron rises from the meadow; picnic/sunbather life reads as lived-in, not staged."
+  },
+  {
+   "id": "dv-corner-harbormouth",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 121,
+   "z": 402.5,
+   "framings": [
+    {
+     "yaw": -1.35,
+     "pitch": 0.1,
+     "dist": 12
+    },
+    {
+     "yaw": 0.15,
+     "pitch": 0.04,
+     "dist": 10
+    },
+    {
+     "yaw": -2.35,
+     "pitch": 0.12,
+     "dist": 11
+    }
+   ],
+   "expectation": "The harbor-mouth read per harbor-mouth-IMG_0399: from the pier's south end, the long TERRACED revetment recedes in a curve to the west, open water south with the skyline on the horizon, and the pier apron (bollards, red life ring, tip lamp) in the near frame. (The photo's finger docks belong to Diversey Harbor proper, off-map SW — not expected in frame.)"
   },
   {
    "id": "wv-spawn",

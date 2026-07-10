@@ -40,9 +40,33 @@ function makeSign(text,x,z,ry){
 }
 // (lamps + benches are built as InstancedMeshes in buildProps below)
 // ---- pier + basin dock (with rails, posts to the water) ----
-function plankDeck(x1,x2,z1,z2,y){
-  const grp=new THREE.Group(),wm=toon(0xb07a46),wm2=toon(0x9c6a3a);
+function plankDeck(x1,x2,z1,z2,y,apron){
   const w=x2-x1,d=z2-z1;
+  if(apron){
+    // task 021 (refs/diversey-corner/ 0395/0399): a pale CONCRETE APRON pier —
+    // slab on concrete piles, white bollard posts inset along the long edges +
+    // the tip (north landing open), red life rings on white posts. No wood.
+    const grp=new THREE.Group(),slab=toon(apron.slab),white=toon(apron.white),red=toon(apron.red);
+    const deck=new THREE.Mesh(new THREE.BoxGeometry(w,0.24,d),slab);deck.position.set((x1+x2)/2,y,(z1+z2)/2);grp.add(deck);
+    for(let px=x1+1.4;px<x2;px+=4.2){                 // concrete piles to the water
+      const pile=new THREE.Mesh(new THREE.BoxGeometry(0.36,y+3.4,0.36),slab);pile.position.set(px,(y-3.4)/2+0.55,z2-0.6);grp.add(pile);
+    }
+    const B=apron.bollard,spots=[];
+    for(let pz=z1+2.2;pz<z2-1.2;pz+=B.spacing){spots.push([x1+B.inset,pz],[x2-B.inset,pz]);}
+    for(let px=x1+B.inset+1.1;px<x2-B.inset;px+=B.spacing)spots.push([px,z2-B.inset]);
+    for(const[bx,bz]of spots){
+      const b=new THREE.Mesh(new THREE.CylinderGeometry(B.r*0.86,B.r,B.h,8),white);
+      b.position.set(bx,y+0.12+B.h/2,bz);grp.add(b);
+    }
+    for(const rg of apron.rings){                     // red life ring on a white post
+      const post=new THREE.Mesh(new THREE.BoxGeometry(0.12,1.3,0.12),white);post.position.set(rg.x,y+0.12+0.65,rg.z);grp.add(post);
+      const ring=new THREE.Mesh(new THREE.TorusGeometry(0.3,0.085,7,16),red);
+      ring.position.set(rg.x,y+1.02,rg.z);ring.rotation.y=rg.ry;grp.add(ring);
+    }
+    scene.add(grp);
+    return;
+  }
+  const grp=new THREE.Group(),wm=toon(0xb07a46),wm2=toon(0x9c6a3a);
   const deck=new THREE.Mesh(new THREE.BoxGeometry(w,0.24,d),wm);deck.position.set((x1+x2)/2,y,(z1+z2)/2);grp.add(deck);
   for(let px=x1+1;px<x2;px+=3.4)for(const pz of[z1+0.4,z2-0.4]){
     const post=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.14,y+3.4,6),wm2);post.position.set(px,(y-3.4)/2+0.55,pz);grp.add(post);
@@ -522,7 +546,8 @@ export function buildProps(){
   }
 
   // ---- pier (peninsula lake side) with rails, posts to the water ----
-  for(const d of CH.DECKS){plankDeck(d.deck[0],d.deck[1],d.deck[2],d.deck[3],d.deck[4]);walkRects.push({x1:d.walk.x1,x2:d.walk.x2,z1:d.walk.z1,z2:d.walk.z2,h:d.walk.h});}
+  // (the corner pier carries d.apron -> concrete-apron style, task 021)
+  for(const d of CH.DECKS){plankDeck(d.deck[0],d.deck[1],d.deck[2],d.deck[3],d.deck[4],d.apron);walkRects.push({x1:d.walk.x1,x2:d.walk.x2,z1:d.walk.z1,z2:d.walk.z2,h:d.walk.h});}
 
   // ---- finger docks along the west seawall + sailboats moored in the slips ----
   // decks + posts are instanced (2 draw calls for all docks); boats via makeBoat.

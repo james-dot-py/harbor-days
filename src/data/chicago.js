@@ -401,6 +401,11 @@ export const BENCHES = [
   { x:30,  z:-90,  ry:-Math.PI/2 },  // west lawn
   { x:55,  z:230,  ry:-Math.PI/2 },  // south lawn
   { x:210, z:-110, ry:Math.PI },     // peninsula pier deck
+  // corner-lawn benches (task 021, IMG_0398): on the CORNER_PARK path's inland
+  // edge, FACING THE WATER across the path + dirt desire path
+  { x:73.5, z:383.2, ry:0.3 },
+  { x:89,   z:373.8, ry:0.5 },
+  { x:105,  z:369,   ry:0.95 },
 ];
 
 // pier plank decks (peninsula lake side + the new corner pier) with walkable rects.
@@ -433,7 +438,13 @@ export const LAKEVIEW_BAND = {
 
 export const DECKS = [
   { deck:[200,216,-120,-90,0.42], walk:{ x1:200, x2:216, z1:-120.5, z2:-89.5, h:0.42 } },
-  { deck:[116,126,373,406,0.42],  walk:{ x1:116, x2:126, z1:372.5, z2:406.5, h:0.42 } },
+  // corner pier restyled task 021 (owner photos 0395/0399): a pale CONCRETE
+  // APRON — white bollards inset along the long edges + tip (north landing
+  // open), two red life rings on white posts, NO wooden rails.
+  { deck:[116,126,373,406,0.42],  walk:{ x1:116, x2:126, z1:372.5, z2:406.5, h:0.42 },
+    apron:{ slab:0xbdb8ae, white:0xf2ece0, red:0xd23b34,
+            bollard:{ inset:0.55, spacing:3.4, r:0.13, h:0.82 },
+            rings:[ {x:125.45, z:395, ry:-Math.PI/2}, {x:116.55, z:381, ry:Math.PI/2} ] } },
 ];
 
 // The corner pier's SLIP: the revetment terrace is carved to OPEN WATER within this
@@ -501,23 +512,59 @@ export const YACHT_CLUB = {
 };
 
 // John Henry's 'Chevron' — a tall BLUE steel sculpture on the south-corner lawn,
-// behind the curved revetment (reads like a post-modern windmill against the sky).
-// A low concrete pad; 3 slender square-section columns leaning together into a
-// tripod mast ~9.5 m tall; and 5 flat blade arms bursting asymmetrically from the
-// masthead like a windmill sail. Builder buildChevron() in structures.js (no rng).
-// Each arm: [dirX, dirY, dirZ, length, width]; dir is the ray out of the masthead.
+// behind the curved revetment. REWORKED task 021 against the owner's on-site
+// photo set (refs/diversey-corner/chevron-closeup-IMG_0389 + 0396): the real
+// sculpture is TWO-TONE — a tapered main BLADE mast (narrow base flaring to a
+// beveled chisel tip) in pale powder blue over a darker steel-blue base — with
+// a second shorter leaning blade and slender square-section straight beams
+// CROSSING the masts like pick-up sticks (beams pass through a loose hub zone;
+// NOT a radial fan). Builder buildChevron() in structures.js (no rng).
+// blades: taper levels bottom->top [y, width, thickness]; splitY = the two-tone
+// paint line. arms: {c:[x,y,z] beam centre, d:[dx,dy,dz] axis, L, t}.
 export const CHEVRON = {
-  pos:[96,0,372], color:0x2f63d0,
+  pos:[96,0,372],
+  pale:0xa3c4e6, steel:0x4c6d99,                   // powder-blue upper / steel-blue base + beams
   pad:{ r:2.4, h:0.3, color:0xbdb8ae },
-  colThick:0.34, baseSpread:1.5, apex:[0,9.2,0],   // 3 columns from a triangle base up to the apex
+  mast:{ levels:[[0,0.85,0.52],[3.3,1.08,0.52],[8.7,1.52,0.50],[9.6,1.60,0.07]],  // chisel tip
+         splitY:3.3, ry:0.55, lean:[0.05,-0.03] },
+  blade2:{ levels:[[0,0.55,0.36],[2.5,0.72,0.36],[6.6,1.02,0.35],[7.2,1.06,0.06]],
+           splitY:2.5, ry:1.25, lean:[-0.10,0.06], off:[1.05,-0.55] },
   arms:[
-    [-0.62, 0.66, 0.12, 5.4, 0.95],
-    [ 0.70, 0.52,-0.18, 4.6, 0.85],
-    [-0.80, 0.20, 0.30, 5.0, 0.85],
-    [ 0.86, 0.30, 0.22, 4.2, 0.80],
-    [ 0.08, 0.84,-0.46, 4.9, 0.95],
+    { c:[ 0.10,6.25, 0.25], d:[ 0.56, 0.72,-0.22], L:7.6, t:0.22 },
+    { c:[ 0.35,6.80,-0.20], d:[-0.62, 0.66, 0.30], L:7.0, t:0.22 },
+    { c:[-0.25,5.60, 0.30], d:[ 0.84, 0.36, 0.42], L:6.0, t:0.20 },
+    { c:[ 0.25,5.95,-0.35], d:[-0.78, 0.30,-0.52], L:5.6, t:0.20 },
+    { c:[ 0.00,7.30, 0.00], d:[ 0.18, 0.90,-0.40], L:5.2, t:0.20 },
   ],
   collide:2.2,
+};
+
+// CORNER PARK dressing (task 021, owner photos refs/diversey-corner/): the
+// Diversey-corner lawn + revetment furniture. Path/desire ribbons build in
+// paths.js (ribbonOn registers them in pathSamples so lawn-life keeps off);
+// railing/stones/growth/riprap build in structures.js buildCornerPark() —
+// zero shared rng (local xorshift only), so world scatter never moves.
+export const CORNER_PARK = {
+  // curving pale concrete path across the lawn to the pier root (IMG_0398)
+  path:{ pts:[[63,392],[71,387],[80,381.5],[90,376.5],[100,373.5],[109,371.2],[117,370]],
+         width:1.8, color:0xbdb8ae, y:0.065 },
+  // the worn dirt desire path paralleling it on the seaward side
+  desire:{ pts:[[66,394.5],[74,389.5],[83,384],[92,379],[101,375.8],[108,373.4]],
+           width:2.0, color:0x9d7f58, y:0.05 },
+  // scattered limestone sitting-stone blocks in the grass (IMG_0396): x,z,ry,scale
+  stones:[ [84,367,0.5,1.0],[91,361,1.4,0.8],[79,375,2.2,1.15],
+           [101,364,0.9,0.9],[106,366.5,2.8,0.75],[70,381,1.1,0.95] ],
+  stone:{ w:1.35, h:0.55, d:0.85, color:0xbdb8ae },
+  // white pipe railing on the revetment top lip (posts + 2 thin rails via the
+  // shared instanced fence meshes): two spans flanking the pier, steps between
+  // them left OPEN for play. Post line = COAST_CORNER fx(z) - edgeInset.
+  rail:{ color:0xf2f4ee, postH:1.02, spacing:2.3, edgeInset:0.75,
+         runs:[ {z0:347, z1:368}, {z0:388, z1:402} ] },
+  // green growth tufting the step joints (0394/0395) — corner arc only
+  growth:{ n:150, z0:342, z1:401, color:0x55924e },
+  // rubble riprap toe at the waterline + the pier-slip lip (the cove read)
+  riprap:{ step:2.6, z0:344, z1:399, color:0xa6ab95,
+           slip:{ x:112.6, z0:383, z1:403, step:2.4 } },
 };
 
 // Sydney R. Marovitz golf course — a fenced green strip along the lake

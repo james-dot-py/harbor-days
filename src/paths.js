@@ -57,6 +57,13 @@ export function buildPaths(){
   // winding path. Built here (not in structures) so ribbonOn registers it in
   // pathSamples: trees/props/lawnlife all keep off it automatically.
   ribbonOn(curveOf(CH.sanctuaryLoop()),CH.SANCTUARY.path.width,CH.SANCTUARY.path.color,CH.SANCTUARY.path.y,0);
+  // Diversey-corner lawn (task 021, refs/diversey-corner/ IMG_0398): the pale
+  // concrete path curving to the pier root + the worn dirt DESIRE PATH
+  // paralleling it on the seaward side. ribbonOn registers both in pathSamples
+  // (corner lawn-life nudges clear); appended LAST so every earlier consumer's
+  // sample indices are unchanged. ribbonOn is rng-free -> world scatter holds.
+  ribbonOn(curveOf(CH.CORNER_PARK.desire.pts),CH.CORNER_PARK.desire.width,CH.CORNER_PARK.desire.color,CH.CORNER_PARK.desire.y,0);
+  ribbonOn(curveOf(CH.CORNER_PARK.path.pts),CH.CORNER_PARK.path.width,CH.CORNER_PARK.path.color,CH.CORNER_PARK.path.y,0);
   // yellow center dashes on the paved BIKE path + the SPUR (not the walkway)
   {
     const dashes=[];

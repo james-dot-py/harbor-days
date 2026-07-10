@@ -189,6 +189,66 @@ CH.MAP_LANDMARKS.forEach((lm, i) => {   // only landmarks no other waypoint cove
     [{ yaw: 1.57, pitch: 0.16, dist: 14 }, { yaw: 1.12, pitch: 0.16, dist: 12 }, { yaw: 2.02, pitch: 0.24, dist: 16 }]);
 });
 
+/* ---- Diversey corner (task 021, owner on-site photo set refs/diversey-corner/):
+   five judged reads triangulated from the six photos — Chevron two-tone closeup,
+   the stepped revetment + cove, seawall furniture, the lawn (path/benches/stones),
+   and the harbor-mouth apron. Stands DERIVE from CHEVRON / COAST_CORNER_PARAMS.fx /
+   DECKS[1] so they survive layout reworks. ---- */
+{
+  const CV = CH.CHEVRON.pos;                       // Chevron pad [96,0,372]
+  const cfx = CH.COAST_CORNER_PARAMS.fx;           // corner revetment top-edge x at z
+  const D = CH.DECKS[1].walk;                      // corner pier walk rect (x116-126, z372.5-406.5)
+  const pierX = (D.x1 + D.x2) / 2;
+
+  // (1) Chevron closeup — IMG_0389 (two-tone mast + crossing arms, water behind).
+  // Stand NW of the pad on the lawn; negative pitch lifts the ~10 m masthead.
+  {
+    const sx = CV[0] - 7, sz = CV[2] - 9;
+    const yaw = yawTo(sx, sz, CV[0], CV[2]);
+    add('dv-corner-chevron', 'lakefront', 'lakefront', R(sx), R(sz), [
+      { yaw, pitch: -0.14, dist: 13 },
+      { yaw: R(yaw + 0.5), pitch: -0.1, dist: 15 },
+      { yaw: R(yaw - 0.38), pitch: -0.18, dist: 11 },
+    ]);
+  }
+  // (2) The steps — IMG_0394/0395 (weathered blocks, joint growth, riprap toe,
+  // the cove inlet by the pier). Stand on the lawn lip above the steps at z 350.
+  {
+    const sx = cfx(350) - 3.5, sz = 350;
+    const yaw = yawTo(sx, sz, pierX, D.z1 + 4);    // down the revetment toward the pier
+    add('dv-corner-steps', 'lakefront', 'lakefront', R(sx), R(sz), [
+      { yaw, pitch: 0.16, dist: 15 },
+      { yaw: R(yaw - 0.55), pitch: 0.3, dist: 11 },   // steeper: the toe/waterline read
+      { yaw: 2.95, pitch: 0.14, dist: 13 },           // north, up the arc toward the rocks join
+    ]);
+  }
+  // (3) Seawall furniture — 0395/0398/0399 (white pipe railing on the shore edge,
+  // bollards + red life ring on the pier). Stand ON the pier deck mid-span.
+  add('dv-corner-furniture', 'lakefront', 'lakefront', R(pierX), R(D.z1 + 16), [
+    { yaw: 3.14, pitch: 0.1, dist: 11 },              // north: shore railing + steps + Chevron
+    { yaw: 0, pitch: 0.14, dist: 10 },                // south: down the deck, life ring + tip
+    { yaw: -2.5, pitch: 0.14, dist: 9 },              // NW across the cove inlet
+  ]);
+  // (4) The lawn — IMG_0398/0396 (curving path, benches FACING THE WATER, worn
+  // dirt desire path, scattered sitting stones). Stand W of the Chevron looking E.
+  {
+    const sx = CV[0] - 17, sz = CV[2] + 9;
+    const yaw = yawTo(sx, sz, CV[0] + 14, CV[2] + 5);
+    add('dv-corner-lawn', 'lakefront', 'lakefront', R(sx), R(sz), [
+      { yaw, pitch: 0.1, dist: 13 },
+      { yaw: R(yaw - 0.55), pitch: 0.08, dist: 13 },  // NE: Chevron rises from the meadow
+      { yaw: R(yaw + 0.5), pitch: 0.16, dist: 15 },   // SE: toward the pier root
+    ]);
+  }
+  // (5) Harbor mouth — IMG_0399 (apron + curved terraced seawall receding, skyline
+  // south). Stand near the pier tip.
+  add('dv-corner-harbormouth', 'lakefront', 'lakefront', R(pierX), R(D.z2 - 4), [
+    { yaw: -1.35, pitch: 0.1, dist: 12 },             // west along the receding revetment arc
+    { yaw: 0.15, pitch: 0.04, dist: 10 },             // south: skyline over open water
+    { yaw: -2.35, pitch: 0.12, dist: 11 },            // NW back across the cove to the lawn
+  ]);
+}
+
 /* ---------------------------- wrigleyville --------------------------- */
 const ST = W.STADIUM_W, V = W.VILLAGE_W;
 const feat = (id, fx, fz, pitch = 0.22, dist = 12) => {
