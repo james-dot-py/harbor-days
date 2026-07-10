@@ -33,10 +33,18 @@ acceptance: >
   so the title swoop frames the monument + garden well, and fix the matching
   hardcoded mayor position (character.js ~L320, mayor.position.set(38.5,0,58))
   — cross-file stale-coordinate protocol: grep for other spawn-adjacent
-  literals before calling it done. MEASUREMENT FIRST: add judged ag-*
-  waypoints (tools/gen-waypoints.mjs + waypoints.expect.json, coords derived
-  from data so they survive reworks) for (a) the spawn/entrance read facing
-  the monument and (b) the statue-loop read; then build until honest
+  literals before calling it done. (5) STRAY GREEN DISC (issue 012): a big
+  green circle overlaps the start of the steps/rocks at (151,115) — owner
+  coords are exact; shot it and LOOK. Prime suspect: the 'The Belmont
+  Rocks' zone rim (chicago.js ~L259, x:150 z:150 r:36 — the report sits
+  exactly on it) or a scattered mottled-grass disc (~L181). Fix the CLASS,
+  not the instance: ground discs must clip at the coast/terrace boundary
+  (coastQuery-driven skip/shrink, the tree POST-filter analog —
+  determinism-safe), then re-shot to confirm the rocks read as stone from
+  their first step. MEASUREMENT FIRST: add judged ag-* waypoints
+  (tools/gen-waypoints.mjs + waypoints.expect.json, coords derived from
+  data so they survive reworks) for (a) the spawn/entrance read facing the
+  monument and (b) the statue-loop read; then build until honest
   expectations pass. Draw budget: tools/budgets.json is a ceiling.
   Determinism: no import-time rng; world scatter must not drift beyond the
   legitimately moved paths. Single-file build passes; desktop + mobile fine.
@@ -47,6 +55,7 @@ refs:
   - src/data/chicago.js (SIGNS ~L364, garden loop ~L233, SPAWN, flower beds ~L314, Haring 95,120)
   - src/paths.js (~L54 Belmont connector), src/props.js (garden tribute L222, edging boulders L282)
   - src/character.js ~L320 (hardcoded spawn duplicate — stale-coordinate protocol)
+  - autopilot/issues/012-green-disc-over-rocks.md (stray disc at 151,115)
 ---
 
 This IS the former Belmont Rocks site — and with this task it becomes the

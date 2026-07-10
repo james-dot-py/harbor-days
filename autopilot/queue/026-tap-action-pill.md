@@ -21,7 +21,9 @@ acceptance: >
   the pill becomes clickable there too, give it a pointer cursor —
   otherwise leave it inert; (5) verify with act.mjs at a 390px touch
   viewport on real interactions (Divvy dock 'grab a divvy', a sit spot, the
-  birdwatch scope): tap the pill rect → interaction fires; walk away → pill
+  birdwatch scope, and the Chicago Handshake at 150,195 — owner reported a
+  Malört drink failing on mobile, issue 013; this occlusion is the suspected
+  trigger blocker there): tap the pill rect → interaction fires; walk away → pill
   clears and dead pill-rect taps do nothing (no ghost tap zone that eats
   joystick input). index.html stays logic-free — wiring lives in
   framework.js / input.js. Single-file build passes; desktop keyboard flow
