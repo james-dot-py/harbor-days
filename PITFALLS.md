@@ -115,6 +115,14 @@ few turns to find; keep each to one line of symptom + fix.
   samples as a byte-identical GHOST at its original build slot (task 023:
   TRAIL_LOOP_GHOST + paths.js sampleGhost) and register the new shape in
   pathSamples2 (merged into pathSamples in main.js only AFTER buildProps).
+- Rotating a cell/pocket root whose children sit at ABSOLUTE world coords pivots
+  about the WORLD origin, not the geometry: a child at world x heaves vertically by
+  |x|·sinθ. The Red Line car (children built at CAR.x=-250) turned a 0.004 rad
+  "gentle sway" into ±1 m of cabin heave — measured 2.011 m peak-to-peak — read by
+  the fixed player as bouncing (issue 009 / task 027). Fix: put an inner pivot
+  group POSITIONED at the geometry centre and build children in LOCAL coords, then
+  rotate the inner group (heave dropped to 0.023 m). Any sway/roll on a displaced
+  cell must rotate a locally-centred group, never the far-from-origin root.
 - Headless touch taps MISS the rising-edge action latch: page.touchscreen.tap
   fires touchStart+touchEnd within one frame gap, so framework `_touchAct` flips
   true->false before any rAF samples it -> the interaction's actPressed edge never
