@@ -76,32 +76,45 @@ function say(text) {
 }
 
 // --------------------------- the car pocket ----------------------------
-let winLights = [], carRoot = null;
+// carBody is an inner pivot group POSITIONED at the car centre; every mesh is
+// built in CAR-LOCAL coords (x,z are offsets from the centre, y is absolute).
+// The gentle ride sway rolls carBody about its own long (z) axis — NOT the
+// world origin, which sits 250 m away and turned a 0.004 rad roll into ±1 m of
+// cabin heave (issue 009; measured 2.0 m peak-to-peak before this re-pivot).
+let winLights = [], carRoot = null, carBody = null;
 function buildCar() {
   carRoot = new THREE.Group(); carRoot.name = 'cell-redline-car';
-  const g = carRoot, C = CAR;
+  scene.add(carRoot);                             // its own cell root at origin (cells.js toggles .visible)
+  carBody = new THREE.Group(); carBody.position.set(CAR.x, 0, CAR.z);
+  carRoot.add(carBody);                           // pivot at the car centre → sway rolls about the long axis
+  const g = carBody;                              // build children in CAR-LOCAL x/z (y absolute)
   const add = m => { g.add(m); return m; };
   const box = (w, h, d, c, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), toon(c)); m.position.set(x, y, z); return add(m); };
-  box(3.4, 0.3, 13.5, 0x6d6a63, C.x, C.y - 0.15, C.z);            // floor
-  box(3.6, 0.3, 13.7, 0x8f8b84, C.x, 2.75, C.z);                  // ceiling
-  box(0.14, 1.05, 13.5, 0xc8c4bc, C.x - 1.72, 0.75, C.z);         // west wainscot
-  box(0.14, 1.05, 13.5, 0xc8c4bc, C.x + 1.72, 0.75, C.z);         // east wainscot
-  box(0.14, 0.7, 13.5, 0xb8442f, C.x - 1.72, 2.55, C.z);          // red trim bands
-  box(0.14, 0.7, 13.5, 0xb8442f, C.x + 1.72, 2.55, C.z);
-  box(3.4, 3, 0.16, 0xc8c4bc, C.x, 1.5, C.z - 6.7);               // ends
-  box(3.4, 3, 0.16, 0xc8c4bc, C.x, 1.5, C.z + 6.7);
-  // window bands — translucent dusk glass so the city lights stream past
-  for (const sx of [-1.7, 1.7]) {
-    const glass = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.1, 13.3),
+  // BIGGER SHELL (task 027 B): interior floor 0.25 → ceiling 3.1 (was ~2.35) and
+  // body ~3.9 m wide (was 3.4), a roomier cabin the chase camera rides inside;
+  // LOW window sills (~1.0) so the streaming city lights stay visible past the
+  // walls from the seated ride camera.
+  box(3.9, 0.3, 13.5, 0x6d6a63, 0, 0.10, 0);                     // floor (top at 0.25)
+  box(4.1, 0.3, 13.7, 0x8f8b84, 0, 3.25, 0);                     // ceiling (bottom at 3.1)
+  box(0.14, 0.9, 13.5, 0xc8c4bc, -1.9, 0.55, 0);                 // west wainscot (sill top ~1.0)
+  box(0.14, 0.9, 13.5, 0xc8c4bc,  1.9, 0.55, 0);                 // east wainscot
+  box(0.14, 0.45, 13.5, 0xb8442f, -1.9, 2.90, 0);               // red trim band above the windows
+  box(0.14, 0.45, 13.5, 0xb8442f,  1.9, 2.90, 0);
+  box(3.9, 3.4, 0.16, 0xc8c4bc, 0, 1.7, -6.7);                   // north end wall (carries the Ko-fi placard)
+  box(3.9, 3.4, 0.16, 0xc8c4bc, 0, 1.7,  6.7);                   // south end wall
+  // window bands — translucent dusk glass, tall (sill 1.0 → header 2.7) so the
+  // city lights stream past and stay visible from the seated ride camera
+  for (const sx of [-1.9, 1.9]) {
+    const glass = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.7, 13.3),
       bmat(0x241f33, { transparent: true, opacity: 0.55 }));
-    glass.position.set(C.x + sx, 1.85, C.z); add(glass);
+    glass.position.set(sx, 1.85, 0); add(glass);
   }
   // longitudinal benches + poles + ads
-  box(0.6, 0.45, 10.5, 0x9a4a3a, C.x - 1.35, 0.45, C.z);
-  box(0.6, 0.45, 10.5, 0x9a4a3a, C.x + 1.35, 0.45, C.z);
-  const poleG = new THREE.CylinderGeometry(0.035, 0.035, 2.6, 6);
+  box(0.6, 0.45, 10.5, 0x9a4a3a, -1.5, 0.45, 0);
+  box(0.6, 0.45, 10.5, 0x9a4a3a,  1.5, 0.45, 0);
+  const poleG = new THREE.CylinderGeometry(0.035, 0.035, 2.9, 6);
   const poles = new THREE.InstancedMesh(poleG, toon(0xd8d5cf), 4);
-  { const M = new THREE.Matrix4(); [-4, -1.3, 1.3, 4].forEach((oz, i) => { M.setPosition(C.x, 1.45, C.z + oz); poles.setMatrixAt(i, M); }); }
+  { const M = new THREE.Matrix4(); [-4, -1.3, 1.3, 4].forEach((oz, i) => { M.setPosition(0, 1.55, oz); poles.setMatrixAt(i, M); }); }
   poles.instanceMatrix.needsUpdate = true; add(poles);
   { // ad card: WRIGLEY'S SPEARMINT — THE PERFECT GUM (the namesake wink)
     const cv = document.createElement('canvas'); cv.width = 256; cv.height = 48;
@@ -111,7 +124,7 @@ function buildCar() {
     c2.fillText("WRIGLEY'S SPEARMINT", 128, 22);
     c2.font = '700 13px Georgia,serif'; c2.fillText('— THE PERFECT GUM —', 128, 40);
     const ad = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 0.36), bmat(0xffffff, { map: new THREE.CanvasTexture(cv) }));
-    ad.position.set(C.x - 1.62, 2.52, C.z + 2.5); ad.rotation.y = Math.PI / 2; add(ad);
+    ad.position.set(-1.84, 2.9, 2.5); ad.rotation.y = Math.PI / 2; add(ad);   // on the west red band, faces the aisle
   }
   { // Ko-fi support placard on the NORTH end wall — the transit-car ad precedent
     // (task 011). "SUPPORT DEVELOPMENT ♥" header over the scannable QR, big and
@@ -137,13 +150,14 @@ function buildCar() {
     tex.magFilter = THREE.NearestFilter; tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
     const card = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1.5),
       bmat(0xffffff, { map: tex, fog: false }));
-    card.position.set(C.x, 1.9, C.z - 6.55); add(card);                       // centred on the end wall, faces +z
+    card.position.set(0, 1.75, -6.55); add(card);                             // centred on the end wall, faces +z
   }
-  // scrolling city lights outside both window bands (animated in update)
+  // scrolling city lights outside both window bands (animated in update) — local
+  // coords under carBody; the LOWER base y + wider spread fills the taller windows
   for (const side of [-1, 1]) {
     const n = 26, gp = new Float32Array(n * 3), aC = new Float32Array(n * 3), aS = new Float32Array(n);
     for (let i = 0; i < n; i++) {
-      gp.set([C.x + side * (3.6 + R() * 3), 1.4 + R() * 1.6, C.z - 9 + R() * 18], i * 3);
+      gp.set([side * (3.6 + R() * 3), 1.1 + R() * 1.6, -9 + R() * 18], i * 3);
       const warm = 0.75 + R() * 0.25;
       aC.set([warm, warm * 0.82, 0.55], i * 3); aS[i] = 2.2 + R() * 2.6;
     }
@@ -154,9 +168,9 @@ function buildCar() {
     const pts = new THREE.Points(geo, pointsMat()); add(pts);
     winLights.push(pts);
   }
-  // interior glow
+  // interior glow (ceiling line, raised for the taller cabin)
   { const n = 3, gp = new Float32Array(n * 3), aC = new Float32Array(n * 3), aS = new Float32Array(n);
-    for (let i = 0; i < n; i++) { gp.set([C.x, 2.6, C.z - 4 + i * 4], i * 3); aC.set([1, 0.95, 0.85], i * 3); aS[i] = 3.4; }
+    for (let i = 0; i < n; i++) { gp.set([0, 2.9, -4 + i * 4], i * 3); aC.set([1, 0.95, 0.85], i * 3); aS[i] = 3.4; }
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(gp, 3));
     geo.setAttribute('aColor', new THREE.BufferAttribute(aC, 3));
@@ -164,7 +178,6 @@ function buildCar() {
     add(new THREE.Points(geo, pointsMat()));
   }
   // minimap while riding: a dark card with the Red Line
-  scene.add(carRoot);                             // its own cell root (cells.js toggles it)
   const mmcv = document.createElement('canvas'); mmcv.width = 304; mmcv.height = 412;
   { const c2 = mmcv.getContext('2d');
     c2.fillStyle = '#2b2833'; c2.fillRect(0, 0, 304, 412);
@@ -179,9 +192,9 @@ function buildCar() {
   }
   return {
     id: 'redline-car', root: carRoot,
-    walkable: (x, z) => x > CAR.x - 1.6 && x < CAR.x + 1.6 && z > CAR.z - 6.4 && z < CAR.z + 6.4,
+    walkable: (x, z) => x > CAR.x - 1.7 && x < CAR.x + 1.7 && z > CAR.z - 6.4 && z < CAR.z + 6.4,
     surfaceY: () => CAR.y,
-    clamp: { xMin: CAR.x - 1.55, xMax: CAR.x + 1.55, zMin: CAR.z - 6.3, zMax: CAR.z + 6.3 },
+    clamp: { xMin: CAR.x - 1.8, xMax: CAR.x + 1.8, zMin: CAR.z - 6.3, zMax: CAR.z + 6.3 },
     spawn: { x: CAR.x, z: CAR.z + 2 },
     minimapBase: mmcv, minimapBounds: { x0: 0, z0: 0, w: 304, h: 412, cw: 304, ch: 412 },
   };
@@ -271,13 +284,13 @@ onWorldReady((player) => {
   // for x<-100, so this override wins. The pocket sits far below all real z.
   if (player.x < CAR.x + 3 && player.x > CAR.x - 3 && player.z < CAR.z + 7 && player.z > CAR.z - 7) {
     setActiveCell('redline-car');
-    player.x = Math.min(Math.max(player.x, CAR.x - 1.5), CAR.x + 1.5);
+    player.x = Math.min(Math.max(player.x, CAR.x - 1.8), CAR.x + 1.8);
     player.z = Math.min(Math.max(player.z, CAR.z - 6.3), CAR.z + 6.3);
     player.y = CAR.y;
   }
   // the rider NPC lives in the car (framework NPC culling hides it elsewhere)
   rider = makeNPC({
-    x: CAR.x + 1.15, z: CAR.z - 3.4, ry: -Math.PI / 2, name: 'red line regular',
+    x: CAR.x + 1.35, z: CAR.z - 3.4, ry: -Math.PI / 2, name: 'red line regular',
     palette: { suit: 0x2a4a7a, pants: 0x3a3a42, skin: 0xb98a62, hair: 0x4a3626 },
     lines: ['ope', 'this car always smells like popcorn', 'the L is the best seat in the city'],
   });
@@ -303,12 +316,12 @@ onWorldReady((player) => {
         const a = pts.geometry.attributes.position;
         for (let i = 0; i < a.count; i++) {
           let z = a.getZ(i) + dt * 14;
-          if (z > CAR.z + 10) z -= 20;
+          if (z > 10) z -= 20;                        // local z now (child of carBody)
           a.setZ(i, z);
         }
         a.needsUpdate = true;
       }
-      if (carRoot) carRoot.rotation.z = Math.sin(t * 1.7) * 0.004;
+      if (carBody) carBody.rotation.z = Math.sin(t * 1.7) * 0.006;   // true subtle roll about the car's long axis
       if (((t * 1.8) | 0) !== (((t - dt) * 1.8) | 0)) clack();
     }
   });
