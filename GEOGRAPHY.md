@@ -227,12 +227,23 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
   edge ≈ (30,406) — the future Diversey-Lincoln Park gate now sits beside the
   Drive. The WIDE south lawns + the corner revetment, Chevron and pier lie EAST
   of the trail — people cross the grass to the rocks, as in the aerial.
-- **Diversey Driving Range & Mini Golf** (BUILT, inland, west of the trail):
-  a fenced green range strip **x 28–88, z +242…+283** (fenced W/N/E, open at the
-  south tee line) with 4 tee mats, 3 distance boards, ~30 scattered balls and a
-  ball bucket; a **mini-golf corner x 70–88, z +286…+306** with 3 whimsical holes
-  (a STATIC windmill, a loop ramp, a tiny Waveland clock-tower replica) on felt
-  fairways with wood rails. Data: `DIVERSEY`; builder `buildDiversey()`.
+- **Diversey Driving Range & Mini Golf** (BUILT + PLAYABLE, inland, west of the
+  trail): a fenced green range strip **x 28–88, z +242…+283** (fenced W/N/E, open
+  at the south tee line) hitting NORTH (−z) downrange under a 12 m perimeter net,
+  with distance boards + scattered balls. The **two-tier bay building on the south
+  tee edge (x 30–66, z +280…+285.5)** has an ENTERABLE ground tier: a walkable
+  hitting deck (`DIVERSEY.bays.deck`, h 0.4, one walk rect, enclosed by
+  divider/end-wall colliders — enter from the park/back side into a bay) where the
+  "hit a bucket" activity (pack `diversey.js`, chargeThrow) launches balls north,
+  arc + bounce + distance-in-yards. The UPPER tier is VISUALLY GATED (decorative
+  posed golfers; no stair invites the player up — the old dead stair is gone). A
+  **playable 3-hole mini-golf course x 70–88, z +286…+306**: hole 1 dogleg, hole 2
+  loop-ramp, hole 3 windmill — each felt fairway a data polygon with wood rails
+  DERIVED from the felt edges (they cannot cross), a tee pad + cup + flag; putt via
+  chargeThrow with strokes/par (pack `diversey.js`). The windmill TOWER is static
+  (structures.js); its BLADES are owned + slowly rotated by the pack (decorative
+  gate). Data: `DIVERSEY` (`bays.deck`, `bays.hit`, `mini.holes[].fair/tee/cup`);
+  builder `buildDiversey()`; play in `src/packs/diversey.js`.
 
 ### Open lake (east of everything)
 - Water from the revetment/peninsula line to the horizon. Drifting sailboat lane

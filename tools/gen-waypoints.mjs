@@ -164,6 +164,34 @@ for (const zn of CH.ZONES) {
   ]);
 }
 
+// Diversey ENTERABLE bay (task 028): stand on the ground hitting deck at a
+// middle bay's hitting spot and look NORTH down the range — the axis-aligned
+// interior framing for the bay pocket (a cross-body camera sits in a divider);
+// camera behind (south) clears the open back at short dist. Stand derives from
+// DIVERSEY.bays.hit. (py omitted — not a framing key; walkthrough uses spawn y.)
+{
+  const H = CH.DIVERSEY.bays.hit, sx = H.xs[3], sz = H.z;   // bay 4 (x51), on the deck
+  add('dv-bay-deck', 'lakefront', 'lakefront', R(sx), R(sz), [
+    { yaw: 3.14, pitch: 0.02, dist: 4 },    // INSIDE the bay, near-level: mayor + open front + field ahead
+    { yaw: 3.14, pitch: 0.14, dist: 9 },    // pulled back: the two-tier building bands frame the downrange field
+    { yaw: 2.9,  pitch: 0.05, dist: 5 },    // slight NW inside the bay — divider + field + a distance board
+  ]);
+}
+
+// Diversey mini-golf (task 028): stand SE of the 3-hole course and look NW/N
+// across all three holes from a raised pitch so the felt fairways, wood rails,
+// cups/flags, windmill + loop all read as one coherent place. Stand + yaw
+// derive from DIVERSEY.mini bounds.
+{
+  const mg = CH.DIVERSEY.mini, sx = (mg.x0 + mg.x1) / 2 + 7, sz = mg.z1 + 4;   // SE of the course
+  const yaw = R(Math.atan2(((mg.x0 + mg.x1) / 2) - sx, ((mg.z0 + mg.z1) / 2) - sz));
+  add('dv-minigolf', 'lakefront', 'lakefront', R(sx), R(sz), [
+    { yaw, pitch: 0.5, dist: 20 },                 // high: the whole course layout
+    { yaw: R(yaw + 0.4), pitch: 0.42, dist: 17 },  // shifted: flags + windmill
+    { yaw: R(yaw - 0.4), pitch: 0.34, dist: 15 },  // lower + closer: a hole + rails read
+  ]);
+}
+
 const signSeen = {};
 for (const s of CH.SIGNS) {
   let id = 'sign-' + slug(s.text.replace(/[^a-z ]/gi, ''));

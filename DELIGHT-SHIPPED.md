@@ -142,3 +142,14 @@ cut becomes a revert task.
   under the Ope! wordmark, above the tagline — the author's credit on the front
   door, subordinate to the title in the card's own rounded type — title card —
   task 024
+- The Diversey range stopped being scenery: step INTO a Topgolf-style ground
+  bay on the walkable hitting deck, charge a swing (E / ✋) and watch the ball
+  arc downrange, bounce on the turf and settle with a yardage call ('171 yards ·
+  new best!') — a ten-ball bucket that refills, best carry remembered — Diversey
+  driving range bays (x30–66, z280) — task 028
+- The mini-golf is a real course now, not crossed sticks: three coherent holes
+  (a dogleg, a loop, a windmill) with wood rails that hug the felt, tee pads,
+  cups + flags and a MINI GOLF sign behind a low fence — putt with a charged
+  stroke, rails deflect, the cup captures, strokes-vs-par per hole, and the
+  holes unlock 1→2→3 while the windmill blades turn — Diversey mini-golf
+  (x70–88, z286–306) — task 028

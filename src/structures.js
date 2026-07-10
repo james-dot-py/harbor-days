@@ -642,37 +642,87 @@ function buildDiversey(POSTS,RAILS){
   // ball bucket (with a couple of balls perched on the rim, same instanced mesh as downrange balls would over-budget — keep it to the bucket)
   const bk=new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.24,0.55,10),toon(D.bucket.color));bk.position.set(D.bucket.x,0.28,D.bucket.z);scene.add(bk);collide(D.bucket.x,D.bucket.z,0.4);
 
-  // ---- mini golf corner: felt fairways + wood rails + 3 holes ----
+  // ===================================================================
+  //  MINI GOLF — 3 playable holes. Each felt fairway is a data polygon
+  //  (mg.holes[].fair, CCW); its wood rails are DERIVED from the polygon
+  //  edges so they hug the felt and can never cross. Draw-call budget:
+  //  ONE merged felt Mesh (plain, frustum-culled), ONE rails InstancedMesh,
+  //  ONE cups+flagpoles InstancedMesh; flag cloths + tee pads each merge to
+  //  a single plain mesh. Static windmill tower + loop torus (the diversey
+  //  pack owns the spinning blades). Low boundary fence via the shared
+  //  instanced fence mesh, left open at the sign for entry.
+  // ===================================================================
   const mg=D.mini,H=mg.holes;
-  const felt=new THREE.InstancedMesh(new THREE.PlaneGeometry(6,6),toon(mg.felt,{}),H.length);
-  const cups=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.16,0.16,0.05,10),toon(mg.cup),H.length);
-  const railM=toon(mg.rail);const rails=[];   // collect rail boxes -> one instanced mesh
-  H.forEach((h,i)=>{
-    M.compose(V.set(h.x,0.045,h.z),flatQ,S);felt.setMatrixAt(i,M);
-    M.compose(V.set(h.x+1.6,0.07,h.z+1.6),Q.identity(),S);cups.setMatrixAt(i,M);
-    for(const [dx,dz,len,rot] of [[0,-3,6,0],[0,3,6,0],[-3,0,6,Math.PI/2],[3,0,6,Math.PI/2]])
-      rails.push({x:h.x+dx,z:h.z+dz,len,rot});
-  });
-  felt.instanceMatrix.needsUpdate=cups.instanceMatrix.needsUpdate=true;scene.add(felt,cups);
-  const railI=new THREE.InstancedMesh(new THREE.BoxGeometry(0.16,0.24,1),railM,rails.length);
-  rails.forEach((rr,i)=>{E.set(0,rr.rot,0);Q.setFromEuler(E);M.compose(V.set(rr.x,0.12,rr.z),Q,new THREE.Vector3(1,1,rr.len));railI.setMatrixAt(i,M);});
-  railI.instanceMatrix.needsUpdate=true;scene.add(railI);Q.identity();
-  // per-hole obstacles
+  // (1) FELT — per-hole ShapeGeometry from the fairway polygon, baked to
+  //     ABSOLUTE world coords (mesh sits at origin so the curve shader works)
+  const feltGeos=[];
   for(const h of H){
+    const sh=new THREE.Shape();
+    h.fair.forEach(([px,pz],k)=>k?sh.lineTo(px,-pz):sh.moveTo(px,-pz));   // shape (x,-z) -> world (x,0,z) after rotateX
+    const g=new THREE.ShapeGeometry(sh);g.rotateX(-Math.PI/2);g.translate(0,0.05,0);
+    feltGeos.push(g);
+  }
+  scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(feltGeos,false),toon(mg.felt,{})));
+  // (2) RAILS — one box per axis-aligned fairway edge, derived from the verts
+  //     (vertical edge -> long axis along z, rot 0; horizontal -> rot PI/2)
+  const railSpecs=[];
+  for(const h of H){const P=h.fair,n=P.length;
+    for(let i=0;i<n;i++){const a=P[i],b=P[(i+1)%n];
+      railSpecs.push({x:(a[0]+b[0])/2,z:(a[1]+b[1])/2,
+        rot:Math.abs(a[0]-b[0])<1e-6?0:Math.PI/2,len:Math.hypot(b[0]-a[0],b[1]-a[1])});}
+  }
+  const railI=new THREE.InstancedMesh(new THREE.BoxGeometry(mg.railW,mg.railH,1),toon(mg.rail),railSpecs.length);
+  railSpecs.forEach((rr,i)=>{E.set(0,rr.rot,0);Q.setFromEuler(E);M.compose(V.set(rr.x,mg.railH/2,rr.z),Q,S.set(1,1,rr.len+mg.railW));railI.setMatrixAt(i,M);});
+  railI.instanceMatrix.needsUpdate=true;scene.add(railI);Q.identity();S.set(1,1,1);
+  // (3) CUPS + FLAGPOLES — ONE InstancedMesh of unit cylinders (2 per hole)
+  const cups=new THREE.InstancedMesh(new THREE.CylinderGeometry(1,1,1,10),toon(mg.cup),H.length*2);
+  let ci=0;
+  for(const h of H){
+    M.compose(V.set(h.cup[0],0.03,h.cup[1]),Q.identity(),S.set(0.16,0.05,0.16));cups.setMatrixAt(ci++,M);   // cup
+    M.compose(V.set(h.cup[0],0.7,h.cup[1]),Q.identity(),S.set(0.03,1.4,0.03));cups.setMatrixAt(ci++,M);      // flagpole
+  }
+  cups.instanceMatrix.needsUpdate=true;scene.add(cups);S.set(1,1,1);
+  // (4) FLAG CLOTHS — merged into ONE plain (frustum-culled) mesh, flying +x
+  const flagGeos=[];
+  for(const h of H){const g=new THREE.PlaneGeometry(0.5,0.32);g.translate(h.cup[0]+0.29,1.3,h.cup[1]);flagGeos.push(g);}
+  scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(flagGeos,false),toon(mg.flag,{mat:{side:THREE.DoubleSide}})));
+  // (5) TEE PADS — merged into ONE plain mesh, one flat pad per hole tee
+  const teeGeos=[];
+  for(const h of H){const g=new THREE.BoxGeometry(0.9,0.06,0.9);g.translate(h.tee[0],0.07,h.tee[1]);teeGeos.push(g);}
+  scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(teeGeos,false),toon(mg.tee)));
+  // (6/7) STATIC obstacles: windmill tower (pack owns the blades) + loop torus
+  for(const h of H){
+    if(!h.obst)continue;const ox=h.obst[0],oz=h.obst[1];
     if(h.type==='windmill'){
-      const shaft=new THREE.Mesh(new THREE.BoxGeometry(0.7,2.2,0.7),toon(0xe9e2cf));shaft.position.set(h.x,1.1,h.z);scene.add(shaft);collide(h.x,h.z,0.55);
-      const roof=new THREE.Mesh(new THREE.ConeGeometry(0.7,0.7,4),toon(0xb3402e));roof.rotation.y=Math.PI/4;roof.position.set(h.x,2.55,h.z);scene.add(roof);
-      const blades=new THREE.InstancedMesh(new THREE.BoxGeometry(0.16,1.7,0.05),toon(0xfdf6e6,{}),4);   // STATIC (no registerUpdate in builders)
-      for(let k=0;k<4;k++){E.set(0,0,k*Math.PI/2);Q.setFromEuler(E);M.compose(V.set(h.x,2.0,h.z+0.4),Q,S);blades.setMatrixAt(k,M);}
-      blades.instanceMatrix.needsUpdate=true;scene.add(blades);Q.identity();
+      const shaft=new THREE.Mesh(new THREE.BoxGeometry(0.7,2.2,0.7),toon(0xe9e2cf));shaft.position.set(ox,1.1,oz);scene.add(shaft);
+      const roof=new THREE.Mesh(new THREE.ConeGeometry(0.7,0.7,4),toon(0xb3402e));roof.rotation.y=Math.PI/4;roof.position.set(ox,2.55,oz);scene.add(roof);
+      collide(ox,oz,0.5);
     }else if(h.type==='loop'){
-      const loop=new THREE.Mesh(new THREE.TorusGeometry(0.9,0.12,8,20),toon(0x4f7dd9));loop.position.set(h.x,0.9,h.z);scene.add(loop);collide(h.x,h.z,0.5);
-    }else if(h.type==='tower'){
-      const body=new THREE.Mesh(new THREE.BoxGeometry(0.8,2.4,0.8),toon(0xa9614b));body.position.set(h.x,1.2,h.z);scene.add(body);collide(h.x,h.z,0.6);
-      const roof=new THREE.Mesh(new THREE.ConeGeometry(0.72,0.8,4),toon(0x527f6d));roof.rotation.y=Math.PI/4;roof.position.set(h.x,2.8,h.z);scene.add(roof);
-      const face=new THREE.Mesh(new THREE.CircleGeometry(0.26,14),bmat(0xf6efdd));face.position.set(h.x,1.9,h.z+0.41);scene.add(face);
+      const loop=new THREE.Mesh(new THREE.TorusGeometry(0.9,0.12,8,20),toon(0x4f7dd9));loop.position.set(ox,0.9,oz);scene.add(loop);
+      collide(ox,oz,0.5);
     }
   }
+  // (9) BOUNDARY FENCE — shared instanced fence mesh, left open at the sign
+  //     corner (gate rect near sign) so the course is enterable from there.
+  const mf=mg.fence;
+  fenceRun([[mg.x0,mg.z0],[mg.x1,mg.z0],[mg.x1,mg.z1],[mg.x0,mg.z1],[mg.x0,mg.z0]],
+    {spacing:mf.spacing,postH:mf.postH,color:mf.color,collideR:0.8,gates:[{x0:69.5,x1:74,z0:304,z1:306.5}]},
+    POSTS,RAILS);
+  // (10) MINI-GOLF SIGN at the entrance (canvas board on a short post). Its own
+  // WIDE canvas — diverseyBoardTex is sized for short numbers and clips a word
+  // like "MINI GOLF" to its middle. FrontSide (faces the entrance/course side
+  // via sign.ry) so the back never shows mirrored text (PITFALLS: DoubleSide
+  // canvas planes mirror from behind).
+  const sgn=mg.sign;
+  const mgSignTex=(txt)=>{
+    const cv=document.createElement('canvas');cv.width=256;cv.height=88;const g=cv.getContext('2d');
+    g.fillStyle='#fdf6e6';g.fillRect(0,0,256,88);g.strokeStyle='#3a6b3f';g.lineWidth=7;g.strokeRect(5,5,246,78);
+    g.fillStyle='#2f5d3a';g.textAlign='center';g.textBaseline='middle';g.font='700 40px "Trebuchet MS",sans-serif';g.fillText(txt,128,47);
+    const t=new THREE.CanvasTexture(cv);t.anisotropy=4;return t;
+  };
+  const signM=new THREE.Mesh(new THREE.PlaneGeometry(2.0,0.69),curveMat(new THREE.MeshBasicMaterial({map:mgSignTex(sgn.text)})));
+  signM.position.set(sgn.x,1.3,sgn.z);signM.rotation.y=sgn.ry;scene.add(signM);
+  const spost=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,1.3,6),toon(mg.pole));spost.position.set(sgn.x,0.65,sgn.z);scene.add(spost);
 
   // ===================================================================
   //  TWO-TIER BAY BUILDING (Topgolf-style) + TALL PERIMETER NET
@@ -700,13 +750,12 @@ function buildDiversey(POSTS,RAILS){
   setBox(frame,fi++,bxc,0.25,zB,bW,0.22,0.22);                  // back ground sill
   frame.instanceMatrix.needsUpdate=true;scene.add(frame);
 
-  // deck-toned slabs: ground platform + upper deck + a 3-step stair on the east end
-  const deckM=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),toon(B.deck),5);
+  // deck-toned slabs: walkable GROUND platform (top = deckRect.h) + upper deck slab.
+  // The old dead east stair is gone — the upper tier is decorative + gated.
+  const deckM=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),toon(B.deck),2);
   let dmi=0;
-  setBox(deckM,dmi++,bxc,0.06,bzc,bW,0.12,dep);                 // ground platform
+  setBox(deckM,dmi++,bxc,B.deckRect.h/2,bzc,bW,B.deckRect.h,dep);   // ground platform (walkable, top at deckRect.h)
   setBox(deckM,dmi++,bxc,sH+deckT/2,bzc,bW,deckT,dep);          // upper deck slab (top at y1)
-  const stTop=[y1/3,2*y1/3,y1];
-  for(let s2=0;s2<3;s2++)setBox(deckM,dmi++,bx1+1.6-s2*1.4,stTop[s2]/2,bzc,1.4,stTop[s2],2.8);
   deckM.instanceMatrix.needsUpdate=true;scene.add(deckM);
 
   // per-bay divider walls, both levels (perLevel+1 walls x 2 = 14)
@@ -740,11 +789,18 @@ function buildDiversey(POSTS,RAILS){
   setBox(rail,ri++,bxc,y1+railH,railZ,bW,0.08,0.08);            // top bar
   rail.instanceMatrix.needsUpdate=true;scene.add(rail);
 
-  // colliders across the footprint (~2.4 m grid, r1.4) + the stair block
-  for(let cx=bx0;cx<=bx1+0.01;cx+=2.4)for(let cz=zF;cz<=zB+0.01;cz+=2.4)collide(cx,cz,1.4);
-  collide(bx1+1.6,bzc,1.5);collide(bx1+0.2,bzc,1.5);
+  // ENCLOSURE colliders: the 5 internal dividers + 2 end walls (x = bx0+j*bw)
+  // each get a run of thin colliders along z; PLUS the back (south) wall, whose
+  // glow panels must not be walked through. So each bay is a 3-sided pocket
+  // entered ONLY from the range/front (north) — stand in, face north, hit. The
+  // north front stays open (entry + the shot downrange).
+  for(let j=0;j<=B.perLevel;j++){const x=bx0+j*bw;
+    for(let cz=zF;cz<=zB+0.01;cz+=1.3)collide(x,cz,0.34);}
+  for(let cx=bx0;cx<=bx1+0.01;cx+=1.3)collide(cx,zB,0.34);   // back (south) wall — behind the glow panels
+  // the ground tier is a walkable hitting deck (engine reads walkRects->surfaceY)
+  walkRects.push({x1:B.deckRect.x0,x2:B.deckRect.x1,z1:B.deckRect.z0,z2:B.deckRect.z1,h:B.deckRect.h});
 
-  // ---- 4 posed chibi golfers mid-swing (lvl0 on the mats, lvl1 on the deck) ----
+  // ---- posed chibi golfers mid-swing (B.golfers: upper-deck decorative only) ----
   const CIT=0.74;
   const gpal=[
     {suit:0xc85a4a,pants:0x35406e,skin:0xe6b98f,hair:0x2a1c12},

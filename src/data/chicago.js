@@ -742,40 +742,67 @@ export const TENNIS = {
 };
 
 // DIVERSEY DRIVING RANGE & MINI GOLF — south-end inland attraction (real:
-// inland, west of the trail). Green range strip x28-88, z242-283 (fenced on
-// its W/N/E, open at the south tee line), 4 tee mats, 3 distance boards,
-// ~30 scattered balls downrange, a ball bucket; a mini-golf corner (x70-88,
-// z286-306) with 3 whimsical holes (STATIC windmill — registerUpdate isn't
-// available in builders and packs are out of scope here — a loop ramp, and a
-// tiny Waveland clock-tower replica) on felt fairways with wood rails.
+// inland, west of the trail), now ENTERABLE + PLAYABLE (task 028, issues
+// 010/011). Green range strip x28-88, z242-283 (fenced W/N/E, open at the
+// south tee line) hitting NORTH (−z) under a 12 m net. The two-tier bay
+// building's GROUND tier is a walkable hitting deck (bays.deck, h 0.4) entered
+// from the park/back side into a bay; the "hit a bucket" activity (pack
+// diversey.js) launches balls north with arc + bounce + distance in yards.
+// The UPPER tier is decorative (posed golfers) + visually gated — NO stair
+// (the old dead stair is removed). A playable 3-hole mini-golf course (x70-88,
+// z286-306): hole 1 dogleg, hole 2 loop-ramp, hole 3 windmill — each felt
+// fairway is a data polygon whose wood rails are DERIVED from its edges (they
+// cannot cross), tee pad + cup + flag on each; putt via chargeThrow with
+// strokes/par (pack). The windmill TOWER is static here; the pack owns +
+// slowly rotates the BLADES.
+// NOTE: range{} is UNCHANGED — props.js tree-scatter filters against this exact
+// rect; moving it would drift the world's tree layout. Do not touch it.
 export const DIVERSEY = {
   range:{ x0:28, x1:88, z0:242, z1:283 },
   green:0x59b356,
   fence:{ color:0xd7cfbe, postH:1.05, spacing:2.8 },   // W + N + E (south/tee side open)
-  // TWO-TIER BAY BUILDING (the real renovated Diversey is a Topgolf-style
-  // double-decker — reference: Downloads/'diversey driving range.jpg' + CPD
-  // photos): ground bays + railed upper deck along the SOUTH/tee edge,
-  // hitting NORTH into the netted field. Dark frame, per-bay dividers,
-  // warm glowing bay interiors at dusk, small cool screens per bay.
+  // TWO-TIER BAY BUILDING (Topgolf-style double-decker). GROUND tier ENTERABLE:
+  // a walkable hitting DECK (deck.h) reached from the park/back (south) side,
+  // enclosed by the divider + end-wall colliders so only the bay fronts open to
+  // the field. UPPER tier decorative + gated (no stair). Hitting NORTH.
   bays:{ x0:30, x1:66, zFront:280, depth:5.5, storyH:3.1, perLevel:6,
          frame:0x3a3f45, deck:0x8b857a, divider:0x565b61, rail:0xcfd4d8,
          glow:0xffd98a, screen:0x9edcff,
-         golfers:[ {x:35,lvl:0},{x:53,lvl:0},{x:41,lvl:1},{x:59,lvl:1} ] },   // posed mid-swing chibis, both levels
+         deckRect:{ x0:30, x1:66, z0:279.8, z1:285.6, h:0.4 },   // ground-tier walk rect (slab top matches h); deck (above) is the slab color
+         hit:{ xs:[33,39,45,51,57,63], z:280.9, r:1.9 },     // per-bay hitting spots (bay centers, on the deck front)
+         golfers:[ {x:41,lvl:1},{x:59,lvl:1} ] },            // UPPER-deck posed chibis only — the ground bays are the player's
   // TALL PERIMETER NET wrapping the downrange field (W/N/E fence lines):
   // thin dark posts + translucent net panels — the photo's big vertical presence.
   net:{ h:12, poleEvery:10, inset:0.5, pole:0x2e3236, poleR:0.16, mesh:0xdadfe4, opacity:0.16 },
-  tees:{ xs:[33,39,45,51,57,63], z:278.4, w:2.4, d:1.7, color:0x2f6b3a },   // one mat per ground bay (bay centers)
-  balls:{ count:30, x0:30, x1:86, z0:246, z1:275, color:0xf6f6ee },
+  tees:{ xs:[33,39,45,51,57,63], z:279.2, w:2.4, d:1.7, color:0x2f6b3a },   // hitting mats, one per bay, on the deck front lip
+  balls:{ count:30, x0:30, x1:86, z0:246, z1:275, color:0xf6f6ee },         // static decorative scatter (structures, LOCAL rng)
   boards:[ ['50',34,266],['100',34,257],['150',34,248] ],   // distance markers down the west edge
   bucket:{ x:76, z:281, color:0x9aa0a6, ball:0xffffff },
+  play:{ ballR:0.14, bucketN:10, gravity:22, netZ:243.0, yardScale:4.5,
+         maxBalls:14 },   // range hitting (pack). yardScale maps the compressed
+         // ~38 m field to real-feeling yards, ~consistent with the 50/100/150
+         // distance boards (a full-field carry reads ~170 yds; a net-buster more)
   mini:{
     x0:70, x1:88, z0:286, z1:306,
-    felt:0x3fae5f, rail:0xb07a46, cup:0x2a2a2a,
+    felt:0x3fae5f, rail:0xb07a46, cup:0x171717, tee:0x2f6b3a, flag:0xd23b32, pole:0x2a2a2a,
+    railW:0.16, railH:0.24,
+    fence:{ color:0xc9b78f, postH:0.7, spacing:2.2 },        // low boundary fence (shared instanced fence mesh)
+    sign:{ x:70.5, z:305.5, ry:0.6, text:'MINI GOLF' },
+    // Each hole's felt FAIRWAY is an ordered rectilinear polygon (CCW). Rails
+    // are DERIVED from its consecutive edges — never freehand — so they hug the
+    // felt and can never cross. tee = start pad, cup = hole, obst = obstacle.
     holes:[
-      { type:'windmill', x:75, z:291 },
-      { type:'loop',     x:83, z:293 },
-      { type:'tower',    x:78, z:301 },
+      { id:1, type:'dogleg', par:3,
+        fair:[[71,297],[81,297],[81,293],[75,293],[75,288],[71,288]],
+        tee:[79,295], cup:[73,290] },
+      { id:2, type:'loop', par:2,
+        fair:[[83,299],[87,299],[87,288],[83,288]],
+        tee:[85,297.5], cup:[85,290], obst:[85,293.5] },
+      { id:3, type:'windmill', par:3,
+        fair:[[72,305],[86,305],[86,300],[72,300]],
+        tee:[84,302.5], cup:[74,302.5], obst:[79,302.5] },
     ],
+    putt:{ power:5.5, friction:1.6, cupR:0.30, cupSpeed:2.4 },   // putt physics (pack)
   },
 };
 

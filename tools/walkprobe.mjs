@@ -37,6 +37,8 @@ for(const d of CH.DECKS)walkRects.push(d.walk);
 { const D=CH.SANCTUARY.deck;                     // sanctuary bird-watching deck + stairs (matches buildSanctuary)
   walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:D.h});
   for(const st of D.stairs)walkRects.push({x1:st.x0,x2:st.x1,z1:st.z0,z2:st.z1,h:st.h}); }
+{ const B=CH.DIVERSEY.bays.deckRect;              // Diversey ground-tier hitting deck (matches structures.js walkRects.push)
+  walkRects.push({x1:B.x0,x2:B.x1,z1:B.z0,z2:B.z1,h:B.h}); }
 function onRect(x,z){for(const r of walkRects)if(x>=r.x1&&x<=r.x2&&z>=r.z1&&z<=r.z2)return r;return null}
 
 function walkable(x,z){
@@ -279,7 +281,7 @@ console.log('\n--- Job 3: Diversey range + mini golf on land, clear of the trail
   const D=CH.DIVERSEY,r=D.range,m=D.mini;
   // range + mini-golf footprints on walkable land
   const pts=[[r.x0,r.z0],[r.x1,r.z0],[r.x0,r.z1],[r.x1,r.z1],[(r.x0+r.x1)/2,(r.z0+r.z1)/2],
-             [m.x0,m.z0],[m.x1,m.z1],...m.holes.map(h=>[h.x,h.z])];
+             [m.x0,m.z0],[m.x1,m.z1],...m.holes.flatMap(h=>[h.tee,h.cup])];
   let dbad=0;for(const p of pts)if(!walkable(p[0],p[1]))dbad++;
   expect(`Diversey range + mini golf all on land (${dbad} off)`,dbad,0);
   // fence edges clear of the trail ribbons
@@ -289,6 +291,21 @@ console.log('\n--- Job 3: Diversey range + mini golf on land, clear of the trail
   let minTrail=1e9;for(const p of edge){const c=ribbonClear(p[0],p[1],0);if(c.min<minTrail)minTrail=c.min;}
   expect(`Diversey fence clears every ribbon by >=3 m (min ${minTrail.toFixed(2)})`,minTrail>=3-1e-2,true);
   expect('Diversey has 3 mini-golf holes',m.holes.length,3);
+}
+
+// ===== Task 028: bay hitting deck (elevated walk rect) + mini-golf felt fairways =====
+console.log('\n--- Task 028: enterable bay deck walkable+elevated, mini-golf tees/cups on their felt ---');
+{
+  const B=CH.DIVERSEY.bays, dc=[(B.deckRect.x0+B.deckRect.x1)/2,(B.deckRect.z0+B.deckRect.z1)/2];
+  expect('bay deck centre walkable',walkable(dc[0],dc[1]),true);
+  expect(`bay deck surface h=${B.deckRect.h}`,onRect(dc[0],dc[1]).h,B.deckRect.h);
+  for(const hx of B.hit.xs)expect(`bay hit spot (${hx},${B.hit.z}) on the deck`,onRect(hx,B.hit.z)!==null,true);
+  const m=CH.DIVERSEY.mini;
+  for(const h of m.holes){
+    expect(`hole ${h.id} tee inside its fairway`,pip(h.tee[0],h.tee[1],h.fair),true);
+    expect(`hole ${h.id} cup inside its fairway`,pip(h.cup[0],h.cup[1],h.fair),true);
+    expect(`hole ${h.id} fairway is a polygon (>=4 verts)`,h.fair.length>=4,true);
+  }
 }
 
 // ===== Job 4: south terraces keep the 7-step Rocks profile around the curve =====

@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-10T19:09:15.485Z",
- "count": 70,
+ "generated": "2026-07-10T21:03:25.241Z",
+ "count": 72,
  "waypoints": [
   {
    "id": "spawn",
@@ -322,6 +322,56 @@
     }
    ],
    "expectation": "From the elevated birdwatch DECK (the sanctuary's hero perch), looking west over the interior: the winding limestone loop and dappled clearings spread below through the trees, deck rail/planks framing the near foreground (the mayor standing on the platform, not fallen to the grass). Crucially the sanctuary reads BUSY WITH BIRDS — MULTIPLE birds visible at once across the layers (canopy / shrubs / ground / clearing edges): little chibi songbirds perched and flitting, and frequently a special sighting — a heron statue-still at a clearing edge, the woodpecker on the pale dead snag, a hovering hummingbird, or a cedar-waxwing flock. It must NOT read as an empty grove."
+  },
+  {
+   "id": "dv-bay-deck",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 51,
+   "z": 280.9,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.02,
+     "dist": 4
+    },
+    {
+     "yaw": 3.14,
+     "pitch": 0.14,
+     "dist": 9
+    },
+    {
+     "yaw": 2.9,
+     "pitch": 0.05,
+     "dist": 5
+    }
+   ],
+   "expectation": "Standing in a Diversey hitting bay on the ground deck, the view DOWN the range (north): the open bay front framed by divider walls, the green fenced field receding under the tall perimeter net, distance boards; reads as a real enterable Topgolf-style bay you hit from — not scenery."
+  },
+  {
+   "id": "dv-minigolf",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 86,
+   "z": 310,
+   "framings": [
+    {
+     "yaw": -2.68,
+     "pitch": 0.5,
+     "dist": 20
+    },
+    {
+     "yaw": -2.28,
+     "pitch": 0.42,
+     "dist": 17
+    },
+    {
+     "yaw": -3.08,
+     "pitch": 0.34,
+     "dist": 15
+    }
+   ],
+   "expectation": "The 3-hole mini-golf course reads as a coherent place: three felt fairways (a dogleg, a loop hole, a windmill hole) with wood rails that HUG the felt edges (never crossing like pick-up sticks), each with a tee pad, a cup + flag, the windmill tower and the blue loop on their own holes, ringed by a low boundary fence with a MINI GOLF sign."
   },
   {
    "id": "sign-belmont-harbor",

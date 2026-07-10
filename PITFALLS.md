@@ -123,6 +123,17 @@ few turns to find; keep each to one line of symptom + fix.
   group POSITIONED at the geometry centre and build children in LOCAL coords, then
   rotate the inner group (heave dropped to 0.023 m). Any sway/roll on a displaced
   cell must rotate a locally-centred group, never the far-from-origin root.
+- A short-label canvas sign helper CLIPS a long word to its middle: reusing
+  diverseyBoardTex (96px canvas, 34px font, built for '50'/'100') for 'MINI GOLF'
+  rendered as 'NI GO' (task 028). Word-signs need their OWN wider canvas + a
+  fitted font; make them FrontSide facing their approach so the back never shows
+  the mirrored-text artifact.
+- Bay/pocket INTERIOR chase-cam framing (task 028): looking OUT the open front
+  reads best at SHORT dist (~4) + near-LEVEL pitch — the camera stays inside the
+  pocket and frames the mayor + the opening. Longer dist parks the camera
+  OUTSIDE/behind the shell staring THROUGH stacked deck slabs + frame beams
+  (banded yellow/gray), and low positive pitch stares down at the deck floor (a
+  flat yellow wall). Axis-aligned yaw, short, level — like the L-car interior.
 - Headless touch taps MISS the rising-edge action latch: page.touchscreen.tap
   fires touchStart+touchEnd within one frame gap, so framework `_touchAct` flips
   true->false before any rAF samples it -> the interaction's actPressed edge never
