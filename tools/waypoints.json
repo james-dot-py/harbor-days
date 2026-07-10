@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-10T01:25:34.616Z",
- "count": 61,
+ "generated": "2026-07-10T02:12:34.435Z",
+ "count": 62,
  "waypoints": [
   {
    "id": "spawn",
@@ -572,6 +572,31 @@
     }
    ],
    "expectation": "Wooden 'FUTURE ENTRANCE →' gag sign at the Irving Park underpass in the LSD berm, far north."
+  },
+  {
+   "id": "suggestion-box",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 20,
+   "z": 112.5,
+   "framings": [
+    {
+     "yaw": -2.13,
+     "pitch": 0.08,
+     "dist": 5.5
+    },
+    {
+     "yaw": -1.93,
+     "pitch": 0.12,
+     "dist": 6.5
+    },
+    {
+     "yaw": -2.21,
+     "pitch": 0.06,
+     "dist": 4.5
+    }
+   ],
+   "expectation": "A cozy park-district suggestion box (wood post, green painted body, gabled lid, brass mail slot) beside the Belmont FUTURE ENTRANCE doors/sign; its cream front label reads 'WHERE NEXT? — drop a suggestion / press E' and is legible. House toon style, sits on the grass off the connector ribbon."
   },
   {
    "id": "deck-1",

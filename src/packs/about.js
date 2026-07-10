@@ -11,5 +11,8 @@ onWorldReady(() => {
        © OpenStreetMap contributors, under the
        <b>Open Database License (ODbL)</b> —
        openstreetmap.org/copyright.</p>
-    <p>OSM is reference only; everything you see is hand-built.</p>`);
+    <p>OSM is reference only; everything you see is hand-built.</p>
+    <p>Where should Ope! go next? There's a <b>suggestion box</b> at the
+       Belmont <b>Future Entrance</b> (west end of the harbor) — press E and
+       drop a note. Jimbo reads them.</p>`);
 });

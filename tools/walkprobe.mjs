@@ -472,5 +472,20 @@ expect('apron corner by the crosswalks (-203,-547) walkable',WV.walkableW(-203,-
 expect('apron meets the Sheffield sidewalk (-202.5,-540) walkable',WV.walkableW(-202.5,-540),true);
 expect('past the chamfer wall (-216,-534) NOT walkable (inside the park)',WV.walkableW(-216,-534),false);
 
+// ===== Task 013: suggestion box at the Belmont FUTURE ENTRANCE =====
+// The box is a small collider on EXISTING walkable LAND — it must add no new
+// walkable surface and must clear every trail ribbon like any other prop.
+console.log('\n--- Task 013: suggestion box beside the Belmont future entrance ---');
+{
+  const b=CH.SUGGESTION_BOX;
+  expect(`box ground walkable (${b.x},${b.z})`,walkable(b.x,b.z),true);
+  expect('box adds no elevated walk rect (still ground level)',surfaceY(b.x,b.z),0);
+  // players approach from the SE (up the connector / over from the park)
+  expect('SE approach spot walkable (20,112)',walkable(20,112),true);
+  expect('E approach spot walkable (22,109)',walkable(22,109),true);
+  // clears every trail ribbon footprint by >=0.6 m (prop radius ~0.5)
+  auditProps('suggestion box',[[b.x,b.z]],0.5);
+}
+
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 process.exit(fail?1:0);

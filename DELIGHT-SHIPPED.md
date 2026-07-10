@@ -76,3 +76,8 @@ cut becomes a revert task.
   Waveland rooftops — task 012
 - The marquee message board rotates a real matchup line — 'CUBS VS SOX ·
   7:05' — dot-matrix, like the photo — Clark & Addison — task 012
+- The FUTURE ENTRANCE takes requests now: a park-district 'WHERE NEXT?'
+  suggestion box beside the Belmont underpass doors — press E, tell Jimbo
+  which neighborhood to build next, and it really sends (with an email
+  fallback); the wink at expansion finally listens back — Belmont underpass
+  — task 013

@@ -157,6 +157,20 @@ for (const s of CH.SIGNS) {
     [{ yaw: R(s.ry + Math.PI), pitch: 0.12, dist: 8 }, { yaw: R(s.ry), pitch: 0.12, dist: 8 }, { yaw: R(s.ry + Math.PI + 0.9), pitch: 0.2, dist: 10 }]);
 }
 
+// suggestion box (task 013): the diegetic "WHERE NEXT?" box at the Belmont
+// FUTURE ENTRANCE. Stand SE on the connector approach and aim NW at the entrance
+// cluster; a dead-on aim hides the small box behind the chibi, so the framings
+// skew the yaw a little to keep the box (and its label) beside the mayor.
+{
+  const b = CH.SUGGESTION_BOX, sx = b.x + 3, sz = b.z + 3.5;
+  const yaw = yawTo(sx, sz, b.x, b.z);
+  add('suggestion-box', 'lakefront', 'lakefront', R(sx), R(sz), [
+    { yaw: R(yaw + 0.3), pitch: 0.08, dist: 5.5 },   // box left of the mayor, close — label read
+    { yaw: R(yaw + 0.5), pitch: 0.12, dist: 6.5 },   // wider: box + FUTURE ENTRANCE arch/platform
+    { yaw: R(yaw + 0.22), pitch: 0.06, dist: 4.5 },  // closer still, box just left of centre
+  ]);
+}
+
 CH.DECKS.forEach((d, i) => {   // skip decks another waypoint already covers
   const [x0, x1, z0, z1] = d.deck, xc = (x0 + x1) / 2, zc = (z0 + z1) / 2;
   if (wps.some(w => (w.x - xc) ** 2 + (w.z - zc) ** 2 < 20 * 20)) return;

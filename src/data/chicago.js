@@ -374,6 +374,14 @@ export const SIGNS = [
   { text:'FUTURE ENTRANCE →',   x:16,  z:-794, ry:-Math.PI/2 },   // Irving Park underpass
 ];
 
+// suggestion box (task 013) — a diegetic park-district "WHERE NEXT?" box beside
+// the Belmont FUTURE ENTRANCE doors (sign at 15,113; underpass mouth at 16,105).
+// Small collider only — NO new walkable surface (it sits on existing LAND). The
+// coordinate lives here so the engine pack, tools/walkprobe.mjs and
+// tools/gen-waypoints.mjs all read ONE placement source. ry ≈ 1.0 → the labelled
+// face points ESE, toward players coming up the connector / over from the park.
+export const SUGGESTION_BOX = { x:17, z:109, ry:1.0 };
+
 // path lamps along the main trail (trail-t + side) plus one pier lamp.
 // ALL on side -1 (the RIGHT normal = the bike-only side; the crushed-limestone
 // WALK ribbon runs on the +1/left normal at a 4.0 m offset). At offset 2.8 a
