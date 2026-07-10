@@ -87,6 +87,22 @@ function initDom(){
     elBtnAct.addEventListener('pointercancel',up);
     elBtnAct.addEventListener('pointerleave',up);
   }
+  // mobile: the interaction pill is ITSELF a tap target — tapping it drives the
+  // SAME _touchAct path as the ✋ hand button (issue 013 / task 026). _touchAct is
+  // a shared boolean fired on the rising edge in runUpdates, so even a tap that
+  // somehow reached both the pill and the button still fires onUse exactly once;
+  // hold-to-charge works too (implicit touch-pointer capture keeps the pointerup
+  // on the pill after hidePrompt hides it, just like the button). Touch only:
+  // desktop keeps E primary and the pill stays inert (CSS pointer-events:none),
+  // so a mouse click never triggers an action.
+  if(elPrompt){
+    const pillDown=e=>{ if(!IS_TOUCH())return; _touchAct=true; elPrompt.classList.add('pressed'); e.preventDefault(); };
+    const pillUp=()=>{ if(!IS_TOUCH())return; _touchAct=false; elPrompt.classList.remove('pressed'); };
+    elPrompt.addEventListener('pointerdown',pillDown,{passive:false});
+    elPrompt.addEventListener('pointerup',pillUp);
+    elPrompt.addEventListener('pointercancel',pillUp);
+    elPrompt.addEventListener('pointerleave',pillUp);
+  }
   const bJ=$('btnJournal');if(bJ)bJ.addEventListener('click',()=>toggleJournal());
   const jc=$('journalClose');if(jc)jc.addEventListener('click',()=>toggleJournal(false));
 }
@@ -109,6 +125,7 @@ export function addInteraction({x,z,r,label,onUse,priority=0}){
 }
 function hidePrompt(){
   elPrompt.style.display='none';
+  elPrompt.classList.remove('pressed');   // drop any touch pressed-state
   if(elBtnAct)elBtnAct.style.display='none';
   _activeInter=null;
 }

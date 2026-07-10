@@ -106,8 +106,17 @@
   /* ---------- framework HUD (interactions / toast / journal / power) ---------- */
   #prompt{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:20;display:none;
     align-items:center;gap:8px;background:rgba(253,246,230,.94);color:var(--ink);border-radius:999px;
-    padding:8px 17px;font-size:14px;letter-spacing:.05em;box-shadow:0 4px 0 rgba(122,62,44,.18);white-space:nowrap;}
+    padding:8px 17px;font-size:14px;letter-spacing:.05em;box-shadow:0 4px 0 rgba(122,62,44,.18);white-space:nowrap;
+    pointer-events:none;}   /* desktop: inert — E is primary; clicks pass through to the canvas */
   #prompt .pk{font-weight:700;color:#e0766a;font-size:16px}
+  /* touch: the pill IS the action button — tap it to fire the interaction
+     (framework.js). Raised clear of the right-hand button cluster so it never
+     sits on top of the ✋ hand button (issue 013 / task 026); a soft coral ring
+     reads "tappable", and a pressed state confirms the tap. */
+  body.touch #prompt{pointer-events:auto;cursor:pointer;bottom:190px;padding:10px 19px;
+    box-shadow:0 4px 0 rgba(122,62,44,.18),0 0 0 2px rgba(224,118,106,.30);}
+  body.touch #prompt.pressed{transform:translateX(-50%) scale(.95);filter:brightness(.97);
+    box-shadow:0 2px 0 rgba(122,62,44,.18),0 0 0 2px rgba(224,118,106,.45);}
   #pwrmeter{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);z-index:20;width:180px;height:12px;
     border-radius:999px;background:rgba(74,59,47,.35);overflow:hidden;display:none;box-shadow:0 3px 0 rgba(122,62,44,.18);}
   #pwrfill{height:100%;width:0%;background:linear-gradient(90deg,#8fce74,#ffd166,#e0766a);border-radius:999px}

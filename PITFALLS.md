@@ -115,3 +115,9 @@ few turns to find; keep each to one line of symptom + fix.
   samples as a byte-identical GHOST at its original build slot (task 023:
   TRAIL_LOOP_GHOST + paths.js sampleGhost) and register the new shape in
   pathSamples2 (merged into pathSamples in main.js only AFTER buildProps).
+- Headless touch taps MISS the rising-edge action latch: page.touchscreen.tap
+  fires touchStart+touchEnd within one frame gap, so framework `_touchAct` flips
+  true->false before any rAF samples it -> the interaction's actPressed edge never
+  fires and onUse never runs (the tap looks dead). act.mjs `tap`/`tapSel` HOLD
+  ~160ms (touchStart · wait · touchEnd) so >=1 frame observes the press; also pass
+  `--mobile` (390px hasTouch viewport) or body.touch never turns on (task 026).
