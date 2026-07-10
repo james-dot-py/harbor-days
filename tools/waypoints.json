@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-10T15:20:48.802Z",
- "count": 69,
+ "generated": "2026-07-10T19:09:15.485Z",
+ "count": 70,
  "waypoints": [
   {
    "id": "spawn",
@@ -297,6 +297,31 @@
     }
    ],
    "expectation": "Sydney R. Marovitz golf course: fenced rolling fairways with greens, flags and bunkers stretching north; tee/green dressing, no buildings dominating."
+  },
+  {
+   "id": "sanctuary-deck",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 171,
+   "z": -396.25,
+   "framings": [
+    {
+     "yaw": -1.46,
+     "pitch": 0.34,
+     "dist": 10
+    },
+    {
+     "yaw": -1.77,
+     "pitch": 0.3,
+     "dist": 11
+    },
+    {
+     "yaw": -0.99,
+     "pitch": 0.36,
+     "dist": 9
+    }
+   ],
+   "expectation": "From the elevated birdwatch DECK (the sanctuary's hero perch), looking west over the interior: the winding limestone loop and dappled clearings spread below through the trees, deck rail/planks framing the near foreground (the mayor standing on the platform, not fallen to the grass). Crucially the sanctuary reads BUSY WITH BIRDS — MULTIPLE birds visible at once across the layers (canopy / shrubs / ground / clearing edges): little chibi songbirds perched and flitting, and frequently a special sighting — a heron statue-still at a clearing edge, the woodpecker on the pale dead snag, a hovering hummingbird, or a cedar-waxwing flock. It must NOT read as an empty grove."
   },
   {
    "id": "sign-belmont-harbor",

@@ -115,14 +115,20 @@ export function buildProps(){
     for(let i=0;i<T.north.count;i++)treeSpots.push([rand(T.north.xr[0],T.north.xr[1]),rand(T.north.zr[0],T.north.zr[1]),rand(T.north.scale[0],T.north.scale[1]),rng()<T.north.pinkProb]);
 
     // POST-filter (after all rng consumption — zero determinism impact): no
-    // trees inside the tennis block or the Diversey range/mini-golf field, and
+    // trees inside the tennis block or the Diversey range/mini-golf field,
     // none over the task-023 garden ribbons (peanut loop + entrance path live
-    // in pathSamples2, invisible to the frozen nearPath scan by design).
+    // in pathSamples2, invisible to the frozen nearPath scan by design), and
+    // none on the sanctuary birdwatch DECK, its stair run, the west approach
+    // or the east camera lane (issue 008). The deck clear-rect DERIVES from
+    // SANCTUARY.deck so it follows any deck rework — the deck reads as sited
+    // in a clearing (how real viewing platforms are placed).
     {
       const inRect=(t,r)=>t[0]>r.x0-1&&t[0]<r.x1+1&&t[1]>r.z0-1&&t[1]<r.z1+1;
       const near2=t=>{for(const p of pathSamples2){if((p[0]-t[0])**2+(p[1]-t[1])**2<T.nearPathD2)return true}return false};
+      const D=CH.SANCTUARY.deck,stX=Math.min(...D.stairs.map(s=>s.x0));
+      const deckClear={x0:stX-5,x1:D.x1+8,z0:D.z0-3.5,z1:D.z1+4};   // x≈160.9–183, z≈−402–−390
       for(let i=treeSpots.length-1;i>=0;i--)
-        if(inRect(treeSpots[i],CH.TENNIS.block)||inRect(treeSpots[i],CH.DIVERSEY.range)||near2(treeSpots[i]))treeSpots.splice(i,1);
+        if(inRect(treeSpots[i],CH.TENNIS.block)||inRect(treeSpots[i],CH.DIVERSEY.range)||inRect(treeSpots[i],deckClear)||near2(treeSpots[i]))treeSpots.splice(i,1);
     }
 
     const n=treeSpots.length,M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3(),Eu=new THREE.Euler();

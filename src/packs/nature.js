@@ -21,9 +21,10 @@
 //  All audio is synthesized and guarded on getAudioCtx().actx.
 // =====================================================================
 import * as THREE from 'three';
+import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { onWorldReady, registerUpdate, addInteraction, chargeThrow, camForward,
          holdItem, toast, journalSection, state, makeNPC, getAudioCtx, screenFx } from '../framework.js';
-import { scene, camera, toon, bmat, clamp, lerp, WATER_Y } from '../core.js';
+import { scene, camera, toon, bmat, curveMat, gmap, clamp, lerp, WATER_Y } from '../core.js';
 import { beachH } from '../coast.js';
 import { cam, keys, joy } from '../input.js';
 import { FX } from '../fx.js';
@@ -84,6 +85,51 @@ const SONGS = [
     o.connect(g); g.connect(sfxBus); o.start(t); o.stop(t + 0.4);
   },
 ];
+// Per-species CALLS — a short synthesized voice keyed by the SPECIES.call
+// [kind, baseHz] pair (guarded on actx; the audio ctx is null until start).
+// Reuses the toon-audio idiom: tiny oscillator chirps + a filtered-noise click
+// for the woodpecker drum. New behavior flavors (heron strike, woodpecker
+// knock, hummingbird hover, waxwing pass) each trigger their own voice here.
+function birdCall(kind, f) {
+  const A = getAudioCtx(), actx = A.actx; if (!actx) return;
+  const sfx = A.sfxBus, t = actx.currentTime, nb = A.noiseBuf;
+  const tone = (freq, dur, gain, type, t0, slideTo) => {
+    const o = actx.createOscillator(), g = actx.createGain(); o.type = type || 'sine';
+    o.frequency.setValueAtTime(freq, t0); if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(gain, t0 + Math.min(0.02, dur * 0.3));
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(sfx); o.start(t0); o.stop(t0 + dur + 0.02);
+  };
+  const click = (freq, gain, t0) => {
+    if (!nb) { tone(freq, 0.03, gain, 'square', t0); return; }
+    const s = actx.createBufferSource(); s.buffer = nb;
+    const bp = actx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = freq; bp.Q.value = 3;
+    const g = actx.createGain(); g.gain.setValueAtTime(gain, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.04);
+    s.connect(bp); bp.connect(g); g.connect(sfx); s.start(t0); s.stop(t0 + 0.05);
+  };
+  switch (kind) {
+    case 'chip':     tone(f, 0.09, 0.05, 'sine', t, f * 1.4); break;
+    case 'jeer':     tone(f, 0.28, 0.06, 'sawtooth', t, f * 0.6); break;
+    case 'twitter':  for (let i = 0; i < 4; i++) tone(f * (i % 2 ? 1.25 : 1), 0.06, 0.035, 'sine', t + i * 0.07); break;
+    case 'conkaree': tone(f, 0.06, 0.045, 'sine', t); tone(f * 1.15, 0.06, 0.045, 'sine', t + 0.08); tone(f * 1.6, 0.22, 0.05, 'sawtooth', t + 0.16, f * 1.2); break;
+    case 'trill':    for (let i = 0; i < 7; i++) tone(f + (i % 2 ? 260 : 0), 0.045, 0.03, 'sine', t + i * 0.05); break;
+    case 'whistle':  tone(f, 0.14, 0.05, 'sine', t, f * 1.25); tone(f * 1.25, 0.16, 0.05, 'sine', t + 0.16, f * 0.9); break;
+    case 'buzz':     tone(f, 0.1, 0.04, 'square', t, f * 1.05); tone(f * 1.02, 0.1, 0.035, 'square', t + 0.12, f * 0.98); break;
+    case 'chipburr': tone(f, 0.07, 0.05, 'sawtooth', t); tone(f * 0.9, 0.18, 0.045, 'sawtooth', t + 0.09, f * 0.7); break;
+    case 'warble':   for (let i = 0; i < 5; i++) tone(f * (1 + 0.18 * Math.sin(i * 1.7)), 0.09, 0.035, 'sine', t + i * 0.1); break;
+    case 'seee':     tone(f, 0.5, 0.03, 'sine', t, f * 0.92); break;
+    case 'sam':      tone(f, 0.16, 0.045, 'sine', t); tone(f * 0.86, 0.2, 0.045, 'sine', t + 0.2); tone(f * 0.86, 0.18, 0.04, 'sine', t + 0.44); break;
+    case 'kek':      for (let i = 0; i < 5; i++) tone(f, 0.05, 0.05, 'square', t + i * 0.09, f * 0.9); break;
+    case 'squeal':   tone(f, 0.24, 0.05, 'sine', t, f * 2.0); break;
+    case 'quawk':    tone(f, 0.16, 0.09, 'sawtooth', t, f * 0.7); break;
+    case 'croak':    tone(f, 0.28, 0.09, 'sawtooth', t, f * 0.6); tone(f * 0.9, 0.2, 0.06, 'square', t + 0.1); break;
+    case 'knock':    for (let i = 0; i < 9; i++) click(1400, 0.09, t + i * 0.035); break;
+    case 'hum':      { const o = actx.createOscillator(), g = actx.createGain(); o.type = 'triangle'; o.frequency.value = f || 55;
+                       const lfo = actx.createOscillator(), lg = actx.createGain(); lfo.frequency.value = 45; lg.gain.value = 8; lfo.connect(lg); lg.connect(o.frequency);
+                       g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.03, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+                       o.connect(g); g.connect(sfx); o.start(t); lfo.start(t); o.stop(t + 0.55); lfo.stop(t + 0.55); break; }
+  }
+}
 function biteBlip() {                                     // bobber dips
   const { actx, sfxBus, noiseBuf } = getAudioCtx(); if (!actx) return; const t = actx.currentTime;
   const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine';
@@ -151,47 +197,123 @@ function bangTex() {
 }
 
 // =============================== birds =================================
-// Six species; each a tiny group (body/beak/tail/2 wings + optional accent).
-// Head-tilt/peck is faked by tilting the small "head" sphere.
+// The Bill Jarvis / Magic Hedge roster — real migrants & residents of the
+// north-lakefront sanctuary. Each songbird is chibi-toon: a MERGED
+// vertex-colored body (1 draw) + a separately tiltable head + two flapping
+// wings = 4 draws, so a busy flock of ~13 stays well under budget. Palette
+// params drive the field-guide plumage per species; `kind` selects the
+// behavior state machine, `layer` the perch height (canopy/shrub/ground/
+// clearing-edge), `flock` clusters birds in twos & threes, `core` marks the
+// original six that the Bird Bingo win still requires, `call` = [voice, Hz].
 const SPECIES = [
-  { name: 'Cardinal', body: 0xd12b2b, wing: 0x9e1f1f, beak: 0xf2a93b, crest: 0xd12b2b, mask: 0x201512, size: 1.0 },
-  { name: 'Blue Jay', body: 0x4f8fd6, wing: 0x2f5fa8, beak: 0x2a2a2a, size: 1.05 },
-  { name: 'Goldfinch', body: 0xf1d434, wing: 0x1c1c1c, beak: 0xe0a24a, size: 0.82 },
-  { name: 'Red-winged Blackbird', body: 0x161616, wing: 0x161616, beak: 0x2a2a2a, shoulder: 0xd12b2b, size: 1.0 },
-  { name: 'Warbler', body: 0xa9c24a, wing: 0x8aa338, beak: 0x3a3a2a, size: 0.78 },
-  { name: 'Black-crowned Night Heron', body: 0x9aa4ad, wing: 0x7f8890, beak: 0x2a2a2a, cap: 0x1c1f24, size: 1.65, hunched: true },
+  // --- the CORE six (bingo win condition — unchanged) ---
+  { name: 'Cardinal',                 body: 0xd12b2b, wing: 0x9e1f1f, beak: 0xf2a93b, crest: 0xd12b2b, mask: 0x201512, size: 1.0,  core: true, layer: 'shrub',  call: ['chip', 1500] },
+  { name: 'Blue Jay',                 body: 0x4f8fd6, wing: 0x2f5fa8, beak: 0x2a2a2a, crest: 0x5a97da, size: 1.08, core: true, layer: 'canopy', call: ['jeer', 900] },
+  { name: 'Goldfinch',                body: 0xf1d434, wing: 0x1c1c1c, beak: 0xe0a24a, cap: 0x1c1c1c, size: 0.82, core: true, flock: 2, layer: 'shrub', call: ['twitter', 2600] },
+  { name: 'Red-winged Blackbird',     body: 0x161616, wing: 0x161616, beak: 0x2a2a2a, shoulder: 0xd12b2b, size: 1.02, core: true, layer: 'shrub', call: ['conkaree', 1400] },
+  { name: 'Warbler',                  body: 0xa9c24a, wing: 0x8aa338, beak: 0x3a3a2a, size: 0.78, core: true, layer: 'shrub', call: ['trill', 2500] },
+  { name: 'Black-crowned Night Heron', body: 0x9aa4ad, wing: 0x7f8890, beak: 0x2a2a2a, cap: 0x1c1f24, legc: 0xd0c26a, size: 1.15, core: true, kind: 'wade', layer: 'edge', call: ['quawk', 360] },
+  // --- bonus migrants (Magic Hedge headliners; identify = bonus sighting) ---
+  { name: 'Baltimore Oriole',         body: 0xf0781a, wing: 0x161616, beak: 0x8a95a0, headColor: 0x161616, size: 0.92, layer: 'canopy', call: ['whistle', 1900] },
+  { name: 'Indigo Bunting',           body: 0x2f5fd0, wing: 0x223f8a, beak: 0xb8c0c8, size: 0.8,  layer: 'canopy', call: ['buzz', 2100] },
+  { name: 'Scarlet Tanager',          body: 0xe02818, wing: 0x141414, beak: 0xc8b88a, size: 0.95, layer: 'canopy', call: ['chipburr', 1600] },
+  { name: 'Rose-breasted Grosbeak',   body: 0xf2f0ea, wing: 0x1c1c1c, beak: 0xe6ddc6, headColor: 0x1c1c1c, throat: 0xd42b4a, size: 0.98, flock: 2, layer: 'shrub', call: ['warble', 2000] },
+  { name: 'Cedar Waxwing',            body: 0xc7a577, wing: 0x8f8a86, beak: 0x241a12, crest: 0xc7a577, mask: 0x1c1512, tailTip: 0xf2c14e, size: 0.9, kind: 'flock', flock: 3, layer: 'canopy', call: ['seee', 7200] },
+  { name: 'Yellow-rumped Warbler',    body: 0x6b7686, wing: 0x3f4756, beak: 0x33383e, shoulder: 0xf2c14e, size: 0.78, flock: 2, layer: 'shrub', call: ['trill', 3000] },
+  { name: 'Palm Warbler',             body: 0xb7a35a, wing: 0x8a7a48, beak: 0x33352a, cap: 0x9c5a30, size: 0.76, kind: 'ground', layer: 'ground', call: ['trill', 3200] },
+  { name: 'White-throated Sparrow',   body: 0x9a8460, wing: 0x7a6444, beak: 0x33352a, cap: 0x2a2418, throat: 0xf4f0e6, size: 0.82, kind: 'ground', flock: 3, layer: 'ground', call: ['sam', 2200] },
+  { name: 'Ruby-throated Hummingbird', body: 0x3fae6a, wing: 0x2f6b45, beak: 0x141414, throat: 0xc41230, belly: 0xdfe3dc, size: 0.42, kind: 'hover', layer: 'shrub', call: ['hum', 55] },
+  { name: 'Downy Woodpecker',         body: 0xf2f2ee, wing: 0x1a1a1a, beak: 0x2a2a2a, cap: 0x1a1a1a, nape: 0xcc2222, size: 0.78, kind: 'cling', layer: 'shrub', call: ['knock', 0] },
+  { name: 'Great Blue Heron',         body: 0x8a97a4, wing: 0x6f7c88, beak: 0xe0b83a, cap: 0xdad8d2, plume: 0x1c1f24, legc: 0x3f4a52, size: 1.6, tall: true, kind: 'wade', layer: 'edge', call: ['croak', 180] },
+  { name: 'Wood Duck',                body: 0x2f6b45, wing: 0x223f2f, beak: 0xd23a3a, cap: 0x184a30, mask: 0xf4f0e6, belly: 0x9c6a3a, size: 1.05, kind: 'ground', layer: 'ground', call: ['squeal', 1100] },
+  { name: "Cooper's Hawk",            body: 0xd8cdbf, wing: 0x53606e, beak: 0x2a2a2a, cap: 0x53606e, size: 1.45, kind: 'raptor', layer: 'canopy', call: ['kek', 1500] },
 ];
-const CORE = SPECIES.map(s => s.name);
+const CORE = SPECIES.filter(s => s.core).map(s => s.name);
+
+// merged vertex-colored geometry (the tree/economy pattern): one shared toon
+// material for EVERY bird part, so a bird is only as many draws as it has
+// independently-animated meshes (body / head / 2 wings).
+const BIRD_MAT = curveMat(new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: gmap, side: THREE.DoubleSide }));
+// chibi-chunky scale so the flock READS from the deck (Animal-Crossing birds
+// are endearingly oversized; herons build their own bigger geometry).
+const BIRD_SCALE = 2.5;
+function paintGeo(g, hex) {
+  const c = new THREE.Color(hex), p = g.attributes.position, m = p.count, a = new Float32Array(m * 3);
+  for (let i = 0; i < m; i++) { a[i * 3] = c.r; a[i * 3 + 1] = c.g; a[i * 3 + 2] = c.b; }
+  g.setAttribute('color', new THREE.BufferAttribute(a, 3));
+  return g.index ? g.toNonIndexed() : g;
+}
+const mergeGeos = arr => BufferGeometryUtils.mergeBufferGeometries(arr);
 
 function makeBird(spec) {
   const g = new THREE.Group();
-  const wingMat = toon(spec.wing, { mat: { side: THREE.DoubleSide } });
-  const body = new THREE.Mesh(new THREE.SphereGeometry(0.15, 9, 8), toon(spec.body));
-  body.scale.set(1, spec.hunched ? 0.86 : 0.98, 1.4); g.add(body);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.11, 8, 7), toon(spec.body));
-  head.position.set(0, spec.hunched ? 0.03 : 0.07, spec.hunched ? 0.19 : 0.17); g.add(head);
-  const beak = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.15, 6), toon(spec.beak));
-  beak.rotation.x = Math.PI / 2; beak.position.set(0, spec.hunched ? 0.02 : 0.05, 0.33); g.add(beak);
-  const tail = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 0.26), wingMat);
-  tail.rotation.x = -0.5; tail.position.set(0, 0.02, -0.24); g.add(tail);
+  const hun = spec.hunched;
+  // --- merged static body (body + beak + tail + accents) ---
+  const parts = [];
+  const body = new THREE.SphereGeometry(0.15, 9, 8); body.scale(1, hun ? 0.86 : 0.98, 1.4); parts.push(paintGeo(body, spec.body));
+  if (spec.belly) { const bl = new THREE.SphereGeometry(0.12, 8, 7); bl.scale(0.92, 0.7, 1.15); bl.translate(0, -0.03, 0.06); parts.push(paintGeo(bl, spec.belly)); }
+  const beak = new THREE.ConeGeometry(0.035, 0.15, 6); beak.rotateX(Math.PI / 2); beak.translate(0, hun ? 0.02 : 0.05, 0.33); parts.push(paintGeo(beak, spec.beak));
+  const tail = new THREE.PlaneGeometry(0.12, 0.26); tail.rotateX(-0.5); tail.translate(0, 0.02, -0.24); parts.push(paintGeo(tail, spec.wing));
+  if (spec.tailTip) { const tt = new THREE.PlaneGeometry(0.12, 0.055); tt.rotateX(-0.5); tt.translate(0, 0.075, -0.35); parts.push(paintGeo(tt, spec.tailTip)); }
+  if (spec.crest) { const c = new THREE.ConeGeometry(0.05, 0.13, 5); c.rotateX(-0.4); c.translate(0, 0.19, 0.13); parts.push(paintGeo(c, spec.crest)); }
+  if (spec.mask) { const m = new THREE.SphereGeometry(0.06, 6, 6); m.scale(1.1, 0.7, 0.7); m.translate(0, 0.02, 0.27); parts.push(paintGeo(m, spec.mask)); }
+  if (spec.shoulder) for (const s of [-1, 1]) { const p = new THREE.CircleGeometry(0.05, 8); p.rotateY(s * Math.PI / 2); p.translate(s * 0.15, 0.06, -0.02); parts.push(paintGeo(p, spec.shoulder)); }
+  if (spec.throat) { const th = new THREE.SphereGeometry(0.055, 7, 6); th.scale(1.0, 0.85, 0.6); th.translate(0, 0.0, 0.22); parts.push(paintGeo(th, spec.throat)); }
+  const bodyMesh = new THREE.Mesh(mergeGeos(parts), BIRD_MAT); g.add(bodyMesh);
+  // --- head (separate mesh so it can tilt/peck) ---
+  const hParts = [];
+  const head = new THREE.SphereGeometry(0.11, 8, 7); hParts.push(paintGeo(head, spec.headColor || spec.body));
+  if (spec.cap) { const cp = new THREE.SphereGeometry(0.1, 7, 6); cp.scale(1, 0.55, 1); cp.translate(0, 0.045, -0.02); hParts.push(paintGeo(cp, spec.cap)); }
+  if (spec.nape) { const np = new THREE.SphereGeometry(0.045, 6, 6); np.translate(0, 0.05, -0.07); hParts.push(paintGeo(np, spec.nape)); }
+  const headMesh = new THREE.Mesh(mergeGeos(hParts), BIRD_MAT);
+  headMesh.position.set(0, hun ? 0.03 : 0.07, hun ? 0.19 : 0.17); g.add(headMesh);
+  // --- wings (separate meshes — flap) ---
   const wings = [];
   for (const s of [-1, 1]) {
-    const w = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.16), wingMat);
-    w.rotation.set(-1.3, s * 0.5, 0); w.position.set(s * 0.13, 0.02, -0.02); g.add(w);
-    wings.push(w);
+    const wg = paintGeo(new THREE.PlaneGeometry(0.28, 0.16), spec.wing);
+    const w = new THREE.Mesh(wg, BIRD_MAT); w.rotation.set(-1.3, s * 0.5, 0); w.position.set(s * 0.13, 0.02, -0.02); g.add(w); wings.push(w);
   }
-  if (spec.crest) { const c = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.13, 5), toon(spec.crest)); c.position.set(0, 0.19, 0.13); c.rotation.x = -0.4; g.add(c); }
-  if (spec.mask) { const m = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), toon(spec.mask)); m.scale.set(1.1, 0.7, 0.7); m.position.set(0, 0.02, 0.27); g.add(m); }
-  if (spec.cap) { const c = new THREE.Mesh(new THREE.SphereGeometry(0.1, 7, 6), toon(spec.cap)); c.scale.set(1, 0.55, 1); c.position.set(0, 0.1, 0.14); g.add(c); }
-  if (spec.shoulder) for (const s of [-1, 1]) { const p = new THREE.Mesh(new THREE.CircleGeometry(0.05, 8), toon(spec.shoulder, { mat: { side: THREE.DoubleSide } })); p.position.set(s * 0.15, 0.06, -0.02); p.rotation.y = s * Math.PI / 2; g.add(p); }
-  g.scale.setScalar(spec.size);
-  if (spec.hunched) g.rotation.x = 0.25;
-  g.userData = { head, wings, base: g.rotation.x, hopPh: rr(0, 6), tiltPh: rr(0, 6), baseY: 0,
-    state: 'perch', perchT: rr(4, 9), flapPh: rr(0, 6),
-    px: 0, py: 0, pz: 0, sx: 0, sy: 0, sz: 0, tx: 0, ty: 0, tz: 0,
-    flyT: 0, flyDur: 1, arcH: 0.4, bow: 0, perpx: 0, perpz: 0 };
+  g.scale.setScalar(spec.size * BIRD_SCALE);
+  if (hun) g.rotation.x = 0.25;
+  g.userData = birdData(spec, headMesh, wings);
   g.visible = false;
   return g;
+}
+
+// wading birds (herons): long legs + upright body + a NECK that pivots for the
+// slow strike, head/beak riding the neck. Body+legs merge (1 draw), neck (1),
+// head (1) = 3 draws; only ~1–2 herons ever visible at once.
+function makeHeron(spec) {
+  const g = new THREE.Group();
+  const legH = spec.tall ? 0.66 : 0.3, neckLen = spec.tall ? 0.5 : 0.24;
+  const parts = [];
+  for (const s of [-1, 1]) { const leg = new THREE.CylinderGeometry(0.022, 0.022, legH, 5); leg.translate(s * 0.055, legH / 2, 0); parts.push(paintGeo(leg, spec.legc || spec.beak)); }
+  const body = new THREE.SphereGeometry(0.16, 9, 8); body.scale(1, 0.92, 1.55); body.translate(0, legH + 0.16, -0.02); parts.push(paintGeo(body, spec.body));
+  for (const s of [-1, 1]) { const w = new THREE.PlaneGeometry(0.16, 0.34); w.rotateY(s * 1.35); w.translate(s * 0.14, legH + 0.17, -0.04); parts.push(paintGeo(w, spec.wing)); }
+  const bodyMesh = new THREE.Mesh(mergeGeos(parts), BIRD_MAT); g.add(bodyMesh);
+  const neckGeo = new THREE.CylinderGeometry(0.035, 0.05, neckLen, 6); neckGeo.translate(0, neckLen / 2, 0);
+  const neck = new THREE.Mesh(paintGeo(neckGeo, spec.body), BIRD_MAT); neck.position.set(0, legH + 0.26, 0.05); g.add(neck);
+  const hParts = [];
+  const head = new THREE.SphereGeometry(0.075, 7, 6); head.translate(0, neckLen, 0.03); hParts.push(paintGeo(head, spec.cap || spec.body));
+  const beak = new THREE.ConeGeometry(0.028, spec.tall ? 0.32 : 0.2, 6); beak.rotateX(Math.PI / 2); beak.translate(0, neckLen, spec.tall ? 0.2 : 0.16); hParts.push(paintGeo(beak, spec.beak));
+  if (spec.plume) { const pl = new THREE.ConeGeometry(0.02, 0.17, 4); pl.rotateX(1.25); pl.translate(0, neckLen + 0.05, -0.09); hParts.push(paintGeo(pl, spec.plume)); }
+  const headMesh = new THREE.Mesh(mergeGeos(hParts), BIRD_MAT); neck.add(headMesh);
+  g.scale.setScalar(spec.size);
+  g.userData = birdData(spec, headMesh, []); g.userData.neck = neck; g.userData.neckRest = 0;
+  g.visible = false;
+  return g;
+}
+
+// shared per-bird state block (perch/fly + the special-behavior timers)
+function birdData(spec, head, wings) {
+  return {
+    spec, name: spec.name, kind: spec.kind || 'song', layer: spec.layer || 'shrub', head, wings,
+    hopPh: rr(0, 6), tiltPh: rr(0, 6), flapPh: rr(0, 6), baseY: 0,
+    state: 'perch', perchT: rr(4, 9), callT: rr(3, 11),
+    px: 0, py: 0, pz: 0, sx: 0, sy: 0, sz: 0, tx: 0, ty: 0, tz: 0,
+    flyT: 0, flyDur: 1, arcH: 0.4, bow: 0, perpx: 0, perpz: 0,
+    behT: rr(4, 10), sub: 0,
+  };
 }
 
 // =============================== plovers ===============================
@@ -228,74 +350,196 @@ onWorldReady(player => {
   document.body.appendChild(wrap);
 
   // ------------------------------ 1. BIRDS ---------------------------- //
-  const birds = SPECIES.map(makeBird);
-  birds.forEach(b => scene.add(b));
-  const idTargets = birds.map((g, i) => ({ group: g, species: SPECIES[i].name, isPlover: false }));
+  // The room reads BUSY: a POOL of songbirds (song/ground/flock/raptor) with
+  // ~6 (calm) to ~13 (busy) visible at once, distance-culled to zero draws
+  // away from the sanctuary; plus dedicated special-behavior birds — two
+  // herons (statue-still + a slow strike), a woodpecker (clings a snag +
+  // knocks), a hummingbird (hover-darts), and a waxwing flock-pass. Real
+  // birding comes in WAVES, so the relocate rhythm pulses busy↔calm.
+  const ROOM = { x0: 108, x1: 180, z0: -415, z1: -361 };     // interior woodland visible from the deck
+  const CLEAR = CH.SANCTUARY.clearings;                      // [[x,z,r],…] dappled openings
+  // Birds gather at the CLEARINGS — the open, watchable focal points the deck
+  // looks onto — not buried in the far canopy. Layer sets the height: ground
+  // on the clearing floor, shrub at the edges, sub-canopy just above the shrubs
+  // (visible, not lost in the leaf masses), edge = clearing rim (herons).
+  // Perch centres, weighted so the flock reads BUSY from the deck: a DECKSIDE
+  // zone right in front of the watcher (birds 3–12 m off the west rail — the
+  // big, obvious foreground) gets the biggest share, then the near clearing
+  // [158,-392], then [140,-390], then far [122,-408]. Herons take a rim.
+  const PZONES = [[163, -396, 5], [158, -392, 6], [140, -390, 7], [122, -408, 5]];
+  const PW = [0.26, 0.55, 0.8];   // cumulative thresholds → deckside / near / mid / far
+  function perchFor(layer) {
+    if (layer === 'edge') { const c = CLEAR[(Math.random() * CLEAR.length) | 0], a = rr(0, 6.283), r = c[2] * 0.9; return { x: clamp(c[0] + Math.cos(a) * r, ROOM.x0, ROOM.x1), z: clamp(c[1] + Math.sin(a) * r, ROOM.z0, ROOM.z1), y: 0 }; }
+    const r0 = Math.random(), zi = r0 < PW[0] ? 0 : r0 < PW[1] ? 1 : r0 < PW[2] ? 2 : 3, Z = PZONES[zi];
+    const a = rr(0, 6.283), r = Math.sqrt(Math.random()) * (Z[2] + 3);
+    const x = clamp(Z[0] + Math.cos(a) * r, ROOM.x0, ROOM.x1), z = clamp(Z[1] + Math.sin(a) * r, ROOM.z0, ROOM.z1);
+    const y = (layer === 'canopy' || layer === 'subcanopy') ? rr(2.0, 3.0) : layer === 'ground' ? rr(0.28, 0.4) : rr(0.7, 1.9);
+    return { x, z, y };
+  }
 
-  const SANC = { x0: 32, x1: 180, z0: -420, z1: -356 };   // perch bounds — extended east so bingo birds range past the new watching DECK (~x172)
-  function randPerch() { return { x: rr(SANC.x0, SANC.x1), z: rr(SANC.z0, SANC.z1), y: rr(0.7, 1.7) }; }
-  let birdRelocT = 2;
-  function relocateBirds() {
-    const n = 3 + (Math.random() < 0.5 ? 0 : 1);
-    const idx = [0, 1, 2, 3, 4, 5];
-    for (let i = idx.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; const tmp = idx[i]; idx[i] = idx[j]; idx[j] = tmp; }
-    birds.forEach(b => (b.visible = false));
-    for (let k = 0; k < n; k++) {
-      const b = birds[idx[k]], p = randPerch(), u = b.userData;
-      b.position.set(p.x, p.y, p.z); b.rotation.y = rr(0, Math.PI * 2);
-      u.px = p.x; u.py = p.y; u.pz = p.z; u.baseY = p.y;
-      u.hopPh = rr(0, 6); u.tiltPh = rr(0, 6); u.flapPh = rr(0, 6);
-      u.state = 'perch'; u.perchT = rr(4, 9);
-      u.wings[0].rotation.x = u.wings[1].rotation.x = -1.3;
-      b.visible = true;
-    }
-    birdRelocT = 22 + Math.random() * 8;   // reshuffle which species show; flights are the main motion
-  }
-  // launch a perched bird on a short hop (or, 20% of the time, a longer circling flight)
-  function startFlight(b) {
+  const poolSpecs = SPECIES.filter(s => !['wade', 'cling', 'hover'].includes(s.kind || 'song'));
+  const pool = [];
+  for (const s of poolSpecs) { const copies = Math.min(s.flock || 1, 3); for (let i = 0; i < copies; i++) pool.push(makeBird(s)); }
+  const nightHeron = makeHeron(SPECIES.find(s => s.name === 'Black-crowned Night Heron'));
+  const greatBlue  = makeHeron(SPECIES.find(s => s.name === 'Great Blue Heron'));
+  const woodpecker = makeBird(SPECIES.find(s => s.name === 'Downy Woodpecker'));
+  const hummer     = makeBird(SPECIES.find(s => s.name === 'Ruby-throated Hummingbird'));
+  const dedicated  = [nightHeron, greatBlue, woodpecker, hummer];
+  [...pool, ...dedicated].forEach(b => scene.add(b));
+  const idTargets = [...pool, ...dedicated].map(g => ({ group: g, species: g.userData.name, isPlover: false }));
+
+  // a weathered dead SNAG — a real bird-sanctuary feature (cavity nesters) and
+  // the woodpecker's home; stands in the interior, deck-facing (east) side.
+  const SNAG = { x: 150, z: -402 };
+  { const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.24, 3.0, 7), toon(0x9a938a)); trunk.position.set(SNAG.x, 1.5, SNAG.z); scene.add(trunk);
+    const stub = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.09, 0.7, 5), toon(0x8a837a)); stub.position.set(SNAG.x + 0.24, 2.35, SNAG.z); stub.rotation.z = -0.9; scene.add(stub); }
+  woodpecker.userData.snag = SNAG;
+
+  // eye-level perches right on the deck RAIL — the "a bird lands beside you"
+  // moment that makes the watch pay off up close (derived from SANCTUARY.deck).
+  const _D = CH.SANCTUARY.deck, _ry = _D.h + 1.05;
+  const RAILP = [ { x: _D.x0 - 0.1, z: _D.z0 + 0.7, y: _ry }, { x: _D.x0 - 0.1, z: _D.z1 - 0.7, y: _ry }, { x: _D.x0 + 1.9, z: _D.z0 - 0.1, y: _ry } ];
+
+  // busy/calm wave + cull state
+  let busy = true, waveT = 12, birdRelocT = 1.2, birdsShown = false, flockPassT = 0;
+  function queueFlockPass() { flockPassT = 0.15; }
+
+  function placePerch(b, p) {
     const u = b.userData;
-    const circ = Math.random() < 0.2;
-    const dist = circ ? 5 + Math.random() * 2.5 : 1.5 + Math.random() * 1.5;
-    const ang = Math.random() * Math.PI * 2;
-    const nx = clamp(u.px + Math.cos(ang) * dist, SANC.x0, SANC.x1);
-    const nz = clamp(u.pz + Math.sin(ang) * dist, SANC.z0, SANC.z1);
-    u.sx = u.px; u.sy = u.py; u.sz = u.pz;
-    u.tx = nx; u.ty = rr(0.7, 1.7); u.tz = nz;
-    const dx = nx - u.sx, dz = nz - u.sz, dl = Math.hypot(dx, dz) || 1;
-    u.perpx = -dz / dl; u.perpz = dx / dl;                 // path bows out to one side when circling
-    u.bow = circ ? (Math.random() < 0.5 ? -1 : 1) * 2.2 : 0;
-    u.arcH = circ ? 1.1 : 0.45;                            // takeoff/landing arc height
-    u.flyT = 0; u.flyDur = circ ? 2.6 + Math.random() * 0.8 : 1.0 + Math.random() * 0.6;
-    u.state = 'fly';
-    b.rotation.y = Math.atan2(dx, dz);                     // face travel (beak = +z)
+    b.position.set(p.x, p.y, p.z); b.rotation.set(0, rr(0, 6.283), 0);
+    u.px = p.x; u.py = p.y; u.pz = p.z; u.baseY = p.y;
+    u.hopPh = rr(0, 6); u.tiltPh = rr(0, 6); u.flapPh = rr(0, 6);
+    u.state = 'perch'; u.perchT = rr(4, 9); u.callT = rr(3, 11);
+    if (u.wings.length) u.wings[0].rotation.x = u.wings[1].rotation.x = -1.3;
   }
-  function updBirds(dt, t) {
-    birdRelocT -= dt; if (birdRelocT <= 0) relocateBirds();
-    for (const b of birds) {
-      if (!b.visible) continue; const u = b.userData;
-      if (u.state === 'perch') {
-        b.position.set(u.px, u.py + Math.abs(Math.sin(t * 2.2 + u.hopPh)) * 0.04, u.pz);
-        u.head.rotation.z = Math.sin(t * 1.6 + u.tiltPh) * 0.35;
-        u.head.rotation.x = Math.sin(t * 3.1 + u.tiltPh) * 0.12;
-        u.perchT -= dt; if (u.perchT <= 0) startFlight(b);
-      } else {                                             // in flight: arc + wing flap
-        u.flyT += dt; let uu = u.flyT / u.flyDur; if (uu > 1) uu = 1;
-        const s = Math.sin(uu * Math.PI);
-        b.position.set(
-          u.sx + (u.tx - u.sx) * uu + u.perpx * u.bow * s,
-          u.sy + (u.ty - u.sy) * uu + s * u.arcH,
-          u.sz + (u.tz - u.sz) * uu + u.perpz * u.bow * s);
-        u.flapPh += dt * 22;
-        const flap = Math.sin(u.flapPh) * 0.7;
-        u.wings[0].rotation.x = -1.3 + flap; u.wings[1].rotation.x = -1.3 + flap;
-        u.head.rotation.z = 0; u.head.rotation.x = 0.1;
-        if (uu >= 1) {                                     // touch down, back to perching
-          u.px = u.tx; u.py = u.ty; u.pz = u.tz; u.baseY = u.ty;
-          u.wings[0].rotation.x = u.wings[1].rotation.x = -1.3;
-          u.state = 'perch'; u.perchT = 4 + Math.random() * 5;
-        }
-      }
+  function relocateBirds() {
+    const target = clamp((busy ? 11 : 5) + ((Math.random() * 3) | 0), 0, pool.length);
+    const idx = pool.map((_, i) => i);
+    for (let i = idx.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; const tmp = idx[i]; idx[i] = idx[j]; idx[j] = tmp; }
+    pool.forEach(b => (b.visible = false));
+    const clusterAt = {};                                   // species → last perch, for flocking twos & threes
+    for (let k = 0; k < target; k++) {
+      const b = pool[idx[k]], u = b.userData; let p;
+      if (u.spec.flock && clusterAt[u.name] && Math.random() < 0.8) { const c = clusterAt[u.name]; p = { x: clamp(c.x + rr(-2.5, 2.5), ROOM.x0, ROOM.x1), z: clamp(c.z + rr(-2.5, 2.5), ROOM.z0, ROOM.z1), y: Math.max(0.28, c.y + rr(-0.4, 0.4)) }; }
+      else p = perchFor(u.layer);
+      clusterAt[u.name] = p; placePerch(b, p); b.visible = true;
     }
+    // seat the first up-to-2 visible birds ON the deck rail (eye level, close);
+    // they linger longer before flitting, and face side-on so plumage reads.
+    const railN = Math.min(2, target);
+    for (let k = 0; k < railN; k++) {
+      const b = pool[idx[k]]; if (!b.visible) continue;
+      placePerch(b, RAILP[k % RAILP.length]);
+      b.rotation.y = k % 2 ? 0.7 : -0.7; b.userData.perchT = rr(9, 15);
+    }
+    birdRelocT = 9 + Math.random() * 7;
+  }
+  // launch a perched bird — hop (short/low), circling flight, or a raptor glide
+  function startFlight(b) {
+    const u = b.userData, k = u.kind;
+    const circ = k === 'raptor' ? true : Math.random() < 0.2, long = k === 'raptor';
+    const dist = long ? 8 + Math.random() * 4 : circ ? 4.5 + Math.random() * 2.5 : 1.4 + Math.random() * 1.6;
+    const ang = Math.random() * 6.283;
+    const nx = clamp(u.px + Math.cos(ang) * dist, ROOM.x0, ROOM.x1), nz = clamp(u.pz + Math.sin(ang) * dist, ROOM.z0, ROOM.z1);
+    const ny = k === 'ground' ? rr(0.28, 0.4) : k === 'raptor' ? rr(3.2, 5.0) : rr(0.8, 1.8);
+    u.sx = u.px; u.sy = u.py; u.sz = u.pz; u.tx = nx; u.ty = ny; u.tz = nz;
+    const dx = nx - u.sx, dz = nz - u.sz, dl = Math.hypot(dx, dz) || 1;
+    u.perpx = -dz / dl; u.perpz = dx / dl;
+    u.bow = circ && !long ? (Math.random() < 0.5 ? -1 : 1) * 2.2 : 0;
+    u.arcH = k === 'ground' ? 0.22 : long ? 0.6 : circ ? 1.1 : 0.45;
+    u.flyT = 0; u.flyDur = long ? 2.8 + Math.random() : circ ? 2.4 + Math.random() * 0.8 : 0.9 + Math.random() * 0.6;
+    u.state = 'fly'; b.rotation.y = Math.atan2(dx, dz);
+  }
+  function updPerchBird(b, dt, t, chorus) {
+    if (!b.visible) return; const u = b.userData;
+    if (u.state === 'pass') { updPass(b, dt); return; }
+    if (u.state === 'perch') {
+      if (chorus) { u.callT -= dt; if (u.callT <= 0) { birdCall(u.spec.call[0], u.spec.call[1]); u.callT = 7 + Math.random() * 11; } }
+      const bob = u.kind === 'ground' ? 0.02 : 0.04;
+      b.position.set(u.px, u.py + Math.abs(Math.sin(t * 2.2 + u.hopPh)) * bob, u.pz);
+      u.head.rotation.z = Math.sin(t * 1.6 + u.tiltPh) * 0.35;
+      u.head.rotation.x = Math.sin(t * 3.1 + u.tiltPh) * 0.12;
+      u.perchT -= dt; if (u.perchT <= 0) startFlight(b);
+    } else {                                                // in flight: arc + wing flap
+      u.flyT += dt; let uu = u.flyT / u.flyDur; if (uu > 1) uu = 1;
+      const s = Math.sin(uu * Math.PI);
+      b.position.set(u.sx + (u.tx - u.sx) * uu + u.perpx * u.bow * s, u.sy + (u.ty - u.sy) * uu + s * u.arcH, u.sz + (u.tz - u.sz) * uu + u.perpz * u.bow * s);
+      u.flapPh += dt * 22; const flap = Math.sin(u.flapPh) * 0.7;
+      u.wings[0].rotation.x = -1.3 + flap; u.wings[1].rotation.x = -1.3 + flap;
+      u.head.rotation.z = 0; u.head.rotation.x = 0.1;
+      if (uu >= 1) { u.px = u.tx; u.py = u.ty; u.pz = u.tz; u.baseY = u.ty; u.wings[0].rotation.x = u.wings[1].rotation.x = -1.3; u.state = 'perch'; u.perchT = 4 + Math.random() * 5; }
+    }
+  }
+  // waxwing flock-pass: the visible waxwings sweep across together in one arc
+  function updFlockPass(dt) {
+    if (flockPassT <= 0) return; flockPassT -= dt; if (flockPassT > 0) return;
+    const wax = pool.filter(b => b.visible && b.userData.name === 'Cedar Waxwing' && b.userData.state !== 'pass');
+    if (wax.length < 2) return;
+    const ang = rr(0, 6.283), cx = Math.cos(ang), cz = Math.sin(ang);
+    wax.forEach((b, i) => { const u = b.userData;
+      u.state = 'pass'; u.sx = b.position.x; u.sy = b.position.y; u.sz = b.position.z;
+      u.tx = clamp(u.sx + cx * rr(14, 20), ROOM.x0, ROOM.x1); u.tz = clamp(u.sz + cz * rr(14, 20), ROOM.z0, ROOM.z1); u.ty = rr(3.5, 5.0);
+      u.flyT = -i * 0.12; u.flyDur = 2.6 + Math.random() * 0.6; u.arcH = 1.4;
+      b.rotation.y = Math.atan2(cx, cz); });
+    birdCall('seee', 7200);
+  }
+  function updPass(b, dt) {
+    const u = b.userData; u.flyT += dt; if (u.flyT < 0) return;
+    let uu = u.flyT / u.flyDur; if (uu > 1) uu = 1; const s = Math.sin(uu * Math.PI);
+    b.position.set(u.sx + (u.tx - u.sx) * uu, u.sy + (u.ty - u.sy) * uu + s * u.arcH, u.sz + (u.tz - u.sz) * uu);
+    u.flapPh += dt * 20; const flap = Math.sin(u.flapPh) * 0.8; u.wings[0].rotation.x = -1.3 + flap; u.wings[1].rotation.x = -1.3 + flap;
+    if (uu >= 1) { u.px = u.tx; u.py = u.ty; u.pz = u.tz; u.baseY = u.ty; u.wings[0].rotation.x = u.wings[1].rotation.x = -1.3; u.state = 'perch'; u.perchT = 4 + Math.random() * 5; }
+  }
+  // heron: statue-still at a clearing edge, then ONE slow neck strike + a call
+  function placeHeron(h) {
+    const c = CLEAR[(Math.random() * CLEAR.length) | 0], a = rr(0, 6.283);
+    const x = c[0] + Math.cos(a) * c[2] * 0.9, z = c[1] + Math.sin(a) * c[2] * 0.9;
+    h.position.set(x, 0, z); h.rotation.y = Math.atan2(c[0] - x, c[1] - z);   // face the clearing centre
+    const u = h.userData; u.sub = 0; u.st = 0; u.strikeT = rr(4, 9); h.visible = true;
+  }
+  function updHeron(h, dt, t) {
+    const u = h.userData; u.behT -= dt;
+    if (!h.visible) { if (u.behT <= 0) { if (Math.random() < 0.6) placeHeron(h); u.behT = 9 + Math.random() * 13; } return; }
+    const nk = u.neck;
+    if (u.sub === 0) { nk.rotation.x = Math.sin(t * 0.5 + u.tiltPh) * 0.05; h.position.y = Math.sin(t * 0.8) * 0.01;
+      u.strikeT -= dt; if (u.strikeT <= 0) { u.sub = 1; u.st = 0; birdCall(u.spec.call[0], u.spec.call[1]); } }
+    else if (u.sub === 1) { u.st += dt; const uu = Math.min(1, u.st / 0.26); nk.rotation.x = 1.65 * Math.sin(uu * Math.PI / 2); if (uu >= 1) { u.sub = 2; u.st = 0; } }
+    else { u.st += dt; const uu = Math.min(1, u.st / 0.7); nk.rotation.x = 1.65 * (1 - uu); if (uu >= 1) { u.sub = 0; u.strikeT = rr(5, 11); } }
+    if (u.behT <= 0) { if (Math.random() < 0.4) { h.visible = false; u.behT = 12 + Math.random() * 16; } else u.behT = 8 + Math.random() * 10; }
+  }
+  // woodpecker: clings the snag (deck-facing east face), hitches up, drums
+  function updWoodpecker(dt) {
+    const w = woodpecker, u = w.userData, sn = u.snag; u.behT -= dt;
+    if (!w.visible) { if (u.behT <= 0) { if (Math.random() < 0.7) { w.visible = true; u.py = rr(1.2, 2.0); u.knockT = rr(1.2, 3.5); u.jab = 0; } u.behT = 8 + Math.random() * 12; } return; }
+    w.position.set(sn.x + 0.26, u.py, sn.z); w.rotation.set(-1.4, 0, 0);
+    u.py += dt * 0.12; if (u.py > 2.35) u.py = 1.2;
+    u.knockT -= dt; if (u.knockT <= 0) { birdCall('knock', 0); u.knockT = 2.5 + Math.random() * 4; u.jab = 0.3; }
+    if (u.jab > 0) { u.jab -= dt; u.head.rotation.x = -Math.abs(Math.sin((0.3 - u.jab) / 0.3 * 9.4)) * 0.5; } else u.head.rotation.x = 0;
+    if (u.behT <= 0 && Math.random() < 0.35) { w.visible = false; u.behT = 10 + Math.random() * 14; }
+  }
+  // hummingbird: hover-darts among the clearing flowers during busy waves
+  function updHummer(dt, t) {
+    const h = hummer, u = h.userData; u.behT -= dt;
+    if (!h.visible) { if (u.behT <= 0) { if (busy && Math.random() < 0.7) { const c = CLEAR[(Math.random() * CLEAR.length) | 0]; u.hx = c[0]; u.hz = c[1]; u.tx = c[0]; u.tz = c[1]; u.ty = 1.3; h.position.set(c[0], 1.3, c[1]); u.dartT = 0; u.humT = 0; h.visible = true; } u.behT = 6 + Math.random() * 8; } return; }
+    u.flapPh += dt * 60; const fl = Math.sin(u.flapPh) * 0.9; u.wings[0].rotation.x = -1.0 + fl; u.wings[1].rotation.x = -1.0 + fl;
+    u.dartT -= dt; if (u.dartT <= 0) { u.tx = u.hx + rr(-3, 3); u.tz = u.hz + rr(-3, 3); u.ty = rr(1.0, 1.7); u.dartT = 0.8 + Math.random() * 1.4; }
+    const sp = Math.min(1, 6 * dt); h.position.x += (u.tx - h.position.x) * sp; h.position.z += (u.tz - h.position.z) * sp;
+    h.position.y = u.ty + Math.sin(t * 8) * 0.03;
+    const dx = u.tx - h.position.x, dz = u.tz - h.position.z; if (dx * dx + dz * dz > 0.02) h.rotation.y = Math.atan2(dx, dz);
+    u.humT -= dt; if (u.humT <= 0) { birdCall('hum', 55); u.humT = 1.4 + Math.random() * 2; }
+    if (u.behT <= 0) { if (Math.random() < 0.5) { h.visible = false; u.behT = 10 + Math.random() * 14; } else u.behT = 6 + Math.random() * 6; }
+  }
+  function updBirds(dt, t, pl) {
+    const d2 = (pl.x - 150) ** 2 + (pl.z + 388) ** 2;   // sanctuary centre ≈ (150,−388)
+    if (d2 > 135 * 135) { if (birdsShown) { [...pool, ...dedicated].forEach(b => (b.visible = false)); birdsShown = false; } return; }
+    if (!birdsShown) { birdsShown = true; birdRelocT = 0.2; }   // re-seed the flock on approach
+    const chorus = d2 < 95 * 95;
+    waveT -= dt; if (waveT <= 0) { busy = !busy; waveT = busy ? 16 + Math.random() * 10 : 14 + Math.random() * 10; relocateBirds(); if (busy && Math.random() < 0.6) queueFlockPass(); }
+    birdRelocT -= dt; if (birdRelocT <= 0) relocateBirds();
+    for (const b of pool) updPerchBird(b, dt, t, chorus);
+    updFlockPass(dt);
+    updHeron(nightHeron, dt, t); updHeron(greatBlue, dt, t);
+    updWoodpecker(dt); updHummer(dt, t);
   }
 
   // --------------------------- 2. PLOVER PEN -------------------------- //
@@ -638,9 +882,13 @@ onWorldReady(player => {
 
   // ------------------------------ journals ---------------------------- //
   journalSection('birds', 'Bird Bingo', () => {
+    const BONUS = SPECIES.filter(s => !s.core).map(s => s.name);
     let rows = CORE.map(n => `<div class="jrow"><span>${state.birdsSeen.has(n) ? '✓' : '·'} ${n}</span><b></b></div>`).join('');
+    rows += `<div class="jrow"><span>Bingo</span><b>${CORE.filter(n => state.birdsSeen.has(n)).length} / 6</b></div>`;
     if (state.birdsSeen.has('Piping Plover')) rows += `<div class="jrow"><span>★ Piping Plover</span><b>secret</b></div>`;
-    rows += `<div class="jrow"><span>Species seen</span><b>${CORE.filter(n => state.birdsSeen.has(n)).length} / 6</b></div>`;
+    const seenBonus = BONUS.filter(n => state.birdsSeen.has(n));
+    if (seenBonus.length) rows += `<div class="jrow"><span>Bonus sightings</span><b>${seenBonus.length} / ${BONUS.length}</b></div>`;
+    for (const n of seenBonus) rows += `<div class="jrow"><span>+ ${n}</span><b></b></div>`;
     return rows;
   });
   journalSection('fishing', 'Fish Log', () => {
@@ -662,7 +910,7 @@ onWorldReady(player => {
   // ------------------------------ per frame --------------------------- //
   registerUpdate((dt, t, pl) => {
     updBinoc(dt, t, pl);
-    updBirds(dt, t);
+    updBirds(dt, t, pl);
     updPlovers(dt, t, pl);
     updFishing(dt, t, pl);
     updSmelt(dt, t);

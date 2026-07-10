@@ -13,3 +13,9 @@
   filters after rng draws, so zero determinism impact), with the clear-rect
   DERIVED from the SANCTUARY deck/stair data in chicago.js, not hardcoded.
 - route: task 025, item 5.
+- RESOLVED (task 025): props.js POST-rng tree filter now clears a rect DERIVED
+  from SANCTUARY.deck (stair min-x−5 … deck.x1+8, deck.z0−3.5 … deck.z1+4 ≈
+  x161–183, z−402…−390), covering the stair run, west approach and the east
+  camera lane. Zero determinism impact (post-filter, same pattern as
+  tennis/Diversey). Verified up the stairs in sanctuary-deck-f2: stair run and
+  landing clear of trunks/canopy; the deck now reads as sited in a clearing.

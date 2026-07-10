@@ -149,6 +149,21 @@ for (const zn of CH.ZONES) {
     [{ yaw: 0.8, pitch: 0.2, dist }, { yaw: 2.9, pitch: 0.2, dist }, { yaw: -1.3, pitch: 0.28, dist: dist + 2 }]);
 }
 
+// sanctuary DECK — the bird-watching hero perch (task 025). Stand on the
+// elevated platform just inside the west rail and look WEST/SW out over the
+// interior loop + dappled clearings where the flock perches; the expectation
+// judges VISIBLE BIRD ACTIVITY, not just the room. Camera sits EAST of the
+// player (behind), in the tree-cleared east lane (props.js deck filter), so
+// it clears the grove. Stand + yaws derive from SANCTUARY.deck.
+{
+  const D = CH.SANCTUARY.deck, cz = (D.z0 + D.z1) / 2, sx = D.x0 + 1.5;
+  add('sanctuary-deck', 'lakefront', 'lakefront', R(sx), R(cz), [
+    { yaw: yawTo(sx, cz, 132, -392), pitch: 0.34, dist: 10 },   // WSW across the clearings
+    { yaw: yawTo(sx, cz, 122, -406), pitch: 0.3,  dist: 11 },   // SW toward the far clearing + loop
+    { yaw: yawTo(sx, cz, 146, -380), pitch: 0.36, dist: 9 },    // W-NW up into the canopy
+  ]);
+}
+
 const signSeen = {};
 for (const s of CH.SIGNS) {
   let id = 'sign-' + slug(s.text.replace(/[^a-z ]/gi, ''));

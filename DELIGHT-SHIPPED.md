@@ -127,3 +127,14 @@ cut becomes a revert task.
   which is right), the leaning granite boulder clear of the letters, the white
   limestone sitting blocks from the owner's photo, the WHERE-NEXT kiosk waiting
   ahead-right — AIDS Garden entrance (110,157) — task 023
+- A bird lands on the deck rail beside you — a red-winged blackbird one visit,
+  a flame-orange Baltimore oriole the next — while the sanctuary clearings below
+  fill with a whole Magic-Hedge roster (cardinal, jay, indigo bunting, scarlet
+  tanager, goldfinch, waxwings, sparrows) — Bird Sanctuary deck (171,−396) —
+  task 025
+- A great blue heron stands statue-still at a clearing edge, then one slow neck
+  strike; a downy woodpecker knocks its way up the dead snag; a ruby-throated
+  hummingbird hover-darts the wildflowers; a cedar-waxwing flock sweeps the
+  canopy — each a bird you stop to WATCH — Bird Sanctuary interior — task 025
+- The Chicago-famous black-crowned night-heron (a real endangered local resident)
+  is in the bingo — locals will clock it — Bird Sanctuary — task 025

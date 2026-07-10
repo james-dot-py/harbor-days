@@ -94,6 +94,20 @@ few turns to find; keep each to one line of symptom + fix.
   claimed the opposite for a full version (issue 006). Never trust a builder
   comment for a yawed prop frame; screenshot from the character's facing side
   and LOOK.
+- A pack's distance-CULL sign flip hides its content everywhere and reads as
+  "nothing renders": the north-lakefront POIs sit at NEGATIVE z, so a cull
+  `(pl.z - 388)**2` (instead of `+ 388`) makes d2 always huge → every bird was
+  culled at the deck, yet draw calls looked plausible (they were the true
+  no-bird baseline) and NO console error fired (task 025 — cost ~an hour chasing
+  "invisible birds"). When new content won't render but the code "looks right",
+  instrument the live count (`window.__x = ...` + page.evaluate) BEFORE tuning
+  geometry/size/density; and sanity-check every `pl.z ± <z0>` against the POI's
+  actual sign in GEOGRAPHY.md.
+- Small toon birds/props DON'T READ at zone distance (deck→clearing ~15–50 m):
+  a realistic 0.15 m songbird is a few pixels lost among wildflowers. For "reads
+  busy" hero views, go chibi-chunky (BIRD_SCALE ~2.5), CLUSTER perches into the
+  view's focal clearings (weighted, not uniform over the whole room), and seat a
+  couple eye-level on the near rail — count alone at true scale never reads.
 - pathSamples is PHASE-sensitive, not just content-sensitive: trees scan it at
   stride 3, so reshaping/reordering/deleting ANY ribbon shifts every later
   ribbon's sample indices -> different subset checked -> tree-rejection rng
