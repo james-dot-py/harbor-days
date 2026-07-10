@@ -429,7 +429,12 @@ function runStart(){
     else if(e.key==='?'){if(card.classList.contains('show'))close();else{fill();card.classList.add('show')}}
   });
 }
-$('start').addEventListener('click',()=>{initAudio();runStart();});
+$('start').addEventListener('click',()=>{initAudio();runStart();
+  // GoatCounter "pressed let's walk" event — AFTER the gesture-critical
+  // initAudio; never throws. The ?play=1 tooling path below deliberately
+  // does not count (keeps headless shots out of the metric).
+  try{if(window.goatcounter&&window.goatcounter.count)goatcounter.count({path:'lets-walk',title:"pressed let's walk",event:true});}catch(e){}
+});
 addEventListener('resize',()=>{
   camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
   renderer.setSize(innerWidth,innerHeight);
