@@ -18,7 +18,7 @@ import { SUGGESTION_BOX as BOX } from '../data/chicago.js';
 
 const NTFY_URL = 'https://ntfy.sh/ope-suggestions-47f05eb0';
 const NTFY_TITLE = 'Ope! player suggestion';
-const MAILTO = 'mailto:jfriedman847@gmail.com?subject=Ope!%20neighborhood%20suggestion';
+const MAILTO = 'mailto:jimbo@playope.com?subject=Ope!%20neighborhood%20suggestion';   // owner directive 2026-07-10
 const MAX = 500;
 
 // -------- the painted front label ("WHERE NEXT? — drop a suggestion") --------
