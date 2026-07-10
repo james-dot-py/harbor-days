@@ -509,7 +509,7 @@ expect('apron corner by the crosswalks (-203,-547) walkable',WV.walkableW(-203,-
 expect('apron meets the Sheffield sidewalk (-202.5,-540) walkable',WV.walkableW(-202.5,-540),true);
 expect('past the chamfer wall (-216,-534) NOT walkable (inside the park)',WV.walkableW(-216,-534),false);
 
-// ===== Task 013: suggestion box at the Belmont FUTURE ENTRANCE =====
+// ===== Task 013: suggestion box (relocated to the AIDS Garden spawn plaza, task 023) =====
 // The box is a small collider on EXISTING walkable LAND — it must add no new
 // walkable surface and must clear every trail ribbon like any other prop.
 console.log('\n--- Task 013 (relocated by owner, task 023): suggestion box at the new spawn ---');

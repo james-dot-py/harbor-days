@@ -43,7 +43,8 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
    (`LAKEVIEW_BAND` in chicago.js, built in sky.js).
    **Underpasses** (future neighborhood gates + Divvy/foot entrances) at
    Belmont z +105, Addison z −400, Irving Park z −800: short tunnels through the
-   berm, fenced dead-end doors for now ("FUTURE ENTRANCE" gag relocates here).
+   berm, fenced dead-end doors for now (the "FUTURE ENTRANCE →" gag signs were
+   removed in task 030 per owner feedback — the portals stay, the signs are gone).
    The Belmont stop moved from z 0 to z +105 to sit on the AIDS-garden/Keith-Haring
    axis; a short paved connector links its mouth (~x 14, z 105) east to the loop.
 2. **x 14–~85 — inner parkland**: lawns, meadows, tree groves, the inner branch of
@@ -178,7 +179,7 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
   (109.5, 156.6) on the forecourt, yaw 1.57 — **FACING THE WATER** (east,
   open lawn to the Belmont Rocks steps); camera starts due west at
   (87.5, 4.5, 156.6). Monument front-right, upsized WHERE-NEXT suggestion box
-  (relocated from the Belmont future entrance, `SUGGESTION_BOX`) ahead-right,
+  (relocated from the Belmont underpass, `SUGGESTION_BOX`) ahead-right,
   Divvy dock behind-left. The monument is the first thing every player sees.
 - **The Belmont Rocks**: stepped revetment along the open lake, **7 terrace steps**
   (reads broader). The east-facing rocks (`COAST_MAIN`, x ≈ 150) run to **z 340**;

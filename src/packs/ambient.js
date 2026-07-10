@@ -121,9 +121,9 @@ function buildTrack(){
   // BELMONT sign — east face, readable from the park
   const sign=new THREE.Mesh(new THREE.PlaneGeometry(5,1.25),bmat(0xffffff,{map:belmontTex(),side:THREE.DoubleSide}));
   sign.position.set(px+1.75,DECK_TOP+1.7,PLATFORM_Z);sign.rotation.y=Math.PI/2;scene.add(sign);
-  // NOTE: the 'FUTURE ENTRANCE' gag now lives on the LSD underpass portals
-  // (data/chicago.js SIGNS) — the Belmont portal sits at the moved underpass
-  // (z 105), so the platform carries NO duplicate sign (exactly one instance).
+  // NOTE: the 'FUTURE ENTRANCE' gag signs were removed in task 030 (owner
+  // feedback) — the LSD underpass portals stay but carry no signs; the platform
+  // carries only its BELMONT sign (exactly one instance).
 }
 
 function buildTrain(){

@@ -560,7 +560,7 @@ function seCornerSigns() {
 // Gate TEASER placard (task 017) — a green ballpark notice on the CLOSED gate
 // doors hinting the interior opens SOMEDAY (owner directive 2026-07-09; "hint,
 // don't promise a date"). Ballpark voice, deliberately NOT the lakefront's
-// literal 'FUTURE ENTRANCE →' gag (owner asked for that one to go, 2026-07-10).
+// literal 'FUTURE ENTRANCE →' gag (the lakefront gag; removed in task 030, 2026-07-10).
 // Green field + cream pinstripe like the real GATES 4&5 boards (IMG_2333 /
 // 47996783347); red 'COMING SOON' ribbon ties the four winks into one set.
 // Baked into the shared wrigley atlas by gateAt → +0 draw calls.

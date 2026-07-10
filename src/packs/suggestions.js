@@ -1,6 +1,7 @@
-// NEIGHBORHOOD SUGGESTION BOX (task 013) — a diegetic park-district box beside
-// the Belmont FUTURE ENTRANCE doors. The game already winks at expansion there;
-// now the wink takes requests. E opens a DOM card (style-matched to the controls
+// NEIGHBORHOOD SUGGESTION BOX (task 013; relocated to the AIDS Garden entrance
+// forecourt by owner direction in task 023) — a diegetic park-district box on
+// the spawn plaza. The game winks at expansion; now the wink takes requests.
+// E opens a DOM card (style-matched to the controls
 // card) with a textarea + Send; Send POSTs the note to a public ntfy topic the
 // owner subscribes to. This is the game's FIRST runtime network call, so it is
 // strictly opt-in: it fires ONLY on the Send click, is wrapped in try/catch, and

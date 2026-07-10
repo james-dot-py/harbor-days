@@ -422,10 +422,11 @@ export const FINGER_DOCKS = {
   sails:[0xffffff,0xffd98a,0x9edcff,0xffb1c9,0xffffff,0xe0c0f0,0xffffff,0xffd98a,0x9edcff,0xffffff,0xffb1c9,0xffffff],
 };
 
-// wooden signs (text + placement); the three underpass gag signs live in
-// the inner park just east of the LSD berm.
+// wooden signs (text + placement).
 // (task 023: the 'AIDS GARDEN' plate was removed — the entrance monument
 // (ENTRANCE, structures.js) is the ONE AND ONLY AIDS Garden signage.)
+// (task 030: the three 'FUTURE ENTRANCE →' underpass gag signs were removed
+// per owner feedback — the LSD underpass portals (structures.js) stay.)
 export const SIGNS = [
   { text:'BELMONT HARBOR',      x:78,  z:-30,  ry:Math.PI/2 },
   { text:'DOG BEACH',           x:103, z:-343, ry:3.0 },            // on the GRASS north of the cove (between fence z-341 and the trail spur), facing the trail — was standing in the sand at the waterline
@@ -434,9 +435,6 @@ export const SIGNS = [
   { text:'YACHT CLUB',          x:70,  z:-168, ry:-0.6 },
   { text:'WAVELAND TENNIS COURTS', x:83, z:-403, ry:-1.9 },        // SE corner, facing the trail approach
   { text:'DIVERSEY RANGE & MINI GOLF', x:30, z:285, ry:0.5 },      // SW of the range, facing the park
-  { text:'FUTURE ENTRANCE →',   x:15,  z:113,  ry:-Math.PI/2 },    // Belmont underpass (moved to z105); beside the connector mouth, off the ribbon
-  { text:'FUTURE ENTRANCE →',   x:16,  z:-394, ry:-Math.PI/2 },   // Addison underpass
-  { text:'FUTURE ENTRANCE →',   x:16,  z:-794, ry:-Math.PI/2 },   // Irving Park underpass
 ];
 
 // suggestion box (task 013; RELOCATED + UPSIZED 2026-07-10 per owner live
@@ -444,7 +442,8 @@ export const SIGNS = [
 // stands ahead-right of the NEW spawn on the monument forecourt's east lawn —
 // "in front and to the right of the user when they spawn", scaled to
 // park-kiosk presence so it reads at spawn distance (it was birdhouse-tiny at
-// the Belmont FUTURE ENTRANCE, which task 030 is de-signing anyway). Small
+// the Belmont underpass, whose FUTURE ENTRANCE signs task 030 has since
+// removed). Small
 // collider only — NO new walkable surface (it sits on existing LAND). The
 // coordinate lives here so the engine pack, tools/walkprobe.mjs and
 // tools/gen-waypoints.mjs all read ONE placement source. Front-right of the
@@ -545,8 +544,9 @@ export const DOG_PROPS = {
 /* ---------------------------- STRUCTURES ----------------------------- */
 // Lake Shore Drive — low grass berm (x 0-14, NOT walkable; it sits outside
 // the LAND polygon) with a paler 8-lane road ribbon on top, and three
-// underpass portals (short tunnel mouths + FUTURE ENTRANCE signs) at
-// Belmont z 0, Addison z -400, Irving Park z -800. Toon cars slide N/S in
+// underpass portals (short tunnel mouths; the FUTURE ENTRANCE gag signs were
+// removed in task 030) at Belmont z 0, Addison z -400, Irving Park z -800.
+// Toon cars slide N/S in
 // the `lsd.js` content pack; the static berm/road/portals build here.
 export const LSD = {
   berm:{ x0:0, x1:14, z0:-846, z1:418, h:1.0, color:0x6f9e5c },   // z1 418: berm/road extend past the new south lawn so the west edge reads continuous

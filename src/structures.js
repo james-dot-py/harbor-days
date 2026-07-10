@@ -100,8 +100,9 @@ function emitFences(POSTS,RAILS){
 // ---- Lake Shore Drive: low grass berm + paler road ribbon + portals ----
 // The berm (x 0-14) sits OUTSIDE the walkable LAND polygon, so it needs no
 // colliders (the player is clamped to x >= 14). Toon cars slide on the road
-// in the lsd.js content pack. Three underpass portals ("FUTURE ENTRANCE")
-// stand at Belmont z 0, Addison z -400, Irving Park z -800.
+// in the lsd.js content pack. Three underpass portals stand at Belmont z 0,
+// Addison z -400, Irving Park z -800 (their "FUTURE ENTRANCE" gag signs were
+// removed in task 030 per owner feedback).
 function buildUnderpass(zc,P,stone,dark){
   const grp=new THREE.Group(),fx=12.5;
   for(const s of[-1,1]){

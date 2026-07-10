@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-10T21:03:25.241Z",
- "count": 72,
+ "generated": "2026-07-10T21:45:06.209Z",
+ "count": 69,
  "waypoints": [
   {
    "id": "spawn",
@@ -547,81 +547,6 @@
     }
    ],
    "expectation": "Wooden 'DIVERSEY RANGE & MINI GOLF' sign readable SW of the range; two-tier driving-range bays and/or the tall perimeter net behind."
-  },
-  {
-   "id": "sign-future-entrance",
-   "area": "lakefront",
-   "cell": "lakefront",
-   "x": 15,
-   "z": 113,
-   "framings": [
-    {
-     "yaw": 1.57,
-     "pitch": 0.12,
-     "dist": 8
-    },
-    {
-     "yaw": -1.57,
-     "pitch": 0.12,
-     "dist": 8
-    },
-    {
-     "yaw": 2.47,
-     "pitch": 0.2,
-     "dist": 10
-    }
-   ],
-   "expectation": "Wooden 'FUTURE ENTRANCE →' gag sign beside the Belmont underpass mouth in the LSD berm; short tunnel/fenced door visible."
-  },
-  {
-   "id": "sign-future-entrance-2",
-   "area": "lakefront",
-   "cell": "lakefront",
-   "x": 16,
-   "z": -394,
-   "framings": [
-    {
-     "yaw": 1.57,
-     "pitch": 0.12,
-     "dist": 8
-    },
-    {
-     "yaw": -1.57,
-     "pitch": 0.12,
-     "dist": 8
-    },
-    {
-     "yaw": 2.47,
-     "pitch": 0.2,
-     "dist": 10
-    }
-   ],
-   "expectation": "Wooden 'FUTURE ENTRANCE →' gag sign at the Addison underpass in the LSD berm."
-  },
-  {
-   "id": "sign-future-entrance-3",
-   "area": "lakefront",
-   "cell": "lakefront",
-   "x": 16,
-   "z": -794,
-   "framings": [
-    {
-     "yaw": 1.57,
-     "pitch": 0.12,
-     "dist": 8
-    },
-    {
-     "yaw": -1.57,
-     "pitch": 0.12,
-     "dist": 8
-    },
-    {
-     "yaw": 2.47,
-     "pitch": 0.2,
-     "dist": 10
-    }
-   ],
-   "expectation": "Wooden 'FUTURE ENTRANCE →' gag sign at the Irving Park underpass in the LSD berm, far north."
   },
   {
    "id": "suggestion-box",
