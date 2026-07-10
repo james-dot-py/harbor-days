@@ -66,3 +66,13 @@ few turns to find; keep each to one line of symptom + fix.
   canary-verified OWN-vite shot (never the foreign :5173 server — it served a
   stale "harbor days · v0.9" build with no ♥) + commit [baseline-regen] +
   the baseline.png change so future diffs stay clean.
+- r128 InstancedMesh sets frustumCulled=false IN ITS CONSTRUCTOR (and fogcull
+  exempts it): every instanced bucket is drawn in EVERY view, everywhere on
+  the map. Budget instanced draw calls as GLOBAL adds, not per-view — which
+  also makes bucket-count == draw-call-add exactly (task 015 measured 39/39).
+- The "empty" lakefront lawns are not empty: TRAIL_MAIN runs x≈44-58 through
+  z −45…−300, and packs pin fixed tableaux (volleyball net 95,215; market cart
+  32,−70; toddler zone 46..60×−126..−110; badminton courts 105/255, 55/60,
+  38/−290). Grep pack coords AND trail polylines before placing anything —
+  task 015's demo row landed on all three before finding clear ground at
+  x 48-127, z 193-220.
