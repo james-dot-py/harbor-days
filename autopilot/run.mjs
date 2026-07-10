@@ -227,6 +227,11 @@ const LIMIT_RE = /rate limit|usage limit|session limit|too many requests|limit r
 // them separately: halt the loop without striking the task. (Learned 2026-07-08:
 // a spend-limit cutoff cascaded into 1-turn sessions that parked two good tasks.)
 const SPEND_RE = /spend limit|monthly limit|credit balance|out of credits|insufficient credits|settings\/usage/i;
+// Auth failures (OAuth expired/revoked) also need the owner — halt without a
+// strike. Learned 2026-07-10: an expired login instant-failed every spawn,
+// cascade-parked 6 good tasks, then the un-parkable planner retried 721×,
+// one ntfy per failure — the owner woke to a notification storm.
+const AUTH_RE = /failed to authenticate|oauth.*(expired|revoked|could not be refreshed)|not logged in|invalid api key|please run \/login/i;
 function looksLikeLimit(text) { return !!text && LIMIT_RE.test(text); }
 function classifyLimit(attempt) {
   const texts = [attempt.limitText, attempt.resultText].filter(Boolean);
@@ -410,6 +415,16 @@ async function iterationOnce() {
     return { halt: true };
   }
 
+  // auth failure: same shape as spend — the task never got a fair run; halt
+  // loudly ONCE instead of striking/retrying into a notification storm
+  if (AUTH_RE.test(res.resultText || '') || AUTH_RE.test(res.limitText || '')) {
+    log({ event: 'auth-halt', msg: taskId });
+    await notify('Ope! autopilot HALTED — Claude login expired',
+      'Sessions cannot authenticate (hit during ' + taskId + '). No fail strike recorded. Run /login on the box, then press Start on the panel.',
+      { priority: 'high' });
+    return { halt: true };
+  }
+
   // failed (or no fresh result)
   const status = result ? result.status : 'no-result';
   fc[taskId] = (fc[taskId] || 0) + 1;
@@ -423,6 +438,13 @@ async function iterationOnce() {
     log({ event: 'parked', msg: taskId });
     commitBookkeeping(taskId + ' parked after 3 failures');
     await notify('Harbor Days autopilot PARKED ' + taskId, 'Task failed 3× — moved to queue/parked/. Needs a human.', { priority: 'high' });
+  } else if (planner && fc[taskId] >= 3) {
+    // the planner has no queue file to park — without this cap it retries
+    // forever (the 2026-07-10 721-failure storm). Halt loudly once instead.
+    delete fc[taskId]; saveFailcounts(fc);
+    log({ event: 'planner-halt', msg: '3 consecutive planner failures' });
+    await notify('Ope! autopilot HALTED — planner failing', 'The planner failed 3× in a row (nothing to park). Investigate the newest session log, then press Start on the panel.', { priority: 'high' });
+    return { halt: true };
   } else {
     commitBookkeeping(taskId + ' failed (attempt ' + fc[taskId] + '/3) — issues/feedback sync');
     await notify('Harbor Days task failed: ' + taskId, (status === 'failed' ? 'Filed an issue' : 'No fresh result.json') + ' (attempt ' + fc[taskId] + '/3).', { priority: 'default' });
