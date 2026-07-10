@@ -58,6 +58,8 @@
     background:rgba(74,59,47,.55);padding:8px 18px;border-radius:999px;font-size:13px;letter-spacing:.05em;
     transition:opacity 1.2s ease;white-space:nowrap;}
   #hint.hide{opacity:0}
+  /* ?dbg=1: coords are selectable + click-to-copy (main.js wires the click) */
+  #hint.dbg{-webkit-user-select:text;user-select:text;cursor:copy;pointer-events:auto;}
   #banner{position:fixed;top:11%;left:50%;transform:translate(-50%,-14px);z-index:20;opacity:0;
     background:rgba(253,246,230,.95);color:var(--ink);padding:12px 30px;border-radius:999px;
     font-size:clamp(16px,3.4vw,22px);letter-spacing:.14em;box-shadow:0 5px 0 rgba(122,62,44,.2);

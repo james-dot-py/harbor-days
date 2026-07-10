@@ -377,8 +377,9 @@ function frame(now){
   updateChibiShadows();   // after runUpdates: rigs have moved; one InstancedMesh re-stamp
   updateFogCull(dt);      // hide fully-fogged meshes (pixel-neutral draw-call cut)
 
-  if(DBG.get('dbg')==='1'){const h=$('hint');h.style.display='block';h.classList.remove('hide');
-    h.textContent=`x=${player.x.toFixed(1)} z=${player.z.toFixed(1)} y=${player.y.toFixed(2)} mag=${mag.toFixed(2)} mvx=${mvx.toFixed(2)} wadeT=${jsk.wadeT.toFixed(2)} on=${jsk.on?1:0} walk=${walkable(player.x,player.z)?1:0} iw07=${isWater(player.x+mvx*0.7,player.z+mvz*0.7)?1:0} walk07=${walkable(player.x+mvx*0.7,player.z+mvz*0.7)?1:0}`;}
+  if(DBG.get('dbg')==='1'&&performance.now()>dbgHud.holdT){const h=$('hint');h.style.display='block';h.classList.remove('hide');
+    const s=`x=${player.x.toFixed(1)} z=${player.z.toFixed(1)} y=${player.y.toFixed(2)} mag=${mag.toFixed(2)} mvx=${mvx.toFixed(2)} wadeT=${jsk.wadeT.toFixed(2)} on=${jsk.on?1:0} walk=${walkable(player.x,player.z)?1:0} iw07=${isWater(player.x+mvx*0.7,player.z+mvz*0.7)?1:0} walk07=${walkable(player.x+mvx*0.7,player.z+mvz*0.7)?1:0}`;
+    if(s!==dbgHud.last){h.textContent=s;dbgHud.last=s;}}  // skip identical writes — a text selection survives while standing still
 
   mmDraw(dt,player);
   renderer.render(scene,camera);
@@ -447,6 +448,22 @@ if(DBG.get('audiodbg')==='1'){
   const el=$('audiodbg');el.style.display='block';
   const paint=()=>{const a=audioDbg();el.textContent='audio: '+a.state+' · resumes '+a.resumes;};
   paint();setInterval(paint,250);
+}
+
+// ---- ?dbg=1 — coordinate HUD is click-to-copy (owner sends coords as feedback):
+// click puts "x=.. z=.." on the clipboard and flashes 'copied'; the text is also
+// selectable (#hint.dbg) since the frame loop skips identical writes. Clipboard
+// needs a secure context (https/localhost) — on failure we select the text instead.
+const dbgHud={last:'',holdT:0};
+if(DBG.get('dbg')==='1'){
+  const h=$('hint');h.classList.add('dbg');
+  h.addEventListener('click',()=>{
+    const s=`x=${player.x.toFixed(1)} z=${player.z.toFixed(1)}`;
+    const flash=()=>{h.textContent='copied  '+s;dbgHud.last='';dbgHud.holdT=performance.now()+900;};
+    const select=()=>{const sel=getSelection(),r=document.createRange();sel.removeAllRanges();r.selectNodeContents(h);sel.addRange(r);};
+    if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(s).then(flash,select);
+    else select();
+  });
 }
 
 requestAnimationFrame(frame);
