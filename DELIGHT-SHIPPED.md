@@ -90,3 +90,10 @@ cut becomes a revert task.
 - The bar row stopped shouting its own name twice: one dominant sign per bar
   plus a single accent, and every storefront now wears a different upper-window
   and door composition — Clark St bar row — task 016
+- The Friendly Confines wink at what's behind the gates: each closed door now
+  wears a green ballpark COMING SOON notice (same green-and-cream family as the
+  real GATES 4&5 boards) hinting the inside opens someday — no date, pure tease.
+  Marquee gate 'STEP INSIDE / THE CONFINES · the gates open someday', Gallagher
+  'WALK THE / WARNING TRACK · when the ivy's ready', Addison 'BALLPARK TOURS /
+  RETURN SOON · watch this gate', Bleachers 'TAKE YOUR SEAT / IN THE BLEACHERS ·
+  save us a spot' — Wrigley Field gates — task 017

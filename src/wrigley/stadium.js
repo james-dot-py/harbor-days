@@ -494,7 +494,29 @@ function buildFacades() {
 }
 
 // ------------------------------ gates ----------------------------------
-function gateAt(x, z, yaw, label, wide = 4.4) {
+// Gate TEASER placard (task 017) — a green ballpark notice on the CLOSED gate
+// doors hinting the interior opens SOMEDAY (owner directive 2026-07-09; "hint,
+// don't promise a date"). Ballpark voice, deliberately NOT the lakefront's
+// literal 'FUTURE ENTRANCE →' gag (owner asked for that one to go, 2026-07-10).
+// Green field + cream pinstripe like the real GATES 4&5 boards (IMG_2333 /
+// 47996783347); red 'COMING SOON' ribbon ties the four winks into one set.
+// Baked into the shared wrigley atlas by gateAt → +0 draw calls.
+function teaserTex(l1, l2, wink) {
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 224;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#1c4a35'; g.fillRect(0, 0, 512, 224);                       // Cubs-green field
+  g.strokeStyle = '#f2ece0'; g.lineWidth = 5; g.strokeRect(9, 9, 494, 206);  // cream pinstripe frame
+  g.lineWidth = 1.6; g.strokeRect(16, 16, 480, 192);                         // doubled inner line
+  g.fillStyle = '#b0202c'; g.fillRect(24, 24, 464, 38);                      // Cubs-red header ribbon
+  g.fillStyle = '#f6f1e6'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '700 23px Georgia,serif'; g.fillText('C O M I N G   S O O N', 256, 44);
+  const fit = (t, y) => { let fs = 48; g.font = `800 ${fs}px Georgia,serif`; while (g.measureText(t).width > 446 && fs > 22) { fs -= 2; g.font = `800 ${fs}px Georgia,serif`; } g.fillText(t, 256, y); };
+  g.fillStyle = '#f6f1e6'; fit(l1, 103); fit(l2, 151);                       // the big tease, two lines
+  g.fillStyle = '#cfe0c8'; g.font = 'italic 600 23px Georgia,serif';         // sage wink line
+  g.fillText(wink, 256, 197);
+  return new THREE.CanvasTexture(cv);
+}
+function gateAt(x, z, yaw, label, wide = 4.4, teaser = null) {
   const grp = new THREE.Group();
   const frame = new THREE.Mesh(new THREE.BoxGeometry(wide + 1.2, 5.2, 0.9), toon(BRICK));
   frame.position.y = 2.6; grp.add(frame);
@@ -511,8 +533,18 @@ function gateAt(x, z, yaw, label, wide = 4.4) {
   g.fillText(label, 128, 28);
   const sign = new THREE.Mesh(new THREE.PlaneGeometry(wide, wide * 40 / 256), bmat(0xffffff, { map: new THREE.CanvasTexture(cv) }));
   sign.position.set(0, 4.6, 0.62); grp.add(sign);
+  // teaser placard on the doors — width clamped to the door face (wide-0.6)
+  // with >=0.3 m margin per issue 001; eye-level, proud of the door face (0.64).
+  let teaserMesh = null;
+  if (teaser) {
+    const pw = Math.min(wide - 1.2, 2.6), ph = pw * 224 / 512;
+    teaserMesh = new THREE.Mesh(new THREE.PlaneGeometry(pw, ph),
+      bmat(0xffffff, { map: teaserTex(teaser.big[0], teaser.big[1], teaser.wink) }));
+    teaserMesh.position.set(0, 1.98, 0.72); grp.add(teaserMesh);
+  }
   grp.position.set(x, 0, z); grp.rotation.y = yaw;
   grp.updateMatrixWorld(true); atlasPlane(sign, false);   // gate sign -> shared wrigley atlas (detaches from grp)
+  if (teaserMesh) atlasPlane(teaserMesh, false);          // teaser -> same atlas (detaches; +0 draw calls)
   wrigleyRoot.add(grp);
 }
 function ticketBooth(x, z, yaw) {
@@ -987,10 +1019,14 @@ export function buildStadium() {
   // outward normal (−0.963, 0.269) faces the plaza (the cant is unchanged).
   const plazaX = z => clarkX(z) + 40;
   const gYaw = Math.atan2(-0.963, 0.269);                        // faces the plaza
-  gateAt(S.gates.marquee.x, S.gates.marquee.z, S.gates.marquee.yaw, 'MARQUEE GATE'); // on the curve apex
-  gateAt(plazaX(-490) + 0.42, -490.12, gYaw, 'GALLAGHER WAY GATE');
-  gateAt(-212.28, -537.72, S.gates.bleacher.yaw, 'BLEACHERS', 7); // hero gate on the chamfer, Caray plaza in front
-  gateAt(S.gates.addison.x, S.gates.addison.z, S.gates.addison.yaw, 'ADDISON GATE'); // south face, mid-block (outer face z≈−413.95)
+  gateAt(S.gates.marquee.x, S.gates.marquee.z, S.gates.marquee.yaw, 'MARQUEE GATE', 4.4, // on the curve apex
+    { big: ['STEP INSIDE', 'THE CONFINES'], wink: 'the gates open someday' });
+  gateAt(plazaX(-490) + 0.42, -490.12, gYaw, 'GALLAGHER WAY GATE', 4.4,
+    { big: ['WALK THE', 'WARNING TRACK'], wink: "when the ivy's ready" });
+  gateAt(-212.28, -537.72, S.gates.bleacher.yaw, 'BLEACHERS', 7, // hero gate on the chamfer, Caray plaza in front
+    { big: ['TAKE YOUR SEAT', 'IN THE BLEACHERS'], wink: 'save us a spot' });
+  gateAt(S.gates.addison.x, S.gates.addison.z, S.gates.addison.yaw, 'ADDISON GATE', 4.4, // south face, mid-block (outer face z≈−413.95)
+    { big: ['BALLPARK TOURS', 'RETURN SOON'], wink: 'watch this gate' });
   friendlyConfinesBanner();                                       // green banner band over the Addison gate
   buildFlagRing();                                                // rooftop flag ring above the marquee
   // marquee-side booth now lives in wrigley-vendors.js (the ticket queue owns it)
