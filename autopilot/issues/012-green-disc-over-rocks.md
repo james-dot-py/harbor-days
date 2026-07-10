@@ -20,3 +20,10 @@
   the terrace top edge. The rocks read as stone from their very first step.
 - route: task 023 (AIDS Garden entrance — same neighborhood, touches this
   exact ground), item 5.
+- RESOLVED (task 023, 2026-07-10): candidate B confirmed by shot — a
+  GRASS_PATCHES ellipse centered near the lip overhung the terraces (the zone
+  entry is HUD-only, no ground tint). Class fix in coast.js: every mottled
+  disc now rim-tests 12 points (+0.5 m margin) against LAND and SHRINKS until
+  the whole rim fits (skip below 40%) — pure geometry after all rand draws,
+  world rng untouched. Re-shot disc-west-after.png + zone-the-belmont-rocks-*:
+  the rocks read as stone from the first step.

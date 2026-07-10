@@ -44,6 +44,7 @@ function labelTex() {
 function buildBox() {
   const g = new THREE.Group();
   g.position.set(BOX.x, 0, BOX.z); g.rotation.y = BOX.ry;
+  g.scale.setScalar(BOX.scale || 1);   // owner 2026-07-10: park-kiosk presence, readable from the spawn
   const WOOD = 0x8a6a4a, GREEN = 0x2f6b46, DARKGREEN = 0x244f34, BRASS = 0xcaa24a;
   // sunk wooden post
   const post = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.11, 1.06, 7), toon(WOOD));
@@ -177,6 +178,6 @@ async function send() {
 
 onWorldReady(() => {
   scene.add(buildBox());                       // lakefront is always-visible; no cell merge here
-  collide(BOX.x, BOX.z, 0.5);                  // small collider, no new walkable surface
-  addInteraction({ x: BOX.x, z: BOX.z, r: 1.6, label: 'suggest a neighborhood', onUse: () => { if (!cardOpen) open(); } });
+  collide(BOX.x, BOX.z, 0.5 * (BOX.scale || 1));   // small collider, no new walkable surface
+  addInteraction({ x: BOX.x, z: BOX.z, r: 1.6 + 0.5 * ((BOX.scale || 1) - 1), label: 'suggest a neighborhood', onUse: () => { if (!cardOpen) open(); } });
 });

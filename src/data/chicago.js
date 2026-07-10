@@ -230,13 +230,42 @@ export const TRAIL_SPUR=[
   [178,-260],[181,-200],[183,-150],[185,-105],      // the SPINE (trees both sides)
   [188,-70],[190,-48],[186,-32],                    // ease toward the tip loop
 ];
-// AIDS-garden plaza LOOP: a CLEAN circle (r=16) centred on the Keith Haring
-// sculpture (95,120). Even 8-point ring (repeat the first to close) so the
-// CatmullRom reads as a true circle. WEST point (79,120) = the connector's
-// T-junction; EAST point (111,120) = where MAIN skims tangentially.
+// AIDS-garden plaza LOOP — a TWO-LOBE PEANUT (task 023, per the owner drone
+// aerial refs/aids-garden/aerial-path-structure.jpg: the real loop is the
+// statue circle plus a larger lawn lobe to its WEST/SW, not a clean circle).
+// Outline = union of the statue ring (r16 about 95,120) and the SW lobe (r12
+// about 78,134), walked as one closed polyline (first point repeated); the
+// CatmullRom rounds the waist into the aerial's pinched figure. BOTH welds
+// are preserved exactly: the connector still T-junctions at (79,120) on the
+// waist's north arc, MAIN still skims (111,120) tangentially.
 export const TRAIL_LOOP=[
+  [79.1,122.1],[79.6,115.8],[82.4,110.1],[87.2,106],[93.2,104.1],[99.5,104.7],
+  [105.1,107.6],[109.1,112.5],[110.9,118.5],[110.3,124.8],[107.2,130.3],
+  [102.3,134.2],[96.2,136],[89.9,135.2],
+  [88.6,139.7],[85.6,143.3],[81.5,145.5],[76.8,145.9],[72.4,144.6],
+  [68.7,141.6],[66.5,137.5],[66.1,132.9],[67.4,128.4],[70.4,124.7],
+  [74.5,122.5],[79.1,122.1],
+];
+// DETERMINISM BALLAST — the retired r=16 circle. Its ribbonOn-identical
+// samples stay registered in pathSamples at the loop's ORIGINAL build slot so
+// the tree-rejection scan (props.js nearPath, stride 3) sees a byte-identical
+// array: same content, same count, same phase => the shared world rng order
+// (trees -> tufts -> towels -> everything) is bit-for-bit unchanged. All NEW
+// garden ribbons (the peanut, TRAIL_ENTRANCE) register in pathSamples2 only.
+// NEVER delete or reshape this table; it is consumed by paths.js sampleGhost.
+export const TRAIL_LOOP_GHOST=[
   [111,120],[106.3,131.3],[95,136],[83.7,131.3],
   [79,120],[83.7,108.7],[95,104],[106.3,108.7],[111,120],
+];
+// ENTRANCE→LAKE PATH (task 023, the aerial's shore arm; re-routed 2026-07-10
+// with the owner's monument re-siting): crushed limestone, leaving the
+// monument forecourt pad's east edge and running ENE to the revetment top —
+// it stops ~1.7 m short of the lip (COAST_MAIN fx(146.8)≈152.6) so the
+// terrace steps stay clean. Registered in pathSamples2 only (see
+// TRAIL_LOOP_GHOST note); trees along its out-of-garden stretch are removed
+// by a POST-filter in props.js.
+export const TRAIL_ENTRANCE=[
+  [115,155.6],[123,153.8],[132,151.6],[141,149.4],[150.9,146.8],
 ];
 // paved connector: the (moved) Belmont underpass mouth (~14,105) east to the
 // LOOP's WEST point (79,120) — a clean radial T-junction, no crossing through.
@@ -268,8 +297,16 @@ export const ZONES=[
   {n:'Marovitz Golf Course', x:150, z:-610, r:90},
 ];
 
-// player + camera start (on the Belmont Rocks, camera behind/south), clamp
-export const SPAWN = { player:{ x:150, z:150 }, camera:{ x:150, y:4.5, z:172 } };
+// player + camera start — THE FRONT DOOR (task 023): the player spawns on the
+// AIDS Garden entrance forecourt by the monument wall, facing SSW along the
+// statue axis (yaw −0.31 → the Haring sculpture at 95,120); the camera rests
+// NNE behind, looking over the wall's north end at monument + garden + statue.
+// yaw seeds BOTH cam.yaw (main.js) and the mayor's initial facing (character.js).
+// OWNER DIRECTION 2026-07-10: spawn on the monument forecourt near the sign,
+// FACING THE WATER — due east (+x), the open lawn running to the Belmont
+// Rocks steps and the lake. Monument wall front-right of the view, suggestion
+// box ahead-right, Divvy dock behind-left across the trail. Camera due west.
+export const SPAWN = { player:{ x:109.5, z:156.6 }, yaw:1.57, camera:{ x:87.5, y:4.5, z:156.6 } };
 export const WORLD_CLAMP = { xMin:14, xMax:244, zMin:-822, zMax:408 };   // zMax 408: reaches the new south lawn + pier tip (z406) but well short of the skyline billboard (z504+)
 
 /* ------------------------------- PROPS ------------------------------- */
@@ -320,6 +357,33 @@ export const GARDEN = {
 // green Keith Haring self-portrait figure at the garden (30 ft)
 export const HARING = { pos:[95,0,120], scale:1.7, ry:-1.7, collide:3.4 };
 
+// AIDS GARDEN ENTRANCE MONUMENT (task 023, owner reference
+// refs/aids-garden/entrance-monument-sign.jpg + owner live direction
+// 2026-07-10): the real monument wall — the game's ONE AND ONLY 'AIDS Garden'
+// signage, and the spawn's first read. OWNER SITING: near the garden Divvy
+// dock (95,145) at the garden's south, the player spawning on its forecourt
+// FACING THE WATER (east). The wall runs E–W (long axis x), lettered NORTH
+// face toward the lawn/trail-bend approach: gold 'AIDS Garden Chicago'
+// letters EAST-biased, bronze ginkgo-leaf plaques (ONE merged geometry — a
+// quiet scatter; names illegible at toon scale, which is right), the rough
+// granite boulder leaning mid-span WEST of the letter band (owner: it must
+// never cover the 'A'), two white limestone sitting blocks on a
+// decomposed-granite forecourt pad north of the wall. Prairie flanks build in
+// props.js (prairie centers); the globe lamp behind is LAMPS.extra. Builder:
+// buildEntranceMonument() in structures.js — zero shared rng (local xorshift).
+// Colors sit ~1 stop darker than the photo reads: the toon ramp + warm dusk
+// light lift them (the first pass read cream/pink, not grey concrete).
+export const ENTRANCE = {
+  wall:{ x0:102.8, x1:116, z:160.2, t:0.55, h:1.55, color:0x706e69 },
+  letters:{ text:'AIDS Garden Chicago', gold:'#caa04c', xc:111.4, w:7.4, h:0.62, y:1.02 },
+  plaques:{ n:34, bronze:0x5f4a2b, xr:[103.6,115.4], yr:[0.32,1.32], letterX0:107.7 },   // scatter the north face; sparser over the letter band (x>letterX0, y>0.72)
+  boulder:{ x:105.6, z:159.2, color:0x8a867d },                    // leans on the wall mid-span, WEST of the letters
+  blocks:[ { x:107.3, z:157.2, w:1.9,  h:0.52, d:0.95, ry:0.22 },  // white limestone sitting blocks
+           { x:112.8, z:157.8, w:1.55, h:0.46, d:1.35, ry:-0.18 } ],
+  blockColor:0xe8e2d4,
+  pad:{ x:110, z:157.1, rx:6.6, rz:2.8, y:0.045, color:0x92907f },  // decomposed-granite forecourt (tufts zero-scaled under it, props.js)
+};
+
 // summer life on the rocks: towels, umbrellas, coolers, loose blocks
 export const BEACH_LIFE = {
   towelColors:[0xff6b6b,0x4ecdc4,0xffd93d,0x6c5ce7,0xff9ff3,0x54a0ff],
@@ -360,8 +424,9 @@ export const FINGER_DOCKS = {
 
 // wooden signs (text + placement); the three underpass gag signs live in
 // the inner park just east of the LSD berm.
+// (task 023: the 'AIDS GARDEN' plate was removed — the entrance monument
+// (ENTRANCE, structures.js) is the ONE AND ONLY AIDS Garden signage.)
 export const SIGNS = [
-  { text:'AIDS GARDEN',         x:95,  z:60,   ry:0.4 },
   { text:'BELMONT HARBOR',      x:78,  z:-30,  ry:Math.PI/2 },
   { text:'DOG BEACH',           x:103, z:-343, ry:3.0 },            // on the GRASS north of the cove (between fence z-341 and the trail spur), facing the trail — was standing in the sand at the waterline
   { text:'BIRD SANCTUARY',      x:98,  z:-386, ry:-1.4 },          // by the WEST gate; nudged east of the walk ribbon (x~94)
@@ -374,13 +439,18 @@ export const SIGNS = [
   { text:'FUTURE ENTRANCE →',   x:16,  z:-794, ry:-Math.PI/2 },   // Irving Park underpass
 ];
 
-// suggestion box (task 013) — a diegetic park-district "WHERE NEXT?" box beside
-// the Belmont FUTURE ENTRANCE doors (sign at 15,113; underpass mouth at 16,105).
-// Small collider only — NO new walkable surface (it sits on existing LAND). The
+// suggestion box (task 013; RELOCATED + UPSIZED 2026-07-10 per owner live
+// direction during task 023): the diegetic park-district "WHERE NEXT?" box now
+// stands ahead-right of the NEW spawn on the monument forecourt's east lawn —
+// "in front and to the right of the user when they spawn", scaled to
+// park-kiosk presence so it reads at spawn distance (it was birdhouse-tiny at
+// the Belmont FUTURE ENTRANCE, which task 030 is de-signing anyway). Small
+// collider only — NO new walkable surface (it sits on existing LAND). The
 // coordinate lives here so the engine pack, tools/walkprobe.mjs and
-// tools/gen-waypoints.mjs all read ONE placement source. ry ≈ 1.0 → the labelled
-// face points ESE, toward players coming up the connector / over from the park.
-export const SUGGESTION_BOX = { x:17, z:109, ry:1.0 };
+// tools/gen-waypoints.mjs all read ONE placement source. Front-right of the
+// east-facing spawn = east AND south of it (right = +z when facing +x);
+// ry ≈ -1.92 → the labelled face points WNW, back toward the spawn.
+export const SUGGESTION_BOX = { x:115.5, z:158.8, ry:-1.92, scale:1.55 };
 
 // path lamps along the main trail (trail-t + side) plus one pier lamp.
 // ALL on side -1 (the RIGHT normal = the bike-only side; the crushed-limestone
@@ -390,7 +460,7 @@ export const SUGGESTION_BOX = { x:17, z:109, ry:1.0 };
 export const LAMPS = {
   trail:[[0.06,-1],[0.14,-1],[0.22,-1],[0.30,-1],[0.38,-1],[0.46,-1],[0.54,-1],[0.62,-1],[0.70,-1],[0.78,-1],[0.86,-1],[0.93,-1]],
   offset:2.8,
-  extra:[[205,-105],[121,404]],   // peninsula pier lamp + the corner pier's tip lamp
+  extra:[[205,-105],[121,404],[114.8,162.2]],   // peninsula pier lamp + corner pier tip lamp + the globe lamp behind the entrance monument (task 023, per the owner photo — reuses the instanced lamp meshes, +0 draws)
 };
 
 // benches (each becomes a "sit for a bit" interaction via the framework)

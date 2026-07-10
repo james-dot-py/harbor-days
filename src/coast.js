@@ -514,17 +514,34 @@ export function buildCoast(){
   // outside the LAND polygon (pip test PER TRY); if no land point turns up
   // within G.tries, SKIP the patch rather than dropping it on the water
   // (that was the 'grass circle floating on the harbor' bug).
+  // CLASS RULE (issue 012 / task 023): a disc's CENTER being on land is not
+  // enough — a big ellipse near the coast overhung the revetment and painted
+  // green over the terrace steps (owner report at 151,115). Every ground disc
+  // must clip at the coast boundary: test 12 rim points (+0.5 m margin)
+  // against LAND and SHRINK the disc until the whole rim fits; if even 40%
+  // doesn't fit, skip it. Pure geometry AFTER all rand draws — the tree
+  // POST-filter analog for ground discs, zero world-rng impact.
   {
     const G=CH.GRASS_PATCHES,pm=bmat(G.color);
     const inst=new THREE.InstancedMesh(new THREE.CircleGeometry(1,G.segs),pm,G.count);
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2,0,0)),S=new THREE.Vector3(),V=new THREE.Vector3();
+    const rimFits=(x,z,rx,rz)=>{
+      for(let a=0;a<12;a++){
+        const th=a/12*Math.PI*2;
+        if(!pip(x+Math.cos(th)*(rx+0.5),z+Math.sin(th)*(rz+0.5),LAND))return false;
+      }
+      return true;
+    };
     let placed=0;
     for(let i=0;i<G.count;i++){
       let x,z,ok=false,tries=0;
       while(tries++<G.tries){x=rand(G.xr[0],G.xr[1]);z=rand(G.zr[0],G.zr[1]);if(pip(x,z,LAND)){ok=true;break}}
       if(!ok)continue;                       // no land found -> never place on water
       const r=rand(G.radius[0],G.radius[1]),sx=rand(G.scaleX[0],G.scaleX[1]);
-      M.compose(V.set(x,0.02,z),Q,S.set(r*sx,r,1));inst.setMatrixAt(placed++,M);
+      let k=1;
+      while(k>=0.4&&!rimFits(x,z,r*sx*k,r*k))k-=0.15;
+      if(k<0.4)continue;                     // hugs the coast too tight at any size -> skip
+      M.compose(V.set(x,0.02,z),Q,S.set(r*sx*k,r*k,1));inst.setMatrixAt(placed++,M);
     }
     inst.count=placed;
     inst.instanceMatrix.needsUpdate=true;scene.add(inst);

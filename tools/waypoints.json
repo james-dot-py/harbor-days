@@ -1,13 +1,13 @@
 {
- "generated": "2026-07-10T13:40:11.443Z",
- "count": 68,
+ "generated": "2026-07-10T15:20:48.802Z",
+ "count": 69,
  "waypoints": [
   {
    "id": "spawn",
    "area": "lakefront",
    "cell": "lakefront",
-   "x": 150,
-   "z": 150,
+   "x": 109.5,
+   "z": 156.6,
    "framings": [
     {},
     {
@@ -21,7 +21,7 @@
      "dist": 14
     }
    ],
-   "expectation": "The canonical Belmont Rocks spawn: the chibi mayor on green lawn atop stepped tan revetment terraces, beach towels/umbrellas/coolers scattered on the steps, dusk-peach sky and blue lake with floaties, minimap top-right. Must match baseline.png composition."
+   "expectation": "The FRONT-DOOR spawn (task 023, owner-sited): the chibi mayor on the decomposed-granite forecourt FACING THE WATER — open lawn running east to the Belmont Rocks steps and the blue lake with sailboats; the grey monument wall (gold letters, bronze ginkgo scatter) along the frame's right with white sitting blocks and the leaning boulder, the upsized WHERE NEXT suggestion box ahead-right, the crushed-limestone entrance path heading toward the lake, Divvy dock + Lakefront Trail behind-left. Must match baseline.png composition."
   },
   {
    "id": "zone-aids-garden-chicago",
@@ -46,7 +46,7 @@
      "dist": 13
     }
    ],
-   "expectation": "AIDS Garden Chicago: colorful flower beds around a circular plaza loop, with the 30-ft green Keith Haring figure sculpture dominating the scene. Lawn setting west of the rocks."
+   "expectation": "AIDS Garden Chicago: colorful flower beds around the two-lobe plaza loop (statue ring + southwest lawn lobe), with the 30-ft green Keith Haring figure sculpture dominating the scene. Lawn setting west of the rocks; the entrance monument fronts the trail at the garden's north edge."
   },
   {
    "id": "zone-the-belmont-rocks",
@@ -297,31 +297,6 @@
     }
    ],
    "expectation": "Sydney R. Marovitz golf course: fenced rolling fairways with greens, flags and bunkers stretching north; tee/green dressing, no buildings dominating."
-  },
-  {
-   "id": "sign-aids-garden",
-   "area": "lakefront",
-   "cell": "lakefront",
-   "x": 95,
-   "z": 60,
-   "framings": [
-    {
-     "yaw": 3.54,
-     "pitch": 0.12,
-     "dist": 8
-    },
-    {
-     "yaw": 0.4,
-     "pitch": 0.12,
-     "dist": 8
-    },
-    {
-     "yaw": 4.44,
-     "pitch": 0.2,
-     "dist": 10
-    }
-   ],
-   "expectation": "Wooden 'AIDS GARDEN' sign readable in frame, garden beds/lawn behind it."
   },
   {
    "id": "sign-belmont-harbor",
@@ -577,26 +552,76 @@
    "id": "suggestion-box",
    "area": "lakefront",
    "cell": "lakefront",
-   "x": 20,
-   "z": 112.5,
+   "x": 112.1,
+   "z": 157.6,
    "framings": [
     {
-     "yaw": -2.13,
+     "yaw": 1.53,
      "pitch": 0.08,
      "dist": 5.5
     },
     {
-     "yaw": -1.93,
+     "yaw": 1.73,
      "pitch": 0.12,
      "dist": 6.5
     },
     {
-     "yaw": -2.21,
+     "yaw": 1.45,
      "pitch": 0.06,
      "dist": 4.5
     }
    ],
-   "expectation": "A cozy park-district suggestion box (wood post, green painted body, gabled lid, brass mail slot) beside the Belmont FUTURE ENTRANCE doors/sign; its cream front label reads 'WHERE NEXT? — drop a suggestion / press E' and is legible. House toon style, sits on the grass off the connector ribbon."
+   "expectation": "The park-district suggestion box at KIOSK scale (owner upsize 2026-07-10): wood post, green painted body, gabled lid, brass mail slot, cream front label 'WHERE NEXT? — drop a suggestion / press E' legible — standing ahead-right of the new monument spawn on the forecourt's east lawn, monument wall and/or entrance path in frame. Reads at spawn distance, not birdhouse-tiny."
+  },
+  {
+   "id": "ag-entrance",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 110.9,
+   "z": 153.7,
+   "framings": [
+    {
+     "yaw": 0.08,
+     "pitch": 0.1,
+     "dist": 9
+    },
+    {
+     "yaw": 0.63,
+     "pitch": 0.14,
+     "dist": 11
+    },
+    {
+     "yaw": -0.42,
+     "pitch": 0.08,
+     "dist": 8
+    }
+   ],
+   "expectation": "The AIDS Garden entrance monument per entrance-monument-sign.jpg (owner-sited near the garden Divvy dock): a low wide grey concrete/granite wall, gold 'AIDS Garden Chicago' letters FULLY legible on its north face — the leaning granite boulder sits mid-span WEST of the letters and never covers the 'A' (owner correction) — a quiet scatter of small bronze ginkgo-leaf plaques (names NOT legible — right at toon scale), two white limestone sitting blocks on a speckled grey-tan decomposed-granite forecourt, prairie grass flanking, a white globe lamp behind. The ONE and ONLY AIDS Garden sign in the game."
+  },
+  {
+   "id": "ag-statue-loop",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 107,
+   "z": 111,
+   "framings": [
+    {
+     "yaw": -0.81,
+     "pitch": 0.5,
+     "dist": 22
+    },
+    {
+     "yaw": -0.81,
+     "pitch": 0.42,
+     "dist": 18
+    },
+    {
+     "yaw": -0.93,
+     "pitch": -0.1,
+     "dist": 12
+    }
+   ],
+   "expectation": "The plaza loop per aerial-path-structure.jpg: a TWO-LOBE peanut of crushed-limestone path — the ring around the green Haring statue's lawn plus a larger southwest lawn lobe — clearly NOT a plain circle; the connector joins from the west, MAIN skims the east point, and the entrance path heads off NE toward the lake. Flower beds and garden life around; statue upright on its pad."
   },
   {
    "id": "deck-1",

@@ -2,39 +2,39 @@
   "query": "play=1&quiet=1",
   "waitMs": 3500,
   "n": 8,
-  "date": "2026-07-08T04:29:16.123Z",
-  "port": 5199,
+  "date": "2026-07-10T15:24:05.705Z",
+  "port": 5217,
   "pairsCount": 28,
   "perPixelThreshold": 0.1,
   "intraRun": {
     "0.1": {
-      "maxRatio": 0.001804470486111111,
-      "meanRatio": 0.0012895662822420637
+      "maxRatio": 0.0032758246527777777,
+      "meanRatio": 0.0018161349826388887
     },
     "0.15": {
-      "maxRatio": 0.0016417100694444443,
-      "meanRatio": 0.0011488947792658729
+      "maxRatio": 0.001986762152777778,
+      "meanRatio": 0.0012725926959325398
     },
     "0.2": {
-      "maxRatio": 0.0014789496527777778,
-      "meanRatio": 0.0010271344866071427
+      "maxRatio": 0.0015104166666666666,
+      "meanRatio": 0.0009419565352182542
     }
   },
   "vsBaseline": {
     "0.1": {
-      "maxRatio": 0.0017154947916666666,
-      "meanRatio": 0.0011994086371527777
+      "maxRatio": 0.00298828125,
+      "meanRatio": 0.0014771864149305558
     },
     "0.15": {
-      "maxRatio": 0.0015397135416666667,
-      "meanRatio": 0.0010685221354166667
+      "maxRatio": 0.0017209201388888888,
+      "meanRatio": 0.001040988498263889
     },
     "0.2": {
-      "maxRatio": 0.0013943142361111111,
-      "meanRatio": 0.0009608289930555556
+      "maxRatio": 0.0012803819444444444,
+      "meanRatio": 0.0007967122395833333
     }
   },
-  "gateRatio": 0.006804470486111111,
+  "gateRatio": 0.008275824652777777,
   "boundable": true,
-  "notes": "Chose per-pixel threshold 0.1: strictest of [0.1,0.15,0.2] whose intra-run max ratio did not blow up vs the next-looser threshold. gateRatio = max(intraMax*2, intraMax+0.005) at chosen threshold. Flake is boundable (gateRatio 0.680% < 5%): keep gate.mjs check 4 as a hard pixelmatch gate at these values. vsBaseline is advisory only — baseline.png was taken with different timing/composition."
+  "notes": "Chose per-pixel threshold 0.1: strictest of [0.1,0.15,0.2] whose intra-run max ratio did not blow up vs the next-looser threshold. gateRatio = max(intraMax*2, intraMax+0.005) at chosen threshold. Flake is boundable (gateRatio 0.828% < 5%): keep gate.mjs check 4 as a hard pixelmatch gate at these values. vsBaseline is advisory only — baseline.png was taken with different timing/composition."
 }

@@ -58,8 +58,8 @@ function surfaceY(x,z){
 let pass=0,fail=0;
 function expect(label,got,want){const ok=got===want;console.log(`${ok?'PASS':'FAIL'}  ${label}  -> ${got} (want ${want})`);ok?pass++:fail++;}
 
-console.log('--- trail walkable end to end (main + spur + connector samples) ---');
-for(const [x,z] of [...CH.TRAIL_MAIN,...CH.TRAIL_SPUR,...CH.TRAIL_CONNECTOR]) expect(`trail (${x},${z})`,walkable(x,z),true);
+console.log('--- trail walkable end to end (main + spur + connector + entrance samples) ---');
+for(const [x,z] of [...CH.TRAIL_MAIN,...CH.TRAIL_SPUR,...CH.TRAIL_CONNECTOR,...CH.TRAIL_ENTRANCE]) expect(`trail (${x},${z})`,walkable(x,z),true);
 
 console.log('\n--- harbor basin water NOT walkable ---');
 for(const [x,z] of [[120,-60],[120,-120],[120,-200],[130,-280],[100,-40],[150,-150]]) expect(`basin (${x},${z})`,walkable(x,z),false);
@@ -197,12 +197,14 @@ console.log('\n--- sanctuary hero room: organic outline + interior loop + deck -
 // diversey fences) must clear EVERY ribbon footprint by >= 0.6 m.
 const loopC=crSample(CH.TRAIL_LOOP,1.2);
 const connC=crSample(CH.TRAIL_CONNECTOR,1.2);
+const entC=crSample(CH.TRAIL_ENTRANCE,1.2);
 const RIBBONS=[
   {name:'bike',pts:bikeC,half:CH.TRAIL_STYLE.bike.width/2},
   {name:'walk',pts:walkC,half:CH.TRAIL_STYLE.walk.width/2},
   {name:'spur',pts:spurC,half:CH.TRAIL_STYLE.spur.width/2},
   {name:'loop',pts:loopC,half:CH.TRAIL_STYLE.loop.width/2},
   {name:'conn',pts:connC,half:CH.TRAIL_STYLE.loop.width/2},
+  {name:'ent',pts:entC,half:CH.TRAIL_STYLE.loop.width/2},
 ];
 function ribbonClear(x,z,propR){          // min footprint clearance to any ribbon
   let min=1e9,worst=null;
@@ -493,16 +495,78 @@ expect('past the chamfer wall (-216,-534) NOT walkable (inside the park)',WV.wal
 // ===== Task 013: suggestion box at the Belmont FUTURE ENTRANCE =====
 // The box is a small collider on EXISTING walkable LAND — it must add no new
 // walkable surface and must clear every trail ribbon like any other prop.
-console.log('\n--- Task 013: suggestion box beside the Belmont future entrance ---');
+console.log('\n--- Task 013 (relocated by owner, task 023): suggestion box at the new spawn ---');
 {
-  const b=CH.SUGGESTION_BOX;
+  const b=CH.SUGGESTION_BOX,r=0.5*(b.scale||1);
   expect(`box ground walkable (${b.x},${b.z})`,walkable(b.x,b.z),true);
   expect('box adds no elevated walk rect (still ground level)',surfaceY(b.x,b.z),0);
-  // players approach from the SE (up the connector / over from the park)
-  expect('SE approach spot walkable (20,112)',walkable(20,112),true);
-  expect('E approach spot walkable (22,109)',walkable(22,109),true);
-  // clears every trail ribbon footprint by >=0.6 m (prop radius ~0.5)
-  auditProps('suggestion box',[[b.x,b.z]],0.5);
+  // players approach from the spawn (west) and off the entrance path (north)
+  expect(`W approach spot walkable (${b.x-3},${b.z})`,walkable(b.x-3,b.z),true);
+  expect(`N approach spot walkable (${b.x},${b.z-2.5})`,walkable(b.x,b.z-2.5),true);
+  // clears every trail ribbon footprint by >=0.6 m (kiosk-scaled radius)
+  auditProps('suggestion box',[[b.x,b.z]],r);
+}
+
+// ===== Task 023: AIDS Garden entrance — monument, peanut loop, entrance path, spawn =====
+console.log('\n--- Task 023: peanut loop + entrance path fully walkable ---');
+{
+  let bad=0;for(const p of loopC)if(!walkable(p[0],p[1]))bad++;
+  expect(`peanut loop ribbon fully walkable (${bad} bad of ${loopC.length})`,bad,0);
+  let ebad=0;for(const p of entC)if(!walkable(p[0],p[1]))ebad++;
+  expect(`entrance path fully walkable (${ebad} bad of ${entC.length})`,ebad,0);
+  // welds preserved: connector T (79,120) and MAIN tangent (111,120) sit ON the loop ribbon
+  const dT=Math.min(...loopC.map((p,i)=>i<loopC.length-1?ptSeg(79,120,p[0],p[1],loopC[i+1][0],loopC[i+1][1]).d:1e9));
+  const dM=Math.min(...loopC.map((p,i)=>i<loopC.length-1?ptSeg(111,120,p[0],p[1],loopC[i+1][0],loopC[i+1][1]).d:1e9));
+  expect(`connector T-junction (79,120) on the loop ribbon (d=${dT.toFixed(2)} <= ${CH.TRAIL_STYLE.loop.width/2})`,dT<=CH.TRAIL_STYLE.loop.width/2+1e-6,true);
+  expect(`MAIN tangent (111,120) on/next to the loop ribbon (d=${dM.toFixed(2)} <= 1.6)`,dM<=1.6,true);
+  // the entrance path STOPS short of the revetment lip (steps stay clean)
+  const last=CH.TRAIL_ENTRANCE[CH.TRAIL_ENTRANCE.length-1];
+  const lip=CH.COAST_MAIN_PARAMS.fx(last[1]);
+  expect(`entrance path end (${last}) stops short of the lip x=${lip.toFixed(1)} (gap ${(lip-last[0]).toFixed(2)} >= 1.2)`,lip-last[0]>=1.2,true);
+  // Haring statue stays inside the loop lawn, clear of the ribbon
+  const H=CH.HARING;
+  const dH=Math.min(...loopC.map((p,i)=>i<loopC.length-1?ptSeg(H.pos[0],H.pos[2],p[0],p[1],loopC[i+1][0],loopC[i+1][1]).d:1e9));
+  expect(`Haring sculpture clears the loop ribbon (d=${dH.toFixed(2)} >= collide ${H.collide}+half+0.6)`,dH>=H.collide+CH.TRAIL_STYLE.loop.width/2+0.6,true);
+}
+
+console.log('\n--- Task 023: entrance monument on land, clear of every ribbon ---');
+{
+  const E=CH.ENTRANCE,w=E.wall;
+  // wall footprint sampled along its length (prop radius = half thickness + a hair)
+  const wallPts=[];for(let x=w.x0;x<=w.x1+1e-6;x+=1.5)wallPts.push([x,w.z]);
+  auditProps('monument wall',wallPts,w.t/2+0.1);
+  auditProps('monument blocks',E.blocks.map(b=>[b.x,b.z]),1.05);
+  auditProps('monument boulder',[[E.boulder.x,E.boulder.z]],1.0);
+  let mbad=0;for(const p of [...wallPts,[E.boulder.x,E.boulder.z],...E.blocks.map(b=>[b.x,b.z]),[E.pad.x,E.pad.z]])if(!walkable(p[0],p[1]))mbad++;
+  expect(`monument pieces all on walkable land (${mbad} off)`,mbad,0);
+}
+
+console.log('\n--- Task 023: spawn on the forecourt, clear of the monument colliders ---');
+{
+  const S=CH.SPAWN.player,E=CH.ENTRANCE;
+  expect(`spawn (${S.x},${S.z}) walkable`,walkable(S.x,S.z),true);
+  expect('spawn at ground level',surfaceY(S.x,S.z),0);
+  // on the forecourt pad ellipse
+  const onPad=((S.x-E.pad.x)/E.pad.rx)**2+((S.z-E.pad.z)/E.pad.rz)**2<1;
+  expect('spawn stands ON the forecourt pad',onPad,true);
+  // clear of every monument collider (r + player 0.34 + 0.2 margin)
+  const clearers=[[E.boulder.x,E.boulder.z,1.0],...E.blocks.map(b=>[b.x,b.z,0.95]),
+                  [CH.SUGGESTION_BOX.x,CH.SUGGESTION_BOX.z,0.5*(CH.SUGGESTION_BOX.scale||1)]];
+  for(let x=E.wall.x0+1.1;x<=E.wall.x1-1.1+1e-6;x+=2.32)clearers.push([x,E.wall.z,1.15]);
+  let minC=1e9;for(const[cx,cz,r]of clearers)minC=Math.min(minC,Math.hypot(S.x-cx,S.z-cz)-r-0.34);
+  expect(`spawn clears every monument collider by >=0.2 (min ${minC.toFixed(2)})`,minC>=0.2,true);
+  // facing: SPAWN.yaw faces THE WATER — due east, +x (owner direction 2026-07-10)
+  expect(`SPAWN.yaw (${CH.SPAWN.yaw}) faces the water/east (want ~1.57)`,Math.abs(CH.SPAWN.yaw-Math.PI/2)<0.2,true);
+  // the suggestion box stands ahead-right of the east-facing spawn (owner
+  // 2026-07-10): in FRONT = east of the spawn (+x), to the RIGHT = south of
+  // it (+z; right = (cos yaw, -sin yaw)·(-1)? — main.js: 'd' moves (-cos yaw,
+  // sin yaw), at yaw pi/2 that is (0,+1) = south).
+  const B=CH.SUGGESTION_BOX;
+  expect(`suggestion box in FRONT of the spawn (x ${B.x} > ${S.x})`,B.x>S.x,true);
+  expect(`suggestion box to the RIGHT of the spawn (z ${B.z} > ${S.z})`,B.z>S.z,true);
+  // spawn keeps off the walk ribbon (stands beside it, not blocking)
+  const c=ribbonClear(S.x,S.z,0.34);
+  expect(`spawn off every ribbon footprint (min clr ${c.min.toFixed(2)} >= 0)`,c.min>=0,true);
 }
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);

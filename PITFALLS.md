@@ -94,3 +94,10 @@ few turns to find; keep each to one line of symptom + fix.
   claimed the opposite for a full version (issue 006). Never trust a builder
   comment for a yawed prop frame; screenshot from the character's facing side
   and LOOK.
+- pathSamples is PHASE-sensitive, not just content-sensitive: trees scan it at
+  stride 3, so reshaping/reordering/deleting ANY ribbon shifts every later
+  ribbon's sample indices -> different subset checked -> tree-rejection rng
+  cascade -> global scatter drift. Reshaping a ribbon = keep the OLD ribbon's
+  samples as a byte-identical GHOST at its original build slot (task 023:
+  TRAIL_LOOP_GHOST + paths.js sampleGhost) and register the new shape in
+  pathSamples2 (merged into pathSamples in main.js only AFTER buildProps).

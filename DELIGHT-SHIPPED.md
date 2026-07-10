@@ -120,3 +120,10 @@ cut becomes a revert task.
   down the street, and the view it points along now actually ends at the girder
   bridge and head-house — wayfinding that tells the truth — Sheffield & Addison
   — task 020
+- The game's new front door is a memorial you can touch: every player now spawns
+  on the AIDS Garden entrance forecourt FACING THE LAKE (owner's siting, by the
+  garden Divvy dock), monument at their shoulder — gold 'AIDS Garden Chicago'
+  over a quiet scatter of bronze ginkgo leaves (names unreadable at toon scale,
+  which is right), the leaning granite boulder clear of the letters, the white
+  limestone sitting blocks from the owner's photo, the WHERE-NEXT kiosk waiting
+  ahead-right — AIDS Garden entrance (110,157) — task 023

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { scene, toon, bmat } from './core.js';
 import * as CH from './data/chicago.js';
-export { TRAIL_MAIN, TRAIL_SPUR, TRAIL_LOOP, TRAIL_CONNECTOR } from './data/chicago.js';
+export { TRAIL_MAIN, TRAIL_SPUR, TRAIL_LOOP, TRAIL_CONNECTOR, TRAIL_ENTRANCE } from './data/chicago.js';
 
 // ------------------------------- paths --------------------------------
 // The Lakefront Trail's MAIN run is a DUAL path: an asphalt BIKE ribbon on
@@ -11,6 +11,13 @@ export { TRAIL_MAIN, TRAIL_SPUR, TRAIL_LOOP, TRAIL_CONNECTOR } from './data/chic
 // the BIKE centerline (cyclists, benches, lamps, traillife consume them);
 // `walkCurve` is the new walking-path centerline (same shape, for future use).
 export const pathSamples=[];
+// pathSamples2 — samples of ribbons ADDED/RESHAPED after the world-rng order
+// froze (task 023: the peanut TRAIL_LOOP + TRAIL_ENTRANCE). They are kept out
+// of pathSamples during the build so the tree-rejection scan (props.js, a
+// shared-rng consumer) sees a byte-identical array; local-rng consumers
+// (garden boulders, prairie) probe BOTH arrays, and main.js merges these into
+// pathSamples AFTER buildProps so every pack still keeps off the new ribbons.
+export const pathSamples2=[];
 export let mainCurve=null, walkCurve=null, spurCurve=null;
 
 function curveOf(ctrl){ return new THREE.CatmullRomCurve3(ctrl.map(p=>new THREE.Vector3(p[0],0,p[1]))); }
@@ -18,7 +25,7 @@ function curveOf(ctrl){ return new THREE.CatmullRomCurve3(ctrl.map(p=>new THREE.
 // Draw a paved ribbon of `width` following `curve`, with its centerline
 // shifted laterally by `shift` (along the left normal). Collects the shifted
 // centerline into pathSamples (so props stay off BOTH ribbons) and returns it.
-function ribbonOn(curve,width,color,y,shift){
+function ribbonOn(curve,width,color,y,shift,samples=pathSamples){
   const n=Math.max(60,Math.round(curve.getLength()/2));
   const pos=[],idx=[],cl=[];
   const p=new THREE.Vector3(),t=new THREE.Vector3();
@@ -26,7 +33,7 @@ function ribbonOn(curve,width,color,y,shift){
     const u=i/n; curve.getPoint(u,p); curve.getTangent(u,t);
     const nx=-t.z,nz=t.x,w=width/2;
     const cx=p.x+nx*shift,cz=p.z+nz*shift;
-    cl.push([cx,cz]); pathSamples.push([cx,cz]);
+    cl.push([cx,cz]); samples.push([cx,cz]);
     pos.push(cx+nx*w,y,cz+nz*w, cx-nx*w,y,cz-nz*w);
     // wind faces UP (normals +y) so the ribbon is visible from above — the
     // old winding faced down and got back-face culled ("no walkways" bug).
@@ -47,10 +54,25 @@ export function buildPaths(){
   const walkCl=ribbonOn(mainCurve,st.walk.width,st.walk.color,st.walk.y,walkOff);
   ribbonOn(mainCurve,st.bike.width,st.bike.color,st.bike.y,0);
   walkCurve=curveOf(walkCl.filter((_,i)=>i%8===0||i===walkCl.length-1));
-  // SPUR + garden LOOP: single ribbons.
+  // SPUR: single ribbon.
   spurCurve=curveOf(CH.TRAIL_SPUR);
   ribbonOn(spurCurve,st.spur.width,st.spur.color,st.spur.y,0);
-  ribbonOn(curveOf(CH.TRAIL_LOOP),st.loop.width,st.loop.color,st.loop.y,0);
+  // GHOST of the retired r=16 garden circle (task 023): push its ribbonOn-
+  // identical centerline samples into pathSamples AT THE LOOP'S ORIGINAL BUILD
+  // SLOT — same content, same count, same stride-3 phase — so the shared-rng
+  // tree-rejection scan (props.js nearPath) is bit-for-bit unchanged and NO
+  // world scatter moves. The REAL (peanut) loop draws at the end of this
+  // function into pathSamples2. Never remove; see CH.TRAIL_LOOP_GHOST.
+  {
+    const gc=curveOf(CH.TRAIL_LOOP_GHOST);
+    const n=Math.max(60,Math.round(gc.getLength()/2));
+    const p=new THREE.Vector3(),t=new THREE.Vector3();
+    for(let i=0;i<=n;i++){
+      const u=i/n; gc.getPoint(u,p); gc.getTangent(u,t);   // getTangent kept: ribbonOn parity (no state, but keep the call pattern obvious)
+      const nx=-t.z;
+      pathSamples.push([p.x+nx*0,p.z+t.x*0]);
+    }
+  }
   // paved connector: (moved) Belmont underpass mouth -> AIDS-garden loop west edge
   ribbonOn(curveOf(CH.TRAIL_CONNECTOR),st.loop.width,st.loop.color,st.loop.y,0);
   // Bird Sanctuary interior walking LOOP (crushed limestone) — the hero room's
@@ -64,6 +86,12 @@ export function buildPaths(){
   // sample indices are unchanged. ribbonOn is rng-free -> world scatter holds.
   ribbonOn(curveOf(CH.CORNER_PARK.desire.pts),CH.CORNER_PARK.desire.width,CH.CORNER_PARK.desire.color,CH.CORNER_PARK.desire.y,0);
   ribbonOn(curveOf(CH.CORNER_PARK.path.pts),CH.CORNER_PARK.path.width,CH.CORNER_PARK.path.color,CH.CORNER_PARK.path.y,0);
+  // Task 023 garden ribbons — LAST, and into pathSamples2 ONLY (pathSamples
+  // must stay byte-identical for the shared world rng; see the ghost above):
+  // the PEANUT plaza loop (statue ring + SW lawn lobe, one closed outline)
+  // and the ENTRANCE→LAKE path from the monument forecourt to the revetment top.
+  ribbonOn(curveOf(CH.TRAIL_LOOP),st.loop.width,st.loop.color,st.loop.y,0,pathSamples2);
+  ribbonOn(curveOf(CH.TRAIL_ENTRANCE),st.loop.width,st.loop.color,st.loop.y,0,pathSamples2);
   // yellow center dashes on the paved BIKE path + the SPUR (not the walkway)
   {
     const dashes=[];

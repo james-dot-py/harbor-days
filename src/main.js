@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { renderer, scene, camera, amb, clamp, lerp, lerpAngle, hexRGB, pip, rng, rand, $, game, toon } from './core.js';
 import { skyGroup, clouds, buildSky } from './sky.js';
 import { buildCoast, water, coastQuery, profileTotal, tierAt, beachH, LAND } from './coast.js';
-import { buildPaths } from './paths.js';
+import { buildPaths, pathSamples, pathSamples2 } from './paths.js';
 import { buildProps, colliders, walkRects, bobbers, drifter, dogTail, foam, fireflies } from './props.js';
 import { buildStructures } from './structures.js';
 import { mayor, mparts, buildMayor, updateCharacter, updateChibiShadows } from './character.js';
@@ -77,6 +77,11 @@ beginCellCapture();   // lakefront world → one cell root (cells.js); sky + may
 buildCoast();
 buildPaths();
 buildProps();
+// merge the task-023 garden ribbons' samples in AFTER buildProps: the shared-
+// rng consumers in buildProps saw the byte-identical legacy array (world
+// scatter frozen), while every pack (worldReady) still keeps off the new
+// peanut loop + entrance path like any other ribbon.
+pathSamples.push(...pathSamples2);
 buildStructures();
 endCellCapture();
 const _tm0=performance.now();
@@ -430,6 +435,7 @@ addEventListener('resize',()=>{
 });
 
 // ---- apply debug params ----
+cam.yaw=CH.SPAWN.yaw??0;   // spawn facing comes from the data (task 023: east, facing the water); ?yaw= still overrides below
 if(dbgNum('yaw')!==null)cam.yaw=dbgNum('yaw');
 if(dbgNum('pitch')!==null)cam.pitch=dbgNum('pitch');
 if(dbgNum('dist')!==null)cam.dist=dbgNum('dist');

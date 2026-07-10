@@ -1,6 +1,6 @@
 import { $ } from './core.js';
 import { COAST_MAIN, COAST_PEN, COAST_GOLF, COAST_CORNER, COAST_TIP, COAST_SEGS, TIP_SEGS, profileTotal, LAND } from './coast.js';
-import { mainCurve, spurCurve, TRAIL_LOOP } from './paths.js';
+import { mainCurve, spurCurve, TRAIL_LOOP, TRAIL_ENTRANCE } from './paths.js';
 import { mayor } from './character.js';
 import * as CH from './data/chicago.js';
 
@@ -41,9 +41,12 @@ export function mmInit(){
     cv2.getPoints(120).forEach((p,i)=>{const[mx,my]=worldToMap(p.x,p.z);i?g.lineTo(mx,my):g.moveTo(mx,my)});
     g.stroke();
   });
-  g.strokeStyle='#e8cfa4';g.lineWidth=2;g.beginPath();
-  TRAIL_LOOP.forEach((p,i)=>{const[mx,my]=worldToMap(p[0],p[1]);i?g.lineTo(mx,my):g.moveTo(mx,my)});
-  g.stroke();
+  g.strokeStyle='#e8cfa4';g.lineWidth=2;
+  [TRAIL_LOOP,TRAIL_ENTRANCE].forEach(pts=>{   // peanut plaza loop + entrance→lake path (task 023)
+    g.beginPath();
+    pts.forEach((p,i)=>{const[mx,my]=worldToMap(p[0],p[1]);i?g.lineTo(mx,my):g.moveTo(mx,my)});
+    g.stroke();
+  });
   // landmarks
   const dot=(x,z,c,r=5)=>{const[mx,my]=worldToMap(x,z);g.fillStyle=c;g.beginPath();g.arc(mx,my,r,0,7);g.fill()};
   CH.MAP_LANDMARKS.forEach(d=>dot(d.x,d.z,d.c,d.r));

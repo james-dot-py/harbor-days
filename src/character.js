@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { scene, toon, curveMat, clamp } from './core.js';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { SPAWN } from './data/chicago.js';
 
 // ----------------------- the mayor (our hero) --------------------------
 export const mayor=new THREE.Group();
@@ -373,7 +374,11 @@ export function buildMayor(){
     const suitFront=new THREE.Mesh(mergeVC(g),vcMat());mayor.add(suitFront);
   }
   mayor.scale.setScalar(0.74);
-  mayor.position.set(38.5,0,58);
+  // pre-start pose = the data spawn (main.js re-stamps from `player` every
+  // frame; this literal only covers frame 0 / the title backdrop). Facing
+  // follows SPAWN.yaw — east, toward the water (task 023, owner direction).
+  mayor.position.set(SPAWN.player.x,0,SPAWN.player.z);
+  mayor.rotation.y=SPAWN.yaw??0;
   scene.add(mayor);
 }
 

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { scene, rng, rand, toon, bmat, curveMat, gmap, pointsMat, pip, WATER_Y } from './core.js';
 import { COAST_SEGS, tierProfile, profileTotal, beachH, LAND, coastQuery } from './coast.js';
-import { pathSamples, mainCurve } from './paths.js';
+import { pathSamples, pathSamples2, mainCurve } from './paths.js';
 import * as CH from './data/chicago.js';
 
 // --------------------------- world props ------------------------------
@@ -115,11 +115,14 @@ export function buildProps(){
     for(let i=0;i<T.north.count;i++)treeSpots.push([rand(T.north.xr[0],T.north.xr[1]),rand(T.north.zr[0],T.north.zr[1]),rand(T.north.scale[0],T.north.scale[1]),rng()<T.north.pinkProb]);
 
     // POST-filter (after all rng consumption — zero determinism impact): no
-    // trees inside the tennis block or the Diversey range/mini-golf field.
+    // trees inside the tennis block or the Diversey range/mini-golf field, and
+    // none over the task-023 garden ribbons (peanut loop + entrance path live
+    // in pathSamples2, invisible to the frozen nearPath scan by design).
     {
       const inRect=(t,r)=>t[0]>r.x0-1&&t[0]<r.x1+1&&t[1]>r.z0-1&&t[1]<r.z1+1;
+      const near2=t=>{for(const p of pathSamples2){if((p[0]-t[0])**2+(p[1]-t[1])**2<T.nearPathD2)return true}return false};
       for(let i=treeSpots.length-1;i>=0;i--)
-        if(inRect(treeSpots[i],CH.TENNIS.block)||inRect(treeSpots[i],CH.DIVERSEY.range))treeSpots.splice(i,1);
+        if(inRect(treeSpots[i],CH.TENNIS.block)||inRect(treeSpots[i],CH.DIVERSEY.range)||near2(treeSpots[i]))treeSpots.splice(i,1);
     }
 
     const n=treeSpots.length,M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3(),Eu=new THREE.Euler();
@@ -237,9 +240,15 @@ export function buildProps(){
     const TU=CH.TUFTS,n=TU.count,tm=toon(TU.color);
     const tuft=new THREE.InstancedMesh(new THREE.ConeGeometry(0.09,0.3,5),tm,n);
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
+    // no grass poking through the entrance monument's decomposed-granite pad
+    // (task 023): the scaleY rand is still drawn (rng order frozen), the tuft
+    // is just stamped at zero scale when it lands on the pad ellipse.
+    const EP=CH.ENTRANCE.pad;
+    const onPad=(x,z)=>((x-EP.x)/EP.rx)**2+((z-EP.z)/EP.rz)**2<1;
     let placed=0,guard=0;
     while(placed<n&&guard++<TU.guard){const x=rand(TU.xr[0],TU.xr[1]),z=rand(TU.zr[0],TU.zr[1]);if(!pip(x,z,LAND))continue;
-      M.compose(V.set(x,0.14,z),Q.identity(),S.set(1,rand(TU.scaleY[0],TU.scaleY[1]),1));tuft.setMatrixAt(placed++,M)}
+      const sy=rand(TU.scaleY[0],TU.scaleY[1]);
+      M.compose(V.set(x,0.14,z),Q.identity(),onPad(x,z)?S.set(0,0,0):S.set(1,sy,1));tuft.setMatrixAt(placed++,M)}
     tuft.instanceMatrix.needsUpdate=true;scene.add(tuft);
   }
 
@@ -315,13 +324,17 @@ export function buildProps(){
     for(const[sx,sz]of seeds){
       let x=sx,z=sz;
       // iteratively push directly away from the nearest ribbon sample until the
-      // nearest is >=1.9 m (sampling ~1.7 m => true distance to the ribbon >=1.5 m)
+      // nearest is >=1.9 m (sampling ~1.7 m => true distance to the ribbon >=1.5 m).
+      // Probes BOTH arrays: the frozen legacy samples AND the task-023 garden
+      // ribbons (peanut loop + entrance path in pathSamples2) — pure geometry,
+      // no rng, so boulders edge the REAL paths without moving the world.
       for(let k=0;k<24;k++){
-        let bi=-1,d2=Infinity;
-        for(let i=0;i<pathSamples.length;i++){const p=pathSamples[i];const e=(p[0]-x)**2+(p[1]-z)**2;if(e<d2){d2=e;bi=i}}
-        if(bi<0||d2>=1.9*1.9)break;
-        const p=pathSamples[bi];let ax=x-p[0],az=z-p[1];const L=Math.hypot(ax,az)||1;
-        x=p[0]+ax/L*1.95;z=p[1]+az/L*1.95;
+        let bp=null,d2=Infinity;
+        for(const arr of[pathSamples,pathSamples2])
+          for(let i=0;i<arr.length;i++){const p=arr[i];const e=(p[0]-x)**2+(p[1]-z)**2;if(e<d2){d2=e;bp=p}}
+        if(!bp||d2>=1.9*1.9)break;
+        let ax=x-bp[0],az=z-bp[1];const L=Math.hypot(ax,az)||1;
+        x=bp[0]+ax/L*1.95;z=bp[1]+az/L*1.95;
       }
       if(pip(x,z,LAND))clear.push([x,z]);
     }
@@ -342,7 +355,10 @@ export function buildProps(){
   // jitters each blade/flower within ~5 m; every one is pip-guarded on land and
   // kept off the ribbons. Exactly 3 draw calls: grass + flower stems + heads.
   {
-    const centers=[[60,150],[120,165],[70,90]];
+    // the last three centers flank the entrance monument (task 023, per the
+    // owner photo: prairie planting at both wall ends + behind it). Instanced
+    // counts scale with centers.length — still exactly 3 draw calls.
+    const centers=[[60,150],[120,165],[70,90],[100.9,160.5],[117.5,163.5],[110,164.5]];
     const grassCols=[0x8a9a5b,0x9fae6b,0x76863f].map(c=>new THREE.Color(c));
     const purples=[0x9a6bd0,0xb58ae0].map(c=>new THREE.Color(c));
     const pr=m32(0x7a1e0055);
@@ -352,7 +368,12 @@ export function buildProps(){
     const stems=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.03,0.03,0.62,4),toon(0x5c7b46,{}),fN);
     const heads=new THREE.InstancedMesh(new THREE.SphereGeometry(0.14,8,7),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),fN);
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),E=new THREE.Euler(),S=new THREE.Vector3(),V=new THREE.Vector3();
-    const clearOf=(x,z)=>{for(let i=0;i<pathSamples.length;i++){const p=pathSamples[i];if((p[0]-x)**2+(p[1]-z)**2<2.4*2.4)return false}return true};
+    const EP=CH.ENTRANCE.pad;   // keep planting off the monument forecourt too
+    const clearOf=(x,z)=>{
+      if(((x-EP.x)/EP.rx)**2+((z-EP.z)/EP.rz)**2<1.1)return false;
+      for(const arr of[pathSamples,pathSamples2])   // legacy + task-023 garden ribbons
+        for(let i=0;i<arr.length;i++){const p=arr[i];if((p[0]-x)**2+(p[1]-z)**2<2.4*2.4)return false}
+      return true};
     const spot=(cx,cz)=>{for(let k=0;k<16;k++){const a=pr()*Math.PI*2,r=Math.sqrt(pr())*R,x=cx+Math.cos(a)*r,z=cz+Math.sin(a)*r;if(pip(x,z,LAND)&&clearOf(x,z))return[x,z]}return[cx,cz]};
     let gi=0,fi=0;
     for(const[cx,cz]of centers){

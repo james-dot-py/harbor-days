@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { scene, rng, rand, toon, bmat, curveMat, gmap, pip } from './core.js';
 import { LAND, COAST_CORNER, buildSegs, tierProfile, profileTotal } from './coast.js';
 import { collide, walkRects } from './props.js';
@@ -870,6 +871,100 @@ function buildCornerPark(POSTS,RAILS){
   }
 }
 
+// ---- AIDS Garden entrance monument (task 023, refs/aids-garden/) --------
+// Owner-sited (live direction 2026-07-10): near the garden Divvy dock at the
+// garden's south, wall long axis E–W, lettered NORTH face toward the
+// lawn/trail approach; the player spawns on the forecourt pad north of it
+// facing the water. Gold 'AIDS Garden Chicago' letters EAST-biased, a quiet
+// bronze scatter of ginkgo-leaf plaques (ONE merged geometry, sparser over
+// the letter band), the granite boulder leaning mid-span WEST of the letters
+// (owner: never cover the 'A'), two white limestone sitting blocks on a
+// decomposed-granite pad. Static toon meshes only -> they fold into the cell
+// z-band merges. ZERO shared rng: a local xorshift drives every jitter.
+function buildEntranceMonument(){
+  const E=CH.ENTRANCE,W=E.wall,fz=W.z-W.t/2;         // fz: the lettered NORTH face
+  let h=0x023AB1DE>>>0;                               // local deterministic jitter
+  const jr=()=>{h^=h<<13;h>>>=0;h^=h>>>17;h^=h<<5;h>>>=0;return h/4294967296;};
+
+  // 1. WALL: one grey slab, long axis E–W. 6 tall colliders (not jumpable).
+  const wall=new THREE.Mesh(new THREE.BoxGeometry(W.x1-W.x0,W.h,W.t),toon(W.color));
+  wall.position.set((W.x0+W.x1)/2,W.h/2,W.z);scene.add(wall);
+  for(let k=0;k<6;k++)collide((W.x0+1.1)+k*((W.x1-1.1)-(W.x0+1.1))/5,W.z,1.15);
+
+  // 2. GOLD LETTERS: transparent canvas plane, shrink-to-fit, faces NORTH.
+  const Lt=E.letters;
+  const cv=document.createElement('canvas');cv.width=1024;cv.height=96;const g=cv.getContext('2d');
+  g.clearRect(0,0,1024,96);                           // keep transparent — no plate
+  g.fillStyle=Lt.gold;g.textAlign='center';g.textBaseline='middle';
+  let fs=64;g.font=`700 ${fs}px "Trebuchet MS",sans-serif`;
+  while(g.measureText(Lt.text).width>980&&fs>20){fs-=2;g.font=`700 ${fs}px "Trebuchet MS",sans-serif`;}
+  g.fillText(Lt.text,512,48);
+  const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
+  const letters=new THREE.Mesh(new THREE.PlaneGeometry(Lt.w,Lt.h),curveMat(new THREE.MeshBasicMaterial({map:tex,transparent:true})));
+  letters.position.set(Lt.xc,Lt.y,fz-0.015);letters.rotation.y=Math.PI;scene.add(letters);
+
+  // 3. GINKGO PLAQUES: n bronze fan-notch leaves, ONE merged mesh on the face.
+  // Placement respects the letter band: most WEST of letterX0 (the dense
+  // cluster), a handful east of it low, 2-3 small ones high among the letters.
+  const Pq=E.plaques,xr=Pq.xr,yr=Pq.yr,lx0=Pq.letterX0,pz=fz-0.01;
+  const nHi=Math.max(2,Math.round(Pq.n*0.1)),nLo=Math.round(Pq.n*0.17);
+  const leaves=[],spots=[];
+  const addLeaf=(y,x,rMax)=>{
+    // real plaques are ~15-25 cm and clearly SPACED (the first pass read as
+    // big touching blobs): small fans, min 0.42 m apart (8 local retries)
+    for(let t=0;t<8;t++){
+      if(spots.some(s=>(s[0]-x)**2+(s[1]-y)**2<0.42*0.42)){y=yr[0]+jr()*(yr[1]-yr[0]);x=xr[0]+jr()*(xr[1]-xr[0]);continue}
+      break;
+    }
+    spots.push([x,y]);
+    const lg=new THREE.CircleGeometry(0.07+jr()*(rMax-0.07),7,0.45,4.25);   // fan w/ notch reads ginkgo
+    lg.rotateZ(jr()*Math.PI*2);                       // spin the notch around the plane normal
+    lg.rotateY(Math.PI);                              // then orient the plane to face NORTH (−z)
+    lg.translate(x,y,pz);leaves.push(lg);
+  };
+  for(let i=0;i<Pq.n;i++){
+    if(i<nHi){                                        // high, small, among the letters' ends
+      addLeaf(0.85+jr()*(yr[1]-0.85),lx0+(xr[1]-lx0)*jr(),0.10);
+    }else if(i<nHi+nLo){                              // a handful under the letters, low
+      addLeaf(yr[0]+jr()*(0.7-yr[0]),lx0+(xr[1]-lx0)*jr(),0.14);
+    }else{                                            // the dense west cluster (clear of the letters)
+      addLeaf(yr[0]+jr()*(yr[1]-yr[0]),xr[0]+(lx0-xr[0])*jr(),0.14);
+    }
+  }
+  scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(leaves.map(g2=>g2.toNonIndexed())),toon(Pq.bronze)));
+
+  // 4. BOULDER: a granite dodeca leaning against the north face, mid-span
+  // WEST of the letter band (never over the 'A' — owner direction).
+  const Bo=E.boulder;
+  const boulder=new THREE.Mesh(new THREE.DodecahedronGeometry(1,0),toon(Bo.color));
+  boulder.position.set(Bo.x,0.62,Bo.z);
+  boulder.scale.set(1.05*(1+(jr()-0.5)*0.2),1.35*(1+(jr()-0.5)*0.2),0.85);   // wide along the wall, shallow toward the viewer
+  boulder.rotation.set(0.22,jr()*Math.PI*2,jr()*0.3);   // +x lean tips the top south, into the wall
+  scene.add(boulder);collide(Bo.x,Bo.z,1.0);
+
+  // 5. SITTING BLOCKS: chunky white limestone (jumpable colliders).
+  const bm=toon(E.blockColor);
+  for(const bl of E.blocks){
+    const box=new THREE.Mesh(new THREE.BoxGeometry(bl.w,bl.h,bl.d),bm);
+    box.position.set(bl.x,bl.h/2-0.03,bl.z);box.rotation.y=bl.ry;scene.add(box);
+    collide(bl.x,bl.z,0.9,0.5);
+  }
+
+  // 6. FORECOURT PAD: flat oval of decomposed granite + a speckle scatter.
+  const Pd=E.pad;
+  const pg=new THREE.CircleGeometry(1,22);pg.rotateX(-Math.PI/2);
+  const pad=new THREE.Mesh(pg,toon(Pd.color));
+  pad.scale.set(Pd.rx,1,Pd.rz);pad.position.set(Pd.x,Pd.y,Pd.z);scene.add(pad);
+  const specks=[];
+  for(let k=0;k<26;k++){
+    const rr=Math.sqrt(jr()),ang=jr()*Math.PI*2,s=0.06+jr()*0.06;
+    const sg=new THREE.BoxGeometry(s,s,s);
+    sg.translate(Pd.x+Math.cos(ang)*rr*Pd.rx*0.92,Pd.y+0.015,Pd.z+Math.sin(ang)*rr*Pd.rz*0.92);
+    specks.push(sg);
+  }
+  scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(specks.map(g2=>g2.toNonIndexed())),toon(0x8a7f70)));
+}
+
 export function buildStructures(){
   const POSTS=[],RAILS=[];
   buildDogFence(POSTS,RAILS);
@@ -883,5 +978,6 @@ export function buildStructures(){
   buildYachtClub();
   buildGolfClubhouse();
   buildChevron();
+  buildEntranceMonument();
   buildLSD();
 }

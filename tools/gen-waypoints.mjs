@@ -159,18 +159,48 @@ for (const s of CH.SIGNS) {
     [{ yaw: R(s.ry + Math.PI), pitch: 0.12, dist: 8 }, { yaw: R(s.ry), pitch: 0.12, dist: 8 }, { yaw: R(s.ry + Math.PI + 0.9), pitch: 0.2, dist: 10 }]);
 }
 
-// suggestion box (task 013): the diegetic "WHERE NEXT?" box at the Belmont
-// FUTURE ENTRANCE. Stand SE on the connector approach and aim NW at the entrance
-// cluster; a dead-on aim hides the small box behind the chibi, so the framings
-// skew the yaw a little to keep the box (and its label) beside the mayor.
+// suggestion box (task 013; relocated + upsized by owner direction during 023):
+// the diegetic "WHERE NEXT?" kiosk ahead-right of the new monument spawn.
+// Stand SE of it and aim NW; a dead-on aim hides the box behind the chibi, so
+// the framings skew the yaw a little to keep the box (and its label) beside
+// the mayor.
 {
-  const b = CH.SUGGESTION_BOX, sx = b.x + 3, sz = b.z + 3.5;
+  // stand on the LABEL side — the face points WNW back toward the spawn
+  // (standing SE shot the green back through the prairie flank)
+  const b = CH.SUGGESTION_BOX, sx = b.x - 3.4, sz = b.z - 1.2;
   const yaw = yawTo(sx, sz, b.x, b.z);
   add('suggestion-box', 'lakefront', 'lakefront', R(sx), R(sz), [
     { yaw: R(yaw + 0.3), pitch: 0.08, dist: 5.5 },   // box left of the mayor, close — label read
-    { yaw: R(yaw + 0.5), pitch: 0.12, dist: 6.5 },   // wider: box + FUTURE ENTRANCE arch/platform
+    { yaw: R(yaw + 0.5), pitch: 0.12, dist: 6.5 },   // wider: box + monument wall + forecourt
     { yaw: R(yaw + 0.22), pitch: 0.06, dist: 4.5 },  // closer still, box just left of centre
   ]);
+}
+
+/* ---- AIDS Garden entrance + statue loop (task 023, refs/aids-garden/):
+   two judged reads — (a) the spawn/entrance: monument wall, gold letters,
+   bronze ginkgo scatter, boulder, sitting blocks, forecourt; (b) the plaza
+   loop: the two-lobe peanut around the Haring lawn + the entrance path
+   reaching the lake. Stands DERIVE from ENTRANCE/HARING so they survive
+   reworks. ---- */
+{
+  const E = CH.ENTRANCE, H = CH.HARING.pos;
+  { // (a) stand on the forecourt lawn north of the wall, aim at the lettered face
+    const sx = E.letters.xc - 0.5, sz = E.wall.z - 6.5;
+    const yaw = yawTo(sx, sz, E.letters.xc, E.wall.z);
+    add('ag-entrance', 'lakefront', 'lakefront', R(sx), R(sz), [
+      { yaw, pitch: 0.1, dist: 9 },                       // head-on: letters legible
+      { yaw: R(yaw + 0.55), pitch: 0.14, dist: 11 },      // oblique: wall + forecourt + prairie + lamp
+      { yaw: R(yaw - 0.5), pitch: 0.08, dist: 8 },        // from the other side: blocks + boulder near
+    ]);
+  }
+  { // (b) statue-loop read: stand on the ring's NE, look SW across both lobes
+    const sx = H[0] + 12, sz = H[2] - 9;
+    add('ag-statue-loop', 'lakefront', 'lakefront', R(sx), R(sz), [
+      { yaw: yawTo(sx, sz, H[0] - 9, H[2] + 11), pitch: 0.5, dist: 22 },   // high: the peanut shape
+      { yaw: yawTo(sx, sz, H[0] - 9, H[2] + 11), pitch: 0.42, dist: 18 },
+      { yaw: yawTo(sx, sz, H[0], H[2]), pitch: -0.1, dist: 12 },           // the statue on its lawn
+    ]);
+  }
 }
 
 CH.DECKS.forEach((d, i) => {   // skip decks another waypoint already covers

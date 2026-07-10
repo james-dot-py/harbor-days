@@ -146,10 +146,40 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
   links the underpass mouth (~x 14, z 105) east to the AIDS-garden loop's west edge.
 - **AIDS Garden Chicago** lawn+beds **x 60–130, z +60…+180**; **Keith Haring
   sculpture (30 ft, green)** at **(x 95, z +120)**; Haring honorary sign beside it.
-  The garden **plaza LOOP** is a clean circle (r 16) centred on the sculpture:
-  the paved CONNECTOR from the Belmont underpass T-junctions its WEST point
-  (79,120); MAIN skims its EAST point (111,120) tangentially — a Y where riders
-  can peel onto the loop, never slicing its interior.
+  **The plaza LOOP is a TWO-LOBE PEANUT** (task 023, per the owner drone aerial
+  refs/aids-garden/aerial-path-structure.jpg — the real loop is NOT a clean
+  circle): the statue ring (r 16 about 95,120) unioned with a larger SW lawn
+  lobe (r 12 about 78,134), drawn as one continuous outline (`TRAIL_LOOP`).
+  The paved CONNECTOR from the Belmont underpass still T-junctions at (79,120)
+  (now on the waist's north arc); MAIN still skims the east point (111,120)
+  tangentially — both welds unchanged. (`TRAIL_LOOP_GHOST` keeps the retired
+  r-16 circle registered in pathSamples as determinism ballast — see chicago.js.)
+- **THE ENTRANCE MONUMENT is the park's FRONT DOOR** (task 023, per
+  refs/aids-garden/entrance-monument-sign.jpg; SITED BY OWNER LIVE DIRECTION
+  2026-07-10): at the garden's SOUTH, on the lawn just SE of MAIN's bend,
+  ~15 m from the garden Divvy dock (95,145) — a low wide grey
+  concrete/granite wall (`ENTRANCE.wall`, x 102.8…116, z 160.2, long axis
+  E–W, lettered face NORTH toward the lawn/trail approach) with gold 'AIDS
+  Garden Chicago' letters EAST-biased, scattered bronze ginkgo-leaf memorial
+  plaques (one merged geometry), the rough granite boulder leaning mid-span
+  WEST of the letter band (owner: it must never cover the 'A'), two white
+  limestone sitting blocks on a decomposed-granite forecourt pad north of the
+  wall, prairie-grass flanks, and a reused instanced globe lamp behind.
+  **This is the ONLY 'AIDS Garden' signage in the game** — the standard
+  wooden SIGNS plate was removed. STANDING LIBERTY: the real monument stands
+  at the garden's NORTH entrance off the trail junction; the owner directive
+  (2026-07-10, watching live) places it by the garden Divvy dock with the
+  spawn facing the water — deliberate, like the Waveland knothole.
+- **ENTRANCE→LAKE PATH** (`TRAIL_ENTRANCE`, the aerial's shore arm): a crushed-
+  limestone ribbon leaving the forecourt pad's east edge (115,155.6) and
+  running ENE down to the revetment top at (150.9,146.8) — the entrance path
+  reaching the lake.
+- **PLAYER SPAWN moved here** (task 023 + owner direction): player
+  (109.5, 156.6) on the forecourt, yaw 1.57 — **FACING THE WATER** (east,
+  open lawn to the Belmont Rocks steps); camera starts due west at
+  (87.5, 4.5, 156.6). Monument front-right, upsized WHERE-NEXT suggestion box
+  (relocated from the Belmont future entrance, `SUGGESTION_BOX`) ahead-right,
+  Divvy dock behind-left. The monument is the first thing every player sees.
 - **The Belmont Rocks**: stepped revetment along the open lake, **7 terrace steps**
   (reads broader). The east-facing rocks (`COAST_MAIN`, x ≈ 150) run to **z 340**;
   the same 7-step profile then WRAPS the south-facing **corner** (see below). The
