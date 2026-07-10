@@ -65,6 +65,9 @@
   #banner.show{opacity:1;transform:translate(-50%,0)}
   #banner .z{display:block;font-size:10px;letter-spacing:.3em;color:#c48f5f;margin-bottom:2px}
   #mark{position:fixed;bottom:10px;right:14px;z-index:20;color:rgba(255,255,255,.55);font-size:11px;letter-spacing:.1em}
+  /* ?audiodbg=1 — live AudioContext-state probe (owner reads it on-device) */
+  #audiodbg{position:fixed;bottom:34px;right:14px;z-index:22;display:none;color:#fff;pointer-events:none;
+    font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;background:rgba(20,24,30,.62);padding:4px 9px;border-radius:8px;letter-spacing:.02em}
 
   /* ---------- minimap ---------- */
   #mini{position:fixed;top:14px;right:14px;z-index:21;width:152px;height:206px;border-radius:18px;overflow:hidden;
@@ -180,6 +183,7 @@
 <div id="hint" style="display:none"></div>
 <div id="banner"><span class="z">now entering</span><span id="bname"></span></div>
 <div id="mark">ope! &middot; v0.9</div>
+<div id="audiodbg"></div>
 <div id="mini" style="display:none"><canvas id="mmc" width="304" height="412"></canvas><button id="mmt">&#9662;</button></div>
 <div id="jzone"><div id="stick"><div id="nub"></div></div></div>
 <button id="btnFire">&#127878;</button>

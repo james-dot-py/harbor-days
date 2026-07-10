@@ -8,7 +8,7 @@ import { buildStructures } from './structures.js';
 import { mayor, mparts, buildMayor, updateCharacter, updateChibiShadows } from './character.js';
 import { updateFogCull, fogCullStats } from './fogcull.js';
 import { FX, DUST, PASTELS, fw, rockets, scheduled, boomLights, setType, updateFireworks } from './fx.js';
-import { initAudio, sStep, sChime, sPop, updateAmbience } from './audio.js';
+import { initAudio, audioDbg, audioCtx, installAudioResumeNet, sStep, sChime, sPop, updateAmbience } from './audio.js';
 import { cam, keys, joy, jump, initInput } from './input.js';
 import { mmInit, mmDraw, initMinimapToggle } from './minimap.js';
 import * as CH from './data/chicago.js';
@@ -62,6 +62,8 @@ function census(top=60){
   return {total,rows:Object.entries(tally).sort((a,b)=>b[1]-a[1]).slice(0,top)};
 }
 window.__hd={errs:errRing,perf:()=>({drawCalls:renderer.info.render.calls,fps:Math.round(perfS.fps*10)/10,buildMs:window.__hd.buildMs}),census,
+  audio:audioDbg,         // ?audiodbg probe: {state,resumes} — headless repro reads this
+  audioCtx,               // debug/tools only: live AudioContext handle (null pre-start)
   fogcull:fogCullStats,   // {managed,hidden} — fog-distance culling introspection
   // debug-only scene access for tools/ (raycast attribution — census() names merged
   // meshes but can't localize a face; a ray can)
@@ -151,6 +153,7 @@ function showBanner(n){
 // ------------------------------ minimap init ---------------------------
 mmInit();
 initInput();
+installAudioResumeNet();   // mobile audio safety net: resume() on any gesture / refocus (issue 007)
 initMinimapToggle();
 
 // ---- framework: run queued pack setup now the world exists ----
@@ -431,5 +434,13 @@ if(dbgNum('yaw')!==null)cam.yaw=dbgNum('yaw');
 if(dbgNum('pitch')!==null)cam.pitch=dbgNum('pitch');
 if(dbgNum('dist')!==null)cam.dist=dbgNum('dist');
 if(DBG.get('play')==='1'){try{initAudio()}catch(e){}runStart();}
+
+// ---- ?audiodbg=1 — live AudioContext-state HUD (owner reads it on the phone) ----
+// off the hot frame loop (a 250 ms timer): none/suspended/running + resume count.
+if(DBG.get('audiodbg')==='1'){
+  const el=$('audiodbg');el.style.display='block';
+  const paint=()=>{const a=audioDbg();el.textContent='audio: '+a.state+' · resumes '+a.resumes;};
+  paint();setInterval(paint,250);
+}
 
 requestAnimationFrame(frame);

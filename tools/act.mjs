@@ -19,7 +19,13 @@ const baseQuery = process.argv[3] || '';
 const outDir = join(dirname(fileURLToPath(import.meta.url)), 'shots');
 mkdirSync(outDir, { recursive: true });
 
-const browser = await puppeteer.launch({ headless: 'new', args: ['--window-size=1280,720', '--mute-audio'] });
+// --strict-autoplay (or STRICT_AUTOPLAY=1) → Chrome gates AudioContext behind a
+// real user gesture, the mobile-audio repro (task 014): a context created at page
+// load comes up 'suspended' until a trusted tap/keypress resumes it.
+const STRICT = process.argv.includes('--strict-autoplay') || !!process.env.STRICT_AUTOPLAY;
+const launchArgs = ['--window-size=1280,720', '--mute-audio'];
+if (STRICT) launchArgs.push('--autoplay-policy=user-gesture-required');
+const browser = await puppeteer.launch({ headless: 'new', args: launchArgs });
 const page = await browser.newPage();
 await page.setViewport({ width: 1280, height: 720 });
 
@@ -42,6 +48,15 @@ async function nav(x, z) {
   await sleep(600);
 }
 
+// --audio-log (or AUDIO_LOG=1) → print window.__hd.audio() ({state,resumes}) after
+// each step, so the mobile-audio repro shows 'suspended' before a tap, 'running' after.
+const AUDIO_LOG = process.argv.includes('--audio-log') || !!process.env.AUDIO_LOG;
+async function logAudio(tag) {
+  if (!AUDIO_LOG) return;
+  const s = await page.evaluate(() => (window.__hd && window.__hd.audio) ? window.__hd.audio() : null);
+  console.log('AUDIO ' + tag + ' ' + JSON.stringify(s));
+}
+
 let navigated = false;
 for (const [op, a, b] of actions) {
   if (op === 'goto') { await nav(a, b); navigated = true; }
@@ -50,8 +65,10 @@ for (const [op, a, b] of actions) {
     else if (op === 'keydown') await page.keyboard.down(a);
     else if (op === 'keyup') await page.keyboard.up(a);
     else if (op === 'wait') await sleep(a);
+    else if (op === 'eval') { const r = await page.evaluate(a); console.log('EVAL ' + JSON.stringify(r)); }
     else if (op === 'shot') { const f = join(outDir, a + '.png'); await page.screenshot({ path: f }); console.log('SHOT ' + f); }
   }
+  await logAudio(op);
 }
 
 await browser.close();

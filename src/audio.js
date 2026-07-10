@@ -2,10 +2,10 @@ import { clamp, game } from './core.js';
 import { coastQuery, profileTotal } from './coast.js';
 
 // ------------------------------ audio ----------------------------------
-let actx=null,musicBus,sfxBus,noiseBuf,waveG=null;
+let actx=null,musicBus,sfxBus,noiseBuf,waveG=null,resumeTries=0;
 const AC_=window.AudioContext||window.webkitAudioContext;
 export function initAudio(){
-  if(actx)return;actx=new AC_();if(actx.state==='suspended')actx.resume();
+  if(actx)return;actx=new AC_();resumeAudio();
   musicBus=actx.createGain();musicBus.gain.value=0.16;
   const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2200;
   musicBus.connect(lp);lp.connect(actx.destination);
@@ -17,6 +17,33 @@ export function initAudio(){
   waveG=actx.createGain();waveG.gain.value=0;
   ws.connect(wf);wf.connect(waveG);waveG.connect(sfxBus);ws.start();
   startMusic();
+}
+// --- persistent audio resume net (mobile) ------------------------------------
+// initAudio() creates the context ONCE inside the start gesture, but mobile OSes
+// can bring it up 'suspended' (iOS' first-gesture quirk) or 'interrupted' and
+// re-suspend it on backgrounding / calls — and NOTHING else ever resumed it, so
+// the game went silent forever (issue 007). resumeAudio() is cheap + idempotent:
+// fire it on every gesture and on tab-refocus, forever. It GUARDS actx, so it is
+// a no-op until initAudio() has run and never creates a context itself — the
+// actx-null-until-start contract packs rely on is preserved.
+export function resumeAudio(){
+  if(!actx)return;
+  if(actx.state!=='running'){resumeTries++;try{actx.resume();}catch(e){}}
+}
+// ?audiodbg=1 probe feed (main.js paints #audiodbg): live state + resume count so
+// the owner can read the truth on-device instead of guessing.
+export function audioDbg(){return{state:actx?actx.state:'none',resumes:resumeTries};}
+// debug/tools only (like __hd.scene) — the live context handle so the headless
+// repro can force-suspend it (simulate an OS interruption) and prove recovery.
+export function audioCtx(){return actx;}
+// bind the net once (main.js calls at startup, independent of user start). The
+// listeners are harmless before audio starts (resumeAudio no-ops on null actx).
+export function installAudioResumeNet(){
+  const net=()=>resumeAudio();
+  addEventListener('pointerdown',net,{passive:true});
+  addEventListener('touchend',net,{passive:true});
+  addEventListener('keydown',net,{passive:true});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)resumeAudio();});
 }
 const mf=m=>440*Math.pow(2,(m-69)/12);
 // --- pack audio access: raw nodes + helpers so content packs can synth their

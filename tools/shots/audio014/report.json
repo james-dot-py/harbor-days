@@ -1,0 +1,7 @@
+{
+  "shots": [
+    { "shot": "C:/Users/James.Friedman/Downloads/harbor-days-autopilot/tools/shots/audio014_suspended.png", "id": "audiodbg suspended (bug)", "framing": 0 },
+    { "shot": "C:/Users/James.Friedman/Downloads/harbor-days-autopilot/tools/shots/audio014_running.png", "id": "audiodbg running after tap (fixed)", "framing": 0 },
+    { "shot": "C:/Users/James.Friedman/Downloads/harbor-days-autopilot/tools/shots/verify-spawn.png", "id": "spawn unaffected (HUD hidden)", "framing": 0 }
+  ]
+}
