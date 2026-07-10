@@ -190,6 +190,45 @@ export const VILLAGE_W = {
   carayStatue: { x: -206.5, z: -543.5, ry: 2.36 }, // centered on the Caray plaza apron, facing the intersection, gate behind
 };
 
+// ------------------- streetscape facades (task 016) -------------------
+// Per-lot FACADE RECIPES for the fabric buildings that line the corridors
+// between the hero landmarks (bars/stadium/Engine 78/rooftops own their own
+// frontage). dressing.js lays a row of lots along each FRONTAGE span, pulling
+// recipes so no two ADJACENT lots share a composition (owner issue 004: no
+// uniform facades). Colours reuse Wrigleyville's cached toon() palette so the
+// static merge pool adds ~no draw calls; two warm hues (·greystone·/·warm·)
+// are the only new materials. Every lot sits just OUTSIDE its walk corridor
+// (unreachable — no colliders needed; the walkable clamp is the wall).
+export const clarkYaw = Math.atan(0.28);
+export const FACADES_W = {
+  // frontages: where a lot row runs. o:'ew' lots step along x at z=face;
+  // o:'ns' lots step along z at x=face; o:'clark' lots step along z at
+  // x=clarkX(z)+off. yaw = direction the storefront FACES (toward the road).
+  // spans = [[a,b],…] extents to fill (gaps skip the hero landmarks).
+  frontages: [
+    { id: 'addison-s',  o: 'ew',    face: -384, yaw: Math.PI,               spans: [[-298, -158]] },
+    { id: 'waveland-n', o: 'ew',    face: -574, yaw: 0,                      spans: [[-348, -254], [-198, -180]] },
+    { id: 'sheffield-e',o: 'ns',    face: -176, yaw: -Math.PI / 2,          spans: [[-534, -388]] },
+    { id: 'clark-wn',   o: 'clark', off: -16,   yaw: Math.PI / 2 + clarkYaw, spans: [[-570, -492]] },
+    { id: 'clark-ws',   o: 'clark', off: -16,   yaw: Math.PI / 2 + clarkYaw, spans: [[-416, -392]] },
+  ],
+  // recipe palette. color = cached toon hex; floors → height; door position;
+  // awning [stripeA,stripeB]|null; upper window style; cornice style; fesc =
+  // fire escape; stoop; sign {t,c} = a small storefront name band (atlas).
+  // awnings use only TWO colorways (navy/cream ANV, red/cream ARC) so the kit's
+  // striped-awning texture stays two buckets, not eight.
+  recipes: [
+    { id: 'greystone', w: 13, color: 0x9a8f80, floors: 3, door: 'center', awning: null,               upper: 'sash',   cornice: 'dentil', fesc: false, stoop: true,  sign: null },
+    { id: 'redbrick',  w: 11, color: 0x94402f, floors: 2, door: 'left',   awning: [0xb03a2e, 0xf2eee4], upper: 'paired', cornice: 'flat',   fesc: true,  stoop: false, sign: { t: 'TAP ROOM', c: 0xff5a3c } },
+    { id: 'blonde',    w: 14, color: 0xc2a370, floors: 3, door: 'right',  awning: [0x24407a, 0xf2eee4], upper: 'sash',   cornice: 'step',   fesc: false, stoop: false, sign: { t: 'CORNER MARKET', c: 0xffb43a } },
+    { id: 'cream',     w: 12, color: 0xe6ddc8, floors: 3, door: 'center', awning: null,               upper: 'arch',   cornice: 'dentil', fesc: false, stoop: true,  sign: null },
+    { id: 'brownwalk', w: 12, color: 0x63594e, floors: 3, door: 'left',   awning: null,               upper: 'bay',    cornice: 'flat',   fesc: true,  stoop: true,  sign: null },
+    { id: 'buffdeli',  w: 11, color: 0xcbb488, floors: 2, door: 'center', awning: [0x24407a, 0xf2eee4], upper: 'paired', cornice: 'step',   fesc: false, stoop: false, sign: { t: 'DELI', c: 0x4ad06a } },
+    { id: 'whitegrill',w: 13, color: 0xd8cdb4, floors: 3, door: 'right',  awning: [0x24407a, 0xf2eee4], upper: 'sash',   cornice: 'dentil', fesc: false, stoop: false, sign: { t: 'GRILL', c: 0xff5545 } },
+    { id: 'warmpizza', w: 11, color: 0xa8654a, floors: 2, door: 'center', awning: [0xb03a2e, 0xf2eee4], upper: 'paired', cornice: 'flat',   fesc: true,  stoop: false, sign: { t: 'PIZZA', c: 0xff8a3c } },
+  ],
+};
+
 // ------------------------- CPD barricades -----------------------------
 // Blue wooden A-frames, 'POLICE LINE — CHICAGO POLICE'. Each line is a
 // street mouth: [x0,z0]→[x1,z1]. streets.js instances them; the walk

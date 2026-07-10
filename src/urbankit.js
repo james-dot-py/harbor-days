@@ -32,17 +32,22 @@ import { toon, bmat } from './core.js';
 const mergeGeos = arr => BufferGeometryUtils.mergeBufferGeometries(arr.map(g => g.index ? g.toNonIndexed() : g), false);
 
 // ---- kit palette (Chicago dusk defaults; callers may override per call) ----
+// Hues are aligned to the Wrigleyville cell's CACHED toon() colours (task 016)
+// so kit solids fold into the cell static-merge pool's existing per-colour
+// meshes — every reused colour costs ZERO extra draw calls. A different city
+// pack can still override any of these; these values just happen to be shared
+// with the only current caller.
 export const KIT = {
-  dark: 0x1e2024,        // storefront bulkheads, door recesses, downspouts, car glass
+  dark: 0x0c0a09,        // storefront bulkheads, door recesses, downspouts, car glass
   limestone: 0xe6ddc8,   // lintels, sills, cornices, coping
-  ironblack: 0x26282e,   // stoplight/fire-escape/grate iron
-  metal: 0x74797f,       // meters, bike racks (galvanized)
-  acgray: 0x9aa0a6,      // window AC units
+  ironblack: 0x2b2b30,   // stoplight/fire-escape/grate iron
+  metal: 0x9c968a,       // meters, bike racks (galvanized)
+  acgray: 0x9c968a,      // window AC units (shares the metal bucket)
   hydrant: 0xc0392b,
-  mailbox: 0x2b4a8b,
-  trash: 0x2e4436,       // CDOT mesh-basket green
+  mailbox: 0x0e4c92,
+  trash: 0x1f5136,       // CDOT mesh-basket green
   trunk: 0x6b4a30,
-  canopy: 0x4f8f46,
+  canopy: 0x2f7d46,
   signalRed: 0xff5348, signalGreen: 0x59d977, headlight: 0xfff2c0, taillight: 0xff5348,
 };
 
@@ -429,13 +434,44 @@ export function createUrbanKit() {
     pushT('box', UBOX, KIT.dark, { pos: at(x, y, z, yaw, c.CO, 0.36 + c.BH + c.CH / 2, 0), yaw, scale: [c.CL, c.CH, c.CW] });
     const wheel = G('wheel', () => { const w = new THREE.CylinderGeometry(0.34, 0.34, 0.24, 9); w.rotateX(Math.PI / 2); return w; });
     for (const sx of [-1, 1]) for (const sz of [-1, 1])
-      push('wheel', wheel, 't' + 0x17181c, () => toon(0x17181c), { pos: at(x, y, z, yaw, sx * c.WB / 2, 0.34, sz * (c.W / 2 - 0.08)), yaw });
+      push('wheel', wheel, 't' + KIT.dark, () => toon(KIT.dark), { pos: at(x, y, z, yaw, sx * c.WB / 2, 0.34, sz * (c.W / 2 - 0.08)), yaw });
     for (const s of [-1, 1]) {   // lights as facing planes flush on the body ends, above the bumper line;
       // warm front; rear SHARES the signal-red bucket
       pushB('plane', UPLANE, KIT.headlight, { pos: at(x, y, z, yaw, c.L / 2 + 0.015, 0.68, s * (c.W / 2 - 0.28)), yaw: yaw + Math.PI / 2, scale: [0.3, 0.14, 1] });
       pushB('plane', UPLANE, KIT.taillight, { pos: at(x, y, z, yaw, -c.L / 2 - 0.015, 0.68, s * (c.W / 2 - 0.24)), yaw: yaw - Math.PI / 2, scale: [0.26, 0.12, 1] });
     }
     colliders.push({ x, z, r: Math.max(c.L, c.W) / 2 + 0.2 });
+  }
+
+  // =====================================================================
+  //  emitMerged — bake every bucket's instances into ONE world-space merged
+  //  BufferGeometry and hand (geo, material, name) to a caller `solid` sink.
+  //  Use this when placing the kit INSIDE a cell that already runs a static
+  //  merge pool (Wrigleyville: mergeCellStatic folds these by material.uuid,
+  //  and toon(color) is cached, so every reused colour costs ZERO extra draw
+  //  calls — unlike emit()'s InstancedMesh buckets, which are frustumCulled=
+  //  false and cost one GLOBAL draw call each). Textured buckets stay unique
+  //  materials, so a whole street's shared door/glazing/sash textures collapse
+  //  to one draw call apiece regardless of how many storefronts use them.
+  // =====================================================================
+  function emitMerged({ solid, collide: coll = null } = {}) {
+    const Mx = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(), V = new THREE.Vector3(), S = new THREE.Vector3();
+    let solids = 0, instances = 0;
+    for (const b of buckets.values()) {
+      const geos = [];
+      for (const it of b.items) {
+        const g = b.geo.index ? b.geo.toNonIndexed() : b.geo.clone();
+        E.set(it.rx || 0, it.yaw || 0, it.rz || 0, 'YXZ'); Q.setFromEuler(E);
+        V.set(it.pos[0], it.pos[1], it.pos[2]);
+        S.set(it.scale ? it.scale[0] : 1, it.scale ? it.scale[1] : 1, it.scale ? it.scale[2] : 1);
+        Mx.compose(V, Q, S); g.applyMatrix4(Mx);
+        geos.push(g);
+      }
+      const merged = mergeGeos(geos);
+      if (merged) { solid(merged, b.mat, b.name); solids++; instances += b.items.length; }
+    }
+    if (coll) for (const c of colliders) coll(c.x, c.z, c.r);
+    return { solids, instances };
   }
 
   // =====================================================================
@@ -464,6 +500,6 @@ export function createUrbanKit() {
   return {
     storefront, block, cornice, parapetSteps, windowGrid, downspout, fireEscape,
     stoplight, meter, hydrant, mailbox, newsbox, bikeRack, streetTree, trashCan,
-    car, emit,
+    car, emit, emitMerged,
   };
 }

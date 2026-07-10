@@ -88,24 +88,10 @@ function winTex() {                                 // warm lit sash window
   g.lineWidth = 4; g.beginPath(); g.moveTo(32, 5); g.lineTo(32, 91); g.moveTo(5, 48); g.lineTo(59, 48); g.stroke();
   return tx(cv);
 }
-// generic neon storefront sign on a dark board
-function neonTex(text, hex, icon) {
-  const [cv, g] = cvTex(384, 128);
-  g.fillStyle = '#0e0b13'; g.fillRect(0, 0, 384, 128);
-  g.strokeStyle = 'rgba(255,255,255,.10)'; g.lineWidth = 4; g.strokeRect(6, 6, 372, 116);
-  if (icon) icon(g);
-  const col = '#' + hex.toString(16).padStart(6, '0');
-  g.textAlign = 'center'; g.textBaseline = 'middle';
-  let fs = 62; g.font = `700 ${fs}px "Trebuchet MS",Arial,sans-serif`;
-  while (g.measureText(text).width > 344 && fs > 26) { fs -= 2; g.font = `700 ${fs}px "Trebuchet MS",Arial,sans-serif`; }
-  g.shadowColor = col; g.shadowBlur = 26; g.fillStyle = col;
-  g.fillText(text, 192, 70); g.fillText(text, 192, 70);
-  g.shadowBlur = 0; g.fillStyle = '#fff8e6'; g.font = `700 ${fs}px "Trebuchet MS",Arial,sans-serif`;
-  g.fillText(text, 192, 70);
-  return tx(cv);
-}
-const bats = g => { g.save(); g.translate(192, 46); g.strokeStyle = '#d9b06a'; g.lineCap = 'round'; g.lineWidth = 12; for (const s of [-1, 1]) { g.save(); g.rotate(s * 0.5); g.beginPath(); g.moveTo(0, -30); g.lineTo(0, 34); g.stroke(); g.restore(); } g.restore(); };
-const shamrock = g => { g.save(); g.translate(300, 44); g.fillStyle = '#39b552'; for (const a of [-1.05, 0, 1.05]) { g.beginPath(); g.arc(Math.sin(a) * 15, -Math.cos(a) * 15, 12, 0, 7); g.fill(); } g.fillRect(-3, 6, 6, 20); g.restore(); };
+// (ISSUE 004 — the generic neonTex(bar) storefront name plate and its bats/
+//  shamrock icons were removed: every Clark bar repeated its own name on both a
+//  generic plate AND a characterful band/blade. Only the band/blade name sign
+//  survives per bar, built in buildBars below.)
 
 function murphyTex() {                               // red letters on cream, green trim
   const [cv, g] = cvTex(512, 128);
@@ -634,16 +620,13 @@ function cubbyBillboard(x, z, roof, ry) {
 // =====================================================================
 function buildBars() {
   const facades = [0xe6ddc8, 0xcbb488, 0xd8cdb4, 0x94402f];   // i0 cream · i1 buff · i2 white · i3 dark-red brick
-  const neons = [
-    { t: 'SLUGGERS', c: 0xff5545, icon: bats },
-    { t: 'SPORTS CORNER', c: 0xffb43a },
-    { t: "CASEY MORAN'S", c: 0x4ad06a, icon: shamrock },
-    { t: 'THE DUGOUT', c: 0x5aa8ff },
-  ];
+  // ISSUE 004 — one dominant name sign per bar: Sluggers yellow/red band,
+  // Sports Corner navy vertical blade, Casey's green-gold band, Dugout black
+  // hand-lettered band (all built below). The old generic neonTex(bar) plate
+  // that duplicated each name is gone.
   // clarkBars[0] ('SLUGGERS') is LOWERED to a 2-storey bar: its roof is the
   // batting-cage destination (task 009 — buildSluggersRoof adds the stair/deck).
   const Hs = [SLUGGERS_W.roofY, 11.0, 8.6, 10.2];
-  const nP = [[5.0, 1.4, 3.9, -4.2], [13, 2.2, 9.0, 0], [12, 1.4, 3.7, 0], [13, 2.2, 8.4, 0]];   // neon w,h,y,z
   const sfF = ['#3a2c1e', '#2e2820', '#30291f', '#1a120e'];   // storefront frame tints
   const sfW = ['#ffd07a', '#ffd98a', '#ffcf8f', '#ffbf6a'];   // warm glow tints
   VILLAGE_W.clarkBars.forEach((bar, i) => {
@@ -658,11 +641,7 @@ function buildBars() {
     { const [sw, s2] = fitSign(wid - 2, sfH, -wid / 2, wid / 2, 0, H, 0, sfY);
       const sf = new THREE.Mesh(new THREE.PlaneGeometry(sw, s2), bmat(0xffffff, { map: storefrontTex(sfF[i], sfW[i]) }));
       sf.position.set(dep / 2 + 0.05, sfY, 0); sf.rotation.y = Math.PI / 2; g.add(sf); planes.push(sf); }
-    // neon sign (clamped)
-    { const [nw, nh] = fitSign(nP[i][0], nP[i][1], -wid / 2, wid / 2, 0, H, nP[i][3], nP[i][2]);
-      const sgn = new THREE.Mesh(new THREE.PlaneGeometry(nw, nh), bmat(0xffffff, { map: neonTex(neons[i].t, neons[i].c, neons[i].icon) }));
-      sgn.position.set(dep / 2 + 0.05, nP[i][2], nP[i][3]); sgn.rotation.y = Math.PI / 2; g.add(sgn); planes.push(sgn); }
-    // ---- per-bar re-skin (in-group elements) ----
+    // ---- per-bar re-skin (in-group elements) — ONE dominant name sign each ----
     if (i === 0) {   // SLUGGERS yellow/red band (primary), south half clear of the stair
       const [bw, bh] = fitSign(6.5, 1.3, -wid / 2, wid / 2, 0, H, -4.2, 5.4);
       const bnd = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), bmat(0xffffff, { map: sluggersBandTex() }));
@@ -680,11 +659,18 @@ function buildBars() {
       const bnd = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), bmat(0xffffff, { map: caseysBandTex() }));
       bnd.position.set(dep / 2 + 0.05, 7.3, 0); bnd.rotation.y = Math.PI / 2; g.add(bnd); planes.push(bnd);
       for (const lz of [-wid / 2 + 1.4, wid / 2 - 1.4]) g.add(M(new THREE.BoxGeometry(0.6, 3.0, 0.5), toon(0xe6ddc8), dep / 2 + 0.15, 1.5, lz));   // pilasters
+      // limestone-framed central door — Casey's storefront recipe (differs from neighbours)
+      g.add(M(new THREE.BoxGeometry(0.14, 2.5, 1.2), toon(0x2c2620), dep / 2 + 0.1, 1.35, 0));                    // dark door leaf
+      for (const s of [-1, 1]) g.add(M(new THREE.BoxGeometry(0.16, 2.8, 0.3), toon(0xe6ddc8), dep / 2 + 0.14, 1.4, s * 0.85));   // limestone jambs
+      g.add(M(new THREE.BoxGeometry(0.16, 0.35, 2.1), toon(0xe6ddc8), dep / 2 + 0.14, 2.95, 0));                  // limestone lintel
       for (const lz of [-3, 3]) for (const lx of [dep / 2 - 3, dep / 2 - 0.5]) g.add(M(new THREE.BoxGeometry(0.16, 1.0, 0.16), toon(0x6b4a30), lx, H + 0.5, lz));   // pergola posts
       for (const lz of [-3, 3]) g.add(M(new THREE.BoxGeometry(3.0, 0.14, 0.16), toon(0x6b4a30), dep / 2 - 1.75, H + 1.0, lz));   // pergola beams
     }
     if (i === 3) {   // THE DUGOUT black band + hand-lettered + wood door
       g.add(M(new THREE.BoxGeometry(0.1, 1.9, wid - 1.5), toon(0x0c0a09), dep / 2 + 0.08, 3.4, 0));   // black band proud
+      // projecting brick oriel bay on the upper storey — Dugout window recipe (differs from Casey's arches)
+      g.add(M(new THREE.BoxGeometry(0.45, 2.4, 9), toon(0x94402f), dep / 2 + 0.22, 6.3, 0));           // proud brick bay
+      for (const yy of [5.1, 7.5]) g.add(M(new THREE.BoxGeometry(0.5, 0.22, 9.4), toon(0xe6ddc8), dep / 2 + 0.22, yy, 0));   // limestone sill + cap
       const [hw, hh] = fitSign(wid - 4, 1.5, -wid / 2, wid / 2, 0, H, 0, 3.4);
       const hl = new THREE.Mesh(new THREE.PlaneGeometry(hw, hh), bmat(0xffffff, { map: dugoutTex() }));
       hl.position.set(dep / 2 + 0.16, 3.4, 0); hl.rotation.y = Math.PI / 2; g.add(hl); planes.push(hl);
@@ -696,9 +682,10 @@ function buildBars() {
     for (const p of planes) atlasPlane(p, false);
     add(g);   // snapshot the group's remaining solids (after every g.add + after detaching planes)
     // ---- out-of-group elements ----
+    if (i === 0) for (const lz of [-5.5, -2.5]) { const [dx, dz] = yrot(dep / 2 + 0.05, lz, clarkYaw); A.win.push({ pos: [gx + dx, 3.85, gz + dz], yaw: clarkYaw + Math.PI / 2, scale: [0.9, 0.9, 1] }); }   // Sluggers: pair of small square sash windows below the band
     if (i === 3) { const [ax, az] = yrot(dep / 2 + 0.7, 0, clarkYaw); awning(gx + ax, 2.7, gz + az, clarkYaw + Math.PI / 2, 1.5, wid - 2); }   // Dugout green awning
     if (i === 1) for (const lz of [-4, 0, 4]) { const [dx, dz] = yrot(dep / 2 + 0.05, lz, clarkYaw); A.win.push({ pos: [gx + dx, 6.7, gz + dz], yaw: clarkYaw + Math.PI / 2, scale: [2.0, 1.9, 1] }); }   // glassy 2nd floor
-    if (i === 3) for (const lz of [-3.5, 3.5]) { const [dx, dz] = yrot(dep / 2 + 0.05, lz, clarkYaw); A.win.push({ pos: [gx + dx, 6.3, gz + dz], yaw: clarkYaw + Math.PI / 2, scale: [1.3, 1.7, 1] }); }
+    if (i === 3) for (const lz of [-3.5, 3.5]) { const [dx, dz] = yrot(dep / 2 + 0.5, lz, clarkYaw); A.win.push({ pos: [gx + dx, 6.3, gz + dz], yaw: clarkYaw + Math.PI / 2, scale: [1.3, 1.7, 1] }); }   // sash windows on the oriel bay face
     if (i === 2) for (const lz of [-4, 0, 4]) { const [dx, dz] = yrot(dep / 2 + 0.06, lz, clarkYaw);   // arched 2nd-floor windows
       const p = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 1.9), bmat(0xffffff, { map: archWinTex() })); p.position.set(gx + dx, 5.6, gz + dz); p.rotation.y = clarkYaw + Math.PI / 2; atlasPlane(p, false); }
     if (i === 1) {   // SPORTS CORNER vertical blade sign (free-standing, back-to-back)

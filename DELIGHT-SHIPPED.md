@@ -81,3 +81,12 @@ cut becomes a revert task.
   which neighborhood to build next, and it really sends (with an email
   fallback); the wink at expansion finally listens back — Belmont underpass
   — task 013
+- The neighborhood finally SURROUNDS you: every game-day block is walled with
+  its own storefronts — recessed doors, warm glazing, striped awnings, iron
+  fire escapes, cornices and bay windows, no two lots alike — over parked cars
+  nosed along the legal curbs and a furniture rhythm of meters, hydrants,
+  newsboxes, mailboxes and tree grates, under Chicago mast-arm stoplights at
+  the corners — Wrigleyville streets — task 016
+- The bar row stopped shouting its own name twice: one dominant sign per bar
+  plus a single accent, and every storefront now wears a different upper-window
+  and door composition — Clark St bar row — task 016
