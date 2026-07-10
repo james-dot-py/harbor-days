@@ -2,7 +2,7 @@
 id: 024
 area: shell
 type: feedback
-model: any
+model: opus
 title: Title card — "by Jimbo" author credit
 acceptance: >
   Owner note (autopilot/feedback/processed/feedback-2026-07-10T01-24-24-133Z.md):

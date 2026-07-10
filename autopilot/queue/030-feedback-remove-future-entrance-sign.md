@@ -2,7 +2,7 @@
 id: 030
 area: lakefront
 type: feedback
-model: any
+model: opus
 turns: 30
 title: Remove the FUTURE ENTRANCE signs (owner feedback 2026-07-10)
 acceptance: >

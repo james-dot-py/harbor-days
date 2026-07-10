@@ -180,7 +180,9 @@ function taskModel(taskFile, planner) {
   const fm = frontmatter(taskFile);
   const m = (fm.model || '').trim().toLowerCase();
   if (MODEL_IDS[m]) return MODEL_IDS[m];
-  if (m) return fm.model.trim();                     // explicit full model id
+  if (m.startsWith('claude-')) return fm.model.trim();   // explicit full model id
+  // unknown aliases ('any', typos) fall back to the default instead of
+  // becoming a bogus --model arg (parked 024 three times, 2026-07-10)
   return (fm.type === 'signoff') ? MODEL_IDS.fable : MODEL_IDS.opus;
 }
 
