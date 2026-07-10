@@ -2,8 +2,8 @@
 
 - severity: medium-high (owner verdict: "this does not look good" — the main
   Clark St view reads formulaic)
-- evidence: owner screenshot refs/inbox/"this does not look good - double
-  signs - same exact windows-doors on each.png" (2026-07-09, post-010).
+- evidence: owner screenshot refs/wrigleyville/owner-issue-004-double-signs-uniform-facades.png
+  (2026-07-09, post-010; filed from refs/inbox/ by task 012).
 - observed: every bar carries BOTH a parapet sign and a storefront sign with
   the same name (Sluggers carries three incl. a rooftop plate); all buildings
   share one identical upper-window template and one storefront band pattern.

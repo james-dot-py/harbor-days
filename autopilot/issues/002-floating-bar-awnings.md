@@ -1,7 +1,8 @@
 # 002 — bar-row awning/bulb assemblies float detached from facades
 
 - severity: medium (main Clark St walking view; owner could not tell what they were)
-- evidence: owner screenshot refs/inbox/"lights or awning - unsure what this is.png"
+- evidence: owner screenshot refs/wrigleyville/owner-issue-002-floating-awnings.png
+  (filed from refs/inbox/"lights or awning - unsure what this is.png", task 012)
   (2026-07-09): green awning slats hover on poles ahead of the Cubby Bear /
   Dugout / Casey s fronts with rows of loose white cubes on top — reads as
   floating planks, not bulb-lit awnings. First flagged as the "floating green

@@ -1,7 +1,8 @@
 # 005 — Gallagher Way bag-toss reads as flat blue slabs on an empty lawn
 
 - severity: medium (owner: "bag toss looks bad"; the plaza reads unfinished)
-- evidence: refs/inbox/"bag toss looks bad and spot is not solid color.png" —
+- evidence: refs/wrigleyville/owner-issue-005-bag-toss-and-splash-dither.png
+  (filed from refs/inbox/ by task 012) —
   two flat blue rectangles flush to the grass (one with a yellow dot), no
   board angle, no legs, no hole; plus a stray red chair floating at the wall.
 - expected: proper angled cornhole boards on legs (the lakefront 003-delight
