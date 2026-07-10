@@ -78,7 +78,10 @@ onWorldReady((player)=>{
   const SITE=clearPath(130,272);                       // south lawn, empty per site-check shots
   const GAP=8;                                          // board-to-board (acceptance: ~8 m)
   const TILT=0.23, W=0.72, L=1.32, DECKH=0.07;
-  // board A north (low edge facing south toward B), board B south (facing north)
+  // Boards LEAN TOWARD each other (owner 2026-07-10, deliberately non-regulation):
+  // each board's RAISED hole-end faces the partner, the low lip sits on the outside.
+  // The −TILT euler below flips the incline; hole/star/leg offsets are re-derived
+  // from the same basis so the decals + legs stay on the (now inward) high end.
   const BOARDS=[
     {x:SITE.x, z:SITE.z-GAP/2, yaw:0,       deck:0x55aedd},   // Chicago-flag light blue (saturated for toon)
     {x:SITE.x, z:SITE.z+GAP/2, yaw:Math.PI, deck:0xf3eddd},   // cream
@@ -103,26 +106,26 @@ onWorldReady((player)=>{
   // per-board basis for landing math: deck-top center + right/fwd/up units
   const starMats=[],holeMats=[],legMats=[];
   BOARDS.forEach(b=>{
-    E.set(TILT,b.yaw,0,'YXZ');Q.setFromEuler(E);
-    const cy=Math.sin(TILT)*(L/2)+0.05;                 // front lip kisses the grass
+    E.set(-TILT,b.yaw,0,'YXZ');Q.setFromEuler(E);       // −TILT: raised (hole) end faces the partner
+    const cy=Math.sin(TILT)*(L/2)+0.05;                 // outer lip kisses the grass (magnitude only)
     const deck=new THREE.Mesh(new THREE.BoxGeometry(W,DECKH,L),toon(b.deck));
     deck.position.set(b.x,cy,b.z);deck.quaternion.copy(Q);scene.add(deck);
     b.q=Q.clone();
     b.right=new THREE.Vector3(1,0,0).applyQuaternion(Q);
-    b.fwd  =new THREE.Vector3(0,0,1).applyQuaternion(Q); // down-slope, toward partner
+    b.fwd  =new THREE.Vector3(0,0,1).applyQuaternion(Q); // up-slope now, toward partner (raised end)
     b.up   =new THREE.Vector3(0,1,0).applyQuaternion(Q);
     b.top  =new THREE.Vector3(b.x,cy,b.z).addScaledVector(b.up,DECKH/2);
-    // hole up-slope, star decal mid-deck (both lie flat on the deck plane)
+    // hole up-slope (inward high end), star decal mid-deck (both lie flat on the deck plane)
     Q.multiply(flatUp);
-    V.copy(b.top).addScaledVector(b.fwd,-0.40).addScaledVector(b.up,0.008);
+    V.copy(b.top).addScaledVector(b.fwd,0.40).addScaledVector(b.up,0.008);
     M.compose(V,Q,S.set(1,1,1));holeMats.push(M.clone());
     b.hole=V.clone();
-    V.copy(b.top).addScaledVector(b.fwd,0.22).addScaledVector(b.up,0.008);
+    V.copy(b.top).addScaledVector(b.fwd,-0.22).addScaledVector(b.up,0.008);
     M.compose(V,Q,S.set(1,1,1));starMats.push(M.clone());
-    // two rear legs (vertical, at the raised corners)
+    // two rear legs (vertical, under the raised INWARD corners)
     const c=Math.cos(b.yaw),s=Math.sin(b.yaw);
     for(const lx of [-(W/2-0.08),W/2-0.08]){
-      const lz=-(L/2-0.07);
+      const lz=(L/2-0.07);
       V.set(b.x+lx*c+lz*s,0.14,b.z-lx*s+lz*c);
       M.compose(V,Q.identity(),S.set(1,1,1));legMats.push(M.clone());
     }
