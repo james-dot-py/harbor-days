@@ -32,6 +32,9 @@
   .card h1 .o,.card h1 .b{display:inline-block;animation:letterBob 2.6s ease-in-out infinite alternate}
   .card h1 .o{color:#e0766a}.card h1 .b{color:#4fa3c7;animation-delay:-1.3s}
   @keyframes letterBob{from{transform:translateY(0)}to{transform:translateY(-4px)}}
+  /* movie-poster author byline: subordinate to the title, sits right beneath it */
+  .card .byline{margin:9px 0 0;color:#9c8168;font-size:13px;letter-spacing:.22em}
+  .card .byline b{font-weight:600;color:#8a5a3a}
   .card .sub{margin:10px 0 4px;color:#8a7561;font-size:15px;letter-spacing:.12em;text-transform:lowercase}
   .card .tiny{margin:2px 0 20px;color:#b39d85;font-size:12px;letter-spacing:.08em}
   #start{cursor:pointer;border:none;border-radius:999px;padding:14px 46px;font-size:20px;font-family:inherit;
@@ -174,6 +177,7 @@
 <div id="title">
   <div class="card">
     <h1><span class="o">O</span>pe<span class="b">!</span></h1>
+    <div class="byline">by <b>Jimbo</b></div>
     <div class="sub">a north side stroll &mdash; the rocks, the harbor, the skyline</div>
     <div class="tiny">v0.9 &middot; the place itself &middot; belmont harbor, chicago</div>
     <button id="start">let's walk</button>

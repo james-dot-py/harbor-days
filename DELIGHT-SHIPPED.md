@@ -138,3 +138,7 @@ cut becomes a revert task.
   canopy — each a bird you stop to WATCH — Bird Sanctuary interior — task 025
 - The Chicago-famous black-crowned night-heron (a real endangered local resident)
   is in the bingo — locals will clock it — Bird Sanctuary — task 025
+- The title card is signed: a small movie-poster 'by Jimbo' byline sits right
+  under the Ope! wordmark, above the tagline — the author's credit on the front
+  door, subordinate to the title in the card's own rounded type — title card —
+  task 024
