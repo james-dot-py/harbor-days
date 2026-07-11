@@ -35,3 +35,4 @@ import './about.js';   // About / credits — OpenStreetMap ODbL attribution
 import './kofi.js';   // Ko-fi support — diegetic rooftop billboard (task 011)
 import './suggestions.js';   // Neighborhood suggestion box on the AIDS Garden spawn plaza (task 013, relocated task 023)
 import './millennium.js';   // neighborhood three — the Millennium Park cell (task 041)
+import './bean-visitors.js';   // posing visitors + journal naming at THE BEAN (task 043)

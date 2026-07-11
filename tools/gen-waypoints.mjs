@@ -650,7 +650,10 @@ const VOLS_M = [];
   vol(M.KIOSK_M.x0, M.KIOSK_M.x1, M.KIOSK_M.z0, M.KIOSK_M.z1, 4.5);                                         // subway kiosk head-house
   for (const t of M.CROWN_M.towers) vol(t.x0, t.x1, t.z0, t.z1, M.CROWN_M.towerH);                          // Crown face-towers
   for (const c of M.EXELON_M.cubes) vol(c.x - M.EXELON_M.sz / 2, c.x + M.EXELON_M.sz / 2, c.z - M.EXELON_M.sz / 2, c.z + M.EXELON_M.sz / 2, M.EXELON_M.h);  // Exelon cubes
-  vol(M.CLOUD_GATE_M.bean.x0, M.CLOUD_GATE_M.bean.x1, M.CLOUD_GATE_M.bean.z0, M.CLOUD_GATE_M.bean.z1, M.CLOUD_GATE_M.bean.h);  // the Bean (043)
+  // the Bean (043): the shell arches OVERHEAD (soffit >= ~3.5 inside the
+  // footprint) — only the two ground-contact lobes block a camera. The
+  // under-arch framing deliberately parks the camera inside the footprint.
+  for (const l of M.CLOUD_GATE_M.legs) vol(l.x - l.r, l.x + l.r, l.z - l.r, l.z + l.r, M.CLOUD_GATE_M.bean.h);
 }
 function camPosM(px, pz, f) {
   const down = Math.max(0, f.pitch), up = Math.max(0, -f.pitch);
@@ -690,11 +693,14 @@ addM('mp-mccormick-cafe', [
   { x: 78, z: 790, yaw: -0.79, pitch: 0.45, dist: 7 },
   { x: 76.5, z: 820, yaw: -2.0, pitch: 0.15, dist: 5 },
 ]);
+// 043: f0/f3 dists widened for the 1:1 shell (13 x 20 — the 040 dists were
+// authored against the raw osm plan and crop it); both cameras verified on
+// the plaza / open lawn air.
 addM('mp-bean', [
-  { x: 92, z: 806, yaw: -2.58, pitch: 0.06, dist: 8 },
+  { x: 92, z: 806, yaw: -2.58, pitch: 0.06, dist: 11 },
   { x: 87, z: 812, yaw: Math.PI, pitch: 0.06, dist: 7 },
   { x: 86.8, z: 797.7, yaw: -Math.PI / 2, pitch: 0.02, dist: 6 },
-  { x: 82, z: 790, yaw: 0.72, pitch: 0.06, dist: 7 },
+  { x: 82, z: 790, yaw: 0.72, pitch: 0.06, dist: 8.5 },
 ]);
 addM('mp-crown-fountain', [
   { x: 69.8, z: 884, yaw: Math.PI, pitch: 0.08, dist: 7 },

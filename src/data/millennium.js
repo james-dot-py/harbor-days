@@ -71,11 +71,16 @@ export const MCCORMICK_M = { x0: 57, x1: 76, z0: 772, z1: 826, y: -1.6, railX: 7
 
 // Cloud Gate on AT&T Plaza — toon HOMAGE (painted reflection, never
 // computed; copyright register). Long axis N-S; the plaza walks CONTINUOUS
-// UNDER the arch — colliders are the two leg pads at the z ends only.
+// UNDER the arch — colliders are the two ground-contact lobes only.
+// 1:1 OBJECT SCALE (13 x 20 x h 10, the real ballpark; task 043): the 040
+// rect was the raw 1:2-compressed osm plan — center (86.8, 797.7) kept.
+// archHalf: the walk-under arch's half-span along z (soffit hits 0 there);
+// the lobes sit just outboard of it.
 export const CLOUD_GATE_M = {
   plaza: { x0: 76, x1: 98, z0: 776, z1: 826 },   // walk quad
-  bean: { x0: 83.1, x1: 90.5, z0: 792.8, z1: 802.6, cx: 86.8, cz: 797.7, h: 10, axis: 'ns' },
-  legs: [{ x: 86.8, z: 794.2, r: 1.6 }, { x: 86.8, z: 801.2, r: 1.6 }],
+  bean: { x0: 80.3, x1: 93.3, z0: 787.7, z1: 807.7, cx: 86.8, cz: 797.7, h: 10, axis: 'ns' },
+  legs: [{ x: 86.8, z: 792.2, r: 2.2 }, { x: 86.8, z: 803.2, r: 2.2 }],
+  archHalf: 4.6,
 };
 
 // Crown Fountain — a walkable WET black-granite plaza (the film is visual;

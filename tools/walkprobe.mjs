@@ -599,12 +599,26 @@ for(const [label,x,z] of [
   ['Chase Promenade N',108,720],['Chase Promenade mid',108,800],['Chase Promenade S',108,880],
   ['Washington cross walk',66,766],['Madison cross walk',66,831],
   ['Bean plaza',92,806],['UNDER the Bean arch',86.8,797.7],
+  // 043: the walk THROUGH the arch stays continuous E-W across the whole
+  // bean footprint (colliders are the two contact lobes, builder-side only)
+  ['Bean arch W approach',78,797.7],['Bean under-arch W',83,797.7],
+  ['Bean under-arch E',91,797.7],['Bean arch E approach',96,797.7],
+  ['Bean N approach (plate line)',86.8,785.5],['Bean S approach',86.8,810],
   ['Crown plaza dry pavers',60,860],['Crown wet pool mid',69.8,864],
   ['seating bowl',147,777],['Great Lawn W',150,820],['Great Lawn SE',176,830],
   ['Lurie NE gate',174,848],['Seam boardwalk mid',159.5,862],['Lurie SW link',144,876],['Lurie south rim',150,882],
 ]) expect(`${label} (${x},${z}) walkable`,MP.walkableM(x,z),true);
 for(const [x,z] of [[55,800],[108,800],[86.8,797.7],[69.8,864],[150,820],[159.5,862]])
   expect(`grade y=0 at (${x},${z})`,MP.surfaceYM(x,z),0);
+
+console.log('\n--- Millennium: Bean geometry discipline (043) ---');
+{ const B=MP.CLOUD_GATE_M.bean, P=MP.CLOUD_GATE_M.plaza, legs=MP.CLOUD_GATE_M.legs;
+  expect('bean footprint inside the plaza walk quad',B.x0>P.x0&&B.x1<P.x1&&B.z0>P.z0&&B.z1<P.z1,true);
+  for(const l of legs) expect(`bean lobe (${l.x},${l.z}) inside the footprint`,l.x>B.x0&&l.x<B.x1&&l.z>B.z0&&l.z<B.z1,true);
+  // the E-W arch line at cz passes BETWEEN the lobe colliders with margin
+  expect('arch line clears both lobe colliders by >=0.8m',
+    legs.every(l=>Math.abs(B.cz-l.z)>=l.r+0.8),true);
+  expect('lobes sit outboard of the arch span',legs.every(l=>Math.abs(l.z-B.cz)>MP.CLOUD_GATE_M.archHalf),true); }
 
 console.log('\n--- Millennium: roads/cafe/planting are NOT walkable ---');
 for(const [label,x,z] of [

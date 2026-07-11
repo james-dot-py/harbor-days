@@ -191,3 +191,10 @@ cut becomes a revert task.
   red-line regular leans over — 'millennium park? locals just say the bean.'
   You surface at the top of the subway stair facing the Bean axis. The L now
   reaches three neighborhoods — Belmont ⇄ Addison ⇄ Monroe — task 042
+- THE BEAN is real, and the mirror is a painting: a 20-metre toon lozenge
+  wearing a hand-painted reflection — silver dusk sky above, the Michigan Ave
+  streetwall hanging UPSIDE-DOWN at its waist, a tiny painted crowd below.
+  Walk under the arch and the joke lands overhead: a marbled omphalos vortex
+  ringed by inverted toon Chicagoans, exactly the reflection you'd crane at
+  in the real one. A kid at the north lobe has it right — 'it's got a belly
+  button!!' — AT&T Plaza (86.8, 797.7) — task 043

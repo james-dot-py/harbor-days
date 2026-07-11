@@ -17,6 +17,7 @@ import { buildStreets } from './streets.js';
 import { buildArrival } from './arrival.js';
 import { buildStreetwall } from './streetwall.js';
 import { buildPromenade } from './promenade.js';
+import { buildCloudGate } from './cloudgate.js';
 
 const _r = mulberry32(0x4d0000 ^ M.SEED_M);
 export const grand = (a = 0, b = 1) => a + (b - a) * _r();
@@ -257,6 +258,7 @@ export function buildMillennium() {
   buildArrival();      // CTA subway stair kiosk + RED LINE pylon + station grate
   buildStreetwall();   // Michigan Ave cliff + Randolph giants + east/south backdrops
   buildPromenade();    // Chase allee trees + plinths + Exelon cubes + scenery
+  buildCloudGate();    // THE BEAN — Cloud Gate homage on AT&T Plaza (task 043)
   mergeCellStatic(millenniumRoot, 1e6);   // collapse static builder meshes; ONE z-band (compact, always fog-fully-inside, invisible from elsewhere)
   scene.add(millenniumRoot);
   registerCell({

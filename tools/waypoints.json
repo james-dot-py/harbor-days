@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-11T10:10:47.940Z",
+ "generated": "2026-07-11T11:36:20.690Z",
  "count": 90,
  "waypoints": [
   {
@@ -2144,7 +2144,7 @@
      "z": 806,
      "yaw": -2.58,
      "pitch": 0.06,
-     "dist": 8
+     "dist": 11
     },
     {
      "x": 87,
@@ -2165,10 +2165,10 @@
      "z": 790,
      "yaw": 0.72,
      "pitch": 0.06,
-     "dist": 7
+     "dist": 8.5
     }
    ],
-   "expectation": "A giant silver toon bean sits on square pavers with a painted skyline-and-crowd reflection wrapped around its belly; its arch opens walkably beneath, small figures cluster at its base, and the limestone cliff rises behind. (041 SHELL: the square-paver plaza and the limestone cliff behind must read; the Bean itself is deferred to 043 — judge ground + backdrop only, empty pad expected.)"
+   "expectation": "A giant silver toon bean sits on square pavers with a painted skyline-and-crowd reflection wrapped around its belly; its arch opens walkably beneath, small figures cluster at its base, and the limestone cliff rises behind."
   },
   {
    "id": "mp-crown-fountain",

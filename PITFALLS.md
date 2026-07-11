@@ -211,6 +211,13 @@ few turns to find; keep each to one line of symptom + fix.
   the finger deck's height looked the same). Verify height/vertical edits with a
   CLOSE, LOW, near-level framing (dist ≤ 6, pitch ≈ 0) where the deck-vs-grade
   seam fills the frame; a wide zone overview won't show a sub-metre drop.
+- baseline.png goes STALE as accepted tasks accumulate: by 043 the spawn view
+  diffed 2.1% against the task-023 capture with NO regression present — inherited
+  drift reads identically to a fresh one. Triage without git stash (blocked on this
+  host): two same-code shots give the temporal noise floor (~0.1%); comment out the
+  new feature's wiring lines and diff WITH vs WITHOUT (043 measured 0.135% ≈ noise).
+  Then regen the baseline from a canary-verified own-vite shot + [baseline-regen]
+  commit so the next task diffs clean.
 - Extending a MULTI-destination ride (Red Line 2→3 stops, task 042): arrival
   flavor keys off the DESTINATION, but the boarding pull-in keys off the
   ORIGIN — the 2-stop code conflated them (`dest==='lakefront'` was a stand-in
