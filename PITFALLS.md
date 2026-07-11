@@ -281,3 +281,28 @@ few turns to find; keep each to one line of symptom + fix.
   Fix: stand BESIDE the subject and aim yaw at a background point so the subject
   falls ~25-40° off the view axis — the mayor stays centred on empty ground and
   the subject reads clear to one side.
+- A HARD CELL leaks into the lakefront WATER fallback: main.js isWater() knows
+  only LAND/walkRects/beach, so ANY non-walkable spot in a hard cell (Wrigleyville/
+  Millennium planting, the Pritzker stage apron) reads as open water and MOUNTS
+  THE JETSKI — the owner "sank through downtown and rode a jetski" (issue 017,
+  task 048). Don't chase individual holes: guard the CLASS — `isWater()` returns
+  false whenever `cellWalk()` is non-null, so a hard cell's non-walkable = BLOCKED,
+  never water. A cell then answers walkability definitively everywhere in its
+  clamp; a 2 m grid sweep (tools/mp-gridsweep.mjs, non-walkable cell with ≥6/8
+  walkable neighbours) enumerates any remaining interior gaps to close by data.
+- Baked "reclining figure" crowds read as JELLYBEANS, not people: pritzker's
+  merged sphere-lump loungers (torso+head+knees spheres per clothing color) looked
+  like colored capsules on a blanket — the owner flagged "must be REAL PEOPLE"
+  (task 048/0d). The lawnlife REGISTER is the fix and it's cheap: createChibi →
+  poseSeated (copy the helper) → registerBumpable(group,parts,lines) → bakeChibiRig
+  = a posed chibi that reads as a person, opes up close, and folds to ONE draw.
+  A few makeNPC(staticLod) standees add live rigs near + 1-draw baked twins far
+  ("baked LOD twins only at distance"). Register the bumpable BEFORE baking (the
+  anchor is captured at registration, then reads only group.matrixWorld).
+- Piecewise-per-NODE deck planks JACKNIFE at the segment joints (BP bridge
+  "treads not following the serpentine", task 048/0c): placing planks with each
+  straight piece's constant quaternion snaps their yaw at every node. Fix: sample
+  a THREE.CatmullRomCurve3 through the nodes and orient each tread by
+  getTangentAt(t) (basis: tangent, world-up-projected-perp, their cross) — the
+  treads sweep smoothly around the curve. Keep the plank half-span ≤ inner-parapet
+  lateral so no tread clips the balustrade on the turns.

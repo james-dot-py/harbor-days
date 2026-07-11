@@ -129,21 +129,28 @@ export function buildBridge() {
   root.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(parapetGeos, false), parapetMat));
 
   // ==================== 2. WOOD PLANK RIBBON ==========================
-  // Thin dark cross-seams across the deck, perpendicular to travel, ~1.3 m
-  // apart along the ramp + segs + into the crest, sitting 0.04 proud of the
-  // deck. Subtle; folds to +0 (shared wood color, merged by mergeCellStatic).
+  // Thin dark cross-seams across the deck that FOLLOW THE SERPENTINE: a
+  // Catmull-Rom spline through the ramp/rise/crest nodes (NODE 0..3 only, so
+  // the treads stop AT the walkable crest ~x205,z810 and never spill onto the
+  // closed east landing). Treads are placed at ~1.3 m arc-length intervals and
+  // each is oriented by the LOCAL curve tangent at its station — the seams
+  // sweep smoothly around the curve instead of jacknifing at the node joints.
+  // 0.04 proud of the deck. Subtle; folds to +0 (shared wood color, merged).
   const plankGeo = new THREE.BoxGeometry(0.1, 0.06, 2 * halfW - 0.1);   // X thin (travel), Z span (across deck)
-  for (let p = 0; p < 3; p++) {                   // pieces 0,1,2 = ramp + rise + crest
-    const f = pieceFrame(NODES[p], NODES[p + 1]);
-    const nP = Math.max(2, Math.round(f.len3 / 1.3));
-    const q = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(f.ex, f.ey, f.ez));
-    for (let i = 0; i < nP; i++) {
-      const t = (i + 0.5) / nP;
-      const base = new THREE.Vector3(NODES[p].x + f.dx * t, NODES[p].y + f.dy * t, NODES[p].z + f.dz * t)
-        .addScaledVector(f.ey, 0.04);
-      const plank = new THREE.Mesh(plankGeo, woodMat);
-      plank.position.copy(base); plank.quaternion.copy(q); root.add(plank);
-    }
+  const deckCurve = new THREE.CatmullRomCurve3(
+    NODES.slice(0, 4).map(n => new THREE.Vector3(n.x, n.y, n.z)), false, 'catmullrom', 0.5);
+  const deckLen = deckCurve.getLength();
+  const nP = Math.max(2, Math.round(deckLen / 1.3));
+  const worldUp = new THREE.Vector3(0, 1, 0);
+  for (let i = 0; i < nP; i++) {
+    const t = (i + 0.5) / nP;
+    const p = deckCurve.getPointAt(t);                                  // arc-length station on the curve
+    const fwd = deckCurve.getTangentAt(t).normalize();                 // local travel dir (span is perp to this)
+    const up = worldUp.clone().addScaledVector(fwd, -worldUp.dot(fwd)).normalize();  // deck-normal (pitches on ramp)
+    const lat = new THREE.Vector3().crossVectors(fwd, up);             // across the deck = plank long (Z) axis
+    const q = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(fwd, up, lat));
+    const plank = new THREE.Mesh(plankGeo, woodMat);                    // box X->fwd (thin), Y->up, Z->lat (span)
+    plank.position.copy(p.addScaledVector(up, 0.04)); plank.quaternion.copy(q); root.add(plank);
   }
 
   // ============= 3. EAST GATE + HEDGE OVERLOOK + TREETOPS ==============

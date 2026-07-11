@@ -235,3 +235,13 @@ cut becomes a revert task.
   Wrigley Square hums with warm air and lets out a muffled departure chime
   every minute or so — and the pigeons pecking it startle off in a flap and
   resettle. — Wrigley Square grate (72, 709) — task 047
+- The Great Lawn is full of REAL people now: picnickers seated on checked
+  blankets with coolers, sunbathers and loungers on towels, and a couple
+  standing to watch the stage — all posed chibi rigs that bump and "ope" up
+  close, baked to 1 draw with live LOD standees, so the pavilion always plays
+  to a crowd instead of a field of colored lumps. — Pritzker Great Lawn
+  (~140, 815) — task 048
+- Take a load off by the rill: the Lurie Seam boardwalk now has a real wood
+  edge bench, so sitting seats the mayor ON the boardwalk lip with his feet
+  dangling over the water instead of hovering mid-plank. — Lurie Garden Seam
+  (~158, 860) — task 048

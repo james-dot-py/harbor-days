@@ -23,3 +23,15 @@
   the two reported.
 - route: task 048 (polish), owner punch-list item (a) — top priority of the
   pass.
+
+- RESOLVED (task 048): fixed the CLASS in `src/main.js` — `isWater()` now
+  returns false whenever a hard cell is active (`cellWalk()` non-null), so a
+  downtown coverage gap is BLOCKED, never open water; a pocket cell can never
+  mount the jetski regardless of which spot has a hole. Added `tools/mp-gridsweep.mjs`
+  (2 m grid sweep of the whole cell): after the guard the only interior "holes"
+  are the intended BP-ramp buffer (already asserted non-walkable in walkprobe;
+  closing them would create an elevator). Closed the one genuine 2 m seam at the
+  Lurie NE gate↔Columbus-rim corner with a connector walk quad. walkprobe gained
+  assertions for the two owner-reported spots (blocked, not water) + the closed
+  seam (411 pass / 0 fail). Verified both owner coords: (168,866) planting =
+  blocked; (144.7,758) bowl edge = walkable; stage apron north of it = blocked.

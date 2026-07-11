@@ -107,7 +107,12 @@ const jsk={on:false,grp:null,wadeT:0,bobT:0,lean:0,cd:0,splashT:0};
   const bar=new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.035,0.56,6),toon(0x2a2d33));bar.rotation.z=Math.PI/2;bar.position.set(0,0.95,0.38);g.add(bar);
   g.visible=false;scene.add(g);jsk.grp=g;
 }
-function isWater(x,z){return x>20&&!pip(x,z,LAND)&&!onRect(x,z)&&beachH(x,z)===null;}
+// A hard cell (Wrigleyville, Millennium) owns walkability ENTIRELY: not-walkable
+// there means BLOCKED, never open water. The jetski/water fallback belongs to the
+// lakefront alone — guard the CLASS so a downtown coverage gap can never mount the
+// jetski (issue 017), no matter which spot has the hole. cellWalk() is null only
+// on the lakefront, where the historic water logic runs unchanged.
+function isWater(x,z){return !cellWalk()&&x>20&&!pip(x,z,LAND)&&!onRect(x,z)&&beachH(x,z)===null;}
 function splash(k){
   if(game.tNow-jsk.splashT<0.15)return;   // throttle — transitions can cluster
   jsk.splashT=game.tNow;

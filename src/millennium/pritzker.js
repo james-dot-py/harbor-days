@@ -51,8 +51,6 @@ const COL = {
   hedge:   0x496b33,   // lawn-edge boxwood hedge (the pad 046's Lurie hedge rises from)
   planter: 0x8d8578,   // limestone planter curb
 };
-const BLANKET = [0xcf584f, 0x4d78ad, 0xd7b046, 0xd8d2c4, 0x6ea38c];  // picnic-blanket checks
-const LOUNGE  = [0x4d78ad, 0xcf6f5a, 0xe0b84a, 0x7d5aa0, 0x3f9e8c];  // lounging-figure clothing (warm pops on green, no grey/green blend)
 
 // brushed-steel band texture (subtle horizontal shingle lines — sells the
 // "brushed-steel petals" read without chasing panel accuracy). One shared
@@ -311,10 +309,11 @@ export function buildPritzker() {
   emitInstanced(podGeo, pods);
   emitInstanced(cableGeo, cables);
 
-  // ==================== 6. GREAT LAWN LIFE =============================
-  // mowed-stripe tint bands (thin overlay quads, alternating greens), the
+  // ==================== 6. GREAT LAWN (stripes + shoulder) =============
+  // mowed-stripe tint bands (thin overlay quads, alternating greens) + the
   // lawn-edge hedge/planter line (the room's shoulder — 046's Lurie hedge
-  // rises from the south run), scattered picnic blankets + lounging figures.
+  // rises from the south run). The lawn CROWD (blankets + real posed-chibi
+  // people) is owned by the millennium-lawnlife pack (task 048 item 0d).
   const stripeGeo = new THREE.PlaneGeometry(T.x1 - T.x0 + 24, 3.4, 8, 1);
   for (let z = 790; z < 846; z += 6.8) {
     const s = new THREE.Mesh(stripeGeo, toon((z / 6.8 | 0) % 2 ? COL.stripeB : COL.stripeA));
@@ -329,39 +328,7 @@ export function buildPritzker() {
   hedgeRun(116.5, 118, 790, 846);                 // west shoulder
   hedgeRun(116.5, 168, 845, 846.5);               // south shoulder (the Lurie-hedge pad for 046)
   hedgeRun(168, 169.5, 812, 846);                 // SE return (clear of the BP ramp mouth)
-
-  // picnic blankets (instanced flat quads per color) + reclining figures.
-  // Cluster figures on the blankets; keep clear of trellis posts and the BP
-  // approach. Reclining figure = merged torso + head + bent-knee lump.
-  const blanketGeo = new THREE.PlaneGeometry(2.6, 2.2);
-  const figGeo = BufferGeometryUtils.mergeBufferGeometries([
-    (() => { const g = new THREE.SphereGeometry(0.5, 8, 6); g.scale(1.0, 0.66, 1.5); g.translate(0, 0.4, 0.15); return g; })(),   // reclining torso (chunkier)
-    (() => { const g = new THREE.SphereGeometry(0.3, 8, 6); g.translate(0, 0.66, -0.72); return g; })(),                          // head (propped up, bigger)
-    (() => { const g = new THREE.SphereGeometry(0.34, 7, 5); g.scale(1.0, 0.85, 0.8); g.translate(0, 0.36, 0.9); return g; })(),  // bent knees
-  ], false);
-  const blankets = new Map(), figs = new Map();
-  const push = (map, key, rec) => { let a = map.get(key); if (!a) map.set(key, a = []); a.push(rec); };
-  const postClear = (x, z) => Math.min(Math.abs(x - T.x0), Math.abs(x - T.x1)) > 2.5 || zPost(0) > z || z > zPost(bays - 1);
-  let placed = 0;
-  for (let tries = 0; tries < 60 && placed < 13; tries++) {
-    const x = rnd(122, 165), z = rnd(795, 842);
-    if (x > 166 && z > 810) continue;              // clear of the BP approach corner
-    if (!postClear(x, z)) continue;
-    const bc = BLANKET[(rr() * BLANKET.length) | 0], yaw = rnd(0, 6.28);
-    push(blankets, bc, { pos: [x, 0.02, z], yaw, color: bc });
-    const nf = 1 + ((rr() * 3) | 0);
-    for (let k = 0; k < nf; k++) {
-      const fc = LOUNGE[(rr() * LOUNGE.length) | 0];
-      push(figs, fc, { pos: [x + rnd(-0.8, 0.8), 0, z + rnd(-0.8, 0.8)], yaw: rnd(0, 6.28), color: fc });
-    }
-    placed++;
-  }
-  for (const [c, recs] of blankets) emitInstanced(blanketGeo, recs.map(r => ({ ...r, rx: -Math.PI / 2 })));
-  // figures are static (chunky, folded per clothing color)
-  for (const [c, recs] of figs) {
-    const geos = recs.map(r => { const g = figGeo.clone(); const m = new THREE.Matrix4();
-      m.compose(new THREE.Vector3(...r.pos), new THREE.Quaternion().setFromEuler(new THREE.Euler(0, r.yaw, 0)), new THREE.Vector3(1, 1, 1));
-      g.applyMatrix4(m); return g; });
-    root.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(geos, false), toon(c)));
-  }
+  // NOTE: the lawn CROWD (picnic blankets + real posed-chibi people) lives in
+  // packs/millennium-lawnlife.js (task 048 item 0d) — this section is stripes
+  // + hedge only, so no local-rng scatter runs after the seats above.
 }

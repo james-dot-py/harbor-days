@@ -125,12 +125,15 @@ export const LURIE_M = {
   hedgeW: { x0: 124, x1: 129, z0: 846, z1: 876, h: 4.5 },
   gateNE: { x0: 170, x1: 179, z0: 843, z1: 852 },        // walk quad (hedge break)
   seam: { a: [175, 849.5], b: [144, 874], halfW: 2.5,    // boardwalk walk quad (rill beneath)
-    // sittable edge — feet dangle over the rill (the sanctuary-deck pattern:
-    // addSitSpot in packs/millennium.js; y 0, on the boardwalk seg). ON the
-    // walk (offset 0 from centre) so walkprobe proves them walkable.
+    // sittable edge — the mayor sits ON the boardwalk-edge bench (lurie.js
+    // builds a real wood bench along the −halfW rail here), feet dangling over
+    // the rill (task 048 item 0b: the old centre-of-walk sits seated on nothing).
+    // Seats sit at lateral −2.15 (0.35 inboard of the ±halfW rail) so they stay
+    // INSIDE the seg walk quad — walkprobe still proves them walkable at y0 —
+    // and face straight out over the rill (ry ≈ −2.47 = the −halfW normal).
     sits: [
-      { x: 162.6, z: 859.3, ry: -2.22 },
-      { x: 155.8, z: 864.7, ry: -2.60 },
+      { x: 161.27, z: 857.61, ry: -2.47 },
+      { x: 154.47, z: 863.01, ry: -2.47 },
     ] },
   linkSW: { x0: 138, x1: 149, z0: 870, z1: 880 },        // walk quad to the south rim
   southRim: { x0: 130, x1: 182, z0: 878, z1: 886 },      // walk quad along Monroe
@@ -247,6 +250,7 @@ export const WALK_M = [
   { x0: 168, x1: 186, z0: 812, z1: 846, y: 0 },   // Great Lawn SE
   { x0: LURIE_M.gateNE.x0, x1: LURIE_M.gateNE.x1,
     z0: LURIE_M.gateNE.z0, z1: LURIE_M.gateNE.z1, y: 0 },           // Lurie NE hedge gate
+  { x0: 179, x1: 182, z0: 843, z1: 853, y: 0 },   // gate↔Columbus-rim corner link (048 gridsweep: closes the 2 m seam at ~180,848)
   segQ(LURIE_M.seam.a, LURIE_M.seam.b, LURIE_M.seam.halfW, 0, 0),   // the Seam boardwalk
   { x0: LURIE_M.linkSW.x0, x1: LURIE_M.linkSW.x1,
     z0: LURIE_M.linkSW.z0, z1: LURIE_M.linkSW.z1, y: 0 },           // seam SW link

@@ -150,12 +150,30 @@ export function buildLurie() {
     plank.position.set(x, 0.05, z); plank.rotation.y = yaw;
     root.add(plank);
   }
-  // sittable edge: a LOW wood-beam curb along BOTH long edges (offset ±halfW).
-  // Kept low (0.35 m) so it never blocks the down-the-rill camera framings.
-  for (const s of [hw, -hw]) {
-    const beam = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.35, len - 0.6), railMat);
-    beam.position.set(cx + s * px, 0.175, cz + s * pz); beam.rotation.y = yaw;
+  // sittable edge: the +halfW (NE) edge keeps a LOW wood-beam curb (0.35 m) so
+  // it never blocks the down-the-rill camera framings; the −halfW (SW) edge is
+  // a REAL backless wood bench (task 048/0b) so the mayor sits ON it with feet
+  // dangling over the rill — seat top y≈0.42 matches sitOnBench's 0.34 hip lift,
+  // and the whole bench stays ≤0.5 m so it clears the mp-lurie framings.
+  const runL = len - 0.6;
+  // +halfW edge: low curb (unchanged read)
+  {
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.35, runL), railMat);
+    beam.position.set(cx + hw * px, 0.175, cz + hw * pz); beam.rotation.y = yaw;
     root.add(beam);
+  }
+  // −halfW edge: backless bench — a 0.30-deep seat plank centered at lateral
+  // −2.2 (spans −2.05…−2.35, so both sit spots at −2.15 land ON it), seat top
+  // y≈0.42; an outboard skirt/apron board drops to y0 under the seat's outer
+  // edge so it reads as a bench, not a floating plank.
+  {
+    const seatL = -2.2, skirtL = -2.32;
+    const seat = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.10, runL), railMat);
+    seat.position.set(cx + seatL * px, 0.37, cz + seatL * pz); seat.rotation.y = yaw;
+    root.add(seat);
+    const skirt = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.34, runL), railMat);
+    skirt.position.set(cx + skirtL * px, 0.17, cz + skirtL * pz); skirt.rotation.y = yaw;
+    root.add(skirt);
   }
 
   // ============ 2+3. PLANTING — salvia river + prairie masses ============

@@ -631,11 +631,27 @@ for(const [label,x,z] of [
   ['streetwall zone',20,800],['east backdrop zone',220,800],['giants band',100,686],
 ]) expect(`${label} (${x},${z}) NOT walkable`,MP.walkableM(x,z),false);
 
-console.log('\n--- Millennium: Lurie Seam boardwalk sittable edge (046) ---');
+console.log('\n--- Millennium: Lurie Seam boardwalk sittable edge (046; 048 edge bench) ---');
 for(const s of MP.LURIE_M.seam.sits){
   expect(`sit spot (${s.x},${s.z}) on the boardwalk walkable`,MP.walkableM(s.x,s.z),true);
   expect(`sit spot (${s.x},${s.z}) at grade y0`,MP.surfaceYM(s.x,s.z),0);
 }
+
+// ===== issue 017 / task 048 item 0a — the cell answers walkability DEFINITIVELY.
+// The main.js CLASS guard (isWater false while a hard cell is active) means a
+// non-walkable spot here is BLOCKED, never the jetski/water fallback; the data
+// layer just has to be unambiguous everywhere the owner probed. mp-gridsweep.mjs
+// enumerates interior holes (only the intended BP-ramp buffer remains).
+console.log('\n--- Millennium: walkability holes closed (issue 017) ---');
+// the two owner-reported spots are DEFINITIVELY non-walkable (planting / stage
+// apron) — with the class guard that means "blocked", never "fall to jetski".
+expect('jetski-fallback spot (168,866) blocked, not walkable',MP.walkableM(168,866),false);
+expect('stage apron just N of the bowl (144.7,757) blocked',MP.walkableM(144.7,757),false);
+expect('bowl edge the owner stood on (144.7,758) still walkable',MP.walkableM(144.7,758),true);
+// the Lurie NE gate↔Columbus-rim corner seam is closed (was a 2 m hole)
+expect('Lurie NE corner link (180,848) walkable',MP.walkableM(180,848),true);
+expect('Lurie NE corner link (180,850) walkable',MP.walkableM(180,850),true);
+expect('Lurie NE corner link at grade y0',MP.surfaceYM(180,848),0);
 
 console.log('\n--- Millennium: BP deck — ramp-only elevated access, crest over Columbus ---');
 { const yA=MP.surfaceYM(177,796);
