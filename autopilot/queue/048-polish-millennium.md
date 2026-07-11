@@ -5,7 +5,24 @@ type: polish
 turns: 120
 title: Millennium Park POLISH — art-director pass, issue burn-down, budgets, both inputs
 acceptance: >
-  The neighborhood is sign-off ready: (1) A FULL fresh
+  OWNER PUNCH LIST FIRST (2026-07-11 playtest, exact coords via the dbg HUD;
+  refs/millennium-park/OWNER-PHOTOS.md logs them): (0a) WALKABILITY HOLES —
+  issue 017, TOP PRIORITY: fall-through-to-jetski at (168.0, 866.0), the
+  Pritzker STAGE falls through at (144.7, 758.0), and the owner says "quite
+  a few places" — fix the CLASS per the issue: the cell's walkable() answers
+  definitively everywhere inside its clamp; hard cells must NEVER reach the
+  jetski/water fallback in main.js (guard the class, not the spots); then a
+  ~2 m grid sweep of the entire cell to enumerate and close EVERY hole, not
+  just the two reported. (0b) INVISIBLE BENCH: sitting by the rill at
+  (155.8, 864.7) seats the mayor on nothing — give that sit spot real seat
+  geometry (the Lurie boardwalk-edge bench) or move it onto existing
+  furniture. (0c) BP BRIDGE STAIRS at (188.5, 798.0): the tread rectangles
+  are jacknifed straight boxes — each tread must follow the serpentine
+  (derive tread yaw from the bridge curve's tangent at its station; nothing
+  clips the balustrade). (0d) the Great Lawn crowd at (138.4, 824.2) must be
+  REAL PEOPLE — full chibi NPCs in the lawnlife register (picnics,
+  sunbathers, loungers) that bump and ope up close; baked LOD twins only at
+  distance; budget-aware. THEN the standard pass: (1) A FULL fresh
   `node tools/walkthrough.mjs --area millennium` run; personally READ every
   PNG; judge every mp-* waypoint against its expectation + /art-director +
   refs/millennium-park/; fix everything short of green — framing traps
