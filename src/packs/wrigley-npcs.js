@@ -25,6 +25,7 @@
 //  NPC groups stay global — makeNPC owns them and the framework culls them.
 // =====================================================================
 import * as THREE from 'three';
+import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { onWorldReady, registerUpdate, addInteraction, holdItem, toast,
          makeNPC, state } from '../framework.js';
 import { camera, toon, bmat, lerpAngle, mulberry32, glowTex } from '../core.js';
@@ -226,7 +227,11 @@ onWorldReady(player => {
   wheels.instanceMatrix.needsUpdate = true; wrigleyRoot.add(wheels); _q.identity();
   const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 3.0, 8), toon(0x8a8a8a)); pole.position.set(CX, 1.6, CZ); wrigleyRoot.add(pole);
   const umb = new THREE.Mesh(new THREE.ConeGeometry(1.4, 0.75, 12), bmat(0xffffff, { map: cartStripeTex() })); umb.position.set(CX, 3.1, CZ); wrigleyRoot.add(umb);
-  const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.48), bmat(0xffffff, { map: cartSignTex(), side: THREE.DoubleSide, transparent: true }));
+  // lone DoubleSide plane reads mirrored from behind (PITFALLS); merge front +
+  // π-rotated back into one FrontSide mesh so each face is upright (+0 draws).
+  const signG = new THREE.PlaneGeometry(1.1, 0.48);
+  const sign = new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries([signG, signG.clone().rotateY(Math.PI)], false),
+    bmat(0xffffff, { map: cartSignTex(), transparent: true }));
   sign.position.set(CX, 1.72, CZ + 0.58); wrigleyRoot.add(sign);
   const hdVendor = makeNPC({ x: CX, z: CZ - 1.5, ry: 0, wander: 0, staticLod: true, name: 'hotdog',
     palette: { suit: 0xe8e2d0, pants: 0x333a44, skin: 0xe0a878, hair: 0x2a2018, face: true },   // setFace at runtime → keep live eyes

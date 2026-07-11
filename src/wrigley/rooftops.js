@@ -353,10 +353,17 @@ function buildClimbable(b) {
   strand(b.x0 + 0.4, 10.5, b.z1 - 0.3, b.x1 - 0.4, 10.5, b.z1 - 0.3, 9, 0.26);
   strand(b.x0 + 0.4, 10.5, b.z0 + 0.35, b.x1 - 0.4, 10.5, b.z0 + 0.35, 7, 0.22);
 
-  // --- sandwich board at the sidewalk stair gate ---
-  const sX = -204, sZ = -572.4;
-  const panel = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.66), bmat(0xffffff, { map: sandwichTex(), side: THREE.DoubleSide }));
-  panel.position.set(sX, 0.62, sZ); panel.rotation.x = 0.1; atlasPlane(panel, false);   // sandwich board -> shared wrigley atlas
+  // --- sandwich board at the sidewalk stair gate: A-FRAME of two panels so
+  //     neither face shows the mirrored back (PITFALLS lone-DoubleSide rule).
+  //     Each panel leans in via its own group -> tops meet at a peak; both fold
+  //     into the shared wrigley atlas (+0 draws). ---
+  const sX = -204, sZ = -572.4, stex = sandwichTex();
+  for (const face of [0, Math.PI]) {                                                     // south-reading + north-reading leaves
+    const g = new THREE.Group(); g.position.set(sX, 0.62, sZ); g.rotation.y = face;
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.66), bmat(0xffffff, { map: stex, side: THREE.DoubleSide }));
+    p.rotation.x = 0.1; p.position.z = 0.03; g.add(p); g.updateMatrixWorld(true);
+    atlasPlane(p, false);
+  }
   seg(sX - 0.34, 0.98, sZ - 0.02, sX - 0.4, 0, sZ + 0.28, 0.05, COL.dark);
   seg(sX + 0.34, 0.98, sZ - 0.02, sX + 0.4, 0, sZ + 0.28, 0.05, COL.dark);
   collide(sX, sZ, 0.45);

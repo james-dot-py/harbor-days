@@ -21,6 +21,7 @@
 //  every gain ramped.
 // =====================================================================
 import * as THREE from 'three';
+import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { onWorldReady, registerUpdate, addInteraction, toast, makeNPC, state,
          getAudioCtx, createChibi, tintChibiLimb } from '../framework.js';
 import { toon, bmat, mulberry32, clamp, lerpAngle, game } from '../core.js';
@@ -172,8 +173,12 @@ onWorldReady(player => {
     palette: { suit: 0x2f6bb0, pants: 0x2a2e36, skin: pick(SKINS), hair: pick(HAIRS) },
     lines: ['programs! scorecards!', "can't tell your Hendricks from your Hottovy without one, ope",
       'get ya program — line-ups right here', 'two bits, help the cause'] });
-  { const prog = new THREE.Mesh(new THREE.PlaneGeometry(0.28, 0.38),
-      bmat(0xffffff, { map: programTex(), side: THREE.DoubleSide }));
+  // held + waved so BOTH faces are seen: a lone DoubleSide plane reads mirrored
+  // from behind (PITFALLS). Merge front + π-rotated back into one FrontSide mesh
+  // so each face is upright (stays one mesh -> +0 draws).
+  { const pg = new THREE.PlaneGeometry(0.28, 0.38);
+    const prog = new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries([pg, pg.clone().rotateY(Math.PI)], false),
+      bmat(0xffffff, { map: programTex() }));
     prog.position.set(0, -0.02, 0.02); hawker.parts.handR.add(prog); }
 
   // ================================================================== //

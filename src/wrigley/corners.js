@@ -48,6 +48,15 @@ function plane(tex, x, y, z, ry, w, h, alpha, rx) {
   m.position.set(x, y, z); m.rotation.set(rx || 0, ry || 0, 0);
   atlasPlane(m, !!alpha);
 }
+// FREE-STANDING sign: a lone atlas plane (atlas is DoubleSide) reads MIRRORED
+// from behind (PITFALLS). Emit a back-to-back pair 0.06 m apart, each facing
+// out with the same texture, so the near plane occludes the far plane's mirror
+// (village.js twoSided rule). Both fold into the shared atlas (+0 draws).
+function plane2(tex, x, y, z, ry, w, h, alpha) {
+  const nx = Math.sin(ry), nz = Math.cos(ry);
+  plane(tex, x + nx * 0.03, y, z + nz * 0.03, ry, w, h, alpha);
+  plane(tex, x - nx * 0.03, y, z - nz * 0.03, ry + Math.PI, w, h, alpha);
+}
 // local offset (lx,lz) under rotation.y = th -> world delta (matches village yrot)
 const yrot = (lx, lz, th) => [lx * Math.cos(th) + lz * Math.sin(th), -lx * Math.sin(th) + lz * Math.cos(th)];
 
@@ -227,10 +236,10 @@ function buildSportsWorld() {
   // --- sidewalk merch racks ON the Addison S sidewalk, just outside the door ---
   // (IN the walk corridor -> colliders; near the NE/chamfer door)
   box(1.3, 0.85, 0.8, BASE, -211.5, 0.45, -386.6, 0);                                    // cap bin
-  plane(merchSignTex('CUBS', 'HATS $10', '#0e4c92', '#c0271f'), -211.5, 1.15, -386.18, Math.PI, 1.1, 0.55, false);
+  plane2(merchSignTex('CUBS', 'HATS $10', '#0e4c92', '#c0271f'), -211.5, 1.15, -386.18, Math.PI, 1.1, 0.55, false);
   collide(-211.5, -386.6, 0.75);
   box(1.0, 1.4, 0.6, DARK, -207.8, 0.7, -386.9, 0);                                       // t-shirt rack post box
-  plane(merchSignTex('TEES', '$20', '#c0271f', '#0e4c92'), -207.8, 1.65, -386.58, Math.PI, 0.9, 0.5, false);
+  plane2(merchSignTex('TEES', '$20', '#c0271f', '#0e4c92'), -207.8, 1.65, -386.58, Math.PI, 0.9, 0.5, false);
   collide(-207.8, -386.9, 0.6);
 }
 

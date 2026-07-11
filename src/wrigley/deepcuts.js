@@ -14,6 +14,7 @@
 // Draw-call discipline: 7 total (4 unique boards + 3 InstancedMeshes).
 // =====================================================================
 import * as THREE from 'three';
+import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { toon, bmat, mulberry32 } from '../core.js';
 import { onWorldReady, registerUpdate, state } from '../framework.js';
 import { activeCell } from '../cells.js';
@@ -121,8 +122,13 @@ function instMesh(geo, mat, items) {
   });
   m.instanceMatrix.needsUpdate = true; wrigleyRoot.add(m); return m;
 }
-function board(w, h, x, y, z, yaw, tex) {                 // one textured plane (bmat + canvas)
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bmat(0xffffff, { map: tex, side: THREE.DoubleSide }));
+// A free-standing board's DoubleSide back reads MIRRORED (PITFALLS: lone
+// DoubleSide canvas plane). Merge the front quad with a π-rotated back quad into
+// ONE FrontSide geometry so each face shows upright text and the back-face is
+// culled — stays ONE draw call (+0 vs the old single plane).
+function twoFaceGeo(geo) { return BufferGeometryUtils.mergeBufferGeometries([geo, geo.clone().rotateY(Math.PI)], false); }
+function board(w, h, x, y, z, yaw, tex) {                 // two-faced textured board (no mirrored back)
+  const m = new THREE.Mesh(twoFaceGeo(new THREE.PlaneGeometry(w, h)), bmat(0xffffff, { map: tex }));
   m.position.set(x, y, z); m.rotation.y = yaw; wrigleyRoot.add(m); return m;
 }
 
@@ -208,7 +214,7 @@ export function buildDeepcuts() {
     lamps.map((l, i) => ({ pos: [l.px, 5.2, l.pz], yaw: i < nAddison ? Math.PI / 2 : clarkYaw })));
 
   // ---- 5. HIT IT HERE bullseye on waveland[2]'s Waveland-facing parapet ----
-  const bull = new THREE.Mesh(new THREE.CircleGeometry(0.7, 32), bmat(0xffffff, { map: bullseyeTex(), side: THREE.DoubleSide }));
+  const bull = new THREE.Mesh(twoFaceGeo(new THREE.CircleGeometry(0.7, 32)), bmat(0xffffff, { map: bullseyeTex() }));  // back-to-back, no mirror
   bull.position.set(-201.5, 11.0, -574.4); wrigleyRoot.add(bull);
 
   // self-registered hoist update (cell-gated inside update)
