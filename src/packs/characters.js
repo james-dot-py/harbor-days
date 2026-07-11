@@ -4,8 +4,10 @@
 //  bubbles + distance culling) with CUSTOM personal lines, plus a simple
 //  hand-held prop and, where it adds life, a per-frame re-posed animation.
 //
-//    * MALÖRT GUY   (156,90, on the rocks) — holds a little amber bottle,
-//      offers you a taste of the burnt-bandaid stuff.
+//    * MALÖRT GUY   (156,90, on the rocks) — holds a little amber bottle and
+//      now SERVES: press E / ✋ for a straight Malört shot (the swig routine
+//      shared with the Handshake regular). A Jeppson's bottle + a case of Old
+//      Style sit on the step beside him (task 031 / issue 013).
 //    * BIRDER       (92,−349, sanctuary gate) — binoculars up, slowly
 //      scanning the treeline for a scarlet tanager.
 //    * WEDDING PARTY (88,116, AIDS Garden) — bride (white) + groom (tux)
@@ -28,12 +30,15 @@
 //
 //  Draw calls added: bottle(1) binoculars(1) veil(1) camera(1) sax(8: body×2,
 //  U-bow, bell, neck, mouthpiece, 3 keys) sax-case(1) chair-legs(1)
-//  chair-seat(1) chair-back(1) megaphone(1).
+//  chair-seat(1) chair-back(1) megaphone(1). Malört-guy stash (task 031):
+//  case(1) 2 cans(2) bottle body/neck/cap/label(4) + the guy's live-eyes(1) —
+//  all regular meshes, frustum-culled, so zero GLOBAL cost (only in his view).
 // =====================================================================
 import * as THREE from 'three';
-import { onWorldReady, registerUpdate, makeNPC, getAudioCtx } from '../framework.js';
+import { onWorldReady, registerUpdate, makeNPC, getAudioCtx, addInteraction } from '../framework.js';
 import { scene, toon, bmat, clamp } from '../core.js';
 import { coastQuery, tierAt, beachH } from '../coast.js';
+import { pourMalort, oldStyleTex } from './malort.js';   // shared Malört swig + Old Style label (task 031)
 
 const SAX_TEST = /[?&]saxtest=1/.test(location.search);
 
@@ -49,6 +54,43 @@ function groundY(x,z){
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _v = new THREE.Vector3(),
       _s = new THREE.Vector3(1,1,1), _e = new THREE.Euler();
 
+// ---- the Malört guy's stash (task 031): a Jeppson's bottle + a case of Old
+// Style on the terrace step beside him — the real Chicago-handshake pairing,
+// and a wink toward the Handshake regular down the rocks. All fixed-coord
+// (no rng) and surface-queried via groundY (the rocks are analytic — coastQuery
+// /tierAt) so nothing floats or clips the revetment. ~7 regular meshes, all
+// frustum-culled → zero global draw cost; only counted when the tableau's on
+// screen. Built inside onWorldReady (called below), never at import time.
+function oldStyleCaseTex(){                       // 24-pack case livery — echoes oldStyleTex's cream/blue/red palette
+  const cv=document.createElement('canvas');cv.width=128;cv.height=96;const g=cv.getContext('2d');
+  g.fillStyle='#e7dcc4';g.fillRect(0,0,128,96);                          // kraft-cream cardboard
+  g.fillStyle='#1c4fa0';g.fillRect(0,0,128,14);g.fillRect(0,82,128,14);  // blue top/bottom bands
+  g.fillStyle='#b8252b';g.beginPath();g.ellipse(64,46,40,26,0,0,7);g.fill();   // red disc
+  g.fillStyle='#e7dcc4';g.beginPath();g.ellipse(64,46,34,20,0,0,7);g.fill();
+  g.fillStyle='#1c4fa0';g.textAlign='center';g.textBaseline='middle';
+  g.font='800 17px "Trebuchet MS",sans-serif';g.fillText('OLD STYLE',64,42);
+  g.fillStyle='#b8252b';g.font='800 12px "Trebuchet MS",sans-serif';g.fillText('· 24 PACK ·',64,60);
+  const tx=new THREE.CanvasTexture(cv);tx.anisotropy=4;return tx;
+}
+function buildMalortStash(gx,gz,groundY){
+  // set the stash just SOUTH (+z, toward the Handshake regular down the rocks) of
+  // the guy, on whatever tier the spot lands on (groundY surface-query).
+  const cx=gx+0.7, cz=gz+1.4, cH=0.3, cBase=groundY(cx,cz);
+  const caseBox=new THREE.Mesh(new THREE.BoxGeometry(0.52,cH,0.36), bmat(0xffffff,{map:oldStyleCaseTex()}));
+  caseBox.position.set(cx, cBase+cH/2, cz); caseBox.rotation.y=-0.5; scene.add(caseBox);
+  // a loose can or two on top (reads generous) — one upright, one rolled on its side
+  const canGeo=new THREE.CylinderGeometry(0.055,0.055,0.16,12), canMat=bmat(0xffffff,{map:oldStyleTex()});
+  const canUp=new THREE.Mesh(canGeo,canMat); canUp.position.set(cx-0.08, cBase+cH+0.08, cz+0.04); scene.add(canUp);
+  const canLie=new THREE.Mesh(canGeo,canMat); canLie.rotation.x=Math.PI/2; canLie.position.set(cx+0.12, cBase+cH+0.055, cz-0.02); scene.add(canLie);
+  // Jeppson's Malört bottle — tall amber, cream/yellow label band, gold cap.
+  const bx=gx+0.5, bz=gz+0.9, bBase=groundY(bx,bz);
+  const amber=toon(0x6f4512), gold=toon(0xd8b13a), cream=toon(0xe9d79a);
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.088,0.26,12), amber); body.position.set(bx,bBase+0.13,bz); scene.add(body);
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(0.03,0.05,0.11,10), amber);  neck.position.set(bx,bBase+0.31,bz); scene.add(neck);
+  const cap =new THREE.Mesh(new THREE.CylinderGeometry(0.034,0.034,0.045,10), gold); cap.position.set(bx,bBase+0.39,bz); scene.add(cap);
+  const label=new THREE.Mesh(new THREE.CylinderGeometry(0.091,0.091,0.11,12), cream); label.position.set(bx,bBase+0.12,bz); scene.add(label);
+}
+
 onWorldReady(() => {
   const rePose = [];   // {fn(dt,t)} re-applied each frame after the NPC pass
 
@@ -57,14 +99,31 @@ onWorldReady(() => {
   // ================================================================= //
   {
     const X=156, Z=90, y=groundY(X,Z);
-    const guy = makeNPC({x:X, z:Z, ry:-1.9, palette:{suit:0x8a4a3a,pants:0x2f3540,skin:0xe0a878,hair:0x2a1c12},
+    // face:true keeps live eyes so the swig's setFace('surprised'/'happy') reads
+    // (+1 draw for this one rig; createChibi consumes no rng — determinism intact).
+    const guy = makeNPC({x:X, z:Z, ry:-1.9, palette:{suit:0x8a4a3a,pants:0x2f3540,skin:0xe0a878,hair:0x2a1c12,face:true},
       name:'malort', lines:["you ever had Malört?","it's a Chicago thing, ya know","builds character","tastes like a burnt band-aid — want some?"]});
     guy.group.position.y = y;
     const bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.058,0.28,9), toon(0x9a7b2e));
     bottle.position.set(0, 0.06, 0.04); guy.parts.handR.add(bottle);
-    rePose.push(() => {
+    buildMalortStash(X, Z, groundY);                 // his bottle + Old Style case on the step
+
+    // He's been OFFERING since Round 5 with no way to say yes (issue 013). Now
+    // you can: straight to the shot, no ceremony (that's the Handshake regular's
+    // bit down the rocks). Shares the swig routine; his own short cooldown/label.
+    const swig = {busy:false, cool:0};
+    const guyInter = addInteraction({x:X, z:Z, r:2.4, label:'burnt band-aid?', onUse:()=>{
+      if(swig.busy||swig.cool>0) return; swig.busy=true;
+      guy.say('attaboy — down the hatch', 2);
+      pourMalort({npc:guy, react:'builds character, told ya',
+        toastMain:'BURNT BAND-AID', toastSub:"Jeppson's Malört",
+        onDone:()=>{ swig.busy=false; swig.cool=28; guyInter.setLabel('...one more?'); }});
+    }});
+
+    rePose.push((dt) => {
       guy.parts.armR.rotation.x = -1.05; guy.parts.armR.rotation.z = -0.12;
       guy.parts.armL.rotation.x = -0.25;
+      if(swig.cool>0){ swig.cool-=dt; if(swig.cool<=0) guyInter.setLabel('burnt band-aid?'); }
     });
   }
 

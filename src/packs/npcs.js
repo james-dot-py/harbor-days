@@ -26,6 +26,7 @@ import { scene, camera, toon, bmat, clamp, lerp, lerpAngle } from '../core.js';
 import { DUST } from '../fx.js';
 import { mayor } from '../character.js';
 import { mainCurve } from '../paths.js';
+import { oldStyleTex, pourMalort } from './malort.js';   // shared Malört swig + Old Style label (task 031)
 
 // ------------------------------ scratch (no per-frame alloc) -----------
 const _m=new THREE.Matrix4(), _v=new THREE.Vector3(), _sc=new THREE.Vector3(), _q=new THREE.Quaternion();
@@ -94,23 +95,7 @@ function sCrack(){                                    // Old Style can crack + f
   const g=actx.createGain();g.gain.setValueAtTime(0.0001,t+0.02);g.gain.linearRampToValueAtTime(0.05,t+0.06);g.gain.exponentialRampToValueAtTime(0.0001,t+0.5);
   s.connect(f);f.connect(g);g.connect(sfxBus);s.start(t+0.02);s.stop(t+0.55);
 }
-function sMalort(){                                   // queasy detuned wobble, descending + dissonant
-  const {actx,sfxBus}=getAudioCtx(); if(!actx)return; const t=actx.currentTime,dur=2.4;
-  const lfo=actx.createOscillator();lfo.type='sine';lfo.frequency.value=6.5;
-  const lfoG=actx.createGain();lfoG.gain.value=24;lfo.connect(lfoG);
-  const master=actx.createGain();
-  master.gain.setValueAtTime(0.0001,t);master.gain.linearRampToValueAtTime(0.16,t+0.15);
-  master.gain.setValueAtTime(0.14,t+dur-0.6);master.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-  master.connect(sfxBus);
-  [-7,7].forEach((det,k)=>{
-    const o=actx.createOscillator();o.type='sawtooth';
-    o.frequency.setValueAtTime(182+k*4,t);o.frequency.exponentialRampToValueAtTime(70,t+dur);
-    o.detune.value=det;lfoG.connect(o.detune);
-    const f=actx.createBiquadFilter();f.type='lowpass';f.frequency.value=900;f.Q.value=6;
-    o.connect(f);f.connect(master);o.start(t);o.stop(t+dur+0.1);
-  });
-  lfo.start(t);lfo.stop(t+dur+0.1);
-}
+// (sMalort moved to malort.js — the Malört guy + the Handshake share it now)
 
 // ============================ canvas textures ==========================
 function stripeTex(){                                 // umbrella — red/yellow radial wedges
@@ -128,16 +113,7 @@ function hotsTex(){                                   // 'RED HOTS' cart sign
   g.font='600 20px "Trebuchet MS",sans-serif';g.fillStyle='#fff2c4';g.fillText('steamed · never boiled',128,80);
   return new THREE.CanvasTexture(cv);
 }
-function oldStyleTex(){                               // blue-striped can label
-  const cv=document.createElement('canvas');cv.width=128;cv.height=128;const g=cv.getContext('2d');
-  g.fillStyle='#f3ede0';g.fillRect(0,0,128,128);
-  g.fillStyle='#1c4fa0';g.fillRect(0,10,128,12);g.fillRect(0,106,128,12);
-  g.fillStyle='#b8252b';g.beginPath();g.ellipse(64,64,44,34,0,0,7);g.fill();
-  g.fillStyle='#f3ede0';g.beginPath();g.ellipse(64,64,38,28,0,0,7);g.fill();
-  g.fillStyle='#1c4fa0';g.textAlign='center';g.textBaseline='middle';
-  g.font='800 20px "Trebuchet MS",sans-serif';g.fillText('OLD',64,56);g.fillText('STYLE',64,76);
-  const tx=new THREE.CanvasTexture(cv);tx.anisotropy=4;return tx;
-}
+// (oldStyleTex moved to malort.js — the Handshake can + the Malört guy's case share it)
 function gullTex(){                                   // white seagull "M" silhouette (transparent)
   const cv=document.createElement('canvas');cv.width=64;cv.height=48;const g=cv.getContext('2d');
   g.clearRect(0,0,64,48);g.strokeStyle='#ffffff';g.lineWidth=6;g.lineCap='round';g.lineJoin='round';
@@ -179,13 +155,15 @@ onWorldReady(player=>{
   // ---- journal counters ----
   state.dogsEaten=state.dogsEaten||0; state.ketchupIncidents=state.ketchupIncidents||0;
   state.gooseEncounters=state.gooseEncounters||0; state.handshakes=state.handshakes||0;
+  state.malortShots=state.malortShots||0;   // every Malört shot (Handshake ceremony + the Malört guy)
   state.bests=state.bests||{}; state.bests.discRally=state.bests.discRally||0;
   journalSection('people','Neighbors',()=>`
     <div class="jrow"><span>Encased meats eaten</span><b>${state.dogsEaten||0}</b></div>
     <div class="jrow"><span>Ketchup incidents</span><b>${state.ketchupIncidents||0}</b></div>
     <div class="jrow"><span>Goose encounters</span><b>${state.gooseEncounters||0}</b></div>
     <div class="jrow"><span>Longest frisbee rally</span><b>${(state.bests&&state.bests.discRally)||0}</b></div>
-    <div class="jrow"><span>Chicago handshakes</span><b>${state.handshakes||0}</b></div>`);
+    <div class="jrow"><span>Chicago handshakes</span><b>${state.handshakes||0}</b></div>
+    <div class="jrow"><span>Malört shots</span><b>${state.malortShots||0}</b></div>`);
 
   // ================================================================== //
   //  1) HOT DOG CART  (on the harbor-west lawn, beside the trail)
@@ -460,20 +438,15 @@ onWorldReady(player=>{
   const cooler=new THREE.Mesh(new THREE.BoxGeometry(0.72,0.46,0.52),toon(0xd0392f));cooler.position.set(HX+1.3,0.23,HZ+0.4);scene.add(cooler);
   const coolerLid=new THREE.Mesh(new THREE.BoxGeometry(0.76,0.1,0.56),toon(0xeceae2));coolerLid.position.set(HX+1.3,0.51,HZ+0.4);scene.add(coolerLid);
   const can=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.11,0.32,12),bmat(0xffffff,{map:oldStyleTex()}));
-  const shot=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.04,0.09,10),toon(0xd9b44a));
   const HS={busy:false,cool:0};
   const hsInter=addInteraction({x:HX,z:HZ+1.5,r:2.2,label:'the Chicago handshake?',onUse:()=>{
     if(HS.busy||HS.cool>0)return; HS.busy=true;
     hsNPC.setFace('happy'); hsNPC.say('here — the Chicago handshake',2.4);
-    can.position.set(0,0.15,0); can.rotation.set(0,0,0); holdItem(can); sCrack();
-    setTimeout(()=>{                                  // after the sip: the Malört
-      shot.position.set(0,0.13,0); holdItem(shot);
-      screenFx.filter('saturate(0.2) contrast(1.35) hue-rotate(-20deg)',2600);
-      screenFx.shake(0.35); sMalort();
-      hsNPC.setFace('surprised'); hsNPC.say('it grows on ya',3);
-      toast('IT GROWS ON YOU',"Jeppson's Malört");
+    can.position.set(0,0.15,0); can.rotation.set(0,0,0); holdItem(can); sCrack();   // the ceremony: an Old Style FIRST...
+    setTimeout(()=>{                                  // ...then the shared swig (the Malört).
       state.handshakes=(state.handshakes||0)+1;
-      setTimeout(()=>{ holdItem(null); hsNPC.setFace('happy'); HS.busy=false; HS.cool=60; hsInter.setLabel('walk it off...'); },1300);
+      pourMalort({npc:hsNPC, react:'it grows on ya', toastMain:'IT GROWS ON YOU', toastSub:"Jeppson's Malört",
+        onDone:()=>{ HS.busy=false; HS.cool=60; hsInter.setLabel('walk it off...'); }});
     },1500);
   }});
   function updHandshake(dt){ if(HS.cool>0){ HS.cool-=dt; if(HS.cool<=0)hsInter.setLabel('the Chicago handshake?'); } }

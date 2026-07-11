@@ -153,3 +153,10 @@ cut becomes a revert task.
   stroke, rails deflect, the cup captures, strokes-vs-par per hole, and the
   holes unlock 1→2→3 while the windmill blades turn — Diversey mini-golf
   (x70–88, z286–306) — task 028
+- The Malört guy finally SERVES: he's offered a taste since Round 5, and now you
+  can say yes — walk up on the Belmont Rocks and press E / ✋ ('burnt band-aid?')
+  for a straight Jeppson's shot; the screen makes the burnt-band-aid face (the
+  same swig the Chicago Handshake pours, shared now), and a real Jeppson's bottle
+  + a case of Old Style sit on the step beside him — the actual Chicago-handshake
+  pairing, a wink toward his colleague down the rocks — Belmont Rocks (156,90) —
+  task 031 / issue 013
