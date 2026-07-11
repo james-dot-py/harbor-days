@@ -229,3 +229,15 @@ few turns to find; keep each to one line of symptom + fix.
   prompts fight. (The stated "ride the L to other neighborhoods" future re-hits
   this.) Aside: never identify a cell from a screenshot — a lakefront lawn read
   as Millennium; confirm via `__hd.scene` cell-root `.visible`.
+- Toon SILVER/steel reads GREEN as foliage at grazing/underside angles: a
+  MeshToonMaterial curved shell picks up the hemisphere light's GREEN
+  ground-bounce (core.js `amb` groundColor 0x8fc98e, intensity 0.9) on its many
+  down/near-horizontal faces, so a stainless form (the Pritzker ribbon petals,
+  task 044) reads as an aloe/agave plant no matter how warm you push the base
+  color — the light, not the color, is green. Fix: render copyright-homage
+  STAINLESS self-lit (`bmat`, the Bean's sanctioned escape from the toon ramp)
+  with a painted brushed-steel map + two-tone tints — no lighting means no green
+  and a consistent metal read at every angle; the SOLID (thick, capped) shell
+  geometry carries the form that the lost toon shading would have. Reserve toon
+  for matte/vertical faces that mostly see sky+sun. Crown Fountain's glass-block
+  towers (045) and the BP bridge stainless shingles (046) inherit this exactly.
