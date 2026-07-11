@@ -314,6 +314,22 @@ few turns to find; keep each to one line of symptom + fix.
   lower band from every on-ice view). Hang facade detail off the wall's exposed
   FACE plane, put the must-read band in the top strip, and verify with a low
   from-the-floor framing, not plan math.
+- A pack's onWorldReady that resolves ANOTHER cell's root via getCell() can run
+  BEFORE that cell is registered: cells are registered inside their OWN pack's
+  onWorldReady (packs/wrigleyville.js → buildWrigleyville → registerCell), and
+  callbacks fire in packs/index.js IMPORT ORDER. wrigley-ride (line 27) runs
+  before millennium (line 37), so `getCell('millennium').root` was undefined →
+  threw. And onWorldReady wraps each callback in try/catch → console.WARN (not
+  console.error), so the throw is INVISIBLE to the canary/NO-ERRORS gate — the
+  Belmont pylon built (before the throw) while the departure boards + the whole
+  registerUpdate silently never ran (task 051, cost a diagnosis cycle; the eval
+  `__hd.scene` traverse found only the pylon panels). Two fixes: (a) don't
+  eagerly getCell() a later-registered cell at onWorldReady — DEFER the work to
+  the first update frame (registerUpdate one-shot flag), by when every pack's
+  onWorldReady has run and all cells exist; (b) when new content won't render
+  but the code looks right and NO error fired, suspect a swallowed onWorldReady
+  throw — grep console.warn output or traverse the scene graph to confirm the
+  meshes exist BEFORE tuning geometry.
 - NEVER put canvas TEXT in a shared texture ATLAS next to live regions: headless
   Chromium lacks Georgia and its serif fallback measures ~35% wider, so a
   centered fillText spilled past its region into the gold strip — every

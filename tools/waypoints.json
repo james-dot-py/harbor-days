@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-11T19:25:30.003Z",
- "count": 92,
+ "generated": "2026-07-11T22:09:30.236Z",
+ "count": 95,
  "waypoints": [
   {
    "id": "spawn",
@@ -322,6 +322,31 @@
     }
    ],
    "expectation": "From the elevated birdwatch DECK (the sanctuary's hero perch), looking west over the interior: the winding limestone loop and dappled clearings spread below through the trees, deck rail/planks framing the near foreground (the mayor standing on the platform, not fallen to the grass). Crucially the sanctuary reads BUSY WITH BIRDS — MULTIPLE birds visible at once across the layers (canopy / shrubs / ground / clearing edges): little chibi songbirds perched and flitting, and frequently a special sighting — a heron statue-still at a clearing edge, the woodpecker on the pale dead snag, a hovering hummingbird, or a cedar-waxwing flock. It must NOT read as an empty grove."
+  },
+  {
+   "id": "redline-belmont",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 26,
+   "z": 106,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.12,
+     "dist": 12
+    },
+    {
+     "yaw": -1.73,
+     "pitch": 0.06,
+     "dist": 9
+    },
+    {
+     "yaw": -1.42,
+     "pitch": 0.06,
+     "dist": 9
+    }
+   ],
+   "expectation": "The Belmont Red Line stop cluster and its DESTINATION PICKER (task 051): a red-header 'RED LINE · BELMONT · lakefront stop' identity pylon (white transit disc) flanked by two lollipop DEPARTURE BOARDS, each its own boarding point you walk up to — '→ ADDISON / Wrigley Field / Howard-bound' and '→ MONROE / Millennium Park / 95th / Dan Ryan-bound'. Text crisp and UPRIGHT (never mirrored), posts end below the panels (no bisected text), and the read stays uncluttered beside the existing blue Belmont Harbor park sign."
   },
   {
    "id": "dv-bay-deck",
@@ -821,7 +846,32 @@
      "dist": 13
     }
    ],
-   "expectation": "Arrival on the elevated Addison Red Line island platform (y 7.6): platform furniture/signage, twin tracks alongside, Wrigleyville streets below; down-the-platform framing, not clipped into walls."
+   "expectation": "Arrival on the elevated Addison Red Line island platform (y 7.6): platform furniture/signage, twin tracks alongside, Wrigleyville streets below; down-the-platform framing, not clipped into walls. The two RED LINE departure boards (task 051 picker) read down the platform east of the post row — '→ BELMONT' (N) and '→ MONROE' (S), both 95th/Dan Ryan-bound."
+  },
+  {
+   "id": "redline-addison-boards",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -140,
+   "z": -442,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.05,
+     "dist": 6
+    },
+    {
+     "yaw": 0,
+     "pitch": 0.05,
+     "dist": 6
+    },
+    {
+     "yaw": 0,
+     "pitch": 0.04,
+     "dist": 4
+    }
+   ],
+   "expectation": "On the Addison island platform, the two Red Line departure boards read DOWN the platform: '→ BELMONT / the lakefront / 95th / Dan Ryan-bound' (facing S at the north board) and '→ MONROE / Millennium Park / 95th / Dan Ryan-bound' (facing N at the south board) — both SOUTHBOUND from Addison. Boards sit east of the canopy post row, upright and legible, lollipop posts, clear of the ADDISON station signs."
   },
   {
    "id": "wv-marquee",
@@ -2038,6 +2088,37 @@
     }
    ],
    "expectation": "A red-pyloned CTA subway stair kiosk stands on the Michigan Avenue sidewalk with stairs leading down into a tiled landing; behind it the limestone streetwall rises like a cliff, and park lawns with globe lamps and pennant banners open east."
+  },
+  {
+   "id": "redline-monroe-boards",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 60,
+   "z": 800,
+   "framings": [
+    {
+     "x": 60,
+     "z": 800,
+     "yaw": -1.57,
+     "pitch": 0.08,
+     "dist": 7
+    },
+    {
+     "x": 60,
+     "z": 797,
+     "yaw": -1.4,
+     "pitch": 0.06,
+     "dist": 6
+    },
+    {
+     "x": 60,
+     "z": 803,
+     "yaw": -1.74,
+     "pitch": 0.06,
+     "dist": 6
+    }
+   ],
+   "expectation": "At the Millennium subway kiosk the RED LINE stair-head pylon is flanked by two departure boards reading like a station portal over the descending stair — '→ BELMONT / the lakefront / Howard-bound' and '→ ADDISON / Wrigley Field / Howard-bound' (both NORTHBOUND from downtown Monroe). Text upright and legible, lollipop posts, the Bean and ice rink opening east beyond."
   },
   {
    "id": "mp-streetwall",

@@ -261,3 +261,13 @@ cut becomes a revert task.
   FOUNDERS OF MILLENNIUM PARK" — and the square shares its name with the
   neighborhood the Red Line just connected. — Wrigley Square (68, 724.5) —
   task 050
+- Pick your stop before you board: each Red Line platform grows a little grove
+  of lollipop DEPARTURE BOARDS — one per destination — and you walk up to the
+  one you want ("→ MONROE / Millennium Park") and board THERE. The bound is
+  real-Chicagoan honest: everything out of Addison is "95th / Dan Ryan-bound",
+  everything out of downtown Monroe is "Howard-bound", and the arrival
+  announcement agrees. Ride downtown and the Monroe boards flank the subway
+  stair like a station portal over the Bean; the seatmate even talks the route
+  ("downtown crowd — everybody off at Monroe"). — Red Line stops: Belmont
+  (16, 107), Addison platform (−138.5, −442), Monroe kiosk (54.5, 800) —
+  task 051

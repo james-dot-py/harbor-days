@@ -165,6 +165,17 @@ for (const zn of CH.ZONES) {
   ]);
 }
 
+// Belmont Red Line stop — the DESTINATION PICKER (task 051). Identity pylon
+// (RED LINE · BELMONT) flanked by two lollipop departure boards at their own
+// boarding points; boards face EAST (the lakefront approach), so stand EAST and
+// look WEST. Boards at (16,100)/(16,111), pylon (15.4,107.2) — the cluster
+// flanks the mayor from stand (26,106).
+add('redline-belmont', 'lakefront', 'lakefront', 26, 106, [
+  { yaw: -1.57, pitch: 0.12, dist: 12 },   // overview: pylon centre, both boards flanking
+  { yaw: -1.73, pitch: 0.06, dist: 9 },    // angled toward the ADDISON board (north)
+  { yaw: -1.42, pitch: 0.06, dist: 9 },    // angled toward the MONROE board (south)
+]);
+
 // Diversey ENTERABLE bay (task 028): stand on the ground hitting deck at a
 // middle bay's hitting spot and look NORTH down the range — the axis-aligned
 // interior framing for the bay pocket (a cross-body camera sits in a divider);
@@ -342,6 +353,17 @@ const featW = (id, fx, fz, { stand, pitch = 0.22, dist = 12 } = {}) => {
 // only; cross-body cameras exit small elevated spaces)
 add('wv-spawn', 'wrigleyville', 'wrigleyville', W.SPAWN_W.x, W.SPAWN_W.z,
   [{ yaw: 3.14, pitch: 0.15, dist: 9 }, { yaw: 0, pitch: 0.15, dist: 9 }, { yaw: -1.57, pitch: 0.3, dist: 13 }]);
+
+// Addison platform departure boards (task 051 picker). Two boards read DOWN
+// the platform (the island's only clean camera axis): '→ BELMONT' faces S at
+// z −447, '→ MONROE' faces N at z −438, both E of the canopy post row (x −140).
+// Stand mid-platform and look N then S (axis-aligned; cross-body cameras exit
+// the narrow island).
+add('redline-addison-boards', 'wrigleyville', 'wrigleyville', -140, -442, [
+  { yaw: 3.14, pitch: 0.05, dist: 6 },     // N: both boards ('→ BELMONT' far, '→ MONROE' near-right), 95th/Dan Ryan-bound
+  { yaw: 0,    pitch: 0.05, dist: 6 },     // S: '→ MONROE / Millennium Park / 95th / Dan Ryan-bound'
+  { yaw: 0,    pitch: 0.04, dist: 4 },     // S close on the MONROE board (level, clear of the hanging Addison band)
+]);
 
 // marquee: the corner is a rounded curve (r 18 after the 009 rework) and the
 // apex sidewalk (the apron) is walkable, so the default snap stands ON the
@@ -721,6 +743,15 @@ addM('mp-arrival', [
   { x: 55, z: 812, yaw: Math.PI, pitch: 0.06, dist: 7 },
   { x: 54, z: 788, yaw: 0, pitch: 0.06, dist: 7 },
   { x: 55, z: 810, yaw: -2.9, pitch: 0.06, dist: 7 },
+]);
+// Monroe departure boards (task 051 picker) — the subway kiosk stair-head
+// flanked by two boards ('→ BELMONT' and '→ ADDISON', both Howard-bound N of
+// downtown). They face EAST (the park approach); stand E on the Michigan spine
+// and look WEST so both flank the RED LINE pylon over the descending stair.
+addM('redline-monroe-boards', [
+  { x: 60, z: 800, yaw: -Math.PI / 2, pitch: 0.08, dist: 7 },   // both boards flank the kiosk pylon
+  { x: 60, z: 797, yaw: -1.40,        pitch: 0.06, dist: 6 },   // toward the '→ BELMONT' board (north)
+  { x: 60, z: 803, yaw: -1.74,        pitch: 0.06, dist: 6 },   // toward the '→ ADDISON' board (south)
 ]);
 addM('mp-streetwall', [
   { x: 90, z: 820, yaw: -Math.PI / 2, pitch: -0.12, dist: 8 },

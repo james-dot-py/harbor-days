@@ -208,38 +208,85 @@ function buildCar() {
   };
 }
 
-// ------------------------- boarding pylon (Belmont) --------------------
+// -------------------- Belmont station-identity pylon -------------------
+// A lollipop STATION MARKER ("RED LINE · BELMONT") — the identity beacon, the
+// twin of the Millennium kiosk pylon and the Addison head-house band. It no
+// longer lists destinations: with three stops the PICK lives on the per-
+// destination departure boards below, so this stays a clean "you're at the
+// Red Line stop" wayfinder (owner 051).
 function buildPylon() {
   const grp = new THREE.Group();
-  // pole ENDS at the sign's bottom edge (y 2.275) so it never crosses the text
-  // band — previously a full 3.4 m post bisected ADDISON/WRIGLEY FIELD (issue 014).
+  // pole ENDS at the sign's bottom edge so it never crosses the text band
+  // (issue 014: a full post bisected the old destination lines).
   const post = new THREE.Mesh(new THREE.BoxGeometry(0.22, 2.275, 0.22), toon(0x3a3a42));
   post.position.y = 1.1375; grp.add(post);
-  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128;
+  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 200;
   const g = cv.getContext('2d');
-  g.fillStyle = '#1f1e24'; g.fillRect(0, 0, 256, 128);
-  g.fillStyle = '#c0271f'; g.fillRect(0, 0, 256, 30);
-  g.fillStyle = '#f4efe6'; g.textAlign = 'center';
-  g.font = '800 21px "Trebuchet MS",sans-serif'; g.fillText('RED LINE', 128, 22);
-  // BOTH served directions, each shrink-to-fit so nothing clips the 1.7 m plane
-  const fit = (txt, y) => {
-    let fs = 18; g.font = `700 ${fs}px "Trebuchet MS",sans-serif`;
-    while (g.measureText(txt).width > 242 && fs > 11) { fs -= 1; g.font = `700 ${fs}px "Trebuchet MS",sans-serif`; }
-    g.fillText(txt, 128, y);
-  };
-  fit('↑ ADDISON · WRIGLEY FIELD', 58);
-  fit('↓ MONROE · MILLENNIUM PARK', 85);
-  g.font = '600 13px "Trebuchet MS",sans-serif'; g.fillText('game day service', 128, 116);
-  // back-to-back FrontSide pair — readable from the plaza (east) AND the underpass
-  // exit (west); a lone DoubleSide plane read RED LINE mirrored from behind (PITFALLS).
-  const tex = new THREE.CanvasTexture(cv);
-  const sgeo = new THREE.PlaneGeometry(1.7, 0.85), smat = bmat(0xffffff, { map: tex });
-  const signE = new THREE.Mesh(sgeo, smat); signE.position.set(0.01, 2.7, 0); signE.rotation.y = Math.PI / 2; grp.add(signE);
-  const signW = new THREE.Mesh(sgeo, smat); signW.position.set(-0.01, 2.7, 0); signW.rotation.y = -Math.PI / 2; grp.add(signW);
+  g.fillStyle = '#f4efe6'; g.fillRect(0, 0, 256, 200);
+  g.fillStyle = '#c9252c'; g.fillRect(0, 0, 256, 60);                    // CTA red header band
+  g.fillStyle = '#ffffff'; g.beginPath(); g.arc(40, 30, 20, 0, 7); g.fill();   // white transit disc
+  g.fillStyle = '#c9252c'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '900 30px Arial,sans-serif'; g.fillText('M', 40, 32);
+  g.fillStyle = '#ffffff'; g.font = '800 34px "Trebuchet MS",Arial,sans-serif';
+  g.fillText('RED LINE', 142, 32);
+  g.fillStyle = '#1f1e24'; g.font = '900 52px "Trebuchet MS",Arial,sans-serif';
+  g.fillText('BELMONT', 128, 112);
+  g.fillStyle = '#5a5148'; g.font = 'italic 700 24px "Trebuchet MS",Arial,sans-serif';
+  g.fillText('lakefront stop', 128, 168);
+  g.textBaseline = 'alphabetic';
+  // back-to-back FrontSide pair — readable from the plaza (east) AND the
+  // underpass exit (west); a lone DoubleSide plane reads mirrored from behind.
+  const tex = new THREE.CanvasTexture(cv); tex.anisotropy = 4;
+  const sgeo = new THREE.PlaneGeometry(1.55, 1.21), smat = bmat(0xffffff, { map: tex });
+  const signE = new THREE.Mesh(sgeo, smat); signE.position.set(0.01, 2.88, 0); signE.rotation.y = Math.PI / 2; grp.add(signE);
+  const signW = new THREE.Mesh(sgeo, smat); signW.position.set(-0.01, 2.88, 0); signW.rotation.y = -Math.PI / 2; grp.add(signW);
   grp.position.set(15.4, 0, 107.2);           // south of the underpass mouth, clear of the CPD board
-  const lf = getCell('lakefront');            // parent into the lakefront cell root
-  lf.root.add(grp);                           // so it hides with the rest of the cell
+  getCell('lakefront').root.add(grp);         // parent into the lakefront cell root (hides with it)
   return grp;
+}
+
+// ----------------------- departure boards (the PICK) -------------------
+// One board per boarding point: a lollipop panel reading "RED LINE → <STOP>"
+// over the neighborhood + the bound (Howard/95th). You walk up to the board
+// you want and board there — the pick reads in the world, on touch, no pill-
+// cycling guessing (owner 051). Signage rules (032/036): back-to-back
+// FrontSide (no mirrored back), post ENDS at the panel bottom (no bisected
+// text), own canvas with measureText-fitted fonts (never a shared atlas —
+// task 050 headless-font trap).
+function boardTex(dest, bound) {
+  const W = 320, H = 216;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#f4efe6'; g.fillRect(0, 0, W, H);                       // cream field
+  g.strokeStyle = '#c9252c'; g.lineWidth = 8; g.strokeRect(4, 4, W - 8, H - 8);
+  g.fillStyle = '#c9252c'; g.fillRect(4, 4, W - 8, 54);                 // red header band
+  g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '800 34px "Trebuchet MS",Arial,sans-serif'; g.fillText('RED LINE', W / 2, 32);
+  const fit = (txt, weight, px, y, color, min) => {           // own-canvas shrink-to-fit
+    let fs = px; g.font = `${weight} ${fs}px "Trebuchet MS",Arial,sans-serif`;
+    while (g.measureText(txt).width > W - 44 && fs > min) { fs -= 2; g.font = `${weight} ${fs}px "Trebuchet MS",Arial,sans-serif`; }
+    g.fillStyle = color; g.fillText(txt, W / 2, y);
+  };
+  fit('→ ' + dest.stop.toUpperCase(), 900, 58, 108, '#1f1e24', 26); // → ADDISON
+  fit(dest.sub, 700, 30, 152, '#5a5148', 16);                            // Wrigley Field
+  g.fillStyle = '#8a2018'; g.font = 'italic 700 22px "Trebuchet MS",Arial,sans-serif';
+  g.fillText(bound === 'howard' ? 'Howard-bound' : '95th / Dan Ryan-bound', W / 2, 190);
+  g.textBaseline = 'alphabetic';
+  const t = new THREE.CanvasTexture(cv); t.anisotropy = 4; t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
+  return t;
+}
+function buildDepartureBoard(root, x, z, faceYaw, dest, bound, baseY) {
+  const postH = 1.5, panelW = 1.5, panelH = 1.01;
+  const post = new THREE.Mesh(new THREE.BoxGeometry(0.12, postH, 0.16), toon(0x33343a));
+  post.position.set(x, baseY + postH / 2, z); root.add(post);           // lollipop: ends at the panel bottom
+  const mat = bmat(0xffffff, { map: boardTex(dest, bound) });
+  const cy = baseY + postH + panelH / 2 - 0.02, nx = Math.sin(faceYaw), nz = Math.cos(faceYaw);
+  for (const s of [1, -1]) {                                            // back-to-back FrontSide (no mirror)
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(panelW, panelH), mat);
+    face.position.set(x + s * 0.03 * nx, cy, z + s * 0.03 * nz);
+    face.rotation.y = faceYaw + (s === 1 ? 0 : Math.PI);
+    root.add(face);
+  }
 }
 
 // ------------------------------ the ride -------------------------------
@@ -247,17 +294,25 @@ function buildPylon() {
 // the Addison pull-in keys off the ORIGIN (activeCell at boarding). Monroe is
 // downtown's State-St SUBWAY — no visible train (the fade is the tunnel) and
 // the streaming window lights turn amber/dark for the tube.
+// lat = the stop's Red Line latitude (real N feet address; Monroe downtown is
+// far south) — the BOUND (Howard = north / 95th = south) of any ride is just
+// dest.lat vs origin.lat, shared by the arrival toast AND the departure boards
+// so they never disagree. sub = the neighborhood line under the stop name on a
+// board. quips = the rider's route flavor (a downtown rider says downtown
+// things) — one is picked per ride.
 const DEST = {
   lakefront: {
-    cell: 'lakefront', x: 20, z: 105, y: 0, yaw: 1.35,
-    stop: 'Belmont', label: 'Belmont / lakefront', name: 'This is Belmont.',
-    quip: 'ope — heading back to the lake?',
+    cell: 'lakefront', x: 20, z: 105, y: 0, yaw: 1.35, lat: 3200,
+    stop: 'Belmont', sub: 'the lakefront', label: 'Belmont / lakefront', name: 'This is Belmont.',
+    quips: ['ope — heading back to the lake?', 'belmont harbor next — best breeze in the city',
+            'the rocks are the best free seat in town'],
     arrive: () => toast('BELMONT', 'back at the lakefront'),
   },
   wrigleyville: {
-    cell: 'wrigleyville', x: SPAWN_W.x + 1.4, z: SPAWN_W.z, y: SPAWN_W.y, yaw: 2.95,  // east of the canopy post row
-    stop: 'Addison', label: 'Addison / Wrigley Field', name: 'This is Addison.',
-    quip: 'ope — my stop too. go cubs, go!',
+    cell: 'wrigleyville', x: SPAWN_W.x + 1.4, z: SPAWN_W.z, y: SPAWN_W.y, yaw: 2.95, lat: 3600,  // east of the canopy post row
+    stop: 'Addison', sub: 'Wrigley Field', label: 'Addison / Wrigley Field', name: 'This is Addison.',
+    quips: ['ope — my stop too. go cubs, go!', 'day game today — the whole car empties at Addison',
+            'flash the W on the way out, huh'],
     arrive: () => {
       organSting();
       if (!state.wrigleyVisited) { state.wrigleyVisited = true; toast('WRIGLEYVILLE', 'the Friendly Confines — game day'); }
@@ -266,9 +321,10 @@ const DEST = {
   },
   millennium: {
     // top of the park subway stair (KIOSK_M east mouth), facing the Bean axis
-    cell: 'millennium', x: KIOSK_M.x1 + 2, z: KIOSK_M.pylonZ, y: 0, yaw: 1.62,
-    stop: 'Monroe', label: 'Monroe / Millennium Park', name: 'This is Monroe.',
-    quip: 'millennium park? locals just say the bean',
+    cell: 'millennium', x: KIOSK_M.x1 + 2, z: KIOSK_M.pylonZ, y: 0, yaw: 1.62, lat: -1300,
+    stop: 'Monroe', sub: 'Millennium Park', label: 'Monroe / Millennium Park', name: 'This is Monroe.',
+    quips: ['millennium park? locals just say the bean', 'downtown crowd — everybody off at Monroe',
+            'mind the gap headed into the loop'],
     arrive: () => {
       if (!state.millenniumVisited) { state.millenniumVisited = true; toast('MILLENNIUM PARK', 'downtown — the Bean is that way'); }
       else toast('MILLENNIUM PARK', 'Monroe / the park');
@@ -304,6 +360,9 @@ function rideTo(dest, player) {
   const origin = activeCell();                      // where we boarded
   const spot = DEST[dest];
   const toTube = dest === 'millennium';             // downtown = the subway
+  // BOUND from the two stops' latitudes (origin-aware): north to Addison =
+  // Howard, anything south = 95th/Dan Ryan. Same rule the boards print.
+  const bound = DEST[dest].lat > DEST[origin].lat ? 'howard' : '95th';
   state.redlineRides = (state.redlineRides || 0) + 1;
   const fade = ms => screenFx.filter('brightness(0)', ms);
   chime();
@@ -322,9 +381,9 @@ function rideTo(dest, player) {
       cam.yaw = Math.PI - 0.28; cam.pitch = 0.06; cam.dist = 4.5; camCtl.snap = true;
       setWindowMood(toTube);
       rumbleOn();
-      toast(toTube ? 'RED LINE — 95TH BOUND' : 'RED LINE — HOWARD BOUND', 'next stop: ' + spot.stop);
+      toast('RED LINE — ' + (bound === 'howard' ? 'HOWARD' : '95TH') + ' BOUND', 'next stop: ' + spot.stop);
     } },
-    { at: P + 2.2, fn: () => rider.say(spot.quip) },
+    { at: P + 2.2, fn: () => rider.say(spot.quips[(R() * spot.quips.length) | 0]) },
     { at: P + 6.2, fn: () => say(spot.name) },
     { at: P + 7.2, fn: () => chime() },
     { at: P + 8.0, fn: () => fade(1500) },
@@ -359,19 +418,40 @@ onWorldReady((player) => {
     palette: { suit: 0x2a4a7a, pants: 0x3a3a42, skin: 0xb98a62, hair: 0x4a3626 },
     lines: ['ope', 'this car always smells like popcorn', 'the L is the best seat in the city'],
   });
-  // Each of the three boarding points offers the OTHER TWO destinations as its
-  // own zone, spaced so the prompts never overlap (centers ≥7 m; r 3 + 1.1
-  // grace = 4.1 reach, so at each stand only that zone is in range).
-  const board = (x, z, dest) => addInteraction({
-    x, z, r: 3, label: 'ride the Red Line — ' + DEST[dest].label, onUse: p => rideTo(dest, p),
-  });
-  board(16, 104, 'wrigleyville');                        // Belmont pylon → Addison
-  board(16, 111, 'millennium');                          // Belmont pylon → Monroe
-  board(SPAWN_W.x, SPAWN_W.z - 5, 'lakefront');          // Addison platform → Belmont
-  board(SPAWN_W.x, SPAWN_W.z + 2, 'millennium');         // Addison platform → Monroe
-  board(KIOSK_M.x1 + 2, KIOSK_M.z0 + 0.5, 'lakefront');  // Millennium kiosk → Belmont
-  board(KIOSK_M.x1 + 2, KIOSK_M.z1 - 1, 'wrigleyville'); // Millennium kiosk → Addison
+  // Each boarding point is a physical DEPARTURE BOARD you walk up to — the pick
+  // reads in the world (owner 051: "let the user pick their redline stop before
+  // going"). One board per OTHER destination, its interaction zone AT the board;
+  // zones stay ≥7 m apart (r 3 + 1.1 grace = 4.1 reach) so only the board you
+  // stand at fires its prompt. Boards face the approach (front toward the
+  // player); the back-to-back partner keeps the far side readable. The Addison
+  // boards sit on the elevated island platform (baseY 7.6), east of the canopy
+  // post row (x −140) and clear of the posts in z. The bound (Howard/95th) is
+  // origin-aware, computed the same way as the ride toast.
+  const EAST = Math.PI / 2, WEST = -Math.PI / 2;
+  const BOARDS = [
+    ['lakefront',     16,     100,   EAST, 'wrigleyville', 0],    // Belmont → Addison (Howard-bound) — N of the CPD harbor sign (z 101.7–104.3)
+    ['lakefront',     16,     111,   EAST, 'millennium',   0],    // Belmont → Monroe (95th-bound) — S of the pylon
+    ['wrigleyville', -138.5, -447,   0,          'lakefront',  7.6],  // Addison → Belmont (95th-bound) — faces S (down-platform), E of the post row
+    ['wrigleyville', -138.5, -438,   Math.PI,    'millennium', 7.6],  // Addison → Monroe (95th-bound) — faces N (down-platform)
+    ['millennium',    54.5,   796.5, EAST, 'lakefront',    0],    // Monroe → Belmont (Howard-bound)
+    ['millennium',    54.5,   803.5, EAST, 'wrigleyville', 0],    // Monroe → Addison (Howard-bound)
+  ];
+  // Interaction zones register now (pure distance checks). The physical boards
+  // must parent into their cell root, but the Millennium cell is registered by
+  // its OWN pack's onWorldReady, which runs AFTER this one (packs/index.js
+  // order) — so build the boards on the first update frame, by when every
+  // pack's onWorldReady has completed and all three cells exist.
+  for (const [, x, z, , dest] of BOARDS)
+    addInteraction({ x, z, r: 3, label: 'ride the Red Line — ' + DEST[dest].label, onUse: p => rideTo(dest, p) });
+  let boardsBuilt = false;
   registerUpdate((dt, t, p) => {
+    if (!boardsBuilt) {
+      boardsBuilt = true;
+      for (const [station, x, z, faceYaw, dest, baseY] of BOARDS) {
+        const bound = DEST[dest].lat > DEST[station].lat ? 'howard' : '95th';
+        buildDepartureBoard(getCell(station).root, x, z, faceYaw, DEST[dest], bound, baseY);
+      }
+    }
     if (seqT >= 0) {
       seqT += dt;
       for (const s of seq) if (!s.done && seqT >= s.at) { s.done = true; s.fn(); }

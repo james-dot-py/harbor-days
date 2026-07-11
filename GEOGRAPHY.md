@@ -143,8 +143,12 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
 ### Belmont & south — AIDS Garden + the Rocks, z 0…+300
 - **Belmont underpass moved to z +105** (on the AIDS-garden/statue axis) + its
   **stop cluster** (x 18–26, z 98–112): platform stub, harbor office kiosk, CPD
-  entrance sign, Divvy dock, Harry Caray sign, busker. A short paved CONNECTOR
-  links the underpass mouth (~x 14, z 105) east to the AIDS-garden loop's west edge.
+  entrance sign, Divvy dock, Harry Caray sign, busker, + the Red Line
+  **RED LINE · BELMONT** identity pylon (~15.4, 107) with a DEPARTURE BOARD at
+  each boarding point — (16, 100) → Addison, (16, 111) → Monroe (task 051's
+  stop picker; the Addison board sits N of the CPD harbor sign's z-span to keep
+  the read clear). A short paved CONNECTOR links the underpass mouth (~x 14,
+  z 105) east to the AIDS-garden loop's west edge.
 - **AIDS Garden Chicago** lawn+beds **x 60–130, z +60…+180**; **Keith Haring
   sculpture (30 ft, green)** at **(x 95, z +120)**; Haring honorary sign beside it.
   **The plaza LOOP is a TWO-LOBE PEANUT** (task 023, per the owner drone aerial
