@@ -180,6 +180,12 @@ few turns to find; keep each to one line of symptom + fix.
   any curb-line/roadway structure, re-walk every waypoint whose camera pulls back
   through that block (hand framings bypass camBlockedW, and camBlockedW's VOLS_W
   doesn't model new builder geometry anyway).
+- Wikimedia filenames differing ONLY BY CASE (Bp_bridge.JPG vs BP_Bridge.jpg)
+  silently merge on Windows's case-insensitive filesystem: refs-fetch's second
+  download OVERWRITES the first file while the manifest keeps both entries —
+  files-on-disk < manifest entries, and the surviving content is whichever
+  downloaded LAST (task 039). After any fetch, count files vs manifest entries
+  and prune the stale entry (tools/mp-manifest-prune.mjs).
 - A SMALL vertical geometry change is invisible in a distant side view: lowering a
   deck ~0.3 m to sit flush on grade moved it only ~20 px at ~13 m, reading as
   "unchanged" — task 038 nearly re-chased a phantom HMR-staleness bug over it (a

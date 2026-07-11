@@ -24,8 +24,8 @@
 //  cell's x against the true projection (PITFALLS.md).
 //
 //  Usage:
-//    node tools/osm-fetch.mjs <poi-slug> --bbox <s,w,n,e> [--offset-dx <n>] [--shear <n>]
-//    node tools/osm-fetch.mjs <named-area>            (belmont-harbor | wrigleyville | wrigley-field)
+//    node tools/osm-fetch.mjs <poi-slug> --bbox <s,w,n,e> [--offset-dx <n>] [--offset-dz <n>] [--shear <n>]
+//    node tools/osm-fetch.mjs <named-area>            (belmont-harbor | wrigleyville | wrigley-field | millennium-park)
 //    node tools/osm-fetch.mjs <poi-slug> --area <named>
 //    flags: --refresh-anchor (ignore the cached anchor query), --no-emit (asserts only)
 //
@@ -63,11 +63,23 @@ const AREAS = {
   // Addison" (= wrigleyville.js clarkX(−400)). z stays TRUE latitude.
   'wrigleyville':  { bbox: [41.9455, -87.6600, 41.9505, -87.6520], calibrate: CLARK_ADDISON() },
   'wrigley-field': { bbox: [41.9455, -87.6600, 41.9505, -87.6520], calibrate: CLARK_ADDISON() },
+  // Displaced hard cell, BOTH axes park-local (true lakefront projection would be
+  // z ≈ +3200 — never a validation target, PITFALLS.md). Frame targets the queue-040
+  // SUGGESTED cell region (x +40..+200, z +640..+920): Michigan Ave centerline →
+  // x 40, Monroe St centerline → z 900 (so Randolph ≈ z 649, Columbus ≈ x 200 at
+  // 1:2 land scale). bbox = Michigan/Randolph/Columbus/Monroe frame + a half-block
+  // west of Michigan so the streetwall ("the cliff") footprints land as reference.
+  'millennium-park': { bbox: [41.8795, -87.6260, 41.8865, -87.6180], calibrate: MICHIGAN_MONROE() },
 };
 function CLARK_ADDISON() {
   return { streetA: 'North Clark Street', streetB: 'West Addison Street',
            targetX: -290, targetZ: -400,
            cite: 'GEOGRAPHY.md WRIGLEY_GEOGRAPHY / wrigleyville.js clarkX(-400) = -290' };
+}
+function MICHIGAN_MONROE() {
+  return { streetA: 'South Michigan Avenue', streetB: 'East Monroe Street',
+           targetX: 40, targetZ: 900, displaceZ: true,
+           cite: 'queue 040 SUGGESTED millennium cell region x +40..+200, z +640..+920: Michigan Ave centerline = x 40, Monroe centerline = z 900 (park-local frame, both axes displaced)' };
 }
 
 // ------------------------------- args ---------------------------------
@@ -234,9 +246,9 @@ function runAsserts(el, anchor) {
 
 // --------------------------- offset resolve ---------------------------
 function resolveOffset(flags, area, targetEl, anchor) {
-  if (flags['offset-dx'] != null || flags['shear'] != null) {
-    return { dx: +(flags['offset-dx'] || 0), dz: 0, shear: +(flags['shear'] || 0),
-             source: 'explicit --offset-dx/--shear' };
+  if (flags['offset-dx'] != null || flags['offset-dz'] != null || flags['shear'] != null) {
+    return { dx: +(flags['offset-dx'] || 0), dz: +(flags['offset-dz'] || 0), shear: +(flags['shear'] || 0),
+             source: 'explicit --offset-dx/--offset-dz/--shear' };
   }
   const cal = area?.calibrate;
   if (!cal) return { dx: 0, dz: 0, shear: 0, source: 'none (true projection)' };
@@ -247,8 +259,9 @@ function resolveOffset(flags, area, targetEl, anchor) {
   }
   const trueXZ = projector(anchor, null)(p.lat, p.lon);
   const dx = cal.targetX - trueXZ[0];
+  const dz = cal.displaceZ ? cal.targetZ - trueXZ[1] : 0;
   return {
-    dx: Math.round(dx * 10) / 10, dz: 0, shear: 0,
+    dx: Math.round(dx * 10) / 10, dz: Math.round(dz * 10) / 10, shear: 0,
     source: 'auto-calibrated (displaced cell)',
     calibration: {
       landmark: `${cal.streetA} ∩ ${cal.streetB}`,
@@ -256,7 +269,9 @@ function resolveOffset(flags, area, targetEl, anchor) {
       trueProjected: { x: trueXZ[0], z: trueXZ[1] },
       target: { x: cal.targetX, z: cal.targetZ },
       cite: cal.cite,
-      note: 'z is TRUE latitude; only x is displaced. Cell x is a documented standing liberty — never a validation target (PITFALLS.md).',
+      note: cal.displaceZ
+        ? 'BOTH axes are cell-local (park-local frame): dx and dz move the whole area onto its displaced cell region. The true lakefront projection (z ≈ +3200 here) is NEVER a validation target for a displaced cell — the lakefront anchor asserts above validate only the projection math (PITFALLS.md).'
+        : 'z is TRUE latitude; only x is displaced. Cell x is a documented standing liberty — never a validation target (PITFALLS.md).',
     },
   };
 }
@@ -279,6 +294,12 @@ async function fetchTarget(bbox) {
   way["leisure"="stadium"](${b});
   relation["leisure"="stadium"](${b});
   relation["building"](${b});
+  relation["leisure"="park"](${b});
+  relation["leisure"="garden"](${b});
+  way["tourism"]["name"](${b});
+  way["historic"]["name"](${b});
+  way["amenity"="fountain"](${b});
+  node["amenity"="fountain"]["name"](${b});
   node["natural"="peak"](${b});
   node["tourism"]["name"](${b});
   node["historic"]["name"](${b});
@@ -311,7 +332,7 @@ function classify(el, proj, bbox) {
     ids.push(e.type[0] + e.id);
     const t = e.tags || {};
     if (e.type === 'node') {
-      if (t.name && (t.tourism || t.historic || t.leisure || t.natural))
+      if (t.name && (t.tourism || t.historic || t.leisure || t.natural || t.amenity === 'fountain'))
         out.landmarks.push({ id: e.id, name: t.name, tags: t, xz: proj(e.lat, e.lon) });
       continue;
     }
@@ -334,6 +355,15 @@ function classify(el, proj, bbox) {
             out.buildings.push({ id: e.id, name: t.name, role: m.role, tags: t, points: run });
         }
       }
+      // park / garden relations (Millennium Park and Lurie Garden are relations):
+      // outer members carry the boundary.
+      if (t.leisure === 'park' || t.leisure === 'garden') {
+        for (const m of e.members || []) {
+          if (!m.geometry || m.role === 'inner') continue;
+          for (const run of clipRuns(m.geometry, bbox, proj))
+            out.parks.push({ id: e.id, name: t.name, role: m.role, tags: t, points: run });
+        }
+      }
       continue;
     }
     const pts = line(e);
@@ -345,6 +375,7 @@ function classify(el, proj, bbox) {
     else if (t.highway) out.highways.push({ ...rec, highway: t.highway });
     else if (t.leisure === 'park' || t.leisure === 'garden') out.parks.push(rec);
     else if (t.building || t.leisure === 'stadium') out.buildings.push(rec);
+    else if (t.tourism || t.historic || t.amenity === 'fountain') out.landmarks.push(rec);
     else out.other.push(rec);
   }
   return { features: out, ids };
