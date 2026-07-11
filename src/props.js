@@ -33,7 +33,7 @@ function makeSign(text,x,z,ry){
   g.fillText(text,256,68);
   const tex=new THREE.CanvasTexture(cv);
   const grp=new THREE.Group();
-  const post=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.11,1.7,6),toon(0xa9713f));post.position.y=0.85;grp.add(post);
+  const post=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.11,1.7,6),toon(0xa9713f));post.position.set(0,0.85,-0.25);grp.add(post);  // BEHIND the board (front at z=0) so it never clips the text
   const board=new THREE.Mesh(new THREE.PlaneGeometry(3.4,0.85),curveMat(new THREE.MeshBasicMaterial({map:tex})));board.position.y=1.9;grp.add(board);
   const back=new THREE.Mesh(new THREE.PlaneGeometry(3.4,0.85),bmat(0xe8d7b4));back.rotation.y=Math.PI;back.position.y=1.9;grp.add(back);
   grp.position.set(x,0,z);grp.rotation.y=ry;scene.add(grp);collide(x,z,0.5);

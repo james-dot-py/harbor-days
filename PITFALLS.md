@@ -140,3 +140,14 @@ few turns to find; keep each to one line of symptom + fix.
   fires and onUse never runs (the tap looks dead). act.mjs `tap`/`tapSel` HOLD
   ~160ms (touchStart · wait · touchEnd) so >=1 frame observes the press; also pass
   `--mobile` (390px hasTouch viewport) or body.touch never turns on (task 026).
+- Free-standing SIGNS have TWO systemic quality failures — audit BOTH on every new
+  sign builder (task 032 swept all of them): (a) a lone DoubleSide canvas plane reads
+  MIRRORED from behind — fix with back-to-back FrontSide planes. To keep draw calls
+  flat: for an InstancedMesh DOUBLE the instances (half rotated PI) — still 1 call
+  (Divvy sign); individual meshes just add a second FrontSide mesh (frustum-culled);
+  where one side backs a wall/tracks use FrontSide + a solid rear (BackSide same
+  transform works for any tilt — PEQUOD'S lid). (b) a support POST at the panel's
+  center-depth + full height BISECTS the text (honorary blades, RED LINE pylon,
+  Diversey boards — issue 014): END the post at the panel's BOTTOM edge (lollipop),
+  or offset it behind a single-faced FrontSide panel (makeSign, mini-golf, CPD).
+  Two-sided readable signs can't hide a central post "behind" — shorten it instead.

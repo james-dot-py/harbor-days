@@ -209,7 +209,10 @@ onWorldReady(()=>{
     signSpots.forEach((sp,i)=>{
       _e.set(0, Math.PI/2,0,'YXZ'); _q.setFromEuler(_e); _M.compose(_v.set(sp.x,1.9,sp.z),_q,_s1); front.setMatrixAt(i,_M);
       _e.set(0,-Math.PI/2,0,'YXZ'); _q.setFromEuler(_e); _M.compose(_v.set(sp.x-0.04,1.9,sp.z),_q,_s1); rear.setMatrixAt(i,_M);
-      for(const lz of [-1,1]){ _M.compose(_v.set(sp.x,1.1,sp.z+lz),_qI,_s1); posts.setMatrixAt(pi++,_M); }
+      // posts BEHIND the panel (panel front at x=sp.x; posts front at ~sp.x-0.08,
+      // behind the rear panel at sp.x-0.04) so the poles never cover the text —
+      // real CPD signs mount the panel on the posts' front face (issue 014).
+      for(const lz of [-1,1]){ _M.compose(_v.set(sp.x-0.16,1.1,sp.z+lz),_qI,_s1); posts.setMatrixAt(pi++,_M); }
       collide(sp.x,sp.z,0.5);
     });
     front.instanceMatrix.needsUpdate=rear.instanceMatrix.needsUpdate=posts.instanceMatrix.needsUpdate=true;

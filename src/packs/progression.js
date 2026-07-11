@@ -98,15 +98,25 @@ function bladeTex(name){
 
 let glintMesh=null;
 function buildSigns(){
-  // one shared InstancedMesh for all 12 slim green posts
-  const posts=new THREE.InstancedMesh(new THREE.BoxGeometry(0.09,2.4,0.09),toon(0x2f7d4f),SIGNS.length);
+  // one shared InstancedMesh for all 12 slim green posts. Height 1.75 so the post
+  // TOPS OUT at the blade's bottom (y0+1.75), never crossing the text band
+  // (y0+1.75..2.35) — a full 2.4 m post ran up through the middle of the name.
+  const posts=new THREE.InstancedMesh(new THREE.BoxGeometry(0.09,1.75,0.09),toon(0x2f7d4f),SIGNS.length);
   SIGNS.forEach((s,i)=>{
     const y0=s.y0||0;
-    _m.compose(_v.set(s.x,y0+1.2,s.z),new THREE.Quaternion(),_s.set(1,1,1)); posts.setMatrixAt(i,_m);
-    // individual brown blade w/ white canvas text (12 draw calls — OK)
-    const blade=new THREE.Mesh(new THREE.PlaneGeometry(2.2,0.6),
-      curveMat(new THREE.MeshBasicMaterial({map:bladeTex(s.name),side:THREE.DoubleSide})));
-    blade.position.set(s.x,y0+2.05,s.z); blade.rotation.y=s.ry; scene.add(blade);
+    _m.compose(_v.set(s.x,y0+0.875,s.z),new THREE.Quaternion(),_s.set(1,1,1)); posts.setMatrixAt(i,_m);
+    // individual brown blade w/ white canvas text — back-to-back FrontSide pair
+    // (NOT a lone DoubleSide plane, which shows MIRRORED text from behind:
+    // PITFALLS). Front + back share one tex/material; each faces outward so
+    // neither side mirrors. 24 frustum-culled draw calls total — a few show per
+    // lakefront view, well under budget (global instanced buckets unchanged).
+    const bgeo=new THREE.PlaneGeometry(2.2,0.6);
+    const bmatF=curveMat(new THREE.MeshBasicMaterial({map:bladeTex(s.name)})); // FrontSide
+    const bnx=Math.sin(s.ry), bnz=Math.cos(s.ry);
+    const bladeF=new THREE.Mesh(bgeo,bmatF);
+    bladeF.position.set(s.x+bnx*0.02,y0+2.05,s.z+bnz*0.02); bladeF.rotation.y=s.ry; scene.add(bladeF);
+    const bladeB=new THREE.Mesh(bgeo,bmatF);
+    bladeB.position.set(s.x-bnx*0.02,y0+2.05,s.z-bnz*0.02); bladeB.rotation.y=s.ry+Math.PI; scene.add(bladeB);
     collide(s.x,s.z,0.35);                                              // bump the post
     s.collected=false; s._gy=y0+2.9;
   });
@@ -267,10 +277,14 @@ function divvyTex(){
 // sign + 1 rack, plus one per parked-bike component (7 parts x 15 bikes).
 function buildDocks(){
   const idQ=new THREE.Quaternion(), N=DOCKS.length;
+  const backQ=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,Math.PI,0));  // face -z
   const bases =new THREE.InstancedMesh(new THREE.BoxGeometry(4.4,0.12,1.5),toon(0x6b7076),N);
   const kiosks=new THREE.InstancedMesh(new THREE.BoxGeometry(0.5,1.5,0.85),toon(0x0f4d78),N);
+  // DIVVY sign as a back-to-back FrontSide pair (2 instances/dock, still ONE
+  // InstancedMesh = 1 draw call): a lone DoubleSide plane read 'YVVID' mirrored
+  // from behind (PITFALLS). Each face points outward, so neither side mirrors.
   const signs =new THREE.InstancedMesh(new THREE.PlaneGeometry(0.72,0.5),
-                 bmat(0xffffff,{map:divvyTex(),side:THREE.DoubleSide,transparent:true}),N);
+                 bmat(0xffffff,{map:divvyTex(),side:THREE.FrontSide,transparent:true}),N*2);
   const racks =new THREE.InstancedMesh(new THREE.TorusGeometry(0.14,0.03,5,10),toon(0xa6adb4),N*5);
   // one parked-bike template -> a shared InstancedMesh per component
   const tmpl=makeParkedBike(); tmpl.updateMatrixWorld(true);
@@ -283,7 +297,8 @@ function buildDocks(){
     _m.compose(_v.set(DX,     gy+0.06,DZ     ),idQ,_s.set(1,1,1)); bases.setMatrixAt(di,_m);   // deck
     _m.compose(_v.set(DX-2.5, gy+0.81,DZ     ),idQ,_s.set(1,1,1)); kiosks.setMatrixAt(di,_m);  // kiosk
     collide(DX-2.5,DZ,0.5);
-    _m.compose(_v.set(DX-2.5, gy+1.75,DZ+0.44),idQ,_s.set(1,1,1)); signs.setMatrixAt(di,_m);   // DIVVY sign
+    _m.compose(_v.set(DX-2.5, gy+1.75,DZ+0.45),idQ, _s.set(1,1,1)); signs.setMatrixAt(di*2,  _m);  // DIVVY sign front (+z)
+    _m.compose(_v.set(DX-2.5, gy+1.75,DZ+0.43),backQ,_s.set(1,1,1)); signs.setMatrixAt(di*2+1,_m);  // back (-z), no mirror
     for(let i=0;i<5;i++){ _m.compose(_v.set(DX-1.6+i*0.8,gy+0.28,DZ-0.55),idQ,_s.set(1,1,1)); racks.setMatrixAt(ri++,_m); }
     [-1.3,0.1,1.5].forEach(dx=>{                                        // 3 racked bikes / dock
       bikeWorld.compose(_v.set(DX+dx,gy,DZ+0.1),bikeQ,_s.set(1,1,1));

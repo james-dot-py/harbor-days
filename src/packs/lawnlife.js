@@ -235,9 +235,14 @@ onWorldReady((player) => {
     base.position.set(c.x,gy+0.08,c.z); scene.add(base);
     const band=new THREE.Mesh(new THREE.BoxGeometry(1.12,0.06,1.12),toon(0xb3261d));  // red band around the base
     band.position.set(c.x,gy+0.13,c.z); scene.add(band);
-    const lidMat=bmat(0xffffff,{map:pequodsTex(),side:THREE.DoubleSide});
-    const lid=new THREE.Mesh(new THREE.PlaneGeometry(1.1,1.1),lidMat);
+    const lidGeo=new THREE.PlaneGeometry(1.1,1.1);
+    const lidMat=bmat(0xffffff,{map:pequodsTex()});                                   // FrontSide: PEQUOD'S faces the eaters
+    const lid=new THREE.Mesh(lidGeo,lidMat);
     lid.position.set(c.x,gy+0.55,c.z-0.55); lid.rotation.x=-1.15; scene.add(lid);   // hinged up, facing the eaters
+    // plain cardboard OUTSIDE (BackSide, same transform) so the back of the lid
+    // never shows mirrored PEQUOD'S text (PITFALLS: lone DoubleSide canvas plane).
+    const lidBack=new THREE.Mesh(lidGeo,bmat(0x2a2a2a,{side:THREE.BackSide}));
+    lidBack.position.copy(lid.position); lidBack.rotation.copy(lid.rotation); scene.add(lidBack);
     // the deep dish: dark caramelized crust RING (torus) + golden cheese disc inside
     const crust=new THREE.Mesh(new THREE.TorusGeometry(0.42,0.12,8,20),toon(0x6a3d18));
     crust.rotation.x=-Math.PI/2; crust.position.set(c.x,gy+0.19,c.z); scene.add(crust);

@@ -118,8 +118,10 @@ function buildTrack(){
   const cposts=new THREE.InstancedMesh(new THREE.BoxGeometry(0.16,2.8,0.16),toon(0x4a4a4a),4);
   let ci=0;for(const cx of[px-1.5,px+1.5])for(const cz of[PLATFORM_Z-8,PLATFORM_Z+8]){M.compose(V.set(cx,DECK_TOP+1.2,cz),Q.identity(),S.set(1,1,1));cposts.setMatrixAt(ci++,M);}
   cposts.instanceMatrix.needsUpdate=true;scene.add(cposts);
-  // BELMONT sign — east face, readable from the park
-  const sign=new THREE.Mesh(new THREE.PlaneGeometry(5,1.25),bmat(0xffffff,{map:belmontTex(),side:THREE.DoubleSide}));
+  // BELMONT sign — FrontSide facing east (+x) into the park; its back faces the
+  // tracks (never walkable), so a DoubleSide plane only risked a mirrored back —
+  // FrontSide culls it entirely (PITFALLS: lone DoubleSide canvas plane mirrors).
+  const sign=new THREE.Mesh(new THREE.PlaneGeometry(5,1.25),bmat(0xffffff,{map:belmontTex(),side:THREE.FrontSide}));
   sign.position.set(px+1.75,DECK_TOP+1.7,PLATFORM_Z);sign.rotation.y=Math.PI/2;scene.add(sign);
   // NOTE: the 'FUTURE ENTRANCE' gag signs were removed in task 030 (owner
   // feedback) — the LSD underpass portals stay but carry no signs; the platform
@@ -345,19 +347,29 @@ function buildNameplates(){
 
   const hw=0.62,hh=0.16,pos=[],uv=[],idx=[];let v=0;
   const W=CELL_W*ATLAS_COLS,H=CELL_H*ATLAS_ROWS;
+  // Mirror-safe: each nameplate is TWO back-to-back FrontSide quads (not one
+  // DoubleSide plane, whose far face reads MIRRORED — PITFALLS). Face A reads
+  // correct from the -n (designed reader) side; face B has its U swapped so it
+  // reads correct from the +n side. Still ONE merged draw call.
   for(const p of plates){
-    const c=Math.cos(p.ry),s=Math.sin(p.ry);        // right vector = (cos,0,-sin), up = +y
+    const c=Math.cos(p.ry),s=Math.sin(p.ry);        // right vector = (cos,0,-sin), up = +y; +n = (s,0,c)
+    const nx=s,nz=c,off=0.006;
     const col=p.cell%ATLAS_COLS,row=(p.cell/ATLAS_COLS)|0;
     const uL=col*CELL_W/W,uR=(col+1)*CELL_W/W,vT=1-row/ATLAS_ROWS,vB=1-(row+1)/ATLAS_ROWS;
-    const cn=[[-hw,-hh,uL,vB],[hw,-hh,uR,vB],[hw,hh,uR,vT],[-hw,hh,uL,vT]];
-    for(const[lxo,lyo,u,vv]of cn){pos.push(p.x+c*lxo,p.y+lyo,p.z-s*lxo);uv.push(u,vv);}
+    // face A — nudged toward -n, reversed winding (front normal -n), original U
+    const cnA=[[-hw,-hh,uL,vB],[hw,-hh,uR,vB],[hw,hh,uR,vT],[-hw,hh,uL,vT]];
+    for(const[lxo,lyo,u,vv]of cnA){pos.push(p.x+c*lxo-nx*off,p.y+lyo,p.z-s*lxo-nz*off);uv.push(u,vv);}
+    idx.push(v,v+2,v+1,v,v+3,v+2);v+=4;
+    // face B — nudged toward +n, normal winding (front normal +n), U swapped
+    const cnB=[[-hw,-hh,uR,vB],[hw,-hh,uL,vB],[hw,hh,uL,vT],[-hw,hh,uR,vT]];
+    for(const[lxo,lyo,u,vv]of cnB){pos.push(p.x+c*lxo+nx*off,p.y+lyo,p.z-s*lxo+nz*off);uv.push(u,vv);}
     idx.push(v,v+1,v+2,v,v+2,v+3);v+=4;
   }
   const g=new THREE.BufferGeometry();
   g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(pos),3));
   g.setAttribute('uv',new THREE.BufferAttribute(new Float32Array(uv),2));
   g.setIndex(idx);
-  const mesh=new THREE.Mesh(g,bmat(0xffffff,{map:namesAtlasTex(BOAT_NAMES),side:THREE.DoubleSide,transparent:true}));
+  const mesh=new THREE.Mesh(g,bmat(0xffffff,{map:namesAtlasTex(BOAT_NAMES),side:THREE.FrontSide,transparent:true}));
   mesh.frustumCulled=false;scene.add(mesh);
 }
 

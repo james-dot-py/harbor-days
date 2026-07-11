@@ -628,12 +628,18 @@ function buildDiversey(POSTS,RAILS){
   const tees=new THREE.InstancedMesh(new THREE.BoxGeometry(D.tees.w,0.08,D.tees.d),toon(D.tees.color,{}),D.tees.xs.length);
   D.tees.xs.forEach((tx,i)=>{M.compose(V.set(tx,0.09,D.tees.z),Q.identity(),S);tees.setMatrixAt(i,M);});
   tees.instanceMatrix.needsUpdate=true;scene.add(tees);
-  // distance boards: instanced posts + one plane each (canvas number)
-  const bposts=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.06,0.06,1.4,6),toon(0xb07a46),D.boards.length);
+  // distance boards: instanced posts + one plane each (canvas number). Post height
+  // 1.1 so it TOPS OUT at the board's bottom (y1.1) and never grazes the digits.
+  const bposts=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.06,0.06,1.1,6),toon(0xb07a46),D.boards.length);
   D.boards.forEach(([txt,bx,bz],i)=>{
-    M.compose(V.set(bx,0.7,bz),Q.identity(),S);bposts.setMatrixAt(i,M);
-    const board=new THREE.Mesh(new THREE.PlaneGeometry(1.5,1.0),curveMat(new THREE.MeshBasicMaterial({map:diverseyBoardTex(txt),side:THREE.DoubleSide})));
-    board.position.set(bx,1.6,bz);board.rotation.y=Math.PI/2;scene.add(board);   // face down the range (east/west)
+    M.compose(V.set(bx,0.55,bz),Q.identity(),S);bposts.setMatrixAt(i,M);
+    // back-to-back FrontSide pair (faces both ways down the range, east/west) so
+    // the yardage never reads mirrored — a lone DoubleSide plane showed the number
+    // flipped from the far side (PITFALLS: DoubleSide canvas plane mirrors).
+    const boardG=new THREE.PlaneGeometry(1.5,1.0);
+    const boardM=curveMat(new THREE.MeshBasicMaterial({map:diverseyBoardTex(txt)}));  // FrontSide
+    const boardE=new THREE.Mesh(boardG,boardM);boardE.position.set(bx+0.02,1.6,bz);boardE.rotation.y=Math.PI/2;scene.add(boardE);
+    const boardW=new THREE.Mesh(boardG,boardM);boardW.position.set(bx-0.02,1.6,bz);boardW.rotation.y=-Math.PI/2;scene.add(boardW);
   });
   bposts.instanceMatrix.needsUpdate=true;scene.add(bposts);
   // ~30 scattered balls downrange (instanced, local rng)
@@ -723,7 +729,10 @@ function buildDiversey(POSTS,RAILS){
   };
   const signM=new THREE.Mesh(new THREE.PlaneGeometry(2.0,0.69),curveMat(new THREE.MeshBasicMaterial({map:mgSignTex(sgn.text)})));
   signM.position.set(sgn.x,1.3,sgn.z);signM.rotation.y=sgn.ry;scene.add(signM);
-  const spost=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,1.3,6),toon(mg.pole));spost.position.set(sgn.x,0.65,sgn.z);scene.add(spost);
+  // post BEHIND the FrontSide panel (offset along −normal) so it never covers the
+  // text — was planted at the panel's center depth, grazing the word's underside.
+  const spost=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,1.3,6),toon(mg.pole));
+  spost.position.set(sgn.x-Math.sin(sgn.ry)*0.14,0.65,sgn.z-Math.cos(sgn.ry)*0.14);scene.add(spost);
 
   // ===================================================================
   //  TWO-TIER BAY BUILDING (Topgolf-style) + TALL PERIMETER NET

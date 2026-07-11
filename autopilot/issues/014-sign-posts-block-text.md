@@ -1,5 +1,14 @@
 # 014 — sign posts planted in front of the face, blocking text (systemic)
 
+> RESOLVED by task 032 (commit on branch autopilot). Every lakefront sign
+> builder audited: CPD entrance posts moved BEHIND the panel; honorary blade,
+> RED LINE pylon, and Diversey-board posts shortened to END at the panel bottom
+> (lollipop); mini-golf + cream park-sign posts offset behind their FrontSide
+> panels. Verified from the reading side in run032b + run-mrfnqhld (cpd-front,
+> redline-front, zone-harbor-pier-f2, sign-belmont-harbor-f0). Wrigleyville
+> hard-cell signs had no post defect (see task 036 for their mirror sweep).
+
+
 - severity: medium (owner: "applies to all signs with that issue" — wayfinding
   signage is a first-read element for the recognizable-to-locals promise)
 - evidence: owner screenshot refs/inbox/owner-issue-014-sign-posts-block-text-x14.6-z107.2.png

@@ -203,8 +203,10 @@ function buildCar() {
 // ------------------------- boarding pylon (Belmont) --------------------
 function buildPylon() {
   const grp = new THREE.Group();
-  const post = new THREE.Mesh(new THREE.BoxGeometry(0.22, 3.4, 0.22), toon(0x3a3a42));
-  post.position.y = 1.7; grp.add(post);
+  // pole ENDS at the sign's bottom edge (y 2.275) so it never crosses the text
+  // band — previously a full 3.4 m post bisected ADDISON/WRIGLEY FIELD (issue 014).
+  const post = new THREE.Mesh(new THREE.BoxGeometry(0.22, 2.275, 0.22), toon(0x3a3a42));
+  post.position.y = 1.1375; grp.add(post);
   const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128;
   const g = cv.getContext('2d');
   g.fillStyle = '#1f1e24'; g.fillRect(0, 0, 256, 128);
@@ -214,8 +216,12 @@ function buildPylon() {
   g.font = '700 20px "Trebuchet MS",sans-serif';
   g.fillText('ADDISON →', 128, 66); g.fillText('WRIGLEY FIELD', 128, 94);
   g.font = '600 13px "Trebuchet MS",sans-serif'; g.fillText('game day service', 128, 116);
-  const sign = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 0.85), bmat(0xffffff, { map: new THREE.CanvasTexture(cv), side: THREE.DoubleSide }));
-  sign.position.set(0, 2.7, 0); sign.rotation.y = Math.PI / 2; grp.add(sign);
+  // back-to-back FrontSide pair — readable from the plaza (east) AND the underpass
+  // exit (west); a lone DoubleSide plane read RED LINE mirrored from behind (PITFALLS).
+  const tex = new THREE.CanvasTexture(cv);
+  const sgeo = new THREE.PlaneGeometry(1.7, 0.85), smat = bmat(0xffffff, { map: tex });
+  const signE = new THREE.Mesh(sgeo, smat); signE.position.set(0.01, 2.7, 0); signE.rotation.y = Math.PI / 2; grp.add(signE);
+  const signW = new THREE.Mesh(sgeo, smat); signW.position.set(-0.01, 2.7, 0); signW.rotation.y = -Math.PI / 2; grp.add(signW);
   grp.position.set(15.4, 0, 107.2);           // south of the underpass mouth, clear of the CPD board
   const lf = getCell('lakefront');            // parent into the lakefront cell root
   lf.root.add(grp);                           // so it hides with the rest of the cell

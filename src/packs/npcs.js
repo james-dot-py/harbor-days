@@ -180,9 +180,13 @@ onWorldReady(player=>{
   // umbrella pole + striped canopy
   const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,3.0,8),toon(0x8a8a8a));pole.position.set(CX,1.6,CZ);scene.add(pole);
   const umb=new THREE.Mesh(new THREE.ConeGeometry(1.5,0.8,12),bmat(0xffffff,{map:stripeTex()}));umb.position.set(CX,3.15,CZ);scene.add(umb);
-  // RED HOTS sign (south face, toward the trail)
-  const sign=new THREE.Mesh(new THREE.PlaneGeometry(1.15,0.5),bmat(0xffffff,{map:hotsTex(),side:THREE.DoubleSide,transparent:true}));
-  sign.position.set(CX,1.72,CZ+0.62);scene.add(sign);
+  // RED HOTS sign — back-to-back FrontSide pair (front toward the trail +z, back
+  // toward the vendor -z). A lone DoubleSide plane showed MIRRORED text from
+  // behind (PITFALLS); each face points outward so neither side mirrors.
+  const hotsM=bmat(0xffffff,{map:hotsTex(),side:THREE.FrontSide,transparent:true});
+  const hotsG=new THREE.PlaneGeometry(1.15,0.5);
+  const signF=new THREE.Mesh(hotsG,hotsM); signF.position.set(CX,1.72,CZ+0.63); scene.add(signF);
+  const signB=new THREE.Mesh(hotsG,hotsM); signB.position.set(CX,1.72,CZ+0.61); signB.rotation.y=Math.PI; scene.add(signB);
 
   const vendor=makeNPC({x:CX,z:CZ-1.6,ry:0,palette:{suit:0xe8e2d0,pants:0x333a44,skin:0xe0a878,hair:0x2a2018,face:true},   // setFace at runtime → keep live eyes
     name:'vendor',lines:["encased meats, my friend","steamed, never boiled","get 'em while they're hot","no ketchup — house rules","you want the works, dontcha"]});
