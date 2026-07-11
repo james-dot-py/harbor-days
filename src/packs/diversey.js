@@ -33,7 +33,9 @@ import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { onWorldReady, registerUpdate, addInteraction, chargeThrow, camForward,
          toast, journalSection, state, getAudioCtx } from '../framework.js';
-import { scene, toon, clamp, pip } from '../core.js';
+import { scene, camera, toon, clamp, lerp, lerpAngle, pip } from '../core.js';
+import { cam } from '../input.js';
+import { mayor } from '../character.js';
 import { DIVERSEY as D } from '../data/chicago.js';
 
 // local deterministic rng — NEVER the shared core rng()/rand()
@@ -117,6 +119,26 @@ onWorldReady(()=>{
   const flight={i:1,x:0,y:0,z:0,vx:0,vy:0,vz:0,live:false};
   let rangeNext=1;                                   // next flight instance (cycles 1..maxBalls-1)
 
+  // --------------------- SWING-SESSION CAMERA (issue 015) --------------------
+  // The bay is an enclosed shell open only to the north; the normal chase cam
+  // ends up behind/inside it, so you can't see the ball fly. While a bucket is
+  // live in a bay we OWN the camera (packs run their update AFTER main.js sets
+  // the chase cam — the binocular precedent in nature.js): an over-the-shoulder
+  // framing from inside the bay opening, locked downrange (NORTH) with a little
+  // manual aim freedom, holding the full arc + landing, then easing back to the
+  // mat for the next ball. Control releases (lerp back, no snap-pop) when the
+  // bucket empties or the player walks out of the bay. No new meshes, no rng,
+  // no per-frame allocation (build-scope scratch vectors only).
+  const CAM_Y=2.0, CAM_BACK=1.0, CAM_SIDE=1.7;   // anchor offset from (bay x, HIT.z): up / south / east
+  // ^ SIDE pushes the bay's blank front screen (at bay centre) out to the frame
+  //   edge; BACK keeps the anchor forward of the ceiling slab so a high arc is
+  //   never occluded. AIM look-at frames the mat + range downrange.
+  const AIM_D=16, AIM_Y=2.15;
+  const YAW_N=Math.PI, YAW_FREE=0.3;             // north facing; ± manual aim yaw
+  const sess={active:false, bx:HIT.xs[0], phase:'aim', releaseT:0, endAfter:false, seed:false};
+  const _cp=new THREE.Vector3(), _ct=new THREE.Vector3();   // smoothed cam pos + look target
+  const _dP=new THREE.Vector3(), _dT=new THREE.Vector3();   // per-frame desired targets (no alloc)
+
   function launchBall(bx,power){
     if(flight.live)return;
     const i=rangeNext; rangeNext++; if(rangeNext>=P.maxBalls)rangeNext=1;
@@ -131,9 +153,12 @@ onWorldReady(()=>{
     state.rangeBucket--;
     refreshRangeLabels();
     sThwack();
+    if(sess.active){ sess.phase='flight'; if(state.rangeBucket<=0)sess.endAfter=true; }   // watch this one fly; last ball ends the session
   }
   function startSwing(bx){
     if(flight.live)return;                            // ignore while a ball is airborne
+    if(!sess.active){ sess.active=true; sess.phase='aim'; sess.endAfter=false; sess.seed=true; cam.yaw=YAW_N; }
+    sess.bx=bx;                                       // anchor the swing cam to this bay
     chargeThrow({onRelease:power=>launchBall(bx,power)});
   }
   function settleFlight(){
@@ -149,6 +174,37 @@ onWorldReady(()=>{
       state.rangeBucket=P.bucketN;
     }
     refreshRangeLabels();
+    if(sess.active){ if(sess.endAfter){ sess.phase='release'; sess.releaseT=0; sess.endAfter=false; } else sess.phase='aim'; }
+  }
+  // Drive the camera while a bucket is live in a bay. Called from the pack update
+  // (after main.js positioned the chase cam), so setting camera.position/lookAt
+  // here wins for the frame. Everything below is scratch-vector math — no alloc.
+  function swingCam(dt, pl){
+    // release when the player leaves this bay (walk-out) — then lerp back
+    if(sess.phase!=='release'){
+      const inBay = pl.z>279.0 && pl.z<286.2 && Math.abs(pl.x-sess.bx)<3.4;
+      if(!inBay){ sess.phase='release'; sess.releaseT=0; }
+      else cam.yaw=clamp(cam.yaw,YAW_N-YAW_FREE,YAW_N+YAW_FREE);   // keep the manual aim within downrange freedom
+    }
+    if(sess.phase==='release'){                                   // reconstruct main.js's chase pos + look, ease onto it
+      sess.releaseT+=dt;
+      const dp=Math.max(0,cam.pitch), hz=Math.cos(dp)*cam.dist;
+      _dP.set(pl.x-Math.sin(cam.yaw)*hz, Math.max(pl.y+0.55,(pl.y+1.6)+Math.sin(dp)*cam.dist), pl.z-Math.cos(cam.yaw)*hz);
+      _dT.set(pl.x, pl.y+1.7, pl.z);
+    }else{
+      _dP.set(sess.bx+CAM_SIDE, CAM_Y, HIT.z+CAM_BACK);           // over-the-shoulder, inside the bay opening
+      if(sess.phase==='flight') _dT.set(flight.x, flight.y+0.4, flight.z);   // gently follow the ball (arc + landing)
+      else{ const fx=Math.sin(cam.yaw), fz=Math.cos(cam.yaw); _dT.set(_dP.x+fx*AIM_D, AIM_Y, _dP.z+fz*AIM_D); }   // aim downrange
+      mayor.rotation.y=lerpAngle(mayor.rotation.y, YAW_N, 1-Math.exp(-6*dt));   // face the range (see the back, not the side)
+    }
+    if(sess.seed){ _cp.copy(camera.position); _ct.set(pl.x,pl.y+1.6,pl.z); sess.seed=false; }   // ease-in from the live chase cam
+    const kP = sess.phase==='release'?8:6;
+    const kT = sess.phase==='flight'?8:(sess.phase==='release'?8:5);
+    _cp.lerp(_dP, 1-Math.exp(-kP*dt));
+    _ct.lerp(_dT, 1-Math.exp(-kT*dt));
+    camera.position.copy(_cp);
+    camera.lookAt(_ct);
+    if(sess.phase==='release' && sess.releaseT>0.5) sess.active=false;   // hand control back to main.js
   }
 
   for(const x of HIT.xs){
@@ -223,7 +279,7 @@ onWorldReady(()=>{
   // =================================================================== //
   //  per-frame integration (single registerUpdate, zero allocation)
   // =================================================================== //
-  registerUpdate((dt)=>{
+  registerUpdate((dt,t,player)=>{
     if(dt<0)dt=0;
 
     // ---- range: the one live flight ball ----
@@ -286,6 +342,9 @@ onWorldReady(()=>{
 
     // ---- windmill blades (slow decorative spin) ----
     if(blades)blades.rotation.z+=dt*0.6;
+
+    // ---- swing-session camera: own the camera while a bucket is live in a bay ----
+    if(sess.active)swingCam(dt,player);
   });
 
   // ------------------------------ JOURNAL ----------------------------- //

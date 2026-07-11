@@ -159,6 +159,21 @@ few turns to find; keep each to one line of symptom + fix.
   Diversey boards — issue 014): END the post at the panel's BOTTOM edge (lollipop),
   or offset it behind a single-faced FrontSide panel (makeSign, mini-golf, CPD).
   Two-sided readable signs can't hide a central post "behind" — shorten it instead.
+- An enclosed pocket that hides its own gameplay payoff needs a SESSION camera,
+  not a chase tweak (task 037 / issue 015, Topgolf bay swing): a pack OWNS the
+  camera inside its registerUpdate (which runs AFTER main.js positions the chase
+  cam — the nature.js binocular precedent), overriding camera.position/lookAt for
+  the duration. The non-obvious trap is the upper-deck ceiling SLAB (y≈3.1,
+  spanning the whole bay depth z 279.8–285.6): a camera SOUTH of the slab's north
+  edge looking UP at a high ball has its sightline cross y=3.1 UNDERNEATH the slab
+  → the ball is occluded by the ceiling. Keep the anchor FORWARD (camZ ≈ hit.z+1,
+  ~1 m south of the tee) and LOW (y≈2.0) so every arc's sightline crosses y=3.1
+  NORTH of z=279.8 (clear air). The bay's front SCREEN + the mayor both sit at
+  bay-centre x, so a lateral offset can't separate them — accept the OTS shoulder.
+  Release cleanly by reconstructing main.js's chase pos (player − (sin,cos)yaw ·
+  cos(pitch)·dist, height (py+1.6)+sin(pitch)·dist) and lerping onto it over ~0.5 s
+  before dropping the override — main.js's camPos has tracked there all along, so
+  the handoff has no snap-pop.
 - NEW street-level mass invalidates previously-clear hand-authored framings: the
   034 viaduct bent column (x −146.6, z −408) landed exactly where wv-photo-arrival
   f0's pull-back camera sat — maroon steel filled the whole frame. After adding

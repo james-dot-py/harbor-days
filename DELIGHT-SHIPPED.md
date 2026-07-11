@@ -179,3 +179,8 @@ cut becomes a revert task.
   divider (two sky stripes, four red six-point stars) between the byline and
   'the rocks, the harbor — and the L up to wrigleyville' — title screen —
   task 035
+- Step into a Topgolf bay and the camera becomes a broadcast tower: it lifts
+  over your shoulder, locks downrange, and rides the whole arc of every ball
+  out to the net — then settles back on the mat for the next one. The bay
+  stopped being a blindfold; now you actually get to watch it fly (the payoff
+  the enclosed shell used to hide) — Diversey driving range bays — task 037
