@@ -39,11 +39,11 @@ feasibility inside perf + single-file constraints.
 
 ## Candidates (famous Chicago spots, seeded per §5.3)
 
-- **Wrigley Field INTERIOR (the bowl)** — owner-flagged future content
-  (2026-07-09): a hard cell entered through the existing stadium gates
-  (the train-interior pocket-cell pattern); teased in-world by the gate signs
-  (queue 017). Design deferred by owner — do NOT scout/build until the owner
-  green-lights; keep the gates honest doors when it happens.
+- **Wrigley Field INTERIOR (the bowl)** — GREEN-LIT by owner 2026-07-11
+  ("get a ticket and enter wrigley... a ref chases them") → queue task 055:
+  pocket cell through the Clark/Addison gate, ticket interaction, empty-bowl
+  roam, ivy wall, field-trespass ref chase with cozy ejection. Moves under
+  Wrigleyville's Shipped scope when 055 is green.
 
 - Montrose Harbor and the Magic Hedge — adjacent north; extends the contiguous
   lakefront world; birding + harbor variety.
