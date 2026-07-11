@@ -665,6 +665,24 @@ const VOLS_M = [];
       const pz = T.z0 + (T.z1 - T.z0) * i / ((T.bays || 6) - 1);
       vol(px - r, px + r, pz - r, pz + r, T.colH);                            // trellis columns
     } }
+  // BP bridge parapets (046): chest-high brushed-shingle walls flanking BOTH
+  // deck edges (bridge.js rails at ±2.6). Modeled as small OUTBOARD boxes
+  // tracing each flank at lateral 2.6+0.35 from the deck centerline, so a
+  // down-the-deck camera BETWEEN the parapets never registers (the L-car
+  // interior doctrine) but a cross-body stand parked in a parapet would.
+  { const B = M.BP_BRIDGE_M, nodes = [[168, 0, 796], [186, 3.8, 796], [196, 5, 804], [205, 5, 810]];
+    for (let p = 0; p < nodes.length - 1; p++) {
+      const a = nodes[p], b = nodes[p + 1];
+      const dx = b[0] - a[0], dz = b[2] - a[2], L = Math.hypot(dx, dz);
+      const pxu = dz / L, pzu = -dx / L;                                       // horizontal perp (lateral)
+      for (let t = 0.15; t <= 0.86; t += 0.35) {
+        const cxp = a[0] + dx * t, czp = a[2] + dz * t, yTop = a[1] + (b[1] - a[1]) * t + B.parapetH;
+        for (const s of [-1, 1]) {
+          const ox = cxp + s * 2.95 * pxu, oz = czp + s * 2.95 * pzu;
+          vol(ox - 0.5, ox + 0.5, oz - 0.5, oz + 0.5, yTop);                   // parapet flank block
+        }
+      }
+    } }
 }
 function camPosM(px, pz, f) {
   const down = Math.max(0, f.pitch), up = Math.max(0, -f.pitch);

@@ -255,3 +255,12 @@ few turns to find; keep each to one line of symptom + fix.
   every fresh-load framing (walkthrough reloads per shot, clock from 0) catches
   a spitting face at one wait — alternating left half the framings looking at
   an idle tower while the other's arc smeared confusingly across it.
+- gen-waypoints camWarnM/camPosM models camera y as an ABSOLUTE ~1.7
+  (1.6 + sin(pitch)·dist), NOT surface-relative — so any VOLS_M volume whose
+  yMax is above ~1.7 FALSE-WARNS "[mp-clearance] may sit inside a volume" for a
+  camera standing ON an elevated deck (BP crest y5, task 046) looking down the
+  deck BETWEEN flanking parapets: the camera is genuinely on-deck and clear,
+  but the model thinks it's at y1.7 below the parapet top. Advisory only
+  (non-fatal, gen-waypoints still writes). Model elevated parapets as OUTBOARD
+  boxes off the deck centerline and VERIFY the actual down-deck shot rather than
+  tuning the coarse volume to silence a truthful proximity flag.

@@ -631,6 +631,12 @@ for(const [label,x,z] of [
   ['streetwall zone',20,800],['east backdrop zone',220,800],['giants band',100,686],
 ]) expect(`${label} (${x},${z}) NOT walkable`,MP.walkableM(x,z),false);
 
+console.log('\n--- Millennium: Lurie Seam boardwalk sittable edge (046) ---');
+for(const s of MP.LURIE_M.seam.sits){
+  expect(`sit spot (${s.x},${s.z}) on the boardwalk walkable`,MP.walkableM(s.x,s.z),true);
+  expect(`sit spot (${s.x},${s.z}) at grade y0`,MP.surfaceYM(s.x,s.z),0);
+}
+
 console.log('\n--- Millennium: BP deck — ramp-only elevated access, crest over Columbus ---');
 { const yA=MP.surfaceYM(177,796);
   expect(`approach ramp mid (177,796) rising (${yA.toFixed(2)})`,yA>1.5&&yA<2.4,true); }

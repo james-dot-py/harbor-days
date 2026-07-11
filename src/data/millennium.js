@@ -124,7 +124,14 @@ export const LURIE_M = {
   hedgeN: { x0: 128, x1: 170, z0: 846, z1: 851, h: 4.5 },
   hedgeW: { x0: 124, x1: 129, z0: 846, z1: 876, h: 4.5 },
   gateNE: { x0: 170, x1: 179, z0: 843, z1: 852 },        // walk quad (hedge break)
-  seam: { a: [175, 849.5], b: [144, 874], halfW: 2.5 },  // boardwalk walk quad (rill beneath)
+  seam: { a: [175, 849.5], b: [144, 874], halfW: 2.5,    // boardwalk walk quad (rill beneath)
+    // sittable edge — feet dangle over the rill (the sanctuary-deck pattern:
+    // addSitSpot in packs/millennium.js; y 0, on the boardwalk seg). ON the
+    // walk (offset 0 from centre) so walkprobe proves them walkable.
+    sits: [
+      { x: 162.6, z: 859.3, ry: -2.22 },
+      { x: 155.8, z: 864.7, ry: -2.60 },
+    ] },
   linkSW: { x0: 138, x1: 149, z0: 870, z1: 880 },        // walk quad to the south rim
   southRim: { x0: 130, x1: 182, z0: 878, z1: 886 },      // walk quad along Monroe
   plates: { light: [153.6, 852.5], dark: [167.7, 870.7] }, // salvia/amsonia tapestries (NOT walkable)

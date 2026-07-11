@@ -20,6 +20,8 @@ import { buildPromenade } from './promenade.js';
 import { buildCloudGate } from './cloudgate.js';
 import { buildPritzker } from './pritzker.js';
 import { buildCrown } from './crown.js';
+import { buildLurie } from './lurie.js';
+import { buildBridge } from './bridge.js';
 
 const _r = mulberry32(0x4d0000 ^ M.SEED_M);
 export const grand = (a = 0, b = 1) => a + (b - a) * _r();
@@ -263,6 +265,8 @@ export function buildMillennium() {
   buildCloudGate();    // THE BEAN — Cloud Gate homage on AT&T Plaza (task 043)
   buildPritzker();     // PRITZKER PAVILION — ribbon crown + red bowl + trellis + lawn life (task 044)
   buildCrown();        // CROWN FOUNTAIN — glass-block face-towers + wet pool + painted reflections (task 045; live faces/spout in packs/crown-fountain.js)
+  buildLurie();        // LURIE GARDEN — shoulder hedge + steel armature + salvia/prairie planting + Seam boardwalk detail (task 046)
+  buildBridge();       // BP BRIDGE — brushed-shingle parapets + wood deck + closed east gate + Maggie Daley treetops (task 046)
   mergeCellStatic(millenniumRoot, 1e6);   // collapse static builder meshes; ONE z-band (compact, always fog-fully-inside, invisible from elsewhere)
   scene.add(millenniumRoot);
   registerCell({

@@ -206,3 +206,10 @@ cut becomes a revert task.
   the landing zone yourself and you get SOAKED — 'SPLASH! soaked head to toe —
   worth it.' The pool doubles the amber glow. — Crown Fountain pool (70, 864)
   — task 045
+
+- Sit by the rill: the Lurie Garden's diagonal plank boardwalk carries a low
+  wood sit-edge over the water seam, and E there settles the mayor down with
+  their feet dangling toward the rill — the secret-garden hush of the big
+  clipped shoulder-hedge walls closing around you while the Gehry ribbons peek
+  over the top. The sanctuary bird-deck's cozy 'take a load off' moment, reborn
+  downtown. — Lurie Seam boardwalk (162.6, 859.3) — task 046
