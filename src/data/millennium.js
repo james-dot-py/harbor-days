@@ -52,12 +52,26 @@ export const BARRIER_M = [
 export const KIOSK_M = { x0: 48, x1: 52.5, z0: 796, z1: 804.5, entry: 'east', pylonZ: 800 };
 
 // ------------------------ landmark anchors -----------------------------
-// Wrigley Square + Millennium Monument (NW): paired-Doric peristyle on a
-// raised plinth (collider), open side SE over its lawn; low curved inscribed
-// wall at the walk corner. osm peristyle footprint 61-73 x 721-727.
+// Wrigley Square + Millennium Monument (NW): semicircular paired-Doric
+// peristyle on a raised curved base, OPEN SIDE SE over its lawn — BUILT 1:1
+// object scale, task 050, from the owner night photo (the 040 rect
+// 61-73 x 721-727 was the raw 1:2 osm plan; Cloud Gate precedent, center
+// kept). Base arc / piers / basin / lamps are builder COLLIDERS standing in
+// the plaza walk quad (statue pattern); the exedra interior stays walkable
+// through the open SE side. peristyle.x0..z1 = built bounding box (tools
+// containment checks). Shared by src/millennium/wrigleymonument.js and
+// tools/gen-waypoints.mjs VOLS_M.
 export const WRIGLEY_SQ_M = {
   plaza: { x0: 57, x1: 96, z0: 713, z1: 752 },   // walk quad
-  peristyle: { x0: 61, x1: 73, z0: 721, z1: 727, cx: 67, cz: 724, open: 'SE', colH: 9 },
+  peristyle: {
+    cx: 68, cz: 724.5, open: 'SE',               // arc center; opening faces SE (+x,+z diagonal)
+    rOut: 9.0, rIn: 7.6, cols: 12,               // paired Doric rings, 12 columns each
+    baseH: 2.2, colH: 8.0, entabH: 1.3,          // curved base + shafts + entablature ≈ 11.5 crown
+    x0: 57.9, x1: 75.8, z0: 714.4, z1: 732.3,    // built bounding box (step ring r 10.1; rotated end piers)
+  },
+  fountain: { x: 70.8, z: 727.3, r: 2.4, jetH: 3.6 },  // single-jet basin at the exedra's foot
+  urns: [[73.9, 718.6], [62.1, 730.4]],          // planter urns on the chord-end piers
+  lamps: [[77.1, 721.8], [65.3, 733.6]],         // quad-globe period lamps at the lawn approach
   lawn: { x0: 58, x1: 90, z0: 730, z1: 750 },    // visual (inside the plaza quad)
   wall: { x: 78, z: 749, text: 'WRIGLEY SQUARE' },
   grate: { x: 72, z: 709 },                      // Millennium Station rumble flavor (delight seed)

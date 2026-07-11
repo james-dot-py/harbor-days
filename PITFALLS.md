@@ -314,3 +314,11 @@ few turns to find; keep each to one line of symptom + fix.
   lower band from every on-ice view). Hang facade detail off the wall's exposed
   FACE plane, put the must-read band in the top strip, and verify with a low
   from-the-floor framing, not plan math.
+- NEVER put canvas TEXT in a shared texture ATLAS next to live regions: headless
+  Chromium lacks Georgia and its serif fallback measures ~35% wider, so a
+  centered fillText spilled past its region into the gold strip — every
+  base/pier face wore a "TO T" hat while the uv math was provably correct
+  (task 050 burned a full diagnose loop; tools/tmp-atlas-dump.mjs-style canvas
+  dump settled it instantly). Text gets its OWN canvas + measureText-FITTED
+  font (the 028 word-sign law), atlases stay letter-free with padded regions,
+  and when a texture bug defies uv math, DUMP THE CANVAS to a PNG and look.

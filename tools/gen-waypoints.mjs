@@ -683,6 +683,21 @@ const VOLS_M = [];
         }
       }
     } }
+  // Millennium Monument peristyle (050): the closed NW arc (base + columns +
+  // entablature) traced as small boxes along the base radius, plus the
+  // chord-end urn piers, the fountain basin and the two approach lamps. The
+  // exedra interior and the open SE side stay clear for interior framings.
+  { const P = M.WRIGLEY_SQ_M.peristyle, F = M.WRIGLEY_SQ_M.fountain;
+    const rB = (P.rOut + P.rIn) / 2, crown = P.baseH + P.colH + P.entabH;
+    for (let k = 0; k < 10; k++) {
+      const th = 3 * Math.PI / 4 + (k + 0.5) * Math.PI / 10;
+      const x = P.cx + Math.cos(th) * rB, z = P.cz + Math.sin(th) * rB;
+      vol(x - 1.6, x + 1.6, z - 1.6, z + 1.6, crown);
+    }
+    for (const [ux, uz] of M.WRIGLEY_SQ_M.urns) vol(ux - 1.4, ux + 1.4, uz - 1.4, uz + 1.4, P.baseH + 2.4);
+    vol(F.x - F.r, F.x + F.r, F.z - F.r, F.z + F.r, 0.7);
+    for (const [lx, lz] of M.WRIGLEY_SQ_M.lamps) vol(lx - 0.4, lx + 0.4, lz - 0.4, lz + 0.4, 4.8);
+  }
 }
 function camPosM(px, pz, f) {
   const down = Math.max(0, f.pitch), up = Math.max(0, -f.pitch);
@@ -712,10 +727,24 @@ addM('mp-streetwall', [
   { x: 108, z: 812, yaw: -Math.PI / 2, pitch: -0.1, dist: 6 },
   { x: 66, z: 766, yaw: -Math.PI / 2, pitch: -0.06, dist: 7 },
 ]);
+// 050: the Millennium Monument is BUILT (1:1 semicircular arc, open side SE
+// — the 041-shell framings assumed an open-S plinth). f2's straight-north
+// head-on became an inside-the-exedra shot: stand near the arc center
+// looking NW INTO the colonnade (axis-aligned to the opening, up-tilted).
 addM('mp-peristyle', [
-  { x: 78, z: 736, yaw: -2.40, pitch: 0.08, dist: 7 },
-  { x: 84, z: 744, yaw: -2.35, pitch: 0.08, dist: 9 },
-  { x: 67, z: 738, yaw: Math.PI, pitch: 0.08, dist: 7 },
+  { x: 78, z: 736, yaw: -2.40, pitch: 0.06, dist: 7 },
+  { x: 84, z: 744, yaw: -2.35, pitch: 0.05, dist: 9 },
+  { x: 69.4, z: 725.9, yaw: -2.356, pitch: -0.14, dist: 6.2 },
+]);
+// 050 NEW: the owner-photo vantage (owner-wrigley-square-night.webp,
+// "x=85.4 z=734.5") — lawn apron foreground, purple colonnade over the warm
+// gold base + fountain jet mid, lit Michigan Ave towers stacked behind.
+// f1 = head-on down the SE axis; f2 = fountain + dedication band close
+// (yaw aimed right of the basin so the mayor doesn't eclipse the jet).
+addM('mp-wrigley-square', [
+  { x: 85.4, z: 734.5, yaw: -2.09, pitch: 0.02, dist: 8 },
+  { x: 78, z: 734.5, yaw: -2.356, pitch: 0.03, dist: 7 },
+  { x: 74.8, z: 730.6, yaw: -1.95, pitch: 0.06, dist: 4.6 },
 ]);
 // 049: the McCormick sunken cafe was rebuilt as the McCormick Tribune ICE
 // RINK. Stands ON the ice/pit sit at floor y −1.6, so the chase cam rides low

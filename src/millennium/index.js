@@ -23,6 +23,7 @@ import { buildCrown } from './crown.js';
 import { buildLurie } from './lurie.js';
 import { buildBridge } from './bridge.js';
 import { buildRink } from './rink.js';
+import { buildWrigleyMonument } from './wrigleymonument.js';
 
 const _r = mulberry32(0x4d0000 ^ M.SEED_M);
 export const grand = (a = 0, b = 1) => a + (b - a) * _r();
@@ -243,7 +244,7 @@ function buildMinimapBase() {
   dot(M.CLOUD_GATE_M.bean.cx, M.CLOUD_GATE_M.bean.cz, '#d8dde4', 5);         // the Bean
   dot(69.8, 864, '#e8b64c', 4);                                             // Crown
   dot(146.5, 752, '#d8d2c4', 4);                                           // Pritzker
-  dot(67, 724, '#e6ddc8', 4);                                             // Wrigley Sq
+  dot(68, 724.5, '#e6ddc8', 4);                                           // Wrigley Sq monument
   dot((M.KIOSK_M.x0 + M.KIOSK_M.x1) / 2, M.KIOSK_M.pylonZ, '#c62828', 4);   // subway kiosk
   return cv;
 }
@@ -262,6 +263,7 @@ export function buildMillennium() {
   buildLurie();        // LURIE GARDEN — shoulder hedge + steel armature + salvia/prairie planting + Seam boardwalk detail (task 046)
   buildBridge();       // BP BRIDGE — brushed-shingle parapets + wood deck + closed east gate + Maggie Daley treetops (task 046)
   buildRink();         // McCORMICK ICE RINK — sunken sheet, boards, stairs, Park Grill band (task 049; glide/NPCs in packs/skating.js)
+  buildWrigleyMonument(); // MILLENNIUM MONUMENT — purple-lit peristyle + fountain + urns + lamps (task 050, owner night photo)
   mergeCellStatic(millenniumRoot, 1e6);   // collapse static builder meshes; ONE z-band (compact, always fog-fully-inside, invisible from elsewhere)
   scene.add(millenniumRoot);
   registerCell({

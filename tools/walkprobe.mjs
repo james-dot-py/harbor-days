@@ -765,7 +765,24 @@ console.log('\n--- Millennium: frame discipline (clamp, spawn, billboard floor, 
   expect('crown pool inside its plaza',CR.pool.x0>=CR.plaza.x0&&CR.pool.x1<=CR.plaza.x1&&CR.pool.z0>=CR.plaza.z0&&CR.pool.z1<=CR.plaza.z1,true);
   expect('both crown towers inside the pool',CR.towers.every(t=>t.x0>=CR.pool.x0&&t.x1<=CR.pool.x1&&t.z0>=CR.pool.z0&&t.z1<=CR.pool.z1),true);
   expect('trellis stops W of the BP approach',MP.PRITZKER_M.trellis.x1<=MP.BP_BRIDGE_M.approach.x0,true);
-  expect('peristyle inside the Wrigley Sq plaza',MP.WRIGLEY_SQ_M.peristyle.x0>=MP.WRIGLEY_SQ_M.plaza.x0&&MP.WRIGLEY_SQ_M.peristyle.z1<=MP.WRIGLEY_SQ_M.plaza.z1,true);
+  // Wrigley Square + Millennium Monument (050: built 1:1 arc — base/piers/
+  // basin/lamps are colliders in the plaza walk quad; the issue-017 class
+  // guard makes every non-walk spot BLOCKED, never water)
+  const WQ=MP.WRIGLEY_SQ_M,PE=WQ.peristyle,PF=WQ.fountain;
+  expect('peristyle bbox inside the Wrigley Sq plaza',
+    PE.x0>=WQ.plaza.x0&&PE.x1<=WQ.plaza.x1&&PE.z0>=WQ.plaza.z0&&PE.z1<=WQ.plaza.z1,true);
+  expect('arc extremes inside the declared bbox (step ring r = rBase+1.8)',
+    PE.cx-((PE.rOut+PE.rIn)/2+1.8)>=PE.x0-0.01&&PE.cz-((PE.rOut+PE.rIn)/2+1.8)>=PE.z0-0.01,true);
+  expect('fountain basin inside the plaza walk quad',
+    PF.x-PF.r>=WQ.plaza.x0&&PF.x+PF.r<=WQ.plaza.x1&&PF.z-PF.r>=WQ.plaza.z0&&PF.z+PF.r<=WQ.plaza.z1,true);
+  expect('basin clear of the base arc inner face',
+    Math.hypot(PF.x-PE.cx,PF.z-PE.cz)+PF.r<=(PE.rOut+PE.rIn)/2-1.5-0.2,true);
+  expect('owner vantage (85.4,734.5) walkable at grade',
+    MP.walkableM(85.4,734.5)&&MP.surfaceYM(85.4,734.5)===0,true);
+  expect('exedra interior walkable through the open SE side',
+    MP.walkableM(PE.cx+2,PE.cz+2),true);
+  expect('approach lamps + urn piers stand in the plaza walk quad',
+    [...WQ.lamps,...WQ.urns].every(([x,z])=>MP.walkableM(x,z)),true);
 }
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);

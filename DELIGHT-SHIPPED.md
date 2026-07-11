@@ -254,3 +254,10 @@ cut becomes a revert task.
   pace, arms out, wobbling — and every so often stops dead for a knee-dip
   near-fall before soldiering on ("ope — still learning!"). — McCormick rink
   east boards (~71.5, 799) — task 049
+- Purple on gold: the Millennium Monument peristyle washes VIOLET from its
+  uplights over a warm-gold base and a single glowing fountain jet — the
+  owner's night photo made permanent at the game's perpetual dusk; step
+  inside the exedra and the colonnade wraps the whole sky. Dedicated "TO THE
+  FOUNDERS OF MILLENNIUM PARK" — and the square shares its name with the
+  neighborhood the Red Line just connected. — Wrigley Square (68, 724.5) —
+  task 050

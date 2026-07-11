@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-11T18:32:18.488Z",
- "count": 91,
+ "generated": "2026-07-11T19:25:30.003Z",
+ "count": 92,
  "waypoints": [
   {
    "id": "spawn",
@@ -2081,25 +2081,56 @@
      "x": 78,
      "z": 736,
      "yaw": -2.4,
-     "pitch": 0.08,
+     "pitch": 0.06,
      "dist": 7
     },
     {
      "x": 84,
      "z": 744,
      "yaw": -2.35,
-     "pitch": 0.08,
+     "pitch": 0.05,
      "dist": 9
     },
     {
-     "x": 67,
-     "z": 738,
-     "yaw": 3.14,
-     "pitch": 0.08,
-     "dist": 7
+     "x": 69.4,
+     "z": 725.9,
+     "yaw": -2.36,
+     "pitch": -0.14,
+     "dist": 6.2
     }
    ],
-   "expectation": "A semicircular peristyle of paired pale Doric columns on a raised plinth curves around a fountain basin at the lawn's north-west corner, framed against glass office giants; a low curved limestone wall nearby reads WRIGLEY SQUARE. (041 SHELL: the plinth pad, the inscribed WRIGLEY SQUARE wall and the cliff/office backdrop must read; the Doric peristyle itself is deferred — judge ground + signage + backdrop only.)"
+   "expectation": "A semicircular peristyle of paired Doric columns on a raised curved base sweeps around a single-jet fountain basin at the lawn's north-west corner — the columns washed purple by uplights over a warm gold-lit base — framed against glass office giants; the interior framing stands inside the exedra with the purple colonnade wrapping around; a low curved limestone wall nearby reads WRIGLEY SQUARE."
+  },
+  {
+   "id": "mp-wrigley-square",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 85.4,
+   "z": 734.5,
+   "framings": [
+    {
+     "x": 85.4,
+     "z": 734.5,
+     "yaw": -2.09,
+     "pitch": 0.02,
+     "dist": 8
+    },
+    {
+     "x": 78,
+     "z": 734.5,
+     "yaw": -2.36,
+     "pitch": 0.03,
+     "dist": 7
+    },
+    {
+     "x": 74.8,
+     "z": 730.6,
+     "yaw": -1.95,
+     "pitch": 0.06,
+     "dist": 4.6
+    }
+   ],
+   "expectation": "The owner night-photo read from the Wrigley Square lawn: across the open lawn apron the Millennium Monument's semicircular Doric colonnade glows PURPLE from uplights above a WARM GOLD-washed curved base carrying a dark dedication band (TO THE FOUNDERS OF MILLENNIUM PARK), a single lit fountain jet rises at its foot between flanking planter urns and twin-globe period lamps, and the lit Michigan Avenue towers stack tall behind the crown — purple-on-gold reading civic-elegant, not neon."
   },
   {
    "id": "mp-rink-overlook",
