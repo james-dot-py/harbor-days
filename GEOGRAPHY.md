@@ -329,6 +329,7 @@ Corridor = road + both sidewalks, walkable curb to curb.
 | Rooftop brownstones | N of Waveland x −226…−199, z −588…−574 (middle one climbable, roof y 9.6) + E of Sheffield x −178…−164, z −534…−486 |
 | Cubby Bear + Clark bar row | Cubby x −316…−300, z −386…−372 (SW corner, opposite the marquee) + bar row west of Clark z −488…−418 (lots at clarkX−22…−10). Likenesses (task 010): Cubby = BLONDE-brick corner block (per refs/cubby-bear/ 2018 photo — not red), black storefront fascia + window neon, maroon corner door, diamond THE CUBBY BEAR logo both faces, dark-green cornice, rooftop billboard truss. Bar row: Sluggers cream w/ yellow-red sign bands (no CC photo — hand-modeled to type); Sports Corner cream 3-storey, vertical blue blade sign, navy awnings, glassy 2nd floor, roof-deck rail (refs/sports-corner/); Casey Moran's white classical, arched 2nd-floor windows, green-gold sign band (sign text CASEY MORAN'S; data name stays CASEY'S for waypoint-id stability; no CC photo); The Dugout dark-brick + black storefront, white hand-lettered band (no CC photo) |
 | Sluggers rooftop cage | clarkBars[0] ('SLUGGERS', z −488…−472) is a LOW 2-storey bar (roof y 6.8) whose ROOF is the batting-cage destination (owner note 2026-07-08 → task 009): an exterior stair up the street (east) face → a rooftop deck holding the fast-pitch cage. Anchors + walkability in SLUGGERS_W (rotated-rect quads in the building's LOCAL frame, shared by the engine + walkprobe) |
+| **Owner photo-fidelity dressing (task 034**, per refs/wrigleyville/owner-photoset-2026-07-10/ — nine judged `wv-photo-*` waypoints make the owner's nine vantages permanent measurements) | (a) the stadium light towers carry wide WHITE LATTICE BANKS (merged lattice head geometry on the existing 8 masts — the photos' street-visible skyline signature; bare masts never read); (b) the Addison bridge UNDERSIDE is dressed steel (stringers + flat X-bracing under the deck, braced column bents at both curb lines z −408/−392 with colliders, grime streaks on the abutment faces) per the under-redline photo; (c) a rooftop AD BILLBOARD (house-style NO CURVEBALLS baseball ad) rides the SE Clark/Addison corner fabric lot roof (~−263.5, −380.5, greystone lot, h 13) angled at the intersection — with Cubby's board the two bracket the corner like the real pair; (d) a round LUCKY STRIKE disc blade (the real bowling anchor of the Addison & Clark block) projects from the whitegrill addison-s lot at ~x −231.5 over the south sidewalk — the arrival-walk register |
 
 ### Walkability (game-day street closure = the clamp, diegetically)
 Walkable = corridor quads only (WALK_W in wrigleyville.js — the single
@@ -381,6 +382,12 @@ Lakeview backdrop band (BACKDROP_W).
   FIELD lettering, task 012): the real board's back is plain green with ad
   boards; ours is dressed so the score reads from the Waveland rooftops —
   legibility liberty, echoing the real back-side ad panels.
+- **Clark bar-row TENANCY vs the owner photoset (2026-07-10, task 034)**: the
+  real NW Clark & Addison corner is Hotel Zachary / Swift & Sons, and the real
+  Sports Corner + The Dugout sit at Sheffield & Addison / beside the Red Line;
+  the game keeps them gathered on the Clark bar row (006/010 sign-off — the
+  evocation panel recognized the row instantly). `wv-photo-swift-and-sons` and
+  `wv-photo-arrival` judge the corner-ANCHOR read, never the tenancy.
 - Perpetual game day (crowd inside, barricades out, bars loud). The lakefront's
   Wrigley-glow backdrop gag stays for the lakefront; it hides while the
   Wrigleyville cell is active (Wave-3 wiring).

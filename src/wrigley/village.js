@@ -182,6 +182,36 @@ function cubbyBillboardTex() {                       // rooftop truss ad
   g.fillStyle = '#ffffff'; g.font = '800 78px "Arial Black",Arial,sans-serif'; g.fillText('GO CUBS', 306, 76);
   return tx(cv);
 }
+function cornerBillboardTex() {                      // SE-corner rooftop ad (fiber-internet gag)
+  const [cv, g] = cvTex(512, 144);
+  g.fillStyle = '#f2ede2'; g.fillRect(0, 0, 512, 144);                            // warm-white ground
+  g.fillStyle = '#ffffff'; g.beginPath(); g.arc(74, 72, 52, 0, 7); g.fill();      // baseball
+  g.strokeStyle = '#b9b2a4'; g.lineWidth = 2; g.beginPath(); g.arc(74, 72, 52, 0, 7); g.stroke();
+  g.strokeStyle = '#c0392b'; g.lineWidth = 2.5;                                   // two red seam arcs
+  g.beginPath(); g.arc(48, 72, 66, -0.5, 0.5); g.stroke();
+  g.beginPath(); g.arc(100, 72, 66, Math.PI - 0.5, Math.PI + 0.5); g.stroke();
+  g.lineWidth = 1.6; for (let i = -3; i <= 3; i++) { const yy = 72 + i * 8;       // perpendicular V ticks
+    g.beginPath(); g.moveTo(102, yy - 3); g.lineTo(112, yy); g.moveTo(102, yy + 3); g.lineTo(112, yy); g.stroke();
+    g.beginPath(); g.moveTo(46, yy - 3); g.lineTo(36, yy); g.moveTo(46, yy + 3); g.lineTo(36, yy); g.stroke(); }
+  g.fillStyle = '#0e2f66'; g.textAlign = 'center'; g.textBaseline = 'middle';     // navy slogan (fit so it never clips)
+  let fs = 62; g.font = `800 ${fs}px "Arial Black",Arial,sans-serif`;
+  while (g.measureText('NO CURVEBALLS.').width > 320 && fs > 20) { fs -= 2; g.font = `800 ${fs}px "Arial Black",Arial,sans-serif`; }
+  g.fillText('NO CURVEBALLS.', 300, 62);
+  g.fillStyle = '#5c6270'; g.font = '700 20px "Trebuchet MS",Arial,sans-serif';
+  g.fillText('WRIGLEYVILLE FIBER · 5 YEARS FLAT', 300, 104);
+  return tx(cv);
+}
+function luckyStrikeTex() {                          // round two-sided bowling blade (alpha)
+  const [cv, g] = cvTex(256, 256);
+  g.clearRect(0, 0, 256, 256);
+  g.fillStyle = '#7a2230'; g.beginPath(); g.arc(128, 128, 116, 0, 7); g.fill();   // maroon ring
+  g.fillStyle = '#f2ede2'; g.beginPath(); g.arc(128, 128, 88, 0, 7); g.fill();    // cream disc
+  g.fillStyle = '#1a2a52'; g.textAlign = 'center'; g.textBaseline = 'middle';     // stacked navy name
+  g.font = '800 40px "Arial Black",Arial,sans-serif';
+  g.fillText('LUCKY', 128, 108); g.fillText('STRIKE', 128, 150);
+  g.fillStyle = '#c0392b'; for (const [dx, dy] of [[0, 182], [-11, 196], [11, 196]]) { g.beginPath(); g.arc(128 + dx, dy, 5, 0, 7); g.fill(); }   // bowling-pin dot trio
+  return tx(cv);
+}
 function bearTex() {                                 // round bear-face logo disc
   const [cv, g] = cvTex(256, 256);
   g.clearRect(0, 0, 256, 256);
@@ -600,19 +630,45 @@ function buildCubby() {
     add(M(new THREE.BoxGeometry(0.16, 0.18, 1.5), toon(0xcbb488), b.x1 + 0.08, 6.95, wz));
     for (const s of [-1, 1]) add(M(new THREE.BoxGeometry(0.16, 0.4, 0.22), toon(0xcbb488), b.x1 + 0.08, 6.65, wz + s * 0.66)); }
   // (h) ROOFTOP BILLBOARD TRUSS facing NE toward Clark & Addison
-  cubbyBillboard(b.x1 - 3, b.z0 + 3, H, ne);
+  rooftopBillboard(b.x1 - 3, b.z0 + 3, H, ne, cubbyBillboardTex());
   collide(cx, cz, 8);
 }
-function cubbyBillboard(x, z, roof, ry) {
+// rooftop truss + ad board; posts/back reuse cached toon() pool colors (+0 draws),
+// face folds into the shared opaque atlas. Board/face widen with `w`.
+function rooftopBillboard(x, z, roof, ry, tex, w = 9.6) {
   const post = toon(0x2c2620);
   const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = ry;
   for (const lx of [-4.6, -1.6, 1.6, 4.6]) g.add(M(new THREE.BoxGeometry(0.16, 2.2, 0.16), post, lx, roof + 1.1, 0));
   for (const lx of [-3.1, 0, 3.1]) { const xb = M(new THREE.BoxGeometry(3.0, 0.09, 0.09), post, lx, roof + 1.1, 0); xb.rotation.z = 0.62; g.add(xb); }   // X-brace hints
-  g.add(M(new THREE.BoxGeometry(9.6, 2.7, 0.16), toon(0x22242a), 0, roof + 3.0, 0));
-  const face = new THREE.Mesh(new THREE.PlaneGeometry(9.2, 2.4), bmat(0xffffff, { map: cubbyBillboardTex() }));
+  g.add(M(new THREE.BoxGeometry(w, 2.7, 0.16), toon(0x22242a), 0, roof + 3.0, 0));
+  const face = new THREE.Mesh(new THREE.PlaneGeometry(w - 0.4, 2.4), bmat(0xffffff, { map: tex }));
   face.position.set(0, roof + 3.0, 0.1); g.add(face);
   g.updateMatrixWorld(true); atlasPlane(face, false);
   add(g);
+}
+// Two 2026 Wrigleyville-photoset additions on the addison-s fabric lots (built by
+// dressing.js, face plane z = -384, storefronts facing north / yaw π). Lot geometry
+// re-derived from dressing recipes — MUST be re-checked if those recipes change:
+//   lot 0 'greystone'  w13 h13  centre x -261.5  span x -268..-255  body z -383.55..-376.55
+//   lot 2 'whitegrill' w13 h13  centre x -236.5  span x -243..-230
+function buildAddisonCornerBillboard() {
+  // (A) SE-corner rooftop AD BILLBOARD on the greystone lot roof (h 13), face aimed
+  //     at the Clark & Addison intersection (~(-281,-400)): -2.41 rad ⇒ normal
+  //     (sin,cos) ≈ (-0.66,-0.75). Brackets the intersection with the Cubby board.
+  rooftopBillboard(-263.5, -380.5, 13, -2.41, cornerBillboardTex());
+  // (B) LUCKY STRIKE round two-sided disc projecting over the sidewalk from the
+  //     whitegrill lot, near its east end (x -231.5). Wall face z -384; arm reaches
+  //     north to z -385.5, a short drop link touches the disc's TOP EDGE only (y ~8.4).
+  add(M(new THREE.BoxGeometry(0.14, 0.14, 1.5), toon(0x2c2620), -231.5, 8.75, -384.75));   // bracket arm off the wall
+  add(M(new THREE.BoxGeometry(0.12, 0.5, 0.12), toon(0x2c2620), -231.5, 8.45, -385.35));   // vertical drop link
+  // disc: transparent tex ⇒ ALPHA atlas; twoSided() is opaque-only, so build the two
+  // back-to-back FrontSide planes here (E-facing toward the Red Line walk, W-facing),
+  // offset ±0.02 in x so neither shows the other's mirrored back.
+  const lst = luckyStrikeTex();
+  const dE = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 2.4), bmat(0xffffff, { map: lst, transparent: true }));
+  dE.position.set(-231.5 + 0.02, 7.2, -385.35); dE.rotation.y = Math.PI / 2; atlasPlane(dE, true);
+  const dW = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 2.4), bmat(0xffffff, { map: lst, transparent: true }));
+  dW.position.set(-231.5 - 0.02, 7.2, -385.35); dW.rotation.y = -Math.PI / 2; atlasPlane(dW, true);
 }
 
 // =====================================================================
@@ -1129,6 +1185,7 @@ function stripXZ(x0f, x1f, z0, z1, y, mat, step = 3) {
 export function buildVillage() {
   buildMurphys();
   buildCubby();
+  buildAddisonCornerBillboard();   // 2026 photoset: SE-corner rooftop board + LUCKY STRIKE disc
   buildBars();
   buildSluggersRoof();
   buildEngine();

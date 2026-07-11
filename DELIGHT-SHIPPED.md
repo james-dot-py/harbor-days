@@ -168,3 +168,8 @@ cut becomes a revert task.
   'N CLARK ST' blade; the displaced buildings weren't deleted, they moved to
   LINE the future street — Clark & Addison S mouth (clarkX(−385), −385.5) —
   task 033
+- The rooftop ad board over the Clark & Addison SE corner answers the owner's
+  own photo of the real corner billboard with a baseball pun: 'NO CURVEBALLS. ·
+  WRIGLEYVILLE FIBER · 5 YEARS FLAT' — angled at the intersection so it and the
+  Cubby Bear's GO CUBS board bracket the crossing like the real pair — SE corner
+  lot roof (−263.5, −380.5) — task 034

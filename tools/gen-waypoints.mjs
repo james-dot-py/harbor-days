@@ -513,6 +513,92 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-196, -550]
   corner('wv-x-clark-waveland', W.clarkX(T.waveland.z), T.waveland.z);
 }
 
+/* ---- OWNER PHOTO VANTAGES (task 034, refs/wrigleyville/owner-photoset-2026-07-10/):
+   nine judged reads, one per owner photo — GPS+heading projected into the cell
+   frame via refs/wrigleyville/osm.json (x = −140 − (Waddr − 950); z stretched
+   ×1.6 north of Addison). Vantages near Clark anchor to FEATURES, not the raw
+   projection (the cell's 0.28 cant liberty vs the real ~0.61 diagonal).
+   Expectations quote what each photo shows; pairs that already read TRUE say
+   so — the waypoint preserves the owner's ground truth either way. ---- */
+{
+  const T = W.STREETS_W, G = W.GALLAGHER_W, O = W.OFFICE_W;
+  // (1) clark-addison-se-corner (41.947158,-87.656342 @129°): NW corner of
+  // Clark & Addison looking SE across the intersection at the corner lot, its
+  // rooftop billboard and the 033 Clark stub beyond the CPD line.
+  add('wv-photo-clark-addison-se', 'wrigleyville', 'wrigleyville', R(W.clarkX(-396) + 6.9), -396, [
+    { yaw: 0.87, pitch: 0.02, dist: 13 },
+    { yaw: 0.87, pitch: -0.12, dist: 15 },   // up-tilt: the rooftop billboard
+    { yaw: 1.15, pitch: 0.1, dist: 11 },
+  ]);
+  // (2) cubby-bear-detail (@244°): from the marquee corner looking WSW at the
+  // Cubby Bear facade + rooftop truss board (the pair already reads TRUE).
+  { const c = V.cubbyBear, fx = (c.x0 + c.x1) / 2, fz = (c.z0 + c.z1) / 2;
+    const yaw = yawTo(-290, -392, fx, fz);
+    add('wv-photo-cubby-bear', 'wrigleyville', 'wrigleyville', -290, -392, [
+      { yaw, pitch: 0.05, dist: 12 },
+      { yaw, pitch: -0.1, dist: 14 },        // billboard truss above the parapet
+      { yaw: R(yaw + 0.35), pitch: 0.08, dist: 12 },
+    ]); }
+  // (3) swift-and-sons-tavern (@314°): the real NW corner anchor (Hotel
+  // Zachary / Swift & Sons) — in-game the bar row holds this frontage (the
+  // signed-off 006 liberty); judge the corner-anchor read at the Dugout lot.
+  { const b = V.clarkBars[3], zc = (b.z0 + b.z1) / 2, fx = W.clarkX(zc) - 16;
+    const yaw = yawTo(-280, -408, fx, zc);
+    add('wv-photo-swift-and-sons', 'wrigleyville', 'wrigleyville', -280, -408, [
+      { yaw, pitch: 0.08, dist: 12 },
+      { yaw, pitch: 0.02, dist: 9 },
+      { yaw: R(yaw + 0.32), pitch: 0.12, dist: 13 },
+    ]); }
+  // (4) gallagher-way-facing-north (@2°): mid-plaza looking north at the
+  // office block, GALLAGHER WAY band, video board and statue row.
+  { const pz = -470, px = R((W.clarkX(pz) + G.off0 + W.gallagherWallX(pz)) / 2);
+    const yaw = yawTo(px, pz, W.clarkX((O.z0 + O.z1) / 2) + (O.off0 + O.off1) / 2, (O.z0 + O.z1) / 2);
+    add('wv-photo-gallagher-north', 'wrigleyville', 'wrigleyville', px, pz, [
+      { yaw, pitch: 0.03, dist: 13 },
+      { yaw, pitch: -0.12, dist: 15 },       // lift to the office top + board
+      { yaw: R(yaw + 0.36), pitch: 0.1, dist: 12 },
+    ]); }
+  // (5) wrigley-west-side-from-addison (@22°): Addison south roadway near
+  // Clark, tilted up the south face to the upper deck + light lattice.
+  add('wv-photo-west-flank', 'wrigleyville', 'wrigleyville', -250, -399, [
+    { yaw: 2.75, pitch: -0.18, dist: 12 },
+    { yaw: 2.75, pitch: -0.3, dist: 14 },    // crown + lattice banks
+    { yaw: 3.05, pitch: -0.12, dist: 12 },
+  ]);
+  // (6) addison-south-side-facing-west (@267°): mid-block looking west along
+  // Addison — south-side register (LUCKY STRIKE disc) + Cubby board far.
+  add('wv-photo-addison-west', 'wrigleyville', 'wrigleyville', -218, -397, [
+    { yaw: -1.52, pitch: 0.06, dist: 13 },
+    { yaw: -1.52, pitch: -0.02, dist: 10 },
+    { yaw: -1.2, pitch: 0.1, dist: 12 },
+  ]);
+  // (7) wrigley-se-corner-addison-sheffield (@321°): the angled bowl corner
+  // from the Sheffield & Addison intersection; lattice banks over the crown.
+  add('wv-photo-se-corner', 'wrigleyville', 'wrigleyville', -190, -404, [
+    { yaw: -2.46, pitch: -0.1, dist: 13 },
+    { yaw: -2.46, pitch: 0.08, dist: 12 },
+    { yaw: -2.1, pitch: 0.06, dist: 12 },
+  ]);
+  // (8) addison-walking-west-from-redline (@229°): the arrival read — camera
+  // exits from under the viaduct; yaw pulled west of the raw heading so the
+  // stadium looms frame-right (the cell's compressed block vs the real one).
+  add('wv-photo-arrival', 'wrigleyville', 'wrigleyville', -158, -404, [
+    // f0 dist 10, not 13: at 13 the pull-back camera lands ON the task-034
+    // viaduct bent column (x −146.6, z −408) and the maroon steel fills the
+    // frame; at 10 the camera sits just west of it, column behind the lens
+    { yaw: -1.25, pitch: 0.05, dist: 10 },
+    { yaw: -1.05, pitch: 0.05, dist: 13 },
+    { yaw: -1.45, pitch: -0.05, dist: 15 },
+  ]);
+  // (9) under-redline-facing-north (@349°): under the Addison bridge looking
+  // north along the structure — underside dressing + head-house beyond.
+  add('wv-photo-viaduct', 'wrigleyville', 'wrigleyville', (W.STATION_W.embank.x0 + W.STATION_W.embank.x1) / 2, -398, [
+    { yaw: -2.95, pitch: -0.2, dist: 7 },
+    { yaw: -2.95, pitch: -0.35, dist: 8 },   // steeper: the steel overhead
+    { yaw: -2.95, pitch: 0, dist: 10 },
+  ]);
+}
+
 /* ---- Ko-fi support surfaces (task 011) — the two DIEGETIC placements. Their
    screenshots feed the mechanical QR oracle (tools/decode-qr.mjs), so framings
    are chosen for a decodable, near-head-on QR, not just a pretty read. The

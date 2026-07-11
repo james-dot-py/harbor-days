@@ -10,7 +10,9 @@ import { collide } from '../props.js';
 import { wrigleyRoot } from './index.js';
 import { atlasPlane } from './village.js';   // shared static-plane atlas (buildVillage emits it, last)
 // Geometry follows STATION_W (../data/wrigleyville.js): embank x-148..-132 topY7.0;
-// bridge z-414..-386 clearY5.6; platform x-143..-137 z-451..-433 y7.6; stair
+// bridge z-414..-386 clearY5.6 (dressed underside hangs to ~y4.9 — bottom flanges,
+// stringers + flat X-bracing — on curb-line column bents that stand to the roadway);
+// platform x-143..-137 z-451..-433 y7.6; stair
 // z-433..-417; landing z-417..-411; track centers x-145.5/-134.5.
 
 const R = mulberry32(940);
@@ -159,6 +161,15 @@ export function buildStation() {
     { x: -131.8, y: 0.35, z: nCz, sx: 0.9, sy: 0.7, sz: nLen },
     { x: -148.2, y: 0.35, z: sCz, sx: 0.9, sy: 0.7, sz: sLen },
     { x: -131.8, y: 0.35, z: sCz, sx: 0.9, sy: 0.7, sz: sLen },
+    // rust/drip grime streaks bleeding down the abutment faces flanking the bridge opening:
+    // north face of the south mass (face z-386, proud at z-385.9)
+    { x: -145.5, y: 4.4, z: -385.9, sx: 0.5, sy: 3.2, sz: 0.14 },
+    { x: -140.0, y: 4.4, z: -385.9, sx: 0.5, sy: 3.2, sz: 0.14 },
+    { x: -134.5, y: 4.4, z: -385.9, sx: 0.5, sy: 3.2, sz: 0.14 },
+    // mirrored on the south face of the north mass (face z-414, proud at z-414.1)
+    { x: -145.5, y: 4.4, z: -414.1, sx: 0.5, sy: 3.2, sz: 0.14 },
+    { x: -140.0, y: 4.4, z: -414.1, sx: 0.5, sy: 3.2, sz: 0.14 },
+    { x: -134.5, y: 4.4, z: -414.1, sx: 0.5, sy: 3.2, sz: 0.14 },
   ], FOOT, 48);
   instBoxes([
     { x: -147.6, y: 7.05, z: nCz, sx: 1.0, sy: 0.35, sz: nLen },
@@ -189,9 +200,39 @@ export function buildStation() {
     const deck = new THREE.Mesh(new THREE.BoxGeometry(13.6, 1.4, 28, 1, 1, 5), toon(DECKC));
     deck.position.set(CX, 6.3, bZ); wrigleyRoot.add(deck);
   }
-  instBoxes([                                             // two deep side girders
+  instBoxes([                                             // two deep side girders + dressed underside
     { x: -147.3, y: 6.55, z: bZ, sx: 0.4, sy: 1.9, sz: 28 },
     { x: -132.7, y: 6.55, z: bZ, sx: 0.4, sy: 1.9, sz: 28 },
+    // 3 intermediate stringers, full span (bottoms ~4.92 — ribs below the 5.6 deck plane)
+    { x: -144.0, y: 5.32, z: bZ, sx: 0.3, sy: 0.8, sz: 28 },
+    { x: -140.0, y: 5.32, z: bZ, sx: 0.3, sy: 0.8, sz: 28 },
+    { x: -136.0, y: 5.32, z: bZ, sx: 0.3, sy: 0.8, sz: 28 },
+    // bottom flange lips on both side girders (wider than the web -> read as flanges)
+    { x: -147.3, y: 5.5, z: bZ, sx: 0.72, sy: 0.22, sz: 28 },
+    { x: -132.7, y: 5.5, z: bZ, sx: 0.72, sy: 0.22, sz: 28 },
+    // flat lateral X-bracing between stringers (yaw only -> read as crossed diagonals from below)
+    { x: -142, y: 5.45, z: -406, sx: 0.14, sy: 0.12, sz: 5.6, ey:  0.62 },
+    { x: -138, y: 5.45, z: -406, sx: 0.14, sy: 0.12, sz: 5.6, ey: -0.62 },
+    { x: -142, y: 5.45, z: -400, sx: 0.14, sy: 0.12, sz: 5.6, ey:  0.62 },
+    { x: -138, y: 5.45, z: -400, sx: 0.14, sy: 0.12, sz: 5.6, ey: -0.62 },
+    { x: -142, y: 5.45, z: -394, sx: 0.14, sy: 0.12, sz: 5.6, ey:  0.62 },
+    { x: -138, y: 5.45, z: -394, sx: 0.14, sy: 0.12, sz: 5.6, ey: -0.62 },
+    // 2 column bents at the curb lines (z-408 / z-392) — 4 columns under the side girders
+    { x: -146.6, y: 2.8, z: -408, sx: 0.55, sy: 5.6, sz: 0.55 },
+    { x: -133.4, y: 2.8, z: -408, sx: 0.55, sy: 5.6, sz: 0.55 },
+    { x: -146.6, y: 2.8, z: -392, sx: 0.55, sy: 5.6, sz: 0.55 },
+    { x: -133.4, y: 2.8, z: -392, sx: 0.55, sy: 5.6, sz: 0.55 },
+    // cap beam per bent (bottom ~4.93, clears the roadway)
+    { x: -140, y: 5.15, z: -408, sx: 13.4, sy: 0.45, sz: 0.7 },
+    { x: -140, y: 5.15, z: -392, sx: 13.4, sy: 0.45, sz: 0.7 },
+    // column base plates
+    { x: -146.6, y: 0.12, z: -408, sx: 0.9, sy: 0.24, sz: 0.9 },
+    { x: -133.4, y: 0.12, z: -408, sx: 0.9, sy: 0.24, sz: 0.9 },
+    { x: -146.6, y: 0.12, z: -392, sx: 0.9, sy: 0.24, sz: 0.9 },
+    { x: -133.4, y: 0.12, z: -392, sx: 0.9, sy: 0.24, sz: 0.9 },
+    // mid-height tie per bent (braced-bent read)
+    { x: -140, y: 3.1, z: -408, sx: 12.9, sy: 0.3, sz: 0.35 },
+    { x: -140, y: 3.1, z: -392, sx: 12.9, sy: 0.3, sz: 0.35 },
   ], MAROON, 4);
   {                                                       // 'ADDISON' plate on each outward face
     const mat = bmat(0xffffff, { map: girderTex(), side: THREE.DoubleSide });
@@ -366,6 +407,8 @@ export function buildStation() {
   collide(-142.8, -413.6, 0.55); collide(-137.2, -413.6, 0.55);
   // south bridge abutment — full wall
   for (const x of [-147, -145, -143, -141, -139, -137, -135, -133]) collide(x, -385.5, 1.1);
+  // under-bridge column bents at the curb lines (4 columns; stand in the roadway edges)
+  for (const z of [-408, -392]) { collide(-146.6, z, 0.6); collide(-133.4, z, 0.6); }
   // platform edges facing the track beds
   for (let z = -451; z <= -433; z += 3) { collide(-143.4, z, 0.4); collide(-136.6, z, 0.4); }
   // stair channel side walls (skip z-433: the stair mouth stays open)

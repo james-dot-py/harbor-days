@@ -159,3 +159,9 @@ few turns to find; keep each to one line of symptom + fix.
   Diversey boards — issue 014): END the post at the panel's BOTTOM edge (lollipop),
   or offset it behind a single-faced FrontSide panel (makeSign, mini-golf, CPD).
   Two-sided readable signs can't hide a central post "behind" — shorten it instead.
+- NEW street-level mass invalidates previously-clear hand-authored framings: the
+  034 viaduct bent column (x −146.6, z −408) landed exactly where wv-photo-arrival
+  f0's pull-back camera sat — maroon steel filled the whole frame. After adding
+  any curb-line/roadway structure, re-walk every waypoint whose camera pulls back
+  through that block (hand framings bypass camBlockedW, and camBlockedW's VOLS_W
+  doesn't model new builder geometry anyway).

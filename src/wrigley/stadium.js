@@ -887,7 +887,19 @@ function buildTowers() {
   }
   const mastG = new THREE.CylinderGeometry(0.2, 0.38, 7.6, 6).translate(0, 3.8, 0);
   const wingMastG = new THREE.CylinderGeometry(0.24, 0.46, 12, 6).translate(0, 6, 0);
-  const headG = new THREE.BoxGeometry(3.4, 1.5, 0.5);
+  // wide white lattice bank (merged into ONE geometry; instanced 8x by the headG inst() below — +0 draws)
+  const bank = [];
+  bank.push(new THREE.BoxGeometry(7.0, 0.22, 0.24).translate(0, 1.25, 0));    // top chord
+  bank.push(new THREE.BoxGeometry(7.0, 0.22, 0.24).translate(0, -1.25, 0));   // bottom chord
+  for (const vx of [-3.4, -1.7, 0, 1.7, 3.4]) bank.push(new THREE.BoxGeometry(0.18, 2.5, 0.18).translate(vx, 0, 0));  // 5 verticals
+  for (const bx of [-2.55, -0.85, 0.85, 2.55]) {                              // X-diagonals, two per bay
+    bank.push(new THREE.BoxGeometry(0.13, 2.9, 0.13).rotateZ(0.6).translate(bx, 0, 0));
+    bank.push(new THREE.BoxGeometry(0.13, 2.9, 0.13).rotateZ(-0.6).translate(bx, 0, 0));
+  }
+  bank.push(new THREE.BoxGeometry(6.6, 0.34, 0.34).translate(0, 1.62, 0));    // lamp bar on the top chord
+  bank.push(new THREE.BoxGeometry(0.14, 1.6, 0.14).rotateZ(0.55).translate(2.3, -1.9, 0));    // curved-brace hint
+  bank.push(new THREE.BoxGeometry(0.14, 1.6, 0.14).rotateZ(-0.55).translate(-2.3, -1.9, 0));
+  const headG = mergeGeos(bank).translate(0, 0.55, 0);                        // sit a touch prouder over the crown
   inst(mastG, toon(0xdad5c8), towers.filter(t => !t.mast).map(t => ({ pos: [t.x, t.base, t.z], yaw: t.yaw })));
   inst(wingMastG, toon(0xdad5c8), towers.filter(t => t.mast).map(t => ({ pos: [t.x, t.base, t.z], yaw: t.yaw })));
   inst(headG, toon(0xc9c4b6), towers.map(t => ({ pos: [t.x, t.base + (t.mast || 7.6) + 0.6, t.z], yaw: t.yaw })));
@@ -895,8 +907,8 @@ function buildTowers() {
   const pts = [];
   towers.forEach(t => {
     const hy = t.base + (t.mast || 7.6) + 0.6;
-    for (let i = -1; i <= 1; i++) {
-      const ox = Math.cos(t.yaw) * i * 1.05, oz = -Math.sin(t.yaw) * i * 1.05;
+    for (let i = -2; i <= 2; i++) {
+      const ox = Math.cos(t.yaw) * i * 1.3, oz = -Math.sin(t.yaw) * i * 1.3;
       pts.push([t.x + ox, hy, t.z + oz]);
     }
   });
