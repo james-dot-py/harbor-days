@@ -198,3 +198,11 @@ cut becomes a revert task.
   ringed by inverted toon Chicagoans, exactly the reflection you'd crane at
   in the real one. A kid at the north lobe has it right — 'it's got a belly
   button!!' — AT&T Plaza (86.8, 797.7) — task 043
+
+- Crown Fountain spits: two glass-block towers glow amber like dusk lanterns,
+  each showing a big-eyed toon citizen on its LED screen — they blink at you,
+  and every ~40 s both faces purse into an 'O' and SPOUT an arc of water into
+  the black-mirror pool. Kid NPCs shriek 'aaah cold!' and scatter; stand in
+  the landing zone yourself and you get SOAKED — 'SPLASH! soaked head to toe —
+  worth it.' The pool doubles the amber glow. — Crown Fountain pool (70, 864)
+  — task 045

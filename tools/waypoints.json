@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-11T12:27:04.861Z",
+ "generated": "2026-07-11T13:31:01.582Z",
  "count": 90,
  "waypoints": [
   {
@@ -2174,29 +2174,29 @@
    "id": "mp-crown-fountain",
    "area": "millennium",
    "cell": "millennium",
-   "x": 69.8,
-   "z": 884,
+   "x": 72,
+   "z": 872,
    "framings": [
     {
-     "x": 69.8,
-     "z": 884,
+     "x": 72,
+     "z": 872,
+     "yaw": -2.6,
+     "pitch": 0.05,
+     "dist": 11
+    },
+    {
+     "x": 69.75,
+     "z": 866,
      "yaw": 3.14,
-     "pitch": 0.08,
+     "pitch": -0.08,
      "dist": 7
     },
     {
-     "x": 69.8,
-     "z": 842,
-     "yaw": 0,
-     "pitch": 0.08,
-     "dist": 7
-    },
-    {
-     "x": 80,
+     "x": 69.75,
      "z": 862,
-     "yaw": -1.57,
-     "pitch": 0.08,
-     "dist": 5
+     "yaw": 0,
+     "pitch": -0.08,
+     "dist": 7
     }
    ],
    "expectation": "Two glass-block towers face each other across a long, wet black reflecting pool that mirrors their amber glow; the near tower shows a giant face, and a water arc spouts from its mouth into the pool where figures splash. (041 SHELL: the long wet black-granite plaza + pool and the elm-bosque flanks must read; the LED face-towers are deferred to 045 — judge ground + backdrop only, empty pad expected.)"

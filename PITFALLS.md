@@ -241,3 +241,17 @@ few turns to find; keep each to one line of symptom + fix.
   geometry carries the form that the lost toon shading would have. Reserve toon
   for matte/vertical faces that mostly see sky+sun. Crown Fountain's glass-block
   towers (045) and the BP bridge stainless shingles (046) inherit this exactly.
+- A pair of tall towers at the ENDS of a short pool breaks the down-axis money
+  shot two ways (Crown Fountain, task 045): (a) a camera on the tower centerline
+  looking down the pool has the NEAR tower FILL the frame (blocks the pool, the
+  far face, everything) — the 040 stands sat SOUTH of the pad and stared into
+  the near tower's back once it was built; and (b) a spout arc that travels
+  ALONG the view axis foreshortens to a vertical DRIBBLE (the z-travel projects
+  to nothing head-on). Fixes: frame the axial FACE shots from IN the open pool
+  BETWEEN the towers (near tower behind the camera); make the "two towers +
+  arc" establishing shot an OBLIQUE 3/4 from a pool corner (big amber near
+  tower + far face tower — the reference night-photo composition), where the
+  arc reads side-on and curves. And make BOTH towers spout SIMULTANEOUSLY so
+  every fresh-load framing (walkthrough reloads per shot, clock from 0) catches
+  a spitting face at one wait — alternating left half the framings looking at
+  an idle tower while the other's arc smeared confusingly across it.

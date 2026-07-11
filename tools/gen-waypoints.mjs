@@ -713,10 +713,15 @@ addM('mp-bean', [
   { x: 86.8, z: 797.7, yaw: -Math.PI / 2, pitch: 0.02, dist: 6 },
   { x: 82, z: 790, yaw: 0.72, pitch: 0.06, dist: 8.5 },
 ]);
+// 045: the 040 stands sat SOUTH/EAST of the pad and now stare into the near
+// tower's back (it fills the frame). Re-framed to stand IN the open pool
+// BETWEEN the towers, looking down-axis at the FAR tower's LED face + spout
+// + the amber pool reflection; f2 is the oblique establishing "two towers
+// face each other" shot from the SE corner (bosques opened to x80+ for it).
 addM('mp-crown-fountain', [
-  { x: 69.8, z: 884, yaw: Math.PI, pitch: 0.08, dist: 7 },
-  { x: 69.8, z: 842, yaw: 0, pitch: 0.08, dist: 7 },
-  { x: 80, z: 862, yaw: -Math.PI / 2, pitch: 0.08, dist: 5 },
+  { x: 72, z: 872, yaw: -2.6, pitch: 0.05, dist: 11 },         // OBLIQUE money shot: both towers + arcs curving into the pool + a face
+  { x: 69.75, z: 866, yaw: Math.PI, pitch: -0.08, dist: 7 },   // axial N tower LED face head-on (+ spit)
+  { x: 69.75, z: 862, yaw: 0, pitch: -0.08, dist: 7 },         // axial S tower LED face head-on (+ spit)
 ]);
 addM('mp-promenade', [
   { x: 108, z: 806, yaw: Math.PI, pitch: 0.04, dist: 7 },
