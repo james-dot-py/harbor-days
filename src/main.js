@@ -304,6 +304,9 @@ function frame(now){
   if(showTgt){if(mag>0.2)showTgt*=0.6;if(cam.freeT>0)showTgt*=0.5}
   assistAmt=lerp(assistAmt,showTgt,1-Math.exp(-3*dt));
   let effP=lerp(cam.pitch,-0.3,assistAmt),effD=cam.dist+assistAmt*1.6;
+  if(!game.running){effP=0.30;effD=17}   // title-screen establishing shot behind the
+  // translucent card (task 035) — ?play=1 runs runStart before the first frame,
+  // so tooling/baseline framings never see this
   if(introT>0){                                   // opening swoop: high over the lake, easing in
     introT=Math.max(0,introT-dt/3.2);
     const k=introT*introT*(3-2*introT);

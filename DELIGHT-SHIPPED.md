@@ -173,3 +173,9 @@ cut becomes a revert task.
   WRIGLEYVILLE FIBER · 5 YEARS FLAT' — angled at the intersection so it and the
   Cubby Bear's GO CUBS board bracket the crossing like the real pair — SE corner
   lot roof (−263.5, −380.5) — task 034
+- The title screen is the game itself: the card now floats over the LIVE dusk
+  lakefront in a wide establishing shot (the world was already rendering behind
+  the old opaque gradient — the poster was free), with a quiet Chicago-flag
+  divider (two sky stripes, four red six-point stars) between the byline and
+  'the rocks, the harbor — and the L up to wrigleyville' — title screen —
+  task 035

@@ -6,20 +6,25 @@
 <title>Ope! — north side, chicago</title>
 <style>
   :root{--cream:#fdf6e6;--ink:#4a3b2f;--peach:#ffb98a;--teal:#2fa3b5;}
-  html,body{margin:0;padding:0;overflow:hidden;background:var(--peach);
+  html,body{margin:0;padding:0;overflow:hidden;
+    background:radial-gradient(120% 120% at 50% 20%, #ffd9b0 0%, #ffb98a 45%, #e98f7d 100%);
     font-family:ui-rounded,"SF Pro Rounded","Hiragino Maru Gothic ProN","Arial Rounded MT Bold","Trebuchet MS",sans-serif;
     -webkit-user-select:none;user-select:none;touch-action:none;}
   canvas{display:block}
 
+  /* the live world (already rendering behind this layer) shows through a warm
+     dusk vignette — the game is its own poster; body gradient is the fallback
+     before the canvas exists / if WebGL dies */
   #title{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:30;overflow:hidden;
-    background:radial-gradient(120% 120% at 50% 20%, #ffd9b0 0%, #ffb98a 45%, #e98f7d 100%);transition:opacity 1s ease;}
+    background:radial-gradient(130% 112% at 50% 36%, rgba(255,214,170,.08) 0%, rgba(255,185,138,.13) 50%, rgba(70,32,46,.40) 100%);
+    transition:opacity 1s ease;}
   #title.hide{opacity:0;pointer-events:none}
-  /* drifting dusk clouds behind the card */
+  /* drifting dusk mist over the world, behind the card */
   #title::before,#title::after{content:'';position:absolute;width:46vmax;height:16vmax;border-radius:50%;
-    background:radial-gradient(closest-side,rgba(255,236,214,.75),rgba(255,236,214,0));
+    background:radial-gradient(closest-side,rgba(255,236,214,.45),rgba(255,236,214,0));
     animation:cloudDrift 26s linear infinite;top:14%;left:-46vmax;}
   #title::after{top:62%;width:34vmax;height:12vmax;animation-duration:34s;animation-delay:-18s;
-    background:radial-gradient(closest-side,rgba(255,214,196,.6),rgba(255,214,196,0));}
+    background:radial-gradient(closest-side,rgba(255,214,196,.35),rgba(255,214,196,0));}
   @keyframes cloudDrift{to{transform:translateX(192vmax)}}
   .card{position:relative;background:var(--cream);border-radius:28px;padding:34px 44px 30px;text-align:center;
     box-shadow:0 14px 0 rgba(122,62,44,.28), 0 30px 60px rgba(122,62,44,.25);max-width:86vw;
@@ -35,16 +40,21 @@
   /* movie-poster author byline: subordinate to the title, sits right beneath it */
   .card .byline{margin:9px 0 0;color:#9c8168;font-size:13px;letter-spacing:.22em}
   .card .byline b{font-weight:600;color:#8a5a3a}
+  /* quiet Chicago-flag nod: two sky stripes, four six-point stars */
+  .card .chi{display:flex;align-items:center;justify-content:center;gap:7px;margin:13px 0 0}
+  .card .chi i{width:26px;height:3px;border-radius:2px;background:#9fd3e2;margin:0 3px}
+  .card .chi b{color:#e0766a;font-size:11px;font-weight:400;line-height:1}
   .card .sub{margin:10px 0 4px;color:#8a7561;font-size:15px;letter-spacing:.12em;text-transform:lowercase}
+  .card .sub .cap{text-transform:none}   /* "the L" — the train keeps its capital */
   .card .tiny{margin:2px 0 20px;color:#b39d85;font-size:12px;letter-spacing:.08em}
   #start{cursor:pointer;border:none;border-radius:999px;padding:14px 46px;font-size:20px;font-family:inherit;
     letter-spacing:.1em;color:#fff;background:#5db06b;box-shadow:0 6px 0 #3f8a4d;
     transition:transform .14s ease,box-shadow .14s ease,background .14s ease;}
   #start:hover{transform:translateY(-2px);box-shadow:0 8px 0 #3f8a4d;background:#65ba74}
   #start:active{transform:translateY(4px);box-shadow:0 2px 0 #3f8a4d}
-  /* small "Support development ♥" line under the start button (own tab; never
-     part of the start gesture) */
-  .card .kofilink{display:inline-block;margin-top:16px;color:#c07a4a;font-size:13px;letter-spacing:.06em;
+  /* "Support development ♥" reads as the start button's caption — block-centred
+     DIRECTLY beneath it (own tab; never part of the start gesture) */
+  .card .kofilink{display:block;width:max-content;margin:11px auto 0;color:#c07a4a;font-size:13px;letter-spacing:.06em;
     text-decoration:none;border-bottom:1px dotted #d8b48a;padding-bottom:1px;transition:color .15s ease}
   .card .kofilink:hover{color:#e0766a}
   .card .kofilink .kh{color:#e0766a}
@@ -187,8 +197,9 @@
   <div class="card">
     <h1><span class="o">O</span>pe<span class="b">!</span></h1>
     <div class="byline">by <b>Jimbo</b></div>
-    <div class="sub">a north side stroll &mdash; the rocks, the harbor, the skyline</div>
-    <div class="tiny">v0.9 &middot; the place itself &middot; belmont harbor, chicago</div>
+    <div class="chi" aria-hidden="true"><i></i><b>&#10038;</b><b>&#10038;</b><b>&#10038;</b><b>&#10038;</b><i></i></div>
+    <div class="sub">the rocks, the harbor &mdash; and the <span class="cap">L</span> up to wrigleyville</div>
+    <div class="tiny">the place itself &middot; north side, chicago</div>
     <button id="start">let's walk</button>
     <a class="kofilink" href="https://ko-fi.com/jimbobuildsope" target="_blank" rel="noopener">Support development <span class="kh">&hearts;</span></a>
   </div>

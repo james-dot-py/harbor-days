@@ -2,6 +2,8 @@
 // Usage: node tools/act.mjs '<actionsJSON>' [baseQuery]
 //   actions is a JSON array of steps:
 //     ["goto",x,z]        navigate/teleport: (re)loads with ?play=1&x&z
+//     ["gototitle"]       load WITHOUT play=1 — title card stays up (start-flow tests)
+//     ["click","#sel"]    trusted mouse click at a selector's centre (counts as a user gesture)
 //     ["key","e"]         tap a key (down, hold ~160ms, up) — survives a frame
 //     ["keydown","e"]     press and keep held
 //     ["keyup","e"]       release a held key
@@ -81,6 +83,11 @@ async function logAudio(tag) {
 let navigated = false;
 for (const [op, a, b] of actions) {
   if (op === 'goto') { await nav(a, b); navigated = true; }
+  else if (op === 'gototitle') {   // land on the title card, no auto-start (task 035)
+    const q = new URLSearchParams(baseQuery || '');
+    await page.goto('http://localhost:' + PORT + '/' + (q.toString() ? '?' + q.toString() : ''), { waitUntil: 'networkidle0', timeout: 20000 });
+    navigated = true;
+  }
   else { if (!navigated) { await nav(); navigated = true; }
     if (op === 'key') { await page.keyboard.down(a); await sleep(160); await page.keyboard.up(a); }
     else if (op === 'keydown') await page.keyboard.down(a);
@@ -88,6 +95,14 @@ for (const [op, a, b] of actions) {
     else if (op === 'wait') await sleep(a);
     else if (op === 'eval') { const r = await page.evaluate(a); console.log('EVAL ' + JSON.stringify(r)); }
     else if (op === 'tap') { await holdTap(a, b); console.log('TAP @' + a + ',' + b); }
+    else if (op === 'click') {   // trusted mouse click at a selector's centre (start-gesture tests)
+      const r = await page.evaluate(sel => {
+        const el = document.querySelector(sel); if (!el) return null;
+        const b = el.getBoundingClientRect(); return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+      }, a);
+      if (!r) console.log('CLICK ' + a + ' NOT-FOUND');
+      else { await page.mouse.click(r.x, r.y); console.log('CLICK ' + a + ' @' + r.x.toFixed(0) + ',' + r.y.toFixed(0)); }
+    }
     else if (op === 'tapSel') {   // held-tap the CENTRE of a selector's rect (skips if hidden/zero-size)
       const r = await page.evaluate(sel => {
         const el = document.querySelector(sel); if (!el) return null;
