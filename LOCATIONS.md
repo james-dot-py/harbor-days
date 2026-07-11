@@ -22,7 +22,9 @@ feasibility inside perf + single-file constraints.
 
 ## In progress
 
-- (none — next planner run selects from the candidates below)
+- (none — **OWNER DIRECTIVE, 2026-07-11: the next planner run picks
+  MILLENNIUM PARK.** The selection is made; do not re-litigate the roster —
+  move it to In progress and generate its SCOUT → SIGNOFF pipeline per §5.3.)
 
 ## Candidates (famous Chicago spots, seeded per §5.3)
 
@@ -43,7 +45,16 @@ feasibility inside perf + single-file constraints.
 - Andersonville — water tower + Swedish flag stripe; hard cell.
 - The Riverwalk — downtown river canyon; strong silhouette; hard cell.
 - Millennium Park — the Bean is the single most recognizable object in the
-  city; hard cell.
+  city; hard cell. OWNER-PICKED 2026-07-11 (see In progress). Planning notes:
+  reached via the ridable Red Line — extend the existing two-destination ride
+  (wrigley-ride pocket-cell pattern) with a downtown stop (real Red Line:
+  Monroe/Lake, a block west of the park). Anchor set: Cloud Gate (evoke as a
+  playful toon "bean" — it is a copyrighted artwork, homage not replica, same
+  register as the bar likenesses), Pritzker Pavilion ribbons + Great Lawn +
+  trellis, Crown Fountain face-towers + splash play, Lurie Garden, the BP
+  bridge serpentine, Michigan Ave streetwall as the west backdrop wall.
+  Sources per standing rules: refs/millennium-park/ osm.json + Wikimedia;
+  Google imagery banned; owner photos gold when supplied.
 - Chinatown — gate + Ping Tom pagoda; hard cell.
 - Pilsen — murals + 18th St; hard cell.
 - Museum Campus — Field/Shedd/Adler skyline sweep; hard cell.
