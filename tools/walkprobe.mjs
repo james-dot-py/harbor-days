@@ -627,6 +627,7 @@ for(const [label,x,z] of [
   ['Lurie light plate',153.6,852.5],['Lurie dark plate',167.7,870.7],
   ['Lurie N hedge',150,848],['Lurie W hedge',126,860],
   ['backstage pocket E of stage',175,730],['pocket between promenade and Lurie',123,866],
+  ['Pritzker stage floor (visually gated, no dead stair)',146,752],['stage house mass',135,749],['stage apron just N of the bowl',146,757],
   ['streetwall zone',20,800],['east backdrop zone',220,800],['giants band',100,686],
 ]) expect(`${label} (${x},${z}) NOT walkable`,MP.walkableM(x,z),false);
 

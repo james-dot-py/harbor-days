@@ -110,7 +110,10 @@ export const PRITZKER_M = {
   speakers: [{ x: 118, z: 752 }, { x: 175, z: 752 }],
   bowl: { x0: 118, x1: 186, z0: 758, z1: 788 },  // red seat field (walkable)
   lawn: { x0: 118, x1: 186, z0: 788, z1: 846 },  // carved into 3 walk quads (BP approach)
-  trellis: { x0: 120, x1: 166, z0: 792, z1: 844, colH: 9, apexH: 14 },
+  // trellis: criss-cross pipe-arc dome. bays paired posts per long edge
+  // (x0/x1); arcs spring from post tops (colH) to apexH. Shared by the
+  // builder (src/millennium/pritzker.js) and gen-waypoints VOLS_M.
+  trellis: { x0: 120, x1: 166, z0: 792, z1: 844, colH: 9, apexH: 14, bays: 6, colR: 0.7 },
 };
 
 // Lurie Garden — shoulder hedges (4.5 m clipped walls inside dark-steel

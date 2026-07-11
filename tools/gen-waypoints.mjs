@@ -654,6 +654,17 @@ const VOLS_M = [];
   // footprint) — only the two ground-contact lobes block a camera. The
   // under-arch framing deliberately parks the camera inside the footprint.
   for (const l of M.CLOUD_GATE_M.legs) vol(l.x - l.r, l.x + l.r, l.z - l.r, l.z + l.r, M.CLOUD_GATE_M.bean.h);
+  // Pritzker (044): the stage house is a solid mass; the ribbon crown +
+  // trellis arcs arch OVERHEAD (y >= colH) — like the Bean, only the ground
+  // columns block a camera, so the under-trellis great-lawn framings are
+  // intentional. Model the stage box + the thin trellis POSTS (not the whole
+  // footprint) so hand stands re-check without false positives.
+  { const S = M.PRITZKER_M.stage; vol(S.x0, S.x1, S.z0, S.z1, 9.5); }         // stage house mass
+  { const T = M.PRITZKER_M.trellis, r = (T.colR || 0.7) + 0.3;
+    for (const px of [T.x0, T.x1]) for (let i = 0; i < (T.bays || 6); i++) {
+      const pz = T.z0 + (T.z1 - T.z0) * i / ((T.bays || 6) - 1);
+      vol(px - r, px + r, pz - r, pz + r, T.colH);                            // trellis columns
+    } }
 }
 function camPosM(px, pz, f) {
   const down = Math.max(0, f.pitch), up = Math.max(0, -f.pitch);
