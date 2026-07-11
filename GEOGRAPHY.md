@@ -391,3 +391,140 @@ Lakeview backdrop band (BACKDROP_W).
 - Perpetual game day (crowd inside, barricades out, bars loud). The lakefront's
   Wrigley-glow backdrop gag stays for the lakefront; it hides while the
   Wrigleyville cell is active (Wave-3 wiring).
+
+## MILLENNIUM_GEOGRAPHY — neighborhood three (the Millennium Park cell)
+
+**A separate CELL** (src/cells.js pattern), reached by riding the Red Line SOUTH
+from Addison — downtown genuinely lies south of the lakefront map, so the cell
+sits at positive z. Data: `src/data/millennium.js`; builders: `src/millennium/*`
+(task 041+). Compass is TRUE: north up, lake east (the lake itself is beyond
+Grant Park, out of frame east).
+
+### Frame (PARK-LOCAL, displaced on BOTH axes — the Wrigleyville precedent)
+- Calibration (refs/millennium-park/osm.json provenance, task 039): South
+  Michigan Ave ∩ East Monroe St → game **(x 40, z 900)**; applied offset
+  dx −468.8, dz −2369.6. The TRUE lakefront projection of that corner is
+  (508.8, 3269.6) — **never validate this cell against the true projection**
+  (PITFALLS.md, AUTOPILOT.md §4.4); the osm.json lakefront-anchor asserts
+  validate only the projection math.
+- Measured street landings (osm.json medians, park-local frame):
+
+| Street line | In-game | Note |
+|---|---|---|
+| Michigan Ave (W frame) | **x 40** centerline | straightened (real curves to ~48 north of Washington — liberty) |
+| Columbus Dr (mid/E) | **x 195** centerline | one grade (real Upper/Lower stack — liberty); BP bridge crests OVER it |
+| Randolph St (N frame) | **z 698** centerline | one grade (real Upper/Lower east of Michigan — liberty) |
+| Washington St axis | **z 766** | no vehicles in the park — a promenade break-line in the paving |
+| Madison St axis | **z 831** | ditto |
+| Monroe St (S frame) | **z 901** centerline | calibrated exactly |
+
+- **Randolph→Monroe = 203 game units** (measured ≈406 m real — Loop blocks run
+  tighter than the standard grid; the planner's 251 estimate was corrected by
+  the 039 scout). Michigan→Columbus ≈ **155 units**. Blocks: Randolph→Washington
+  68, Washington→Madison 65, Madison→Monroe 70.
+- **Cell region (FINALIZED from the queue-040 suggestion x 40..200, z 640..920):
+  geometry bounds ≈ x 6…238, z 680…938 (incl. backdrop bands); player clamp
+  x 44…208, z 700…900.** The north edge moved 640 → 680: the lakefront's GLOBAL
+  skyline billboard (sky.js, scene-level — it never hides on cell swap, and its
+  instanced bands draw in every view) reaches world z 676.8 at x 181–209 after
+  its 2.2× scale (computed from its deterministic mulberry32(0x5c1000) layout).
+  Nothing of this cell may sit at z < 680 or it interpenetrates the billboard.
+  Disjoint from the Wrigleyville clamp (x −365…−115, z −615…−310), the
+  redline-car pocket (−250, −650) and WORLD_CLAMP (zMax 408); millennium is the
+  only place with z > 500, so a `player.z > 500` dev-spawn check activates it
+  unambiguously (wrigleyville.js's `player.x < -100` check can never match a
+  millennium spawn — all cell x are positive).
+
+### Streets & edges (scenery streets behind park fence — the quiet register)
+Roads are SCENERY (planters + low park fence, no CPD theatrics downtown);
+walkable ground is the park network + its frame sidewalks (WALK_M).
+
+| Street | Road (scenery) | Walkable sidewalk |
+|---|---|---|
+| Michigan | x 32…48, z 684…935 | **the spine**: x 48…57, z 705…894 (park side) |
+| Randolph | z 692…704, x 32…216 | z 705…713, x 48…189 (south side) |
+| Monroe | z 894…908, x 32…216 | z 886…894, x 48…189 (north side) |
+| Columbus | x 190…200, z 692…908 | west side x 181…189, z 713…788 + z 818…886 (split where the BP deck flies over — its approach/deck zone z ~788…818 is the elevator-guard buffer, PITFALLS) |
+
+Park fence + planter lines (BARRIER_M): x 48 along Michigan (gap only at the
+arrival kiosk z 795–805), z 705 along Randolph, z 894 along Monroe, x 189 along
+Columbus (gap under the bridge z 792–814).
+
+### Arrival (Red Line = the State St SUBWAY — recorded standing liberty)
+The real Monroe/State Red Line is a block WEST of Michigan; the State→Michigan
+block is **compressed to zero** (exactly the register of the Wrigleyville
+x-frame liberty): a **CTA subway stair kiosk stands ON the Michigan Ave
+sidewalk at x 48…52.5, z 796…804.5** (KIOSK_M), stairs down into a tiled
+landing — the 042 boarding point (dead-ends politely until then, task-030 owner
+rule). Downtown Red Line is a subway, so the ride arrives through DARKNESS into
+a tiled stair — deliberately the opposite flavor of Wrigleyville's elevated
+arrival. Dev spawn SPAWN_M = (55, 800), on the sidewalk beside the kiosk.
+
+### Anchors (osm-cited; game rects in millennium.js)
+| Feature | Position | Note |
+|---|---|---|
+| **Wrigley Square peristyle (NW)** | plinth 61–73 × 721–727, open side SE | paired Doric columns + fountain basin; lawn SE of it (58–90 × 730–750); low inscribed WRIGLEY SQUARE wall at (78, 749); plaza walk 57–96 × 713–752 |
+| **McCormick Tribune Plaza (cafe)** | 57–76 × 772–826, **sunken y −1.6** | THE summer cafe (perpetual summer: no ice rink, ever) — umbrella grid + cream bar-tent; **view-only** (decorative, NOT walkable — seen from the Bean plaza's white balustrade overlook rail at x 76) |
+| **Cloud Gate / AT&T Plaza** | bean footprint 83.1–90.5 × 792.8–802.6, h 10, long axis N–S | toon HOMAGE w/ painted reflection (copyright register); plaza walk 76–98 × 776–826, **continuous UNDER the arch** (legs at the z ends are the only colliders) |
+| **Crown Fountain (SW)** | pool 66–73.5 × 847–881; towers 68–71.5 × 850–853 and 68.5–72 × 875.5–878.5, h 15.2 | walkable WET plaza (walk 57–86 × 838–886, y 0, wet film is visual); glass-block LED-face towers = colliders; homage register |
+| **Pritzker Pavilion (NE)** | stage 123–170 × 747–758, mouth faces SOUTH | ribbon-petal crown homage; Harris Theater flybox adjoins north (129–163 × 715–747); speaker towers flank (118, 752) / (175, 752) |
+| **Seating bowl + Great Lawn** | bowl 118–186 × 758–788 (red seat field, walkable); lawn 118–186 × 788–846 | **trellis** pipe-arc dome over the lawn on perimeter columns, 120–166 × 792–844 (east edge stops at the BP approach) |
+| **Lurie Garden (SE)** | 124–179 × 842–892 | shoulder hedge N 128–170 × 846–851 + W 124–129 × 846–876 (4.5 h, dark-steel armature lips proud); NE entry gap x 170–179; **the Seam boardwalk** = the only interior walk, diagonal (175, 849.5) → (144, 874), halfW 2.5, over the rill (cites osm rill 159.2, 859.5; boardwalk 159.1, 852.6); light plate (153.6, 852.5) NW / dark plate (167.7, 870.7) SE, both planting (not walkable); south rim walk 130–182 × 878–886 |
+| **BP bridge (E)** | walkable deck: ramp x 168→186 (z 792–800, y 0→3.8) → seg (186,796)→(196,804) y→5 → crest seg (196,804)→(205,810) y 5 OVER Columbus; scenery run continues (205,810)→(242,833) descending beyond the clamp toward Maggie Daley (dead-ends politely — 046 decides treatment) | stainless shingle parapets, wood deck (homage); osm way 25026666 launches (172.6, 787.9)→(242.1, 834.9) — game launch sits ~6 south (z 792+) to buffer the bowl/lawn seam. **Ramp-only access: the deck's flanks are enclosed by non-walkable buffer (z 788–818 at x 168+), never adjacent to y-0 walks** (PITFALLS elevator rule) |
+| **Chase Promenade** | allee walk 96–120 × 713–886 (full Randolph→Monroe, three blocks) | tree rows x 100 / 116; paired curved inscribed plinths at z 716 + 883; Boeing galleries (81, 724) / (81, 884) |
+| **Exelon pavilions** | black glass cubes (125, 718) NW · (168, 720) NE · (125, 882) SW · (170, 882) SE | osm S pair (129, 888) / (170, 891) pulled ~6 north off the Monroe walk |
+| **Michigan streetwall — "the cliff"** | band x 6–30 (faces at x 30), z 684–935 | osm-cited anchors: Cultural Center z 760 (colonnade, PUBLIC LIBRARY cornice), Six N Michigan 824, CAA 836 (gothic tracery), Willoughby 846, Gage 861 (Sullivan), University Club 896 (gothic tower), Monroe Bldg 919 (gable); 1:1 verticals (10–25 storeys ≈ 35–80) |
+| **Randolph giants band** | z 680–692, x 44–214: One Pru x 79 (white sign slab, h ~130) → Two Pru x 102 (diamond spire ~165) → Aon x 172 (white fins ~200) → Blue Cross x ~206 (~95) | E–W ORDER preserved; z pulled south from osm centers (657/647/640/670) to clear the billboard — see liberties |
+| **South backdrop** | z 914–938: Art Institute mass x 123; Stock Exchange Arch cameo x 175 | beyond the Monroe scenery road |
+| **East backdrop** | x 214–238, z 700–908 | lower Loop band across Columbus |
+| Millennium Station flavor | sidewalk grate (72, 709) on the Randolph walk | warm air + rumble every few minutes (delight seed; station itself is subsurface, osm 71.7, 687.5) |
+| McDonald's Cycle Center | (176, 722), NE pocket | glassy bike depot, scenery |
+| Nichols Bridgeway | scenery ribbon (122, 846, y 1.5) → (112, 930, y 13) | Renzo Piano white curve leaving the frame over Monroe (liberty: launch pulled east of the promenade into the x 120–128 pocket); sells the S edge |
+| Food trucks | Monroe curb z 897, xs 72/84/96/108 (osm 84, 902) | perpetual-summer street-food row, read over the fence |
+
+### Walkability (WALK_M in millennium.js — THE single definition, engine + walkprobe)
+Ordered quads, elevated first: the three BP-deck quads (ramp/seg/seg), then the
+y-0 network — Michigan spine, Randolph/Monroe sidewalks, split Columbus rim
+walks, Wrigley Square plaza, Chase Promenade, Washington (57–96 × 758–770) +
+Madison (57–96 × 826–838) cross walks, Bean plaza, Crown wet plaza, the
+bowl (118–186 × 758–788), the lawn carved around the BP approach (lawnW
+118–168 × 788–846, lawnSE 168–186 × 812–846), Lurie NE gate (170–179 ×
+843–852) + Seam boardwalk + SW link (138–149 × 870–880) + south rim. The
+McCormick cafe, all planting plates, hedges, backstage pockets and every road
+stay non-walkable; buildings standing on walks (Exelon cubes, Crown towers,
+kiosk) are builder colliders, exactly like Wrigleyville statues.
+
+### Standing liberties (deliberate, keep)
+- **PARK-LOCAL displaced frame on BOTH axes** (dx −468.8, dz −2369.6, recorded
+  in osm.json provenance): the ride is a scripted transition. True projection
+  z ≈ +3200 is never a validation target.
+- **State→Michigan block compressed to zero**: the Red Line subway kiosk stands
+  at the park's Michigan Ave edge (the Wrigleyville x-frame register).
+- **Perpetual summer dusk staging**: McCormick plaza is THE CAFE — no ice rink,
+  ever. Fog 0xf6ab84 register, first window-lights on.
+- **Homage register for the copyrighted artworks** (Cloud Gate, Crown Fountain,
+  the Gehry works): chunky toon caricature, invented detail, painted (never
+  computed) reflections, no traced geometry, no photo textures (039 brief,
+  LOCATIONS.md owner rule).
+- **TRUE compass kept**: north up, lakeward east; downtown south of the
+  lakefront map — matching real geography, unlike no cell before it.
+- **Nothing at z < 680** (billboard clearance, computed max 676.8): the
+  Randolph giants stand as a flat backdrop slab band z 680–692 fronting the
+  road, pulled south from their osm footprint centers; E–W order preserved.
+  The global billboard boxes beyond read as "more Loop" through the gaps —
+  acceptable; their arrangement is never judged from this cell.
+- **Giants' verticals at the skyline-billboard register (~0.55–0.6×), not 1:1**
+  (billboard Willis = 242 for the real 442 m): two adjacent tower fields must
+  share one scale logic. The in-park cliff stays 1:1 (35–80 m).
+- **One grade per street** (real Randolph-east and Columbus are Upper/Lower
+  stacks over the garages/rail); the BP bridge still crests over Columbus.
+- **Michigan Ave straightened to x 40** (real centerline drifts to ~48 north of
+  Washington).
+- **View-only sunken cafe**: McCormick terrace is decorative (Murphy's
+  beer-garden register) — the overlook balustrade is the read, not the seating.
+- Editorial compression: bowl/lawn spans trimmed to drop redundant panels
+  (§5.4 — topological ORDER preserved everywhere: peristyle NW → cafe/bean →
+  Crown SW → Lurie SE behind its hedge → bridge snaking E from the lawn's SE).
+- BP launch pulled ~6 units south of the osm way start; Exelon south pair
+  pulled ~6 north off the Monroe walk; Stock Exchange Arch sits in the south
+  backdrop band (osm 175, 908 is inside the Monroe roadway).

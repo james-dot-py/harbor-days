@@ -305,6 +305,108 @@ axis-aligned framings per the camera doctrine.
 Minimum judged set per task acceptance: one per signature landmark +
 arrival + streetwall + bridge crest — the 11 above cover it with margin.
 
+## WAYPOINTS (final) — task 040 (supersedes the DRAFT list above)
+
+Stands verified against WALK_M (src/data/millennium.js) and the walkprobe
+flood-fill; coordinates cite GEOGRAPHY.md MILLENNIUM_GEOGRAPHY. 041 pastes
+the expectation strings into tools/waypoints.expect.json in the SAME commit
+that wires the module into gen-waypoints.mjs (never earlier — gen-waypoints
+fails loudly on unmatched expect ids). Camera math: camera = stand −
+(sin yaw, cos yaw)·dist; every camera position below was hand-checked to
+land on open walkable ground or open air — the two camera traps in this
+cell are (a) the SUNKEN CAFE VOID (x 57–76, z 772–826: cameras south/east
+of the kiosk must hug the spine x ≤ 57) and (b) the CROWN ELM BOSQUES
+(x 58–65 / 75–84, z 846–882: prefer the pool's two axis framings).
+
+- **mp-arrival** — stand (55, 812), feature KIOSK_M (50.3, 800.3).
+  f0 yaw π dist 7 (N up the sidewalk: kiosk front-left, cliff left, lawns
+  right); f1 stand (54, 788) yaw 0 dist 7 (reverse); f2 stand (55, 810)
+  yaw −2.9 dist 7 (three-quarter; camera hugs the spine, clear of the cafe
+  void). Expect: "A red-pyloned CTA subway stair kiosk stands on the
+  Michigan Avenue sidewalk with stairs leading down into a tiled landing;
+  behind it the limestone streetwall rises like a cliff, and park lawns
+  with globe lamps and pennant banners open east."
+- **mp-streetwall** — stand (90, 820), feature the cliff face (30, 820).
+  f0 yaw −π/2 dist 8; f1 stand (108, 812) yaw −π/2 dist 6; f2 stand
+  (66, 766) yaw −π/2 dist 7 (Cultural Center colonnade close-up, z 760).
+  Expect: "West across the park, a continuous wall of limestone and
+  terra-cotta towers closes the entire view — arched gothic fronts, lit
+  windows, one classical colonnade block — reading as a downtown canyon
+  face, not scattered buildings."
+- **mp-peristyle** — stand (78, 736), feature peristyle (67, 724).
+  f0 yaw −2.40 dist 7; f1 stand (84, 744) yaw −2.35 dist 9 (wide: the
+  peristyle-against-glass-giants contrast IS the shot); f2 stand (67, 738)
+  yaw π dist 7 (head-on symmetric). Expect: "A semicircular peristyle of
+  paired pale Doric columns on a raised plinth curves around a fountain
+  basin at the lawn's north-west corner, framed against glass office
+  giants; a low curved limestone wall nearby reads WRIGLEY SQUARE."
+- **mp-mccormick-cafe** — stand (78, 812) at the balustrade, feature cafe
+  center (66, 800, y −1.6). f0 yaw −2.36 dist 7 pitch ~0.5 (down into the
+  terrace); f1 stand (78, 790) yaw −0.79 dist 7 pitch ~0.45; f2 stand
+  (76.5, 820) yaw −2.0 dist 5 (along the rail). Expect: "A sunken cafe
+  terrace packed with blue and yellow market umbrellas over bistro tables
+  sits one level below the Bean's plaza, edged by a white balustrade and
+  planter hedges, with diners under a long cream bar canopy — summer al
+  fresco, no ice."
+- **mp-bean** — stand (92, 806), feature CLOUD_GATE_M (86.8, 797.7).
+  f0 yaw −2.58 dist 8 (three-quarter + cliff behind); f1 stand (87, 812)
+  yaw π dist 7 (head-on, painted reflection); f2 stand (87, 797.7) yaw
+  −π/2 dist 6 (UNDER the arch, looking west through it to the balustrade
+  and cliff); f3 stand (82, 790) yaw 0.72 dist 7. Expect: "A giant silver
+  toon bean sits on square pavers with a painted skyline-and-crowd
+  reflection wrapped around its belly; its arch opens walkably beneath,
+  small figures cluster at its base, and the limestone cliff rises behind."
+- **mp-crown-fountain** — stand (69.8, 884), feature N tower (69.8, 851.5).
+  f0 yaw π dist 7 (down-the-pool axis, both towers); f1 stand (69.8, 842)
+  yaw 0 dist 7 (reverse axis); f2 stand (80, 862) yaw −π/2 dist 5 (E-rim
+  cross shot — fights the bosque, lowest priority). Expect: "Two
+  glass-block towers face each other across a long, wet black reflecting
+  pool that mirrors their amber glow; the near tower shows a giant face,
+  and a water arc spouts from its mouth into the pool where figures
+  splash."
+- **mp-promenade** — stand (108, 806), feature the allee axis north
+  (108, 716). f0 yaw π dist 7 (tree tunnel dead-ending at the Pru slab +
+  diamond twin); f1 stand (108, 726) yaw π dist 6 (plinth pair close);
+  f2 stand (108, 790) yaw 0 dist 7 (reverse, south). Expect: "A broad
+  paved allee runs north between double rows of trees with globe lamps
+  and colorful pennant banners, past a curved inscribed limestone plinth,
+  and dead-ends visually at the white PRUDENTIAL slab and its
+  diamond-topped twin."
+- **mp-pritzker-stage** — stand (147, 777), feature stage mouth
+  (146.5, 758). f0 yaw π dist 8 (stage + ribbon crown + Aon behind);
+  f1 stand (135, 782) yaw −2.9 dist 9 (three-quarter w/ speaker tower);
+  f2 stand (147, 768) yaw π dist 5 (mouth interior: wood + red curtain).
+  Expect: "A crown of curled stainless ribbon petals bursts around a
+  glass stage mouth with a warm wood interior and dark red curtain; ranks
+  of red folding seats fill the bowl in front, and the Aon monolith towers
+  directly behind."
+- **mp-great-lawn** — stand (150, 834), feature stage through the trellis
+  (146.5, 758). f0 yaw π dist 8; f1 stand (130, 838) yaw −2.95 dist 8
+  (SW diagonal); f2 stand (150, 810) yaw π dist 6 (mid-lawn, arcs
+  overhead). Expect: "Steel pipe arcs criss-cross overhead in a dome-like
+  lattice hung with paired speaker pods, converging toward a lit silver
+  stage at the lawn's far end, with the north skyline wall — Prudential
+  sign, diamond spire, white monolith — standing beyond."
+- **mp-lurie** — stand (159.5, 862) ON the Seam boardwalk, feature the
+  rill axis NE (175, 849.5). AXIS-ALIGNED ALONG THE RILL ONLY (the hedge
+  cage blocks cross-body lines): f0 yaw 2.25 dist 6 (NE along the water);
+  f1 yaw −0.91 dist 6 (reverse, SW); f2 stand (174, 848) at the NE gate,
+  yaw −0.80 dist 6 (down into the garden from the entry). Expect: "A low
+  wood boardwalk runs beside a thin water rill through drifts of purple
+  and gold planting, all enclosed by a tall clipped hedge wall growing
+  inside a dark steel frame, with the Gehry ribbons and towers peeking
+  over its shoulder."
+- **mp-bp-bridge-crest** — stand (199, 806.5) on the crest, feature
+  deck-west (186, 796). DOWN-THE-DECK ONLY, dist ≤ 6, near-level pitch
+  (chest-high shingle parapets block every cross-body line — the L-car
+  interior doctrine): f0 yaw −2.07 dist 5.5 (west: deck curve, pavilion
+  ribbons, skyline wall); f1 stand (193, 802) yaw −1.93 dist 5 (back down
+  the ramp); f2 stand (198, 806) yaw 1.07 dist 5.5 (east to the polite
+  dead-end + lower Loop band). Expect: "A wood-plank deck curves ahead
+  between chest-high brushed-steel shingle parapets, snaking over a road
+  below and back toward the stainless pavilion ribbons and the skyline
+  wall."
+
 ## Gaps & caveats (honest bookkeeping)
 
 - **No freedom of panorama (US)**: Commons close-up coverage of Cloud Gate's

@@ -3,6 +3,7 @@
 // without needing THREE / a browser. Pure JS mirrors of the engine funcs.
 import * as CH from '../src/data/chicago.js';
 import * as WV from '../src/data/wrigleyville.js';
+import * as MP from '../src/data/millennium.js';
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const smooth=t=>t*t*(3-2*t);
@@ -584,6 +585,130 @@ console.log('\n--- Task 023: spawn on the forecourt, clear of the monument colli
   // spawn keeps off the walk ribbon (stands beside it, not blocking)
   const c=ribbonClear(S.x,S.z,0.34);
   expect(`spawn off every ribbon footprint (min clr ${c.min.toFixed(2)} >= 0)`,c.min>=0,true);
+}
+
+// ===== MILLENNIUM PARK CELL (task 040 — pure data; engine wiring is 041).
+// walkableM/surfaceYM are imported from the data module itself — the SAME
+// functions the engine will use (no mirror to drift).
+console.log('\n--- Millennium: the park network is walkable at grade ---');
+for(const [label,x,z] of [
+  ['Michigan spine @ spawn',55,800],['Michigan spine N',52,710],['Michigan spine S',52,890],
+  ['Randolph sidewalk',120,709],['Monroe sidewalk',120,890],
+  ['Columbus rim N',185,750],['Columbus rim S',185,850],
+  ['Wrigley Sq plaza (peristyle foot)',67,730],['Wrigley Sq entrance corner',58,714],
+  ['Chase Promenade N',108,720],['Chase Promenade mid',108,800],['Chase Promenade S',108,880],
+  ['Washington cross walk',66,766],['Madison cross walk',66,831],
+  ['Bean plaza',92,806],['UNDER the Bean arch',86.8,797.7],
+  ['Crown plaza dry pavers',60,860],['Crown wet pool mid',69.8,864],
+  ['seating bowl',147,777],['Great Lawn W',150,820],['Great Lawn SE',176,830],
+  ['Lurie NE gate',174,848],['Seam boardwalk mid',159.5,862],['Lurie SW link',144,876],['Lurie south rim',150,882],
+]) expect(`${label} (${x},${z}) walkable`,MP.walkableM(x,z),true);
+for(const [x,z] of [[55,800],[108,800],[86.8,797.7],[69.8,864],[150,820],[159.5,862]])
+  expect(`grade y=0 at (${x},${z})`,MP.surfaceYM(x,z),0);
+
+console.log('\n--- Millennium: roads/cafe/planting are NOT walkable ---');
+for(const [label,x,z] of [
+  ['Michigan roadway',40,800],['Randolph roadway',100,700],['Monroe roadway',100,900],['Columbus roadway',195,750],
+  ['McCormick sunken cafe (view-only)',66,800],['cafe N rim',60,775],['cafe S rim',70,822],
+  ['Lurie light plate',153.6,852.5],['Lurie dark plate',167.7,870.7],
+  ['Lurie N hedge',150,848],['Lurie W hedge',126,860],
+  ['backstage pocket E of stage',175,730],['pocket between promenade and Lurie',123,866],
+  ['streetwall zone',20,800],['east backdrop zone',220,800],['giants band',100,686],
+]) expect(`${label} (${x},${z}) NOT walkable`,MP.walkableM(x,z),false);
+
+console.log('\n--- Millennium: BP deck — ramp-only elevated access, crest over Columbus ---');
+{ const yA=MP.surfaceYM(177,796);
+  expect(`approach ramp mid (177,796) rising (${yA.toFixed(2)})`,yA>1.5&&yA<2.4,true); }
+expect('ramp base at grade (168.2,796) y<0.1',MP.surfaceYM(168.2,796)<0.1,true);
+expect('lawn W of ramp base (167.5,796) walkable at 0',MP.walkableM(167.5,796)&&MP.surfaceYM(167.5,796)===0,true);
+{ const y1=MP.surfaceYM(185.9,796),y2=MP.surfaceYM(186.3,796.2);
+  expect(`ramp->seg seam continuous (${y1.toFixed(2)} vs ${y2.toFixed(2)})`,Math.abs(y1-y2)<0.15,true); }
+{ const y1=MP.surfaceYM(195.7,803.8),y2=MP.surfaceYM(196.3,804.2);
+  expect(`seg->crest seam continuous (${y1.toFixed(2)} vs ${y2.toFixed(2)})`,Math.abs(y1-y2)<0.15,true); }
+expect('crest over Columbus (200,807) at y 5',MP.surfaceYM(200,807),5);
+expect('crest covers the roadway span (195,804.5) elevated',MP.surfaceYM(195,804.5)>4.4,true);
+expect('deck end (204.5,809.8) still walkable',MP.walkableM(204.5,809.8),true);
+expect('past the deck end (207.5,811.5) NOT walkable',MP.walkableM(207.5,811.5),false);
+// enclosure buffers (PITFALLS elevator rule): the deck's flanks never touch grade walks
+for(const [label,x,z] of [
+  ['N flank buffer',183,790],['S flank buffer',176,805],['SW pocket beside seg',186,806.5],
+  ['rim-N/deck gap',185,808],['rim-S/deck gap',188,815],['bowl/approach gap',180,790],
+]) expect(`${label} (${x},${z}) NOT walkable`,MP.walkableM(x,z),false);
+
+console.log('\n--- Millennium: flood fill from the spawn — one connected network, no elevators ---');
+{
+  const C=MP.CLAMP_M, x0=Math.floor(C.xMin), x1=Math.ceil(C.xMax), z0=Math.floor(C.zMin), z1=Math.ceil(C.zMax);
+  const W=x1-x0+1, H=z1-z0+1, walk=new Uint8Array(W*H), y=new Float32Array(W*H);
+  let total=0;
+  for(let gz=0;gz<H;gz++)for(let gx=0;gx<W;gx++){
+    const wx=x0+gx,wz=z0+gz;
+    if(MP.walkableM(wx,wz)){walk[gz*W+gx]=1;y[gz*W+gx]=MP.surfaceYM(wx,wz);total++;}
+  }
+  // elevator guard: no two ADJACENT walkable cells differ by > 0.55 in y —
+  // every level change must ride a ramp (0.21/unit), never a cliff edge.
+  let worstStep=0,worstAt='';
+  for(let gz=0;gz<H;gz++)for(let gx=0;gx<W;gx++){
+    if(!walk[gz*W+gx])continue;
+    for(const [dx,dz] of [[1,0],[0,1]]){
+      const nx=gx+dx,nz=gz+dz;
+      if(nx>=W||nz>=H||!walk[nz*W+nx])continue;
+      const d=Math.abs(y[gz*W+gx]-y[nz*W+nx]);
+      if(d>worstStep){worstStep=d;worstAt=`(${x0+gx},${z0+gz})`;}
+    }
+  }
+  expect(`no elevator seams: worst adjacent step ${worstStep.toFixed(2)} at ${worstAt} <= 0.55`,worstStep<=0.55,true);
+  // BFS from the spawn: every walkable cell must be reachable (no islands)
+  const seen=new Uint8Array(W*H),Q=[(Math.round(MP.SPAWN_M.z)-z0)*W+(Math.round(MP.SPAWN_M.x)-x0)];
+  seen[Q[0]]=1;let reach=0;
+  while(Q.length){const i=Q.pop();reach++;const gx=i%W,gz=(i-gx)/W;
+    for(const [dx,dz] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const nx=gx+dx,nz=gz+dz;if(nx<0||nz<0||nx>=W||nz>=H)continue;
+      const j=nz*W+nx;if(walk[j]&&!seen[j]){seen[j]=1;Q.push(j);}
+    }}
+  expect(`spawn cell (${MP.SPAWN_M.x},${MP.SPAWN_M.z}) walkable`,walk[Q.length?0:(Math.round(MP.SPAWN_M.z)-z0)*W+(Math.round(MP.SPAWN_M.x)-x0)]===1,true);
+  expect(`whole network reachable from the spawn (${reach}/${total} cells)`,reach,total);
+  expect(`network area sane (${total} cells > 8000)`,total>8000,true);
+  // key destinations reachable (grid cells): peristyle, bean, crown pool,
+  // bowl, lawn, seam boardwalk, bridge crest, all four frame corners
+  for(const [label,x,z] of [
+    ['peristyle plaza',67,730],['Bean plaza',87,798],['Crown pool',70,864],
+    ['seating bowl',147,777],['Great Lawn',150,820],['Seam boardwalk',159,862],
+    ['BP crest',200,807],['NW corner',50,709],['NE corner',185,715],['SE corner',185,884],['SW corner',50,890],
+  ]) expect(`${label} (${x},${z}) reached`,seen[(z-z0)*W+(x-x0)]===1,true);
+}
+
+console.log('\n--- Millennium: frame discipline (clamp, spawn, billboard floor, disjointness) ---');
+{
+  const C=MP.CLAMP_M;
+  // every walk quad sample sits inside the clamp (the clamp backs the walls)
+  let out=0;
+  for(const q of MP.WALK_M){
+    const pts=q.seg
+      ? [[q.cx+q.ux*q.hl+q.uz*q.hw,q.cz+q.uz*q.hl-q.ux*q.hw],[q.cx+q.ux*q.hl-q.uz*q.hw,q.cz+q.uz*q.hl+q.ux*q.hw],
+         [q.cx-q.ux*q.hl+q.uz*q.hw,q.cz-q.uz*q.hl-q.ux*q.hw],[q.cx-q.ux*q.hl-q.uz*q.hw,q.cz-q.uz*q.hl+q.ux*q.hw]]
+      : [[q.x0,q.z0],[q.x1,q.z0],[q.x0,q.z1],[q.x1,q.z1]];
+    for(const [px,pz] of pts) if(px<C.xMin||px>C.xMax||pz<C.zMin||pz>C.zMax)out++;
+  }
+  expect(`all WALK_M corners inside CLAMP_M (${out} out)`,out,0);
+  expect('spawn walkable at grade',MP.walkableM(MP.SPAWN_M.x,MP.SPAWN_M.z)&&MP.surfaceYM(MP.SPAWN_M.x,MP.SPAWN_M.z)===0,true);
+  const kc=Math.hypot(MP.SPAWN_M.x-(MP.KIOSK_M.x0+MP.KIOSK_M.x1)/2,MP.SPAWN_M.z-(MP.KIOSK_M.z0+MP.KIOSK_M.z1)/2);
+  expect(`spawn clear of the kiosk footprint (d ${kc.toFixed(1)} > 3)`,kc>3,true);
+  expect('kiosk stands ON the Michigan spine walk',
+    MP.KIOSK_M.x0>=48&&MP.KIOSK_M.x1<=57&&MP.KIOSK_M.z0>=705&&MP.KIOSK_M.z1<=894,true);
+  // billboard floor: nothing in the cell at z < 680 (GEOGRAPHY.md liberty)
+  expect(`giants band z0 (${MP.BACKDROP_M.giants.z0}) >= 680`,MP.BACKDROP_M.giants.z0>=680,true);
+  expect(`streetwall band z0 (${MP.STREETWALL_M.band.z0}) >= 680`,MP.STREETWALL_M.band.z0>=680,true);
+  // disjoint from every other play space; z>500 is unique to this cell
+  expect('cell z-range beyond WORLD_CLAMP',C.zMin>CH.WORLD_CLAMP.zMax,true);
+  expect('cell disjoint from the Wrigleyville clamp',C.xMin>WV.CLAMP_W.xMax||C.zMin>WV.CLAMP_W.zMax,true);
+  expect('z>500 dev-spawn check is unambiguous',C.zMin>500&&CH.WORLD_CLAMP.zMax<500&&WV.CLAMP_W.zMax<500,true);
+  // landmark data consistency
+  const CG=MP.CLOUD_GATE_M,CR=MP.CROWN_M;
+  expect('bean footprint inside its plaza',CG.bean.x0>=CG.plaza.x0&&CG.bean.x1<=CG.plaza.x1&&CG.bean.z0>=CG.plaza.z0&&CG.bean.z1<=CG.plaza.z1,true);
+  expect('crown pool inside its plaza',CR.pool.x0>=CR.plaza.x0&&CR.pool.x1<=CR.plaza.x1&&CR.pool.z0>=CR.plaza.z0&&CR.pool.z1<=CR.plaza.z1,true);
+  expect('both crown towers inside the pool',CR.towers.every(t=>t.x0>=CR.pool.x0&&t.x1<=CR.pool.x1&&t.z0>=CR.pool.z0&&t.z1<=CR.pool.z1),true);
+  expect('trellis stops W of the BP approach',MP.PRITZKER_M.trellis.x1<=MP.BP_BRIDGE_M.approach.x0,true);
+  expect('peristyle inside the Wrigley Sq plaza',MP.WRIGLEY_SQ_M.peristyle.x0>=MP.WRIGLEY_SQ_M.plaza.x0&&MP.WRIGLEY_SQ_M.peristyle.z1<=MP.WRIGLEY_SQ_M.plaza.z1,true);
 }
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);

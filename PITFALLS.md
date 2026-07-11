@@ -186,6 +186,14 @@ few turns to find; keep each to one line of symptom + fix.
   files-on-disk < manifest entries, and the surviving content is whichever
   downloaded LAST (task 039). After any fetch, count files vs manifest entries
   and prune the stale entry (tools/mp-manifest-prune.mjs).
+- The lakefront SKYLINE BILLBOARD is GLOBAL: sky.js adds it at scene level BEFORE
+  beginCellCapture (never hidden on cell swap), its materials are fog:false (never
+  fog-culled) and its fill bands are InstancedMesh (drawn in EVERY view). After its
+  2.2x group scale it occupies world z 504..676.8, x −264..297 (exact extents replay
+  its local mulberry32(0x5c1000): tools/tmp-billboard-extent.mjs). Any southern
+  (downtown) cell must keep ALL its geometry at z >= 680 or towers interpenetrate
+  the billboard boxes — the millennium cell region was finalized z 680+ for exactly
+  this (task 040, GEOGRAPHY.md MILLENNIUM_GEOGRAPHY liberties).
 - A SMALL vertical geometry change is invisible in a distant side view: lowering a
   deck ~0.3 m to sit flush on grade moved it only ~20 px at ~13 m, reading as
   "unchanged" — task 038 nearly re-chased a phantom HMR-staleness bug over it (a
