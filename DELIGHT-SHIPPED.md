@@ -184,3 +184,10 @@ cut becomes a revert task.
   out to the net — then settles back on the mat for the next one. The bay
   stopped being a blindfold; now you actually get to watch it fly (the payoff
   the enclosed shell used to hide) — Diversey driving range bays — task 037
+- Ride the Red Line downtown and the trip tells on itself: the in-car map runs
+  Belmont→Addison solid but SKIPS to Monroe on a broken line (the express
+  wink), the streaming window lights drop to sodium-amber in the dark State St
+  tube, the headsign toast flips to '95TH BOUND — next stop: Monroe', and the
+  red-line regular leans over — 'millennium park? locals just say the bean.'
+  You surface at the top of the subway stair facing the Bean axis. The L now
+  reaches three neighborhoods — Belmont ⇄ Addison ⇄ Monroe — task 042

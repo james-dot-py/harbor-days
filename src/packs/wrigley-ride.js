@@ -10,6 +10,7 @@ import { registerCell, setActiveCell, getCell, activeCell } from '../cells.js';
 import { camCtl } from '../main.js';
 import { cam } from '../input.js';
 import { SPAWN_W } from '../data/wrigleyville.js';
+import { KIOSK_M } from '../data/millennium.js';
 import { buildAddisonTrains, updateTrains, forceDwell, forceApproach } from '../wrigley/train.js';
 
 const R = mulberry32(90210 + 1947);
@@ -166,6 +167,8 @@ function buildCar() {
     geo.setAttribute('aColor', new THREE.BufferAttribute(aC, 3));
     geo.setAttribute('aSize', new THREE.BufferAttribute(aS, 1));
     const pts = new THREE.Points(geo, pointsMat()); add(pts);
+    pts.userData.warm = aC.slice();               // base colours + sizes — setWindowMood restores from here
+    pts.userData.size = aS.slice();
     winLights.push(pts);
   }
   // interior glow (ceiling line, raised for the taller cabin)
@@ -177,14 +180,19 @@ function buildCar() {
     geo.setAttribute('aSize', new THREE.BufferAttribute(aS, 1));
     add(new THREE.Points(geo, pointsMat()));
   }
-  // minimap while riding: a dark card with the Red Line
+  // minimap while riding: a dark card with the Red Line. Belmont↔Addison runs
+  // solid; the downtown express to Monroe is a BROKEN line (the wink that it
+  // skips the whole North Side — real Belmont→Monroe is ~14 stops).
   const mmcv = document.createElement('canvas'); mmcv.width = 304; mmcv.height = 412;
   { const c2 = mmcv.getContext('2d');
     c2.fillStyle = '#2b2833'; c2.fillRect(0, 0, 304, 412);
     c2.strokeStyle = '#c0271f'; c2.lineWidth = 10; c2.lineCap = 'round';
-    c2.beginPath(); c2.moveTo(152, 330); c2.lineTo(152, 80); c2.stroke();
+    c2.beginPath(); c2.moveTo(152, 330); c2.lineTo(152, 80); c2.stroke();   // Belmont → Addison (solid)
+    c2.setLineDash([7, 9]);                                                 // express-run gap
+    c2.beginPath(); c2.moveTo(152, 340); c2.lineTo(152, 373); c2.stroke();  // Belmont → Monroe (broken)
+    c2.setLineDash([]);
     c2.fillStyle = '#f4efe6';
-    for (const [y, n] of [[330, 'BELMONT'], [205, 'SHERIDAN'], [80, 'ADDISON']]) {
+    for (const [y, n] of [[330, 'BELMONT'], [205, 'SHERIDAN'], [80, 'ADDISON'], [381, 'MONROE']]) {
       c2.beginPath(); c2.arc(152, y, 8, 0, 7); c2.fill();
       c2.font = '700 16px "Trebuchet MS",sans-serif'; c2.textAlign = 'left';
       c2.fillText(n, 170, y + 6);
@@ -210,11 +218,17 @@ function buildPylon() {
   const cv = document.createElement('canvas'); cv.width = 256; cv.height = 128;
   const g = cv.getContext('2d');
   g.fillStyle = '#1f1e24'; g.fillRect(0, 0, 256, 128);
-  g.fillStyle = '#c0271f'; g.fillRect(0, 0, 256, 34);
+  g.fillStyle = '#c0271f'; g.fillRect(0, 0, 256, 30);
   g.fillStyle = '#f4efe6'; g.textAlign = 'center';
-  g.font = '800 22px "Trebuchet MS",sans-serif'; g.fillText('RED LINE', 128, 25);
-  g.font = '700 20px "Trebuchet MS",sans-serif';
-  g.fillText('ADDISON →', 128, 66); g.fillText('WRIGLEY FIELD', 128, 94);
+  g.font = '800 21px "Trebuchet MS",sans-serif'; g.fillText('RED LINE', 128, 22);
+  // BOTH served directions, each shrink-to-fit so nothing clips the 1.7 m plane
+  const fit = (txt, y) => {
+    let fs = 18; g.font = `700 ${fs}px "Trebuchet MS",sans-serif`;
+    while (g.measureText(txt).width > 242 && fs > 11) { fs -= 1; g.font = `700 ${fs}px "Trebuchet MS",sans-serif`; }
+    g.fillText(txt, 128, y);
+  };
+  fit('↑ ADDISON · WRIGLEY FIELD', 58);
+  fit('↓ MONROE · MILLENNIUM PARK', 85);
   g.font = '600 13px "Trebuchet MS",sans-serif'; g.fillText('game day service', 128, 116);
   // back-to-back FrontSide pair — readable from the plaza (east) AND the underpass
   // exit (west); a lone DoubleSide plane read RED LINE mirrored from behind (PITFALLS).
@@ -229,20 +243,73 @@ function buildPylon() {
 }
 
 // ------------------------------ the ride -------------------------------
+// THREE destinations now (task 042). Arrival flavor keys off the DESTINATION;
+// the Addison pull-in keys off the ORIGIN (activeCell at boarding). Monroe is
+// downtown's State-St SUBWAY — no visible train (the fade is the tunnel) and
+// the streaming window lights turn amber/dark for the tube.
+const DEST = {
+  lakefront: {
+    cell: 'lakefront', x: 20, z: 105, y: 0, yaw: 1.35,
+    stop: 'Belmont', label: 'Belmont / lakefront', name: 'This is Belmont.',
+    quip: 'ope — heading back to the lake?',
+    arrive: () => toast('BELMONT', 'back at the lakefront'),
+  },
+  wrigleyville: {
+    cell: 'wrigleyville', x: SPAWN_W.x + 1.4, z: SPAWN_W.z, y: SPAWN_W.y, yaw: 2.95,  // east of the canopy post row
+    stop: 'Addison', label: 'Addison / Wrigley Field', name: 'This is Addison.',
+    quip: 'ope — my stop too. go cubs, go!',
+    arrive: () => {
+      organSting();
+      if (!state.wrigleyVisited) { state.wrigleyVisited = true; toast('WRIGLEYVILLE', 'the Friendly Confines — game day'); }
+      else toast('WRIGLEYVILLE', 'Addison station');
+    },
+  },
+  millennium: {
+    // top of the park subway stair (KIOSK_M east mouth), facing the Bean axis
+    cell: 'millennium', x: KIOSK_M.x1 + 2, z: KIOSK_M.pylonZ, y: 0, yaw: 1.62,
+    stop: 'Monroe', label: 'Monroe / Millennium Park', name: 'This is Monroe.',
+    quip: 'millennium park? locals just say the bean',
+    arrive: () => {
+      if (!state.millenniumVisited) { state.millenniumVisited = true; toast('MILLENNIUM PARK', 'downtown — the Bean is that way'); }
+      else toast('MILLENNIUM PARK', 'Monroe / the park');
+    },
+  },
+};
+
+// window-light mood: amber sodium bulbs against the dark State St tube for a
+// Monroe-bound run, warm city lights otherwise. Recolors the static per-vertex
+// aColor (no rng; per-ride, resets from each pts' stored warm base).
+function setWindowMood(tube) {
+  for (const pts of winLights) {
+    const a = pts.geometry.attributes.aColor, s = pts.geometry.attributes.aSize;
+    const base = pts.userData.warm, bs = pts.userData.size;
+    for (let i = 0; i < a.count; i++) {
+      if (tube) {                                   // sodium-amber bulbs, dimmer + smaller: the dark State St tube
+        const b = base[i * 3];
+        a.setXYZ(i, b * 0.95, b * 0.36, 0.02); s.setX(i, bs[i] * 0.5);
+      } else {                                       // warm city lights streaming past
+        a.setXYZ(i, base[i * 3], base[i * 3 + 1], base[i * 3 + 2]); s.setX(i, bs[i]);
+      }
+    }
+    a.needsUpdate = true; s.needsUpdate = true;
+  }
+}
+
 const seq = [];                                     // [{at, fn}] one-shot timeline
 let seqT = -1;
 function runSeq(steps) { seq.length = 0; steps.forEach(s => seq.push(s)); seqT = 0; }
 
 function rideTo(dest, player) {
   if (seqT >= 0) return;                            // already riding
+  const origin = activeCell();                      // where we boarded
+  const spot = DEST[dest];
+  const toTube = dest === 'millennium';             // downtown = the subway
   state.redlineRides = (state.redlineRides || 0) + 1;
-  const spot = dest === 'wrigleyville'
-    ? { cell: 'wrigleyville', x: SPAWN_W.x + 1.4, z: SPAWN_W.z, y: SPAWN_W.y, yaw: 2.95, name: 'This is Addison.' }   // east of the canopy post row
-    : { cell: 'lakefront', x: 20, z: 105, y: 0, yaw: 1.35, name: 'This is Belmont.' };
   const fade = ms => screenFx.filter('brightness(0)', ms);
   chime();
-  // boarding AT Addison: a real train pulls in first; the fade covers boarding
-  const preRoll = dest === 'lakefront' ? 2.6 : 0;
+  // boarding AT Addison: a real train pulls in first; the fade covers boarding.
+  // Belmont (surface stub) and Monroe (subway) board without a visible train.
+  const preRoll = origin === 'wrigleyville' ? 2.6 : 0;
   if (preRoll) forceApproach();
   const P = preRoll;                              // every step waits for the pull-in
   runSeq([
@@ -253,10 +320,11 @@ function rideTo(dest, player) {
       // look down the car's length, slightly angled at the west windows —
       // any cross-car camera lands outside the 3.4 m body
       cam.yaw = Math.PI - 0.28; cam.pitch = 0.06; cam.dist = 4.5; camCtl.snap = true;
+      setWindowMood(toTube);
       rumbleOn();
-      toast('RED LINE — HOWARD BOUND', dest === 'wrigleyville' ? 'next stop: Addison' : 'next stop: Belmont');
+      toast(toTube ? 'RED LINE — 95TH BOUND' : 'RED LINE — HOWARD BOUND', 'next stop: ' + spot.stop);
     } },
-    { at: P + 2.2, fn: () => rider.say(dest === 'wrigleyville' ? "ope — my stop too. go cubs, go!" : 'ope — heading back to the lake?') },
+    { at: P + 2.2, fn: () => rider.say(spot.quip) },
     { at: P + 6.2, fn: () => say(spot.name) },
     { at: P + 7.2, fn: () => chime() },
     { at: P + 8.0, fn: () => fade(1500) },
@@ -267,16 +335,7 @@ function rideTo(dest, player) {
       rumbleOff();
       if (dest === 'wrigleyville') forceDwell(4);  // "that was my train" — it departs behind you
     } },
-    { at: P + 9.4, fn: () => {
-      if (dest === 'wrigleyville') {
-        organSting();
-        if (!state.wrigleyVisited) {
-          state.wrigleyVisited = true;
-          toast('WRIGLEYVILLE', 'the Friendly Confines — game day');
-        } else toast('WRIGLEYVILLE', 'Addison station');
-      } else toast('BELMONT', 'back at the lakefront');
-      seqT = -1;
-    } },
+    { at: P + 9.4, fn: () => { spot.arrive(); seqT = -1; } },
   ]);
 }
 
@@ -300,16 +359,18 @@ onWorldReady((player) => {
     palette: { suit: 0x2a4a7a, pants: 0x3a3a42, skin: 0xb98a62, hair: 0x4a3626 },
     lines: ['ope', 'this car always smells like popcorn', 'the L is the best seat in the city'],
   });
-  addInteraction({
-    x: 16, z: 106, r: 3.6,
-    label: 'ride the Red Line — Addison / Wrigley Field',
-    onUse: p => rideTo('wrigleyville', p),
+  // Each of the three boarding points offers the OTHER TWO destinations as its
+  // own zone, spaced so the prompts never overlap (centers ≥7 m; r 3 + 1.1
+  // grace = 4.1 reach, so at each stand only that zone is in range).
+  const board = (x, z, dest) => addInteraction({
+    x, z, r: 3, label: 'ride the Red Line — ' + DEST[dest].label, onUse: p => rideTo(dest, p),
   });
-  addInteraction({
-    x: SPAWN_W.x, z: SPAWN_W.z - 3, r: 4.5,
-    label: 'ride the Red Line — Belmont / lakefront',
-    onUse: p => rideTo('lakefront', p),
-  });
+  board(16, 104, 'wrigleyville');                        // Belmont pylon → Addison
+  board(16, 111, 'millennium');                          // Belmont pylon → Monroe
+  board(SPAWN_W.x, SPAWN_W.z - 5, 'lakefront');          // Addison platform → Belmont
+  board(SPAWN_W.x, SPAWN_W.z + 2, 'millennium');         // Addison platform → Monroe
+  board(KIOSK_M.x1 + 2, KIOSK_M.z0 + 0.5, 'lakefront');  // Millennium kiosk → Belmont
+  board(KIOSK_M.x1 + 2, KIOSK_M.z1 - 1, 'wrigleyville'); // Millennium kiosk → Addison
   registerUpdate((dt, t, p) => {
     if (seqT >= 0) {
       seqT += dt;

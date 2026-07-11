@@ -211,3 +211,14 @@ few turns to find; keep each to one line of symptom + fix.
   the finger deck's height looked the same). Verify height/vertical edits with a
   CLOSE, LOW, near-level framing (dist ≤ 6, pitch ≈ 0) where the deck-vs-grade
   seam fills the frame; a wide zone overview won't show a sub-metre drop.
+- Extending a MULTI-destination ride (Red Line 2→3 stops, task 042): arrival
+  flavor keys off the DESTINATION, but the boarding pull-in keys off the
+  ORIGIN — the 2-stop code conflated them (`dest==='lakefront'` was a stand-in
+  for origin===Addison, the only Belmont-bound board). With 3+ stops read
+  origin = `activeCell()` at boarding and gate `forceApproach` on it; gate the
+  arrival train / `say` / toast on dest. Boarding zones are pure-distance
+  interactions and the three cells are coordinate-disjoint, so one stop's zones
+  never fire in another cell — but space same-stop zones ≥ r+1.1 apart or two
+  prompts fight. (The stated "ride the L to other neighborhoods" future re-hits
+  this.) Aside: never identify a cell from a screenshot — a lakefront lawn read
+  as Millennium; confirm via `__hd.scene` cell-root `.visible`.
