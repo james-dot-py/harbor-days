@@ -87,13 +87,19 @@ walk corner (9179486203) — the park's signature signage form (see Chase
 plinths). The peristyle-against-glass-towers contrast IS the shot.
 
 **McCormick Tribune Plaza (Michigan edge, Washington→Madison, ~x 50–75,
-z ~770–825)** — THE SUMMER CAFE (game is perpetual summer dusk: **no ice
-rink, ever**): a sunken terrace one level below the Bean plaza, packed grid
-of blue/yellow/green market umbrellas over cafe tables, a long cream
-bar-tent ("the Plaza"), Park Grill under the AT&T Plaza overlook, planter
-hedges, banner-boxes on floodlight posts (refs: McCormick pair, 9181704444).
-The balustraded overlook rail between it and the Bean plaza is real and
-photogenic.
+z ~770–825)** — THE ICE RINK (owner override 2026-07-11, task 049 —
+supersedes the 039/040 "summer cafe, no rink ever" call; owner refs
+owner-aerial-use-this.jpg = footprint truth, owner-mccormick-ice-skating.jpg
+= the read): a sunken sheet one level below the Bean plaza, white
+scratched ice ringed by ads-free white boards with cream caps, corner
+floodlight masts with banner boxes, skater traffic + one wobbly beginner,
+Park Grill front (cream + green awnings + sign) under the AT&T Plaza
+overlook balustrade. **PERPETUAL-DUSK LIBERTY (recorded)**: the game stays
+endless summer evening and the rink is open anyway — a knowing seasonal
+liberty the owner asked for ("let's make ice skating a thing"). Skating is
+a movement mode: the ice surface (data kind 'ice') swaps walking for a
+carveable GLIDE (main.js), SPACE hop-spins, entry via the Michigan-spine
+stairs at z≈800.
 
 **Cloud Gate on AT&T Plaza** — footprint (83.1–90.5 × 792.8–802.6), h 10 m,
 long axis N–S, OSM tags: Kapoor / stainless / loc_name "The Bean". Sits
@@ -314,8 +320,11 @@ that wires the module into gen-waypoints.mjs (never earlier — gen-waypoints
 fails loudly on unmatched expect ids). Camera math: camera = stand −
 (sin yaw, cos yaw)·dist; every camera position below was hand-checked to
 land on open walkable ground or open air — the two camera traps in this
-cell are (a) the SUNKEN CAFE VOID (x 57–76, z 772–826: cameras south/east
-of the kiosk must hug the spine x ≤ 57) and (b) the CROWN ELM BOSQUES
+cell are (a) the SUNKEN RINK PIT (x 57–76, z 772–826 — since 049 stands may
+go IN it at floor y −1.6, but cameras must clear the stair cheek walls
+(x 57–60.6 flanking z 798.5–801.5), the boards ring and the SKATE RENTAL
+board at (57.2, 798); grade cameras south/east of the kiosk still hug the
+spine x ≤ 57) and (b) the CROWN ELM BOSQUES
 (x 58–65 / 75–84, z 846–882: prefer the pool's two axis framings).
 
 - **mp-arrival** — stand (55, 812), feature KIOSK_M (50.3, 800.3).
@@ -340,14 +349,21 @@ of the kiosk must hug the spine x ≤ 57) and (b) the CROWN ELM BOSQUES
   paired pale Doric columns on a raised plinth curves around a fountain
   basin at the lawn's north-west corner, framed against glass office
   giants; a low curved limestone wall nearby reads WRIGLEY SQUARE."
-- **mp-mccormick-cafe** — stand (78, 812) at the balustrade, feature cafe
-  center (66, 800, y −1.6). f0 yaw −2.36 dist 7 pitch ~0.5 (down into the
-  terrace); f1 stand (78, 790) yaw −0.79 dist 7 pitch ~0.45; f2 stand
-  (76.5, 820) yaw −2.0 dist 5 (along the rail). Expect: "A sunken cafe
-  terrace packed with blue and yellow market umbrellas over bistro tables
-  sits one level below the Bean's plaza, edged by a white balustrade and
-  planter hedges, with diners under a long cream bar canopy — summer al
-  fresco, no ice."
+- **mp-rink-overlook** (049, replaces mp-mccormick-cafe) — f0 stand ON the
+  ice (66.5, 800) yaw 1.5708 pitch 0.10 dist 5.5 (camera in the boards gate
+  gap; the PARK GRILL band + balustrade + Bean read east — the owner
+  skating-photo composition); f1 stand (78, 806) on the Bean plaza yaw −2.2
+  pitch 0.42 dist 8 (down over the balustrade — the aerial read); f2 stand
+  (67, 812) yaw π pitch 0.05 dist 9 (down the long axis north). Expect: see
+  tools/waypoints.expect.json (sheet + scratches + boards/caps + masts +
+  skaters + beginner + PARK GRILL band).
+- **mp-rink-entry** (049) — f0 stand (59, 800) mid-ramp yaw 1.5708 pitch
+  0.12 dist 4.5 (stairs → gate → ice; camera on the spine clear of the
+  kiosk volume x 48–52.5); f1 stand (65.5, 800) yaw −1.5708 pitch −0.12
+  dist 5 (reverse: gate + stairs + kiosk + cliff); f2 stand (61, 799) at
+  the landing yaw 2.0 pitch 0.16 dist 6 (NE across the sheet; camera clear
+  of the SKATE RENTAL board at (57.2, 798)). Expect: see
+  tools/waypoints.expect.json.
 - **mp-bean** — stand (92, 806), feature CLOUD_GATE_M (86.8, 797.7).
   f0 yaw −2.58 dist 8 (three-quarter + cliff behind); f1 stand (87, 812)
   yaw π dist 7 (head-on, painted reflection); f2 stand (87, 797.7) yaw

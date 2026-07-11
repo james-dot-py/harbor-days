@@ -3,8 +3,8 @@
 - severity: medium (dark mass at knee height that the mayor SINKS INTO —
   no surface, no collider, not on the minimap)
 - evidence: owner screenshot
-  refs/inbox/owner-issue-020-black-platform-x-311.5-z-523.0.png
-  (2026-07-11, coords via dbg). The mayor stands waist-deep in a long dark
+  refs/wrigleyville/owner-issue-020-black-platform-x-311.5-z-523.0.png
+  (2026-07-11, coords via dbg; filed from refs/inbox by task 049). The mayor stands waist-deep in a long dark
   wedge platform against a cream facade with a dark window band; owner:
   "idk if you meant to remove the building that was there but isn't on the
   minimap."

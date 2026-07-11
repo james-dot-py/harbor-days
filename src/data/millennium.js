@@ -63,11 +63,33 @@ export const WRIGLEY_SQ_M = {
   grate: { x: 72, z: 709 },                      // Millennium Station rumble flavor (delight seed)
 };
 
-// McCormick Tribune Plaza — THE SUMMER CAFE (perpetual summer: no ice rink,
-// ever). SUNKEN one level below the Bean plaza and VIEW-ONLY (decorative,
-// NOT walkable — Murphy's beer-garden register): umbrella grid + cream
-// bar-tent, read from the white balustrade overlook at railX.
-export const MCCORMICK_M = { x0: 57, x1: 76, z0: 772, z1: 826, y: -1.6, railX: 76 };
+// McCormick Tribune Plaza — THE ICE RINK (owner override 2026-07-11, task
+// 049; supersedes the 040 "summer cafe, no rink ever" call). SUNKEN one
+// level below the Bean plaza and fully WALKABLE-GLIDABLE: a white ice sheet
+// (kind 'ice' -> the main.js skate glide) ringed by chunky boards (0.8 m
+// non-walk gap — wider than the worst per-frame step so a fast glide can't
+// tunnel), a rubber apron ring, a west stair-ramp entry from the Michigan
+// spine, and a ~1.4-1.6 m non-walk rim buffer all around (elevator rule:
+// no y0 walk may sit grid-adjacent to the y -1.6 floor). East rim band
+// (74.9-76) carries the toon PARK GRILL facade under the balustrade at
+// railX. Perpetual-dusk seasonal liberty recorded in GEOGRAPHY + BRIEF.
+export const RINK_M = {
+  x0: 57, x1: 76, z0: 772, z1: 826, y: -1.6, railX: 76,
+  ice:     { x0: 61.5, x1: 72.5, z0: 780, z1: 818 },     // the sheet (kind 'ice')
+  boardW: 0.8, boardH: 1.05,                              // boards gap/wall around the ice
+  gate:    { z0: 797.5, z1: 802.5 },                      // opening in the WEST boards
+  ramp:    { x0: 57, x1: 60.2, z0: 798.5, z1: 801.5 },    // stair-ramp, y 0 -> -1.6 along x
+  landing: { x0: 60.2, x1: 61.5, z0: 797.5, z1: 802.5 },  // foot of the stairs, through the gate
+  apron:   { x0: 58.6, x1: 74.9, z0: 773.6, z1: 824.9 },  // walkable ring outer bounds
+  cornerR: 1.5,                                           // 45° corner-cut colliders (builder)
+};
+// surface KIND at (x,z) — the engine (cells.js cellKind) and any tool read
+// the SAME answer. 'ice' turns on the skate glide in main.js.
+export function kindAtM(x, z) {
+  const I = RINK_M.ice;
+  if (x >= I.x0 && x <= I.x1 && z >= I.z0 && z <= I.z1) return 'ice';
+  return null;
+}
 
 // Cloud Gate on AT&T Plaza — toon HOMAGE (painted reflection, never
 // computed; copyright register). Long axis N-S; the plaza walks CONTINUOUS
@@ -243,6 +265,19 @@ export const WALK_M = [
   { x0: CLOUD_GATE_M.plaza.x0, x1: CLOUD_GATE_M.plaza.x1,
     z0: CLOUD_GATE_M.plaza.z0, z1: CLOUD_GATE_M.plaza.z1, y: 0 },   // Bean plaza (under the arch)
   { x0: 57, x1: 96,   z0: 826, z1: 838, y: 0 },   // Madison cross walk (axis 831)
+  // --- the SUNKEN RINK group (049, all y -1.6; see RINK_M) — ramp first so
+  // its lerped y wins over the flat landing/apron where they touch ---
+  { x0: RINK_M.ramp.x0, x1: RINK_M.ramp.x1,
+    z0: RINK_M.ramp.z0, z1: RINK_M.ramp.z1, rampX: true, y0: 0, y1: -1.6 }, // entry stair-ramp
+  { x0: RINK_M.landing.x0, x1: RINK_M.landing.x1,
+    z0: RINK_M.landing.z0, z1: RINK_M.landing.z1, y: -1.6 },  // landing + boards GATE threshold
+  { x0: 58.6, x1: 60.7, z0: 773.6, z1: 797.5, y: -1.6 },      // apron W (north of the entry)
+  { x0: 58.6, x1: 60.7, z0: 802.5, z1: 824.9, y: -1.6 },      // apron W (south of the entry)
+  { x0: 73.3, x1: 74.9, z0: 773.6, z1: 824.9, y: -1.6 },      // apron E (under the Park Grill band)
+  { x0: 60.7, x1: 73.3, z0: 773.6, z1: 779.2, y: -1.6 },      // apron N
+  { x0: 60.7, x1: 73.3, z0: 818.8, z1: 824.9, y: -1.6 },      // apron S
+  { x0: RINK_M.ice.x0, x1: RINK_M.ice.x1,
+    z0: RINK_M.ice.z0, z1: RINK_M.ice.z1, y: -1.6 },          // THE ICE (kindAtM -> 'ice')
   { x0: CROWN_M.plaza.x0, x1: CROWN_M.plaza.x1,
     z0: CROWN_M.plaza.z0, z1: CROWN_M.plaza.z1, y: 0 },             // Crown wet plaza
   { x0: 118, x1: 186, z0: 758, z1: 788, y: 0 },   // seating bowl

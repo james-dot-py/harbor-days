@@ -717,10 +717,26 @@ addM('mp-peristyle', [
   { x: 84, z: 744, yaw: -2.35, pitch: 0.08, dist: 9 },
   { x: 67, z: 738, yaw: Math.PI, pitch: 0.08, dist: 7 },
 ]);
-addM('mp-mccormick-cafe', [
-  { x: 78, z: 812, yaw: -2.36, pitch: 0.5, dist: 7 },
-  { x: 78, z: 790, yaw: -0.79, pitch: 0.45, dist: 7 },
-  { x: 76.5, z: 820, yaw: -2.0, pitch: 0.15, dist: 5 },
+// 049: the McCormick sunken cafe was rebuilt as the McCormick Tribune ICE
+// RINK. Stands ON the ice/pit sit at floor y −1.6, so the chase cam rides low
+// INSIDE the pit (the camWarnM advisory models camera y as absolute ~1.7 and
+// may print for these sunken stands — advisory only). Camera positions were
+// hand-verified: the f0 cams land on open apron / Michigan spine / plaza air,
+// clear of the subway kiosk volume (x 48–52.5, z 796–804.5).
+// overlook f0 pitches DOWN from mid-ice so the 1.6 m Park Grill band
+// (awnings, lit windows, sign) fills the east read instead of Bean-and-sky
+// (the first-run f0 aimed level and the band compressed to slivers).
+addM('mp-rink-overlook', [
+  { x: 66.5, z: 800, yaw: 1.5708, pitch: 0.10, dist: 5.5 },
+  { x: 78, z: 806, yaw: -2.2, pitch: 0.42, dist: 8 },
+  { x: 67, z: 812, yaw: Math.PI, pitch: 0.05, dist: 9 },
+]);
+// entry f2 stands at the landing looking NE across the sheet — the first-run
+// f2 camera parked ~0.3 m from the SKATE RENTAL board and it filled the frame.
+addM('mp-rink-entry', [
+  { x: 59, z: 800, yaw: 1.5708, pitch: 0.12, dist: 4.5 },
+  { x: 65.5, z: 800, yaw: -1.5708, pitch: -0.12, dist: 5 },
+  { x: 61, z: 799, yaw: 2.0, pitch: 0.16, dist: 6 },
 ]);
 // 043: f0/f3 dists widened for the 1:1 shell (13 x 20 — the 040 dists were
 // authored against the raw osm plan and crop it); both cameras verified on

@@ -31,7 +31,7 @@ acceptance: >
   BLACK PLATFORM (issue 020): at (-311.5, -523.0) near Gallagher Way a dark
   plinth mass sinks the mayor waist-deep — no surface, no collider, absent
   from the minimap (owner screenshot
-  refs/inbox/owner-issue-020-black-platform-x-311.5-z-523.0.png). Likely
+  refs/wrigleyville/owner-issue-020-black-platform-x-311.5-z-523.0.png). Likely
   debris from 033's building rehoming: find the orphan in the build tables
   and either remove it clean or restore the intended building there,
   consistent with 033's plan; minimap syncs; nothing a player can sink

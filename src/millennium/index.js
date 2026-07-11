@@ -22,6 +22,7 @@ import { buildPritzker } from './pritzker.js';
 import { buildCrown } from './crown.js';
 import { buildLurie } from './lurie.js';
 import { buildBridge } from './bridge.js';
+import { buildRink } from './rink.js';
 
 const _r = mulberry32(0x4d0000 ^ M.SEED_M);
 export const grand = (a = 0, b = 1) => a + (b - a) * _r();
@@ -164,18 +165,9 @@ function buildGround() {
   addQuad(LU.linkSW.x0, LU.linkSW.x1, LU.linkSW.z0, LU.linkSW.z1, 0.0, COL.pave);
   segStrip(LU.seam.a, LU.seam.b, LU.seam.halfW, 0.02, 0.02, COL.wood);   // the boardwalk
 
-  // 9. McCormick sunken cafe terrace (view-only, y -1.6) + retaining walls
-  const MC = M.MCCORMICK_M;
-  addQuad(MC.x0, MC.x1, MC.z0, MC.z1, MC.y, COL.cafe);
-  for (const w of [                                                 // four retaining walls grade->sunken
-    [MC.x0, MC.x0 + 0.4, MC.z0, MC.z1], [MC.x1 - 0.4, MC.x1, MC.z0, MC.z1],
-    [MC.x0, MC.x1, MC.z0, MC.z0 + 0.4], [MC.x0, MC.x1, MC.z1 - 0.4, MC.z1],
-  ]) {
-    const g = new THREE.BoxGeometry(w[1] - w[0], -MC.y, w[3] - w[2]);
-    const m = new THREE.Mesh(g, toon(COL.wall));
-    m.position.set((w[0] + w[1]) / 2, MC.y / 2, (w[2] + w[3]) / 2);
-    millenniumRoot.add(m);
-  }
+  // 9. McCormick sunken pit: floor, walls, ice, boards, stairs and all
+  // dressing are rink.js (task 049 — the cafe became THE ICE RINK).
+  const MC = M.RINK_M;
 
   // 10. BP bridge deck as honest raised WOOD ground (parapets/shingles = 046)
   const B = M.BP_BRIDGE_M;
@@ -192,7 +184,8 @@ function buildGround() {
     segStrip(B.scenery[i], B.scenery[i + 1], B.deckW / 2, 5 - i * 0.35, 5 - (i + 1) * 0.35, COL.wood);
 
   // 11. McCormick overlook BALUSTRADE (the shell read per BRIEF) — white
-  // posts + rail along the Bean-plaza edge at railX; back to the cafe void.
+  // posts + rail along the Bean-plaza edge at railX; the rink reads below
+  // it exactly like the owner skating photo (balustrade over PARK GRILL).
   { const rx = MC.railX, posts = [];
     for (let z = MC.z0 + 1; z <= MC.z1 - 1; z += 2.2) posts.push({ pos: [rx, 0.55, z], scale: [0.18, 1.1, 0.18], color: 0xe9e4d8 });
     emitInstanced(new THREE.BoxGeometry(1, 1, 1), posts);
@@ -242,6 +235,7 @@ function buildMinimapBase() {
   rect(48, 189, 705, 713, '#9a9384'); rect(48, 189, 886, 894, '#9a9384');
   // signature pads
   rect(M.CLOUD_GATE_M.plaza.x0, M.CLOUD_GATE_M.plaza.x1, M.CLOUD_GATE_M.plaza.z0, M.CLOUD_GATE_M.plaza.z1, '#b7b0a0'); // Bean plaza
+  rect(M.RINK_M.ice.x0, M.RINK_M.ice.x1, M.RINK_M.ice.z0, M.RINK_M.ice.z1, '#e6eef4');                                 // McCormick ice sheet
   rect(M.CROWN_M.pool.x0, M.CROWN_M.pool.x1, M.CROWN_M.pool.z0, M.CROWN_M.pool.z1, '#2b3038');                        // Crown pool
   rect(118, 186, 788, 846, '#5b7a44');                                       // Great Lawn
   // landmark dots
@@ -267,11 +261,12 @@ export function buildMillennium() {
   buildCrown();        // CROWN FOUNTAIN — glass-block face-towers + wet pool + painted reflections (task 045; live faces/spout in packs/crown-fountain.js)
   buildLurie();        // LURIE GARDEN — shoulder hedge + steel armature + salvia/prairie planting + Seam boardwalk detail (task 046)
   buildBridge();       // BP BRIDGE — brushed-shingle parapets + wood deck + closed east gate + Maggie Daley treetops (task 046)
+  buildRink();         // McCORMICK ICE RINK — sunken sheet, boards, stairs, Park Grill band (task 049; glide/NPCs in packs/skating.js)
   mergeCellStatic(millenniumRoot, 1e6);   // collapse static builder meshes; ONE z-band (compact, always fog-fully-inside, invisible from elsewhere)
   scene.add(millenniumRoot);
   registerCell({
     id: M.CELL_ID, root: millenniumRoot,
-    walkable: M.walkableM, surfaceY: M.surfaceYM,
+    walkable: M.walkableM, surfaceY: M.surfaceYM, kindAt: M.kindAtM,
     clamp: M.CLAMP_M, spawn: M.SPAWN_M,
     minimapBase: buildMinimapBase(), minimapBounds: M.MAP_M,
   });

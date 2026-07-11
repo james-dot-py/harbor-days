@@ -39,3 +39,4 @@ import './bean-visitors.js';   // posing visitors + journal naming at THE BEAN (
 import './crown-fountain.js';   // Crown Fountain LED faces + spout + splash + kid NPCs (task 045)
 import './millennium-delight.js';   // Millennium delight — bean polisher, wedding shoot, Pritzker soundcheck, station rumble (task 047)
 import './millennium-lawnlife.js';   // Millennium Great Lawn crowd — real posed chibi people (task 048 item 0d)
+import './skating.js';   // McCormick rink — NPC skaters, mayor skates + blade-carve audio (task 049)

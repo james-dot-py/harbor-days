@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-11T14:19:39.392Z",
- "count": 90,
+ "generated": "2026-07-11T18:32:18.488Z",
+ "count": 91,
  "waypoints": [
   {
    "id": "spawn",
@@ -2102,35 +2102,66 @@
    "expectation": "A semicircular peristyle of paired pale Doric columns on a raised plinth curves around a fountain basin at the lawn's north-west corner, framed against glass office giants; a low curved limestone wall nearby reads WRIGLEY SQUARE. (041 SHELL: the plinth pad, the inscribed WRIGLEY SQUARE wall and the cliff/office backdrop must read; the Doric peristyle itself is deferred — judge ground + signage + backdrop only.)"
   },
   {
-   "id": "mp-mccormick-cafe",
+   "id": "mp-rink-overlook",
    "area": "millennium",
    "cell": "millennium",
-   "x": 78,
-   "z": 812,
+   "x": 66.5,
+   "z": 800,
    "framings": [
     {
+     "x": 66.5,
+     "z": 800,
+     "yaw": 1.57,
+     "pitch": 0.1,
+     "dist": 5.5
+    },
+    {
      "x": 78,
+     "z": 806,
+     "yaw": -2.2,
+     "pitch": 0.42,
+     "dist": 8
+    },
+    {
+     "x": 67,
      "z": 812,
-     "yaw": -2.36,
-     "pitch": 0.5,
-     "dist": 7
-    },
-    {
-     "x": 78,
-     "z": 790,
-     "yaw": -0.79,
-     "pitch": 0.45,
-     "dist": 7
-    },
-    {
-     "x": 76.5,
-     "z": 820,
-     "yaw": -2,
-     "pitch": 0.15,
-     "dist": 5
+     "yaw": 3.14,
+     "pitch": 0.05,
+     "dist": 9
     }
    ],
-   "expectation": "A sunken cafe terrace packed with blue and yellow market umbrellas over bistro tables sits one level below the Bean's plaza, edged by a white balustrade and planter hedges, with diners under a long cream bar canopy — summer al fresco, no ice. (041 SHELL: the sunken terrace void, its retaining walls and the white overlook balustrade must read; umbrellas + bar-tent are deferred — judge the sunken pad + balustrade + backdrop only.)"
+   "expectation": "A sunken white ice sheet streaked with faint blue skate lines sits a level below the plaza, ringed by chunky white boards with cream caps and corner floodlight masts; several chibi skaters glide in loops while a wobbly beginner hugs the boards, and eastward views show the PARK GRILL sign band on the cream grill front beneath the white balustrade, the Bean and the streetwall rising above."
+  },
+  {
+   "id": "mp-rink-entry",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 59,
+   "z": 800,
+   "framings": [
+    {
+     "x": 59,
+     "z": 800,
+     "yaw": 1.57,
+     "pitch": 0.12,
+     "dist": 4.5
+    },
+    {
+     "x": 65.5,
+     "z": 800,
+     "yaw": -1.57,
+     "pitch": -0.12,
+     "dist": 5
+    },
+    {
+     "x": 61,
+     "z": 799,
+     "yaw": 2,
+     "pitch": 0.16,
+     "dist": 6
+    }
+   ],
+   "expectation": "Concrete stairs descend from the Michigan Avenue sidewalk between chunky rail-capped cheek walls to a landing and a gate through the rink boards; a SKATE RENTAL board marks the stair head, wood benches line the west apron, and beyond the gate skaters cross the scratched white ice toward the Park Grill wall."
   },
   {
    "id": "mp-bean",

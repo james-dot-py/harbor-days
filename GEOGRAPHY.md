@@ -464,7 +464,7 @@ arrival. Dev spawn SPAWN_M = (55, 800), on the sidewalk beside the kiosk.
 | Feature | Position | Note |
 |---|---|---|
 | **Wrigley Square peristyle (NW)** | plinth 61–73 × 721–727, open side SE | paired Doric columns + fountain basin; lawn SE of it (58–90 × 730–750); low inscribed WRIGLEY SQUARE wall at (78, 749); plaza walk 57–96 × 713–752 |
-| **McCormick Tribune Plaza (cafe)** | 57–76 × 772–826, **sunken y −1.6** | THE summer cafe (perpetual summer: no ice rink, ever) — umbrella grid + cream bar-tent; **view-only** (decorative, NOT walkable — seen from the Bean plaza's white balustrade overlook rail at x 76) |
+| **McCormick Tribune Plaza (ICE RINK)** | 57–76 × 772–826, **sunken y −1.6** | THE ICE RINK (owner override 2026-07-11, task 049 — supersedes the 040 "cafe, no rink ever" call; refs owner-aerial-use-this.jpg + owner-mccormick-ice-skating.jpg): a white ice SHEET 61.5–72.5 × 780–818 (kind `ice` — skates-on glide movement) ringed by chunky white boards w/ cream caps (0.8 non-walk gap; 45° corner-cut boards + r 1.5 corner colliders), a rubber apron ring at y −1.6, ENTRY = stair-ramp from the Michigan spine x 57→60.2 at z 798.5–801.5 (y 0→−1.6, enclosed cheeks — elevator rule) → landing 60.2–61.5 × 797.5–802.5 → the 5 m boards GATE. Non-walk rim buffer ~1.4–1.6 all around (W planter rim 57–58.6, N 772–773.6, S 824.9–826, E 74.9–76 = the PARK GRILL facade band under the Bean-plaza balustrade at railX 76 — cream wall + green awnings + warm windows, per the owner skating photo) |
 | **Cloud Gate / AT&T Plaza** | bean 80.3–93.3 × 787.7–807.7 = **1:1 object scale 13 × 20, h 10** (center (86.8, 797.7) kept from osm; the 040 rect 83.1–90.5 × 792.8–802.6 was the raw 1:2-compressed osm plan — enlarged per the map-wide 1:1 object-scale law, task 043), long axis N–S | toon HOMAGE w/ PAINTED reflection wrap (copyright register; never a computed envMap); plaza walk 76–98 × 776–826, **continuous UNDER the E–W omphalos arch** (soffit ~3.7 rising to ~4.9 at the navel; ground-contact lobes (86.8, 792.2) / (86.8, 803.2) r 2.2 are the only colliders) |
 | **Crown Fountain (SW)** | pool 66–73.5 × 847–881; towers 68–71.5 × 850–853 and 68.5–72 × 875.5–878.5, h 15.2 | walkable WET plaza (walk 57–86 × 838–886, y 0, wet film is visual); glass-block LED-face towers = colliders; homage register. BUILT task 045: two SELF-LIT amber glass-block tower shells (`bmat` + painted block-glow map — the Bean's escape from the toon ramp, so they read as lit-from-within lanterns at dusk, no green ground-bounce), inner LED faces = canvas-texture toon CITIZENS (blink idle, rotate 4 faces, purse on the spout), a wet-mirror pool skim + PAINTED amber reflections + amber glow pooling at each tower foot (layered at distinct y — issue-003 discipline, no z-fight). LIVE layer in `src/packs/crown-fountain.js`: BOTH towers purse + SPOUT arcs into pool centre on a ~40 s local-seed cycle (instanced droplets + splash ring + synth audio); standing in the landing zone soaks the player (screenFx + single toast); kid NPCs shriek-and-scatter. Flanking elm bosques hug the strip OUTER edges (x 58–62 / 80–84) to keep the pool framings clear |
 | **Pritzker Pavilion (NE)** | stage 123–170 × 747–758, mouth faces SOUTH | ribbon-petal crown homage; Harris Theater flybox adjoins north (129–163 × 715–747); speaker towers flank (118, 752) / (175, 752). BUILT task 044: exploding stainless RIBBON headdress (14 hand-modeled curved shells, two-tone silver/warm merged to 2 tone meshes — burst silhouette, not panel-accurate), open proscenium showing a warm-fir interior + dark-red curtain + music-stand/timpani silhouettes (the soundcheck GAG is 047), canted steel buttresses, flanking black line-array speaker towers |
@@ -489,8 +489,14 @@ walks, Wrigley Square plaza, Chase Promenade, Washington (57–96 × 758–770) 
 Madison (57–96 × 826–838) cross walks, Bean plaza, Crown wet plaza, the
 bowl (118–186 × 758–788), the lawn carved around the BP approach (lawnW
 118–168 × 788–846, lawnSE 168–186 × 812–846), Lurie NE gate (170–179 ×
-843–852) + Seam boardwalk + SW link (138–149 × 870–880) + south rim. The
-McCormick cafe, all planting plates, hedges, backstage pockets and every road
+843–852) + Seam boardwalk + SW link (138–149 × 870–880) + south rim, and the
+SUNKEN RINK GROUP at y −1.6 (task 049; ordered ramp → landing/gate → apron
+ring → ice): entry ramp 57→60.2 × 798.5–801.5 (y 0→−1.6), landing 60.2–61.5
+× 797.5–802.5, apron W 58.6–60.7 × 773.6–797.5 + 802.5–824.9 (split at the
+entry), apron E 73.3–74.9 × 773.6–824.9, apron N/S 60.7–73.3 × 773.6–779.2 /
+818.8–824.9, ICE 61.5–72.5 × 780–818 (`kindAtM` = 'ice' → the main.js glide).
+The boards line (0.8), the rink rim buffers, all planting plates, hedges,
+backstage pockets and every road
 stay non-walkable; buildings standing on walks (Exelon cubes, Crown towers,
 kiosk) are builder colliders, exactly like Wrigleyville statues.
 
@@ -500,8 +506,11 @@ kiosk) are builder colliders, exactly like Wrigleyville statues.
   z ≈ +3200 is never a validation target.
 - **State→Michigan block compressed to zero**: the Red Line subway kiosk stands
   at the park's Michigan Ave edge (the Wrigleyville x-frame register).
-- **Perpetual summer dusk staging**: McCormick plaza is THE CAFE — no ice rink,
-  ever. Fog 0xf6ab84 register, first window-lights on.
+- **Perpetual-dusk ice rink** (owner override 2026-07-11, task 049 — replaces
+  the 040 "cafe, no rink ever" liberty): the game stays endless summer evening
+  and the McCormick rink is OPEN ANYWAY — a knowing seasonal liberty, recorded
+  in refs/millennium-park/BRIEF.md. Fog 0xf6ab84 register, first
+  window-lights on, unchanged.
 - **Homage register for the copyrighted artworks** (Cloud Gate, Crown Fountain,
   the Gehry works): chunky toon caricature, invented detail, painted (never
   computed) reflections, no traced geometry, no photo textures (039 brief,
@@ -520,8 +529,10 @@ kiosk) are builder colliders, exactly like Wrigleyville statues.
   stacks over the garages/rail); the BP bridge still crests over Columbus.
 - **Michigan Ave straightened to x 40** (real centerline drifts to ~48 north of
   Washington).
-- **View-only sunken cafe**: McCormick terrace is decorative (Murphy's
-  beer-garden register) — the overlook balustrade is the read, not the seating.
+- **Skateable sunken rink**: the McCormick terrace is fully walkable-glidable
+  (049; supersedes "view-only cafe") — the Bean-plaza balustrade at x 76 stays
+  as the overlook above the toon PARK GRILL band (1.6 m facade compression of
+  the real full-storey grill front — recorded liberty).
 - Editorial compression: bowl/lawn spans trimmed to drop redundant panels
   (§5.4 — topological ORDER preserved everywhere: peristyle NW → cafe/bean →
   Crown SW → Lurie SE behind its hedge → bridge snaking E from the lawn's SE).

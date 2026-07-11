@@ -1,6 +1,14 @@
 {
   "images": [
     {
+      "file": "owner-issue-020-black-platform-x-311.5-z-523.0.png",
+      "source": "owner",
+      "author": "owner-supplied",
+      "license": "owner reference only",
+      "fetchDate": "2026-07-11T00:00:00.000Z",
+      "note": "Owner playtest screenshot (2026-07-11, dbg coords -311.5,-523.0): mayor waist-deep in a dark orphan plinth near Gallagher Way — no surface, no collider, not on the minimap. Filed from refs/inbox by task 049; evidence for issue 020, routed to task 052 item 4."
+    },
+    {
       "file": "owner-verdict-clark-marquee-sad.png",
       "source": "owner",
       "author": "owner-supplied",

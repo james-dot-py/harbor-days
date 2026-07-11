@@ -306,3 +306,11 @@ few turns to find; keep each to one line of symptom + fix.
   getTangentAt(t) (basis: tangent, world-up-projected-perp, their cross) — the
   treads sweep smoothly around the curve. Keep the plank half-span ≤ inner-parapet
   lateral so no tread clips the balustrade on the turns.
+- Facade dressing hung on a pit wall by PLAN coordinates can land INSIDE the
+  wall box (the rink's Park Grill awnings/windows/sign at x 75.33-75.58 sat
+  buried in the 75.1-75.6 cream wall — only sloped awning tips peeked out, task
+  049); and even once outboard, anything below rim-height MINUS the boards
+  height is invisible from the pit floor (the 1.05 m boards hide the wall's
+  lower band from every on-ice view). Hang facade detail off the wall's exposed
+  FACE plane, put the must-read band in the top strip, and verify with a low
+  from-the-floor framing, not plan math.

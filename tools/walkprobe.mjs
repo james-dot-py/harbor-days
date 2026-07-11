@@ -623,7 +623,8 @@ console.log('\n--- Millennium: Bean geometry discipline (043) ---');
 console.log('\n--- Millennium: roads/cafe/planting are NOT walkable ---');
 for(const [label,x,z] of [
   ['Michigan roadway',40,800],['Randolph roadway',100,700],['Monroe roadway',100,900],['Columbus roadway',195,750],
-  ['McCormick sunken cafe (view-only)',66,800],['cafe N rim',60,775],['cafe S rim',70,822],
+  ['rink boards gap W',61.3,790],['rink boards gap E',73,800],['rink boards gap N',66,779.5],['rink boards gap S',67,818.5],
+  ['rink rim buffer W',58,780],['rink rim buffer E (Park Grill band)',75.5,800],['rink rim buffer N',66,773],['rink rim buffer S',66,825.5],['rink stair cheek',59,798],
   ['Lurie light plate',153.6,852.5],['Lurie dark plate',167.7,870.7],
   ['Lurie N hedge',150,848],['Lurie W hedge',126,860],
   ['backstage pocket E of stage',175,730],['pocket between promenade and Lurie',123,866],
@@ -636,6 +637,25 @@ for(const s of MP.LURIE_M.seam.sits){
   expect(`sit spot (${s.x},${s.z}) on the boardwalk walkable`,MP.walkableM(s.x,s.z),true);
   expect(`sit spot (${s.x},${s.z}) at grade y0`,MP.surfaceYM(s.x,s.z),0);
 }
+
+console.log('\n--- Millennium: McCormick ICE RINK — walkable-glidable (task 049, owner override) ---');
+for(const [label,x,z] of [
+  ['ice sheet centre (owner spot)',64.4,800.1],['ice N',67,782],['ice S',67,816],['ice E lane',72,800],
+  ['gate threshold',61.3,800],['landing',60.8,800],['apron W',60,790],['apron E',74,800],
+  ['apron N',66,776],['apron S',70,822],['apron SW of entry',59,803],['apron NW of entry',59,797],
+]) expect(`${label} (${x},${z}) walkable`,MP.walkableM(x,z),true);
+// surfaceY descends down the entry ramp (0 spine -> -1.6 pit floor), tolerance ±0.26
+for(const [label,x,z,want] of [
+  ['spine at stair head',57,800,0],['ramp mid',58.6,800,-0.8],['ramp foot',60.1,800,-1.55],
+  ['landing floor',61,800,-1.6],['ice sheet',67,799,-1.6],['apron floor',74,800,-1.6],
+]){ const y=MP.surfaceYM(x,z); expect(`${label} surfaceY (${x},${z})=${y.toFixed(2)} ~ ${want} (±0.26)`,Math.abs(y-want)<=0.26,true); }
+// kind contract: 'ice' only inside the ice rect; landing/apron/plaza are null
+// (skates not yet on the sheet). kindAtM returns null, not undefined — expect === matches.
+expect('kindAtM(64.4,800.1) === ice (owner spot)',MP.kindAtM(64.4,800.1),'ice');
+expect('kindAtM(63,782) === ice',MP.kindAtM(63,782),'ice');
+expect('kindAtM(60.8,800) === null (landing — skates not yet on)',MP.kindAtM(60.8,800),null);
+expect('kindAtM(66,776) === null (apron)',MP.kindAtM(66,776),null);
+expect('kindAtM(86.8,797.7) === null (Bean plaza)',MP.kindAtM(86.8,797.7),null);
 
 // ===== issue 017 / task 048 item 0a — the cell answers walkability DEFINITIVELY.
 // The main.js CLASS guard (isWater false while a hard cell is active) means a

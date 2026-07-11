@@ -245,3 +245,12 @@ cut becomes a revert task.
   edge bench, so sitting seats the mayor ON the boardwalk lip with his feet
   dangling over the water instead of hovering mid-plank. — Lurie Garden Seam
   (~158, 860) — task 048
+- ICE SKATING IS A THING: step through the McCormick rink gate and the
+  mayor's shoes turn to skates — movement becomes a carveable glide with
+  real momentum, SPACE does a squash-stretch hop-spin, and a filtered-noise
+  blade-carve swells with your speed (perpetual-dusk rink, floods lit — the
+  owner's seasonal liberty). — McCormick Tribune Ice Rink (67, 799) — task 049
+- The wobbly beginner: one pink-puffered skater hugs the boards at walking
+  pace, arms out, wobbling — and every so often stops dead for a knee-dip
+  near-fall before soldiering on ("ope — still learning!"). — McCormick rink
+  east boards (~71.5, 799) — task 049

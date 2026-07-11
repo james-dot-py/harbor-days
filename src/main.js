@@ -13,7 +13,7 @@ import { cam, keys, joy, jump, initInput } from './input.js';
 import { mmInit, mmDraw, initMinimapToggle } from './minimap.js';
 import * as CH from './data/chicago.js';
 import { worldReady, runUpdates, state } from './framework.js';
-import { beginCellCapture, endCellCapture, mergeCellStatic, getCell, cellWalk, cellSurf, cellClamp } from './cells.js';
+import { beginCellCapture, endCellCapture, mergeCellStatic, getCell, cellWalk, cellSurf, cellClamp, cellKind } from './cells.js';
 import './packs/index.js';   // content packs (side-effect); loaded before world build
 
 // ---- dev/debug URL params (harmless in prod build) ----
@@ -99,6 +99,12 @@ const MSCL=mayor.scale.clone();   // base scale for jump squash/stretch
 // ---- jetski: jump or wade into the lake and ride it like a Divvy ----
 const WATER_Y=-2.3;
 const jsk={on:false,grp:null,wadeT:0,bobT:0,lean:0,cd:0,splashT:0};
+// ---- skating (task 049): standing on a cell 'ice' surface (cellKind — the
+// McCormick rink) swaps the walk for a GLIDE: heading CARVES toward the input
+// while speed converges slowly (momentum you can steer, not soap); SPACE does
+// a hop-SPIN flourish instead of a plain jump. Pack layer (skates, audio,
+// NPC skaters) reads state.onIce / state.iceHops — physics stays here.
+const skate={on:false,lean:0,spinT:0,spinD:0.45,spinBase:0,spinDir:1};
 {
   const g=new THREE.Group();
   const hull=new THREE.Mesh(new THREE.SphereGeometry(0.55,10,8),toon(0xff8a3d));hull.scale.set(0.62,0.35,1.5);hull.position.y=0.22;g.add(hull);
@@ -195,9 +201,30 @@ function frame(now){
   let mag=Math.hypot(mvx,mvz);
   if(mag>1){mvx/=mag;mvz/=mag;mag=1}
   const runF=keys.has('shift')||joy.len>0.92;
+  const kAt=cellKind();
+  skate.on=!!(kAt&&kAt(player.x,player.z)==='ice');
+  state.onIce=skate.on;
   const spd=(jsk.on?(runF?12:8):(runF?9.5:4.2)*(state.speedMult||1))*(game.running?1:0);
-  player.vx=lerp(player.vx,mvx*spd,1-Math.exp(-10*dt));
-  player.vz=lerp(player.vz,mvz*spd,1-Math.exp(-10*dt));
+  let leanT=0;
+  if(skate.on){
+    const cur=Math.hypot(player.vx,player.vz);
+    const tgt=mag*(runF?10.5:7.2)*(game.running?1:0);
+    if(mag>0.15&&tgt>0.01){
+      const inHd=Math.atan2(mvx,mvz);
+      // carve: heading turns toward the stick much faster than speed changes
+      const hd=cur>0.5?lerpAngle(Math.atan2(player.vx,player.vz),inHd,1-Math.exp(-2.6*dt)):inHd;
+      const ns=lerp(cur,tgt,1-Math.exp(-(tgt>cur?1.7:0.6)*dt));
+      player.vx=Math.sin(hd)*ns;player.vz=Math.cos(hd)*ns;
+      let dh=inHd-hd;dh=((dh+Math.PI*3)%(Math.PI*2))-Math.PI;
+      leanT=clamp(-dh*Math.min(cur/7,1)*0.7,-0.42,0.42);   // bank into the carve
+    }else{
+      const k=Math.exp(-0.4*dt);player.vx*=k;player.vz*=k;  // long glide-out, no input
+    }
+  }else{
+    player.vx=lerp(player.vx,mvx*spd,1-Math.exp(-10*dt));
+    player.vz=lerp(player.vz,mvz*spd,1-Math.exp(-10*dt));
+  }
+  skate.lean=lerp(skate.lean,leanT,1-Math.exp(-6*dt));
 
   // ---- slide collision against the world (water-aware) ----
   const wtx=player.x+mvx*0.7,wtz=player.z+mvz*0.7;   // probe by INPUT dir (velocity dies when blocked)
@@ -266,7 +293,14 @@ function frame(now){
     else player.y=lerp(player.y,surf,1-Math.exp(-12*dt));
   }
   if(!jsk.on&&jump.buf>0&&jphys.coyote>0&&game.running&&(!jphys.air||jphys.vy<=0)){
-    jump.buf=0;jphys.coyote=0;jphys.air=true;jphys.vy=JUMP_V;jphys.squash=-0.55;
+    jump.buf=0;jphys.coyote=0;jphys.air=true;
+    if(skate.on){   // hop-SPIN flourish: lower hop, full 360 over the airtime
+      jphys.vy=5.8;jphys.squash=-0.7;
+      skate.spinD=2*5.8/GRAV;skate.spinT=skate.spinD;
+      skate.spinBase=mayor.rotation.y;
+      skate.spinDir=skate.lean>0.02?1:skate.lean<-0.02?-1:1;
+      state.iceHops=(state.iceHops||0)+1;
+    }else{jphys.vy=JUMP_V;jphys.squash=-0.55;}
   }
   jphys.squash*=Math.exp(-9*dt);
   mayor.position.set(player.x,player.y,player.z);
@@ -274,13 +308,18 @@ function frame(now){
 
   const sp=Math.hypot(player.vx,player.vz);
   if(sp>0.4)mayor.rotation.y=lerpAngle(mayor.rotation.y,Math.atan2(player.vx,player.vz),1-Math.exp(-10*dt));
+  if(skate.spinT>0){   // hop-spin owns the facing until the twirl completes
+    skate.spinT=Math.max(0,skate.spinT-dt);
+    mayor.rotation.y=skate.spinBase+skate.spinDir*(1-skate.spinT/skate.spinD)*Math.PI*2;
+  }
+  mayor.rotation.z=skate.lean;   // carve bank (0 off-ice — leanT decays)
 
-  // ---- walk animation (limb swing damped mid-air / afloat) ----
-  updateCharacter(jsk.on?sp*0.15:(jphys.air?sp*0.25:sp),dt,t);
+  // ---- walk animation (limb swing damped mid-air / afloat / gliding) ----
+  updateCharacter(jsk.on?sp*0.15:skate.on?sp*0.22:(jphys.air?sp*0.25:sp),dt,t);
 
   // footsteps + run sparkles
   stepT-=dt;
-  if(!jsk.on&&sp>1&&stepT<=0){
+  if(!jsk.on&&!skate.on&&sp>1&&stepT<=0){
     const q0=coastQuery(player.x,player.z);
     const surf=onRect(player.x,player.z)?'wood':(q0&&q0.lat>0.2&&q0.ae<1?'stone':'grass');
     sStep(surf);stepT=runF?0.26:0.42;
@@ -288,7 +327,7 @@ function frame(now){
       rand(-0.3,0.3),rand(0.5,1),rand(-0.3,0.3),0.98,0.93,0.8,0.28,0.95,2.2,2.5);
   }
   sparkT-=dt;
-  if(!jsk.on&&runF&&sp>5&&sparkT<=0){
+  if(!jsk.on&&!skate.on&&runF&&sp>5&&sparkT<=0){
     const c=hexRGB(PASTELS[rng()*PASTELS.length|0]);
     DUST.spawn(player.x+rand(-0.25,0.25),player.y+0.15,player.z+rand(-0.25,0.25),
       rand(-0.4,0.4),rand(0.6,1.4),rand(-0.4,0.4),c[0],c[1],c[2],0.5,0.55,-1,2);
@@ -426,7 +465,9 @@ function runStart(){
         +row('J','journal')+row('1–4','pick firework')+row('F','launch firework')
         +row('R','Divvy bell / radio station')+row('Z / C · wheel','orbit · zoom'))
       +'<div class="ctlnote">🌊 <b>jetski</b> — wade in past your knees and jump on; ride up to any low step to hop off.'
-      +'<br>🚲 <b>Divvy</b> — interact at a dock to borrow a bike; drop it back at any dock.</div>';
+      +'<br>🚲 <b>Divvy</b> — interact at a dock to borrow a bike; drop it back at any dock.'
+      +'<br>⛸ <b>skating</b> — step onto the McCormick rink downtown; '
+      +(document.body.classList.contains('touch')?'⬆️':'SPACE')+' hop-spins.</div>';
   }
   const close=()=>card.classList.remove('show');
   btn.addEventListener('click',()=>{if(card.classList.contains('show'))close();else{fill();card.classList.add('show')}});

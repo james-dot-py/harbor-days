@@ -32,8 +32,10 @@ export function beginCellCapture() {
 }
 export function endCellCapture() { restoreAdd(); restoreAdd = null; }
 
-// cell: {id, root, walkable(x,z), surfaceY(x,z), clamp:{xMin..}, spawn,
-//        minimapBase:canvas, minimapBounds:{x0,z0,w,h,cw,ch}}
+// cell: {id, root, walkable(x,z), surfaceY(x,z), kindAt?(x,z), clamp:{xMin..},
+//        spawn, minimapBase:canvas, minimapBounds:{x0,z0,w,h,cw,ch}}
+// kindAt returns a surface KIND string ('ice' -> the main.js skate glide) or
+// null; it lives in the cell's DATA module so tools read the same answer.
 export function registerCell(c) {
   cells[c.id] = c;
   if (c.root) c.root.visible = (c.id === activeId);
@@ -44,6 +46,7 @@ export const getCell = id => cells[id];
 export const cellWalk  = () => { const c = cells[activeId]; return (c && c.walkable)  || null; };
 export const cellSurf  = () => { const c = cells[activeId]; return (c && c.surfaceY) || null; };
 export const cellClamp = () => { const c = cells[activeId]; return (c && c.clamp)    || null; };
+export const cellKind  = () => { const c = cells[activeId]; return (c && c.kindAt)   || null; };
 
 // ---------------------------------------------------------------------
 // STATIC-GEOMETRY MERGE PASS — collapse a cell's hundreds of small solid
