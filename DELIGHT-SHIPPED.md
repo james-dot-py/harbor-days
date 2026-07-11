@@ -213,3 +213,25 @@ cut becomes a revert task.
   clipped shoulder-hedge walls closing around you while the Gehry ribbons peek
   over the top. The sanctuary bird-deck's cozy 'take a load off' moment, reborn
   downtown. — Lurie Seam boardwalk (162.6, 859.3) — task 046
+
+- The Bean has a keeper: a Chicago Park District worker rolls a little yellow
+  scaffold under Cloud Gate and squeegees the fingerprints off its silver
+  underbelly, grumbling — 'everybody's gotta touch it, nobody's gotta clean it'
+  · 'she'll be smudged again by lunch, but that's the job'. The city really
+  does polish it, and the smudge economy is the joke. — AT&T Plaza (82, 803.5)
+  — task 047
+- A wedding party has the Bean booked: a couple poses (bride in white, groom
+  in navy) while a photographer circles for the angle — 'one more, pretend you
+  like each other!' — and waves you out of frame if you wander into the shot
+  ('ope — one sec, bud!'), then thanks you after. Every Chicago wedding album
+  has this page. — AT&T Plaza (88.9, 814) — task 047
+- The pavilion is always almost-rehearsing: a tuxedoed conductor on the podium
+  counts in two beats and conducts a warm synthesized string swell that drifts
+  over the bowl and ducks with distance — Grant Park Music Festival soundchecks,
+  the city's free secret, deep cuts only (100% WebAudio via the musicBus,
+  actx-guarded; scheduling asserted through window.__hd.mp). — Jay Pritzker
+  Pavilion (146.5, 754) — task 047
+- The park sits on a working train station: the Millennium Station grate by
+  Wrigley Square hums with warm air and lets out a muffled departure chime
+  every minute or so — and the pigeons pecking it startle off in a flap and
+  resettle. — Wrigley Square grate (72, 709) — task 047

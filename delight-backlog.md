@@ -32,23 +32,10 @@ doors · Wrigley's Spearmint ad inside the L car.
   always win. (seed: harbor-new.md)
 - Farmers-market-style cart (corn, elotes?) on a trail edge — lakefront —
   street-cart food culture. (seed: harbor-new.md)
-- [proposed] Bean polisher NPC on a little rolling scaffold, squeegeeing the
-  toon bean and muttering about fingerprints — Millennium Park — the city
-  really does polish it, and the homage register loves the wink. (source:
-  task 039; refs/millennium-park/ DD_04, plaza refs)
 - [proposed] Crown Fountain spout soak: stand in the wet plaza when the near
   tower's face purses its lips — a water arc drenches you (screenFx splash,
   kids cheer, "ope" from a bystander) — Millennium Park — the defining
   Chicago hot-day ritual. (source: task 039; refs 9181717698, night shot)
-- [proposed] Pritzker synth-orchestra soundcheck: WebAudio strings tune and
-  noodle over the Great Lawn; at the stage rail a conductor NPC counts in a
-  two-bar fanfare, cuts it off, "again from the top" — Millennium Park —
-  Grant Park Music Festival rehearsals are the city's free secret. (source:
-  task 039; ref 28507845187 shows exactly this)
-- [proposed] Wedding photo shoot at the bean: couple + photographer NPC who
-  waves you out of frame ("ope — one sec, bud") and thanks you after —
-  Millennium Park — every Chicago wedding album has this page. (source:
-  task 039; plaza refs)
 - [proposed] Bucket-drummer crew on the Michigan Ave sidewalk: three
   five-gallon buckets, synthesized syncopated groove that swells as you
   approach — Millennium Park cliff edge — the Loop's actual soundtrack.
@@ -61,7 +48,3 @@ doors · Wrigley's Spearmint ad inside the L car.
   big hedge is "the city's Big Shoulder, we just keep it trimmed" —
   Millennium Park — Sandburg made horticulture. (source: task 039; Lurie
   refs, shoulder-hedge armature)
-- [proposed] Millennium Station rumble: a sidewalk grate by Wrigley Square
-  hums with warm air and a muffled departure chime every few minutes;
-  pigeons startle off it — Millennium Park — the park sits on a working
-  train station. (source: task 039; osm.json Millennium Station/Pedway)

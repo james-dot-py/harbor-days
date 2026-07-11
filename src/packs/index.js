@@ -37,3 +37,4 @@ import './suggestions.js';   // Neighborhood suggestion box on the AIDS Garden s
 import './millennium.js';   // neighborhood three — the Millennium Park cell (task 041)
 import './bean-visitors.js';   // posing visitors + journal naming at THE BEAN (task 043)
 import './crown-fountain.js';   // Crown Fountain LED faces + spout + splash + kid NPCs (task 045)
+import './millennium-delight.js';   // Millennium delight — bean polisher, wedding shoot, Pritzker soundcheck, station rumble (task 047)
