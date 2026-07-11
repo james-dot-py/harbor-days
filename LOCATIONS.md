@@ -22,9 +22,20 @@ feasibility inside perf + single-file constraints.
 
 ## In progress
 
-- (none — **OWNER DIRECTIVE, 2026-07-11: the next planner run picks
-  MILLENNIUM PARK.** The selection is made; do not re-litigate the roster —
-  move it to In progress and generate its SCOUT → SIGNOFF pipeline per §5.3.)
+- **Millennium Park** — OWNER-PICKED 2026-07-11; planner pipeline generated
+  2026-07-11 as queue 039–049 (SCOUT 039 → LAYOUT 040 → BUILD 041 cell shell /
+  042 Red Line downtown extension / 043 Cloud Gate hero / 044 Pritzker +
+  Great Lawn / 045 Crown Fountain / 046 Lurie + BP bridge → DELIGHT 047 →
+  POLISH 048 → SIGNOFF 049). Hard cell reached via the ridable Red Line
+  extended Belmont ⇄ Addison ⇄ Monroe (downtown Red Line is the State St
+  subway; the kiosk-at-the-park-edge compression is a recorded standing
+  liberty). Anchor set: Cloud Gate (playful toon "bean" — copyrighted
+  artwork, homage not replica, same register as the bar likenesses),
+  Pritzker Pavilion ribbons + Great Lawn + trellis, Crown Fountain
+  face-towers + splash play, Lurie Garden, the BP bridge serpentine,
+  Michigan Ave streetwall as the west backdrop wall. Sources per standing
+  rules: refs/millennium-park/ osm.json + Wikimedia; Google imagery banned;
+  owner photos gold when supplied.
 
 ## Candidates (famous Chicago spots, seeded per §5.3)
 
@@ -44,17 +55,6 @@ feasibility inside perf + single-file constraints.
 - Logan Square — the eagle column + boulevards; hard cell via Blue Line motif.
 - Andersonville — water tower + Swedish flag stripe; hard cell.
 - The Riverwalk — downtown river canyon; strong silhouette; hard cell.
-- Millennium Park — the Bean is the single most recognizable object in the
-  city; hard cell. OWNER-PICKED 2026-07-11 (see In progress). Planning notes:
-  reached via the ridable Red Line — extend the existing two-destination ride
-  (wrigley-ride pocket-cell pattern) with a downtown stop (real Red Line:
-  Monroe/Lake, a block west of the park). Anchor set: Cloud Gate (evoke as a
-  playful toon "bean" — it is a copyrighted artwork, homage not replica, same
-  register as the bar likenesses), Pritzker Pavilion ribbons + Great Lawn +
-  trellis, Crown Fountain face-towers + splash play, Lurie Garden, the BP
-  bridge serpentine, Michigan Ave streetwall as the west backdrop wall.
-  Sources per standing rules: refs/millennium-park/ osm.json + Wikimedia;
-  Google imagery banned; owner photos gold when supplied.
 - Chinatown — gate + Ping Tom pagoda; hard cell.
 - Pilsen — murals + 18th St; hard cell.
 - Museum Campus — Field/Shedd/Adler skyline sweep; hard cell.
