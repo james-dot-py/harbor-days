@@ -412,10 +412,13 @@ export const DRIFTER = { x:238, z:70, ry:Math.PI, hull:0xf7f3ea, sail:0xff9d94, 
 // beached against the revetment feet (the user's 'mystery cone in the water').
 export const BUOYS = [ { x:168, z:-2, c:0xff5a5a }, { x:152, z:-2, c:0x5db06b } ];
 
-// finger docks along the west seawall (4 groups, z -300..-60) — narrow
-// plank walkways jutting east into the basin, two moored sailboats each.
+// finger docks along the west seawall (4 groups, z -300..-60) — narrow plank
+// boardwalks that root FLUSH with the shore lawn and reach east over the basin,
+// two moored sailboats each. The deck y is DERIVED in props.js from the shore
+// grade (SEAWALL_Y.top) so a coast reshape carries the docks with it — never a
+// hardcoded height that could float above the grass (issue 016 / task 038).
 export const FINGER_DOCKS = {
-  x0:78, len:13, halfW:0.9, h:0.42,
+  x0:78, len:13, halfW:0.9,
   rows:[-75,-140,-205,-275],                       // 4 dock groups along the west shore
   boat:{ scale:0.7, xMid:89, dz:2.6 },
   hulls:[0xf7f3ea,0xff9d94,0x7fc8f0,0xfbe3a0,0xbfe0b0,0xffd0a0,0xf0d0e0,0x9edcff,0xf3e0c0,0xffb1c9,0xcfe8f7,0xf7f3ea],
@@ -506,11 +509,14 @@ export const LAKEVIEW_BAND = {
 };
 
 export const DECKS = [
-  { deck:[200,216,-120,-90,0.42], walk:{ x1:200, x2:216, z1:-120.5, z2:-89.5, h:0.42 } },
+  // peninsula pier juts EAST over the lake; its landward root is the WEST edge
+  // (root:'w') — a fascia closes the daylight where it meets the spit (issue 016).
+  { deck:[200,216,-120,-90,0.42], walk:{ x1:200, x2:216, z1:-120.5, z2:-89.5, h:0.42 }, root:'w' },
   // corner pier restyled task 021 (owner photos 0395/0399): a pale CONCRETE
   // APRON — white bollards inset along the long edges + tip (north landing
-  // open), two red life rings on white posts, NO wooden rails.
-  { deck:[116,126,373,406,0.42],  walk:{ x1:116, x2:126, z1:372.5, z2:406.5, h:0.42 },
+  // open), two red life rings on white posts, NO wooden rails. It juts SOUTH, so
+  // its landward root is the NORTH edge (root:'n') — a curb roots it to the top edge.
+  { deck:[116,126,373,406,0.42],  walk:{ x1:116, x2:126, z1:372.5, z2:406.5, h:0.42 }, root:'n',
     apron:{ slab:0xbdb8ae, white:0xf2ece0, red:0xd23b34,
             bollard:{ inset:0.55, spacing:3.4, r:0.13, h:0.82 },
             rings:[ {x:125.45, z:395, ry:-Math.PI/2}, {x:116.55, z:381, ry:Math.PI/2} ] } },

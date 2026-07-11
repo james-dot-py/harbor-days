@@ -40,8 +40,23 @@ function makeSign(text,x,z,ry){
 }
 // (lamps + benches are built as InstancedMeshes in buildProps below)
 // ---- pier + basin dock (with rails, posts to the water) ----
-function plankDeck(x1,x2,z1,z2,y,apron){
+function plankDeck(x1,x2,z1,z2,y,apron,root){
   const w=x2-x1,d=z2-z1;
+  // landward fascia/curb: a solid face from the deck underside down past the shore
+  // grade at whichever edge meets land, so the pier ROOTS FLUSH instead of floating
+  // on stilts with daylight under its shore edge (issue 016 / task 038). An
+  // individual mesh -> frustum/fog-culled -> +0 to the draw-call gate's (far-north
+  // Wrigleyville) max view; only its own harbor/corner views pay the ~1 call.
+  const mkFascia=(grp,mat)=>{
+    if(!root)return;
+    const top=y-0.12,bot=-1.2,hh=top-bot,cy=(top+bot)/2,t=0.5;
+    let fx,fz,sw,sd;
+    if(root==='n'){fx=(x1+x2)/2;fz=z1+0.15;sw=w;sd=t;}        // deck juts +z; landward = north edge
+    else if(root==='s'){fx=(x1+x2)/2;fz=z2-0.15;sw=w;sd=t;}
+    else if(root==='w'){fx=x1+0.15;fz=(z1+z2)/2;sw=t;sd=d;}   // deck juts +x; landward = west edge
+    else{fx=x2-0.15;fz=(z1+z2)/2;sw=t;sd=d;}
+    const f=new THREE.Mesh(new THREE.BoxGeometry(sw,hh,sd),mat);f.position.set(fx,cy,fz);grp.add(f);
+  };
   if(apron){
     // task 021 (refs/diversey-corner/ 0395/0399): a pale CONCRETE APRON pier —
     // slab on concrete piles, white bollard posts inset along the long edges +
@@ -63,6 +78,7 @@ function plankDeck(x1,x2,z1,z2,y,apron){
       const ring=new THREE.Mesh(new THREE.TorusGeometry(0.3,0.085,7,16),red);
       ring.position.set(rg.x,y+1.02,rg.z);ring.rotation.y=rg.ry;grp.add(ring);
     }
+    mkFascia(grp,slab);                                // concrete curb roots the apron to the top edge
     scene.add(grp);
     return;
   }
@@ -74,6 +90,7 @@ function plankDeck(x1,x2,z1,z2,y,apron){
     const railSeg=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.09,0.09),wm2);railSeg.position.set(px+1.7,y+0.95,pz);if(px+3.4<x2+1)grp.add(railSeg);
     const stem=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,0.85,5),wm2);stem.position.set(px,y+0.55,pz);grp.add(stem);
   }
+  mkFascia(grp,wm2);                                   // wood fascia roots the deck to the spit edge
   scene.add(grp);
 }
 // ---- boats / buoys ----
@@ -574,26 +591,37 @@ export function buildProps(){
 
   // ---- pier (peninsula lake side) with rails, posts to the water ----
   // (the corner pier carries d.apron -> concrete-apron style, task 021)
-  for(const d of CH.DECKS){plankDeck(d.deck[0],d.deck[1],d.deck[2],d.deck[3],d.deck[4],d.apron);walkRects.push({x1:d.walk.x1,x2:d.walk.x2,z1:d.walk.z1,z2:d.walk.z2,h:d.walk.h});}
+  for(const d of CH.DECKS){plankDeck(d.deck[0],d.deck[1],d.deck[2],d.deck[3],d.deck[4],d.apron,d.root);walkRects.push({x1:d.walk.x1,x2:d.walk.x2,z1:d.walk.z1,z2:d.walk.z2,h:d.walk.h});}
 
   // ---- finger docks along the west seawall + sailboats moored in the slips ----
-  // decks + posts are instanced (2 draw calls for all docks); boats via makeBoat.
+  // The deck reads CONTINUOUS with the west-shore lawn (issue 016 / task 038): it
+  // sits FLUSH with the shore grade — deckY DERIVED from SEAWALL_Y.top so a coast
+  // reshape carries the docks with it, never a hardcoded y that floats above the
+  // grass on stilts. Over the lawn the deck rests on the ground (no daylight gap,
+  // no post punching through the grass); posts drop ONLY seaward of the basin west
+  // seawall (BASIN_W_PARAMS.fx per row), where the deck is genuinely over water.
+  // Matches the owner's harbor-mouth apron photo (docks meeting a surface at grade).
+  // Decks + posts stay 2 InstancedMeshes (+0 draw calls); makeBoat call order/count
+  // is IDENTICAL so the shared world rng stays bit-for-bit intact.
   {
     const FD=CH.FINGER_DOCKS,rows=FD.rows;
+    const deckY=CH.SEAWALL_Y.top+0.08;                       // low boardwalk flush on the shore grade
+    const postH=deckY+2.9;                                   // deck underside down to ~-2.8 (below the lake)
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
     const postXs=[];for(let px=FD.x0+1.2;px<FD.x0+FD.len;px+=3.4)postXs.push(px);
+    const postSpots=[];                                      // over-water post feet (variable per row)
     const decks=new THREE.InstancedMesh(new THREE.BoxGeometry(1,0.24,1),toon(0xb07a46),rows.length);
-    const posts=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.14,0.14,FD.h+3.4,6),toon(0x9c6a3a),rows.length*postXs.length*2);
-    let pi=0,bi=0;
+    let bi=0;
     rows.forEach((zc,i)=>{
-      M.compose(V.set(FD.x0+FD.len/2,FD.h,zc),Q.identity(),S.set(FD.len,1,FD.halfW*2));decks.setMatrixAt(i,M);
-      for(const px of postXs)for(const pz of[zc-FD.halfW,zc+FD.halfW]){
-        M.compose(V.set(px,(FD.h-3.4)/2+0.55,pz),Q.identity(),S.set(1,1,1));posts.setMatrixAt(pi++,M);
-      }
-      walkRects.push({x1:FD.x0,x2:FD.x0+FD.len,z1:zc-FD.halfW,z2:zc+FD.halfW,h:FD.h});
+      const xSea=CH.BASIN_W_PARAMS.fx(zc);                   // basin west seawall x at this row = the land/water line
+      M.compose(V.set(FD.x0+FD.len/2,deckY,zc),Q.identity(),S.set(FD.len,1,FD.halfW*2));decks.setMatrixAt(i,M);
+      for(const px of postXs)if(px>xSea)for(const pz of[zc-FD.halfW,zc+FD.halfW])postSpots.push([px,pz]);
+      walkRects.push({x1:FD.x0,x2:FD.x0+FD.len,z1:zc-FD.halfW,z2:zc+FD.halfW,h:deckY});
       makeBoat(FD.boat.xMid,zc-FD.boat.dz,Math.PI/2,FD.hulls[bi%FD.hulls.length],FD.sails[bi%FD.sails.length],FD.boat.scale);bi++;
       makeBoat(FD.boat.xMid,zc+FD.boat.dz,-Math.PI/2,FD.hulls[bi%FD.hulls.length],FD.sails[bi%FD.sails.length],FD.boat.scale);bi++;
     });
+    const posts=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.14,0.14,postH,6),toon(0x9c6a3a),Math.max(1,postSpots.length));
+    postSpots.forEach(([px,pz],k)=>{M.compose(V.set(px,deckY-postH/2+0.02,pz),Q.identity(),S.set(1,1,1));posts.setMatrixAt(k,M);});
     decks.instanceMatrix.needsUpdate=posts.instanceMatrix.needsUpdate=true;scene.add(decks,posts);
   }
 

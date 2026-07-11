@@ -180,3 +180,10 @@ few turns to find; keep each to one line of symptom + fix.
   any curb-line/roadway structure, re-walk every waypoint whose camera pulls back
   through that block (hand framings bypass camBlockedW, and camBlockedW's VOLS_W
   doesn't model new builder geometry anyway).
+- A SMALL vertical geometry change is invisible in a distant side view: lowering a
+  deck ~0.3 m to sit flush on grade moved it only ~20 px at ~13 m, reading as
+  "unchanged" — task 038 nearly re-chased a phantom HMR-staleness bug over it (a
+  fresh vite confirmed the code WAS live: the corner-pier fascia had appeared, only
+  the finger deck's height looked the same). Verify height/vertical edits with a
+  CLOSE, LOW, near-level framing (dist ≤ 6, pitch ≈ 0) where the deck-vs-grade
+  seam fills the frame; a wide zone overview won't show a sub-metre drop.
