@@ -299,6 +299,7 @@ Corridor = road + both sidewalks, walkable curb to curb.
 | Sheffield | x −190 | 12 m (x −196…−184) | x −202…−178, z −572…−386 |
 | Kenmore stub | x −231 | 8 m (x −235…−227) | x −237…−225, z −604…−548 |
 | Clark | clarkX(z) | 16 m (±8) | ±14 off clarkX, z −572…−386 |
+| **Clark STUB (scenery, task 033)** | clarkX(z) | 16 m (±8) | z −386…−338 past the CPD line — NOT walkable; pavement/centerline/curbs/lamps continue so Clark reads as a real street beyond the closure (detail ends ~z −352, bare asphalt fades to −338) |
 
 | Feature | Position |
 |---|---|
@@ -309,6 +310,8 @@ Corridor = road + both sidewalks, walkable curb to curb.
 | **Sports World corner store** (task 020 owner directive: a souvenir-store corner across Addison at Sheffield; Sports World-style likeness, canvas signage — invented-minor-fill under SS4.4, the real store sits at Clark) | SW corner of Sheffield & Addison, lot x −220…−204, z −384…−371 (fronting the Addison S sidewalk line z −384, east wall lining the closed Sheffield mouth): 2-storey cream/white mass, CHAMFERED NE corner with the door facing the intersection (massing per the real buff-brick corner building in the Addison-and-Sheffield ref), red fascia band SPORTS WORLD on both street faces, red awnings, canvas souvenir banners (CUBS SOUVENIRS · T-SHIRTS · CAPS) |
 | **940-W station corner** (task 020: the station-entrance relationship east of Sheffield) | NE corner of Sheffield & Addison, lot x −176…−162, z −430…−415: 3-storey blonde-brick corner block (retail ground floor) with a dark CTA-style wayfinding blade 'CTA · ADDISON →' on its Addison face pointing east to the head-house; the fabric row north of it (FACADES_W sheffield-e) now STOPS at z −432 — task 016's span ran to z −388, standing lots INSIDE the Addison corridor and walling off the view east to the embankment/bridge/head-house |
 | Sheffield-mouth backdrop | the Sheffield S mouth (x −202…−178 past the z −385.5 barricade) gets its own BACKDROP_W band (x −202…−178, z −378…−340, facing north) so the closed street reads as continuing city like every other mouth (it was bare ground) |
+| **Clark right-of-way RESERVED** (task 033, owner 2026-07-10: "it's clark, legendary... right now it's buildings where the street should continue on") | **No building mass may sit on clarkX(z)±14 beyond EITHER Clark barricade out to the cell edges** — this alignment is the future gate to the next neighborhood. South of the z −385.5 CPD line: the FACADES_W addison-s row now starts at x −268 (was −298; three lots stood in the alignment), BACKDROP_W's S-of-Addison band is SPLIT into west (x −326…−307) + east (x −248…−212) halves flanking the alignment, and the **CLARK STUB** (CLARK_STUB_W) carries visible street south to z −338. North of the z −572.5 line: the west band's east edge pulled to x −358 (was −353, clipping the alignment ≤4 m near z −590). The CPD barricade + officer STAY as the soft wall — closure is event-day truth; the street beyond is scenery |
+| **Clark stub streetwall (the task-033 REHOME — owner: "put those buildings somewhere else they'll look good")** | the three displaced Addison-S fabric lots return as TWO new FACADES_W frontages LINING the stub (off ±16 like every Clark frontage, storefronts facing the alignment): **clark-se** (east side, z −374…−346, fronting west) and **clark-sw** (west side, z −370…−344, fronting east, clear of the Cubby Bear lot z ≥ −372). Net fabric is preserved (~35 m removed, ~48 m re-laid); the flanked stub reads as a street the city always had. Teaser reads at the line (017 register): a 4th green blade 'N CLARK ST' at the ROW's east curb (≈ −271, −387) + a small green COMING-SOON placard on the closure centerline (clarkX(−384.6), −384.6) facing the intersection |
 | Rooftop corner house | NE corner of Sheffield & Waveland, x −178…−163, z −588…−574: a 4th Waveland rooftop brownstone (ROOFTOPS_W.waveland[3] + rooftops.js BLD) closing the bare backdrop-grade corner; its west end walls the closed Sheffield N mouth |
 | Gallagher office corner dressing (task 020; the office is 019's mass) | the office block's WEST (Clark) and NORTH (Waveland) faces get windows/entry/sign-band dressing so the Clark & Waveland SE corner stops reading as a blank cream backdrop; 'GALLAGHER WAY' band at the NW corner |
 | **The marquee corner is ROUND** | the Clark & Addison corner is the real art-deco curve: fillet **r 18** about (−266.27, −432), tangent to the Clark wall at (−283.60, −427.15) and the Addison wall at (−266.27, −414); curve apex (−277.09, −417.62). The fillet opens the marquee-corner APRON (triangle Clark-edge/Addison-edge minus the circle) — RED BRICK, the corner entry court |
@@ -361,6 +364,14 @@ Lakeview backdrop band (BACKDROP_W).
 - **The knothole is on WAVELAND (left field), not Sheffield (right field)** —
   owner directive 2026-07-09 (task 012). Refs place the real knothole on
   Sheffield; the owner chooses the Waveland ball-hawk corner. Deliberate.
+- **Clark's cant is 0.28 dx/dz; the REAL diagonal is ~0.61** (task 033, verified
+  against refs/wrigleyville/osm.json ways 435370995/486869977: south of Addison
+  real Clark runs (−290,−398.7)→(−266.1,−358.8)→(−240.2,−316.6), no bend at
+  Addison). The shipped 0.28 slope is the cell's standing cant; the task-033
+  Clark stub CONTINUES clarkX(z) at 0.28 so the street reads unbroken at the
+  barricade. When the next neighborhood cell is planned, its connector
+  recalibrates to the true diagonal at the cell seam exactly like the
+  displaced x-frame — never validate the stub against true OSM bearing.
 - **Statue Row stays gathered on Gallagher Way** (Banks/Williams/Santo/Jenkins
   fronting the office block) — this is the real modern (2021+) arrangement;
   the 006 reviewer's suggestion to scatter them to their historic corners was

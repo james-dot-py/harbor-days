@@ -7,7 +7,7 @@ import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtil
 import { toon, bmat, mulberry32, pointsMat } from '../core.js';
 import { collide } from '../props.js';
 import { wrigleyRoot } from './index.js';
-import { STREETS_W, BARRICADES_W, BACKDROP_W, clarkX } from '../data/wrigleyville.js';
+import { STREETS_W, BARRICADES_W, BACKDROP_W, clarkX, CLARK_STUB_W } from '../data/wrigleyville.js';
 import { atlasPlane } from './village.js';   // shared static-plane atlas (buildVillage emits it, last)
 
 const R = mulberry32(3600);
@@ -68,6 +68,21 @@ function bladeTex(text) {
   g.fillText(text, 256, 52);
   return new THREE.CanvasTexture(cv);
 }
+function stubPlacardTex() {                                       // task 033 — the 017 teaser register (cf. stadium.js teaserTex)
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 224;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#1c4a35'; g.fillRect(0, 0, 512, 224);                       // Cubs-green field
+  g.strokeStyle = '#f2ece0'; g.lineWidth = 5; g.strokeRect(9, 9, 494, 206);  // cream pinstripe frame
+  g.lineWidth = 1.6; g.strokeRect(16, 16, 480, 192);                         // doubled inner line
+  g.fillStyle = '#b0202c'; g.fillRect(24, 24, 464, 38);                      // Cubs-red header ribbon
+  g.fillStyle = '#f6f1e6'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '700 23px Georgia,serif'; g.fillText('C O M I N G   S O O N', 256, 44);
+  const fit = (t, y) => { let fs = 48; g.font = `800 ${fs}px Georgia,serif`; while (g.measureText(t).width > 446 && fs > 22) { fs -= 2; g.font = `800 ${fs}px Georgia,serif`; } g.fillText(t, 256, y); };
+  g.fillStyle = '#f6f1e6'; fit('N CLARK ST', 103); fit('KEEPS GOING', 151);  // the big tease, two lines
+  g.fillStyle = '#cfe0c8'; g.font = 'italic 600 23px Georgia,serif';         // sage wink line
+  g.fillText('all the way to the loop, someday', 256, 197);
+  return new THREE.CanvasTexture(cv);
+}
 
 // =====================================================================
 export function buildStreets() {
@@ -86,8 +101,7 @@ export function buildStreets() {
         : { pos: [cx, 0.03, c], scale: [w, 0.05, Math.abs(seg) - 0.12] });
     }
   }
-  function paraWalk(offc, width) {                          // Clark sheared ribbon
-    const z0 = STREETS_W.clark.z0, z1 = STREETS_W.clark.z1;
+  function paraWalk(offc, width, z0 = STREETS_W.clark.z0, z1 = STREETS_W.clark.z1) {   // Clark sheared ribbon
     const n = Math.max(1, Math.round((z1 - z0) / 2.4)), seg = (z1 - z0) / n;
     for (let k = 0; k < n; k++) {
       const z = z0 + seg * (k + 0.5);
@@ -100,6 +114,7 @@ export function buildStreets() {
   straightWalk(SH.x0, SH.x0 + 6, SH.z0, SH.z1); straightWalk(SH.x1 - 6, SH.x1, SH.z0, SH.z1); // Sheffield W/E
   straightWalk(K.x0, K.x0 + 2, K.z0, K.z1); straightWalk(K.x1 - 2, K.x1, K.z0, K.z1);   // Kenmore W/E
   paraWalk(-11, 6); paraWalk(11, 6);                                                    // Clark W/E
+  paraWalk(-11, 6, CLARK_STUB_W.z0, CLARK_STUB_W.detailZ1); paraWalk(11, 6, CLARK_STUB_W.z0, CLARK_STUB_W.detailZ1);  // Clark stub W/E (task 033)
   instMesh(new THREE.BoxGeometry(1, 1, 1), toon(0xffffff, { mat: { map: slabTex() } }), slabs);
 
   // ------------------------- 2. CURBS ----------------------------------
@@ -112,6 +127,9 @@ export function buildStreets() {
   { const zc = -479, xw = clarkX(zc);                                                   // Clark sheared road edges
     curbs.push({ pos: [xw - 8, 0.065, zc], yaw: clarkYaw, scale: [0.3, 0.13, 193.1] });
     curbs.push({ pos: [xw + 8, 0.065, zc], yaw: clarkYaw, scale: [0.3, 0.13, 193.1] }); }
+  { const zc = (CLARK_STUB_W.z0 + CLARK_STUB_W.detailZ1) / 2, xw = clarkX(zc);          // Clark stub road edges (task 033)
+    curbs.push({ pos: [xw - 8, 0.065, zc], yaw: clarkYaw, scale: [0.3, 0.13, 35.3] });
+    curbs.push({ pos: [xw + 8, 0.065, zc], yaw: clarkYaw, scale: [0.3, 0.13, 35.3] }); }
   instMesh(new THREE.BoxGeometry(1, 1, 1), toon(0x9c968a), curbs);
 
   // ------------------------- 3. ROAD PAINT -----------------------------
@@ -122,6 +140,8 @@ export function buildStreets() {
   for (let z = STREETS_W.clark.z0 + 4; z <= STREETS_W.clark.z1 - 4; z += 5)              // Clark centre dashes
     if (Math.abs(z + 400) > 4 && Math.abs(z + 560) > 6)
       yellow.push({ pos: [clarkX(z), 0.025, z], yaw: clarkYaw, scale: [0.16, 0.02, 2.2] });
+  for (let z = CLARK_STUB_W.z0 + 3; z <= CLARK_STUB_W.detailZ1 - 2; z += 5)              // Clark stub dashes (task 033)
+    yellow.push({ pos: [clarkX(z), 0.025, z], yaw: clarkYaw, scale: [0.16, 0.02, 2.2] });
   function crosswalk(cx, cz, roadHalf) {                                                 // zebra across an E–W road
     const barLen = roadHalf * 2 - 0.6, span = 4.6, n = 8;
     for (let k = 0; k < n; k++) white.push({ pos: [cx - span / 2 + span * k / (n - 1), 0.03, cz], scale: [0.42, 0.02, barLen] });
@@ -141,6 +161,9 @@ export function buildStreets() {
   li = 0; for (let z = SH.z0 + 8; z <= SH.z1 - 8; z += 18) side(() => lamps.push({ px: -201.2, pz: z, yaw: Math.PI / 2 }), () => lamps.push({ px: -178.8, pz: z, yaw: -Math.PI / 2 }))();
   li = 0; for (let z = K.z0 + 8; z <= K.z1 - 8; z += 18) side(() => lamps.push({ px: -236.2, pz: z, yaw: Math.PI / 2 }), () => lamps.push({ px: -225.8, pz: z, yaw: -Math.PI / 2 }))();
   li = 0; for (let z = STREETS_W.clark.z0 + 8; z <= STREETS_W.clark.z1 - 8; z += 17.3) side(() => lamps.push({ px: clarkX(z) - 13.2, pz: z, yaw: Math.PI / 2 }), () => lamps.push({ px: clarkX(z) + 13.2, pz: z, yaw: -Math.PI / 2 }))();
+  lamps.push({ px: clarkX(-374) - 13.2, pz: -374, yaw: Math.PI / 2 });                  // Clark stub lamps (task 033) — alternating rhythm
+  lamps.push({ px: clarkX(-362) + 13.2, pz: -362, yaw: -Math.PI / 2 });
+  lamps.push({ px: clarkX(-350) - 13.2, pz: -350, yaw: Math.PI / 2 });
   // pole+arm archetype (grey), head baked-offset (warm), one glow point each
   const poleG = new THREE.CylinderGeometry(0.09, 0.12, 7, 7); poleG.translate(0, 3.5, 0);
   const armG = new THREE.BoxGeometry(0.12, 0.12, 2.6); armG.translate(0, 6.85, 1.3);
@@ -159,7 +182,7 @@ export function buildStreets() {
     wrigleyRoot.add(new THREE.Points(g, pointsMat())); }
 
   // ------------------------- 5. BLADE SIGNS ----------------------------
-  const bladePoles = [[-303, -387.6], [-200.8, -549.2], [-238.5, -571]];
+  const bladePoles = [[-303, -387.6], [-200.8, -549.2], [-238.5, -571], [CLARK_STUB_W.blade.x, CLARK_STUB_W.blade.z]];
   const poleGeo = new THREE.CylinderGeometry(0.06, 0.06, 3.1, 6); poleGeo.translate(0, 1.55, 0);
   instMesh(poleGeo, toon(0x2b2b30), bladePoles.map(p => ({ pos: [p[0], 0, p[1]] })));
   bladePoles.forEach(p => collide(p[0], p[1], 0.3));
@@ -181,6 +204,27 @@ export function buildStreets() {
   blade('WAVELAND 3700 N', -201.7, 2.62, -549.2, 0, 1.9);
   blade('SHEFFIELD 1000 W', -200.8, 2.98, -550.1, Math.PI / 2, 1.8);
   blade('KENMORE 1040 W', -238.5, 2.62, -571.9, Math.PI / 2, 1.7);
+  blade('N CLARK ST', CLARK_STUB_W.blade.x - 0.85, 2.62, CLARK_STUB_W.blade.z, Math.PI + clarkYaw, 1.7);  // stub blade (task 033), squared to Clark
+  {  // COMING SOON placard (task 033) — the 017 teaser register, just S of the
+     // barricade, offset EAST of the centerline (placard.off) so the CPD
+     // officer NPC at (−286.5, −388) never blocks the head-on read.
+     // Rear/legs use 0x2c2620 — the dressing-kit downspout color, already a
+     // static-merge bucket on every facade lot → truly +0 draw calls
+     // (0x2b2b30 exists only as the blade-pole InstancedMesh, which
+     // mergeCellStatic excludes — it would have opened a NEW bucket).
+    const cx = clarkX(CLARK_STUB_W.placard.z) + (CLARK_STUB_W.placard.off || 0);
+    const cz = CLARK_STUB_W.placard.z, pyaw = Math.PI + clarkYaw;
+    const ph = 2.3 * 224 / 512;                                       // panel height (512×224 canvas aspect)
+    const front = new THREE.Mesh(new THREE.PlaneGeometry(2.3, ph), bmat(0xffffff, { map: stubPlacardTex() }));
+    front.position.set(cx, 1.5, cz); front.rotation.y = pyaw; atlasPlane(front, false);   // -> shared opaque atlas (+0 draws)
+    const rear = new THREE.Mesh(new THREE.BoxGeometry(2.3, ph, 0.05), toon(0x2c2620));     // solid back hides the DoubleSide atlas mirror
+    rear.position.set(cx - 0.04 * Math.sin(pyaw), 1.5, cz - 0.04 * Math.cos(pyaw)); rear.rotation.y = pyaw; wrigleyRoot.add(rear);
+    const legH = 1.5 - ph / 2, wx = Math.cos(clarkYaw), wz = -Math.sin(clarkYaw);          // legs end at the panel bottom; width axis
+    for (const s of [1, -1]) {
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.07, legH, 0.07), toon(0x2c2620));
+      leg.position.set(cx + s * 0.95 * wx, legH / 2, cz + s * 0.95 * wz); wrigleyRoot.add(leg);
+    }
+  }
 
   // ------------------------- 6. FLAVOR ---------------------------------
   {  // hydrants (merged archetype, red)
@@ -233,7 +277,7 @@ export function buildStreets() {
   }
 
   // ------------------------- 8. BACKDROP BAND --------------------------
-  const bandDir = [[1, 0], [0, 1], [0, 1], [-1, 0], [0, -1], [-1, 0], [-1, 0], [0, -1]];  // last: Sheffield S mouth (020), fronts north
+  const bandDir = [[1, 0], [0, 1], [0, 1], [-1, 0], [0, -1], [0, -1], [-1, 0], [-1, 0], [0, -1]];  // 9 bands (task 033: S-of-Addison split into idx 4&5, both front north); last: Sheffield S mouth (020), fronts north
   const palette = [0x7a4a38, 0x8a5a44, 0x9a948b, 0x88837a, 0xa8946f, 0xb3a480, 0x6f5240];
   const buildings = [], windows = [];
   BACKDROP_W.bands.forEach((b, bi) => {

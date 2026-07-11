@@ -140,6 +140,14 @@ few turns to find; keep each to one line of symptom + fix.
   fires and onUse never runs (the tap looks dead). act.mjs `tap`/`tapSel` HOLD
   ~160ms (touchStart · wait · touchEnd) so >=1 frame observes the press; also pass
   `--mobile` (390px hasTouch viewport) or body.touch never turns on (task 026).
+- "+0 draw calls by cached toon color" requires the color to already be in the
+  STATIC merge pool — a color consumed ONLY by an InstancedMesh (mergeCellStatic
+  excludes those) opens a NEW merged bucket (task 033: the placard back reused
+  the blade-pole 0x2b2b30 = +1 draw; switching to the dressing downspout
+  0x2c2620 folded to +0). Check the color's consumer TYPE, not just its
+  presence. Also: teaser/sign boards at a barricade mouth must sit OFF the
+  centerline — every mouth has a CPD officer NPC standing there who blocks the
+  head-on read.
 - Free-standing SIGNS have TWO systemic quality failures — audit BOTH on every new
   sign builder (task 032 swept all of them): (a) a lone DoubleSide canvas plane reads
   MIRRORED from behind — fix with back-to-back FrontSide planes. To keep draw calls

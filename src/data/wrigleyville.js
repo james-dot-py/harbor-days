@@ -255,8 +255,11 @@ export const FACADES_W = {
   // spans = [[a,b],…] extents to fill (gaps skip the hero landmarks).
   frontages: [
     // addison-s: split around the Sports World lot (x −220…−204) + the closed
-    // Sheffield mouth (x −202…−178) — task 020 corner truth
-    { id: 'addison-s',  o: 'ew',    face: -384, yaw: Math.PI,               spans: [[-298, -224], [-176, -158]] },
+    // Sheffield mouth (x −202…−178) — task 020 corner truth. Task 033: the row
+    // START moved −298 → −268 — the three western lots stood in the Clark
+    // right-of-way (clarkX±14 reaches x −299.6…−269.3 over the lot depth);
+    // they are REHOMED to the clark-se/clark-sw stub frontages below.
+    { id: 'addison-s',  o: 'ew',    face: -384, yaw: Math.PI,               spans: [[-268, -224], [-176, -158]] },
     { id: 'waveland-n', o: 'ew',    face: -574, yaw: 0,                      spans: [[-348, -254], [-198, -180]] },
     // sheffield-e: STOPS at z −432 (task 020) — the 016 span ran to −388,
     // standing lots INSIDE the Addison corridor (z −414…−386) and walling off
@@ -264,6 +267,13 @@ export const FACADES_W = {
     { id: 'sheffield-e',o: 'ns',    face: -176, yaw: -Math.PI / 2,          spans: [[-534, -432]] },
     { id: 'clark-wn',   o: 'clark', off: -16,   yaw: Math.PI / 2 + clarkYaw, spans: [[-570, -492]] },
     { id: 'clark-ws',   o: 'clark', off: -16,   yaw: Math.PI / 2 + clarkYaw, spans: [[-416, -392]] },
+    // task-033 REHOME: the stub frontages — storefronts LINING the reserved
+    // Clark alignment south of the CPD line (scenery; unreachable, no colliders).
+    // clark-se starts z −374 (south of the addison-s lot backs, z −376) so the
+    // Addison corner lot owns the corner; clark-sw starts z −370, clear of the
+    // Cubby Bear lot (z ≥ −372).
+    { id: 'clark-se',   o: 'clark', off: 16,    yaw: -Math.PI / 2 + clarkYaw, spans: [[-374, -346]] },
+    { id: 'clark-sw',   o: 'clark', off: -16,   yaw: Math.PI / 2 + clarkYaw,  spans: [[-370, -344]] },
   ],
   // recipe palette. color = cached toon hex; floors → height; door position;
   // awning [stripeA,stripeB]|null; upper window style; cornice style; fesc =
@@ -304,16 +314,39 @@ export const BARRICADES_W = [
 // (facing dirs live in streets.js bandDir, same order.)
 export const BACKDROP_W = {
   bands: [
-    { x0: -384, x1: -353, z0: -590, z1: -360 },    // west of Clark bars
+    // west of Clark bars — x1 pulled −353 → −358 (task 033): the east edge
+    // clipped the reserved Clark alignment (clarkX−14 ≤ −353 for z ≤ −575)
+    { x0: -384, x1: -358, z0: -590, z1: -360 },
     { x0: -324, x1: -240, z0: -632, z1: -594 },    // north of the rooftops
     { x0: -178, x1: -152, z0: -650, z1: -582 },    // NE, toward the tracks
     { x0: -178, x1: -156, z0: -382, z1: -340 },    // SE block (S of Addison)
-    { x0: -326, x1: -212, z0: -370, z1: -336 },    // S of Addison (behind Cubby)
+    // S of Addison, SPLIT around the reserved Clark alignment (task 033) —
+    // the old single band (x −326…−212) stood across the right-of-way.
+    // West half sits behind the clark-sw stub lots (their masses reach
+    // x −306); east half behind clark-se (masses reach x −253).
+    { x0: -326, x1: -307, z0: -370, z1: -336 },    // S of Addison, W of the Clark stub (behind Cubby)
+    { x0: -248, x1: -212, z0: -370, z1: -336 },    // S of Addison, E of the Clark stub
     { x0: -122, x1: -110, z0: -560, z1: -350 },    // sliver east of the tracks
     { x0: -178, x1: -152, z0: -480, z1: -434 },    // E of Sheffield mid-block (streetwall; z1 pulled to −434 so it clears the 020 stationCorner lot)
     { x0: -202, x1: -178, z0: -378, z1: -340 },    // Sheffield S mouth (task 020) — the closed street continues into city, not bare ground
   ],
   floors: [2, 4],                                  // storeys range
+};
+
+// ------------------ Clark stub (task 033 — SCENERY) -------------------
+// The reserved Clark right-of-way south of the z −385.5 CPD line: visible
+// street (asphalt/curbs/centerline/sidewalk slabs/lamps) continuing to z1
+// so the closure reads as event-day Chicago, not a dead end. NOT walkable —
+// no WALK_W quad; the barricade stays the soft wall. detailZ1 = where curbs/
+// slabs/dashes stop; bare asphalt continues to z1 and fades with the world
+// curve. blade/placard = the 017-register teaser anchors at the line.
+export const CLARK_STUB_W = {
+  z0: -386, z1: -338, detailZ1: -352,
+  blade:   { x: -271.2, z: -386.9 },               // 'N CLARK ST' pole, east curb corner
+  // COMING SOON board, x = clarkX(z)+off — offset EAST of the centerline
+  // because the Clark-S CPD officer NPC stands at (−286.5, −388) and blocks
+  // a centered board's head-on read (task-033 shot review)
+  placard: { z: -384.6, off: 4.5 },
 };
 
 // ----------------------- walkability (THE definition) -----------------

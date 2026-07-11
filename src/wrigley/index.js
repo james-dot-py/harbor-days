@@ -78,6 +78,11 @@ function buildGround() {
     wrigleyRoot.add(m);
   }
   wrigleyRoot.add(paraStrip(-T.clark.halfW, T.clark.halfW, T.clark.z0, T.clark.z1, 0.0, ASPHALT));
+  // task 033: the Clark STUB — the reserved right-of-way continuing past the
+  // z −385.5 CPD line as scenery (CLARK_STUB_W). Same cached ASPHALT material
+  // → folds into the existing merge bucket, +0 draw calls.
+  const CS = WV.CLARK_STUB_W;
+  wrigleyRoot.add(paraStrip(-T.clark.halfW, T.clark.halfW, CS.z0, CS.z1, 0.0, ASPHALT));
   const G = WV.GALLAGHER_W;                        // plaza pavers, slightly warm
   wrigleyRoot.add(wedgeStrip(G.off0, G.z0, G.z1, 0.01, 0x8b7f6d));
 }
@@ -98,6 +103,12 @@ function buildMinimapBase() {
   line([T.sheffield.x, T.sheffield.z0], [T.sheffield.x, T.sheffield.z1], 7);
   line([T.kenmore.x, T.kenmore.z0], [T.kenmore.x, T.kenmore.z1], 4);
   line([WV.clarkX(T.clark.z0), T.clark.z0], [WV.clarkX(T.clark.z1), T.clark.z1], 9);
+  { // task 033: Clark continues past the closure — dimmer, thinner stub line
+    const CS = WV.CLARK_STUB_W;
+    g.strokeStyle = '#6f6a7a';
+    line([WV.clarkX(CS.z0), CS.z0], [WV.clarkX(CS.z1), CS.z1], 6);
+    g.strokeStyle = '#8d8798';
+  }
   // the park
   g.fillStyle = '#2e7d4f'; g.beginPath();
   WV.STADIUM_W.poly.forEach((p, i) => { const [mx, my] = wm(p[0], p[1]); i ? g.lineTo(mx, my) : g.moveTo(mx, my); });

@@ -160,3 +160,11 @@ cut becomes a revert task.
   + a case of Old Style sit on the step beside him — the actual Chicago-handshake
   pairing, a wink toward his colleague down the rocks — Belmont Rocks (156,90) —
   task 031 / issue 013
+- Clark keeps going: the CPD closure south of Addison now opens onto a real
+  receding street — pavement, centerline dashes, cobra lamps, storefront lots
+  flanking the reserved right-of-way, the Loop skyline hazy at the far end —
+  and a green ballpark-register COMING SOON board on the line reads
+  'N CLARK ST / KEEPS GOING · all the way to the loop, someday' beside a real
+  'N CLARK ST' blade; the displaced buildings weren't deleted, they moved to
+  LINE the future street — Clark & Addison S mouth (clarkX(−385), −385.5) —
+  task 033

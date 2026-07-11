@@ -465,6 +465,18 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-196, -550]
   add('wv-barricade-addison-e', 'wrigleyville', 'wrigleyville', px, pz,
     spread(yawTo(px, pz, mx, mz), 0.15, 9));
 }
+{ // the Clark S right-of-way (task 033): stand on Clark just north of the
+  // z −385.5 CPD line and look SSE down the reserved alignment — the stub
+  // must read as a CONTINUING street (pavement/dashes/lamps/flanking lots),
+  // never a wall. At these yaws the follow-cam (player − dir·dist) lands in
+  // the open Clark & Addison intersection, always clear of geometry.
+  const cz = -397, cx = W.clarkX(cz);
+  add('wv-barricade-clark-s', 'wrigleyville', 'wrigleyville', cx, cz, [
+    { yaw: 0.27, pitch: 0.12, dist: 11 },   // head-on down the alignment
+    { yaw: 0.27, pitch: 0.05, dist: 7 },    // low + close: placard/blade read
+    { yaw: 0.62, pitch: 0.2,  dist: 13 },   // oblique: east flank + barricade line
+  ]);
+}
 
 /* ---- street-canyon waypoints (owner playtest 2026-07-09): the loop only
    judged SUBJECTS (signs, gates) and never the STREET AROUND them, so blocks

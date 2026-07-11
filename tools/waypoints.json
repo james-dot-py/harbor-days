@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-10T21:45:06.209Z",
- "count": 69,
+ "generated": "2026-07-11T01:57:11.144Z",
+ "count": 70,
  "waypoints": [
   {
    "id": "spawn",
@@ -1474,6 +1474,31 @@
    "expectation": "A CPD street closure: blue wooden A-frame barricades ('POLICE LINE') with an officer NPC closing Addison east past the station; Lakeview backdrop buildings continue beyond — diegetic wall, not a void."
   },
   {
+   "id": "wv-barricade-clark-s",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -289.16,
+   "z": -397,
+   "framings": [
+    {
+     "yaw": 0.27,
+     "pitch": 0.12,
+     "dist": 11
+    },
+    {
+     "yaw": 0.27,
+     "pitch": 0.05,
+     "dist": 7
+    },
+    {
+     "yaw": 0.62,
+     "pitch": 0.2,
+     "dist": 13
+    }
+   ],
+   "expectation": "The Clark right-of-way south of Addison (task 033, owner directive): blue CPD 'POLICE LINE' A-frames close the mouth at z -385.5 with an officer nearby, but Clark VISIBLY CONTINUES beyond the line — asphalt with yellow centerline dashes, curbs, sidewalk slabs and cobra lamps receding SSE on the diagonal, FLANKED by storefront buildings that line the alignment (Cubby Bear then the clark-sw lots west, the addison-s corner lot then clark-se lots east); NO building mass stands IN the right-of-way anywhere down the vista; a green 'N CLARK ST' blade reads near the east curb and a small green pinstriped COMING-SOON placard (017 teaser register) reads on the closure line; the street fades into the low-rise Lakeview backdrop and open distance — a street the city plans to use, not a dead end and not a wall."
+  },
+  {
    "id": "wv-street-addison",
    "area": "wrigleyville",
    "cell": "wrigleyville",
@@ -1601,7 +1626,7 @@
      "dist": 13
     }
    ],
-   "expectation": "Clark & Addison, all four corners occupied and right: the marquee on its rounded corner (NE of the intersection — the stadium block is north of Addison, east of Clark), the Cubby Bear across Addison (SW), bar-row masses up Clark (NW), storefront fabric SE. No bare corner, no backdrop-grade box facing the intersection."
+   "expectation": "Clark & Addison, all four corners occupied and right: the marquee on its rounded corner (NE of the intersection — the stadium block is north of Addison, east of Clark), the Cubby Bear across Addison (SW), bar-row masses up Clark (NW), storefront fabric SE — and between the SW and SE corners the Clark right-of-way OPENS south past the CPD line (task 033): visible street continuing, no building across the alignment. No bare corner, no backdrop-grade box facing the intersection."
   },
   {
    "id": "wv-x-sheffield-addison",
