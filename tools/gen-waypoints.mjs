@@ -14,6 +14,7 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import * as CH from '../src/data/chicago.js';
 import * as W from '../src/data/wrigleyville.js';
+import * as M from '../src/data/millennium.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const OUT = join(here, 'waypoints.json');
@@ -632,6 +633,100 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-196, -550]
   ]);
 }
 
+/* ---------------------------- millennium ----------------------------- */
+// The Millennium Park cell (task 041 shell). Stands + framings are the
+// task-040 "WAYPOINTS (final)" list, hand-verified against WALK_M — each
+// framing carries its OWN stand (x,z) because these features are shot from
+// several vantages (walkthrough.mjs honors f.x/f.z). Camera = stand −
+// (sin yaw, cos yaw)·dist·cos(pitch). VOLS_M models this cell's camera-
+// blocking masses so the hand stands can be re-checked (soft warning; the
+// 040 stands were verified to land on open walkable ground / open air).
+const VOLS_M = [];
+{
+  const vol = (x0, x1, z0, z1, yMax) => VOLS_M.push({ x0, x1, z0, z1, yMax });
+  vol(M.STREETWALL_M.band.x0, M.STREETWALL_M.band.x1, M.STREETWALL_M.band.z0, M.STREETWALL_M.band.z1, 80);  // the cliff
+  vol(M.BACKDROP_M.giants.z0 - 4, 214, M.BACKDROP_M.giants.z0, M.BACKDROP_M.giants.z1, 200);                // Randolph giants (x/z swapped: band runs E-W)
+  vol(M.BACKDROP_M.east.x0, M.BACKDROP_M.east.x1, M.BACKDROP_M.east.z0, M.BACKDROP_M.east.z1, 44);          // east Loop band
+  vol(M.KIOSK_M.x0, M.KIOSK_M.x1, M.KIOSK_M.z0, M.KIOSK_M.z1, 4.5);                                         // subway kiosk head-house
+  for (const t of M.CROWN_M.towers) vol(t.x0, t.x1, t.z0, t.z1, M.CROWN_M.towerH);                          // Crown face-towers
+  for (const c of M.EXELON_M.cubes) vol(c.x - M.EXELON_M.sz / 2, c.x + M.EXELON_M.sz / 2, c.z - M.EXELON_M.sz / 2, c.z + M.EXELON_M.sz / 2, M.EXELON_M.h);  // Exelon cubes
+  vol(M.CLOUD_GATE_M.bean.x0, M.CLOUD_GATE_M.bean.x1, M.CLOUD_GATE_M.bean.z0, M.CLOUD_GATE_M.bean.z1, M.CLOUD_GATE_M.bean.h);  // the Bean (043)
+}
+function camPosM(px, pz, f) {
+  const down = Math.max(0, f.pitch), up = Math.max(0, -f.pitch);
+  const horiz = Math.cos(down) * f.dist;
+  const y = Math.max(0.55, 1.6 + Math.sin(down) * f.dist + up * 1.2);
+  return [px - Math.sin(f.yaw) * horiz, y, pz - Math.cos(f.yaw) * horiz];
+}
+function camWarnM(id, i, f) {
+  const [cx, cy, cz] = camPosM(f.x, f.z, f);
+  for (const v of VOLS_M)
+    if (cy < v.yMax && cx > v.x0 - 1 && cx < v.x1 + 1 && cz > v.z0 - 1 && cz < v.z1 + 1)
+      console.error(`  [mp-clearance] ${id}-f${i} camera (${cx.toFixed(1)},${cz.toFixed(1)}) may sit inside a volume`);
+}
+// addM: framings each fully specify {x,z,yaw,pitch,dist}; the waypoint stand
+// defaults to f0's stand (walkthrough falls back to it if a framing omits x/z).
+function addM(id, framings) {
+  framings.forEach((f, i) => { f.yaw = R(f.yaw); f.pitch = R(f.pitch); f.dist = R(f.dist); f.x = R(f.x); f.z = R(f.z); camWarnM(id, i, f); });
+  add(id, 'millennium', 'millennium', framings[0].x, framings[0].z, framings);
+}
+addM('mp-arrival', [
+  { x: 55, z: 812, yaw: Math.PI, pitch: 0.06, dist: 7 },
+  { x: 54, z: 788, yaw: 0, pitch: 0.06, dist: 7 },
+  { x: 55, z: 810, yaw: -2.9, pitch: 0.06, dist: 7 },
+]);
+addM('mp-streetwall', [
+  { x: 90, z: 820, yaw: -Math.PI / 2, pitch: -0.12, dist: 8 },
+  { x: 108, z: 812, yaw: -Math.PI / 2, pitch: -0.1, dist: 6 },
+  { x: 66, z: 766, yaw: -Math.PI / 2, pitch: -0.06, dist: 7 },
+]);
+addM('mp-peristyle', [
+  { x: 78, z: 736, yaw: -2.40, pitch: 0.08, dist: 7 },
+  { x: 84, z: 744, yaw: -2.35, pitch: 0.08, dist: 9 },
+  { x: 67, z: 738, yaw: Math.PI, pitch: 0.08, dist: 7 },
+]);
+addM('mp-mccormick-cafe', [
+  { x: 78, z: 812, yaw: -2.36, pitch: 0.5, dist: 7 },
+  { x: 78, z: 790, yaw: -0.79, pitch: 0.45, dist: 7 },
+  { x: 76.5, z: 820, yaw: -2.0, pitch: 0.15, dist: 5 },
+]);
+addM('mp-bean', [
+  { x: 92, z: 806, yaw: -2.58, pitch: 0.06, dist: 8 },
+  { x: 87, z: 812, yaw: Math.PI, pitch: 0.06, dist: 7 },
+  { x: 86.8, z: 797.7, yaw: -Math.PI / 2, pitch: 0.02, dist: 6 },
+  { x: 82, z: 790, yaw: 0.72, pitch: 0.06, dist: 7 },
+]);
+addM('mp-crown-fountain', [
+  { x: 69.8, z: 884, yaw: Math.PI, pitch: 0.08, dist: 7 },
+  { x: 69.8, z: 842, yaw: 0, pitch: 0.08, dist: 7 },
+  { x: 80, z: 862, yaw: -Math.PI / 2, pitch: 0.08, dist: 5 },
+]);
+addM('mp-promenade', [
+  { x: 108, z: 806, yaw: Math.PI, pitch: 0.04, dist: 7 },
+  { x: 108, z: 726, yaw: Math.PI, pitch: 0.06, dist: 6 },
+  { x: 108, z: 790, yaw: 0, pitch: 0.04, dist: 7 },
+]);
+addM('mp-pritzker-stage', [
+  { x: 147, z: 777, yaw: Math.PI, pitch: 0.05, dist: 8 },
+  { x: 135, z: 782, yaw: -2.9, pitch: 0.05, dist: 9 },
+  { x: 147, z: 768, yaw: Math.PI, pitch: 0.05, dist: 5 },
+]);
+addM('mp-great-lawn', [
+  { x: 150, z: 834, yaw: Math.PI, pitch: 0.05, dist: 8 },
+  { x: 130, z: 838, yaw: -2.95, pitch: 0.05, dist: 8 },
+  { x: 150, z: 810, yaw: Math.PI, pitch: 0.05, dist: 6 },
+]);
+addM('mp-lurie', [
+  { x: 159.5, z: 862, yaw: 2.25, pitch: 0.05, dist: 6 },
+  { x: 159.5, z: 862, yaw: -0.91, pitch: 0.05, dist: 6 },
+  { x: 174, z: 848, yaw: -0.80, pitch: 0.05, dist: 6 },
+]);
+addM('mp-bp-bridge-crest', [
+  { x: 199, z: 806.5, yaw: -2.07, pitch: 0.02, dist: 5.5 },
+  { x: 193, z: 802, yaw: -1.93, pitch: 0.02, dist: 5 },
+  { x: 198, z: 806, yaw: 1.07, pitch: 0.02, dist: 5.5 },
+]);
+
 /* --------------------------- expectations ---------------------------- */
 let expect = {};
 try { expect = JSON.parse(readFileSync(EXPECT, 'utf8')); } catch { /* none authored yet */ }
@@ -647,7 +742,8 @@ const out = { generated: new Date().toISOString(), count: wps.length, waypoints:
 writeFileSync(OUT, JSON.stringify(out, null, 1));
 console.log('waypoints.json: ' + wps.length + ' waypoints (' +
   wps.filter(w => w.area === 'lakefront').length + ' lakefront, ' +
-  wps.filter(w => w.area === 'wrigleyville').length + ' wrigleyville), ' +
+  wps.filter(w => w.area === 'wrigleyville').length + ' wrigleyville, ' +
+  wps.filter(w => w.area === 'millennium').length + ' millennium), ' +
   wps.filter(w => w.expectation).length + ' with authored expectations');
 
 export function genWaypoints() { return out; }

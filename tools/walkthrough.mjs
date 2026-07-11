@@ -75,7 +75,10 @@ try {
     const entry = { id: w.id, area: w.area, x: w.x, z: w.z, expectation: w.expectation, framings: [] };
     for (let i = 0; i < w.framings.length; i++) {
       const f = w.framings[i];
-      const q = new URLSearchParams({ play: '1', x: w.x, z: w.z, canary: runId });
+      // a framing may override the stand (f.x/f.z) — some waypoints (the
+      // Millennium mp-* list) frame one feature from several stands.
+      const sx = f.x ?? w.x, sz = f.z ?? w.z;
+      const q = new URLSearchParams({ play: '1', x: sx, z: sz, canary: runId });
       for (const k of ['yaw', 'pitch', 'dist']) if (f[k] !== undefined) q.set(k, f[k]);
       const name = w.id + '-f' + i;
       // one shot must never kill the run: retry once, then record the failure

@@ -1,0 +1,227 @@
+// =====================================================================
+// MILLENNIUM PARK — the Michigan Ave CLIFF + Randolph GIANTS + east/south
+// backdrops (task 041, executor C). This is the landmark-holder: every
+// in-park view west/north terminates in a CONTINUOUS limestone-and-terra-
+// cotta canyon wall (not scattered towers), with a classical COLONNADE
+// block, gothic peaks, and one warm-window read; the north horizon is the
+// bold Loop skyline (Prudential sign-slab, diamond-topped twin, Aon white
+// monolith, Blue Cross glass).
+//
+// PERF: static toon-coloured BOX/CONE/CYL masses fold by colour in
+// mergeCellStatic (~1 draw per palette colour); ALL lit windows are ONE
+// instanced bucket (single warm colour). Attach everything to
+// millenniumRoot. Randomness is LOCAL (mulberry32 below) — never shared rng.
+// HARD FLOOR: nothing at z < 680 (the giants front the band at z 692,
+// bodies reach back to z 680 exactly — never past it).
+// =====================================================================
+import * as THREE from 'three';
+import { millenniumRoot, emitInstanced } from './index.js';
+import { toon, bmat, mulberry32 } from '../core.js';
+import * as M from '../data/millennium.js';
+
+// warm limestone / buff / terra-cotta / brick — the cliff folds to these
+const PAL   = [0xc9bfa6, 0xd8cdb2, 0xb9a88a, 0xa89478, 0xcabfae, 0x9a8468];
+const PALE  = 0xe6ddc8;   // pale limestone: colonnade, gothic crowns, arch
+const DARK  = 0x6f5c44;   // inset shadow band (suggests arched fronts)
+const COPING = 0xa89478;  // coping cap (a palette tone → folds with masses)
+const GREYS = [0x7e8da6, 0x8a9fbe, 0x6f7a8e];   // cool Loop backdrop
+const WIN   = 0xffd6a0;   // one warm lit-window colour (the whole bucket)
+
+const FRONT = 30, DEPTH = 18, BACKx = FRONT - DEPTH / 2;   // cliff geometry
+const GFRONT = 692, GDEPTH = 12, GBACKz = GFRONT - GDEPTH / 2; // giants
+
+export function buildStreetwall() {
+  const R = mulberry32(0x4d3000);
+  const rr = (a, b) => a + (b - a) * R();
+  const pick = arr => arr[Math.floor(rr(0, arr.length))];
+
+  const wins = [];   // ALL lit-window records → one emitInstanced at the end
+
+  // ---- primitive helpers (every mesh is static toon → merged by colour) ----
+  const box = (cx, cy, cz, sx, sy, sz, color) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), toon(color));
+    m.position.set(cx, cy, cz); millenniumRoot.add(m); return m;
+  };
+  const cone = (cx, cy, cz, r, h, color, seg = 4) => {
+    const m = new THREE.Mesh(new THREE.ConeGeometry(r, h, seg), toon(color));
+    m.position.set(cx, cy, cz); m.rotation.y = Math.PI / 4; millenniumRoot.add(m); return m;
+  };
+  const cyl = (cx, cy, cz, r, h, color) => {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 8), toon(color));
+    m.position.set(cx, cy, cz); millenniumRoot.add(m); return m;
+  };
+
+  // lit windows on an X-facing wall (cliff +x / east band -x): cols along z
+  const winsX = (xFace, dir, zc, w, hTop, o = {}) => {
+    const { step = 2.4, fh = 3.4, prob = 0.4, y0 = 4, top = 3 } = o;
+    const x = xFace + dir * 0.05, yaw = dir > 0 ? Math.PI / 2 : -Math.PI / 2;
+    const nC = Math.max(1, Math.floor((w - 1) / step)), z0 = zc - (nC - 1) * step / 2;
+    for (let c = 0; c < nC; c++) { const z = z0 + c * step;
+      for (let y = y0; y < hTop - top; y += fh)
+        if (R() < prob) wins.push({ pos: [x, y, z], scale: [0.7, 1.0, 1], color: WIN, yaw }); }
+  };
+  // lit windows on a +z-facing wall (the giants face the park): cols along x
+  const winsZ = (zFace, xc, w, hTop, o = {}) => {
+    const { step = 3.2, fh = 5.5, prob = 0.22, y0 = 8, top = 8 } = o;
+    const z = zFace + 0.05;
+    const nC = Math.max(1, Math.floor((w - 1) / step)), x0 = xc - (nC - 1) * step / 2;
+    for (let c = 0; c < nC; c++) { const x = x0 + c * step;
+      for (let y = y0; y < hTop - top; y += fh)
+        if (R() < prob) wins.push({ pos: [x, y, z], scale: [0.9, 1.3, 1], color: WIN, yaw: 0 }); }
+  };
+
+  // ==================================================================
+  // 1. THE MICHIGAN AVE CLIFF — march z 684..935, front face at x30,
+  //    bodies reaching west to ~x12. Fill gaps between the named anchors
+  //    with generic masses so the wall reads CONTINUOUS (no sky at base).
+  // ==================================================================
+  const placeGeneric = (cz, w, h) => {
+    const c = pick(PAL);
+    box(BACKx, h / 2, cz, DEPTH, h, w, c);
+    box(BACKx, h + 0.6, cz, DEPTH + 0.4, 1.2, w + 0.5, COPING);   // coping cap
+    winsX(FRONT, +1, cz, w, h);
+  };
+
+  const placeAnchor = (a) => {
+    const c = pick(PAL), w = a.w, h = a.h, cz = a.z;
+    box(BACKx, h / 2, cz, DEPTH, h, w, c);                        // the body mass
+
+    if (a.style === 'colonnade') {
+      // CLASSICAL COLONNADE: a row of 8 columns + a heavy cornice cap.
+      const n = 8, colH = h - 9;
+      for (let i = 0; i < n; i++) {
+        const z = cz - w / 2 + (i + 0.5) * (w / n);
+        cyl(FRONT + 0.4, 2 + colH / 2, z, 0.7, colH, PALE);
+      }
+      box(BACKx, colH + 3.2, cz, DEPTH + 0.4, 1.6, w, PALE);      // architrave beam
+      box(BACKx, h + 1.3, cz, DEPTH + 1, 2.6, w + 1.2, PALE);     // heavy cornice cap
+      return;                                                     // (few windows: classical)
+    }
+    if (a.style === 'gothic') {
+      box(FRONT - 0.3, h - 3, cz, 0.6, 3, w - 1, DARK);           // inset arched-front band
+      box(BACKx, h + 2, cz, DEPTH - 2, 4, w - 3, PALE);           // stepped crown block
+      cone(BACKx, h + 4 + w * 0.35, cz, w * 0.55, w * 0.7, PALE); // pointed peak
+    } else if (a.style === 'sullivan') {
+      box(BACKx, h - 1, cz, DEPTH + 0.4, 2.5, w + 1.5, 0xd8cdb2); // strong horizontal cornice
+      for (let i = 0; i < 5; i++) {                               // fine vertical pier rhythm
+        const z = cz - w / 2 + (i + 0.5) * (w / 5);
+        box(FRONT + 0.15, 1 + (h - 5) / 2, z, 0.6, h - 5, 0.7, 0xa89478);
+      }
+    } else if (a.style === 'gable') {
+      cone(BACKx, h + 2.5, cz, w * 0.62, 5, 0x9a8468);            // low pitched gable roof
+    } else {                                                      // 'tower'
+      box(BACKx, h + 0.75, cz, DEPTH + 0.4, 1.5, w + 0.6, COPING);// simple coping cap
+    }
+    winsX(FRONT, +1, cz, w, h);
+  };
+
+  {
+    const { band, anchors } = M.STREETWALL_M;
+    const A = anchors.slice().sort((p, q) => p.z - q.z);
+    let z = band.z0, i = 0;
+    while (z < band.z1 - 0.5) {
+      const a = A[i], lead = a ? a.z - a.w / 2 : band.z1;
+      if (a && z >= lead - 0.01) {                               // reached an anchor
+        placeAnchor(a);
+        z = Math.max(z, a.z + a.w / 2) + rr(0.2, 1.0);
+        i++;
+      } else {                                                    // tile the gap solidly
+        const span = lead - z;
+        if (span < 3) { z = lead; continue; }
+        const n = Math.max(1, Math.round(span / 13)), cw = span / n;
+        for (let k = 0; k < n; k++)
+          placeGeneric(z + cw * (k + 0.5), cw + 1.4, rr(35, 64));  // overlap → no base gaps
+        z = lead;
+      }
+    }
+  }
+
+  // ==================================================================
+  // 2. THE RANDOLPH GIANTS — bold north-horizon terminators, front face
+  //    at z692, bodies reaching north to z680. Distinct silhouettes.
+  // ==================================================================
+  for (const g of M.BACKDROP_M.giants.list) {
+    const { x, w, h, style } = g;
+    if (style === 'sign-slab') {                                 // ONE PRU: white slab + sign
+      box(x, h / 2, GBACKz, w, h, GDEPTH, 0xeef0f2);
+      const tex = signTex('PRUDENTIAL', '#1b2733', '#eef2f6');
+      const sign = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.82, 9), bmat(0xffffff, { map: tex }));
+      sign.position.set(x, h - 14, GFRONT + 0.06); millenniumRoot.add(sign);
+      winsZ(GFRONT, x, w, h - 24, { prob: 0.16 });
+    } else if (style === 'diamond-spire') {                      // TWO PRU: diamond top + antenna
+      box(x, h / 2, GBACKz, w, h, GDEPTH, 0xdfe3ea);
+      cone(x, h + 15, GBACKz, 12, 30, 0xdfe3ea);                 // 4-sided diamond spire
+      cyl(x, h + 30 + 12, GBACKz, 0.4, 24, 0xdfe3ea);            // antenna
+      winsZ(GFRONT, x, w, h);
+    } else if (style === 'white-fins') {                         // AON: white monolith + fins
+      box(x, h / 2, GBACKz, w, h, GDEPTH, 0xeae6dc);
+      const nf = 7;
+      for (let i = 0; i < nf; i++) {
+        const fx = x - w / 2 + (i + 0.5) * (w / nf);
+        box(fx, h * 0.5 + 1, GFRONT + 0.15, 1.0, h * 0.95, 0.8, 0xf4f1ea);
+      }
+      winsZ(GFRONT, x, w, h, { prob: 0.14 });
+    } else {                                                     // BLUE CROSS: glass box
+      box(x, h / 2, GBACKz, w, h, GDEPTH, 0x66aecb);
+      winsZ(GFRONT, x, w, h, { prob: 0.28 });
+    }
+  }
+
+  // ==================================================================
+  // 3. EAST LOOP BAND — lower cool mid-rises across Columbus, front face
+  //    at x214 (faces west), bodies reaching east to x238.
+  // ==================================================================
+  {
+    const e = M.BACKDROP_M.east, cx = (e.x0 + e.x1) / 2, d = e.x1 - e.x0;
+    let z = e.z0;
+    while (z < e.z1 - 3) {
+      const w = rr(12, 20), h = rr(e.floors[0] * 3.4, e.floors[1] * 3.4);
+      box(cx, h / 2, z + w / 2, d, h, w, pick(GREYS));
+      winsX(e.x0, -1, z + w / 2, w, h, { prob: 0.3, step: 3 });
+      z += w + rr(0.3, 1.2);
+    }
+  }
+
+  // ==================================================================
+  // 4. SOUTH BACKDROP — low continuous stone band across Monroe, front
+  //    face at z914 (faces north). Art Institute + Stock Exchange Arch.
+  // ==================================================================
+  {
+    const s = M.BACKDROP_M.south, d = s.z1 - s.z0, cz = (s.z0 + s.z1) / 2;
+    // low continuous fill so the south view never gaps
+    { let x = s.x0;
+      while (x < s.x1 - 3) {
+        const w = rr(12, 18), h = rr(9, 16);
+        box(x + w / 2, h / 2, cz, w, h, d, pick(GREYS));
+        x += w + rr(0.3, 1.0);
+      } }
+    // Art Institute — low warm classical mass + cornice (lions arrive in 048)
+    const ai = s.artInstitute;
+    box(ai.x, ai.h / 2, cz, ai.w, ai.h, d, 0xbdb49c);
+    box(ai.x, ai.h + 1, cz, ai.w + 2, 2, d + 1, PALE);
+    // Stock Exchange Arch cameo — freestanding limestone arch, front of band
+    const ax = s.archX, az = s.z0 - 2;
+    box(ax - 3.5, 4.5, az, 2, 9, 2, PALE);                       // west pier
+    box(ax + 3.5, 4.5, az, 2, 9, 2, PALE);                       // east pier
+    box(ax, 10.2, az, 9, 3, 2.2, PALE);                          // spanning lintel
+    box(ax, 12, az, 2, 1.4, 2.4, PALE);                          // keystone
+  }
+
+  // ==================================================================
+  // 5. ALL LIT WINDOWS — one instanced bucket, single warm colour.
+  // ==================================================================
+  const CAP = 680;
+  let recs = wins;
+  if (recs.length > CAP) { const k = Math.ceil(recs.length / CAP); recs = recs.filter((_, i) => i % k === 0); }
+  emitInstanced(new THREE.PlaneGeometry(1, 1), recs, { basic: true });
+}
+
+// dark sign band with light lettering (PRUDENTIAL) — one canvas texture
+function signTex(text, bg, fg) {
+  const cv = document.createElement('canvas'); cv.width = 512; cv.height = 96;
+  const g = cv.getContext('2d');
+  g.fillStyle = bg; g.fillRect(0, 0, 512, 96);
+  g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '700 46px Arial,Helvetica,sans-serif'; g.fillText(text, 256, 52);
+  const t = new THREE.CanvasTexture(cv); t.anisotropy = 4; return t;
+}
