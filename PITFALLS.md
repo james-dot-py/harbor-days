@@ -264,3 +264,20 @@ few turns to find; keep each to one line of symptom + fix.
   (non-fatal, gen-waypoints still writes). Model elevated parapets as OUTBOARD
   boxes off the deck centerline and VERIFY the actual down-deck shot rather than
   tuning the coarse volume to silence a truthful proximity flag.
+- A held prop parented to a chibi's parts.handR uses handR's LOCAL frame, so a
+  positional offset authored as if it were GROUP-local flings the prop far: a
+  wedding camera at handR-local (0,1.95,0.42) landed on the plaza a body-length
+  away (task 047). Rule: attach a FIXED-pose prop to the NPC GROUP at ~face/hand
+  height (bean-visitors precedent — the group tracks the mover's position+facing
+  so the prop stays put); reserve handR ONLY for a prop that must follow an
+  ANIMATED hand, and keep its offset SMALL (a conductor's baton at handR-local
+  (0,0.24,0) rides the hand fine; a large offset does not). Also: makeNPC's
+  setFace (happy/surprised squint) is a NO-OP without palette face:true — the
+  eyes fold into the head merge otherwise (+1 draw buys a live eye mesh).
+- Chase-cam framings occlude the SUBJECT behind the mayor whenever yaw points
+  straight AT it (the player sits dead-centre at `dist` ahead of the camera):
+  aiming a shot at the Pritzker conductor / the station grate / a small NPC put
+  the mayor exactly in front and hid it (task 047, cost a whole framing pass).
+  Fix: stand BESIDE the subject and aim yaw at a background point so the subject
+  falls ~25-40° off the view axis — the mayor stays centred on empty ground and
+  the subject reads clear to one side.
