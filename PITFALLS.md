@@ -194,6 +194,16 @@ few turns to find; keep each to one line of symptom + fix.
   (downtown) cell must keep ALL its geometry at z >= 680 or towers interpenetrate
   the billboard boxes — the millennium cell region was finalized z 680+ for exactly
   this (task 040, GEOGRAPHY.md MILLENNIUM_GEOGRAPHY liberties).
+- A cell's GRADE-LEVEL ground carpet (a big y≈0 lawn/fill plane) OCCLUDES any
+  SUNKEN feature beneath it from above: the Millennium subway stair pit (floor
+  y −3.2) AND the McCormick sunken cafe terrace (floor y −1.6) both rendered as
+  plain lawn until the carpet was CARVED around their footprints (task 041 — cost
+  a fix cycle; the cafe bug hid behind the balustrade, which read fine, so it
+  looked done). Retaining walls at the rim don't help — the top plane still
+  covers the void. Fix: tile the carpet as quads that skip the hole rects
+  (index.js `paveRegion` scanline split handles several disjoint holes). Any
+  sub-grade pad (Crown pool, Lurie rill, future areaways) needs the same carve;
+  verify with a DOWN-pitched framing that looks INTO the void, not a level one.
 - A SMALL vertical geometry change is invisible in a distant side view: lowering a
   deck ~0.3 m to sit flush on grade moved it only ~20 px at ~13 m, reading as
   "unchanged" — task 038 nearly re-chased a phantom HMR-staleness bug over it (a
