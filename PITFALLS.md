@@ -403,4 +403,14 @@ few turns to find; keep each to one line of symptom + fix.
   params the same tree diffed 2.31% — all HUD hint bar, wandering beach NPCs,
   flower AA. tools/tmp-diffmap.mjs writes the diff MAP: read WHERE the pixels
   are before concluding drift. Rule: reproduce baseline.png's exact query
-  params before comparing anything against it.
+  params before comparing anything against it. SEQUEL: that 2.1% residual was
+  itself a DEFECTIVE BASELINE — 059's [baseline-regen] was captured without
+  quiet=1, baking the "WASD move ·..." hint pill into baseline.png (the pill
+  alone = 95% of the diff, 18,521 of 19,513 px — the exact ~2.1% bimodality
+  quiet=1 exists to kill; the non-pill residue was 0.108%, at the 0.117%
+  noise floor), and gate check 4 then hard-blocks EVERY later session. 060
+  re-regenerated it (fresh-vs-fresh 0.072%). Rule: a [baseline-regen] must be
+  captured via the gate's own recipe (flake-calibration.json query+waitMs, own
+  port + canary) and crop-checked PILL-FREE (tools/tmp-cropdiff.mjs, band
+  ~300,665 680x50) before committing — a defective baseline taxes every
+  future session, not the one that made it.
