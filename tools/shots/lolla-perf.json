@@ -1,0 +1,8 @@
+[
+  ["goto", 252, 990],
+  ["wait", 4000],
+  ["eval", "(()=>{const p=window.__hd.perf();const c=window.__hd.census(8);return{draws:p.drawCalls,top:c.rows.slice(0,6).map(r=>r[0].slice(0,40)+' ='+r[1])};})()"],
+  ["goto", 262, 962],
+  ["wait", 3500],
+  ["eval", "window.__hd.perf().drawCalls"]
+]

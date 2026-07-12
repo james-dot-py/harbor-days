@@ -1,0 +1,10 @@
+[
+  ["goto", 272, 974],
+  ["wait", 3000],
+  ["eval", "window.__lolla ? window.__lolla.moves : 'no-lolla'"],
+  ["key", "e"],
+  ["wait", 500],
+  ["eval", "window.__lolla.moves"],
+  ["wait", 700],
+  ["shot", "v061b-f-dance-desktop"]
+]

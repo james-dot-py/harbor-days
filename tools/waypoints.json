@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-12T13:01:53.738Z",
- "count": 109,
+ "generated": "2026-07-12T17:07:22.057Z",
+ "count": 111,
  "waypoints": [
   {
    "id": "spawn",
@@ -2843,14 +2843,14 @@
      "dist": 6
     },
     {
-     "x": 60,
-     "z": 901,
+     "x": 65,
+     "z": 902.5,
      "yaw": 1.35,
      "pitch": 0.03,
      "dist": 5
     }
    ],
-   "expectation": "Closed E Monroe reads as festival LOAD-IN, not a live road: pipe crowd-fence sections going up, orange traffic cones and a stacked pallet on open walkable asphalt, a bare scaffold arch at the park crossing — and south across the street the Art Institute's pedimented facade with its two bronze lions rising over the forecourt."
+   "expectation": "Closed E Monroe with the festival LIVE: pipe crowd-fence sections, orange traffic cones and a stacked pallet still on the walkable asphalt (load-in gear at the quiet west end), the scaffold arch at the park crossing now wearing a LOLLAPALOOZA banner — and south across the street the Art Institute's pedimented facade with its two bronze lions rising over the forecourt."
   },
   {
    "id": "mp-nichols",
@@ -2882,6 +2882,61 @@
     }
    ],
    "expectation": "NICHOLS BRIDGEWAY: a slim white footbridge with a smooth boat-hull belly rises from the lawn over a river-stone bed, soars over the closed street and the open rail cut, and lands on the Modern Wing's white-and-glass terrace; on deck, thin mesh parapets with a warm cap rail frame the view back to the park — trellis arcs, stainless ribbons, the skyline wall."
+  },
+  {
+   "id": "mp-lolla-rail",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 252,
+   "z": 990,
+   "framings": [
+    {
+     "x": 252,
+     "z": 990,
+     "yaw": -0.78,
+     "pitch": 0.02,
+     "dist": 7
+    },
+    {
+     "x": 247,
+     "z": 1008,
+     "yaw": -2.35,
+     "pitch": 0.1,
+     "dist": 5.5
+    }
+   ],
+   "expectation": "Over the front-rail crowd to the dressed Petrillo shell: a cream tile-grid proscenium wrapped in festival banners, a flat white canopy over an elevated stage where a little chibi band plays (drummer at a kit, guitarist, frontman working the crowd), hung line arrays and glowing side video boards, the barricade rail with real bumpable fans — a festival at golden dusk heard from the lawn; f1 reverses from beside the stage over the swaying crowd sea, totems and flag garlands against the sky."
+  },
+  {
+   "id": "mp-lolla-crowd",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 271,
+   "z": 960,
+   "framings": [
+    {
+     "x": 271,
+     "z": 960,
+     "yaw": -0.7,
+     "pitch": 0.1,
+     "dist": 7
+    },
+    {
+     "x": 228,
+     "z": 905,
+     "yaw": 1.3,
+     "pitch": 0.04,
+     "dist": 5.2
+    },
+    {
+     "x": 209.5,
+     "z": 905,
+     "yaw": -0.25,
+     "pitch": 0.04,
+     "dist": 5
+    }
+   ],
+   "expectation": "A field of chibi festivalgoers in mixed colors swaying and bouncing in waves toward the stage — distinct heads over chunky bodies (people, not jellybeans), totems poking above the crowd (a hand-made yellow star, a foam EL car, a disco ball — and an inflatable alligator drifting over hands), the FOH sound booth and dance circle nearby; f1 stands under the branded entry arch on closed Monroe with the food-truck row beyond; f2 reads the all-Chicago pun LINEUP poster (MALÖRT FACE, DEEP DISH MODE, THE LAKE EFFECTS) at the Monroe/Columbus corner."
   }
  ]
 }

@@ -29,6 +29,7 @@ import { buildPlayGarden } from './playgarden.js';
 import { buildArtInstitute } from './artinstitute.js';
 import { buildLions } from './lions.js';
 import { buildNichols } from './nichols.js';
+import { buildButler } from './butler.js';
 
 const _r = mulberry32(0x4d0000 ^ M.SEED_M);
 export const grand = (a = 0, b = 1) => a + (b - a) * _r();
@@ -354,6 +355,23 @@ function buildMinimapBase() {
     // THE LIONS — verdigris dots at the steps
     for (const l of AI.lions) dot(l.x, l.z, '#4da28c', 3);
   }
+
+  // ---- Butler Field + LOLLA (061, flag butler) ----
+  if (M.OPEN_GRANT.butler) {
+    const BU = M.BUTLER_M;
+    rect(BU.field.x0, BU.field.x1, 908, BU.field.z1, '#4f6a3e');      // festival field green
+    // closed festival streets = WALKABLE pave color (distinct from scenery road)
+    g.fillStyle = '#9a9384';
+    rect(200, 336, 894, 908, '#9a9384');                             // closed Monroe east
+    rect(190, 200, 894, 1042, '#9a9384');                            // closed Columbus
+    rect(BU.lsdRim.x0, BU.lsdRim.x1, BU.lsdRim.z0, BU.lsdRim.z1, '#9a9384');   // LSD rim walk
+    rect(332, 346, 908, 1044, '#5a5750');                            // LSD scenery road
+    rect(BU.tents.x0, BU.tents.x1, BU.tents.z0, BU.tents.z1, '#b7b0a0');       // tent rows
+    rect(BU.petrillo.x0, BU.petrillo.x1, BU.petrillo.z0, BU.petrillo.z1, '#8a857a');   // Petrillo mass
+    rect(348, 362, 894, 1040, '#3d5a6e');                            // Monroe Harbor lake glint
+    dot((BU.petrillo.x0 + BU.petrillo.x1) / 2, (BU.petrillo.z0 + BU.petrillo.z1) / 2, '#c62828', 4);   // stage dot
+    dot((BU.booth.x0 + BU.booth.x1) / 2, (BU.booth.z0 + BU.booth.z1) / 2, '#d8d2c4', 2);               // sound booth
+  }
   return cv;
 }
 
@@ -381,6 +399,7 @@ export function buildMillennium() {
     buildLions();        // THE LIONS — the two bronze guardians flanking the steps (task 060, the hero meshes)
     buildNichols();      // NICHOLS BRIDGEWAY — white boat-hull span, lawn → Bluhm terrace (task 060, flag nichols = walkable)
   }
+  if (M.OPEN_GRANT.butler) buildButler();   // BUTLER FIELD + LOLLA — Petrillo shell in festival dress, crowd rail, tents, potties, trucks, arches, lineup poster, lake band (task 061; live crowd/music in packs/lolla.js)
   flushPool();         // emit the shared instanced pool (P2) — cross-zone repeats fold to one bucket each
   // Grown Grant-expansion cell (~300×340 m): merge into ≤240×240 m TILES per
   // material so far tiles fog-cull (P1). Pre-expansion the cell was compact and

@@ -646,9 +646,10 @@ console.log('\n--- Millennium: Bean geometry discipline (043) ---');
 console.log('\n--- Millennium: roads/cafe/planting are NOT walkable ---');
 for(const [label,x,z] of [
   ['Michigan roadway',40,800],['Randolph roadway',100,700],
-  // 060: CLOSURE_M.monroeWest (x48-190) is now the walkable festival street, so
-  // (100,900) walks; monroeEast (x200-336) stays gated on `butler` (false).
-  ['Monroe roadway east of the closure',210,900],['Columbus roadway',195,750],
+  // 060/061: the closed festival streets (Monroe west+east, Columbus south) are
+  // now WALKABLE curb-to-curb — see the BUTLER block below. Columbus NORTH of
+  // Monroe (z<894) stays open SCENERY (the BP bridge is the only way to Maggie).
+  ['Columbus roadway N of Monroe',195,750],
   ['rink boards gap W',61.3,790],['rink boards gap E',73,800],['rink boards gap N',66,779.5],['rink boards gap S',67,818.5],
   ['rink rim buffer W',58,780],['rink rim buffer E (Park Grill band)',75.5,800],['rink rim buffer N',66,773],['rink rim buffer S',66,825.5],['rink stair cheek',59,798],
   ['Lurie light plate',153.6,852.5],['Lurie dark plate',167.7,870.7],
@@ -812,6 +813,29 @@ for(const [label,x,z] of [
   expect(`Nichols deck follows its nodes end-to-end (worst mid-seam ${worst.toFixed(2)} at ${at} < 0.6)`,worst<0.6,true); }
 // KIND — no ice anywhere in the AI zone (the rink + ribbon are north)
 expect('kindAtM(52,970) === null (no ice in the AI zone)',MP.kindAtM(52,970),null);
+
+// ===== Millennium: BUTLER FIELD + LOLLA (task 061) — flag butler LIVE. The
+// festival field (Petrillo + booth carved), the two CLOSED festival streets
+// (walkable curb-to-curb), the LSD rim walk and the three Maggie south-rim gate
+// knits join the network. walkableM/surfaceYM are the SAME funcs the engine uses.
+console.log('\n--- Millennium: BUTLER FIELD + LOLLA (061) ---');
+// WALKABLE at grade — closed streets, field lawn, around Petrillo, LSD rim, gates
+for(const [label,x,z] of [
+  ['closed Monroe east',240,901],['closed Columbus',195,950],
+  ['field lawn N',250,950],['field lawn mid',290,990],
+  ['west-of-Petrillo lane',206,1015],['south-of-Petrillo',222,1025],['east-of-Petrillo',250,1015],
+  ['LSD rim walk',327,970],
+  ['Maggie gate knit W',250,891],['Maggie gate knit M',284,891],['Maggie gate knit E',319,891],
+]) expect(`${label} (${x},${z}) walkable at grade`,MP.walkableM(x,z)&&MP.surfaceYM(x,z)===0,true);
+// NOT walkable — Petrillo mass, sound booth, past the closures, LSD road, off-rim
+for(const [label,x,z] of [
+  ['Petrillo mass',222,1009],['sound booth (carved)',262,972],
+  ['Monroe east of the closure',338,901],['Columbus past Jackson',195,1043],
+  ['Jackson band',250,1036],['LSD road',336,970],['lawn east of the rim',333,990],
+  ['open ground N of the field between the gates',270,893],
+]) expect(`${label} (${x},${z}) NOT walkable`,MP.walkableM(x,z),false);
+// no ice anywhere in the festival field
+expect('kindAtM(250,950) === null (no ice at Butler Field)',MP.kindAtM(250,950),null);
 
 console.log('\n--- Millennium: flood fill from the spawn — one connected network, no elevators ---');
 {

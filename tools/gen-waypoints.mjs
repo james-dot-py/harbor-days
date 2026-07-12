@@ -827,6 +827,20 @@ const VOLS_M = [];
     vol(182, 186, 930, 940, 11);                                                  // Stock Exchange Arch piers
     vol(M.STREETWALL_M.band.x0, M.STREETWALL_M.band.x1, 935, 1080, 80);           // cliff extension south
   }
+  // Butler Field + Lolla masses (061) — the Petrillo shell, tents, FOH booth,
+  // delay towers, the lineup poster and the crowd totems, so the festival
+  // stands re-check (soft advisory; the instanced crowd is too low to model).
+  if (M.OPEN_GRANT.butler) {
+    const BU = M.BUTLER_M;
+    vol(BU.petrillo.x0, BU.petrillo.x1, BU.petrillo.z0, BU.petrillo.z1, BU.petrillo.h + 1);
+    vol(BU.tents.x0, BU.tents.x1, BU.tents.z0, BU.tents.z1, 4.5);
+    vol(BU.booth.x0, BU.booth.x1, BU.booth.z0, BU.booth.z1, 4);
+    for (const [dx2, dz2] of BU.delays) vol(dx2 - 1, dx2 + 1, dz2 - 1, dz2 + 1, 7.5);
+    for (const [tx2, tz2] of BU.totems) vol(tx2 - 0.5, tx2 + 0.5, tz2 - 0.5, tz2 + 0.5, 3.6);
+    vol(204, 208.5, 909, 911.5, 4.6);                                             // LINEUP poster board
+    vol(BU.readingCones.x - 2.6, BU.readingCones.x + 2.6,
+        BU.readingCones.z - 2.6, BU.readingCones.z + 2.6, 4.4);                   // Serra Reading Cones
+  }
 }
 function camPosM(px, pz, f) {
   const down = Math.max(0, f.pitch), up = Math.max(0, -f.pitch);
@@ -993,7 +1007,7 @@ addM('mp-south-garden', [
 ]);
 addM('mp-monroe-crossing', [
   { x: 52.5, z: 899, yaw: 0.25, pitch: 0.03, dist: 6 },     // the arrival read: crossing the closed street toward the lions
-  { x: 60, z: 901, yaw: 1.35, pitch: 0.03, dist: 5 },       // down the closed street: LOLLA LOAD-IN (fences, cones, pallet)
+  { x: 65, z: 902.5, yaw: 1.35, pitch: 0.03, dist: 5 },     // down the closed street: LOLLA LOAD-IN (fences, cones, pallet; 061 moved the stand E — the old camera sat against the now-dressed scaffold-arch leg)
 ]);
 // Nichols: down-the-deck framings only at deck level (mesh parapets are low
 // but the L-car axis doctrine still composes best); f0 reads the hull belly
@@ -1003,6 +1017,20 @@ addM('mp-nichols', [
   { x: 112, z: 852, yaw: 0.30, pitch: 0.02, dist: 6 },      // the boat-hull belly + nameplate rising over the stone bed
   { x: 118.2, z: 885, yaw: 0.05, pitch: -0.06, dist: 4.5 }, // ON deck, down-deck south to the Modern Wing landing
   { x: 128, z: 916, yaw: -2.51, pitch: 0.05, dist: 5 },     // from the Bluhm terrace back NW: deck, park, ribbons, skyline
+]);
+// 061: LOLLAPALOOZA on Butler Field. The rail stand is THE census view (057
+// perf plan P4 — full festival kit + crowd buckets + closed Columbus + AI
+// east masses in one frustum). f1 stands east of the stage looking NW so the
+// crowd sea + flags read as the reverse angle (yaw keeps the stage edge
+// ~30° off-axis — the 047 occlusion law).
+addM('mp-lolla-rail', [
+  { x: 252, z: 990, yaw: -0.78, pitch: 0.02, dist: 7 },     // over the crowd to the dressed Petrillo: banners + arrays + boards + the band (057's yaw 2.55 was pi-flipped — view fwd is +(sin,cos); mouth ~20° off-axis so the mayor doesn't eclipse the band, 047 law)
+  { x: 247, z: 1008, yaw: -2.35, pitch: 0.10, dist: 5.5 },  // stage-side reverse: the crowd sea + totems + garlands at dusk
+]);
+addM('mp-lolla-crowd', [
+  { x: 271, z: 960, yaw: -0.70, pitch: 0.10, dist: 7 },     // the swaying instanced field + totems + FOH booth + dance circle (SW)
+  { x: 228, z: 905, yaw: 1.3, pitch: 0.04, dist: 5.2 },     // ON closed Monroe at the entry arch looking E down the festival street (camera clear of the z-901 garland string + truck awnings — both ate earlier framings)
+  { x: 209.5, z: 905, yaw: -0.25, pitch: 0.04, dist: 5 },   // the LINEUP poster at the Monroe/Columbus corner (~25° right of axis — 047 law)
 ]);
 
 /* --------------------------- expectations ---------------------------- */

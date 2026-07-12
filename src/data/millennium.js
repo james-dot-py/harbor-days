@@ -266,7 +266,7 @@ export const BACKDROP_M = {
 //   butler       → 061 (Butler Field + Lolla + street closure east/south)
 // =====================================================================
 export const OPEN_GRANT = {
-  maggie: true, ribbonIce: true, artInstitute: true, nichols: true, butler: false,   // 058: Maggie LIVE · 059: ribbon ICE live · 060: ART INSTITUTE + NICHOLS LIVE (bridgeway walkable)
+  maggie: true, ribbonIce: true, artInstitute: true, nichols: true, butler: true,   // 058: Maggie LIVE · 059: ribbon ICE live · 060: ART INSTITUTE + NICHOLS LIVE · 061: BUTLER + LOLLA LIVE
 };
 const G = OPEN_GRANT;
 
@@ -288,7 +288,7 @@ export const STREETS_GRANT = {
 export const CLOSURE_M = {
   monroeWest: { x0: 48, x1: 190, z0: 894, z1: 908 },   // artInstitute (LOLLA LOAD-IN register pre-061)
   monroeEast: { x0: 200, x1: 336, z0: 894, z1: 908 },  // butler
-  columbus:   { x0: 190, x1: 200, z0: 894, z1: 1042 }, // butler
+  columbus:   { x0: 190, x1: 200, z0: 894, z1: 1040 }, // butler (z1 caps at CLAMP_FULL_M.zMax — frame discipline)
   arches: [{ x: 52, z: 901, face: 'S' }, { x: 240, z: 901, face: 'W' }, { x: 195, z: 925, face: 'N' }],
   lineup: { x: 206, z: 910 },                          // the all-Chicago pun poster (061)
 };
@@ -432,9 +432,13 @@ export const BUTLER_M = {
   field: { x0: 198.6, x1: 326, z0: 900.7, z1: 1032.6 },             // osm 139013800
   // THE STAGE IS PETRILLO (osm 210671695; mouth faces NE — real bearing),
   // wearing festival dress: banner truss, line arrays, video side-boards.
-  petrillo: { x0: 214, x1: 230, z0: 1002, z1: 1017, h: 14, mouth: 'NE' },
+  petrillo: { x0: 214, x1: 230, z0: 1002, z1: 1017, h: 14, mouth: 'NE', deckY: 1.6 },
   crowd: { x0: 225, x1: 300, z0: 940, z1: 1005 },                   // instanced swaying field; real bumpables at the rail
   booth: { x0: 258, x1: 266, z0: 968, z1: 976 },                    // sound booth (carved); dance circle beside (061)
+  dance: { x: 272, z: 971.5, r: 3.0 },                              // the joinable dance circle, beside the booth (061)
+  rail: { x0: 218, x1: 262, z: 1000.2 },                            // front-of-stage crowd barricade line (builder colliders)
+  delays: [[250, 960], [288, 966]],                                 // mid-crowd delay/light towers (NEMA kit; colliders)
+  totems: [[262, 981, 'star'], [246, 956, 'el'], [283, 950, 'disco']], // crowd totems (the gator crowd-surfs — packs/lolla.js)
   readingCones: { x: 262.7, z: 912.7 },                             // Serra — real spot, stays
   tents: { x0: 300, x1: 322, z0: 930, z1: 1010 },                   // white tent rows (NEMA-aerial kit)
   potties: { x0: 202, x1: 207, z0: 950, z1: 1000 },                 // the honest row, closed-Columbus east curb
@@ -557,7 +561,7 @@ const AI_WALK = [
 ];
 const BUTLER_WALK = [
   { x0: 200, x1: 336, z0: 894, z1: 908, y: 0 },   // closed Monroe east (festival street)
-  { x0: 190, x1: 200, z0: 894, z1: 1042, y: 0 },  // closed Columbus (festival street)
+  { x0: 190, x1: 200, z0: 894, z1: 1040, y: 0 },  // closed Columbus (festival street; z1 = clamp zMax)
   { x0: 202, x1: 324, z0: 902, z1: 968, y: 0 },   // Butler lawn N (booth carved below)
   { x0: 202, x1: 258, z0: 968, z1: 976, y: 0 },
   { x0: 266, x1: 324, z0: 968, z1: 976, y: 0 },

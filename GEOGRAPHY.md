@@ -702,7 +702,13 @@ Field x 198.6–326, z 900.7–1032.6 (osm 139013800).
 - Crowd field fans NE of the mouth (~x 225–300, z 940–1005): instanced swaying
   crowd, real bumpables at the rail (048 law); sound booth (258–266 × 968–976,
   carved) + dance circle; Serra's **Reading Cones** stay at their real
-  (262.7, 912.7).
+  (262.7, 912.7). 061 data-pins the festival kit inside the field: stage deck
+  y 1.6, the joinable dance circle at (272, 971.5) r 3 beside the booth, the
+  front-of-stage barricade rail x 218–262 at z 1000.2, two mid-crowd delay/
+  light towers (250, 960) / (288, 966), and three crowd totems — a hand-made
+  star, a foam EL car, a disco ball — at (262, 981) / (246, 956) / (283, 950)
+  (the inflatable alligator crowd-surfs live in packs/lolla.js). All stand as
+  colliders in the walkable field (statue pattern).
 - Dressing per the NEMA-aerial kit: white tent rows east edge, food-truck row
   on closed Monroe, the honest port-a-potty row on closed Columbus's east
   curb, perimeter flag garlands, entry arches on both closed streets, LINEUP

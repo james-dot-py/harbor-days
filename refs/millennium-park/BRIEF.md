@@ -642,3 +642,26 @@ pre-existing blessed rink/approach-buffer candidates and (b) 38 documented
 BP/Nichols deck edges at bends and flanks (blocked, never water; the deck
 meshes cover them visually; dominated by the Nichols west flank x≈116 column).
 058/060 review-and-bless these exactly as 048 blessed the rink set.
+
+## 061 CLOSE-OUT LEDGER (for 062's audit)
+
+- **Instanced buckets added by 061: 17 of the ≤25 allowance** — builder 8
+  (`bt-rail-post`, `bt-tent-post`, `bt-tent-roof-w`, `bt-potty-body`,
+  `bt-potty-roof`, `bt-garland-pole`, `bt-pennant` ×2 colors) + pack 9
+  (lolla crowd: 6 shirt-color body buckets + 3 skin head buckets, ~560
+  instances, matrix re-stamped per frame for the beat-synced wave). X-masts
+  and street trees reused `mg-*` pool keys (+0).
+- **Census (walkthrough runs mri1ccv9/mri1hdss/mri1qjbf, budget 480):**
+  mp-lolla-rail f0 293 · f1 389; mp-lolla-crowd f0 353 · f1 282 · f2 325;
+  mp-monroe-crossing f1 401; mp-bp-crossing f1 423 (cell max observed);
+  mp-crown-fountain f1 406 (pre-061 worst 401 → +5, the global bucket adds).
+  Worst headroom ≥ 57 everywhere observed.
+- **Gridsweep:** zero new interior holes in the Butler zone (x>190, z>894);
+  the 70 candidates reported are the previously blessed rink/chain-ledge sets.
+- **Waypoint yaw erratum:** the §WAYPOINT-PLAN yaws above for mp-lolla-rail/
+  mp-lolla-crowd stage-facing framings were authored π-FLIPPED (view forward
+  is +(sin yaw, cos yaw)); gen-waypoints.mjs carries the corrected values.
+  Camera traps found on closed Monroe: the z-901 arch garland string and the
+  truck awnings both eat cameras — final framings verified clear.
+- 062 re-judge note: mp-monroe-crossing f1's stand moved E to (65, 902.5)
+  (the old camera sat against the now-dressed scaffold-arch leg).

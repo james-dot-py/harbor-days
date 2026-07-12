@@ -340,3 +340,20 @@ cut becomes a revert task.
   skyline porch in the game. — Art Institute (steps x53-57, z963.5-978; lions
   54.4/962.4 + 54.4/979.4), Nichols Bridgeway (lawn ~112/852 → terrace
   ~128/916) — task 060
+- LOLLAPALOOZA IS LIVE ON BUTLER FIELD. A festival at golden dusk, heard from a
+  picnic blanket: the Petrillo shell wears banner truss, line arrays and glowing
+  video boards while a little chibi band plays a 100%-synthesized set — a
+  driving synth-rock number alternating with a four-on-the-floor one, loud at
+  the rail, gone by Pritzker — and ~560 instanced festivalgoers bounce ON the
+  beat in traveling waves. An inflatable ALLIGATOR crowd-surfs slow laps and
+  pauses at the rail so the front rows can pass it forward; totems poke out of
+  the crowd (a hand-made star, a foam EL car, a disco ball); the LINEUP poster
+  at Monroe/Columbus bills MALÖRT FACE · DEEP DISH MODE · THE LAKE EFFECTS over
+  DIBS, GIARDINIERA and CTA GHOST TRAIN (no real artists were harmed); the
+  honest port-a-potty row on closed Columbus ends at a sign reading THE
+  THINKING ROOMS; and a dance circle by the sound booth is joinable — E/tap to
+  bust one of three moves while the dancers cheer, no wristband needed. Grounds
+  free to wander via the real festival street closure; LOLLA FM joins the
+  boombox radio cycle, live from Butler Field. — Butler Field (stage 214-230 x
+  z1002-1017, crowd 225-300 x 940-1005, dance circle 272/971.5, poster 206/910)
+  — task 061

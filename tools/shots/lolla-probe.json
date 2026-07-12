@@ -1,0 +1,7 @@
+[
+  ["goto", 262, 985],
+  ["wait", 9000],
+  ["eval", "(()=>{let g=null;window.__hd.scene.traverse(o=>{if(o.name==='lolla-gator')g=o;});const L=window.__lolla||{};const base={song:L.song,bpm:L.bpm,bar:L.bar,gain:L.gain,prox:L.prox,crowd:L.crowd,moves:L.moves,sets:L.sets,gator:L.gator};if(!g)return Object.assign({found:false},base);const w=g.getWorldPosition(new window.__hd.THREE.Vector3());return Object.assign({found:true,pos:[+g.position.x.toFixed(1),+g.position.y.toFixed(1),+g.position.z.toFixed(1)],worldY:+w.y.toFixed(2),visible:g.visible,parentVis:g.parent&&g.parent.visible},base);})()"],
+  ["wait", 14000],
+  ["eval", "(()=>{let g=null;window.__hd.scene.traverse(o=>{if(o.name==='lolla-gator')g=o;});const L=window.__lolla||{};if(!g)return {found:false,song:L.song,bar:L.bar};return {pos:[+g.position.x.toFixed(1),+g.position.y.toFixed(1),+g.position.z.toFixed(1)],song:L.song,bpm:L.bpm,bar:L.bar,gain:L.gain,prox:L.prox};})()"]
+]

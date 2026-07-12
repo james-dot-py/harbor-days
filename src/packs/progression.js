@@ -396,6 +396,7 @@ const STATION_META=[
   {name:"WBMX · HOUSE",       flavor:'warehouse, 122 BPM'},
   {name:'CHECKERBOARD · BLUES',flavor:'a slow shuffle in E'},
   {name:'WGN · GO CUBS GO',   flavor:'Steve Goodman, on a loop since 1984'},
+  {name:'LOLLA FM',           flavor:'live from Butler Field'},
   {name:'RADIO OFF',          flavor:'just the lake now'},
 ];
 const radio={station:0,carrying:false,timer:null,next:0,step:0,stepDur:0,bus:null,pulse:0,walkBeat:0,speakers:[],box:null};
@@ -448,7 +449,7 @@ function radioReturn(){
     mb.linearRampToValueAtTime(MB_BASE!=null?MB_BASE:0.16,now+0.4); }
   radio.station=0; radio.carrying=false; radio.pulse=0;
 }
-function cycleStation(){ radioSetStation((radio.station+1)%5); }
+function cycleStation(){ radioSetStation((radio.station+1)%6); }
 function radioSetStation(sTo){
   const ctx=getAudioCtx(); radio.station=sTo;
   newRadioBus(); staticBlip();
@@ -459,7 +460,7 @@ function radioSetStation(sTo){
     const mb=ctx.musicBus.gain;
     mb.cancelScheduledValues(now); mb.setValueAtTime(mb.value,now);
     mb.linearRampToValueAtTime(sTo===0?(MB_BASE!=null?MB_BASE:0.16):0.0001, now+0.4);
-    if(sTo>=1&&sTo<=3){ radio.stepDur = sTo===1 ? (60/122/4) : sTo===2 ? (60/92/3) : (60/126/2);
+    if(sTo>=1&&sTo<=4){ radio.stepDur = sTo===1 ? (60/122/4) : sTo===2 ? (60/92/3) : sTo===3 ? (60/126/2) : (60/124/4);
       radio.bus.gain.cancelScheduledValues(now); radio.bus.gain.setValueAtTime(0.0001,now);
       radio.bus.gain.linearRampToValueAtTime(0.5,now+0.1); }
   }
@@ -467,18 +468,19 @@ function radioSetStation(sTo){
 }
 function radioTick(){
   const ctx=getAudioCtx(); if(!ctx.actx)return;
-  if(radio.station<1||radio.station>3)return;                          // HOUSE/BLUES/CUBS synthesize
+  if(radio.station<1||radio.station>4)return;                          // HOUSE/BLUES/CUBS/LOLLA synthesize
   if(radio.next<ctx.actx.currentTime) radio.next=ctx.actx.currentTime+0.05;
   while(radio.next<ctx.actx.currentTime+0.5){
     if(radio.station===1)      houseStep(radio.step,radio.next);
     else if(radio.station===2) bluesStep(radio.step,radio.next);
-    else                       cubsStep(radio.step,radio.next);
+    else if(radio.station===3) cubsStep(radio.step,radio.next);
+    else                       lollaStep(radio.step,radio.next);
     radio.next+=radio.stepDur; radio.step++;
   }
 }
 function updateRadio(dt){
   radio.pulse*=Math.exp(-6*dt);
-  const playing=(radio.station>=1&&radio.station<=3);
+  const playing=(radio.station>=1&&radio.station<=4);
   const sc=playing?1+radio.pulse*0.4:1;
   for(const s of radio.speakers) s.scale.set(sc,sc,1);
 }
@@ -534,6 +536,25 @@ function bluesStep(step,t){
   if(trip===0){ walkBass(BLUES_WALK[radio.walkBeat%BLUES_WALK.length],t,60/92*0.9); radio.walkBeat++; radio.pulse=1; }
   if(trip===0 && (beat===1||beat===3)) brush(t);                       // brushed backbeat
   if(trip===0 && Math.random()<0.16) bentLead(t);
+}
+
+// ---------------- LOLLA FM — live-from-Butler four-on-the-floor (task 061) ---- //
+// A compact 124-BPM house loop (kick each beat + offbeat hat + a 2-osc stab
+// every 2 bars + a faint crowd-noise wash), synthesized on the radio bus like
+// the other stations — NOT the lolla pack's own festival bus.
+const LOLLA_ROOT=[45,50,52,48];                                        // A D E C — four-on-the-floor roots
+function lollaWash(t){ const c=getAudioCtx(),bus=radio.bus; if(!c.actx||!bus)return;
+  const s=c.actx.createBufferSource(); s.buffer=c.noiseBuf;
+  const f=c.actx.createBiquadFilter(); f.type='bandpass'; f.frequency.value=520; f.Q.value=0.5;
+  const g=c.actx.createGain(); g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(0.06,t+0.25); g.gain.exponentialRampToValueAtTime(0.0001,t+0.9);
+  s.connect(f); f.connect(g); g.connect(bus); s.start(t,0,0.95); }
+function lollaStep(step,t){
+  const s=step%64, bar=(s>>4)&3;
+  if(s%4===0){ kick(t); radio.pulse=1; }                               // kick each beat
+  if(s%4===2) hat(t,0.05);                                             // offbeat hat
+  if(s%8===0) subBass(LOLLA_ROOT[bar]-12,t,radio.stepDur*3.5);         // driving sub
+  if(s%32===0) stab([LOLLA_ROOT[bar],LOLLA_ROOT[bar]+7],t);           // 2-osc stab every 2 bars
+  if(s%16===0) lollaWash(t);                                           // faint crowd-noise wash each bar
 }
 
 // ================================ audio ================================

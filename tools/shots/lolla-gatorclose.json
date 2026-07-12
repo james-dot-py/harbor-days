@@ -1,0 +1,7 @@
+[
+  ["goto", 262, 985],
+  ["wait", 24000],
+  ["eval", "(()=>{let g=null;window.__hd.scene.traverse(o=>{if(o.name==='lolla-gator')g=o;});if(!g)return{found:false};const gx=g.position.x,gz=g.position.z;window.__hd.player.x=gx-7.8;window.__hd.player.z=gz-1.75;return{gx:+gx.toFixed(1),gz:+gz.toFixed(1),wy:+g.position.y.toFixed(2)};})()"],
+  ["wait", 1000],
+  ["shot", "v061b-eB-gatorClose15"]
+]
