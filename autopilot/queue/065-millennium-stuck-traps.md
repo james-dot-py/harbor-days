@@ -26,7 +26,15 @@ acceptance: >
   current cell) — the game must never hard-stick the player again, even
   on top of a future placement bug; implement in the shared movement
   gate so ALL cells inherit it, no per-frame allocations, jetski/water
-  gates unaffected (the issue-017 guard stays intact). Verify: bot-walk
+  gates unaffected (the issue-017 guard stays intact). (4) THE GRASS
+  (owner, same session: "i can't move onto the grass in all places"):
+  audit lawn walkability across Butler Field and every expansion lawn —
+  the flood-fill will enumerate blocked-grass patches; open them unless a
+  solid prop genuinely stands there. Prime suspect: 061's crowd zones as
+  blocked rects — WRONG for a festival lawn: you wade through a crowd
+  (instanced crowd stays collider-free; real NPC rows bump-ope; only the
+  stage structure + sound booth + trucks are solid). The whole field
+  should walk edge to edge, crowd and all. Verify: bot-walk
   the owner's exact approach, the fixed arch both sides, plus a synthetic
   trap test (temporarily blocked cell → player still escapes). Zero rng
   impact; walkprobe green incl. new reachability section; draw budget

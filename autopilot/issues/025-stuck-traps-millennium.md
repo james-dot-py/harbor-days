@@ -26,3 +26,11 @@
   even on top of a future bug. That rule alone converts every future trap
   from a reload into a shrug.
 - route: task 065.
+- OWNER UPDATE (same session): "actually I got out, just took some doing" —
+  so the arch is a severe PINCH, not a sealed islet (065's three layers all
+  still apply; the escape rule turns pinches into non-events). NEW symptom:
+  "i'm seeing i can't move onto the grass in all places" — Butler Field /
+  expansion lawns have PATCHY walkability: some grass edges blocked. Prime
+  suspect: 061's crowd zones shipped as blocked rects over the lawn — but
+  a festival lawn is FOR walking; you wade through the crowd (bump-ope!).
+  065 gains a lawn-walkability audit.
