@@ -368,3 +368,9 @@ few turns to find; keep each to one line of symptom + fix.
   (tag ≥6 s) so every load catches mid-pursuit — and aim the yaw ~0.4 rad OFF
   the pursuer's bearing or the mayor pins dead-center in front of him (the 047
   occlusion pitfall applies to MOVING subjects too).
+- An OSM way's ENDPOINTS are its ordered first/last NODES, never its bbox
+  corners: the 039 brief cited the BP bridge "launch (172.6, 787.9)" — a
+  bbox min/min corner — and the 046 deck shipped on that wrong line; the
+  real way STARTS at (172.6, 834.9), runs north, and crosses Columbus at
+  z≈790 (47 units off). Dump the ordered point list (tmp-grant-inspect geom)
+  before citing any endpoint or bearing from an extract.
