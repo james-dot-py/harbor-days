@@ -115,7 +115,21 @@ export function buildStreets() {
   straightWalk(K.x0, K.x0 + 2, K.z0, K.z1); straightWalk(K.x1 - 2, K.x1, K.z0, K.z1);   // Kenmore W/E
   paraWalk(-11, 6); paraWalk(11, 6);                                                    // Clark W/E
   paraWalk(-11, 6, CLARK_STUB_W.z0, CLARK_STUB_W.detailZ1); paraWalk(11, 6, CLARK_STUB_W.z0, CLARK_STUB_W.detailZ1);  // Clark stub W/E (task 033)
-  instMesh(new THREE.BoxGeometry(1, 1, 1), toon(0xffffff, { mat: { map: slabTex() } }), slabs);
+  // CARVE sidewalk slabs OUT of every drivable lane (issue 018 root cause,
+  // task 063): the slab rows run the full frontage, so at each intersection
+  // they paved right over the perpendicular ROADWAY — cream sidewalk tiles on
+  // top of where the crosswalk paint lives. Drop any slab centred in a road
+  // lane (axis roads ± road/2, Clark diagonal ± its 8 m curb half) so the
+  // ASPHALT shows through and the white crosswalk bars below read as paint.
+  const inRoadLane = (x, z) => (
+    (x >= A.x0  && x <= A.x1  && Math.abs(z - A.z) <= A.road / 2) ||
+    (x >= W.x0  && x <= W.x1  && Math.abs(z - W.z) <= W.road / 2) ||
+    (z >= SH.z0 && z <= SH.z1 && Math.abs(x - SH.x) <= SH.road / 2) ||
+    (z >= K.z0  && z <= K.z1  && Math.abs(x - K.x) <= K.road / 2) ||
+    (z >= STREETS_W.clark.z0 && z <= CLARK_STUB_W.detailZ1 && Math.abs(x - clarkX(z)) <= 8)
+  );
+  instMesh(new THREE.BoxGeometry(1, 1, 1), toon(0xffffff, { mat: { map: slabTex() } }),
+    slabs.filter(s => !inRoadLane(s.pos[0], s.pos[2])));
 
   // ------------------------- 2. CURBS ----------------------------------
   const curbs = [
@@ -142,30 +156,42 @@ export function buildStreets() {
       yellow.push({ pos: [clarkX(z), 0.025, z], yaw: clarkYaw, scale: [0.16, 0.02, 2.2] });
   for (let z = CLARK_STUB_W.z0 + 3; z <= CLARK_STUB_W.detailZ1 - 2; z += 5)              // Clark stub dashes (task 033)
     yellow.push({ pos: [clarkX(z), 0.025, z], yaw: clarkYaw, scale: [0.16, 0.02, 2.2] });
-  // CONTINENTAL CROSSWALKS (issue 018: "the crosswalks are just sidewalks"). A
-  // real Chicago crossing is a set of white bar-stripes running PERPENDICULAR to
-  // traffic (spanning the road curb-to-curb), spaced ALONG the road over a ~4.6 m
-  // crossing zone. alongYaw = the road's traffic heading (direction (sin,cos)):
-  // π/2 = E–W road along x, 0 = N–S road along z, clarkYaw = the Clark diagonal.
-  // Every bar is a yawed box, so all axes (incl. Clark's cant) come out true.
-  // Deterministic per-bar length wear (NO rng — never perturb the shared R
-  // sequence that lays lamps/hydrants) so the set reads painted-on, not stamped.
-  function xwalk(cx, cz, roadHalf, alongYaw) {
+  // CONTINENTAL CROSSWALKS (issue 018, REOPENED as task 063). A crossing is
+  // PAINT, not a slab: flat WHITE bars lying FLUSH on the asphalt (h 0.016 at
+  // y 0.028 — a hair of clearance only against z-fighting, no slab thickness,
+  // no sidewalk palette), asphalt clearly showing between them. 052 got the
+  // GEOMETRY right — bars run PERPENDICULAR to traffic (span the road curb-to-
+  // curb), spaced ALONG the road over a ~4.6 m zone; alongYaw = the road's
+  // traffic heading (direction (sin,cos)): π/2 = E–W road along x, 0 = N–S road
+  // along z, clarkYaw = the Clark diagonal — every bar a yawed box so all axes
+  // (incl. Clark's cant) come out true. The cream slabs that used to bury this
+  // are carved out of the roadway above (inRoadLane). Deterministic per-bar wear
+  // (length + bar-width wobble, NO rng — never perturb the shared R sequence
+  // that lays lamps/hydrants) so it reads hand-painted, not stamped. Bars AND
+  // the stop lines share one white InstancedMesh (~1 draw).
+  const XW_Y = 0.028;
+  function xwalk(cx, cz, roadHalf, alongYaw, outSign) {
     const barLen = roadHalf * 2 - 0.7, depth = 4.6, n = 7;
     const sy = Math.sin(alongYaw), cy = Math.cos(alongYaw);
     for (let k = 0; k < n; k++) {
       const t = (k / (n - 1) - 0.5) * depth;                          // along the road from the band centre
-      const wear = 0.85 + 0.13 * (((k * 37 + 11) % 7) / 6);           // length wobble, deterministic in k
-      white.push({ pos: [cx + sy * t, 0.03, cz + cy * t], yaw: alongYaw, scale: [barLen * wear, 0.02, 0.42] });
+      const wear = 0.86 + 0.12 * (((k * 37 + 11) % 7) / 6);           // length wobble, deterministic in k
+      const barW = 0.44 + 0.04 * (((k * 53 + 5) % 5) / 4);            // bar-width wobble, deterministic in k
+      white.push({ pos: [cx + sy * t, XW_Y, cz + cy * t], yaw: alongYaw, scale: [barLen * wear, 0.016, barW] });
     }
+    // STOP LINE: one solid transverse bar just OUTSIDE the crossing (where
+    // approaching traffic halts, farther from the intersection centre).
+    const so = outSign * (depth / 2 + 0.9);
+    white.push({ pos: [cx + sy * so, XW_Y, cz + cy * so], yaw: alongYaw, scale: [barLen * 0.98, 0.016, 0.52] });
   }
   // one intersection = up to four leg crossings (the standard box): cross street
   // A on both sides of B, cross B on both sides of A. legsA/legsB (+1/−1) prune
-  // legs that dead-end at a barricade. Centres derive straight from STREETS_W.
+  // legs that dead-end at a barricade; the sign is also the OUTWARD direction for
+  // that leg's stop line. Centres derive straight from STREETS_W.
   function crossBox(ix, iz, hA, yawA, hB, yawB, legsA = [1, -1], legsB = [1, -1]) {
     const sA = Math.sin(yawA), cA = Math.cos(yawA), sB = Math.sin(yawB), cB = Math.cos(yawB);
-    for (const s of legsA) xwalk(ix + sA * s * (hB + 1.6), iz + cA * s * (hB + 1.6), hA, yawA);   // cross A, flanking B
-    for (const s of legsB) xwalk(ix + sB * s * (hA + 1.6), iz + cB * s * (hA + 1.6), hB, yawB);   // cross B, flanking A
+    for (const s of legsA) xwalk(ix + sA * s * (hB + 1.6), iz + cA * s * (hB + 1.6), hA, yawA, s);   // cross A, flanking B
+    for (const s of legsB) xwalk(ix + sB * s * (hA + 1.6), iz + cB * s * (hA + 1.6), hB, yawB, s);   // cross B, flanking A
   }
   const yEW = Math.PI / 2, yNS = 0, clarkHalf = 8;                                       // Clark road = off ±8 (curb-to-curb)
   crossBox(clarkX(A.z), A.z, A.road / 2, yEW, clarkHalf, clarkYaw);                      // Addison × Clark
@@ -174,7 +200,7 @@ export function buildStreets() {
   crossBox(clarkX(W.z), W.z, W.road / 2, yEW, clarkHalf, clarkYaw);                      // Waveland × Clark
   crossBox(K.x,         W.z, W.road / 2, yEW, K.road / 2, yNS);                          // Waveland × Kenmore
   instMesh(new THREE.BoxGeometry(1, 1, 1), bmat(0xf3d24a), yellow);
-  instMesh(new THREE.BoxGeometry(1, 1, 1), bmat(0xeef0ee), white);
+  instMesh(new THREE.BoxGeometry(1, 1, 1), bmat(0xf2f2ec), white);
 
   // ------------------------- 4. STREET LAMPS ---------------------------
   const lamps = [];
