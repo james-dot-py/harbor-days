@@ -48,3 +48,31 @@ doors · Wrigley's Spearmint ad inside the L car.
   big hedge is "the city's Big Shoulder, we just keep it trimmed" —
   Millennium Park — Sandburg made horticulture. (source: task 039; Lurie
   refs, shoulder-hedge armature)
+- [proposed] ROUTE 66 BEGINS HERE sign at Adams by the lions — stand on it
+  and a tiny synth car-horn riff plays; journal line "got my kicks" — Art
+  Institute steps — the real eastern terminus is right there. (source: task
+  057; osm-grant landmarks 5401536922/13019692832)
+- [proposed] Lion nose-boop: E at a lion plinth buffs a bright patch on the
+  verdigris ("for luck — everyone does it") — Art Institute steps — the
+  local ritual. (source: task 057; lion refs)
+- [proposed] Tube-slide WHOOSH: climb the striped lighthouse, E rides the
+  curling steel slide down into the crater bowl (screenFx rush + a chibi
+  cheer) — Maggie Daley Slide Crater — the thing every kid queues for.
+  (source: task 057; 20151008 slide ref, owner aerial)
+- [proposed] Enchanted Forest string lights hum a faint music-box loop at
+  dusk; fireflies gather where you stand still — Maggie Daley play garden —
+  the park's secret-hour read. (source: task 057; 2022 lights ref)
+- [proposed] Ribbon lap counter: a fieldhouse attendant with a stopwatch
+  calls your time each full loop; journal at 3 laps — Maggie Daley Skating
+  Ribbon — the glide gets a goal. (source: task 057; owner aerial; 059)
+- [proposed] Lolla wristband guy outside the fence offering a "totally
+  real" wristband — the grounds are free anyway (recorded cozy liberty); he
+  opes if you decline — Butler Field entry — festival-week street truth.
+  (source: task 057; NEMA aerials)
+- [proposed] Port-a-potty queue physics: one door rattles, a chibi bursts
+  out relieved, the line shuffles one step — closed Columbus at Butler —
+  Chicago festival comedy, kept gentle. (source: task 057; NEMA aerial
+  potty strips)
+- [proposed] Metra ghost: the parked silver EMU in the Art Institute rail
+  trench sounds a far-off horn when you lean on the rim rail — Grant Park —
+  the trench is alive. (source: task 057; osm-grant Metra corridor)

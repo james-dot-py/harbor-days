@@ -451,3 +451,194 @@ spine x ≤ 57) and (b) the CROWN ELM BOSQUES
 [proposed], source refs cited there): bean polisher, fountain spout soak,
 Pritzker soundcheck, wedding shoot, bucket drummers, lawn picnic culture,
 Lurie gardener's "Big Shoulder", Millennium Station rumble grate.
+
+---
+
+# GRANT PARK EXPANSION — scout + layout addendum (task 057, 2026-07-12)
+
+Owner directive 2026-07-11: Art Institute + Butler Field with Lollapalooza
+live + all of Maggie Daley + the BP bridge fully built out. Layout law lives
+in GEOGRAPHY.md → GRANT PARK EXPANSION; tables in src/data/millennium.js
+(flag-staged, nothing live until builders 058–061 flip OPEN_GRANT). This
+addendum records sources, the perf plan, and the builders' waypoint plan.
+
+## Sources & provenance (expansion)
+
+- **osm-grant.json** — fetched 2026-07-12 via
+  `node tools/osm-fetch.mjs millennium-park --area grant-park --out osm-grant.json
+  --offset-dx -468.8 --offset-dz -2369.6` (named area + --out added to the
+  tool this task). 3,093 elements, bbox [41.876, −87.6265, 41.8865, −87.612];
+  EXPLICIT offsets = the recorded millennium provenance values, so both
+  extracts share ONE frame (BP way 25026666 lands identically in both —
+  verified). Lakefront anchor asserts all PASS. © OpenStreetMap contributors,
+  ODbL. REFERENCE ONLY — hand-model everything.
+- **Wikimedia (34 kept images added to manifest.json, licenses per-image)**:
+  AI lions ×6 + facade ×3 (incl. the 1900s public-domain postcard) ·
+  Lollapalooza-from-NEMA aerials ×2 (festival kit truth: truss stages, tent
+  rows, port-a-potty strips, delay towers, harbor full of sails) · Petrillo
+  ×4 (the shell = cream-tiled angular proscenium + banner truss + hung
+  arrays — already festival-dressed) · Maggie Daley ×11 (climbing walls
+  faceted-panel truth, lighthouse+tube-slide, play ship + rope nets, rope
+  suspension bridge + timber fort, string lights, X-crossed floodlight
+  masts) · Nichols ×4 (white boat-hull belly, mesh rails, river-stone bed) ·
+  Cancer Survivors' Garden ×4 (Corinthian column pair + black steel pavilion
+  frames). Junk culled: 3 gallery-interior Trading Room shots + 1
+  construction-era Nichols (files + manifest entries pruned; parity checked,
+  no Windows case collisions).
+- **Owner gold**: owner-skating-ribbon-northeast.webp is THE Maggie Daley NE
+  truth — ribbon lobes, central climbing-wall island, SW warming hut,
+  rockwork islands, skater traffic. refs/inbox checked 2026-07-12: empty.
+- No Google data in any form (mechanically denied; nothing fetched).
+
+## Measured truths worth repeating (they contradicted the 039-era guesses)
+
+- **The BP bridge does NOT launch from the shipped approach line.** The real
+  way starts at the Great Lawn SE corner (172.6, 834.9), runs NORTH along the
+  lawn rim, crosses Columbus at z ≈ 790, then double-hairpins down into
+  Maggie at (242.1, 806.9). The 039 brief's "launch (172.6, 787.9)" was a
+  bbox-corner misread. 058 rebuilds on the real alignment (BP_CROSSING_M).
+- **The Skating Ribbon is a named OSM way** (524270342, 66 pts) — no eyeball
+  needed; RIBBON_M carries it verbatim.
+- **LSD sits at x ≈ 340** through the expansion latitudes (not ~395): Columbus
+  → LSD is ~140 units, so Maggie Daley + Butler fit honestly at 1:2 with only
+  the NE-wedge fold (GEOGRAPHY liberties).
+- **Petrillo faces NE** (footprint bearing) — the crowd field and the whole
+  Lolla read hang off that.
+- The play garden's rooms are OSM-NAMED (Slide Crater, Enchanted Forest,
+  Cradle Nest, Harbor, The Sea, Lagoon, Swings, The Watering Hole) — builders
+  use the real names in journal/sign copy.
+- Buckingham Fountain measured (246–289 × 1157–1200): OUT of scope, recorded
+  as future growth — do not cameo it.
+
+## PERF PLAN — the cell doubles; this is the contract (058–062 inherit)
+
+Baseline (053 sign-off, unchanged by 056 within noise): millennium worst view
+**363 draws** (mp-crown-fountain-f1), budget **480** (tools/budgets.json —
+never raise). Two engine laws drive everything:
+
+1. **Instanced buckets are CELL-GLOBAL adds** (r128 InstancedMesh sets
+   frustumCulled=false; fogcull exempts them): every bucket in the cell root
+   is drawn in EVERY in-cell view. Bucket count == draw-call adds, exactly.
+2. **Everything else is bounded by the fog bubble** (fog.far ≈ 210 → ~220 m
+   view depth): merged statics and live meshes beyond it cost zero (fogcull),
+   IF their bounding spheres are small enough to fall wholly past the far
+   plane.
+
+The grown cell (~300 × 340) breaks the current `mergeCellStatic(root, 1e6)`
+single-bucket assumption ("compact, always fog-fully-inside" — no longer
+true). The plan:
+
+- **(P1) 2-D band the static merge** — 058's FIRST commit: cells.js
+  mergeCellStatic gains an optional x-band (key gains `floor(x/bandX)`);
+  millennium switches to bandW 240 / bandX 240. Buckets become ≤240×240
+  tiles → any view holds ≤4 in-frustum tiles per material and far tiles
+  fog-cull. Regression gate: the 14 existing mp waypoints must census within
+  +10 of current.
+- **(P2) One shared instanced POOL for all new builders** — millennium/index.js
+  grows `poolInstanced(geo, records)`: sub-builders enqueue, index emits ONE
+  InstancedMesh per (geometry × color) after all builders run. Mandatory for
+  058–061 repeats (trees, lamps, X-masts, fence posts, flags, holds, crowd
+  bodies, garlands); reuse cached toon() colors so cross-zone repeats fold.
+- **(P3) Instanced-bucket ALLOWANCE ledger** (cell-global; every view pays;
+  062 audits the ledger):
+  | Task | New buckets ≤ |
+  |---|---|
+  | 058 bridge + Maggie | 22 |
+  | 059 ribbon skating | 4 |
+  | 060 Art Institute (+Nichols) | 12 |
+  | 061 Butler + Lolla | 25 |
+  Total ≤ 63 → the old worst view rises to ≈ 426; +~10 of P1 tile splits and
+  live meshes keeps EVERY old view ≤ ~440, headroom 40. Deck treads, parapet
+  shingle bands, seat rows etc. go to the MERGE pool (mergeCellStatic /
+  kit-style emitMerged), not instancing.
+- **(P4) The named worst-case sightline: `mp-lolla-rail`** — crowd rail
+  (~252, 990) looking SW at the stage: full festival kit + crowd buckets +
+  closed Columbus + AI east masses within the bubble + the whole instanced
+  floor. 061 must census THIS view before any dressing pass and keep it
+  ≤ 480 with ≥ 20 headroom. Second candidate `mp-bp-crossing` f2 (crest
+  looking east over all of Maggie): 058 censuses it on landing the zone.
+- **(P5) Crowd law** (061): nearest rows = real bumpable chibis (≤10 live,
+  NPC-cull 145 m does the rest); the mass = per-color instanced swaying crowd
+  via matrix re-stamp (no per-frame allocs, gameday precedent); baked LOD
+  twins beyond. Play-garden kids (058): ≤6 live + baked twins.
+- **(P6) Fog stays the wall**: cell fog register unchanged; no definePlace
+  push that widens the bubble. Money shots must compose inside ~200 m — the
+  waypoint plan below already does.
+- Determinism: all new builders use LOCAL mulberry32 seeds (pack law); the
+  expansion consumes ZERO shared world rng — no lakefront drift possible.
+  Single-file build + both inputs re-verified per task as always.
+
+## WAYPOINT PLAN (builders finalize stands/framings + wire expects in their
+own commits — the 040 pattern; axis doctrine: down-the-deck on bridges,
+oblique on tall pairs, subjects 25–40° off-axis)
+
+- **mp-bp-crossing** (058) — the bridge crossing read. f0 stand ON the S-hook
+  (231.5, 800) yaw ≈ 2.8 dist 5 (down-deck: hairpin sweep + Columbus trench
+  below + Maggie ahead); f1 crest (203, 791) yaw ≈ −1.35 dist 5.5 (west:
+  deck curve + ribbon-petal crown + cliff); f2 (226, 791.5) yaw ≈ 0.9 dist 5
+  (east: descent into the landing plaza, X-masts + fieldhouse). Expect draft:
+  "A wood-plank deck snakes over a sunken roadway between brushed-steel
+  shingle parapets, hairpins twice as it drops, and lands in a plaza beside
+  a glassy fieldhouse with white criss-cross light masts."
+- **mp-ribbon** (058 bed / 059 re-judged with ice + skaters) — f0 island
+  (252, 757) yaw ≈ −2.2 dist 6 (the SW lobe sweeping around the rockwork,
+  wall A shoulder in-frame); f1 ON the ribbon (224, 760) yaw ≈ 0.5 dist 5
+  (down-path switchback read); f2 (247, 772) yaw 0 dist 7 (north across the
+  loops toward fieldhouse + giants). Judge content against the owner aerial
+  (lobes, island, hut), never the overhead angle.
+- **mp-climbing-walls** (058) — f0 (240, 756) yaw ≈ 1.0 dist 5.5 (wall A
+  faceted face + holds, truss edge of wall B, towers behind — the 20151008
+  composition at chibi scale).
+- **mp-play-garden** (058) — f0 (285, 852) yaw ≈ −0.7 dist 6 (ship + rope
+  nets over wave rubber); f1 (295, 858) yaw ≈ −0.6 dist 6.5 (lighthouse +
+  tube slide + crater, giants NW behind — the 20151008 slide composition);
+  f2 (300, 833) yaw ≈ 0.4 dist 5 (Enchanted Forest string lights at dusk).
+- **mp-cancer-survivors** (058) — f0 (330, 760) yaw ≈ π dist 6 (column pair +
+  pavilion frames + beds, giants-east band behind).
+- **mp-lions** (060) — f0 (51.5, 981) yaw ≈ 0.55 dist 7 (both lions + steps +
+  banners + pediment three-quarter); f1 (50, 971) yaw 1.57 dist 8 (head-on
+  portico axis from the spine); f2 (53, 966.5) yaw ≈ 0.95 dist 4.5 (north
+  lion close: verdigris + plinth + urns). Camera trap: stands hug the spine —
+  Michigan road band is scenery void west of x 48.
+- **mp-south-garden** (060) — f0 (74, 1020) yaw ≈ −2.4 dist 6 (bosque grid +
+  Fountain of the Great Lakes against the annex wall).
+- **mp-monroe-crossing** (060) — f0 (52.5, 899) yaw ≈ π dist 6 (the closed
+  street: fence + LOLLA LOAD-IN + the AI rising beyond — the arrival read).
+- **mp-nichols** (060 if walkable; else judged as scenery from f0 only) —
+  f0 (112, 852) yaw ≈ 2.5 dist 6 (hull belly curving up toward the Modern
+  Wing); f1 ON-deck (118.2, 885) yaw ≈ π dist 4.5 near-level (down-deck to
+  the Bluhm landing — L-car doctrine).
+- **mp-lolla-rail** (061, THE census view) — f0 (252, 990) yaw ≈ 2.55 dist 6
+  (over shoulders to the dressed Petrillo: truss + arrays + video boards +
+  stage chibis); f1 (245, 1012) behind the rail yaw ≈ 0.6 dist 5 (stage-side
+  reverse over the crowd sea + flags, dusk).
+- **mp-lolla-crowd** (061) — f0 (270, 962) yaw ≈ 2.4 dist 7 (the swaying
+  instanced field + totems + booth); f1 (240, 901) ON closed Monroe yaw ≈
+  −1.57 dist 6 (entry arch + LINEUP poster + truck row).
+- Minimum judged set for 062's addendum: all of the above once green, PLUS
+  re-judging the 14 original mp-* waypoints (no regression).
+
+## Walkability contract (issue-017 extension)
+
+walkableM answers definitively over the WHOLE grown clamp the moment any flag
+flips (isWater class-guard already covers hard cells). Every new WALK family
+ships walkprobe rules + expects IN THE BUILDER TASK that flips it live;
+tools/mp-gridsweep.mjs now sweeps CLAMP_FULL_M (pre-flip: the staged area is
+uniformly non-walkable → zero holes by construction; post-flip it audits the
+real net). Elevator law hotspots the sweep must watch: the BP chain's north
+run beside the re-split Columbus rim walk (buffers ≥ 1.4), the AI portico
+landing (urn beds seal the open stair flanks), the Nichols carve-outs, and
+the rink group (unchanged).
+
+**057 verification of the staged data (tools/tmp-grant-verify.mjs, keep for
+062):** flags-off = 0 diffs vs HEAD over 143,865 walkable/surfaceY/kind
+samples, WALK_M count + clamp/map/spawn identical. All-flags-on = 1 m flood
+fill from spawn reaches ALL 60,784 walkable cells (no islands: bridge, ribbon
++ climbing island, play garden, CSG, AI forecourt/steps/landing, gardens,
+Bluhm terrace, Butler + closed streets all connected); ZERO adjacent-walkable
+steps > 0.6 (elevator law); ZERO new interior holes beyond (a) the 39
+pre-existing blessed rink/approach-buffer candidates and (b) 38 documented
+**chain-ledge candidates** — non-walk buffer slivers hugging the elevated
+BP/Nichols deck edges at bends and flanks (blocked, never water; the deck
+meshes cover them visually; dominated by the Nichols west flank x≈116 column).
+058/060 review-and-bless these exactly as 048 blessed the rink set.

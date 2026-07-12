@@ -8,7 +8,10 @@
 import * as MP from '../src/data/millennium.js';
 
 const STEP = 2;
-const C = MP.CLAMP_M;
+// Sweep the FULL Grant-expansion box (task 057): pre-flip the staged area is
+// uniformly non-walkable (zero holes by construction); once builders flip
+// OPEN_GRANT flags the same sweep audits the real net.
+const C = MP.CLAMP_FULL_M || MP.CLAMP_M;
 const xs = [], zs = [];
 for (let x = Math.floor(C.xMin); x <= Math.ceil(C.xMax); x += STEP) xs.push(x);
 for (let z = Math.floor(C.zMin); z <= Math.ceil(C.zMax); z += STEP) zs.push(z);

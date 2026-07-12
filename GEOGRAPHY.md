@@ -591,4 +591,168 @@ kiosk) are builder colliders, exactly like Wrigleyville statues.
   Crown SW → Lurie SE behind its hedge → bridge snaking E from the lawn's SE).
 - BP launch pulled ~6 units south of the osm way start; Exelon south pair
   pulled ~6 north off the Monroe walk; Stock Exchange Arch sits in the south
-  backdrop band (osm 175, 908 is inside the Monroe roadway).
+  backdrop band (osm 175, 908 is inside the Monroe roadway). **(BOTH SUPERSEDED
+  by the Grant expansion when its flags flip: the bridge takes its REAL
+  lawn-SE launch, and the Arch moves to its REAL spot — see below.)**
+
+## GRANT PARK EXPANSION (task 057 layout; builders 058–061; flags in millennium.js)
+
+**Owner directive 2026-07-11: the cell grows into Grant Park proper — the Art
+Institute, Butler Field with Lollapalooza live, ALL of Maggie Daley Park, and
+the BP bridge fully built out.** Same park-local frame; every coordinate below
+cites `refs/millennium-park/osm-grant.json` (fetched with the EXPLICIT
+millennium offsets dx −468.8 / dz −2369.6, so the two extracts share one frame
+exactly — provenance in that file).
+
+**STAGING LAW: nothing below is live until its builder flips its flag** in
+`src/data/millennium.js` `OPEN_GRANT` (`maggie` → 058, `ribbonIce` → 059,
+`artInstitute` [+`nichols`] → 060, `butler` → 061). With all flags false the
+cell is byte-identical to the pre-057 world: same WALK_M order, same clamp,
+same minimap. Clamp/map growth is computed from the flags (east needs maggie
+or butler; south needs artInstitute or butler). Data tables ship in 057;
+meshes ship with the flag flip; walkprobe/gridsweep read the same flags.
+
+### Frame additions (osm-grant.json street medians)
+| Street line | In-game | Note |
+|---|---|---|
+| Adams St axis (the lions) | **z 972** | E Adams dead-ends at Michigan (osm x 47.5); AI portico centers here — a paving break-line on the spine like Washington/Madison |
+| Jackson Dr (new S frame) | **z 1038** | road band z 1032–1044; scenery, never walkable |
+| Monroe Dr east of Michigan | z 897 | road band z 894–908 continues east to x 340 (real east-end bend to meet LSD trimmed — liberty) |
+| Randolph Dr east of Columbus | z 701 | scenery band extends to x 352 |
+| DuSable Lake Shore Dr (new E frame) | **x 340** | road band x 332–346, z 694–1044; measured x 339–342 for z 770–1300; STRAIGHTENED north of z 770 (the NE-wedge fold, liberty below) |
+| Columbus south | x 195 | road band extends z 908 → 1044 (to Jackson) |
+
+Grown extents when fully open: geometry ≈ x 6…362, z 680…1080; player clamp
+x 44…340, z 700…1040. z 680 hard floor unchanged (billboard law). Minimap
+bounds MAP_FULL x0 28, z0 676, 336 × 412.
+
+### THE CROSSING LAW (how zones connect — festival street closure)
+Roads stay scenery and uncrossable EXCEPT: **Lollapalooza closes E Monroe Dr
+(Michigan → LSD) and S Columbus Dr (Monroe → Jackson)** — real festival-week
+truth; the closed streets are walkable curb-to-curb (the Wrigleyville game-day
+register, festival crowd-fence + branded arches instead of CPD barricades).
+The Michigan spine crosses closed Monroe at grade (x 48–57) to reach the Art
+Institute; Maggie Daley's south rim gates onto closed Monroe; Butler Field
+fronts both closed streets. **Columbus NORTH of Monroe stays open scenery — the
+BP bridge remains the only way into Maggie Daley from the park (its whole
+point).** Closure segments gate: x 48–189 of Monroe with `artInstitute`;
+x 200–336 of Monroe, all of closed Columbus, and the south-rim gate knits with
+`butler`. Diegesis pre-061: "LOLLA LOAD-IN" (cones, a pallet, the fence going
+up — 060 dresses its segment).
+
+### Zone A — BP CROSSING, fully built out (058; flag `maggie`)
+- **The REAL serpentine** (osm way 25026666, 64 pts, verbatim in both osm
+  extracts): launches at the Great Lawn's SE corner **(172.6, 834.9)**, runs
+  NORTH hugging the lawn's east rim (first wiggle out to x 179.4 at z 828,
+  back to x 176.3 at z 818), bends EAST at z ≈ 796, crosses Columbus at
+  z ≈ 790–792 (deck y 5 over the road), then the famous **double-hairpin
+  S-hook** (out to x 224.8 z 798 → north to z 787.9 → back south through
+  (231.3, 801.7)) descends into Maggie Daley, landing at **(242.1, 806.9) →
+  grade apron (247, 807.5)**. Hand-fit 28-node curve + y profile in
+  `BP_CROSSING_M` (millennium.js); 058 sweeps treads/parapets by CatmullRom
+  tangent (the 048 contour law) and REPLACES the shipped simplified deck +
+  approach (BP_BRIDGE_M stays in data for the pre-flip world).
+- Walkable = the segQ chain over the same nodes (halfW 2.6), ramp-only at both
+  ends; flank rules: lawn SE quad shrinks to the launch esplanade
+  (168–186 × 833–846), a planted non-walk buffer under the rising north run,
+  Columbus rim walks re-split for the new overflight (N: 713–784; S:
+  x 185.8–189 z 808–846 then full-width 846–886). Slope compressed like the
+  shipped approach (recorded).
+- Columbus below reads as a road TRENCH passing under (visual only).
+
+### Zone B — MAGGIE DALEY PARK, all of it (058 terrain/park + 059 ice; flags `maggie`, `ribbonIce`)
+Bounds x 198–338, z 699.5–892 (osm relation 224231352, west of straightened
+LSD). The rooftop-park's rolling topography reads as planted landform MOUNDS;
+walkable ground stays park grade y 0 (liberty).
+| Feature | Position (osm-cited) | Read |
+|---|---|---|
+| Fieldhouse | mass x 243–285, z 712–727.5 (osm 764227071 anchors the Randolph front) | long low glassy park-district building; entry lawn south |
+| **Skating Ribbon** | closed 66-pt loop x 222.2–279, z 731.7–770.9 (osm way 524270342, VERBATIM in RIBBON_M) | ~250 m serpentine path, halfW 2.7, looping the climbing walls; 058 builds the BED (paved pre-ice + rockwork rims + X-mast lights); 059 flips `ribbonIce` → kindAt 'ice' on the strip, 049 glide verbatim |
+| **Climbing walls** (not in OSM; owner aerial + 20151008 ref) | wall A x 242–258, z 744–752, h 12 (faceted crescent); wall B x 258.5–268, z 756.5–763.5, h 9 (prow) | gray faceted panels + candy-colored holds + steel truss backs; stand on the ribbon's island (walkable, 6 rects sealing both walls — 052 law); climbable only if it reads honestly (058's call) |
+| **Play Garden** (osm rooms, real names) | zone x 252–316, z 806–864: Cradle Nest 254.5–267 × 840–848 · Harbor SHIP 267.6–276 × 841–849 · The Sea 270.6–293 × 812.5–835 · Lagoon 278–285 × 820–827 · Watering Hole splash pad 278–282 × 815–819 · Enchanted Forest 295–313 × 808–829 · Swings 279–286 × 836–842 · **Slide Crater 294.5–314 × 838–862 w/ the LIGHTHOUSE (303, 849)** | chibi-heaven: red/blue play ship + rope nets, rope suspension bridge + timber fort tower (286–292 × 819–825), red-striped lighthouse + curling steel tube slide + crater bowl, string-lit mini-forest, blue-green wave rubber ground; 11 walk rects seal ship/lighthouse/tower |
+| **Cancer Survivors' Garden** | x 321.7–338.8, z 710.8–789 (osm 10601819) | terraced formal garden on the LSD overlook rim: the two real **Federal Building Columns** (327.4, 714.5) / (331.9, 714.5), two black steel PAVILION frames (~(329.5, 746) / (329.5, 772), carved from the walk), crabapple bosque, beds |
+| Tennis pair (RELOCATED — NE-wedge fold) | pads x 296–318, z 713–727 | real courts sit in the folded wedge (osm x 393–414); moved to the north lawn between fieldhouse and CSG, north-rim program order preserved (fieldhouse → tennis → columns → CSG) |
+| Landing plaza + paths | plaza 243–258 × 800–816 at the bridge apron; E-rim promenade x 201–209 full height; fieldhouse esplanade x 209–323 × 728–736; south rim x 201–338 × 878–888; meadow connectors | the aerial's path net simplified to rects/chains in WALK_GRANT |
+| Signature fixtures | white X-crossed floodlight masts (owner aerial + 2022 lights ref) | Maggie's lamp register — NOT the park's quad-globes |
+
+### Zone C — ART INSTITUTE block (060; flag `artInstitute`, sub-flag `nichols`)
+Masses simplified from osm relation 1870546 (105-pt outline):
+| Mass | Rect | Read |
+|---|---|---|
+| **West block (1893 Allerton)** | x 59–94, z 946–995, h 17 (pediment 19) | beaux-arts: rusticated base, arched loggia w/ hanging exhibition banners (invented shows), THE ART INSTITVTE OF CHICAGO frieze, artist-name band |
+| Portico + grand steps | portico proud x 57.2–59.5 × z 963.5–978 (Adams axis 972); steps x 54.2–57.2 rampX y 0→1.9; forecourt apron x 50–54.2 × 958–984; urn beds (non-walk) flank the steps | steps SITTABLE (lunch pair); doors honest non-doors + sandwich board |
+| **THE LIONS** | plinth centers **(54.4, 962.4)** north "on the prowl" and **(54.4, 979.4)** south "in an attitude of defiance" (r 1.9 colliders sealing the plinths) | verdigris green-bronze, Caray-care meshes, subtly different stances — the single most-checked detail |
+| North Garden | x 53–81, z 906–941 (osm 235227858) | hedged sculpture garden: Flying Dragon (71.8, 930.2) red Calder · Large Interior Form (61.4, 914) · Cubi VII (67.6, 919.4) — mini-cameo register |
+| South Garden | x 55–95, z 999–1032 (osm 235216579) | sunken hawthorn bosque grid + **Fountain of the Great Lakes** basin (81.9–86.5 × 1009–1015.5, carved 4-rect) against the south annex wall |
+| Rail trench | x 96–124, z 909–1032, floor y −3 | open Metra cut (catenary, a parked silver EMU ~z 1000); THE GRADE CARPET MUST BE CARVED (041 pit law); crossed by the Gunsaulus waist x 94–125 × z 964.5–974 (h 12) and the Modern Wing |
+| **Modern Wing** | x 121–171, z 909–930, h 14 (+ flying-carpet canopy) | white limestone + glass; Bluhm terrace x 124.8–132.4 × 909.5–922 at y 13 = the Nichols landing |
+| East campus | McKinlock x 125–147 × 973–1031 · SE block x 147–175 × 980–1027 · Columbus pavilion x 168–180.3 × 942–980 + pool strip x 177.4–183 × 954–985 | quieter masses; east rim walk x 181–189 z 908–1032 |
+| **Stock Exchange Arch — MOVED TO ITS REAL SPOT** | freestanding at **(184, 935)**, facing Columbus | supersedes the south-backdrop cameo (BACKDROP_M.south retires when the flag flips — the real zone replaces it) |
+| **Nichols Bridgeway** (sub-flag `nichols`) | osm way 90707301: (117.4, 839.7) → (122.7, 925.9); chain y 0→13, halfW 1.6, landing on the Bluhm terrace (walkable pad, honest door) | white boat-hull belly over a river-stone bed; walkable ONLY with the recorded carve-outs (Monroe sidewalk slot x 115.8–122.2 + bypass, allee SE trim, lawnW west trim) — 060 flips or ships scenery and says which |
+| Michigan cliff extension | band x 6–30 grows z 935 → 1080: BORG-WARNER z 984 (glass) · **SYMPHONY CENTER z 1002** (ORCHESTRA HALL) · **RAILWAY EXCHANGE z 1023** (white terra-cotta, rooftop SANTA FE sign, self-lit) · McCORMICK BLDG z 1072 (edge) | the cliff faces the lions |
+| Route 66 | BEGIN sign at the spine near (48.5, 968) (osm 33.4, 967.5 across Michigan — pulled to the park curb, liberty) | delight seed: "ROUTE 66 BEGINS HERE" |
+
+### Zone D — BUTLER FIELD + LOLLAPALOOZA (061; flag `butler`)
+Field x 198.6–326, z 900.7–1032.6 (osm 139013800).
+- **The stage IS Petrillo** (osm 210671695: x 214.4–229.7, z 1002–1017, mouth
+  facing NE — real bearing): the permanent shell wearing festival dress
+  (banner truss frame, line arrays, side video boards) — RECORDED FUSION
+  LIBERTY (real Lolla erects temp stages; the game hangs the festival on the
+  field's real shell — geographically honest, evocation-stronger).
+- Crowd field fans NE of the mouth (~x 225–300, z 940–1005): instanced swaying
+  crowd, real bumpables at the rail (048 law); sound booth (258–266 × 968–976,
+  carved) + dance circle; Serra's **Reading Cones** stay at their real
+  (262.7, 912.7).
+- Dressing per the NEMA-aerial kit: white tent rows east edge, food-truck row
+  on closed Monroe, the honest port-a-potty row on closed Columbus's east
+  curb, perimeter flag garlands, entry arches on both closed streets, LINEUP
+  POSTER at the Monroe/Columbus corner (~(206, 910); all-Chicago pun lineup,
+  no real artists).
+- LSD scenery road x 332–346 with a **lake-glint + sail-silhouette backdrop
+  band beyond (x 348–362)** — downtown finally shows its lake (Monroe Harbor).
+- Walks: field lawn (Petrillo + booth carved), closed Monroe + Columbus, LSD
+  rim walk x 324–331, three fence-gate knits from Maggie's south rim.
+
+### Backdrop growth
+- **Giants band extends EAST over Maggie's north rim** (flag maggie), z 680–692,
+  order preserved, register heights (~0.55×): 340 ON THE PARK x 274 ·
+  THE BUCKINGHAM x 308 · OUTER DRIVE EAST x 352 (white scalloped curve) ·
+  HARBOR POINT x 385 (dark rounded; osm x 440, pulled in-frame). Aqua stays
+  out (real z ≈ 596 — under the billboard floor, recorded).
+- **East of LSD = the LAKE**, not towers (flag maggie/butler): harbor-glint
+  band x 348–362, moored-sail silhouettes; Peanut Park strip compressed into
+  it (recorded).
+- **South backdrop** (flag artInstitute/butler) z 1050–1080: quiet South Loop
+  band (trees + low streetwall hints). **Buckingham Fountain is measured at
+  (246–289, 1157–1200) and deliberately OUT — future growth south**, never a
+  squished cameo.
+
+### Walkability (extends the WALK_M law; all in millennium.js, flag-gated)
+Elevated first: the BP_CROSSING chain (replaces the three shipped deck quads
+when maggie flips) and the Nichols chain (nichols). Then y-0: Maggie's rect
+net (rim promenades, esplanades, ribbon strip + island, play-garden 11-rect
+set, CSG 7-rect set, landing plaza, connectors, tennis pad), the AI set
+(spine extension z 908–1032, Monroe crossing, forecourt apron + steps ramp +
+portico landing [flanked by non-walk urn beds — no open stair sides], North/
+South Gardens with data carves, east rim), the Butler set (field minus
+Petrillo/booth, closed streets, LSD rim, gate knits). Every new building
+footprint in a walk area is CARVED IN DATA (052 law — no circular-collider
+sealing); small statues/urns/lions stay collider-pattern. kindAtM: 'ice' on
+the ribbon strip only when `ribbonIce`. mp-gridsweep sweeps CLAMP_FULL_M.
+
+### Standing liberties (Grant expansion — deliberate, keep)
+- **LSD straightened to x 340 north of z 770** and the park's NE wedge folded
+  west (the real boundary flares to x ~450 at Randolph; the wedge's tennis
+  pair relocates to the north lawn) — the Michigan-straightening register.
+- **Festival street closure as the crossing mechanism** (Monroe Michigan→LSD +
+  Columbus Monroe→Jackson walkable; fence + arches, no CPD theatrics) — and
+  Columbus north of Monroe never crossable at grade: the bridge is the way in.
+- **Petrillo-as-Lolla-stage fusion**; grounds free to wander (no wristband).
+- **Rooftop-park topography as visual mounds**; walkable ground stays y 0.
+- **Bridge slope compressed** (real ~5% → game ramp register); the real launch
+  curl and double-hairpin kept.
+- **Monroe Dr's east-end northward bend trimmed** (road band stays straight).
+- **Route 66 BEGIN sign pulled to the park curb** (real sign hangs across
+  Michigan at Adams).
+- **Buckingham Fountain, Hutchinson Field, Peanut Park = FUTURE GROWTH south/
+  east** — explicitly out of the expansion, no cameo compression.

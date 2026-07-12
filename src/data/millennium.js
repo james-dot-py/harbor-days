@@ -102,6 +102,11 @@ export const RINK_M = {
 export function kindAtM(x, z) {
   const I = RINK_M.ice;
   if (x >= I.x0 && x <= I.x1 && z >= I.z0 && z <= I.z1) return 'ice';
+  // the Maggie Daley Skating Ribbon (059 flips OPEN_GRANT.ribbonIce; the
+  // strip segs are defined with the walkability tables below — call-time
+  // reference, so declaration order is fine)
+  if (OPEN_GRANT.ribbonIce)
+    for (const q of RIBBON_SEGS_M) if (inQuadM(q, x, z)) return 'ice';
   return null;
 }
 
@@ -247,6 +252,212 @@ export const BACKDROP_M = {
            archX: 175 },                                                    // Stock Exchange Arch cameo
 };
 
+// =====================================================================
+// GRANT PARK EXPANSION (task 057 layout; GEOGRAPHY.md → GRANT PARK
+// EXPANSION is the law; refs/millennium-park/osm-grant.json is the cite).
+// STAGED: nothing here is live until a builder flips its OPEN_GRANT flag —
+// with all flags false this module behaves byte-identically to pre-057
+// (same WALK_M order, same clamp, same minimap). Builders flip:
+//   maggie       → 058 (BP crossing rebuilt on the real curve + all of
+//                  Maggie Daley; east clamp/backdrops grow)
+//   ribbonIce    → 059 (kindAtM 'ice' on the ribbon strip; 049 glide)
+//   artInstitute → 060 (AI block + gardens + cliff extension; south grows)
+//   nichols      → 060 sub-flag, ONLY if the bridgeway ships walkable
+//   butler       → 061 (Butler Field + Lolla + street closure east/south)
+// =====================================================================
+export const OPEN_GRANT = {
+  maggie: false, ribbonIce: false, artInstitute: false, nichols: false, butler: false,
+};
+const G = OPEN_GRANT;
+
+// Scenery street extensions (builders draw these when their flag flips;
+// STREETS_M above stays untouched for the pre-flip world).
+export const STREETS_GRANT = {
+  monroeEast:  { z: 897, z0: 894, z1: 908, x0: 216, x1: 340 },  // to LSD (east-end bend trimmed — liberty)
+  columbusS:   { x: 195, x0: 190, x1: 200, z0: 908, z1: 1044 }, // to Jackson
+  randolphE:   { z: 701, z0: 692, z1: 704, x0: 216, x1: 352 },
+  jackson:     { z: 1038, z0: 1032, z1: 1044, x0: 32, x1: 352 },// new S frame (scenery, never walkable)
+  lsd:         { x: 340, x0: 332, x1: 346, z0: 694, z1: 1044 }, // new E frame; straightened N of z 770 (NE-wedge fold)
+  adamsAxis:   972,                                             // paving break-line on the spine (the lions' axis)
+};
+
+// THE CROSSING LAW: Lolla closes Monroe (Michigan→LSD) + Columbus (Monroe→
+// Jackson) — walkable curb to curb, festival fence + arches (no CPD).
+// Columbus NORTH of Monroe stays open scenery: the BP bridge is the only
+// way into Maggie Daley from the park. Segments gate per GEOGRAPHY.
+export const CLOSURE_M = {
+  monroeWest: { x0: 48, x1: 190, z0: 894, z1: 908 },   // artInstitute (LOLLA LOAD-IN register pre-061)
+  monroeEast: { x0: 200, x1: 336, z0: 894, z1: 908 },  // butler
+  columbus:   { x0: 190, x1: 200, z0: 894, z1: 1042 }, // butler
+  arches: [{ x: 52, z: 901, face: 'S' }, { x: 240, z: 901, face: 'W' }, { x: 195, z: 925, face: 'N' }],
+  lineup: { x: 206, z: 910 },                          // the all-Chicago pun poster (061)
+};
+
+// ---------------- Zone A: BP CROSSING (058, flag maggie) ---------------
+// The REAL serpentine (osm way 25026666, verbatim in both extracts): lawn-SE
+// launch → north along the lawn rim (first wiggle) → east over Columbus at
+// z≈790 (y 5) → the double-hairpin S-hook → grade at (247, 807.5) in Maggie.
+// Hand-fit 28 nodes [x, z, y]; 058 sweeps treads/parapets by CatmullRom
+// tangent (048 contour law) and REPLACES the shipped BP_BRIDGE_M deck.
+// Slope compressed like the shipped approach (recorded liberty).
+export const BP_CROSSING_M = {
+  deckW: 5.2, parapetH: 1.4, halfW: 2.6,
+  nodes: [
+    [172.6, 834.9, 0],   [176.5, 831.9, 0.25], [179.4, 827.9, 0.6],
+    [177.5, 822.5, 1.05],[176.3, 818.0, 1.4],  [178.5, 815.0, 1.75],
+    [181.2, 811.5, 2.1], [180.5, 806.0, 2.55], [181.0, 801.0, 3.0],
+    [183.5, 796.0, 3.5], [188.4, 792.0, 4.1],  [193.3, 790.2, 4.6],
+    [199.6, 789.8, 5.0], [206.5, 791.6, 5.0],  [212.4, 795.9, 4.8],
+    [217.5, 802.8, 4.5], [222.5, 802.0, 4.2],  [224.8, 797.5, 3.9],
+    [225.5, 791.5, 3.5], [228.6, 788.2, 3.2],  [232.5, 789.0, 2.9],
+    [234.6, 792.5, 2.6], [232.6, 797.5, 2.2],  [231.4, 801.7, 1.9],
+    [232.8, 805.5, 1.5], [236.5, 806.3, 1.1],  [242.1, 806.9, 0.5],
+    [247.0, 807.5, 0],
+  ],
+  launchPad: { x0: 168, x1: 186, z0: 833, z1: 846 },   // the shrunk lawn-SE esplanade
+  // Columbus rim re-split for the new overflight (replaces the 788/818 gap):
+  rimN: { x0: 181, x1: 189, z0: 713, z1: 784 },
+  rimS: [{ x0: 185.8, x1: 189, z0: 808, z1: 846 }, { x0: 181, x1: 189, z0: 846, z1: 886 }],
+};
+
+// ---------------- Zone B: MAGGIE DALEY (058 + 059) ---------------------
+// Bounds x 198–338, z 699.5–892 (osm rel 224231352 west of straightened
+// LSD). Rooftop-park topography = visual mounds; walk grade stays y 0.
+export const MAGGIE_M = {
+  bounds: { x0: 198, x1: 338, z0: 699.5, z1: 892 },
+  fieldhouse: { x0: 243, x1: 285, z0: 712, z1: 727.5, h: 7 },       // osm 764227071 (Randolph front)
+  tennis: { x0: 296, x1: 318, z0: 711.5, z1: 728 },                 // RELOCATED (NE-wedge fold liberty; real osm x 393–414)
+  // climbing walls (owner aerial + 20151008 ref; not in OSM) — island masses:
+  walls: [
+    { x0: 242, x1: 258, z0: 744, z1: 752, h: 12, read: 'faceted crescent' },
+    { x0: 258.5, x1: 268, z0: 756.5, z1: 763.5, h: 9, read: 'prow' },
+  ],
+  hut: { x: 232, z: 762 },                                          // SW-lobe warming hut (aerial)
+  landing: { x0: 243, x1: 266, z0: 800, z1: 816 },                  // bridge apron plaza
+  csg: {                                                            // Cancer Survivors' Garden (osm 10601819)
+    bounds: { x0: 321.7, x1: 338.8, z0: 710.8, z1: 789 },
+    columns: [[327.4, 714.5], [331.9, 714.5]],                      // the real Federal Building Columns
+    pavilions: [{ x0: 326, x1: 333, z0: 743, z1: 749 }, { x0: 326, x1: 333, z0: 769, z1: 775 }],
+  },
+  play: {                                                           // the Play Garden (osm-NAMED rooms)
+    zone: { x0: 252, x1: 316, z0: 806, z1: 864 },
+    rooms: {
+      cradleNest: { x0: 254.5, x1: 267, z0: 840, z1: 848 },
+      ship:       { x0: 267, x1: 277, z0: 840, z1: 849 },           // 'Harbor' — red/blue play boat + rope nets
+      sea:        { x0: 270.6, x1: 293, z0: 812.5, z1: 835 },
+      lagoon:     { x0: 278, x1: 285, z0: 820, z1: 827 },
+      wateringHole: { x0: 277.8, x1: 282.2, z0: 815, z1: 819 },     // splash pad (walkable wet, Crown register)
+      enchantedForest: { x0: 295, x1: 313, z0: 808, z1: 829 },      // string lights at dusk
+      swings:     { x0: 279, x1: 286, z0: 836, z1: 842 },
+      slideCrater:{ x0: 294.5, x1: 314, z0: 838, z1: 862 },
+    },
+    tower:      { x0: 286, x1: 292, z0: 819, z1: 825, h: 8 },       // timber fort + rope suspension bridge
+    lighthouse: { x: 303, z: 849, r: 3.2, h: 11 },                  // red/white stripes + curling tube slide
+  },
+  xmasts: [[214, 744], [246, 776], [272, 730], [258, 850], [300, 800]], // white X-crossed floodlight masts (signature)
+};
+// The Skating Ribbon (osm way 524270342 VERBATIM, closed loop, 66 pts).
+// 058 builds the BED (paved pre-ice + rockwork rims); 059 flips ribbonIce →
+// kindAtM 'ice' over the strip and the 049 glide just works.
+export const RIBBON_M = { halfW: 2.7, loop: [
+  [276.1,738.9],[276.9,737.5],[277.1,736],[276.8,734.5],[276,733.2],[274.9,732.2],
+  [273.4,731.7],[273,731.7],[271.9,731.7],[270.4,732.3],[268,734],[265.3,735.2],
+  [262.3,735.5],[259.4,734.9],[257.3,734.1],[255.1,733.9],[253.6,734.1],[252.9,734.3],
+  [250.9,735.3],[249.3,736.8],[248,739.5],[247.5,741.9],[247.2,746.4],[246.1,749.4],
+  [244.2,751.8],[241.5,753.6],[238.4,754.9],[234.9,754.9],[230.4,753.5],[228.1,753.5],
+  [225.9,754.2],[224,755.6],[222.8,757.6],[222.2,759.8],[222.2,762.1],[223,764.3],
+  [224.5,766.1],[226.4,767.3],[228.6,767.9],[230.9,767.8],[236.3,766],[241,763],
+  [244,761.5],[247.4,760.9],[250.8,761.1],[253.2,761.9],[255.3,763.4],[256.5,764.8],
+  [256.9,765.4],[258.9,768.4],[262.5,770.2],[266.5,770.9],[270.5,770.6],[274.1,768.6],
+  [276.9,765.6],[278.6,761.9],[279,760],[278.8,758],[278.2,756.2],[277,754.6],
+  [274,750.4],[272.8,748.3],[272.3,745.9],[272.6,743.5],[273.6,741.3],[276.1,738.9],
+] };
+
+// ---------------- Zone C: ART INSTITUTE (060, flag artInstitute) --------
+// Masses simplified from osm relation 1870546 (105-pt outline).
+export const ART_M = {
+  westBlock: { x0: 59, x1: 94, z0: 946, z1: 995, h: 17, pedimentH: 19 },
+  portico:   { x0: 57.2, x1: 59.5, z0: 963.5, z1: 978 },            // Adams axis 972
+  steps:     { x0: 53.2, x1: 57.2, z0: 963.5, z1: 978, y0: 0, y1: 1.9 }, // sittable
+  urnBeds: [                                                        // non-walk flanks sealing the open stair sides
+    { x0: 53.2, x1: 59.5, z0: 958, z1: 963.5 }, { x0: 53.2, x1: 59.5, z0: 978, z1: 984 },
+  ],
+  lions: [                                                          // THE meshes (r 1.9 colliders seal the plinths)
+    { x: 54.4, z: 962.4, stance: 'on the prowl' },                  // north
+    { x: 54.4, z: 979.4, stance: 'in an attitude of defiance' },    // south
+  ],
+  northGarden: { x0: 53, x1: 81, z0: 906, z1: 941,                  // osm 235227858 — hedged sculpture garden
+    sculptures: [['Flying Dragon', 71.8, 930.2], ['Large Interior Form', 61.4, 914], ['Cubi VII', 67.6, 919.4]] },
+  southGarden: { x0: 55, x1: 95, z0: 999, z1: 1032,                 // osm 235216579 — hawthorn bosque grid
+    fountain: { x0: 81.9, x1: 86.5, z0: 1009, z1: 1015.5 } },       // Fountain of the Great Lakes (carved 4-rect)
+  trench: { x0: 96, x1: 124, z0: 909, z1: 1032, floorY: -3 },       // open Metra cut — CARVE THE CARPET (041 pit law)
+  waist:  { x0: 94, x1: 125, z0: 964.5, z1: 974, h: 12 },           // Gunsaulus gallery bridging the trench
+  modernWing: { x0: 121, x1: 171, z0: 909, z1: 930, h: 14,
+    bluhm: { x0: 124.8, x1: 132.4, z0: 909.5, z1: 922, y: 13 } },   // the Nichols landing terrace
+  eastCampus: [
+    { x0: 125, x1: 147, z0: 973, z1: 1031, h: 12 },                 // McKinlock block
+    { x0: 147, x1: 175, z0: 980, z1: 1027, h: 12 },
+    { x0: 168, x1: 180.3, z0: 942, z1: 980, h: 13 },                // Columbus pavilion
+  ],
+  pool: { x0: 177.4, x1: 183, z0: 954, z1: 985 },                   // east reflecting strip
+  arch: { x: 184, z: 935 },                                         // Stock Exchange Arch — ITS REAL SPOT (retires the S-backdrop cameo)
+  route66: { x: 48.5, z: 968 },                                     // BEGIN sign, pulled to the park curb (liberty)
+  cliffS: [                                                         // Michigan cliff band extension z 935→1080
+    { name: 'BORG-WARNER',      z: 984,  w: 16, h: 60, style: 'glass' },
+    { name: 'SYMPHONY CENTER',  z: 1002, w: 26, h: 40, style: 'colonnade' },  // ORCHESTRA HALL
+    { name: 'RAILWAY EXCHANGE', z: 1023, w: 26, h: 65, style: 'santafe' },    // white terra-cotta + rooftop SANTA FE sign
+    { name: 'McCORMICK BLDG',   z: 1072, w: 28, h: 60, style: 'tower' },
+  ],
+};
+// Nichols Bridgeway, REAL alignment (osm way 90707301) — white boat-hull
+// ribbon lawn→Bluhm terrace. Walkable ONLY under OPEN_GRANT.nichols (060
+// decides; else 060 rebuilds it as scenery on this alignment). nodes [x,z,y].
+export const NICHOLS2_M = {
+  halfW: 1.6,
+  nodes: [[117.5, 839, 0], [117.6, 852, 1.6], [117.9, 872, 4.6], [118.7, 902, 9.2],
+          [120.3, 918, 11.9], [122.4, 925.4, 13], [126, 922, 13]],
+  pad: { x0: 113, x1: 121, z0: 833, z1: 839 },                      // lawn launch
+  slot: { x0: 115.8, x1: 122.2 },                                   // carve width where it overflies y-0 walks
+};
+
+// ---------------- Zone D: BUTLER FIELD + LOLLA (061, flag butler) -------
+export const BUTLER_M = {
+  field: { x0: 198.6, x1: 326, z0: 900.7, z1: 1032.6 },             // osm 139013800
+  // THE STAGE IS PETRILLO (osm 210671695; mouth faces NE — real bearing),
+  // wearing festival dress: banner truss, line arrays, video side-boards.
+  petrillo: { x0: 214, x1: 230, z0: 1002, z1: 1017, h: 14, mouth: 'NE' },
+  crowd: { x0: 225, x1: 300, z0: 940, z1: 1005 },                   // instanced swaying field; real bumpables at the rail
+  booth: { x0: 258, x1: 266, z0: 968, z1: 976 },                    // sound booth (carved); dance circle beside (061)
+  readingCones: { x: 262.7, z: 912.7 },                             // Serra — real spot, stays
+  tents: { x0: 300, x1: 322, z0: 930, z1: 1010 },                   // white tent rows (NEMA-aerial kit)
+  potties: { x0: 202, x1: 207, z0: 950, z1: 1000 },                 // the honest row, closed-Columbus east curb
+  trucks: { z: 902, xs: [220, 236, 252, 268, 284] },                // food-truck row on closed Monroe
+  lsdRim: { x0: 324, x1: 331, z0: 902, z1: 1030 },
+};
+
+// ---------------- Backdrop growth (flag-gated) --------------------------
+export const BACKDROP_GRANT = {
+  // giants band extension EAST over Maggie's north rim (flag maggie);
+  // E-W order preserved, register heights (~0.55x). Aqua stays out (real
+  // z≈596 — under the z-680 billboard floor, recorded).
+  giantsE: { z0: 680, z1: 692, list: [
+    { name: '340 ON THE PARK', x: 274, w: 26, h: 105, style: 'glass-green' },
+    { name: 'THE BUCKINGHAM',  x: 308, w: 18, h: 90,  style: 'tower' },
+    { name: 'OUTER DRIVE EAST', x: 352, w: 40, h: 90, style: 'white-curve' },  // scalloped slab
+    { name: 'HARBOR POINT',    x: 385, w: 24, h: 100, style: 'dark-round' },   // osm x 440, pulled in-frame
+  ] },
+  // east of LSD = THE LAKE (Monroe Harbor glint + moored sails; Peanut Park
+  // compressed into it — recorded). flag maggie (z<894) / butler (z>894).
+  eastLake: { x0: 348, x1: 362, z0: 700, z1: 1040 },
+  // quiet South Loop band beyond Jackson (flag artInstitute/butler).
+  // Buckingham Fountain measured (246-289 x 1157-1200) = FUTURE GROWTH, out.
+  southLoop: { x0: 48, x1: 330, z0: 1050, z1: 1080, floors: [4, 10] },
+};
+
+// Full-growth clamp + minimap bounds (gridsweep sweeps CLAMP_FULL_M always).
+export const CLAMP_FULL_M = { xMin: 44, xMax: 340, zMin: 700, zMax: 1040 };
+export const MAP_FULL_M = { x0: 28, z0: 676, w: 336, h: 412, cw: 336, ch: 412 };
+
 // ----------------------- walkability (THE definition) -----------------
 // Ordered quads; FIRST hit wins for walkable + surfaceY. Elevated deck
 // quads come first; everything else is y 0. Kinds:
@@ -260,21 +471,148 @@ const segQ = (a, b, halfW, y0, y1) => {
            ux: dx / len, uz: dz / len, hl: len / 2, hw: halfW, y0, y1 };
 };
 const B = BP_BRIDGE_M;
+// segQ chain over [x,z,y] node lists (BP crossing, Nichols) — 058/060 sweep
+// the visuals from the same nodes (CatmullRom, 048 contour law).
+const chainQ = (nodes, halfW) => {
+  const out = [];
+  for (let i = 0; i < nodes.length - 1; i++)
+    out.push(segQ([nodes[i][0], nodes[i][1]], [nodes[i + 1][0], nodes[i + 1][1]],
+                  halfW, nodes[i][2], nodes[i + 1][2]));
+  return out;
+};
+// Ribbon strip = stride-2 segQ over the verbatim closed loop (33 flat segs);
+// shared by WALK (maggie), kindAtM (ribbonIce) and the 058/059 builders.
+export const RIBBON_SEGS_M = (() => {
+  const L = RIBBON_M.loop, out = [];
+  for (let i = 0; i < L.length - 1; i += 2)
+    out.push(segQ(L[i], L[Math.min(i + 2, L.length - 1)], RIBBON_M.halfW, 0, 0));
+  return out;
+})();
+
+// ---- flag-gated Grant walk sets (see GEOGRAPHY.md GRANT walkability) ----
+const MAGGIE_WALK = [
+  // E-rim promenade (east of Columbus) — split under the BP crest overflight
+  // (chain footprint z 787-798.5 at this x; ≥2.5 m planted buffer both sides)
+  { x0: 201, x1: 209, z0: 706, z1: 784.5, y: 0 },
+  { x0: 201, x1: 209, z0: 801, z1: 888, y: 0 },
+  { x0: 201, x1: 338, z0: 705, z1: 711.5, y: 0 }, // Randolph-side north walk
+  { x0: 209, x1: 323, z0: 728, z1: 736, y: 0 },   // fieldhouse esplanade
+  { x0: 296, x1: 318, z0: 711.5, z1: 728, y: 0 }, // tennis pad (relocated — NE-wedge fold)
+  ...RIBBON_SEGS_M,                               // the Skating Ribbon strip (paved bed; ice via kindAtM)
+  // the climbing-wall island — 6 rects sealing both wall footprints (052 law);
+  // edges overlap the ribbon strip / spill slightly past the loop's south lip
+  // (both y 0) so no 1-m seam slivers read as holes
+  { x0: 236, x1: 275, z0: 736.5, z1: 744, y: 0 },
+  { x0: 236, x1: 242, z0: 744, z1: 770, y: 0 },
+  { x0: 242, x1: 258, z0: 752, z1: 770, y: 0 },
+  { x0: 258, x1: 275, z0: 744, z1: 756.5, y: 0 },
+  { x0: 268, x1: 276.5, z0: 756.5, z1: 770, y: 0 },
+  { x0: 258, x1: 268, z0: 763.5, z1: 770, y: 0 },
+  { x0: 243, x1: 266, z0: 800, z1: 816, y: 0 },   // bridge-landing plaza (x0 243: the chain tail is <=0.45 there)
+  { x0: 258, x1: 266, z0: 770, z1: 800, y: 0 },   // plaza -> ribbon connector
+  { x0: 256, x1: 316, z0: 802, z1: 810, y: 0 },   // landing -> play-garden esplanade
+  // the Play Garden — 10 rects sealing ship / fort tower / lighthouse
+  { x0: 252, x1: 316, z0: 810, z1: 818, y: 0 },
+  { x0: 252, x1: 286, z0: 818, z1: 826, y: 0 },
+  { x0: 292, x1: 316, z0: 818, z1: 826, y: 0 },
+  { x0: 252, x1: 316, z0: 826, z1: 839, y: 0 },
+  { x0: 252, x1: 267, z0: 839, z1: 864, y: 0 },
+  { x0: 277, x1: 299, z0: 839, z1: 864, y: 0 },
+  { x0: 299, x1: 316, z0: 839, z1: 845, y: 0 },
+  { x0: 309, x1: 316, z0: 845, z1: 855, y: 0 },
+  { x0: 299, x1: 316, z0: 855, z1: 864, y: 0 },
+  { x0: 267, x1: 277, z0: 849, z1: 864, y: 0 },
+  // Cancer Survivors' Garden — 7 rects sealing the two pavilion frames
+  { x0: 323, x1: 337, z0: 711.5, z1: 743, y: 0 },
+  { x0: 323, x1: 326, z0: 743, z1: 749, y: 0 },
+  { x0: 333, x1: 337, z0: 743, z1: 749, y: 0 },
+  { x0: 323, x1: 337, z0: 749, z1: 769, y: 0 },
+  { x0: 323, x1: 326, z0: 769, z1: 775, y: 0 },
+  { x0: 333, x1: 337, z0: 769, z1: 775, y: 0 },
+  { x0: 323, x1: 337, z0: 775, z1: 789, y: 0 },
+  { x0: 201, x1: 338, z0: 878, z1: 888, y: 0 },   // Monroe-side south rim esplanade
+  { x0: 330, x1: 338, z0: 789, z1: 878, y: 0 },   // LSD-overlook east walk
+  { x0: 246, x1: 254, z0: 816, z1: 878, y: 0 },   // plaza -> south rim
+  { x0: 280, x1: 288, z0: 864, z1: 878, y: 0 },   // play garden -> south rim
+];
+const AI_WALK = [
+  { x0: 48, x1: 57, z0: 908, z1: 958, y: 0 },     // spine extension N of the forecourt
+  { x0: 48, x1: 53.2, z0: 958, z1: 984, y: 0 },   // forecourt apron (urn beds seal the stair flanks)
+  { x0: 48, x1: 57, z0: 984, z1: 1032, y: 0 },    // spine extension S (to Jackson band)
+  { x0: 53, x1: 81, z0: 906, z1: 941, y: 0 },     // North Garden (sculptures = colliders)
+  { x0: 55, x1: 95, z0: 999, z1: 1009, y: 0 },    // South Garden (fountain basin carved — 052 law)
+  { x0: 55, x1: 81.9, z0: 1009, z1: 1015.5, y: 0 },
+  { x0: 86.5, x1: 95, z0: 1009, z1: 1015.5, y: 0 },
+  { x0: 55, x1: 95, z0: 1015.5, z1: 1032, y: 0 },
+  { x0: 181, x1: 189, z0: 908, z1: 954, y: 0 },   // east rim walk (pool strip carved mid-run)
+  { x0: 183.2, x1: 189, z0: 954, z1: 985, y: 0 },
+  { x0: 181, x1: 189, z0: 985, z1: 1032, y: 0 },
+];
+const BUTLER_WALK = [
+  { x0: 200, x1: 336, z0: 894, z1: 908, y: 0 },   // closed Monroe east (festival street)
+  { x0: 190, x1: 200, z0: 894, z1: 1042, y: 0 },  // closed Columbus (festival street)
+  { x0: 202, x1: 324, z0: 902, z1: 968, y: 0 },   // Butler lawn N (booth carved below)
+  { x0: 202, x1: 258, z0: 968, z1: 976, y: 0 },
+  { x0: 266, x1: 324, z0: 968, z1: 976, y: 0 },
+  { x0: 202, x1: 324, z0: 976, z1: 1002, y: 0 },
+  { x0: 202, x1: 214, z0: 1002, z1: 1030, y: 0 }, // west of Petrillo
+  { x0: 230, x1: 324, z0: 1002, z1: 1030, y: 0 }, // east of Petrillo
+  { x0: 214, x1: 230, z0: 1017, z1: 1030, y: 0 }, // south of Petrillo (mass sealed 4-side)
+  { x0: 324, x1: 331, z0: 902, z1: 1030, y: 0 },  // LSD rim walk
+  { x0: 246, x1: 254, z0: 888, z1: 894, y: 0 },   // Maggie south-rim gate knits
+  { x0: 280, x1: 288, z0: 888, z1: 894, y: 0 },
+  { x0: 315, x1: 323, z0: 888, z1: 894, y: 0 },
+];
+const N2 = NICHOLS2_M, NSLOT = N2.slot;
+
 export const WALK_M = [
-  // --- elevated (the BP deck; flanks buffered non-walkable, ramp-only) ---
-  { ...B.approach, rampX: true },                                   // lawn-edge ramp, y 0->3.8
-  segQ(B.segs[0].a, B.segs[0].b, B.segs[0].halfW, 3.8, 5),          // rising seg
-  segQ(B.segs[1].a, B.segs[1].b, B.segs[1].halfW, 5, 5),            // crest over Columbus
-  // --- the y-0 park network ---
+  // --- elevated first (ramp-only access; flanks buffered non-walkable) ---
+  ...(G.maggie
+    ? chainQ(BP_CROSSING_M.nodes, BP_CROSSING_M.halfW)              // the REAL serpentine, end to end
+    : [
+        { ...B.approach, rampX: true },                             // lawn-edge ramp, y 0->3.8
+        segQ(B.segs[0].a, B.segs[0].b, B.segs[0].halfW, 3.8, 5),    // rising seg
+        segQ(B.segs[1].a, B.segs[1].b, B.segs[1].halfW, 5, 5),      // crest over Columbus
+      ]),
+  ...(G.artInstitute ? [
+    { x0: ART_M.steps.x0, x1: ART_M.steps.x1, z0: ART_M.steps.z0, z1: ART_M.steps.z1,
+      rampX: true, y0: 0, y1: 1.9 },                                // the grand steps (sittable)
+    { x0: 57.2, x1: 59.6, z0: 963.5, z1: 978, y: 1.9 },             // portico landing (honest non-door)
+  ] : []),
+  ...(G.artInstitute && G.nichols ? [
+    ...chainQ(N2.nodes, N2.halfW),                                  // Nichols Bridgeway deck
+    { x0: ART_M.modernWing.bluhm.x0, x1: ART_M.modernWing.bluhm.x1,
+      z0: ART_M.modernWing.bluhm.z0, z1: ART_M.modernWing.bluhm.z1, y: 13 },  // Bluhm terrace
+  ] : []),
+  // --- the y-0 park network (pre-057 order preserved exactly) ---
   { x0: 48, x1: 57,   z0: 705, z1: 894, y: 0 },   // Michigan sidewalk spine
   { x0: 48, x1: 189,  z0: 705, z1: 713, y: 0 },   // Randolph S sidewalk
-  { x0: 48, x1: 189,  z0: 886, z1: 894, y: 0 },   // Monroe N sidewalk
-  { x0: 181, x1: 189, z0: 713, z1: 788, y: 0 },   // Columbus rim walk N (stops at the BP buffer)
-  { x0: 181, x1: 189, z0: 818, z1: 886, y: 0 },   // Columbus rim walk S
+  ...(G.artInstitute && G.nichols ? [              // Monroe N sidewalk (slot carved under the bridgeway + bypass)
+    { x0: 48, x1: NSLOT.x0, z0: 886, z1: 894, y: 0 },
+    { x0: NSLOT.x1, x1: 189, z0: 886, z1: 894, y: 0 },
+    { x0: 108, x1: NSLOT.x0, z0: 878, z1: 886, y: 0 },
+    { x0: NSLOT.x1, x1: 128, z0: 878, z1: 886, y: 0 },
+  ] : [
+    { x0: 48, x1: 189,  z0: 886, z1: 894, y: 0 }, // Monroe N sidewalk
+  ]),
+  ...(G.maggie ? [                                 // Columbus rims re-split for the real overflight
+    { ...BP_CROSSING_M.rimN, y: 0 },
+    { ...BP_CROSSING_M.rimS[0], y: 0 },
+    { ...BP_CROSSING_M.rimS[1], y: 0 },
+  ] : [
+    { x0: 181, x1: 189, z0: 713, z1: 788, y: 0 }, // Columbus rim walk N (stops at the BP buffer)
+    { x0: 181, x1: 189, z0: 818, z1: 886, y: 0 }, // Columbus rim walk S
+  ]),
   { x0: WRIGLEY_SQ_M.plaza.x0, x1: WRIGLEY_SQ_M.plaza.x1,
     z0: WRIGLEY_SQ_M.plaza.z0, z1: WRIGLEY_SQ_M.plaza.z1, y: 0 },   // Wrigley Square
-  { x0: CHASE_M.walk.x0, x1: CHASE_M.walk.x1,
-    z0: CHASE_M.walk.z0, z1: CHASE_M.walk.z1, y: 0 },               // Chase Promenade allee
+  ...(G.artInstitute && G.nichols ? [              // Chase allee (SE corner trimmed under the bridgeway;
+    // x1 114.5 keeps a full non-walk cell between the allee and the rising deck)
+    { x0: CHASE_M.walk.x0, x1: CHASE_M.walk.x1, z0: CHASE_M.walk.z0, z1: 843, y: 0 },
+    { x0: CHASE_M.walk.x0, x1: 114.5, z0: 843, z1: CHASE_M.walk.z1, y: 0 },
+  ] : [
+    { x0: CHASE_M.walk.x0, x1: CHASE_M.walk.x1,
+      z0: CHASE_M.walk.z0, z1: CHASE_M.walk.z1, y: 0 },             // Chase Promenade allee
+  ]),
   { x0: 57, x1: 96,   z0: 758, z1: 770, y: 0 },   // Washington cross walk (axis 766)
   { x0: CLOUD_GATE_M.plaza.x0, x1: CLOUD_GATE_M.plaza.x1,
     z0: CLOUD_GATE_M.plaza.z0, z1: CLOUD_GATE_M.plaza.z1, y: 0 },   // Bean plaza (under the arch)
@@ -295,8 +633,18 @@ export const WALK_M = [
   { x0: CROWN_M.plaza.x0, x1: CROWN_M.plaza.x1,
     z0: CROWN_M.plaza.z0, z1: CROWN_M.plaza.z1, y: 0 },             // Crown wet plaza
   { x0: 118, x1: 186, z0: 758, z1: 788, y: 0 },   // seating bowl
-  { x0: 118, x1: 168, z0: 788, z1: 846, y: 0 },   // Great Lawn W (carved at the BP approach)
-  { x0: 168, x1: 186, z0: 812, z1: 846, y: 0 },   // Great Lawn SE
+  ...(G.artInstitute && G.nichols ? [              // Great Lawn W (west edge trimmed under the bridgeway)
+    { x0: 122, x1: 168, z0: 788, z1: 846, y: 0 },
+    { x0: 118, x1: 122, z0: 788, z1: 833, y: 0 },
+    { x0: N2.pad.x0, x1: N2.pad.x1, z0: N2.pad.z0, z1: N2.pad.z1, y: 0 },  // Nichols launch pad
+  ] : [
+    { x0: 118, x1: 168, z0: 788, z1: 846, y: 0 }, // Great Lawn W (carved at the BP approach)
+  ]),
+  ...(G.maggie ? [
+    { ...BP_CROSSING_M.launchPad, y: 0 },         // lawn-SE launch esplanade (deck flank buffer z 812-833 is planted)
+  ] : [
+    { x0: 168, x1: 186, z0: 812, z1: 846, y: 0 }, // Great Lawn SE
+  ]),
   { x0: LURIE_M.gateNE.x0, x1: LURIE_M.gateNE.x1,
     z0: LURIE_M.gateNE.z0, z1: LURIE_M.gateNE.z1, y: 0 },           // Lurie NE hedge gate
   { x0: 179, x1: 182, z0: 843, z1: 853, y: 0 },   // gate↔Columbus-rim corner link (048 gridsweep: closes the 2 m seam at ~180,848)
@@ -305,6 +653,18 @@ export const WALK_M = [
     z0: LURIE_M.linkSW.z0, z1: LURIE_M.linkSW.z1, y: 0 },           // seam SW link
   { x0: LURIE_M.southRim.x0, x1: LURIE_M.southRim.x1,
     z0: LURIE_M.southRim.z0, z1: LURIE_M.southRim.z1, y: 0 },       // Lurie south rim
+  // --- Grant zones (flag-gated; empty arrays pre-flip) ---
+  ...(G.maggie ? MAGGIE_WALK : []),
+  ...(G.artInstitute ? [
+    ...(G.nichols ? [
+      { x0: 48, x1: NSLOT.x0, z0: 894, z1: 908, y: 0 },             // closed-Monroe crossing (slot carved)
+      { x0: NSLOT.x1, x1: 190, z0: 894, z1: 908, y: 0 },
+    ] : [
+      { x0: 48, x1: 190, z0: 894, z1: 908, y: 0 },                  // closed-Monroe crossing (LOLLA LOAD-IN)
+    ]),
+    ...AI_WALK,
+  ] : []),
+  ...(G.butler ? BUTLER_WALK : []),
 ];
 function inQuadM(q, x, z) {
   if (q.seg) {
@@ -334,8 +694,17 @@ export function surfaceYM(x, z) {
 
 // --------------------------- cell plumbing ----------------------------
 // Clamp is the hard box; the walk quads are the fine wall (Wrigleyville
-// pattern). xMax 208 backs the BP crest dead-end; z > 500 is unique to this
-// cell (dev-spawn disambiguation — GEOGRAPHY.md).
-export const CLAMP_M = { xMin: 44, xMax: 208, zMin: 700, zMax: 900 };
+// pattern). Pre-expansion: xMax 208 backs the BP crest dead-end. Growth is
+// computed from OPEN_GRANT (east needs maggie/butler, south needs
+// artInstitute/butler); z > 500 stays unique to this cell (dev-spawn
+// disambiguation — GEOGRAPHY.md).
+export const CLAMP_M = {
+  xMin: 44,
+  xMax: (G.maggie || G.butler) ? CLAMP_FULL_M.xMax : 208,
+  zMin: 700,
+  zMax: (G.artInstitute || G.butler) ? CLAMP_FULL_M.zMax : 900,
+};
 export const SPAWN_M = { x: 55, z: 800, y: 0 };          // beside the subway kiosk
-export const MAP_M   = { x0: 28, z0: 676, w: 184, h: 240, cw: 188, ch: 246 };
+export const MAP_M = (G.maggie || G.artInstitute || G.butler)
+  ? MAP_FULL_M
+  : { x0: 28, z0: 676, w: 184, h: 240, cw: 188, ch: 246 };

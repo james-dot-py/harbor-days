@@ -70,6 +70,13 @@ const AREAS = {
   // 1:2 land scale). bbox = Michigan/Randolph/Columbus/Monroe frame + a half-block
   // west of Michigan so the streetwall ("the cliff") footprints land as reference.
   'millennium-park': { bbox: [41.8795, -87.6260, 41.8865, -87.6180], calibrate: MICHIGAN_MONROE() },
+  // Grant Park expansion (task 057): the millennium bbox grown SOUTH past
+  // Jackson (Art Institute block) and EAST to Lake Shore Drive (Maggie Daley
+  // + Butler Field). Same park-local frame as millennium-park — fetch with
+  // EXPLICIT --offset-dx -468.8 --offset-dz -2369.6 (the recorded millennium
+  // provenance offsets) so the two extracts share one frame exactly; emit as
+  // a SIBLING file: --out osm-grant.json into refs/millennium-park/.
+  'grant-park': { bbox: [41.8760, -87.6265, 41.8865, -87.6120], calibrate: MICHIGAN_MONROE() },
 };
 function CLARK_ADDISON() {
   return { streetA: 'North Clark Street', streetB: 'West Addison Street',
@@ -289,6 +296,11 @@ async function fetchTarget(bbox) {
   way["leisure"="park"](${b});
   way["leisure"="garden"](${b});
   way["leisure"="pitch"](${b});
+  way["leisure"="playground"](${b});
+  way["leisure"="ice_rink"](${b});
+  way["leisure"="track"](${b});
+  way["leisure"="sports_centre"](${b});
+  relation["leisure"="playground"](${b});
   way["highway"](${b});
   way["building"](${b});
   way["leisure"="stadium"](${b});
@@ -452,7 +464,7 @@ async function main() {
       attribution: '© OpenStreetMap contributors, licensed under ODbL (queue task 001).',
     },
   };
-  const file = join(outDir, 'osm.json');
+  const file = join(outDir, args.flags.out || 'osm.json');
   writeFileSync(file, JSON.stringify(doc), 'utf-8');
   console.log(`  EMITTED ${file} (${ids.length} elements, ${(JSON.stringify(doc).length / 1024).toFixed(0)} kB)`);
 }
