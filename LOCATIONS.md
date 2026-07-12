@@ -48,7 +48,12 @@ feasibility inside perf + single-file constraints.
   Bridgeway), Butler Field with LOLLAPALOOZA live, ALL of Maggie Daley Park
   (play garden, climbing walls, skating ribbon = unparked 059), and the BP
   bridge fully built out across Columbus. Scout/layout 057 → builds 058-061
-  → polish + sign-off addendum 062.
+  → polish + sign-off addendum 062. **SHIPPED + SIGNED OFF 2026-07-12
+  (task 062 — refs/millennium-park/SIGNOFF.md addendum): all four owner
+  punch-list items closed (walls-as-islands, BP band walkability, Nichols
+  entrance + landing), 22-waypoint walkthrough green, worst view 478/480.
+  Millennium+Grant polish continues only on owner report; the next planner
+  run selects Montrose per the owner pick below.**
 
 ## Candidates (famous Chicago spots, seeded per §5.3)
 

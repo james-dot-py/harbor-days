@@ -54,3 +54,13 @@
   boxes" and now carries the rooflines Chicagoans navigate by; full
   name-at-a-glance from f0 remains a structural ceiling. The diamond additionally
   reads from BP-bridge-crest f1 (053 SIGNOFF).
+- **CLOSED (062, 2026-07-12):** every lever this issue prescribed is exhausted —
+  the 3 hero silhouettes are individuated (056: PRUDENTIAL crown band, bold dark
+  diamond spire, cool-white fluted Aon) and the allee was thinned; two sign-off
+  passes (053, 056) plus this issue's own analysis agree the residual
+  (crowns above near-level f0 frames + world-curve sink at the promenade
+  dead-end) is STRUCTURAL at the recorded billboard register, not missing
+  silhouette work. Fixing it would need framing pitch-ups that break the
+  near-level house style or shorter giants that break winsZ rng-order
+  determinism. Recorded as a known liberty in refs/millennium-park/SIGNOFF.md
+  (062 expansion addendum); reopen only if the owner names it in a playtest.

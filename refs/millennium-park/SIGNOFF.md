@@ -129,3 +129,93 @@
 **Millennium Park is signed off. This file + refs/wrigleyville/SIGNOFF.md unlock
 §5.3 planner self-expansion; polish 054–056 and the owner's Grant pipeline 057–062
 queue behind it.**
+
+---
+
+# ADDENDUM — Grant Park expansion (tasks 057–062, signed off 2026-07-12)
+
+- Scope: the cell grew into Grant Park proper — Art Institute west facade +
+  lions + Nichols Bridgeway (058), McCormick ice + AI campus (059), Nichols
+  Modern Wing + Cancer Survivors/play garden (060), LOLLAPALOOZA on Butler
+  Field (061), owner punch-list polish + this addendum (062).
+- Walkthrough of record: ONE fresh full run `node tools/walkthrough.mjs --area
+  millennium` → run `mri5puyn` (own vite, canary echoed): **22 waypoints × 2–4
+  framings = 68 shots, 0 console/page errors, 0 canary misses**, every PNG
+  personally read. Contact sheet: `tools/shots/run-mri5puyn/contact-sheet.png`.
+- Standing gate: walkprobe **600/600** (incl. the new "Millennium 062" section:
+  wall-envelope/mast/hut clearances off the ribbon polyline, BP + Nichols band
+  lane continuity + y-continuity); single-file build 1,418.92 kB (gzip
+  445.78 kB); spawn matches baseline (diff = HUD pill fade + NPC/AA noise,
+  structural zero); **max 478 draw calls (mp-bean-f3)** — every waypoint ≤ 480.
+- Gridsweep: entire footprint at 2 m, **zero holes, zero jetski cells**; 74
+  blessed boundary candidates (census in tools/mp-gridsweep.mjs), incl. the
+  intentional hut-pocket mouth at (242,758).
+
+## Owner punch list (all four closed; details in autopilot/issues/022–024)
+
+| Item | Verdict |
+|---|---|
+| 0a walls × ribbon (issue 022) | RESOLVED — walls re-cut (12×6 crescent h12, 7×5 prow h9; recorded liberty, not in OSM) as TRUE ISLANDS; envelope clearance 6.30/6.49 m off the ice (gate ≥3.5, walkprobe-asserted); full loop skated both directions by steering bot, no strands |
+| 0b BP stutter (issue 023) | RESOLVED — walk data now a point-to-polyline BAND from the same CatmullRom samples as the geometry (hw 2.35, caps at joints); bot hold-forward both ways: 0 stalls, continuous y |
+| 0c Nichols entrance (issue 024a) | RESOLVED — hedge breaks at the mouth (runs end z831 / start x120.5) + paved curb apron; decisive shot clean |
+| 0d Nichols landing (issue 024b) | RESOLVED — canopy raised y14.9→18.1 (self-lit bmat after the toon slab read green from below), 'BRIDGE TO THE PARK' arrow plate at the rail gap; round trip verified both ways |
+
+## Per-waypoint verdicts (run mri5puyn — expansion waypoints)
+
+| Waypoint | Verdict | Notes |
+|---|---|---|
+| mp-lions | MET | AI west facade: bronze lions flanking the steps, banner row + frieze + museum name plates all legible in f1 (the sign-audit frame; the 062 canvas-plate ATLAS renders identically at 1 draw) |
+| mp-south-garden | MET | Sunken hedged garden south of the AI, fountain court read |
+| mp-nichols | MET | White deck rises off the lawn through the hedge break; f2 = Modern Wing terrace overlook with raised warm-white canopy, rail gap + wayfinding plate, deck sightline back down |
+| mp-bp-crossing | MET | Serpentine shingle-parapet deck over the Columbus trench; smooth plank sweep, no joint kinks; trench walls + roadway below |
+| mp-monroe-crossing | MET | Monroe boundary seam: continuous pavement Millennium → Maggie Daley, no gap/step artifact |
+| mp-climbing-walls | MET | Re-aimed framings: faceted crescent + prow read as sculpted islands IN the loop, ice flowing around them with rail margin |
+| mp-ribbon | MET | Ribbon loop: banked ice, rails, skaters, warming hut, interior rock islands; f1 known cosmetic note below |
+| mp-play-garden | MET | Play garden mounds/slides/watchful parents east of the ribbon |
+| mp-cancer-survivors | MET | Pavilion + garden walk at the NE corner |
+| mp-lolla-rail | MET | Rail crowd pressed to the barricade, stage beyond, flag props |
+| mp-lolla-crowd | MET | Butler Field bowl: dense crowd, stage wash, sound tower |
+
+All 11 pre-expansion waypoints (mp-arrival … mp-bp-crossing's predecessor set,
+redline-monroe-boards) re-verified MET in the same run — no regressions from
+the 062 draw folds (AI/nichols plate atlases, bean-polisher vertex-color
+merges, ribbon-skaters distance-hide).
+
+## E2E (both inputs, scripted, PNGs read)
+
+Desktop: Belmont board → real Red Line ride → arrived (54.5, 800) → Bean →
+BP crest → Maggie landing → ribbon skate (displacement verified) → play
+garden → lion luck toast → Lolla rail → dance circle. Mobile (--mobile,
+tapSel): same ride + ribbon + dance tap, all green (m3 retake = portrait
+chase-cam artifact at one goto, not geometry).
+
+## Evocation dry-run (fresh-eyes, contact sheet first, then refs)
+
+- Phase 1 (ONLY tools/shots/run-mri5puyn/contact-sheet.png): *"Millennium Park
+  (and the adjoining Maggie Daley Park) in downtown Chicago"* — confidence
+  **UNMISTAKABLE**. Named unprompted: Cloud Gate + omphalos, Crown Fountain,
+  Pritzker + trellis, the peristyle, BP bridge, Lurie, McCormick rink, **and
+  every expansion piece**: Maggie Daley's climbing walls / play garden /
+  Skating Ribbon, the Art Institute lions, Nichols Bridgeway to the Modern
+  Wing, LOLLAPALOOZA, Cancer Survivors' Garden, the Red Line/Monroe tiles.
+- Phase 2 (refs/millennium-park/ comparison): **"YES — every reference photo
+  maps to a game tile on sight"**, incl. the ribbon figure-eight aerial and
+  the play-garden winter photo; relative layout called correct against the
+  owner aerial.
+- Picky list (cosmetic, documented not chased; several are thumbnail-scale
+  artifacts of the contact sheet — Crown faces and BP plank striping exist
+  and read in the full-size run frames): BP metallic sheen, Bean skyline hint
+  in the reflection, trellis member density, lion patina desaturation.
+- Misreads: none substantive (hedged the purple-lit walls' attribution;
+  called the mayor "elderly" — inference, not error).
+
+## Known cosmetic notes (non-blocking)
+
+- mp-ribbon-f1: the warming hut's west wall reads blank at very close range.
+- mp-bean-f1: transient NPC photobomb near the lens (wandering crowd).
+- Issue 021 (skyline crown individuation from near-level park framings)
+  CLOSED as structural residual — crown crop + world-curve sink at the
+  billboard register; levers exhausted, reopen only if the owner names it.
+
+**The Grant Park expansion is signed off. Next per LOCATIONS.md: Montrose
+(owner-picked, contiguous northward growth).**

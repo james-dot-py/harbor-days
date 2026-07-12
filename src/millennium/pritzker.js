@@ -335,9 +335,11 @@ export function buildPritzker() {
     box(x0, x1, 0, 0.25, z0, z1, curbMat);
     box(x0 + 0.1, x1 - 0.1, 0.25, 1.15, z0 + 0.1, z1 - 0.1, hedgeMat);
   };
-  hedgeRun(116.5, 118, 790, 846);                 // west shoulder
-  hedgeRun(116.5, 168, 845, 846.5);               // south shoulder (the Lurie-hedge pad for 046)
+  hedgeRun(116.5, 118, 790, 831);                 // west shoulder (BREAKS 2 m before the Nichols pad — 062/024a)
+  hedgeRun(120.5, 168, 845, 846.5);               // south shoulder (W end clears the deck band x<=119.2 — 062/024a)
   hedgeRun(168, 169.5, 812, 846);                 // SE return (clear of the BP ramp mouth)
+  // pale limestone approach apron: clear paved walk from the lawn onto the Nichols pad through the break (062/issue 024a)
+  box(118, 121.3, 0, 0.03, 827, 833, curbMat);
   // NOTE: the lawn CROWD (picnic blankets + real posed-chibi people) lives in
   // packs/millennium-lawnlife.js (task 048 item 0d) — this section is stripes
   // + hedge only, so no local-rng scatter runs after the seats above.

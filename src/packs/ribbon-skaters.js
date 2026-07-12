@@ -143,10 +143,26 @@ onWorldReady(() => {
   const beg = { group: bg.group, parts: bg.parts, s: 0, hd: _ph, ph: _r() * 6.283,
     stride: 0, nfT: 0, nfCd: 6 + _r() * 4 };
 
-  registerUpdate((dt, t) => {
+  // 062 DRAW-FOLD: the 8 live skater rigs are ~35 draws, and from the west
+  // park they're 4-6 px fog-washed silhouettes 150-200 m out — yet every
+  // Bean/rink frustum paid for them (mp-bean-f3 measured 486>480, the budget
+  // gate). Hide the troupe whenever the player is far from the ribbon
+  // (hysteresis 120/130 m so it never flickers). The framework can't own
+  // this cull — these are custom-animated createChibi rigs, not makeNPC.
+  const RIB_CX = 252, RIB_CZ = 751;
+  let _farHidden = false;
+
+  registerUpdate((dt, t, p) => {
     if (dt < 0) dt = 0;
     // NPC skaters only animate while downtown (cell-culled anyway).
     if (activeCell() !== 'millennium') return;
+    const pdx = p.x - RIB_CX, pdz = p.z - RIB_CZ, pd2 = pdx * pdx + pdz * pdz;
+    if (_farHidden ? pd2 < 120 * 120 : pd2 > 130 * 130) {
+      _farHidden = !_farHidden;
+      for (const s of loopers) s.group.visible = !_farHidden;
+      beg.group.visible = !_farHidden;
+    }
+    if (_farHidden) return;
 
     for (let i = 0; i < loopers.length; i++) {
       const s = loopers[i], g = s.group, p = s.parts;

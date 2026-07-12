@@ -414,3 +414,42 @@ few turns to find; keep each to one line of symptom + fix.
   port + canary) and crop-checked PILL-FREE (tools/tmp-cropdiff.mjs, band
   ~300,665 680x50) before committing — a defective baseline taxes every
   future session, not the one that made it.
+- Union-of-rotated-RECTS walkability on a CURVING deck leaves blocked wedge
+  slivers on the OUTSIDE of every bend (the chord cuts the corner) — the owner
+  feels it as "stopped every few meters" (issue 023 / task 062). Fix the CLASS:
+  walkable = point-to-POLYLINE distance ≤ half-width over DENSE samples of the
+  SAME curve the geometry uses (millennium.js `bandQ` + `catmullChain`, circular
+  caps at joints, bbox prefilter) — one lane, zero joints. catmullChain must
+  replicate THREE.CatmullRomCurve3's tangents exactly (0.5·(p[i+1]−p[i−1]),
+  mirrored phantom endpoints) or walk and visuals diverge by the model error.
+- Same chord disease in PLAN: walk rects sized to a ribbon's stride-2 SEGS
+  chords sit inside the true sampled polyline by the SAGITTA, so the visual ice
+  edge overhangs blocked ground (26 gridsweep holes that "shouldn't exist",
+  task 062). When walk data and visuals sample the same curve at DIFFERENT
+  strides, cover the sagitta with explicit shim rects — or sample both at the
+  same stride.
+- collide() is NOT y-aware by default: ground-level colliders (Nichols piers,
+  trench balustrade feet) block the player walking the ELEVATED lane above
+  them — free-floating "stopped by nothing" on bridges. Pass the height param
+  (collide(x,z,r,h) ignores the collider once player.y > h) for anything that
+  lives UNDER a deck (task 062).
+- Centroid-RADIAL "outward" scatter on a NON-CONVEX loop runs ALONG the curve
+  at concave stretches (the centroid direction is tangent there), piling rim
+  rocks onto the ice (37 offenders on the ribbon, task 062). Outward = the
+  polyline's per-segment NORMAL (flipped by point-in-poly test), and gate every
+  placement on clearance against the FULL polyline, not the nearest segment.
+- The chase camera needs ~3.5 m+ headroom over an ELEVATED floor: a canopy
+  ~0.6 m above head height buries the cam inside the slab (the owner: "ceiling
+  too low to see anything", issue 024). And any BIG toon slab seen from BELOW
+  reads pea-GREEN (hemisphere ground-bounce, the 044 stainless pitfall's
+  ceiling variant) — raised canopies go self-lit bmat. Both bit the Modern Wing
+  terrace in one feature (task 062).
+- The canvas-plate ATLAS fold (one CanvasTexture, drawImage each sign's canvas
+  into a dest rect, merge PlaneGeometries with remapped UVs, ONE
+  bmat(0xffffff,{map}) mesh) collapses N one-off sign/banner draws to 1 with
+  zero visual change (task 062: AI facade 9 plates + Nichols 3 plates; the
+  wrigley sign-atlas precedent generalized — artinstitute.js `plate()/
+  flushPlates()` is the copyable pattern). Keep letter-bearing regions PADDED
+  and per-sign (the 050 shared-atlas font-spill law still applies), apply
+  rotateY/tiltX to the GEOMETRY before translate, and call flushPlates()
+  before the pool flush so the mesh joins the cell root.

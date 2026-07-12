@@ -333,12 +333,16 @@ export const MAGGIE_M = {
   bounds: { x0: 198, x1: 338, z0: 699.5, z1: 892 },
   fieldhouse: { x0: 243, x1: 285, z0: 712, z1: 727.5, h: 7 },       // osm 764227071 (Randolph front)
   tennis: { x0: 296, x1: 318, z0: 711.5, z1: 728 },                 // RELOCATED (NE-wedge fold liberty; real osm x 393–414)
-  // climbing walls (owner aerial + 20151008 ref; not in OSM) — island masses:
+  // climbing walls (owner aerial + 20151008 ref; not in OSM) — TRUE ISLAND
+  // masses the ribbon loops AROUND (repositioned 062/issue 022: the 058 spots
+  // put wall A's shell ON the ice centerline). Shell envelopes (footprint +
+  // fold/bulge/truss overhangs) clear the ice band (centerline ±2.7) by
+  // ≥3.5 m — walkprobe asserts this mechanically.
   walls: [
-    { x0: 242, x1: 258, z0: 744, z1: 752, h: 12, read: 'faceted crescent' },
-    { x0: 258.5, x1: 268, z0: 756.5, z1: 763.5, h: 9, read: 'prow' },
+    { x0: 254, x1: 266, z0: 745, z1: 751, h: 12, read: 'faceted crescent' },
+    { x0: 263, x1: 270, z0: 758, z1: 763, h: 9, read: 'prow' },
   ],
-  hut: { x: 232, z: 762 },                                          // SW-lobe warming hut (aerial)
+  hut: { x: 229.75, z: 760.75 },                                    // SW-lobe warming hut (aerial; re-centred in its pocket 062 — the old spot's roof kissed the ice edge)
   landing: { x0: 243, x1: 266, z0: 800, z1: 816 },                  // bridge apron plaza
   csg: {                                                            // Cancer Survivors' Garden (osm 10601819)
     bounds: { x0: 321.7, x1: 338.8, z0: 710.8, z1: 789 },
@@ -360,7 +364,7 @@ export const MAGGIE_M = {
     tower:      { x0: 286, x1: 292, z0: 819, z1: 825, h: 8 },       // timber fort + rope suspension bridge
     lighthouse: { x: 303, z: 849, r: 3.2, h: 11 },                  // red/white stripes + curling tube slide
   },
-  xmasts: [[214, 744], [246, 776], [272, 730], [258, 850], [300, 800]], // white X-crossed floodlight masts (signature)
+  xmasts: [[214, 744], [246, 776], [272, 726.5], [258, 850], [300, 800]], // white X-crossed floodlight masts (signature; #3 pulled off the ice band, 062)
 };
 // The Skating Ribbon (osm way 524270342 VERBATIM, closed loop, 66 pts).
 // 058 built the BED (rockwork rims + rails); 059 flipped ribbonIce → the
@@ -482,15 +486,60 @@ const segQ = (a, b, halfW, y0, y1) => {
            ux: dx / len, uz: dz / len, hl: len / 2, hw: halfW, y0, y1 };
 };
 const B = BP_BRIDGE_M;
-// segQ chain over [x,z,y] node lists (BP crossing, Nichols) — 058/060 sweep
-// the visuals from the same nodes (CatmullRom, 048 contour law).
-const chainQ = (nodes, halfW) => {
-  const out = [];
-  for (let i = 0; i < nodes.length - 1; i++)
-    out.push(segQ([nodes[i][0], nodes[i][1]], [nodes[i + 1][0], nodes[i + 1][1]],
-                  halfW, nodes[i][2], nodes[i + 1][2]));
-  return out;
+// ---- deck BANDS (062/issue 023). The old per-node segQ union left
+// outside-of-bend WEDGE slivers at every joint of the serpentine — the
+// owner was "stopped every few meters". THE definition now: walkable =
+// within halfW of the SAME CatmullRom the builders sweep (point-to-POLYLINE
+// distance over a dense sample, circular caps at joints — no slivers).
+// catmullChain replicates THREE.CatmullRomCurve3(pts, false, 'catmullrom',
+// 0.5) exactly (uniform cubic Hermite, tangents 0.5*(p[i+1]-p[i-1]),
+// mirrored phantom endpoints) — NO THREE import (walkprobe shares this).
+// pinY: y stays the node-linear lerp (the Nichols Y-PIN law — nichols.js
+// pins its deck y the same way); without it y rides the smoothed curve
+// (the BP deck geometry does — bridge.js sweeps the full 3D curve).
+function catmullChain(nodes, sub, pinY) {
+  const n = nodes.length, T = 0.5, pts = [];
+  const mirror = (a, b) => [2 * a[0] - b[0], 2 * a[1] - b[1], 2 * a[2] - b[2]];
+  for (let i = 0; i < n - 1; i++) {
+    const p1 = nodes[i], p2 = nodes[i + 1];
+    const p0 = i === 0 ? mirror(nodes[0], nodes[1]) : nodes[i - 1];
+    const p3 = i === n - 2 ? mirror(nodes[n - 1], nodes[n - 2]) : nodes[i + 2];
+    for (let s = 0; s < sub; s++) {
+      const t = s / sub, t2 = t * t, t3 = t2 * t, out = [0, 0, 0];
+      for (let c = 0; c < 3; c++) {
+        const m1 = T * (p2[c] - p0[c]), m2 = T * (p3[c] - p1[c]);
+        out[c] = p1[c] + m1 * t + (-3 * p1[c] + 3 * p2[c] - 2 * m1 - m2) * t2
+               + (2 * p1[c] - 2 * p2[c] + m1 + m2) * t3;
+      }
+      if (pinY) {
+        const dx = p2[0] - p1[0], dz = p2[1] - p1[1], L2 = dx * dx + dz * dz || 1;
+        const f = Math.max(0, Math.min(1, ((out[0] - p1[0]) * dx + (out[1] - p1[1]) * dz) / L2));
+        out[2] = p1[2] + (p2[2] - p1[2]) * f;
+      }
+      pts.push(out);
+    }
+  }
+  pts.push([nodes[n - 1][0], nodes[n - 1][1], nodes[n - 1][2]]);
+  return pts;
+}
+// dense curve samples ([x,z,y]) — exported so walkprobe can assert the band
+// is continuously walkable along the whole arc.
+export const BP_DECK_PTS = catmullChain(BP_CROSSING_M.nodes, 6, false);
+export const NICHOLS_DECK_PTS = catmullChain(NICHOLS2_M.nodes, 6, true);
+// band walk-quad: bbox prefilter + min point-to-segment distance <= halfW
+const bandQ = (pts, halfW) => {
+  const segs = []; let bx0 = 1e9, bx1 = -1e9, bz0 = 1e9, bz1 = -1e9;
+  for (const p of pts) { bx0 = Math.min(bx0, p[0]); bx1 = Math.max(bx1, p[0]); bz0 = Math.min(bz0, p[1]); bz1 = Math.max(bz1, p[1]); }
+  for (let i = 0; i < pts.length - 1; i++) {
+    const a = pts[i], b = pts[i + 1], dx = b[0] - a[0], dz = b[1] - a[1];
+    segs.push({ ax: a[0], az: a[1], dx, dz, L2: dx * dx + dz * dz || 1, y0: a[2], y1: b[2] });
+  }
+  return { band: true, segs, hw2: halfW * halfW,
+           bx0: bx0 - halfW, bx1: bx1 + halfW, bz0: bz0 - halfW, bz1: bz1 + halfW };
 };
+// lane half-widths: 0.25 inside the BP parapet inner face (2.6) so the mayor
+// never wedges into the shingles; Nichols posts sit at 1.5, lane 1.4.
+export const BP_BAND_HW = 2.35, NICHOLS_BAND_HW = 1.4;
 // Ribbon strip = stride-2 segQ over the verbatim closed loop (33 flat segs);
 // shared by WALK (maggie), kindAtM (ribbonIce) and the 058/059 builders.
 export const RIBBON_SEGS_M = (() => {
@@ -510,15 +559,18 @@ const MAGGIE_WALK = [
   { x0: 209, x1: 323, z0: 728, z1: 736, y: 0 },   // fieldhouse esplanade
   { x0: 296, x1: 318, z0: 711.5, z1: 728, y: 0 }, // tennis pad (relocated — NE-wedge fold)
   ...RIBBON_SEGS_M,                               // the Skating Ribbon strip (paved bed; ice via kindAtM)
-  // the climbing-wall island — 6 rects sealing both wall footprints (052 law);
-  // edges overlap the ribbon strip / spill slightly past the loop's south lip
-  // (both y 0) so no 1-m seam slivers read as holes
-  { x0: 236, x1: 275, z0: 736.5, z1: 744, y: 0 },
-  { x0: 236, x1: 242, z0: 744, z1: 770, y: 0 },
-  { x0: 242, x1: 258, z0: 752, z1: 770, y: 0 },
-  { x0: 258, x1: 275, z0: 744, z1: 756.5, y: 0 },
-  { x0: 268, x1: 276.5, z0: 756.5, z1: 770, y: 0 },
-  { x0: 258, x1: 268, z0: 763.5, z1: 770, y: 0 },
+  // the climbing-wall island — 7 rects sealing both wall footprints (052 law;
+  // walls repositioned 062/issue 022 so the ice clears the rock everywhere);
+  // edges overlap the ribbon strip (both y 0) so no seam slivers read as holes
+  { x0: 249, x1: 274.5, z0: 736.5, z1: 745, y: 0 },// island N plaza
+  { x0: 246, x1: 254, z0: 745, z1: 751, y: 0 },    // W of the crescent
+  { x0: 266, x1: 273.5, z0: 745, z1: 751, y: 0 },  // E of the crescent
+  { x0: 243.5, x1: 271.5, z0: 751, z1: 758, y: 0 },// mid plaza (crescent->prow)
+  { x0: 255.5, x1: 263, z0: 758, z1: 767, y: 0 },  // W of the prow
+  { x0: 243.5, x1: 256.5, z0: 758, z1: 760.5, y: 0 },// SW corridor (chord-sagitta cover)
+  { x0: 270, x1: 274.5, z0: 751, z1: 767, y: 0 },  // E of the prow (+SE pocket)
+  { x0: 273.5, x1: 276, z0: 753, z1: 763, y: 0 },  // SE-lobe shim (chord-sagitta cover)
+  { x0: 263, x1: 270, z0: 763, z1: 768, y: 0 },    // S of the prow
   { x0: 243, x1: 266, z0: 800, z1: 816, y: 0 },   // bridge-landing plaza (x0 243: the chain tail is <=0.45 there)
   { x0: 258, x1: 266, z0: 770, z1: 800, y: 0 },   // plaza -> ribbon connector
   { x0: 256, x1: 316, z0: 802, z1: 810, y: 0 },   // landing -> play-garden esplanade
@@ -579,7 +631,7 @@ const N2 = NICHOLS2_M, NSLOT = N2.slot;
 export const WALK_M = [
   // --- elevated first (ramp-only access; flanks buffered non-walkable) ---
   ...(G.maggie
-    ? chainQ(BP_CROSSING_M.nodes, BP_CROSSING_M.halfW)              // the REAL serpentine, end to end
+    ? [bandQ(BP_DECK_PTS, BP_BAND_HW)]                              // the REAL serpentine, end to end (062 band law)
     : [
         { ...B.approach, rampX: true },                             // lawn-edge ramp, y 0->3.8
         segQ(B.segs[0].a, B.segs[0].b, B.segs[0].halfW, 3.8, 5),    // rising seg
@@ -591,7 +643,7 @@ export const WALK_M = [
     { x0: 57.2, x1: 59.6, z0: 963.5, z1: 978, y: 1.9 },             // portico landing (honest non-door)
   ] : []),
   ...(G.artInstitute && G.nichols ? [
-    ...chainQ(N2.nodes, N2.halfW),                                  // Nichols Bridgeway deck
+    bandQ(NICHOLS_DECK_PTS, NICHOLS_BAND_HW),                       // Nichols Bridgeway deck (062 band law)
     { x0: ART_M.modernWing.bluhm.x0, x1: ART_M.modernWing.bluhm.x1,
       z0: ART_M.modernWing.bluhm.z0, z1: ART_M.modernWing.bluhm.z1, y: 13 },  // Bluhm terrace
   ] : []),
@@ -678,6 +730,16 @@ export const WALK_M = [
   ...(G.butler ? BUTLER_WALK : []),
 ];
 function inQuadM(q, x, z) {
+  if (q.band) {
+    if (x < q.bx0 || x > q.bx1 || z < q.bz0 || z > q.bz1) return false;
+    for (const s of q.segs) {
+      let t = ((x - s.ax) * s.dx + (z - s.az) * s.dz) / s.L2;
+      t = t < 0 ? 0 : t > 1 ? 1 : t;
+      const ex = x - (s.ax + s.dx * t), ez = z - (s.az + s.dz * t);
+      if (ex * ex + ez * ez <= q.hw2) return true;
+    }
+    return false;
+  }
   if (q.seg) {
     const dx = x - q.cx, dz = z - q.cz;
     return Math.abs(dx * q.ux + dz * q.uz) <= q.hl &&
@@ -686,6 +748,17 @@ function inQuadM(q, x, z) {
   return x >= q.x0 && x <= q.x1 && z >= q.z0 && z <= q.z1;
 }
 function quadYM(q, x, z) {
+  if (q.band) {                       // y at the NEAREST point on the curve
+    let best = 1e18, y = 0;
+    for (const s of q.segs) {
+      let t = ((x - s.ax) * s.dx + (z - s.az) * s.dz) / s.L2;
+      t = t < 0 ? 0 : t > 1 ? 1 : t;
+      const ex = x - (s.ax + s.dx * t), ez = z - (s.az + s.dz * t);
+      const d2 = ex * ex + ez * ez;
+      if (d2 < best) { best = d2; y = s.y0 + (s.y1 - s.y0) * t; }
+    }
+    return y;
+  }
   if (q.seg) {
     if (q.y1 === q.y0) return q.y0;
     const al = (x - q.cx) * q.ux + (z - q.cz) * q.uz;

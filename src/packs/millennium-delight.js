@@ -71,24 +71,33 @@ onWorldReady(player => {
   // camera from the south-west frames worker + pole + silver shell together.
   const POL = { x: 82, z: 803.5, deckY: 0.4 };
   POL.ry = faceTo(POL.x, POL.z, BEAN.x, BEAN.z);            // face the shell
+  // per-constant-color vertex paint → several prims share ONE vcol toon mesh
+  // (062 DRAW-FOLD: the scaffold was 6 one-off draws in every Bean frustum,
+  // the squeegee 3 more — mp-bean-f3 measured over the 480 budget gate).
+  const _vc = new THREE.Color();
+  const vcol = (geo, hex) => {
+    _vc.set(hex); const n = geo.attributes.position.count, arr = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) { arr[i * 3] = _vc.r; arr[i * 3 + 1] = _vc.g; arr[i * 3 + 2] = _vc.b; }
+    geo.setAttribute('color', new THREE.BufferAttribute(arr, 3)); return geo;
+  };
   {
-    // rolling scaffold (cell-culled statics added after the merge → stay live)
+    // rolling scaffold (cell-culled statics added after the merge → stay live;
+    // 5 boxes + bucket merged to ONE vertex-colored toon mesh, 062)
     const g = new THREE.Group(); g.position.set(POL.x, 0, POL.z); g.rotation.y = POL.ry;
-    const deck = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.12, 1.1), toon(0xc9a13a));
-    deck.position.y = POL.deckY; g.add(deck);
-    const skirt = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.26, 0.95), toon(0x8a7524));
-    skirt.position.y = 0.2; g.add(skirt);
-    // back rail (so it reads as a work platform, not a crate)
-    const rail = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.06, 0.06), toon(0x8a7524));
-    rail.position.set(0, 1.0, -0.5); g.add(rail);
-    for (const dx of [-0.8, 0.8]) { const p = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.62, 0.06), toon(0x8a7524)); p.position.set(dx, 0.72, -0.5); g.add(p); }
+    const sg = [];
+    const sbox = (w, h, d, x, y, z, hex) => { const b = new THREE.BoxGeometry(w, h, d); b.translate(x, y, z); sg.push(vcol(b, hex)); };
+    sbox(1.7, 0.12, 1.1, 0, POL.deckY, 0, 0xc9a13a);                 // deck
+    sbox(1.5, 0.26, 0.95, 0, 0.2, 0, 0x8a7524);                      // skirt
+    sbox(1.7, 0.06, 0.06, 0, 1.0, -0.5, 0x8a7524);                   // back rail
+    for (const dx of [-0.8, 0.8]) sbox(0.06, 0.62, 0.06, dx, 0.72, -0.5, 0x8a7524);  // rail posts
+    { const bk = new THREE.CylinderGeometry(0.13, 0.11, 0.2, 10);    // suds bucket
+      bk.translate(0.6, POL.deckY + 0.12, 0.32); sg.push(vcol(bk, 0xf1c40f)); }
+    g.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(sg, false),
+      toon(0xffffff, { mat: { vertexColors: true } })));
     // four casters, one instanced mesh (1 draw)
     const casters = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.11, 0.11, 0.08, 10), toon(0x2b2b30), 4);
     let ci = 0; for (const dx of [-0.72, 0.72]) for (const dz of [-0.45, 0.45]) { _q.setFromEuler(new THREE.Euler(0, 0, Math.PI / 2)); _m4.compose(_v.set(dx, 0.11, dz), _q, _s); casters.setMatrixAt(ci++, _m4); }
     casters.instanceMatrix.needsUpdate = true; g.add(casters);
-    // a little suds bucket on the deck corner
-    const bucket = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.11, 0.2, 10), toon(0xf1c40f));
-    bucket.position.set(0.6, POL.deckY + 0.12, 0.32); g.add(bucket);
     millenniumRoot.add(g);
   }
   const polisher = makeNPC({
@@ -110,10 +119,12 @@ onWorldReady(player => {
   // pole angle is stable while the arm scrubs (bean-visitors prop precedent).
   {
     const sq = new THREE.Group();
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 2.5, 6), toon(0x9aa0a6));
-    pole.position.y = 1.15; sq.add(pole);
-    const bar = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.09, 0.08), toon(0x2b2f36)); bar.position.y = 2.34; sq.add(bar);
-    const blade = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.05, 0.03), toon(0x14161a)); blade.position.set(0, 2.28, 0.06); sq.add(blade);
+    const qg = [];                                                   // pole+bar+blade → ONE vcol mesh (062)
+    { const pl = new THREE.CylinderGeometry(0.03, 0.03, 2.5, 6); pl.translate(0, 1.15, 0); qg.push(vcol(pl, 0x9aa0a6)); }
+    { const br = new THREE.BoxGeometry(0.5, 0.09, 0.08); br.translate(0, 2.34, 0); qg.push(vcol(br, 0x2b2f36)); }
+    { const bl = new THREE.BoxGeometry(0.5, 0.05, 0.03); bl.translate(0, 2.28, 0.06); qg.push(vcol(bl, 0x14161a)); }
+    sq.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(qg, false),
+      toon(0xffffff, { mat: { vertexColors: true } })));
     sq.position.set(0.34, 1.28, 0.36); sq.rotation.set(-0.72, 0, 0.1);      // reach up-and-forward to the underbelly
     polisher.group.add(sq);
   }

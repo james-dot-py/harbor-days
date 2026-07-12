@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-12T17:07:22.057Z",
+ "generated": "2026-07-12T18:58:48.957Z",
  "count": 111,
  "waypoints": [
   {
@@ -2698,21 +2698,21 @@
    "id": "mp-climbing-walls",
    "area": "millennium",
    "cell": "millennium",
-   "x": 240,
-   "z": 756,
+   "x": 252,
+   "z": 757,
    "framings": [
     {
-     "x": 240,
-     "z": 756,
-     "yaw": 1,
-     "pitch": 0.06,
-     "dist": 5.5
+     "x": 252,
+     "z": 757,
+     "yaw": 2.42,
+     "pitch": 0.08,
+     "dist": 6
     },
     {
-     "x": 250,
-     "z": 768,
-     "yaw": -2.4,
-     "pitch": 0.06,
+     "x": 263,
+     "z": 772.5,
+     "yaw": 2.95,
+     "pitch": 0.1,
      "dist": 6
     }
    ],

@@ -64,6 +64,25 @@ function plateTex(text, w, h, pad) {                 // dark serif letters on a 
   g.fillStyle = '#39372e'; g.fillText(text, w / 2, h / 2 + 1);
   const t = new THREE.CanvasTexture(cv); t.anisotropy = 4; return t;
 }
+// wayfinding plate: dark serif text + a filled directional triangle. The arrow is
+// DRAWN (a canvas path, never a font glyph like '←/→') so headless Chromium can't
+// tofu it. Apex points canvas-RIGHT: on a plate turned to face NORTH (rotation.y
+// = π) local +x maps to world −x, so the arrow points WEST — back toward the deck
+// gap (062/issue 024b). Text is fitted clear of the arrow's right margin.
+function wayTex(text) {
+  const w = 512, h = 104;
+  const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#ecebe3'; g.fillRect(0, 0, w, h);
+  g.strokeStyle = '#b7b2a4'; g.lineWidth = 3; g.strokeRect(3, 3, w - 6, h - 6);
+  const ax = w - 34, ah = 28;                        // apex x, half-height
+  g.fillStyle = '#39372e';
+  g.beginPath(); g.moveTo(ax, h / 2); g.lineTo(ax - 46, h / 2 - ah); g.lineTo(ax - 46, h / 2 + ah); g.closePath(); g.fill();
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  fitFont(g, text, w - 130, Math.round(h * 0.5));
+  g.fillStyle = '#39372e'; g.fillText(text, (w - 100) / 2, h / 2 + 1);
+  const t = new THREE.CanvasTexture(cv); t.anisotropy = 4; return t;
+}
 
 export function buildNichols() {
   const root = millenniumRoot;
@@ -220,7 +239,11 @@ export function buildNichols() {
     }
     silverGeos.push(boxWorld(1.9, 0.2, 0.6, d.x, keelY - 0.14, zc));            // saddle cradle
     silverGeos.push(boxWorld(0.7, 0.18, 0.5, d.x, keelY - 0.03, zc));           // keel seat
-    if (doCollide) collide(d.x, zc, 0.5);
+    // 062/issue 023 class: colliders UNDER an elevated lane must be height-gated.
+    // The pier legs stand at grade (y0) but the DECK flies overhead (y4.6–8.7 up
+    // here) — an un-gated collider blocked the walker ON the deck. h=2.0 lets a
+    // grade walker still bump the legs while the deck walker passes clean above.
+    if (doCollide) collide(d.x, zc, 0.5, 2.0);
   };
   pier(872, 0, true);                              // grade, in the allee-trim buffer
   pier(897, 0, true);                              // grade, inside the Monroe slot (non-walk)
@@ -247,9 +270,30 @@ export function buildNichols() {
   // ==================== 7. NAMEPLATE (west flank) =====================
   // "NICHOLS BRIDGEWAY" facing WEST toward the Chase allee; the hull is the
   // solid rear (FrontSide, no mirror artifact).
-  { const np = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 0.55),
-      bmat(0xffffff, { map: plateTex('NICHOLS BRIDGEWAY', 512, 64, 40), side: THREE.FrontSide }));
-    np.position.set(115.9, 1.1, 846); np.rotation.y = -Math.PI / 2; root.add(np); }
+  // 062 DRAW-FOLD: this plate + the MODERN WING plate + the wayfinding plate
+  // were 3 separate bmat draws in every south frustum — folded into ONE
+  // 512x256 atlas mesh (pixel-identical placement), same recipe as the
+  // artinstitute.js campus plate atlas.
+  const _plates = [];
+  const plate = (x, y, z, w, h, rotY, tex, dx, dy, dw, dh) =>
+    _plates.push({ x, y, z, w, h, rotY, img: tex.image, dx, dy, dw, dh });
+  function flushPlates() {
+    const AW = 512, AH = 256, cv = document.createElement('canvas'); cv.width = AW; cv.height = AH;
+    const g = cv.getContext('2d');
+    const geos = [];
+    for (const p of _plates) {
+      g.drawImage(p.img, p.dx, p.dy, p.dw, p.dh);
+      const geo = new THREE.PlaneGeometry(p.w, p.h), uv = geo.attributes.uv;
+      const u0 = p.dx / AW, u1 = (p.dx + p.dw) / AW, v1 = 1 - p.dy / AH, v0 = 1 - (p.dy + p.dh) / AH;
+      uv.setXY(0, u0, v1); uv.setXY(1, u1, v1); uv.setXY(2, u0, v0); uv.setXY(3, u1, v0);
+      geo.rotateY(p.rotY); geo.translate(p.x, p.y, p.z);
+      geos.push(geo);
+    }
+    const t = new THREE.CanvasTexture(cv); t.anisotropy = 4;
+    root.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(geos, false),
+      bmat(0xffffff, { map: t, side: THREE.FrontSide })));
+  }
+  plate(115.9, 1.1, 846, 4.6, 0.55, -Math.PI / 2, plateTex('NICHOLS BRIDGEWAY', 512, 64, 40), 0, 0, 512, 64);
 
   // ==================== 8. BLUHM TERRACE FURNITURE ====================
   // (terrace slab is executor A's; y13, walkable.) White guard rails on N/W/S
@@ -269,6 +313,21 @@ export function buildNichols() {
   for (let x = 128.5; x <= B.x1 + 0.01; x += 1.9) railPost(x, B.z1);         // S edge (gap x123.5–128.5)
   railCap(128.5, B.x1, B.z1, B.z1);
 
+  // WAYFINDING lollipop beside the S-edge gap (062/issue 024b — the return route
+  // must read at a glance): a small "BRIDGE TO THE PARK" plate whose arrow points
+  // WEST, back to where the deck lands. Post rises from the terrace floor to the
+  // plate's BOTTOM edge only (PITFALLS: a lollipop post never runs up behind the
+  // text). Post + solid rear frame fold into railGeos (0xdad6ca, +0 draws); the
+  // plate is one bmat mesh like the NICHOLS BRIDGEWAY nameplate.
+  { const wx = 130.2, wz = 921.2, plateW = 2.55, plateH = 0.52;
+    const plateCy = B.y + 1.35;                       // centre y14.35; bottom edge y14.09
+    const plateBot = plateCy - plateH / 2;
+    railGeos.push(boxWorld(0.1, plateBot - B.y, 0.1, wx, (B.y + plateBot) / 2, wz));      // post: floor → plate bottom
+    railGeos.push(boxWorld(plateW + 0.12, plateH + 0.12, 0.06, wx, plateCy, wz + 0.06));  // solid rear (back never shows mirrored text)
+    plate(wx, plateCy, wz, plateW, plateH, Math.PI,
+      wayTex('BRIDGE TO THE PARK'), 0, 128, 512, 104);              // FrontSide faces NORTH into the terrace (atlas-folded, 062)
+  }
+
   // honest NON-DOOR on the wing wall (x132.4) facing the terrace (west)
   { const gx = B.x1;                               // 132.4
     const glass = new THREE.Mesh(new THREE.BoxGeometry(0.15, 3.0, 2.4), bmat(0x86a2b6));
@@ -277,9 +336,8 @@ export function buildNichols() {
       railGeos.push(boxWorld(0.16, 3.3, w, gx - 0.14, B.y + 1.65, 915 + dz));
     railGeos.push(boxWorld(0.16, 0.16, 2.86, gx - 0.14, B.y + 3.25, 915));    // frame head
     railGeos.push(boxWorld(0.16, 0.16, 2.86, gx - 0.14, B.y + 0.05, 915));    // frame sill
-    const mw = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.52),
-      bmat(0xffffff, { map: plateTex('MODERN WING', 256, 64, 26), side: THREE.FrontSide }));
-    mw.position.set(gx - 0.15, B.y + 3.62, 915); mw.rotation.y = -Math.PI / 2; root.add(mw); }
+    plate(gx - 0.15, B.y + 3.62, 915, 2.6, 0.52, -Math.PI / 2,
+      plateTex('MODERN WING', 256, 64, 26), 0, 64, 256, 64); }      // atlas-folded (062)
 
   // two simple west-facing benches (seat = wood bucket, legs = silver bucket)
   for (const [bx, bz] of [[127, 911], [130.5, 918]]) {
@@ -296,4 +354,5 @@ export function buildNichols() {
   root.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(glowGeos, false), bmat(0xfff2c8)));
   root.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(woodGeos, false), toon(WOOD)));   // folds into wood bucket
   root.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(railGeos, false), toon(0xdad6ca)));
+  flushPlates();   // the bridgeway plate atlas — ONE draw for all 3 plates (062)
 }

@@ -7,8 +7,8 @@ turns: 50
 title: Crosswalks are PAINT, not sidewalk slabs (issue 018 reopened)
 acceptance: >
   Owner screenshot (2026-07-12,
-  refs/inbox/owner-issue-018-reopen-crosswalk-sidewalk-slabs.png — LOOK at
-  it): 052's crosswalks came out as raised sidewalk-material slabs laid
+  refs/wrigleyville/owner-issue-018-reopen-crosswalk-sidewalk-slabs.png —
+  filed from refs/inbox by 062, manifest source "owner" — LOOK at it): 052's crosswalks came out as raised sidewalk-material slabs laid
   across the asphalt — pink/cream tiles with dark joints, reading exactly
   like "sidewalks on top of where there should be crosswalks" (the owner's
   words, twice now). Rebuild the crosswalk rendering at every Wrigleyville
@@ -24,7 +24,7 @@ acceptance: >
   collection. Zero rng impact; walkprobe green; draw budget unchanged;
   single-file build passes.
 refs:
-  - refs/inbox/owner-issue-018-reopen-crosswalk-sidewalk-slabs.png (the anti-pattern)
+  - refs/wrigleyville/owner-issue-018-reopen-crosswalk-sidewalk-slabs.png (the anti-pattern)
   - refs/streetscape/ (016's Commons set includes real crossings — e.g. the Clark/Waveland Raising Cane's corner shots)
   - src/wrigley/streets.js (052's crosswalk builder — fix in place)
   - autopilot/issues/018-wrigley-crosswalks-missing.md (REOPENED note)

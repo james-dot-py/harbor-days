@@ -20,3 +20,20 @@
   plate) so the return route is legible at a glance; walk the full round
   trip lawn→terrace→lawn in act.mjs with shots READ at both ends.
 - route: task 062, owner punch-list items (0c)/(0d).
+
+## RESOLVED (062, 2026-07-12)
+
+(a) The Great Lawn hedge now BREAKS at the bridge mouth: the west hedge run
+stops at z=831 and the south run starts at x=120.5, leaving a clear gap with
+a paved curb apron (x 118–121.3, z 827–833) leading onto the ramp. Decisive
+shot 062-mouth-decisive2 read: open mouth, apron, deck rising beyond.
+(b) The Modern Wing terrace canopy was raised from y14.9 to y18.1 (~3.7 m of
+chase-cam headroom over the y≈14.3 terrace — the bay-swing-camera lesson),
+posts re-lengthened to match, and the slab switched to self-lit bmat(0xe6e4dc)
+after the raised toon slab read pea-green from below (ground-bounce pitfall).
+Wayfinding: a 'BRIDGE TO THE PARK' plate with a drawn arrow at the terrace
+rail gap (130.2, y14.35, 921.2) facing the arriving player; the railing gap +
+deck sightline read in mp-nichols-f2. Round trip lawn→terrace→lawn verified by
+the steering bot (up and down runs, done=true stalls=0) with shots READ at
+both ends. Pier colliders under the deck are now height-gated
+(collide(...,h=2.0)) so they can't pinch the elevated lane.

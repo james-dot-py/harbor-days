@@ -733,7 +733,7 @@ for(const [label,x,z] of [
 console.log('\n--- Millennium: MAGGIE DALEY (058) — rim net, ribbon bed, island, play garden, CSG all walkable ---');
 for(const [label,x,z] of [
   ['E-rim promenade',205,750],['Randolph-side north walk',300,708],['fieldhouse esplanade',280,732],
-  ['bridge-landing plaza',250,808],['climbing-wall island',250,760],['plaza->ribbon connector',262,785],
+  ['bridge-landing plaza',250,808],['climbing-wall island',260,741],['plaza->ribbon connector',262,785],
   ['play-garden esplanade',285,806],['play garden core',285,830],['Slide Crater apron',305,858],
   ['CSG garden walk',330,760],['tennis pad',307,720],['Monroe-side south rim',270,882],['LSD overlook',334,830],
 ]) expect(`${label} (${x},${z}) walkable at grade`,MP.walkableM(x,z)&&MP.surfaceYM(x,z)===0,true);
@@ -747,17 +747,65 @@ for(const i of [0,12,24,34,44,54]){ const P=MP.RIBBON_M.loop[i];
 // ...and the skates come OFF at the lip: island / connector / landing / rims
 // are walkable but kind-null (no glide on the plaza, no class leak).
 for(const [label,x,z] of [
-  ['climbing-wall island plaza',250,757],['plaza->ribbon connector',262,785],
+  ['climbing-wall island plaza',261,754],['plaza->ribbon connector',262,785],
   ['bridge-landing plaza',250,808],['fieldhouse esplanade',280,732],['E-rim promenade',205,750],
 ]) expect(`${label} (${x},${z}) walkable but NOT ice`,MP.walkableM(x,z)&&MP.kindAtM(x,z)===null,true);
 // building footprints SEALED (052 law — data carve, not circular colliders)
 for(const [label,x,z] of [
-  ['climbing wall A footprint',250,748],['play ship footprint',272,845],['lighthouse footprint',303,849],
+  ['climbing wall A footprint',260,748],['climbing wall B footprint',266.5,760.5],
+  ['play ship footprint',272,845],['lighthouse footprint',303,849],
   ['fort tower footprint',289,822],['CSG pavilion frame',329.5,746],['fieldhouse footprint',264,720],
 ]) expect(`${label} (${x},${z}) sealed (NOT walkable)`,MP.walkableM(x,z),false);
 // the CSG Federal Building COLUMNS stay collider-pattern (small piers standing
 // ON the garden walk, like the Crown towers / peristyle) — walkable in data.
 expect('CSG columns are colliders on walkable ground (327.4,714.5)',MP.walkableM(327.4,714.5),true);
+
+console.log('\n--- Millennium 062: ribbon ISLANDS + deck BANDS (issues 022/023) ---');
+// (a) the climbing walls are ISLANDS the ribbon loops AROUND: each wall's
+// SHELL ENVELOPE (footprint + fold/bulge/truss overhang per maggie.js
+// climbWall opts) clears the ice band (centerline ±2.7) by a rail/curb margin.
+{
+  const L=MP.RIBBON_M.loop,N=65,U=L.slice(0,N),HW=MP.RIBBON_M.halfW;
+  const rectClr=(x0,x1,z0,z1)=>{let best=1e9;
+    for(let i=0;i<N;i++){const a=U[i],b=U[(i+1)%N];
+      const st=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/0.25);
+      for(let s=0;s<=st;s++){const px=a[0]+(b[0]-a[0])*s/st,pz=a[1]+(b[1]-a[1])*s/st;
+        const dx=px<x0?x0-px:px>x1?px-x1:0,dz=pz<z0?z0-pz:pz>z1?pz-z1:0;
+        best=Math.min(best,Math.hypot(dx,dz));}}
+    return best;};
+  const OPTS=[{thick:4.5,foldAmp:0.85,bulge:1.9,lean:0.6},{thick:3.2,foldAmp:0.7,bulge:1.2,lean:-0.5}];
+  MP.MAGGIE_M.walls.forEach((w,i)=>{
+    const cz=(w.z0+w.z1)/2,o=OPTS[i];
+    const d=rectClr(w.x0,w.x1,cz-o.foldAmp-o.thick-0.35,cz+o.foldAmp+o.bulge+Math.max(o.lean,0)+0.45);
+    expect(`wall${i} shell envelope clears the ice band by >= 0.8 (${(d-HW).toFixed(2)})`,d>=HW+0.8,true);});
+  // x-masts (pole + collider r0.5) never stand in the ice band
+  for(const [mx,mz] of MP.MAGGIE_M.xmasts){
+    let best=1e9;
+    for(let i=0;i<N;i++){const a=U[i],b=U[(i+1)%N];
+      const dx=b[0]-a[0],dz=b[1]-a[1],L2=dx*dx+dz*dz||1;
+      let t=Math.max(0,Math.min(1,((mx-a[0])*dx+(mz-a[1])*dz)/L2));
+      best=Math.min(best,Math.hypot(mx-(a[0]+dx*t),mz-(a[1]+dz*t)));}
+    expect(`x-mast (${mx},${mz}) clear of the ice band (${best.toFixed(2)} >= ${(HW+0.55).toFixed(2)})`,best>=HW+0.55,true);}
+}
+// (b) the BP + Nichols decks are CONTINUOUS BANDS over their swept curves —
+// centerline AND both outer lanes walkable at every dense sample (the old
+// per-segment rect union left outside-of-bend wedge slivers = "stopped every
+// few meters", issue 023). This is the mechanical no-sliver regression test.
+{
+  const lane=(pts,offs,label)=>{let bad=0;
+    for(let i=1;i<pts.length;i++){const p=pts[i],q=pts[i-1];
+      let tx=p[0]-q[0],tz=p[1]-q[1];const l=Math.hypot(tx,tz)||1;tx/=l;tz/=l;
+      for(const s of offs) if(!MP.walkableM(p[0]-tz*s,p[1]+tx*s))bad++;}
+    expect(`${label}: centerline + lanes walkable at every sample (${bad} bad)`,bad,0);};
+  lane(MP.BP_DECK_PTS,[0,1.9,-1.9],'BP band');
+  lane(MP.NICHOLS_DECK_PTS,[0,1.0,-1.0],'Nichols band');
+  // y stays continuous along the BP band (no seam jumps)
+  let worst=0;for(let i=1;i<MP.BP_DECK_PTS.length;i++){
+    const d=Math.abs(MP.surfaceYM(MP.BP_DECK_PTS[i][0],MP.BP_DECK_PTS[i][1])
+                    -MP.surfaceYM(MP.BP_DECK_PTS[i-1][0],MP.BP_DECK_PTS[i-1][1]));
+    if(d>worst)worst=d;}
+  expect(`BP band y continuous (worst step ${worst.toFixed(3)} < 0.35)`,worst<0.35,true);
+}
 
 // ===== Millennium: ART INSTITUTE + NICHOLS (task 060) — flags artInstitute +
 // nichols LIVE. The AI block (steps ramp, gardens, east rim), the closed-Monroe
@@ -877,7 +925,7 @@ console.log('\n--- Millennium: flood fill from the spawn — one connected netwo
     ['seating bowl',147,777],['Great Lawn',150,820],['Seam boardwalk',159,862],
     ['BP crest',200,790],['NW corner',50,709],['SW corner',50,890],
     // Maggie Daley (058) — every zone reached ONLY over the BP crossing
-    ['BP landing plaza',250,808],['ribbon bed',276,738],['climbing island',250,760],
+    ['BP landing plaza',250,808],['ribbon bed',276,738],['climbing island',260,741],
     ['play garden',285,830],['Slide Crater',305,858],['CSG',330,760],['fieldhouse esplanade',280,732],
     ['Maggie NE corner',336,708],['Maggie SE corner',336,884],['LSD overlook',334,830],
   ]) expect(`${label} (${x},${z}) reached`,seen[(z-z0)*W+(x-x0)]===1,true);
@@ -889,7 +937,9 @@ console.log('\n--- Millennium: frame discipline (clamp, spawn, billboard floor, 
   // every walk quad sample sits inside the clamp (the clamp backs the walls)
   let out=0;
   for(const q of MP.WALK_M){
-    const pts=q.seg
+    const pts=q.band
+      ? [[q.bx0,q.bz0],[q.bx1,q.bz0],[q.bx0,q.bz1],[q.bx1,q.bz1]]   // 062 deck bands: bbox corners
+      : q.seg
       ? [[q.cx+q.ux*q.hl+q.uz*q.hw,q.cz+q.uz*q.hl-q.ux*q.hw],[q.cx+q.ux*q.hl-q.uz*q.hw,q.cz+q.uz*q.hl+q.ux*q.hw],
          [q.cx-q.ux*q.hl+q.uz*q.hw,q.cz-q.uz*q.hl-q.ux*q.hw],[q.cx-q.ux*q.hl-q.uz*q.hw,q.cz-q.uz*q.hl+q.ux*q.hw]]
       : [[q.x0,q.z0],[q.x1,q.z0],[q.x0,q.z1],[q.x1,q.z1]];

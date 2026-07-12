@@ -652,8 +652,13 @@ up — 060 dresses its segment).
   `BP_CROSSING_M` (millennium.js); 058 sweeps treads/parapets by CatmullRom
   tangent (the 048 contour law) and REPLACES the shipped simplified deck +
   approach (BP_BRIDGE_M stays in data for the pre-flip world).
-- Walkable = the segQ chain over the same nodes (halfW 2.6), ramp-only at both
-  ends; flank rules: lawn SE quad shrinks to the launch esplanade
+- Walkable = a continuous half-width BAND over the SAME CatmullRom the
+  geometry sweeps (062/issue 023: the old per-segment segQ chain left
+  outside-of-bend wedge slivers at every joint — "stopped every few meters").
+  The data module samples the curve densely (plain Hermite, THREE-matching,
+  tension 0.5) and tests point-to-polyline distance ≤ 2.35 (0.25 lane margin
+  off the parapet inner face at 2.6), circular caps at joints. Ramp-only at
+  both ends; flank rules: lawn SE quad shrinks to the launch esplanade
   (168–186 × 833–846), a planted non-walk buffer under the rising north run,
   Columbus rim walks re-split for the new overflight (N: 713–784; S:
   x 185.8–189 z 808–846 then full-width 846–886). Slope compressed like the
@@ -668,7 +673,7 @@ walkable ground stays park grade y 0 (liberty).
 |---|---|---|
 | Fieldhouse | mass x 243–285, z 712–727.5 (osm 764227071 anchors the Randolph front) | long low glassy park-district building; entry lawn south |
 | **Skating Ribbon** | closed 66-pt loop x 222.2–279, z 731.7–770.9 (osm way 524270342, VERBATIM in RIBBON_M) | ~250 m serpentine path, halfW 2.7, looping the climbing walls; 058 built the BED (rockwork rims + rails + X-mast lights); **059 SHIPPED: `ribbonIce` on** — the strip renders as ICE (rink recipe), kindAt 'ice' end to end (049 glide verbatim), NPC skaters strung along the loop (packs/ribbon-skaters.js) |
-| **Climbing walls** (not in OSM; owner aerial + 20151008 ref) | wall A x 242–258, z 744–752, h 12 (faceted crescent); wall B x 258.5–268, z 756.5–763.5, h 9 (prow) | gray faceted panels + candy-colored holds + steel truss backs; stand on the ribbon's island (walkable, 6 rects sealing both walls — 052 law); climbable only if it reads honestly (058's call) |
+| **Climbing walls** (not in OSM; owner aerial + 20151008 ref; REPOSITIONED 062/issue 022 — the 058 spots overlapped the ice) | wall A x 254–266, z 745–751, h 12 (faceted crescent); wall B x 263–270, z 758–763, h 9 (prow) | gray faceted panels + candy-colored holds + steel truss backs; TRUE ISLANDS the ribbon loops AROUND — every shell envelope clears the ice band (centerline ±2.7) by ≥ 3.5 m (rail/curb margin, walkprobe-asserted); stand on the island plaza (walkable, 9 rects sealing both walls — 052 law); climbable only if it reads honestly (058's call) |
 | **Play Garden** (osm rooms, real names) | zone x 252–316, z 806–864: Cradle Nest 254.5–267 × 840–848 · Harbor SHIP 267.6–276 × 841–849 · The Sea 270.6–293 × 812.5–835 · Lagoon 278–285 × 820–827 · Watering Hole splash pad 278–282 × 815–819 · Enchanted Forest 295–313 × 808–829 · Swings 279–286 × 836–842 · **Slide Crater 294.5–314 × 838–862 w/ the LIGHTHOUSE (303, 849)** | chibi-heaven: red/blue play ship + rope nets, rope suspension bridge + timber fort tower (286–292 × 819–825), red-striped lighthouse + curling steel tube slide + crater bowl, string-lit mini-forest, blue-green wave rubber ground; 11 walk rects seal ship/lighthouse/tower |
 | **Cancer Survivors' Garden** | x 321.7–338.8, z 710.8–789 (osm 10601819) | terraced formal garden on the LSD overlook rim: the two real **Federal Building Columns** (327.4, 714.5) / (331.9, 714.5), two black steel PAVILION frames (~(329.5, 746) / (329.5, 772), carved from the walk), crabapple bosque, beds |
 | Tennis pair (RELOCATED — NE-wedge fold) | pads x 296–318, z 713–727 | real courts sit in the folded wedge (osm x 393–414); moved to the north lawn between fieldhouse and CSG, north-rim program order preserved (fieldhouse → tennis → columns → CSG) |
@@ -688,7 +693,7 @@ Masses simplified from osm relation 1870546 (105-pt outline):
 | **Modern Wing** | x 121–171, z 909–930, h 14 (+ flying-carpet canopy) | white limestone + glass; Bluhm terrace x 124.8–132.4 × 909.5–922 at y 13 = the Nichols landing |
 | East campus | McKinlock x 125–147 × 973–1031 · SE block x 147–175 × 980–1027 · Columbus pavilion x 168–180.3 × 942–980 + pool strip x 177.4–183 × 954–985 | quieter masses; east rim walk x 181–189 z 908–1032 |
 | **Stock Exchange Arch — MOVED TO ITS REAL SPOT** | freestanding at **(184, 935)**, facing Columbus | supersedes the south-backdrop cameo (BACKDROP_M.south retires when the flag flips — the real zone replaces it) |
-| **Nichols Bridgeway** (sub-flag `nichols`) | osm way 90707301: (117.4, 839.7) → (122.7, 925.9); chain y 0→13, halfW 1.6, landing on the Bluhm terrace (walkable pad, honest door) | white boat-hull belly over a river-stone bed; walkable ONLY with the recorded carve-outs (Monroe sidewalk slot x 115.8–122.2 + bypass, allee SE trim, lawnW west trim) — 060 flips or ships scenery and says which |
+| **Nichols Bridgeway** (sub-flag `nichols`) | osm way 90707301: (117.4, 839.7) → (122.7, 925.9); deck y 0→13 — walkable = continuous BAND (hw 1.4) over the same smoothed alignment the deck sweeps, y pinned to the node-linear lerp (062 band law, kills the terrace-swing wedge sliver) — landing on the Bluhm terrace (walkable pad, honest door) | white boat-hull belly over a river-stone bed; walkable ONLY with the recorded carve-outs (Monroe sidewalk slot x 115.8–122.2 + bypass, allee SE trim, lawnW west trim) — 060 flips or ships scenery and says which |
 | Michigan cliff extension | band x 6–30 grows z 935 → 1080: BORG-WARNER z 984 (glass) · **SYMPHONY CENTER z 1002** (ORCHESTRA HALL) · **RAILWAY EXCHANGE z 1023** (white terra-cotta, rooftop SANTA FE sign, self-lit) · McCORMICK BLDG z 1072 (edge) | the cliff faces the lions |
 | Route 66 | BEGIN sign at the spine near (48.5, 968) (osm 33.4, 967.5 across Michigan — pulled to the park curb, liberty) | delight seed: "ROUTE 66 BEGINS HERE" |
 

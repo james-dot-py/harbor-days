@@ -1,6 +1,14 @@
 {
   "images": [
     {
+      "file": "owner-issue-018-reopen-crosswalk-sidewalk-slabs.png",
+      "source": "owner",
+      "author": "owner-supplied",
+      "license": "owner reference only",
+      "fetchDate": "2026-07-12T00:00:00.000Z",
+      "note": "Owner playtest screenshot (2026-07-12): 052's crosswalks read as raised pink/cream SIDEWALK slabs with dark joints laid across the asphalt — 'sidewalks on top of where there should be crosswalks'. Issue 018 reopened; filed from refs/inbox by task 062; evidence for task 063 (crosswalks are PAINT: flat white continental bars flush on asphalt)."
+    },
+    {
       "file": "owner-issue-020-black-platform-x-311.5-z-523.0.png",
       "source": "owner",
       "author": "owner-supplied",

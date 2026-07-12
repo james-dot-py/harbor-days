@@ -91,8 +91,12 @@ export function buildMaggie() {
   q(256, 316, 802, 806, 0.0, C.pave);                            // landing -> play esplanade (N of PZ)
   q(246, 252, 816, 878, 0.0, C.pave);                            // plaza -> south rim (W of PZ)
   q(252, 254, 864, 878, 0.0, C.pave);                            // ...its stub S of PZ
-  // climbing-wall island plaza (inside the ribbon loop, around the walls)
-  q(236, 276, 736, 770, 0.005, C.plaza);
+  // climbing-wall island plaza (inside the ribbon loop, around the walls) —
+  // two quads matching the 062 island (walls x254-266 z745-751 + x263-270
+  // z758-763). Overlap with the ice band/soil rim is harmless: plaza y 0.005
+  // renders UNDER the ice (0.035) and the soil rim (0.018).
+  q(243.5, 274.5, 736.5, 758, 0.005, C.plaza);
+  q(255.5, 276, 758, 767, 0.005, C.plaza);
 
   // =====================================================================
   // B. ROLLING LANDFORMS — a few low PLANTED mounds (visual only, off-walk)
@@ -112,7 +116,6 @@ export function buildMaggie() {
   //    the pale pre-ice bed before that (058).
   // =====================================================================
   const N = 65, U = L.slice(0, N);                                 // 65 unique loop verts (closed)
-  let cx = 0, cz = 0; for (const p of U) { cx += p[0]; cz += p[1]; } cx /= N; cz /= N;
   // planting/soil rim under the ribbon
   for (let i = 0; i < N; i++) {
     const a = U[i], b = U[(i + 1) % N];
@@ -196,23 +199,44 @@ export function buildMaggie() {
   }
   poolInstanced('mg-rail-post', postGeo, posts);
   poolInstanced('mg-rail', railGeo, rails);
-  // ROCKWORK RIMS — chunky gray rocks on the outer rim + islands inside the loop
+  // ROCKWORK RIMS — chunky gray rocks on the outer rim + islands inside the loop.
+  // 062/issue 022: the outer-rim scatter used to offset each vertex along the
+  // CENTROID-radial direction; the loop is non-convex, so at concave stretches
+  // that ran ALONG the ice band and dumped rocks ON the ice. Now offset along the
+  // TRUE outward normal (nrm() flipped by a point-in-polygon test) and GATE every
+  // rock/shrub against the FULL loop centerline so nothing can land on the ice.
   const rockGeo = new THREE.IcosahedronGeometry(1, 0);
   const shrubGeo = new THREE.SphereGeometry(1, 7, 5);
   const rocks = [], shrubs = [];
+  // point-in-polygon over U (loop verts) — orients nrm outward, and the full
+  // point-to-polyline distance both gate placement against the ice band.
+  const pipU = (x, z) => { let c = false; for (let a = 0, b = N - 1; a < N; b = a++) { const xi = U[a][0], zi = U[a][1], xj = U[b][0], zj = U[b][1]; if ((zi > z) !== (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi) c = !c; } return c; };
+  const distToLoop = (x, z) => { let best = Infinity; for (let k = 0; k < N; k++) { const a = U[k], b = U[(k + 1) % N]; const dx = b[0] - a[0], dz = b[1] - a[1], L2 = dx * dx + dz * dz || 1; let t = ((x - a[0]) * dx + (z - a[1]) * dz) / L2; t = Math.max(0, Math.min(1, t)); best = Math.min(best, Math.hypot(x - (a[0] + dx * t), z - (a[1] + dz * t))); } return best; };
   for (let i = 0; i < N; i++) {
-    const p = U[i]; let ox = p[0] - cx, oz = p[1] - cz; const l = Math.hypot(ox, oz) || 1; ox /= l; oz /= l;
-    if (i % 2 === 0) {                                             // outer-rim rock/shrub clusters
-      const d = HW + 1.4 + rr(0, 2.2), rx = p[0] + ox * d, rz = p[1] + oz * d;
-      const s = rr(0.55, 1.5);
-      rocks.push({ pos: [rx, s * 0.35, rz], yaw: rr(0, 6.28), scale: [s, s * rr(0.6, 0.9), s], color: C.rock });
-      if (i % 4 === 0) shrubs.push({ pos: [p[0] + ox * (d + 1.6), 0.35, p[1] + oz * (d + 1.6)], yaw: rr(0, 6.28), scale: [rr(1, 1.5), rr(0.65, 0.95), rr(1, 1.5)], color: C.shrub });
+    if (i % 2 !== 0) continue;                                     // outer-rim rock/shrub clusters
+    // DRAW every random FIRST so the local-rng consumption is identical whether
+    // or not the gates below keep this rock/shrub (stable call order).
+    const dd = rr(0, 2.2), s = rr(0.55, 1.5), ry = rr(0, 6.28), sy = rr(0.6, 0.9);
+    const isShrub = i % 4 === 0;
+    const shY = isShrub ? rr(0, 6.28) : 0, shX2 = isShrub ? rr(1, 1.5) : 0, shY2 = isShrub ? rr(0.65, 0.95) : 0, shZ2 = isShrub ? rr(1, 1.5) : 0;
+    const p = U[i];
+    let [nx, nz] = nrm(i);                                          // lateral unit; flip to point OUTWARD
+    if (pipU(p[0] + nx * 0.5, p[1] + nz * 0.5)) { nx = -nx; nz = -nz; }
+    const d = HW + 1.4 + dd, rx = p[0] + nx * d, rz = p[1] + nz * d;
+    if (distToLoop(rx, rz) >= HW + s + 0.4)                         // gate: never on/against the ice
+      rocks.push({ pos: [rx, s * 0.35, rz], yaw: ry, scale: [s, s * sy, s], color: C.rock });
+    if (isShrub) {
+      const sx = p[0] + nx * (d + 1.6), sz = p[1] + nz * (d + 1.6);
+      if (distToLoop(sx, sz) >= HW + 1.8)
+        shrubs.push({ pos: [sx, 0.35, sz], yaw: shY, scale: [shX2, shY2, shZ2], color: C.shrub });
     }
   }
-  // a few rock islands INSIDE the loop, clear of the wall footprints
-  for (const [ix, iz] of [[231, 748], [269, 743], [272, 766], [238, 762], [263, 749]]) {
+  // rock islands ON the island plaza, clear of BOTH wall footprints (>=1.5) and
+  // the loop centerline (>=4.6); each gets a collider (players stand on plaza).
+  for (const [ix, iz] of [[255.5, 741], [266.5, 741.5], [251, 754], [270, 755], [260, 759]]) {
     const s = rr(0.7, 1.4);
     rocks.push({ pos: [ix, s * 0.35, iz], yaw: rr(0, 6.28), scale: [s, s * rr(0.6, 0.9), s], color: C.rock });
+    collide(ix, iz, s);
   }
   poolInstanced('mg-rock', rockGeo, rocks);
 

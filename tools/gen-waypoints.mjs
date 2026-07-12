@@ -978,9 +978,11 @@ addM('mp-ribbon', [
   // lands there).
   { x: 262, z: 775, yaw: -2.9, pitch: 0.06, dist: 6.5 },    // east lobes sweep + wall B holds + rails + skaters
 ]);
+// 062: the walls are TRUE islands now (A 254-266 x 745-751, B 263-270 x
+// 758-763 — issue 022); framings re-aimed at the new spots from the plaza.
 addM('mp-climbing-walls', [
-  { x: 240, z: 756, yaw: 1.0, pitch: 0.06, dist: 5.5 },     // wall A faceted face + holds, truss edge of wall B, towers behind
-  { x: 250, z: 768, yaw: -2.4, pitch: 0.06, dist: 6 },      // both walls on the ribbon island, three-quarter
+  { x: 252, z: 757, yaw: 2.42, pitch: 0.08, dist: 6 },      // wall A faceted face + holds from the mid plaza
+  { x: 263, z: 772.5, yaw: 2.95, pitch: 0.1, dist: 6 },     // both walls three-quarter from the south connector
 ]);
 addM('mp-play-garden', [
   { x: 279, z: 851, yaw: -2.32, pitch: 0.08, dist: 8 },     // the navy play SHIP (rope nets over wave rubber)

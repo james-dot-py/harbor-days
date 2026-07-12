@@ -130,15 +130,35 @@ export function buildArtInstitute() {
   q(55, 95, 1014, 1017, 0.006, C.pave);             // center aisle
   q(74, 77, 1001, 1030, 0.006, C.pave);             // cross path
 
-  // canvas planes — FrontSide facing a compass dir + rely on a solid rear.
-  const westCanvas = (x, y, z, w, h, tex) => {          // faces WEST (-x)
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bmat(0xffffff, { map: tex }));
-    m.position.set(x, y, z); m.rotation.y = -Math.PI / 2; root.add(m); return m;
-  };
-  const eastCanvas = (x, y, z, w, h, tex) => {          // faces EAST (+x)
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), bmat(0xffffff, { map: tex }));
-    m.position.set(x, y, z); m.rotation.y = Math.PI / 2; root.add(m); return m;
-  };
+  // canvas plates — FrontSide facing a compass dir + rely on a solid rear.
+  // 062 DRAW-FOLD: every one-off canvas plate on this campus (frieze, name
+  // bands, 3 exhibition banners, chalk board, both Route 66 faces) used to
+  // be its OWN 4-vert bmat mesh — 9 draws in every south-park frustum
+  // (mp-bean-f3 measured 486>480, the budget gate). They now share ONE
+  // hand-packed 1024x1024 atlas + ONE merged mesh = 1 draw, pixel-identical
+  // placement (each plate keeps its exact plane size/position/rotation; the
+  // atlas just re-homes the texels). flushPlates() runs at the end of the
+  // build. rotY-then-tiltX order matches the old mesh Euler ('XYZ').
+  const _plates = [];
+  const plate = (x, y, z, w, h, rotY, tex, dx, dy, dw, dh, tiltX = 0) =>
+    _plates.push({ x, y, z, w, h, rotY, img: tex.image, dx, dy, dw, dh, tiltX });
+  function flushPlates() {
+    const A = 1024, cv = document.createElement('canvas'); cv.width = A; cv.height = A;
+    const g = cv.getContext('2d');
+    const geos = [];
+    for (const p of _plates) {
+      g.drawImage(p.img, p.dx, p.dy, p.dw, p.dh);
+      const geo = new THREE.PlaneGeometry(p.w, p.h), uv = geo.attributes.uv;
+      const u0 = p.dx / A, u1 = (p.dx + p.dw) / A, v1 = 1 - p.dy / A, v0 = 1 - (p.dy + p.dh) / A;
+      uv.setXY(0, u0, v1); uv.setXY(1, u1, v1); uv.setXY(2, u0, v0); uv.setXY(3, u1, v0);
+      geo.rotateY(p.rotY);
+      if (p.tiltX) geo.rotateX(p.tiltX);
+      geo.translate(p.x, p.y, p.z);
+      geos.push(geo);
+    }
+    const t = new THREE.CanvasTexture(cv); t.anisotropy = 4;
+    root.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(geos, false), bmat(0xffffff, { map: t })));
+  }
 
   // =====================================================================
   // 2. THE WEST BLOCK (1893 Allerton) — the beaux-arts hero, face WEST at x59
@@ -186,8 +206,8 @@ export function buildArtInstitute() {
     ];
     bays.forEach((bz, i) => {
       const [bg, fg, words, sub] = banners[i];
-      const m = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 5), bmat(0xffffff, { map: bannerTex(bg, fg, words, sub) }));
-      m.position.set(58.72, 9.0, bz); m.rotation.set(0.04, -Math.PI / 2, 0); root.add(m);
+      plate(58.72, 9.0, bz, 2.2, 5, -Math.PI / 2,
+        bannerTex(bg, fg, words, sub), i * 256, 240, 256, 576, 0.04);  // atlas-folded (062)
       box(0.05, 5, 2.2, 58.8, 9.0, bz, C.glaze);                    // solid dark rear
     });
     // --- flank-wing upper loggia (y 8–13.5): arched recesses + mullions ----
@@ -201,9 +221,9 @@ export function buildArtInstitute() {
     // --- entablature + frieze lettering + heavy cornice --------------------
     box(0.35, 0.4, d, 58.75, 14.4, cz, C.trim);                      // architrave (full width)
     box(0.6, 0.95, d + 0.6, 58.6, 15.9, cz, C.trim);                 // heavy cornice
-    westCanvas(58.93, 15.0, 970.75, 11, 0.85, friezeTex('THE ART INSTITVTE OF CHICAGO'));
-    westCanvas(58.93, 15.0, 954.75, 9, 0.6, nameTex('RAPHAEL · LEONARDO · TITIAN'));
-    westCanvas(58.93, 15.0, 986.5, 9, 0.6, nameTex('REMBRANDT · HOLBEIN · VERONESE'));
+    plate(58.93, 15.0, 970.75, 11, 0.85, -Math.PI / 2, friezeTex('THE ART INSTITVTE OF CHICAGO'), 0, 0, 1024, 96);
+    plate(58.93, 15.0, 954.75, 9, 0.6, -Math.PI / 2, nameTex('RAPHAEL · LEONARDO · TITIAN'), 0, 96, 768, 72);
+    plate(58.93, 15.0, 986.5, 9, 0.6, -Math.PI / 2, nameTex('REMBRANDT · HOLBEIN · VERONESE'), 0, 168, 768, 72);
     // --- PEDIMENT over the portico bay (base y16.4, apex y19) --------------
     box(0.72, 0.36, 15, 58.55, 16.45, 970.75, C.trim);              // base cornice
     const steps = [[16.75, 14], [17.2, 11], [17.65, 8], [18.1, 5], [18.55, 2.2]];
@@ -249,7 +269,7 @@ export function buildArtInstitute() {
     }
     // --- sandwich board on the portico landing (chalk faces WEST approach) --
     { const bx = 58.6, bz = 969.4, by = 1.9;
-      westCanvas(bx - 0.09, by + 0.55, bz, 0.9, 0.95, chalkTex());   // chalkboard front
+      plate(bx - 0.09, by + 0.55, bz, 0.9, 0.95, -Math.PI / 2, chalkTex(), 768, 240, 256, 200);  // chalkboard front
       box(0.05, 0.95, 0.9, bx + 0.06, by + 0.55, bz, C.trim);       // pale A-frame rear
       box(0.28, 0.1, 0.9, bx, by + 1.05, bz, C.trim);              // top ridge cap
       for (const fz of [bz - 0.35, bz + 0.35]) box(0.3, 0.1, 0.1, bx, by + 0.03, fz, C.trim); // feet
@@ -479,8 +499,8 @@ export function buildArtInstitute() {
     // shield reads from BOTH the park (east) and the road (west) — a landmark.
     const sx = 48.5, sz = 962.5, tex = route66Tex();
     box(0.14, 2.05, 0.14, sx, 1.02, sz, C.dark);                    // lollipop post (ends at panel bottom)
-    eastCanvas(sx + 0.05, 2.35, sz, 1.0, 1.25, tex);               // park side
-    westCanvas(sx - 0.05, 2.35, sz, 1.0, 1.25, tex);               // road side
+    plate(sx + 0.05, 2.35, sz, 1.0, 1.25, Math.PI / 2, tex, 768, 440, 256, 320);   // park side
+    plate(sx - 0.05, 2.35, sz, 1.0, 1.25, -Math.PI / 2, tex, 768, 440, 256, 320);  // road side
     collide(sx, sz, 0.4);
   }
 
@@ -515,17 +535,29 @@ export function buildArtInstitute() {
     q(B.x0, 132.4, B.z1, 930, 0.004, C.plaza);
     // FLYING-CARPET canopy: a thin white slab floating over roof + terrace +
     // the trench sliver, on slim posts (the wing's signature).
-    box(172.5 - 122.5, 0.3, 931.5 - 907.5, (122.5 + 172.5) / 2, 14.9, (907.5 + 931.5) / 2, wingWhite);
+    // 062/issue 024b: RAISED from y14.9 → y18.1 (underside 17.95). At 14.9 the
+    // 1.9 m of terrace headroom buried the chase cam (~y16.6) INSIDE the slab —
+    // "the ceiling is too low to see anything." The bay-camera lesson: NEVER
+    // leave the chase cam inside geometry; give the terrace a real overhead deck.
+    // SELF-LIT (bmat, the Nichols-hull escape): once raised, this big near-
+    // horizontal slab is the dominant plane in every terrace view, and a toon
+    // slab that size reads PEA-GREEN from below — its underside catches the
+    // hemisphere's green ground-bounce (PITFALLS "toon steel reads GREEN"). The
+    // signature blade is WHITE, so bake it cream self-lit. +1 draw (no longer
+    // folds into the wingWhite merge bucket). Posts stay toon (thin verticals ok).
+    { const carpet = new THREE.Mesh(new THREE.BoxGeometry(172.5 - 122.5, 0.3, 931.5 - 907.5), bmat(0xe6e4dc));
+      carpet.position.set((122.5 + 172.5) / 2, 18.1, (907.5 + 931.5) / 2); root.add(carpet); }
     for (const [px, pz] of [[134, 911], [134, 928], [152, 911], [152, 928], [169, 911], [169, 928]])
-      cyl(0.14, 0.14, 1.0, px, 14.25, pz, wingWhite, 8);            // short roof posts
+      cyl(0.14, 0.14, 4.05, px, 15.925, pz, wingWhite, 8);          // short roof posts (roof top y13.9 → underside y17.95)
     for (const [px, pz] of [[125.6, 911], [125.6, 920]])
-      cyl(0.16, 0.16, 1.85, px, 13.95, pz, wingWhite, 8);           // tall terrace posts under the west overhang
+      cyl(0.16, 0.16, 4.95, px, 15.475, pz, wingWhite, 8);          // tall terrace posts (terrace y13 → underside y17.95)
   }
 
   // ---- flush instanced pools (reuse maggie buckets → +0 draws) ----
   poolInstanced('mg-tree-trunk', trunkGeo, trunks);
   poolInstanced('mg-tree-canopy', canopyGeo, canopies);
   poolInstanced('mg-rock', rockGeo, rocks);
+  flushPlates();   // the campus plate atlas — ONE draw for all 9 canvas plates (062)
 }
 
 // ------------------------- canvas-texture helpers ----------------------
