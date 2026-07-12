@@ -292,3 +292,12 @@ cut becomes a revert task.
   score; at three ejections: "banned? never. persistent? yes." — Marquee Gate
   (−277.1, −417.6), box office (−283.9, −448.2), the bowl pocket cell
   (HP −252, −864) — task 055
+- THE CROWN FOUNTAIN DUSK-MIRROR. Stand down the pool axis and the two glass
+  lanterns don't float on a road anymore — the wet black granite doubles their
+  amber glow in a bold reflected column that streaks toward you, brightest at the
+  waterline, over a cool blue-black skim with a lit rim: a reflecting pool of
+  water at dusk. The Randolph skyline behind the park also grew rooflines a local
+  can read — Two Pru's dark diamond crown, Aon's cool-white fluted monolith
+  (nameable from the great lawn), the dark-capped Prudential slab — and the Chase
+  allee thins at its head so the dead-end opens onto them. — Crown pool
+  (69.8, 864), great lawn skyline (Aon x172), Chase Promenade — task 056

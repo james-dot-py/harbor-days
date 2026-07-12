@@ -35,8 +35,9 @@ import * as M from '../data/millennium.js';
 
 // ---- shared palette (all folded per-color at merge) -------------------
 const COL = {
-  silver:  0xc6c2b9,   // brushed-steel ribbon (WARM neutral — reads stainless, not green foliage)
-  warm:    0xe4dcc9,   // dusk-lit warm face of the petals (two-tone read)
+  silver:  0xa6abb0,   // COOL shade-steel petal tone (task 056 item 2: darker + cooler so
+                       // the burst silhouette separates from the pale dusk sky, not washes into it)
+  warm:    0xe9d6a9,   // dusk-lit WARM (amber-catching) petal tone — pushed warmer for a bold two-tone read
   steelDk: 0x8a8f93,   // ribbon shade / stage-house shell in shadow
   arc:     0x9ba1aa,   // trellis pipe steel
   post:    0x8f8c86,   // trellis / speaker-tower concrete-steel columns
@@ -58,15 +59,24 @@ const COL = {
 function brushTex() {
   const cv = document.createElement('canvas'); cv.width = 32; cv.height = 128;
   const g = cv.getContext('2d');
-  g.fillStyle = '#d6d2cb'; g.fillRect(0, 0, 32, 128);           // light warm STEEL base (stainless catches the dusk)
+  g.fillStyle = '#c4c0b8'; g.fillRect(0, 0, 32, 128);          // MID warm steel base (was near-white → washed into the sky)
   for (let x = 0; x < 32; x += 2) {                             // faint vertical brushed streaks
     g.fillStyle = (x / 2) % 2 ? 'rgba(255,255,255,0.10)' : 'rgba(120,124,132,0.10)';
     g.fillRect(x, 0, 2, 128);
   }
-  g.strokeStyle = 'rgba(120,124,132,0.28)'; g.lineWidth = 1;    // SUBTLE shingle seams (heavy seams read as leaf veins)
+  g.strokeStyle = 'rgba(110,114,122,0.30)'; g.lineWidth = 1;    // SUBTLE shingle seams (heavy seams read as leaf veins)
   for (let y = 5; y < 128; y += 11) { g.beginPath(); g.moveTo(0, y + 0.5); g.lineTo(32, y + 0.5); g.stroke(); }
-  g.strokeStyle = 'rgba(255,255,255,0.35)'; g.lineWidth = 1;
+  g.strokeStyle = 'rgba(255,255,255,0.32)'; g.lineWidth = 1;
   for (let y = 6; y < 128; y += 11) { g.beginPath(); g.moveTo(0, y + 0.5); g.lineTo(32, y + 0.5); g.stroke(); }
+  // RIM DARKENING (task 056 item 2): shade both lateral edges of every petal so
+  // the curled shells read as separated ribbons against the pale dusk sky — a
+  // cheap silhouette outline (uv u runs across the petal width, wrapping at the seam).
+  const edge = g.createLinearGradient(0, 0, 32, 0);
+  edge.addColorStop(0.00, 'rgba(58,62,70,0.55)');
+  edge.addColorStop(0.14, 'rgba(58,62,70,0.00)');
+  edge.addColorStop(0.86, 'rgba(58,62,70,0.00)');
+  edge.addColorStop(1.00, 'rgba(58,62,70,0.55)');
+  g.fillStyle = edge; g.fillRect(0, 0, 32, 128);
   const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; return t;
 }
 

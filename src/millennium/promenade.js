@@ -58,10 +58,14 @@ export function buildPromenade() {
   for (const rowX of M.CHASE_M.treeRowsX) {
     for (let i = 0; i < NT; i++) {
       const z = 720 + i * (160 / (NT - 1));
-      const x = rowX + rr(-0.5, 0.5);
-      const s = rr(0.9, 1.2);
-      trunks.push({ pos: [x, 0, z], yaw: rr(0, 6.283), color: 0x6b4a30 });
-      canopies.push({ pos: [x, 4.2 + rr(-0.2, 0.35), z], yaw: rr(0, 6.283), scale: [s, s, s], color: 0x3f7d3a });
+      const x = rowX + rr(-0.5, 0.5);                 // rng calls consumed for EVERY slot (i<2 too) so the
+      const s = rr(0.9, 1.2);                         // remaining allee trees stay byte-identical — only the
+      const tYaw = rr(0, 6.283);                      // 2 northernmost are dropped, opening the dead-end onto
+      const cY = 4.2 + rr(-0.2, 0.35);                // the Randolph giants (task 056 item 3, mp-promenade f0).
+      const cYaw = rr(0, 6.283);
+      if (i < 2) continue;                            // thin the 2 northernmost trees — open the allee dead-end onto the skyline band
+      trunks.push({ pos: [x, 0, z], yaw: tYaw, color: 0x6b4a30 });
+      canopies.push({ pos: [x, cY, z], yaw: cYaw, scale: [s, s, s], color: 0x3f7d3a });
       collide(x, z, 0.4);                             // allee trunks are colliders (statue pattern)
     }
   }

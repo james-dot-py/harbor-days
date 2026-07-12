@@ -109,6 +109,17 @@
 - Crown pool wet-mirror legibility at thumbnail scale; Pritzker ribbon/sky contrast;
   named-tower silhouettes + streetwall relief → **queue task 056** (evocation picky
   list, the Wrigleyville task-012 precedent), corroborating **issue 021**.
+  - **056 SHIPPED (2026-07-12):** Crown pool now reads as an amber-lantern-
+    reflecting WATER sheet (cool blue-black skim + bold painted amber wet-mirror
+    doubling + lit rim) at thumbnail; Pritzker ribbon burst reads against the pale
+    sky (cool/warm two-tone + rim-darkened petal edges); Cultural Center colonnade
+    is a deep classical PORTICO and CAA gains gothic tracery + pinnacles (historic
+    Michigan Blvd, not flat slabs); the Randolph giants are individuated (bold dark
+    diamond crown, cool-white fluted Aon monolith, dark-capped Prudential slab) with
+    **Aon nameable from the great lawn (mp-great-lawn f1)**. RESIDUAL (issue 021,
+    LOW): the *near-level f0* framings + world curve keep the tall giant crowns from
+    reading name-at-a-glance from the promenade dead-end / great-lawn f0 — now
+    root-caused (crown crop + curve-sink), not a lack of silhouette work.
 - Chase-cam central occlusion covers sign centers when the mayor stands dead-on
   (dedication band f0/f1; PARK GRILL f0) — each has a clean framing elsewhere in
   the same run.

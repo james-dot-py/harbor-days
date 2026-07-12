@@ -89,21 +89,52 @@ function poolSkimTex() {
   const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const g = cv.getContext('2d');
   g.clearRect(0, 0, W, H);
-  for (let k = 0; k < 22; k++) {                        // faint horizontal sky-streak sheen
-    const y = _r() * H, a = 0.02 + _r() * 0.05;
-    g.fillStyle = `rgba(214,226,236,${a.toFixed(3)})`;
+  // COOLER BLUE-BLACK WET SKIM over the whole pool (task 056 item 1): a
+  // semi-opaque deep blue-black wash so the wet basin reads as a DISTINCT sheet
+  // of water set into the warmer, drier granite plaza — not the same asphalt
+  // grey. Deep/cool, never daytime blue-grey glass (the dusk-lantern liberty).
+  { const base = g.createLinearGradient(0, 0, 0, H);
+    base.addColorStop(0.00, 'rgba(15,24,39,0.70)');
+    base.addColorStop(0.50, 'rgba(19,29,45,0.62)');
+    base.addColorStop(1.00, 'rgba(13,21,35,0.70)');
+    g.fillStyle = base; g.fillRect(0, 0, W, H); }
+  // lit meniscus — a soft cool-white highlight along the pool rim so the sheet
+  // of water reads as a contained basin (the "visible pool rim" cue, painted).
+  g.fillStyle = 'rgba(176,200,226,0.5)';
+  g.fillRect(0, 0, 3, H); g.fillRect(W - 3, 0, 3, H);
+  g.fillRect(0, 0, W, 3); g.fillRect(0, H - 3, W, 3);
+  for (let k = 0; k < 22; k++) {                        // cool horizontal sky-sheen ripples (KEEP _r() count — elm scatter parity)
+    const y = _r() * H, a = 0.03 + _r() * 0.06;
+    g.fillStyle = `rgba(150,180,214,${a.toFixed(3)})`;
     g.fillRect(0, y, W, 1 + _r() * 2);
   }
-  const smear = (vTower, dir) => {                       // amber reflection streaking to centre
-    for (let s = 0; s < 70; s++) {
-      const f = s / 70, y = (vTower + dir * f * 0.40) * H;
-      const a = 0.82 * (1 - f) * (1 - f), w = (0.26 - 0.11 * f) * W;
+  // AMBER WET-MIRROR: each tower's lantern glow DOUBLED down into the pool — a
+  // BOLD, wide reflection column streaking from the tower foot toward pool
+  // centre, brightest at the waterline (the recorded amber-glow-mirror read).
+  const smear = (vTower, dir) => {
+    for (let s = 0; s < 92; s++) {                       // reflection column (no _r — deterministic)
+      const f = s / 92, y = (vTower + dir * f * 0.46) * H;
+      const a = 1.0 * (1 - f) ** 1.2, w = (0.46 - 0.13 * f) * W;
       const grd = g.createLinearGradient(W / 2 - w, 0, W / 2 + w, 0);
-      grd.addColorStop(0, 'rgba(255,176,86,0)');
-      grd.addColorStop(0.5, `rgba(255,196,104,${a.toFixed(3)})`);
-      grd.addColorStop(1, 'rgba(255,176,86,0)');
-      g.fillStyle = grd; g.fillRect(W / 2 - w, y, 2 * w, H / 80);
+      grd.addColorStop(0.0, 'rgba(255,150,58,0)');
+      grd.addColorStop(0.5, `rgba(255,202,116,${a.toFixed(3)})`);
+      grd.addColorStop(1.0, 'rgba(255,150,58,0)');
+      g.fillStyle = grd; g.fillRect(W / 2 - w, y, 2 * w, H / 60);
     }
+    for (let s = 0; s < 60; s++) {                       // bright reflected-lantern CORE straight down the tower foot
+      const f = s / 60, y = (vTower + dir * f * 0.42) * H;
+      const a = 0.9 * (1 - f) ** 1.6, w = (0.16 - 0.05 * f) * W;
+      const grd = g.createLinearGradient(W / 2 - w, 0, W / 2 + w, 0);
+      grd.addColorStop(0.0, 'rgba(255,214,150,0)');
+      grd.addColorStop(0.5, `rgba(255,232,182,${a.toFixed(3)})`);
+      grd.addColorStop(1.0, 'rgba(255,214,150,0)');
+      g.fillStyle = grd; g.fillRect(W / 2 - w, y, 2 * w, H / 60);
+    }
+    const yb = vTower * H;                               // hot specular waterline right under the tower foot
+    const hot = g.createLinearGradient(0, yb, 0, yb + dir * H * 0.11);
+    hot.addColorStop(0.0, 'rgba(255,240,210,0.95)');
+    hot.addColorStop(1.0, 'rgba(255,200,110,0)');
+    g.fillStyle = hot; g.fillRect(W * 0.15, yb, W * 0.70, dir * H * 0.11);
   };
   smear(0.11, 1);    // N tower reflection streaks south (toward centre)
   smear(0.89, -1);   // S tower reflection streaks north
@@ -158,10 +189,10 @@ export function buildCrown() {
   // "doubles their amber glow" (BRIEF).  Soft radial amber, one shared
   // material so the two decals merge to a single draw; floated to y 0.05
   // (above the skim, depthWrite off → blends, never z-fights).
-  { const glowMat = bmat(0xffb257, { map: radialGlowTex(), transparent: true, opacity: 0.85, depthWrite: false });
+  { const glowMat = bmat(0xffb257, { map: radialGlowTex(), transparent: true, opacity: 0.95, depthWrite: false });
     for (const t of CR.towers) {
       const cx = (t.x0 + t.x1) / 2, cz = (t.z0 + t.z1) / 2;
-      const gl = new THREE.Mesh(new THREE.PlaneGeometry(6, 9), glowMat);
+      const gl = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 12), glowMat);
       gl.rotation.x = -Math.PI / 2; gl.position.set(cx, 0.05, cz); gl.renderOrder = 3;
       millenniumRoot.add(gl);
     } }

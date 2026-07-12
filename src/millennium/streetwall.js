@@ -26,6 +26,7 @@ const DARK  = 0x6f5c44;   // inset shadow band (suggests arched fronts)
 const COPING = 0xa89478;  // coping cap (a palette tone → folds with masses)
 const GREYS = [0x7e8da6, 0x8a9fbe, 0x6f7a8e];   // cool Loop backdrop
 const WIN   = 0xffd6a0;   // one warm lit-window colour (the whole bucket)
+const ACC   = 0x2c333d;   // cool-dark accent (giant sign band / diamond antenna / fin reveals) — ONE shared bucket
 
 const FRONT = 30, DEPTH = 18, BACKx = FRONT - DEPTH / 2;   // cliff geometry
 const GFRONT = 692, GDEPTH = 12, GBACKz = GFRONT - GDEPTH / 2; // giants
@@ -87,20 +88,38 @@ export function buildStreetwall() {
     box(BACKx, h / 2, cz, DEPTH, h, w, c);                        // the body mass
 
     if (a.style === 'colonnade') {
-      // CLASSICAL COLONNADE: a row of 8 columns + a heavy cornice cap.
-      const n = 8, colH = h - 9;
+      // CLASSICAL COLONNADE (Cultural Center / old Public Library) — task 056
+      // item 4: a DEEP portico, not a flat face. Columns stand proud on a
+      // stylobate against a recessed shadow field, capped by capitals, a heavy
+      // cornice and a central pediment → reads as historic Michigan Boulevard.
+      const n = 10, colH = h - 9;
+      box(FRONT + 0.05, 2 + colH / 2, cz, 0.2, colH, w, DARK);    // recessed portico shadow (columns read against it)
+      box(FRONT + 0.15, 1.2, cz, 1.9, 2.4, w + 0.6, PALE);        // stylobate base course
       for (let i = 0; i < n; i++) {
         const z = cz - w / 2 + (i + 0.5) * (w / n);
-        cyl(FRONT + 0.4, 2 + colH / 2, z, 0.7, colH, PALE);
+        cyl(FRONT + 0.5, 2 + colH / 2, z, 0.62, colH, PALE);      // column shaft (proud of the face)
+        box(FRONT + 0.5, 2 + colH + 0.35, z, 1.5, 0.7, 1.5, PALE);// capital block
       }
       box(BACKx, colH + 3.2, cz, DEPTH + 0.4, 1.6, w, PALE);      // architrave beam
       box(BACKx, h + 1.3, cz, DEPTH + 1, 2.6, w + 1.2, PALE);     // heavy cornice cap
+      box(BACKx, h + 3.6, cz, DEPTH, 2.2, w * 0.5, PALE);         // central attic / pediment block
       return;                                                     // (few windows: classical)
     }
     if (a.style === 'gothic') {
-      box(FRONT - 0.3, h - 3, cz, 0.6, 3, w - 1, DARK);           // inset arched-front band
+      // VENETIAN GOTHIC (Chicago Athletic Assn) — task 056 item 4: pale
+      // terra-cotta tracery ribs marching up a recessed dark field, a crenellated
+      // pinnacled crown + the pointed peak → ornate, not a flat slab.
+      box(FRONT + 0.05, (h - 2) / 2 + 1, cz, 0.2, h - 2, w - 0.8, DARK);   // recessed dark tracery field
+      const np = 5;
+      for (let i = 0; i < np; i++) {                              // vertical mullion piers (the gothic rhythm)
+        const z = cz - w / 2 + (i + 0.5) * (w / np);
+        box(FRONT + 0.4, (h - 4) / 2 + 1, z, 0.85, h - 4, 0.7, PALE);
+      }
+      box(FRONT + 0.35, h - 2.5, cz, w - 0.8, 1.1, 0.9, PALE);    // pale sill/transom band across the tracery
       box(BACKx, h + 2, cz, DEPTH - 2, 4, w - 3, PALE);           // stepped crown block
       cone(BACKx, h + 4 + w * 0.35, cz, w * 0.55, w * 0.7, PALE); // pointed peak
+      for (const s of [-1, 1])                                    // corner pinnacles (crenellated gothic crown)
+        cone(BACKx, h + 3.4, cz + s * (w / 2 - 1.2), 1.2, 4.5, PALE);
     } else if (a.style === 'sullivan') {
       box(BACKx, h - 1, cz, DEPTH + 0.4, 2.5, w + 1.5, 0xd8cdb2); // strong horizontal cornice
       for (let i = 0; i < 5; i++) {                               // fine vertical pier rhythm
@@ -140,26 +159,41 @@ export function buildStreetwall() {
   // 2. THE RANDOLPH GIANTS — bold north-horizon terminators, front face
   //    at z692, bodies reaching north to z680. Distinct silhouettes.
   // ==================================================================
+  // task 056 item 3 (+ issue 021): nudge each giant toward a NAMEABLE silhouette
+  // at the billboard register (never 1:1) — a bold dark PRUDENTIAL crown band, a
+  // big crisp diamond spire, deep-fluted bone-white Aon. Cool-dark ACC accents
+  // read against both the pale bodies and the pale dusk sky.
   for (const g of M.BACKDROP_M.giants.list) {
     const { x, w, h, style } = g;
-    if (style === 'sign-slab') {                                 // ONE PRU: white slab + sign
+    if (style === 'sign-slab') {                                 // ONE PRU: flat white slab + bold PRUDENTIAL crown
       box(x, h / 2, GBACKz, w, h, GDEPTH, 0xeef0f2);
-      const tex = signTex('PRUDENTIAL', '#1b2733', '#eef2f6');
-      const sign = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.82, 9), bmat(0xffffff, { map: tex }));
-      sign.position.set(x, h - 14, GFRONT + 0.06); millenniumRoot.add(sign);
+      box(x, h - 7, GFRONT - 0.15, w * 0.98, 13, 0.8, ACC);      // dark sign-crown band (reads as the Prudential cap at distance)
+      const tex = signTex('PRUDENTIAL', '#242c37', '#f4f8fc');
+      const sign = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.92, 12), bmat(0xffffff, { map: tex }));
+      sign.position.set(x, h - 7, GFRONT + 0.2); millenniumRoot.add(sign);
       winsZ(GFRONT, x, w, h - 24, { prob: 0.16 });
-    } else if (style === 'diamond-spire') {                      // TWO PRU: diamond top + antenna
+    } else if (style === 'diamond-spire') {                      // TWO PRU: bold stepped diamond crown + antenna
       box(x, h / 2, GBACKz, w, h, GDEPTH, 0xdfe3ea);
-      cone(x, h + 15, GBACKz, 12, 30, 0xdfe3ea);                 // 4-sided diamond spire
-      cyl(x, h + 30 + 12, GBACKz, 0.4, 24, 0xdfe3ea);            // antenna
+      box(x, h + 2.5, GBACKz, w * 0.82, 7, GDEPTH * 0.9, 0x6f7a8e); // stepped setback (dark cool steel — reuse GREYS bucket)
+      cone(x, h + 27, GBACKz, 18, 54, 0x6f7a8e);                // BOLD dark 4-sided diamond spire: a dark diamond crown on the pale
+                                                                  // dusk sky — the highest-contrast, most nameable Chicago roofline at ~150 m
+      cyl(x, h + 54 + 18, GBACKz, 0.5, 34, ACC);                // tall dark antenna (crisp on the sky)
       winsZ(GFRONT, x, w, h);
-    } else if (style === 'white-fins') {                         // AON: white monolith + fins
-      box(x, h / 2, GBACKz, w, h, GDEPTH, 0xeae6dc);
-      const nf = 7;
+    } else if (style === 'white-fins') {                         // AON: cool bone-white DEEP-fluted monolith
+      // COOL white (reuse the One-Pru white bucket) so the shaft separates from the WARM tan
+      // billboard skyline behind it; the full-height fluting is the one Aon feature the near-level
+      // great-lawn framing does NOT crop, so BOLD WIDE dark reveals carry the read at ~150 m.
+      box(x, h / 2, GBACKz, w, h, GDEPTH, 0xeef0f2);
+      const nf = 4;                                              // very coarse fluting — reads far
       for (let i = 0; i < nf; i++) {
         const fx = x - w / 2 + (i + 0.5) * (w / nf);
-        box(fx, h * 0.5 + 1, GFRONT + 0.15, 1.0, h * 0.95, 0.8, 0xf4f1ea);
+        box(fx, h * 0.5 + 1, GFRONT + 0.22, w / nf - 1.6, h * 0.95, 0.7, 0xeef0f2); // wide cool-white fin
       }
+      for (let i = 0; i <= nf; i++) {                            // BOLD dark reveals in the gaps (strong vertical shadow lines)
+        const gx = x - w / 2 + i * (w / nf);
+        box(gx, h * 0.5 + 1, GFRONT + 0.06, 1.5, h * 0.96, 0.5, ACC);
+      }
+      box(x, h + 2, GBACKz, w * 0.7, 5, GDEPTH, 0xeef0f2);       // cool-white crown cap (crisp flat top)
       winsZ(GFRONT, x, w, h, { prob: 0.14 });
     } else {                                                     // BLUE CROSS: glass box
       box(x, h / 2, GBACKz, w, h, GDEPTH, 0x66aecb);
