@@ -6,6 +6,23 @@ model: fable
 turns: 120
 title: Grant Park expansion POLISH + sign-off addendum
 acceptance: >
+  OWNER PUNCH LIST FIRST (2026-07-12 playtest of the fresh expansion):
+  (0a) RIBBON × CLIMBING WALLS (issue 022): rockwork overlaps the ice at
+  points — per the owner aerial the walls are islands the ribbon loops
+  AROUND; reposition/reshape until the ice clears the rock with a
+  rail/curb margin everywhere, then skate the full loop both directions
+  and shot the former overlaps. (0b) BP BRIDGE STUTTER (issue 023): the
+  owner is STOPPED every few meters crossing — fix the class: deck
+  walkability derives from the same curve as the geometry (continuous
+  half-width band over the full arc, not a union of segment rects), and
+  balustrade colliders keep a margin off the lane; act.mjs hold-forward
+  across the whole crossing both ways asserting continuous displacement.
+  (0c) NICHOLS ENTRANCE (issue 024): the Great Lawn hedges overlap the
+  bridge mouth — break the hedge line there with a clear paved approach.
+  (0d) NICHOLS LANDING (issue 024): the terrace's low canopy buries the
+  camera — open the headroom (bay-camera lesson), give a clear sightline
+  + wayfinding cue back onto the bridge, and verify the full round trip
+  lawn→terrace→lawn with shots at both ends. THEN the standard pass:
   The 048 playbook applied to the grown cell: (1) full fresh walkthrough of
   every mp-* waypoint old AND new — the expansion must not have regressed
   the original park (Bean/fountain/Pritzker reads re-judged); READ every
