@@ -453,3 +453,21 @@ few turns to find; keep each to one line of symptom + fix.
   and per-sign (the 050 shared-atlas font-spill law still applies), apply
   rotateY/tiltX to the GEOMETRY before translate, and call flushPlates()
   before the pool flush so the mesh joins the cell root.
+- A "crosswalks are just sidewalks" report can be a SIDEWALK-OVERLAP bug, NOT a
+  crosswalk-material bug (issue 018 reopened / task 063): the white crosswalk
+  bars were already correct paint, but streets.js's sidewalk slab rows
+  (straightWalk/paraWalk) ran the FULL frontage, so at every intersection they
+  paved the perpendicular ROADWAY with cream slabs (top y 0.055) that sat ABOVE
+  and buried the paint (top y 0.04) — "sidewalks on top of where there should be
+  crosswalks." The task brief mis-attributed it to the crosswalk builder's
+  material/height; trust the SCREENSHOT and a TOP-DOWN over the brief — the
+  top-down showed one street as clean asphalt and the crossing street slab-paved,
+  pinpointing the sidewalk rows. Fix the CLASS: carve sidewalk slabs OUT of every
+  drivable lane (inRoadLane center test — axis roads ±road/2, Clark diagonal
+  ±8 curb-half) so the corridor asphalt (drawn full-width in wrigley/index.js
+  buildGround, so no void appears) shows at intersections and the paint reads
+  on-road; sidewalks stay only on the corners. Center-point slab filtering leaves
+  ~1 m stair-step slop at the curb lines — acceptable at a corner. Keep the whole
+  white set (bars + stop lines) in ONE InstancedMesh (draw budget unchanged) and
+  do all per-bar wear deterministically (no rng — streets.js's local R lays the
+  lamps/hydrants/backdrop and must not shift).
