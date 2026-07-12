@@ -15,6 +15,7 @@ import { fileURLToPath } from 'url';
 import * as CH from '../src/data/chicago.js';
 import * as W from '../src/data/wrigleyville.js';
 import * as M from '../src/data/millennium.js';
+import * as B from '../src/data/wrigley-bowl.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const OUT = join(here, 'waypoints.json');
@@ -665,6 +666,70 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-196, -550]
     { yaw: 3.14, pitch: 0.05, dist: 1.95 },
     { yaw: 3.14, pitch: 0.08, dist: 2.05 },
   ]);
+}
+
+/* ---- INSIDE WRIGLEY — the 'wrigley-bowl' pocket cell (task 055). Stands
+   derive from src/data/wrigley-bowl.js; the dev-spawn hook in packs/
+   wrigley-bowl.js activates the pocket (+comp ticket) for spawns inside its
+   clamp. Framings are hand-authored on the interior doctrine: the ONLY safe
+   camera air is over the FIELD (outward yaws from a stand put the camera
+   field-side) or high over the seats (elevated stands) — a low camera behind
+   a concourse stand aiming at the field buries itself in the seat risers. ---- */
+{
+  const atB = (r, th) => [R(B.HP_B[0] + Math.sin(th) * r), R(B.HP_B[1] + Math.cos(th) * r)];
+  const AX = B.AXIS_B, BK = B.BACK_B;
+  const rS0 = th => B.rWallB(th) + 0.8 + 3.8;
+  // GATE ENTRY — the arrival reveal from the spawn on the warning track:
+  // camera passes back through the OPEN home-plate field gate (clear air)
+  add('wb-arrival', 'wrigleyville', 'wrigley-bowl', R(B.SPAWN_B.x), R(B.SPAWN_B.z), [
+    { yaw: R(AX), pitch: 0.08, dist: 5.5 },      // the reveal: field → ivy → scoreboard
+    { yaw: R(AX + 0.5), pitch: 0.12, dist: 8 },  // oblique: diamond + RF side
+    { yaw: R(AX - 0.55), pitch: 0.2, dist: 10 }, // high oblique: LF sweep
+  ]);
+  // CONCOURSE READ — on the ring; outward/tangential yaws only (see doctrine)
+  { const th = BK - 0.75, [px, pz] = atB(B.rWallB(th) + 2.6, th);
+    const [tx, tz] = atB(B.rWallB(BK - 0.05) + 2.6, BK - 0.05);  // toward the tunnel mouth
+    add('wb-concourse', 'wrigleyville', 'wrigley-bowl', px, pz, [
+      { yaw: R(th), pitch: 0.1, dist: 7 },                        // outward: ring, low wall, seats+deck rising
+      { yaw: yawTo(px, pz, tx, tz), pitch: 0.08, dist: 7 },       // along the ring to the tunnel portal
+      { yaw: R(th + 0.55), pitch: 0.14, dist: 9 },                // oblique outward: wedge B rises frame-left
+    ]); }
+  // BOWL FROM THE SEATS — wedge B rows. Cameras verified against polyRadiusB
+  // (tools/tmp/frame-calc.mjs): behind-home poly depth is only ~30–36, so the
+  // pull-back must stay steep + short (pitch ≥0.3 clears the 24° riser slope;
+  // camR stays ≤ polyR−1.3 in the open air below the upper deck).
+  { const stand = (s, row) => { const th = BK + s; return { th, p: atB(rS0(th) + row * 1.4 + 0.7, th) }; };
+    const a = stand(-0.67, 6), bq = stand(-0.5, 4), c = stand(-0.9, 5);
+    add('wb-bowl-from-seats', 'wrigleyville', 'wrigley-bowl', a.p[0], a.p[1], [
+      { yaw: yawTo(...a.p, B.SCOREBOARD_B.x, B.SCOREBOARD_B.z), pitch: 0.3, dist: 5 },     // across the bowl to the board
+      { x: bq.p[0], z: bq.p[1], yaw: yawTo(...bq.p, B.HP_B[0], B.HP_B[1]), pitch: 0.3, dist: 5 },   // down at the diamond
+      { x: c.p[0], z: c.p[1], yaw: yawTo(...c.p, ...atB(70, AX + 0.55)), pitch: 0.12, dist: 7 },    // LF ivy + rooftops over the wall
+    ]); }
+  // IVY WALL — on the warning track in LF (track is SAFE: no chase in frame)
+  { const th = AX + 0.45, [px, pz] = atB(B.rWallB(th) - 1.4, th);
+    const [mx, mz] = atB(B.rWallB(AX + 0.5) - 0.2, AX + 0.5);     // the 355 marker
+    const [fx, fz] = atB(B.rWallB(AX + 0.72) - 0.4, AX + 0.72);   // the LF foul pole
+    add('wb-ivy', 'wrigleyville', 'wrigley-bowl', px, pz, [
+      { yaw: yawTo(px, pz, mx, mz), pitch: 0.02, dist: 6 },       // ivy + 355, near-normal
+      { yaw: yawTo(px, pz, fx, fz), pitch: 0.0, dist: 7 },        // down the wall to the foul pole
+      { yaw: yawTo(px, pz, mx, mz), pitch: -0.14, dist: 10 },     // up: ivy → bleachers → rooftops
+    ]); }
+  // CHASE MOMENT — stand ON THE GRASS: the dev spawn trips the ump (whistle
+  // + 0.38 s windup, then 6.9 m/s from his post by the home gate). Stands sit
+  // ~40–44 m of chase path from the post (frame-calc.mjs): at the shot
+  // (~3–5.5 s of game time depending on load) he is mid-sprint 8–25 m out,
+  // dead ahead — and can NEVER tag before ~6.2 s (no black post-eject frame,
+  // the first-run mound stand's failure mode). Yaws face his charge line.
+  // Yaws aim ~0.4 rad OFF the post bearing (the 047 pitfall: yaw straight at
+  // the subject pins the mayor dead-center IN FRONT of it — first run hid the
+  // charging ump behind the player in all three frames).
+  { const post = (() => { const th = BK + 0.3; return atB(B.rWallB(th) - 1.3, th); })();
+    const s0 = atB(28, AX + 0.1), s1 = atB(31, AX - 0.15), s2 = atB(26, AX + 0.35);
+    add('wb-chase', 'wrigleyville', 'wrigley-bowl', s0[0], s0[1], [
+      { yaw: R(yawTo(...s0, ...post) + 0.42), pitch: 0.05, dist: 6 },                 // charge line beside the mayor
+      { x: s1[0], z: s1[1], yaw: R(yawTo(...s1, ...post) - 0.45), pitch: 0.08, dist: 8.5 },  // wider, other side
+      { x: s2[0], z: s2[1], yaw: R(yawTo(...s2, ...post) + 0.38), pitch: 0.03, dist: 5.5 },  // low + close
+    ]); }
 }
 
 /* ---------------------------- millennium ----------------------------- */

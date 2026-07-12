@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-12T02:24:49.853Z",
- "count": 96,
+ "generated": "2026-07-12T04:03:24.597Z",
+ "count": 101,
  "waypoints": [
   {
    "id": "spawn",
@@ -946,7 +946,7 @@
      "dist": 16
     }
    ],
-   "expectation": "The Marquee Gate ON the rounded corner's apex under the marquee: gate recess in the curved cream facade, with the RED-BRICK corner apron paving the ground in front (the 009 signature Wrigley ground treatment), crowd/turnstile dressing."
+   "expectation": "The Marquee Gate ON the rounded corner's apex under the marquee — AN HONEST DOOR NOW (task 055): gate recess in the curved cream facade with the RED-BRICK corner apron paving the ground in front, crowd/turnstile dressing, and the green house-style placard on the doors reading OPEN HOUSE / GATES OPEN TODAY / tickets at the box office (the old COMING SOON tease kept its promise)."
   },
   {
    "id": "wv-gate-gallagher",
@@ -2088,6 +2088,139 @@
     }
    ],
    "expectation": "Inside the Red Line car, the 'SUPPORT DEVELOPMENT ♥' ad placard on the north end wall (the transit-car ad precedent, like the Wrigley's Spearmint card): a cream poster with red frame, the header over a large crisp black-on-white QR and the ko-fi.com/jimbobuildsope caption, read head-on down the car's length and clear of the grab poles. The QR must be sharp enough to scan (mechanically decoded to the Ko-fi URL by tools/decode-qr.mjs)."
+  },
+  {
+   "id": "wb-arrival",
+   "area": "wrigleyville",
+   "cell": "wrigley-bowl",
+   "x": -256.75,
+   "z": -852.55,
+   "framings": [
+    {
+     "yaw": 2.75,
+     "pitch": 0.08,
+     "dist": 5.5
+    },
+    {
+     "yaw": 3.25,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 2.2,
+     "pitch": 0.2,
+     "dist": 10
+    }
+   ],
+   "expectation": "INSIDE WRIGLEY, the arrival reveal (task 055): standing on the brown warning track behind home plate, the empty bowl opens up — real GRASS field with mow arcs and the infield diamond ahead, the dark-green IVY wall arcing across the outfield, green bleachers rising behind it, and the tall hand-turned green SCOREBOARD (clock + line grid, OPEN HOUSE line) high over center field. Quiet cathedral: NO crowd anywhere. Camera passes clean through the open home-plate field gate — no wall clipping."
+  },
+  {
+   "id": "wb-concourse",
+   "area": "wrigleyville",
+   "cell": "wrigley-bowl",
+   "x": -268.66,
+   "z": -856.41,
+   "framings": [
+    {
+     "yaw": -1.14,
+     "pitch": 0.1,
+     "dist": 7
+    },
+    {
+     "yaw": 0.86,
+     "pitch": 0.08,
+     "dist": 7
+    },
+    {
+     "yaw": -0.59,
+     "pitch": 0.14,
+     "dist": 9
+    }
+   ],
+   "expectation": "The field-level CONCOURSE ring behind home: concrete walkway underfoot, the low brick field wall with its pale cap on the field side, and the seating bowl rising behind — green bench rows on concrete steps, green steel columns, the upper deck + tilted roof overhead, the dark entry-tunnel portal with its MARQUEE GATE → CLARK & ADDISON sign. Reads as a real walkable ring, not scenery; empty of people."
+  },
+  {
+   "id": "wb-bowl-from-seats",
+   "area": "wrigleyville",
+   "cell": "wrigley-bowl",
+   "x": -277.59,
+   "z": -849.76,
+   "framings": [
+    {
+     "yaw": 2.6,
+     "pitch": 0.3,
+     "dist": 5
+    },
+    {
+     "x": -272.41,
+     "z": -847.57,
+     "yaw": 2.25,
+     "pitch": 0.3,
+     "dist": 5
+    },
+    {
+     "x": -279.17,
+     "z": -856.25,
+     "yaw": 2.93,
+     "pitch": 0.12,
+     "dist": 7
+    }
+   ],
+   "expectation": "From a climbable seating section's upper rows (bench rows stepping down below, handrail line visible): the whole bowl reads in one frame — the green field with the diamond, the ivy outfield wall, and the green scoreboard with clock/pennants across the bowl. The under-deck soffit may frame the top of shot (the classic under-the-upper-deck Wrigley view)."
+  },
+  {
+   "id": "wb-ivy",
+   "area": "wrigleyville",
+   "cell": "wrigley-bowl",
+   "x": -256.13,
+   "z": -936.48,
+   "framings": [
+    {
+     "yaw": -1.81,
+     "pitch": 0.02,
+     "dist": 6
+    },
+    {
+     "yaw": -1.4,
+     "pitch": 0,
+     "dist": 7
+    },
+    {
+     "yaw": -1.81,
+     "pitch": -0.14,
+     "dist": 10
+    }
+   ],
+   "expectation": "THE IVY, close: the outfield wall filling the frame with dense layered green leaf clusters (brick peeking through at the top), a yellow distance number (355) stenciled on it, the yellow foul pole nearby, warning-track dirt underfoot; above the wall the bleachers and the rooftop-club silhouettes (EAMUS CATULI board) watch over. The most Wrigley thing there is."
+  },
+  {
+   "id": "wb-chase",
+   "area": "wrigleyville",
+   "cell": "wrigley-bowl",
+   "x": -243.91,
+   "z": -890.81,
+   "framings": [
+    {
+     "yaw": 0.19,
+     "pitch": 0.05,
+     "dist": 6
+    },
+    {
+     "x": -235.98,
+     "z": -890.54,
+     "yaw": -0.86,
+     "pitch": 0.08,
+     "dist": 8.5
+    },
+    {
+     "x": -250.88,
+     "z": -889.98,
+     "yaw": 0.32,
+     "pitch": 0.03,
+     "dist": 5.5
+    }
+   ],
+   "expectation": "THE CHASE MOMENT: the mayor is trespassing ON THE GRASS in the outfield, and the ump — a dark-suited chibi official — is visibly EN ROUTE across the grass toward the camera from his home-plate post (mid-field, mid-sprint, 8-25 m out depending on load timing; limbs swinging); the empty grandstand + upper deck rise behind his charge line. Reads as playground tag, not menace. NEVER a black/post-eject frame (stands sit ~40 m of chase path from the post)."
   },
   {
    "id": "mp-arrival",

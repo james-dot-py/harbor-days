@@ -350,9 +350,58 @@ SLUGGERS_W). Every corridor mouth ends at a **CPD blue wooden barricade**
 (BARRICADES_W) with an officer NPC; streets visually continue into a low-rise
 Lakeview backdrop band (BACKDROP_W).
 
+### The INTERIOR — the 'wrigley-bowl' pocket cell (task 055, owner green-light 2026-07-11)
+A pocket cell through the **Marquee Gate** (the redline-car pattern: own root,
+clamp, walkable, surfaceY, kindAt, spawn, dark minimap card). The whole
+footprint is **STADIUM_W displaced z −420** (poly, HP→CF axis, scoreboard
+bearing identical plus the offset) so interior and exterior agree **by
+construction**; the displacement keeps every bowl point ≥180 m from all
+scene-level pack content (NPC cull 145 m, fog bubble ~220 m). Data:
+`src/data/wrigley-bowl.js` (THE walkability definition, shared verbatim by the
+engine and tools/walkprobe.mjs); builder `src/wrigley/bowl.js`; gameplay
+`src/packs/wrigley-bowl.js`.
+
+- **Ticket**: 'get a ticket' at the box-office mass (the notchS face closing
+  Gallagher Way's south end, ~(−284, −448)); free, cozy, holdItem stub. The
+  Marquee Gate is an **honest door**: E → fade → the bowl (spawn on the
+  warning track behind home, facing center field). Exit at the entry tunnel;
+  ejection deposits you on the marquee apron outside, ticket gone.
+- **Radial model about HP (−252, −864)** (θ from HP, s = signed angle from
+  BACK): GRASS (r < rWall−3 — the ref-chase trigger) · **warning track** (3 m,
+  walkable, SAFE — ships the Gallagher teaser's 'walk the warning track') ·
+  wall band 0.8 m (blocked; **ivy** |dθ|≤0.80 h 3.5 / **brick** h 1.1 down the
+  lines / green corner fences) with **three open field gates** (behind home +
+  both dugouts, ~3.4 m — the field is physically enterable, no invisible
+  walls) · **field-level concourse ring** 3.8 m (|s| ≤ 1.55) · 8 stepped seat
+  rows (0.62 rise, 1.4 run), **climbable in two wedges** (s ±0.40…0.95, sit
+  spots) — everything else scenery.
+- **rWall(θ) = min(target curve [74 m at the foul poles → 14.5 backstop],
+  polyRadius(θ) − 2.2)** via a 256-entry LUT — deep LF (74) vs **short RF
+  (~53.5, hugging the Sheffield face)** happens by construction, matching the
+  exterior foul poles.
+- Scenery ringing the walkable bowl: upper deck + tilted roof + green steel
+  columns behind home, CF bleachers + juniper batter's eye + the hand-turned
+  scoreboard (OPEN HOUSE line, clock, pennants), light towers on the rim, and
+  the **rooftop-club silhouettes over the Waveland/Sheffield walls** (bleacher
+  racks + EAMUS CATULI board) — the view the bleacher bums built.
+- **The ref chase** (owner's design, exact): stepping on the GRASS wakes the
+  ump at his track-side post — whistle, chase at 6.9 m/s (walk 4.2 < ump <
+  run 9.5). Tag (r 1.05) → whistle + fade + EJECTED + ticket gone; off the
+  grass in time → he pulls up, dusts his cap ("...and STAY off the grass"),
+  returns to post. state.ejections counts; journal line at 3+.
+
 ### Standing liberties (deliberate, keep)
 - The cell sits ~x −140 rather than the true ~x −800 (1.6 km inland) — the L
   ride is a scripted transition, not literal track distance.
+- **The interior bowl is GENEROUS vs the exterior peek-over silhouette** (task
+  055): the walkable lower bowl reaches r ~30 with its upper deck above
+  r ~26.5, while the exterior's over-the-wall bowl visual sits at r 13–25.
+  The two are never seen in one frame (separate cells) and the inside must
+  hold a playable chase — same class as the 009 big-league footprint liberty.
+- **Open house inside vs perpetual game day outside** (task 055): the street
+  keeps its crowd-noise game-day register; through the gate it is the empty
+  quiet cathedral (owner's ask — "no game-day crowd this task"). The fade is
+  the day-dream seam; the scoreboard reads OPEN HOUSE — NO GAME TODAY.
 - **The cell-local z frame is STRETCHED ×1.6 between Addison (z −400, true)
   and Waveland (z −560, true −500)** — owner layout rework 2026-07-09 (task
   009): the space for double-wide streets, the big-league bowl and the gate

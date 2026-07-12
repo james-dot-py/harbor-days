@@ -278,3 +278,17 @@ cut becomes a revert task.
   seat and the camera drifts across the dressed green scoreboard, EAMUS CATULI
   and the grandstand riding over the right-field wall. — climbable Sheffield
   rooftop (deck ~−171, −526, y 9.6; stair base ~−179.5, −521) — task 054
+- THE GATES OPEN. Get a free ticket at the box office (the stub rides in your
+  hand), walk the Marquee Gate — the 017 COMING SOON tease kept its promise,
+  the placard now reads OPEN HOUSE / GATES OPEN TODAY — and the fade drops you
+  on the warning track of an EMPTY Wrigley: ivy, foul poles, the hand-turned
+  scoreboard ("OPEN HOUSE — NO GAME TODAY"), rooftops watching over the wall,
+  climbable seating with benches to sit in. The grass is enterable — and the
+  ump at his track post gives playground chase (whistle, 6.9 m/s, catchable if
+  you dawdle): tagged means whistle + fade + EJECTED, deposited at the gate
+  under a marquee still insisting GAME IN PROGRESS, ticket gone, box office
+  right there — buy another and walk straight back in. Escape to the track and
+  he pulls up, dusts his cap: "...and STAY off the grass." The journal keeps
+  score; at three ejections: "banned? never. persistent? yes." — Marquee Gate
+  (−277.1, −417.6), box office (−283.9, −448.2), the bowl pocket cell
+  (HP −252, −864) — task 055

@@ -564,7 +564,7 @@ function seCornerSigns() {
 // Green field + cream pinstripe like the real GATES 4&5 boards (IMG_2333 /
 // 47996783347); red 'COMING SOON' ribbon ties the four winks into one set.
 // Baked into the shared wrigley atlas by gateAt → +0 draw calls.
-function teaserTex(l1, l2, wink) {
+function teaserTex(l1, l2, wink, ribbon = 'C O M I N G   S O O N') {
   const cv = document.createElement('canvas'); cv.width = 512; cv.height = 224;
   const g = cv.getContext('2d');
   g.fillStyle = '#1c4a35'; g.fillRect(0, 0, 512, 224);                       // Cubs-green field
@@ -572,7 +572,9 @@ function teaserTex(l1, l2, wink) {
   g.lineWidth = 1.6; g.strokeRect(16, 16, 480, 192);                         // doubled inner line
   g.fillStyle = '#b0202c'; g.fillRect(24, 24, 464, 38);                      // Cubs-red header ribbon
   g.fillStyle = '#f6f1e6'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = '700 23px Georgia,serif'; g.fillText('C O M I N G   S O O N', 256, 44);
+  { let fs = 23; g.font = `700 ${fs}px Georgia,serif`;                       // ribbon shrink-to-fit
+    while (g.measureText(ribbon).width > 440 && fs > 12) { fs -= 1; g.font = `700 ${fs}px Georgia,serif`; }
+    g.fillText(ribbon, 256, 44); }
   const fit = (t, y) => { let fs = 48; g.font = `800 ${fs}px Georgia,serif`; while (g.measureText(t).width > 446 && fs > 22) { fs -= 2; g.font = `800 ${fs}px Georgia,serif`; } g.fillText(t, 256, y); };
   g.fillStyle = '#f6f1e6'; fit(l1, 103); fit(l2, 151);                       // the big tease, two lines
   g.fillStyle = '#cfe0c8'; g.font = 'italic 600 23px Georgia,serif';         // sage wink line
@@ -602,7 +604,7 @@ function gateAt(x, z, yaw, label, wide = 4.4, teaser = null) {
   if (teaser) {
     const pw = Math.min(wide - 1.2, 2.6), ph = pw * 224 / 512;
     teaserMesh = new THREE.Mesh(new THREE.PlaneGeometry(pw, ph),
-      bmat(0xffffff, { map: teaserTex(teaser.big[0], teaser.big[1], teaser.wink) }));
+      bmat(0xffffff, { map: teaserTex(teaser.big[0], teaser.big[1], teaser.wink, teaser.ribbon) }));
     teaserMesh.position.set(0, 1.98, 0.72); grp.add(teaserMesh);
   }
   grp.position.set(x, 0, z); grp.rotation.y = yaw;
@@ -1104,10 +1106,13 @@ export function buildStadium() {
   // (west, toward the plaza) unit normal is (−0.99963, 0.02726).
   const gx = S.gates.gallagher.x, gz = S.gates.gallagher.z;
   const gnx = -0.99963, gnz = 0.02726, gYaw = Math.atan2(gnx, gnz);   // faces the plaza
+  // task 055: the Marquee Gate is an HONEST DOOR now — the 017 teaser kept
+  // its promise. OPEN HOUSE placard (same green house style, new ribbon);
+  // the interaction lives in packs/wrigley-bowl.js.
   gateAt(S.gates.marquee.x, S.gates.marquee.z, S.gates.marquee.yaw, 'MARQUEE GATE', 4.4, // on the curve apex
-    { big: ['STEP INSIDE', 'THE CONFINES'], wink: 'the gates open someday' });
+    { big: ['GATES OPEN', 'TODAY'], wink: 'tickets at the box office', ribbon: 'O P E N   H O U S E' });
   gateAt(gx - gnx * 0.42, gz - gnz * 0.42, gYaw, 'GALLAGHER WAY GATE', 4.4, // recessed 0.42 into the bowl wall
-    { big: ['WALK THE', 'WARNING TRACK'], wink: "when the ivy's ready" });
+    { big: ['WALK THE', 'WARNING TRACK'], wink: 'enter at the Marquee Gate', ribbon: 'T H E   I V Y   I S   I N' });
   gateAt(-212.28, -537.72, S.gates.bleacher.yaw, 'BLEACHERS', 7, // hero gate on the chamfer, Caray plaza in front
     { big: ['TAKE YOUR SEAT', 'IN THE BLEACHERS'], wink: 'save us a spot' });
   gateAt(S.gates.addison.x, S.gates.addison.z, S.gates.addison.yaw, 'ADDISON GATE', 4.4, // south face, mid-block (outer face z≈−413.95)

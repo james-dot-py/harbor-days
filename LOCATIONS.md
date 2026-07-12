@@ -19,6 +19,13 @@ feasibility inside perf + single-file constraints.
   stadium, marquee, scoreboard, rooftops, Gallagher Way, Clark St fabric,
   game-day cycle. (Merged to main at 02aa933. **SIGNED OFF** 2026-07-09 —
   refs/wrigleyville/SIGNOFF.md; polish continues in queue 007/009/010/012.)
+  - **INSIDE WRIGLEY — the bowl** (task 055, owner green-light 2026-07-11,
+    SHIPPED): ticket at the box office → the Marquee Gate is an honest door →
+    the 'wrigley-bowl' pocket cell (empty open-house register): walkable
+    warning track + concourse ring, two climbable seating wedges with sit
+    spots, the ivy wall + foul poles + hand-turned scoreboard + rooftop
+    silhouettes — and the field-trespass REF CHASE (grass → the ump chases at
+    6.9 m/s; tagged → EJECTED outside, ticket gone; cozy re-entry loop).
 
 ## In progress
 
@@ -44,12 +51,6 @@ feasibility inside perf + single-file constraints.
   → polish + sign-off addendum 062.
 
 ## Candidates (famous Chicago spots, seeded per §5.3)
-
-- **Wrigley Field INTERIOR (the bowl)** — GREEN-LIT by owner 2026-07-11
-  ("get a ticket and enter wrigley... a ref chases them") → queue task 055:
-  pocket cell through the Clark/Addison gate, ticket interaction, empty-bowl
-  roam, ivy wall, field-trespass ref chase with cozy ejection. Moves under
-  Wrigleyville's Shipped scope when 055 is green.
 
 - Montrose Harbor and the Magic Hedge — adjacent north; extends the contiguous
   lakefront world; birding + harbor variety. **OWNER-PICKED NEXT (2026-07-11):

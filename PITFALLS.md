@@ -353,3 +353,18 @@ few turns to find; keep each to one line of symptom + fix.
   or "clip through," probe the whole footprint against walkableW, don't trust a
   screenshot of the single reported spot. (Also: never close a sink report by
   reproducing only the owner's exact x,z — sweep a grid.)
+- Arc-chord boxes on a radial ring: rotY(ψ) maps local +X → (cosψ,0,−sinψ), so
+  a box whose LENGTH is along X lies TANGENT at bearing θ with ψ=θ — ψ=θ+π/2
+  runs it RADIAL (task 055: the ivy wall rendered as green PILLARS on brick and
+  the low wall saw-toothed; stadium.js's exterior wallSegs carry the same +π/2
+  and hide it inside the bleachers). And per-chord boxes whose radius tracks a
+  VARYING ring (rWall(θ)) expose lit END-FACE slivers that read as floating
+  shards — build rows/floors as continuous riser+tread ring STRIPS sampled from
+  the same data functions the walk surface uses (bowl.js seat strips).
+- A dev-spawned SHOT of a pursuit NPC is timing-coupled: page-load game time
+  varies ~2.6–5.5 s (cold vite loads run longest), so a chase-trigger stand too
+  near the pursuer gets TAGGED pre-screenshot and the frame is post-eject BLACK
+  (task 055 wb-chase v1 stood 26 m out; tag ≈4.2 s). Stand ≥~40 m of chase path
+  (tag ≥6 s) so every load catches mid-pursuit — and aim the yaw ~0.4 rad OFF
+  the pursuer's bearing or the mayor pins dead-center in front of him (the 047
+  occlusion pitfall applies to MOVING subjects too).

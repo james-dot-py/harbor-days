@@ -4,6 +4,7 @@
 import * as CH from '../src/data/chicago.js';
 import * as WV from '../src/data/wrigleyville.js';
 import * as MP from '../src/data/millennium.js';
+import * as WB from '../src/data/wrigley-bowl.js';
 
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const smooth=t=>t*t*(3-2*t);
@@ -802,6 +803,73 @@ console.log('\n--- Millennium: frame discipline (clamp, spawn, billboard floor, 
     MP.walkableM(PE.cx+2,PE.cz+2),true);
   expect('approach lamps + urn piers stand in the plaza walk quad',
     [...WQ.lamps,...WQ.urns].every(([x,z])=>MP.walkableM(x,z)),true);
+}
+
+// ===== WRIGLEY BOWL pocket cell (task 055) — walkableB/surfaceYB/kindAtB are
+// imported from src/data/wrigley-bowl.js (THE shared definition). Issue-017
+// class rules: the cell answers definitively EVERYWHERE in-clamp (a hole is
+// BLOCKED, never water — main.js isWater() is cell-guarded).
+console.log('\n--- Wrigley bowl: field / track / wall / gates / concourse / wedges ---');
+{
+  const atB=(r,th)=>[WB.HP_B[0]+Math.sin(th)*r,WB.HP_B[1]+Math.cos(th)*r];
+  const wrapB=a=>((a+Math.PI*3)%(Math.PI*2))-Math.PI;
+  expect('spawn on the warning track',WB.walkableB(WB.SPAWN_B.x,WB.SPAWN_B.z)&&WB.kindAtB(WB.SPAWN_B.x,WB.SPAWN_B.z)==='track'&&WB.surfaceYB(WB.SPAWN_B.x,WB.SPAWN_B.z)===0,true);
+  expect('mound is grass (chase trigger)',WB.kindAtB(...atB(12.9,WB.AXIS_B)),'grass');
+  expect('deep center is grass',WB.kindAtB(...atB(65,WB.AXIS_B)),'grass');
+  expect('CF warning track',WB.kindAtB(...atB(72.5,WB.AXIS_B)),'track');
+  expect('past the ivy wall NOT walkable',WB.walkableB(...atB(75.5,WB.AXIS_B)),false);
+  expect('short-RF wall hugs Sheffield (rWall ~53.5)',Math.abs(WB.rWallB(WB.AXIS_B-0.72)-53.5)<1.5,true);
+  expect('deep-LF wall at the target arc (74)',Math.abs(WB.rWallB(WB.AXIS_B+0.72)-74)<1,true);
+  // the wall band blocks EXCEPT at the three open field gates
+  {const th=WB.BACK_B+0.5,rw=WB.rWallB(th);expect('wall band blocked off-gate (s 0.5)',WB.walkableB(...atB(rw+0.4,th)),false);}
+  for(const gs of WB.GATES_B){const th=WB.BACK_B+gs,rw=WB.rWallB(th);
+    expect(`field gate open at s ${gs}`,WB.walkableB(...atB(rw+0.4,th)),true);}
+  // concourse ring continuous at mid-width
+  {let holes=0;
+   for(let s=-1.5;s<=1.5;s+=0.05){const th=WB.BACK_B+s,rw=WB.rWallB(th);if(!WB.walkableB(...atB(rw+2.5,th)))holes++;}
+   expect('concourse ring continuous (|s|<=1.5)',holes,0);}
+  // wedge rows climb 0.62/row; outside the wedges the seats are blocked
+  {const th=WB.BACK_B-0.7,rw=WB.rWallB(th),rS0=rw+0.8+3.8;let mono=true,last=-1;
+   for(let k=0;k<8;k++){const y=WB.surfaceYB(...atB(rS0+k*1.4+0.7,th));if(y<=last)mono=false;last=y;}
+   expect('wedge B rows step up monotonically',mono,true);
+   expect('wedge B row0 y',WB.surfaceYB(...atB(rS0+0.7,th)),1.15);}
+  {const th=WB.BACK_B+0.2,rw=WB.rWallB(th);            // between vomitory and wedge A
+   expect('seats outside the wedges NOT walkable',WB.walkableB(...atB(rw+0.8+3.8+2,th)),false);}
+  // full-coverage sweep: every 2 m point in-clamp ANSWERS (no exceptions),
+  // and the walkable network is one island reachable from the spawn
+  {const C=WB.CLAMP_B,x0=C.xMin,z0=C.zMin,W=Math.ceil((C.xMax-C.xMin)/1)+1,H=Math.ceil((C.zMax-C.zMin)/1)+1;
+   const walk=new Uint8Array(W*H);let n=0;
+   for(let gx=0;gx<W;gx++)for(let gz=0;gz<H;gz++){if(WB.walkableB(x0+gx,z0+gz)){walk[gz*W+gx]=1;n++;}}
+   const seen=new Uint8Array(W*H);
+   const sx=Math.round(WB.SPAWN_B.x-x0),sz=Math.round(WB.SPAWN_B.z-z0);
+   const Q=[sz*W+sx];seen[Q[0]]=walk[Q[0]];let reach=walk[Q[0]]?1:0;
+   while(Q.length){const i=Q.pop();const gx=i%W,gz=(i/W)|0;
+     for(const[dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=gx+dx,nz=gz+dz;
+       if(nx<0||nz<0||nx>=W||nz>=H)continue;const j=nz*W+nx;
+       if(walk[j]&&!seen[j]){seen[j]=1;reach++;Q.push(j);}}}
+   expect(`whole bowl network reachable from spawn (${reach}/${n})`,reach,n);
+   expect(`walkable area sane (${n} > 6000)`,n>6000,true);
+   const hit=(x,z,label)=>expect(`${label} reached`,seen[(Math.round(z)-z0)*W+(Math.round(x)-x0)]===1,true);
+   hit(...atB(0.5,WB.AXIS_B),'home plate');
+   hit(...atB(65,WB.AXIS_B),'deep center grass');
+   hit(...atB(WB.rWallB(WB.AXIS_B+0.6)-1.5,WB.AXIS_B+0.6),'LF corner track');
+   hit(...atB(WB.rWallB(WB.AXIS_B-0.6)-1.5,WB.AXIS_B-0.6),'RF corner track');
+   {const th=WB.BACK_B-1.45,rw=WB.rWallB(th);hit(...atB(rw+2.5,th),'concourse 3B end');}
+   {const th=WB.BACK_B+1.45,rw=WB.rWallB(th);hit(...atB(rw+2.5,th),'concourse 1B end');}
+   {const th=WB.BACK_B-0.7,rw=WB.rWallB(th);hit(...atB(rw+0.8+3.8+7*1.4+0.7,th),'wedge B top row');}
+   {const th=WB.BACK_B+0.66,rw=WB.rWallB(th);hit(...atB(rw+0.8+3.8+4*1.4+0.7,th),'wedge A row 4 (sit)');}
+  }
+  // ref post stands on the track; the eject deposit point is walkable OUTSIDE
+  {const th=WB.BACK_B+0.3,[px,pz]=atB(WB.rWallB(th)-1.3,th);
+   expect('ump post on the warning track',WB.walkableB(px,pz)&&WB.kindAtB(px,pz)==='track',true);}
+  expect('eject deposit (-280,-416.5) walkable on the marquee apron',WV.walkableW(-280,-416.5),true);
+  expect('box office spot (-283.9,-448.2) walkable on the plaza',WV.walkableW(-283.9,-448.2),true);
+  // frame discipline: pocket disjoint from every other clamp + the car box
+  const C=WB.CLAMP_B;
+  expect('bowl clamp disjoint from Wrigleyville clamp',C.zMax<WV.CLAMP_W.zMin,true);
+  expect('bowl clamp disjoint from the redline-car box (z -656..-643)',C.zMax<-657||C.zMin>-642,true);
+  expect('bowl clamp outside WORLD_CLAMP',C.zMax<CH.WORLD_CLAMP.zMin||C.xMax<CH.WORLD_CLAMP.xMin,true);
+  expect('dev-spawn box unambiguous vs wrigleyville (zMax < its zMin)',C.zMax< WV.CLAMP_W.zMin,true);
 }
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);

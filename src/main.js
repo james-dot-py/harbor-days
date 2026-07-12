@@ -175,6 +175,7 @@ initMinimapToggle();
 // ---- framework: run queued pack setup now the world exists ----
 const _tp0=performance.now();
 worldReady(player);
+window.__hd.player=player;   // debug/tools only: live player handle (act.mjs E2E reads coords / teleports within a cell)
 window.__hd.buildMs={build:Math.round(_tm0-_tb0),merge:Math.round(_tm1-_tm0),packs:Math.round(performance.now()-_tp0)};
 console.log('[perf] world build '+window.__hd.buildMs.build+'ms · mergeCellStatic '+window.__hd.buildMs.merge+'ms · packs '+window.__hd.buildMs.packs+'ms');
 
