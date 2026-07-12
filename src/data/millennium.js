@@ -266,7 +266,7 @@ export const BACKDROP_M = {
 //   butler       → 061 (Butler Field + Lolla + street closure east/south)
 // =====================================================================
 export const OPEN_GRANT = {
-  maggie: false, ribbonIce: false, artInstitute: false, nichols: false, butler: false,
+  maggie: true, ribbonIce: false, artInstitute: false, nichols: false, butler: false,   // 058: BP crossing + all of Maggie Daley LIVE
 };
 const G = OPEN_GRANT;
 
@@ -318,6 +318,12 @@ export const BP_CROSSING_M = {
   // Columbus rim re-split for the new overflight (replaces the 788/818 gap):
   rimN: { x0: 181, x1: 189, z0: 713, z1: 784 },
   rimS: [{ x0: 185.8, x1: 189, z0: 808, z1: 846 }, { x0: 181, x1: 189, z0: 846, z1: 886 }],
+  // Columbus reads as a road TRENCH passing beneath the deck (visual only,
+  // never walkable): the road band under the overflight is cut to floorY with
+  // retaining walls at each curb (index.js carves the grade carpet + the
+  // streets.js road plane around it — the 041 pit law; bridge.js builds the
+  // sunken roadbed + walls). Spans the deck footprint at Columbus (z≈790, y5).
+  trench: { x0: 190, x1: 200, z0: 783, z1: 799, floorY: -1.7 },
 };
 
 // ---------------- Zone B: MAGGIE DALEY (058 + 059) ---------------------

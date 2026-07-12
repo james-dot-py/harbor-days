@@ -24,6 +24,8 @@ import { buildLurie } from './lurie.js';
 import { buildBridge } from './bridge.js';
 import { buildRink } from './rink.js';
 import { buildWrigleyMonument } from './wrigleymonument.js';
+import { buildMaggie } from './maggie.js';
+import { buildPlayGarden } from './playgarden.js';
 
 const _r = mulberry32(0x4d0000 ^ M.SEED_M);
 export const grand = (a = 0, b = 1) => a + (b - a) * _r();
@@ -60,12 +62,33 @@ export function emitInstanced(geo, records, { basic = false } = {}) {
   }
 }
 
+// Shared INSTANCED POOL (P2, task 058 perf plan — refs/millennium-park/BRIEF.md).
+// Sub-builders ENQUEUE instance records keyed by a stable (geoKey × basic)
+// bucket; index emits ONE emitInstanced per key AFTER every builder runs, so
+// the SAME geometry+color repeated across zones/builders (trees, lamps,
+// X-masts, holds, flags, crowd bodies…) folds into ONE InstancedMesh instead
+// of one-per-builder. Reuse cached toon() color hexes on the records so
+// cross-zone repeats share a color sub-bucket (emitInstanced splits by color).
+// geoKey MUST map 1:1 to a distinct geometry — the FIRST geo registered under
+// a key is the one used. Flushed in buildMillennium(), before the static merge.
+const _pool = new Map();   // key -> { geo, basic, records }
+export function poolInstanced(geoKey, geo, records, { basic = false } = {}) {
+  const key = geoKey + (basic ? '|b' : '');
+  let e = _pool.get(key);
+  if (!e) _pool.set(key, e = { geo, basic, records: [] });
+  for (const r of records) e.records.push(r);
+}
+function flushPool() {
+  for (const e of _pool.values()) if (e.records.length) emitInstanced(e.geo, e.records, { basic: e.basic });
+  _pool.clear();
+}
+
 // ---------------------------- ground ----------------------------------
 // Honest ground for every WALK_M surface + the view-only surfaces (cafe,
 // planting plates, roads-are-in-streets.js). NO landmark geometry — the
 // bean/pavilion/fountain/lurie/bridge pads read as dressed ground; their
 // hero objects arrive in tasks 043-046.
-const COL = {
+export const COL = {
   base:   0x6f6a5f,   // neutral urban fill under everything (no voids)
   lawn:   0x5f8a48,   // park green
   lawnDk: 0x527a3d,   // shaded lawn (bosque understory, planting borders)
@@ -107,7 +130,8 @@ function paveRegion(x0, x1, z0, z1, y, color, holes) {
 }
 // rotated / sloped deck quad along a centre-line a->b (halfW lateral), y
 // lerps a->b; built as a flat strip then tilted so both ends hit y0/y1.
-function segStrip(a, b, halfW, y0, y1, color) {
+// Exported so bridge.js/maggie.js sweep matching ground strips (deck, ramps).
+export function segStrip(a, b, halfW, y0, y1, color) {
   const dx = b[0] - a[0], dz = b[1] - a[1], len = Math.hypot(dx, dz);
   const yaw = Math.atan2(dx, dz), pitch = Math.atan2(y1 - y0, len);
   const g = new THREE.PlaneGeometry(halfW * 2, len, 2, Math.max(1, Math.round(len / 4)));
@@ -118,10 +142,18 @@ function segStrip(a, b, halfW, y0, y1, color) {
 }
 
 function buildGround() {
-  const S = M.STREETS_M;
+  const S = M.STREETS_M, G = M.OPEN_GRANT;
+  // The Columbus TRENCH (058): a sunken road cut under the BP overflight reads
+  // as a road passing beneath. The grade carpet must be cut around it (041 pit
+  // law) or it occludes the cut from the crest above (bridge.js builds the
+  // sunken roadbed + retaining walls; streets.js splits the Columbus plane).
+  const TR = M.BP_CROSSING_M.trench;
+  const baseHoles = G.maggie ? [...HOLES, TR] : HOLES;
   // 0. base fill over the whole cell footprint (kills any seam void) — carved
-  //    around the subway pit + the sunken cafe so both read as real openings.
-  paveRegion(6, 238, 680, 938, -0.06, COL.base, HOLES);
+  //    around the subway pit + the sunken cafe (+ the Columbus trench when
+  //    Maggie is live) so each reads as a real opening. Grown east to the LSD
+  //    frame (x 346) when the Grant expansion is open.
+  paveRegion(6, G.maggie ? 346 : 238, 680, 938, -0.06, COL.base, baseHoles);
   // 1. park lawn carpet (interior inside the frame sidewalks)
   paveRegion(48, 189, 705, 894, -0.02, COL.lawn, HOLES);
 
@@ -170,19 +202,24 @@ function buildGround() {
   // dressing are rink.js (task 049 — the cafe became THE ICE RINK).
   const MC = M.RINK_M;
 
-  // 10. BP bridge deck as honest raised WOOD ground (parapets/shingles = 046)
-  const B = M.BP_BRIDGE_M;
-  { const a = B.approach;                                           // ramp lawn-edge, y0->y1 along x
-    const g = new THREE.PlaneGeometry(a.x1 - a.x0, a.z1 - a.z0, 6, 2);
-    const m = new THREE.Mesh(g, toon(COL.wood));
-    m.rotation.set(-Math.PI / 2, 0, 0);
-    m.rotation.z = -Math.atan2(a.y1 - a.y0, a.x1 - a.x0);           // tilt up toward +x
-    m.position.set((a.x0 + a.x1) / 2, (a.y0 + a.y1) / 2, (a.z0 + a.z1) / 2);
-    millenniumRoot.add(m); }
-  segStrip(B.segs[0].a, B.segs[0].b, B.segs[0].halfW, B.segs[0].y0, B.segs[0].y1, COL.wood);
-  segStrip(B.segs[1].a, B.segs[1].b, B.segs[1].halfW, B.segs[1].y0, B.segs[1].y1, COL.wood);
-  for (let i = 0; i < B.scenery.length - 1; i++)                    // scenery run beyond the clamp (dead-ends politely)
-    segStrip(B.scenery[i], B.scenery[i + 1], B.deckW / 2, 5 - i * 0.35, 5 - (i + 1) * 0.35, COL.wood);
+  // 10. BP bridge deck as honest raised WOOD ground (parapets/shingles = 046).
+  // ONLY the pre-057 simplified deck: when Maggie is live (058) bridge.js
+  // rebuilds the whole deck GROUND on the real serpentine (BP_CROSSING_M),
+  // so skip this here to avoid two overlapping decks.
+  if (!G.maggie) {
+    const B = M.BP_BRIDGE_M;
+    { const a = B.approach;                                           // ramp lawn-edge, y0->y1 along x
+      const g = new THREE.PlaneGeometry(a.x1 - a.x0, a.z1 - a.z0, 6, 2);
+      const m = new THREE.Mesh(g, toon(COL.wood));
+      m.rotation.set(-Math.PI / 2, 0, 0);
+      m.rotation.z = -Math.atan2(a.y1 - a.y0, a.x1 - a.x0);           // tilt up toward +x
+      m.position.set((a.x0 + a.x1) / 2, (a.y0 + a.y1) / 2, (a.z0 + a.z1) / 2);
+      millenniumRoot.add(m); }
+    segStrip(B.segs[0].a, B.segs[0].b, B.segs[0].halfW, B.segs[0].y0, B.segs[0].y1, COL.wood);
+    segStrip(B.segs[1].a, B.segs[1].b, B.segs[1].halfW, B.segs[1].y0, B.segs[1].y1, COL.wood);
+    for (let i = 0; i < B.scenery.length - 1; i++)                    // scenery run beyond the clamp (dead-ends politely)
+      segStrip(B.scenery[i], B.scenery[i + 1], B.deckW / 2, 5 - i * 0.35, 5 - (i + 1) * 0.35, COL.wood);
+  }
 
   // 11. McCormick overlook BALUSTRADE (the shell read per BRIEF) — white
   // posts + rail along the Bean-plaza edge at railX; the rink reads below
@@ -246,6 +283,33 @@ function buildMinimapBase() {
   dot(146.5, 752, '#d8d2c4', 4);                                           // Pritzker
   dot(68, 724.5, '#e6ddc8', 4);                                           // Wrigley Sq monument
   dot((M.KIOSK_M.x0 + M.KIOSK_M.x1) / 2, M.KIOSK_M.pylonZ, '#c62828', 4);   // subway kiosk
+
+  // ---- Maggie Daley expansion (058, flag maggie) ----
+  if (M.OPEN_GRANT.maggie) {
+    const MG = M.MAGGIE_M;
+    rect(198, 338, 700, 892, '#4f6a3e');                     // Maggie park green
+    g.fillStyle = '#9a9384';
+    rect(201, 209, 706, 888, '#9a9384');                    // E-rim promenade
+    rect(201, 338, 705, 712, '#9a9384');                    // Randolph-side north walk
+    rect(201, 338, 878, 888, '#9a9384');                    // Monroe-side south rim
+    rect(209, 323, 728, 736, '#9a9384');                    // fieldhouse esplanade
+    rect(MG.fieldhouse.x0, MG.fieldhouse.x1, MG.fieldhouse.z0, MG.fieldhouse.z1, '#8a857a'); // fieldhouse
+    rect(MG.csg.bounds.x0, MG.csg.bounds.x1, MG.csg.bounds.z0, MG.csg.bounds.z1, '#5b7a44'); // Cancer Survivors' Garden
+    rect(MG.play.zone.x0, MG.play.zone.x1, MG.play.zone.z0, MG.play.zone.z1, '#6f6a55');      // play garden rubber
+    rect(MG.landing.x0, MG.landing.x1, MG.landing.z0, MG.landing.z1, '#b7b0a0');              // bridge-landing plaza
+    // the skating ribbon loop (pale ice-white) + climbing island inside it
+    g.strokeStyle = '#e6eef4'; g.lineWidth = 3; g.beginPath();
+    M.RIBBON_M.loop.forEach((p, i) => { const [mx, my] = wm(p[0], p[1]); i ? g.lineTo(mx, my) : g.moveTo(mx, my); });
+    g.closePath(); g.stroke();
+    { const [ax, ay] = wm(242, 744), [bx, by] = wm(268, 764); g.fillStyle = '#8b9098'; g.fillRect(ax, ay, bx - ax, by - ay); }
+    // the BP crossing serpentine (wood)
+    g.strokeStyle = '#8a6b46'; g.lineWidth = 2.5; g.beginPath();
+    M.BP_CROSSING_M.nodes.forEach((n, i) => { const [mx, my] = wm(n[0], n[1]); i ? g.lineTo(mx, my) : g.moveTo(mx, my); });
+    g.stroke();
+    dot(MG.play.lighthouse.x, MG.play.lighthouse.z, '#e23b2e', 3);   // lighthouse
+    dot(272, 845, '#3a72c4', 3);                            // play ship
+    dot(250, 752, '#8b9098', 3);                            // climbing walls
+  }
   return cv;
 }
 
@@ -264,7 +328,17 @@ export function buildMillennium() {
   buildBridge();       // BP BRIDGE — brushed-shingle parapets + wood deck + closed east gate + Maggie Daley treetops (task 046)
   buildRink();         // McCORMICK ICE RINK — sunken sheet, boards, stairs, Park Grill band (task 049; glide/NPCs in packs/skating.js)
   buildWrigleyMonument(); // MILLENNIUM MONUMENT — purple-lit peristyle + fountain + urns + lamps (task 050, owner night photo)
-  mergeCellStatic(millenniumRoot, 1e6);   // collapse static builder meshes; ONE z-band (compact, always fog-fully-inside, invisible from elsewhere)
+  if (M.OPEN_GRANT.maggie) {
+    buildMaggie();     // MAGGIE DALEY — ribbon bed, climbing walls, fieldhouse, tennis, CSG, landforms, X-masts, backdrop east (task 058)
+    buildPlayGarden(); // THE PLAY GARDEN — lighthouse+tube slide, ship, fort+rope bridge, enchanted forest, slide crater, swings, splash (task 058)
+  }
+  flushPool();         // emit the shared instanced pool (P2) — cross-zone repeats fold to one bucket each
+  // Grown Grant-expansion cell (~300×340 m): merge into ≤240×240 m TILES per
+  // material so far tiles fog-cull (P1). Pre-expansion the cell was compact and
+  // used one bucket per material (1e6); the tiling keeps every in-cell view's
+  // in-frustum tile count small. mergeCellStatic bakes world transforms → zero
+  // visual change.
+  mergeCellStatic(millenniumRoot, M.OPEN_GRANT.maggie ? 240 : 1e6, M.OPEN_GRANT.maggie ? 240 : Infinity);
   scene.add(millenniumRoot);
   registerCell({
     id: M.CELL_ID, root: millenniumRoot,

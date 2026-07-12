@@ -797,6 +797,21 @@ const VOLS_M = [];
     vol(F.x - F.r, F.x + F.r, F.z - F.r, F.z + F.r, 0.7);
     for (const [lx, lz] of M.WRIGLEY_SQ_M.lamps) vol(lx - 0.4, lx + 0.4, lz - 0.4, lz + 0.4, 4.8);
   }
+  // Maggie Daley masses (058) — climbing walls, fieldhouse, CSG columns +
+  // pavilion frames, the play-garden lighthouse/tower/ship, and the X-masts,
+  // so the new hand stands re-check (soft advisory).
+  if (M.OPEN_GRANT.maggie) {
+    const MG = M.MAGGIE_M;
+    for (const w of MG.walls) vol(w.x0, w.x1, w.z0, w.z1, w.h);
+    vol(MG.fieldhouse.x0, MG.fieldhouse.x1, MG.fieldhouse.z0, MG.fieldhouse.z1, MG.fieldhouse.h);
+    for (const [cx, cz] of MG.csg.columns) vol(cx - 1.2, cx + 1.2, cz - 1.2, cz + 1.2, 12);
+    for (const p of MG.csg.pavilions) vol(p.x0, p.x1, p.z0, p.z1, 6);
+    const LH = MG.play.lighthouse, TW = MG.play.tower, SH = MG.play.rooms.ship;
+    vol(LH.x - LH.r, LH.x + LH.r, LH.z - LH.r, LH.z + LH.r, LH.h);
+    vol(TW.x0, TW.x1, TW.z0, TW.z1, TW.h);
+    vol(SH.x0, SH.x1, SH.z0, SH.z1, 5);
+    for (const [xx, zz] of MG.xmasts) vol(xx - 0.6, xx + 0.6, zz - 0.6, zz + 0.6, 11);
+  }
 }
 function camPosM(px, pz, f) {
   const down = Math.max(0, f.pitch), up = Math.max(0, -f.pitch);
@@ -914,10 +929,32 @@ addM('mp-lurie', [
   { x: 159.5, z: 862, yaw: -0.91, pitch: 0.05, dist: 6 },
   { x: 174, z: 848, yaw: -0.80, pitch: 0.05, dist: 6 },
 ]);
-addM('mp-bp-bridge-crest', [
-  { x: 199, z: 806.5, yaw: -2.07, pitch: 0.02, dist: 5.5 },
-  { x: 193, z: 802, yaw: -1.93, pitch: 0.02, dist: 5 },
-  { x: 198, z: 806, yaw: 1.07, pitch: 0.02, dist: 5.5 },
+// 058: the BP bridge is a FULL CROSSING now (the pre-057 mp-bp-bridge-crest
+// dead-end is retired — its stand (199,806.5) is off the rebuilt deck). The
+// crossing reads from three down-deck stands (parapets block cross-body lines
+// — the L-car doctrine); the S-hook sweep, the crest looking back west, and
+// the descent east into Maggie.
+addM('mp-bp-crossing', [
+  { x: 231.5, z: 800, yaw: 2.8, pitch: 0.02, dist: 5 },     // down the S-hook (hairpin sweep + Columbus trench + Maggie ahead)
+  { x: 203, z: 791, yaw: -1.35, pitch: 0.02, dist: 5.5 },   // crest looking WEST: deck curve + pavilion ribbons + skyline
+  { x: 206, z: 791.6, yaw: 1.3, pitch: 0.02, dist: 5.5 },   // crest looking EAST: descent into Maggie (X-masts + fieldhouse)
+]);
+addM('mp-ribbon', [
+  { x: 252, z: 757, yaw: -2.2, pitch: 0.05, dist: 6 },      // SW lobe sweeping around the rockwork, wall shoulder in-frame
+  { x: 224, z: 760, yaw: 0.5, pitch: 0.05, dist: 5 },       // ON the ribbon: down-path switchback read
+  { x: 252, z: 734, yaw: 2.6, pitch: 0.1, dist: 6 },        // along the north lobe (SW), rails + rockwork sweeping
+]);
+addM('mp-climbing-walls', [
+  { x: 240, z: 756, yaw: 1.0, pitch: 0.06, dist: 5.5 },     // wall A faceted face + holds, truss edge of wall B, towers behind
+  { x: 250, z: 768, yaw: -2.4, pitch: 0.06, dist: 6 },      // both walls on the ribbon island, three-quarter
+]);
+addM('mp-play-garden', [
+  { x: 279, z: 851, yaw: -2.32, pitch: 0.08, dist: 8 },     // the navy play SHIP (rope nets over wave rubber)
+  { x: 296, z: 858, yaw: 2.45, pitch: 0.08, dist: 7 },      // the striped LIGHTHOUSE + curling tube slide + crater
+  { x: 302, z: 830, yaw: -2.12, pitch: 0.06, dist: 9 },     // timber FORT + rope bridge + Enchanted Forest string lights
+]);
+addM('mp-cancer-survivors', [
+  { x: 330, z: 760, yaw: Math.PI, pitch: 0.05, dist: 6 },   // column pair + pavilion frames + beds, giants-east band behind
 ]);
 
 /* --------------------------- expectations ---------------------------- */

@@ -28,11 +28,20 @@ export function buildStreets() {
   // ------------------------------------------------------------------
   // 1. ROAD ASPHALT (curve-shaded ground planes, folded by mergeCellStatic)
   // ------------------------------------------------------------------
-  const RD = 0x45454d;
+  const RD = 0x45454d, G = M.OPEN_GRANT;
   millenniumRoot.add(flatGrid(16, 251, -0.04, RD, 40, 809.5));   // Michigan   x32-48  z684-935
   millenniumRoot.add(flatGrid(184, 12, -0.04, RD, 124, 698));    // Randolph   x32-216 z692-704
   millenniumRoot.add(flatGrid(184, 14, -0.04, RD, 124, 901));    // Monroe     x32-216 z894-908
-  millenniumRoot.add(flatGrid(10, 216, -0.04, RD, 195, 800));    // Columbus   x190-200 z692-908
+  if (G.maggie) {
+    // Columbus SPLIT around the BP trench (bridge.js builds the sunken roadbed
+    // + retaining walls in the gap; the deck flies over at y5, reading as a
+    // road passing beneath in a cut).
+    const T = M.BP_CROSSING_M.trench;
+    millenniumRoot.add(flatGrid(10, T.z0 - 692, -0.04, RD, 195, (692 + T.z0) / 2));   // Columbus N of the trench
+    millenniumRoot.add(flatGrid(10, 908 - T.z1, -0.04, RD, 195, (T.z1 + 908) / 2));   // Columbus S of the trench
+  } else {
+    millenniumRoot.add(flatGrid(10, 216, -0.04, RD, 195, 800));  // Columbus   x190-200 z692-908
+  }
 
   // ------------------------------------------------------------------
   // 2. CURBS — thin light-grey box along the PARK-SIDE edge of each road

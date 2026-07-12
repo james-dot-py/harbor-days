@@ -1,62 +1,56 @@
 // =====================================================================
-// BP PEDESTRIAN BRIDGE — task 046.  Gehry's snaking stainless ribbon that
-// hops Columbus Drive out of the Great Lawn toward Maggie Daley Park: a
-// brushed-metal SHINGLE parapet enclosing a raised wood deck, ending at a
-// quiet CLOSED gate-and-hedge overlook (no "future entrance" — task-030
-// owner rule; the deck lands, turns you back, and frames the treetops).
+// BP PEDESTRIAN BRIDGE — the FULL CROSSING (task 058, flag `maggie`).
+// Gehry's snaking stainless ribbon that hops Columbus Drive out of the
+// Great Lawn's SE corner and lands, end to end, in Maggie Daley Park. The
+// pre-057 dead-end deck is retired: the crossing now carries you the whole
+// way over the real serpentine (BP_CROSSING_M's 28 hand-fit nodes) — launch
+// at the lawn esplanade (172.6, 834.9) → north along the lawn rim → east
+// over the Columbus TRENCH at z≈790 (deck y5) → the double-hairpin S-hook →
+// grade at the Maggie landing (247, 807.5). No gate, no treetops — it lands.
 //
 // COPYRIGHT REGISTER (BRIEF/LOCATIONS owner rule): the Gehry bridge is a
-// copyrighted work — chunky toon HOMAGE only.  The parapet captures the
+// copyrighted work — chunky toon HOMAGE only. The parapet captures the
 // SERPENTINE brushed-shingle SKIN silhouette, never a plate-for-plate
 // replica; no traced/imported geometry, no photo textures.
+//
+// CONTOUR LAW (PITFALLS "piecewise-per-NODE deck planks JACKNIFE", 048): the
+// deck ground, the shingle parapets and the plank treads are ALL swept along
+// ONE THREE.CatmullRomCurve3 through the 28 nodes and oriented by the local
+// curve tangent — NEVER per-node constant-yaw rectangles (that snaps the yaw
+// at every node and jacknifes). The nodes are dense (~4-6 m apart) so the
+// 0.5-tension CatmullRom's y stays within a few cm of the walkability's
+// linear-between-nodes surface (WALK_M chainQ) — well inside the walkprobe
+// 0.15 seam tolerance.
 //
 // DRAW-CALL DISCIPLINE (PITFALLS "toon SILVER reads GREEN"): the stainless
 // parapet is SELF-LIT (bmat + a painted brushed-steel map, the Bean's
 // sanctioned escape from the toon ramp) — toon steel here catches the
 // hemisphere's GREEN ground-bounce on its many down/near-horizontal shingle
-// faces and reads as a hedge.  ALL parapet geometry (both flanks, every
-// band, every cap, whole run) is baked to world space and SELF-MERGED into
-// ONE mesh with ONE shared bmat material = exactly ONE new draw call.  The
-// wood plank seams (toon 0x8f6836), gate/bars/rail (toon 0x2b2f36) and
-// hedge/treetops (toon 0x496b33) reuse colors pritzker.js already seeded in
-// the static pool, so mergeCellStatic folds them to +0 draws.
+// faces and reads as a hedge. ALL parapet geometry (both flanks, every band,
+// every cap, whole run) is baked to world space and self-merged into ONE
+// mesh with ONE shared bmat = exactly ONE new draw call. Everything else
+// reuses colours already seeded in the static pool so mergeCellStatic folds
+// them +0: deck ground + ramps (COL.wood 0x8a6b46, index/Lurie boardwalk),
+// treads (0x8f6836, pritzker firDk), trench road (0x45454d, streets asphalt),
+// trench walls (COL.wall 0x777063, rink retaining walls).
 //
 // DETERMINISM: LOCAL mulberry32 only (never the shared world rng — moving a
-// single lakefront towel is a hard-constraint regression).  Only the Maggie
-// Daley treetop scatter consumes the local rng; the deck layout is fixed.
-//
-// Geometry law: GEOGRAPHY.md MILLENNIUM_GEOGRAPHY + data BP_BRIDGE_M — the
-// raised WOOD deck ground already exists (index.js buildGround: approach
-// ramp x168-186 y0->3.8, rising + crest segs to (205,810) y5, descending
-// scenery run beyond the clamp).  This builder ADDS the hero geometry ON
-// TOP: parapets (parapetH 1.4 above deck, railed at +/-2.6 so a down-deck
-// camera frames BETWEEN them), plank detail, the east gate + treetops.
+// single lakefront towel is a hard-constraint regression). Only a subtle
+// hand-laid tread-spacing jitter consumes the local rng.
 // =====================================================================
 import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { millenniumRoot, emitInstanced } from './index.js';
+import { millenniumRoot, flatGrid, COL } from './index.js';
 import { toon, bmat, mulberry32 } from '../core.js';
-import { collide } from '../props.js';
 import * as M from '../data/millennium.js';
 
 const _r = mulberry32(0x42504252);              // 'BPBR' — local, never the world rng
 const rr = (a, b) => a + (b - a) * _r();
 
-// The continuous deck CENTERLINE (constant halfW 2.6). The ramp reads 8 wide
-// on the ground but is railed at +/-2.6 for a clean landing-apron -> bridge
-// narrowing. nodes: (x, deckY, z).
-const NODES = [
-  { x: 168,   y: 0.0, z: 796 },   // 0 lawn-edge foot of the ramp
-  { x: 186,   y: 3.8, z: 796 },   // 1 top of the ramp
-  { x: 196,   y: 5.0, z: 804 },   // 2 rise into the crest (turn)
-  { x: 205,   y: 5.0, z: 810 },   // 3 crest over Columbus (turn)
-  { x: 207.5, y: 4.9, z: 811 },   // 4 the closed east landing
-];
-
 // ------------------------- brushed-steel map ---------------------------
 // One warm-silver brushed map shared by the whole parapet. Fine brushed
-// streaks run ALONG the plate length (the UV u-axis on each band's outboard
-// face), with a few stronger HORIZONTAL seam lines so the courses read as
+// streaks run ALONG the plate length (the box face u-axis = band length),
+// with a few stronger HORIZONTAL seam lines so the courses read as
 // overlapping shingle PLATES rather than a smooth wall.
 function brushTex() {
   const cv = document.createElement('canvas'); cv.width = 128; cv.height = 32;
@@ -73,122 +67,136 @@ function brushTex() {
   const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; return t;
 }
 
-// right-handed frame for a deck piece a->b: ex along the (pitched) piece,
-// ey the deck-normal "up" (tilts on the ramp so bands pitch with the deck),
-// ez the horizontal lateral (perp) axis. mid = piece midpoint.
-function pieceFrame(a, b) {
-  const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
-  const xzLen = Math.hypot(dx, dz), len3 = Math.hypot(dx, dy, dz);
-  const ex = new THREE.Vector3(dx, dy, dz).multiplyScalar(1 / len3);
-  const up = new THREE.Vector3(0, 1, 0);
-  const ey = up.clone().addScaledVector(ex, -up.dot(ex)).normalize();  // up projected perp to ex
-  const ez = new THREE.Vector3().crossVectors(ex, ey);                 // horizontal lateral, right-handed
-  const mid = new THREE.Vector3((a.x + b.x) / 2, (a.y + b.y) / 2, (a.z + b.z) / 2);
-  return { dx, dy, dz, xzLen, len3, ex, ey, ez, mid };
-}
-
 export function buildBridge() {
-  const B = M.BP_BRIDGE_M, root = millenniumRoot;
-  const halfW = 2.6;                              // rail lateral (deckW/2, clean narrowing)
-  const parapetH = B.parapetH;                    // 1.4 — chest-high, frames between the flanks
-  const woodMat = toon(0x8f6836);                 // plank seams (pritzker firDk — folds +0)
-  const steelDkMat = toon(0x2b2f36);              // gate bars/posts/rail (pritzker dark — folds +0)
-  const hedgeMat = toon(0x496b33);                // hedges + treetops (pritzker hedge — folds +0)
+  const C = M.BP_CROSSING_M, root = millenniumRoot;
+  const halfW = C.halfW;                          // 2.6 — walkable strip half-width (parapet inner rail)
+  const parapetH = C.parapetH;                    // 1.4 — chest-high, frames between the flanks
+  const deckHalf = halfW + 0.2;                   // 2.8 — deck ground over-covers the walk + seats the walls
+  const worldUp = new THREE.Vector3(0, 1, 0);
 
-  // ==================== 1. THE SHINGLE PARAPET ========================
-  // Brushed-metal walls enclosing BOTH flanks of the whole run. Merged BAND
-  // geometry (horizontal overlapping plate courses), not per-shingle: 4
-  // stacked bands per side per piece from the deck up to deckY+1.4, each
-  // higher band ~0.03 proud (outboard) so they read as lapped plates, plus a
-  // rounded coping cap. Every band is baked to world space and self-merged
-  // into ONE mesh (ONE new draw) with ONE self-lit bmat brushed-steel map.
+  // The crossing CENTERLINE: one CatmullRom through all 28 nodes (x, y, z).
+  // Smooth XZ curvature; y ≈ the linear-between-nodes walk surface (dense
+  // nodes → cm-scale deviation). Everything below is swept along it.
+  const pts = C.nodes.map(n => new THREE.Vector3(n[0], n[2], n[1]));   // node [x,z,y] -> Vector3(x,y,z)
+  const curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.5);
+  const curveLen = curve.getLength();
+
+  // right-handed frame at arc-param t: ex along the (pitched) travel dir,
+  // ey the deck-normal "up" (world-up projected perp to ex — tilts on the
+  // ramps), ez the horizontal lateral (across the deck). p = curve point.
+  function frameAt(t) {
+    const p = curve.getPointAt(t);
+    const ex = curve.getTangentAt(t).normalize();
+    const ey = worldUp.clone().addScaledVector(ex, -worldUp.dot(ex)).normalize();
+    const ez = new THREE.Vector3().crossVectors(ex, ey);              // horizontal lateral, right-handed
+    return { p, ex, ey, ez };
+  }
+
+  // ==================== 1. THE DECK GROUND ============================
+  // A CONTINUOUS swept WOOD-plank ribbon (halfW ~2.8) — the visible walkable
+  // surface of the whole crossing, ramps included (nodes 0 and 27 sit at
+  // grade y0, so the ribbon descends to grade at both ends by itself). Built
+  // as one gap-free BufferGeometry: a cross-section at each arc-station,
+  // triangulated to its neighbour, each oriented by the curve tangent (no
+  // jacknife, no seams). uv is planar (unused by the matte toon COL.wood, but
+  // it matches the pool's plane/box attribute signature so it folds +0).
+  const nDeck = Math.max(2, Math.round(curveLen / 1.4));
+  const dpos = [], duv = [];
+  let pL = null, pR = null;
+  for (let i = 0; i <= nDeck; i++) {
+    const fr = frameAt(i / nDeck);
+    const c = fr.p.clone().addScaledVector(fr.ey, 0.02);             // just proud of grade (clears the lawn carpet)
+    const L = c.clone().addScaledVector(fr.ez, -deckHalf);
+    const R = c.clone().addScaledVector(fr.ez,  deckHalf);
+    if (pL) {                                                        // two up-facing triangles bridging the sections
+      dpos.push(pL.x, pL.y, pL.z,  pR.x, pR.y, pR.z,  L.x, L.y, L.z);
+      dpos.push(pR.x, pR.y, pR.z,  R.x, R.y, R.z,  L.x, L.y, L.z);
+      duv.push(0, 0, 1, 0, 0, 1,  1, 0, 1, 1, 0, 1);
+    }
+    pL = L; pR = R;
+  }
+  const deckGeo = new THREE.BufferGeometry();
+  deckGeo.setAttribute('position', new THREE.Float32BufferAttribute(dpos, 3));
+  deckGeo.setAttribute('uv', new THREE.Float32BufferAttribute(duv, 2));
+  deckGeo.computeVertexNormals();
+  root.add(new THREE.Mesh(deckGeo, toon(COL.wood)));                 // folds into the wood static bucket (+0)
+
+  // ==================== 2. THE SHINGLE PARAPET ========================
+  // Brushed-stainless self-lit walls enclosing BOTH flanks of the whole run,
+  // chest-high (parapetH 1.4 above the deck) with a rounded coping cap. Swept
+  // along the curve in short tangent-oriented segments (the 048 contour law —
+  // NOT per-node rectangles): 4 stacked overlapping BANDS per flank per
+  // segment (each higher band steps `proud` outboard = lapped shingle read)
+  // + a coping cap. Inner face at exactly halfW so a down-deck camera frames
+  // BETWEEN the flanks (the L-car interior doctrine). Every box is baked to
+  // world space and self-merged into ONE mesh with ONE self-lit bmat = ONE
+  // new draw call.
   const nBands = 4, stepH = parapetH / nBands, bandH = 0.46, bandDepth = 0.14, proud = 0.03;
-  const capH = 0.15, capDepth = 0.22, flareCurved = 0.1;
+  const capH = 0.15, capDepth = 0.24;
+  const nWall = Math.max(2, Math.round(curveLen / 1.6));
+  const segLen = curveLen / nWall;
+  const bandLen = segLen + 0.6;                   // overlap so corners close on the turns
   const parapetGeos = [];
-  for (let p = 0; p < NODES.length - 1; p++) {
-    const f = pieceFrame(NODES[p], NODES[p + 1]);
-    const curved = (p === 1 || p === 2);          // the two turning pieces get a slightly flared coping
-    const bandLen = f.len3 + 0.3;                 // overlap at the nodes so corners close cleanly
-    const rot = new THREE.Matrix4().makeBasis(f.ex, f.ey, f.ez);
+  for (let i = 0; i < nWall; i++) {
+    const fr = frameAt((i + 0.5) / nWall);
+    const rot = new THREE.Matrix4().makeBasis(fr.ex, fr.ey, fr.ez);  // X=length, Y=deck-up, Z=lateral
     for (const s of [-1, 1]) {
       for (let k = 0; k < nBands; k++) {
-        const g = new THREE.BoxGeometry(bandLen, bandH, bandDepth);   // X=length, Y=height, Z=thickness(lateral)
-        const off = f.mid.clone()
-          .addScaledVector(f.ey, stepH * k + stepH / 2)               // band height above the deck
-          .addScaledVector(f.ez, s * (halfW + proud * k));            // lateral seat + shingle proud step
+        const g = new THREE.BoxGeometry(bandLen, bandH, bandDepth);
+        const off = fr.p.clone()
+          .addScaledVector(fr.ey, stepH * k + stepH / 2)             // band height above the deck
+          .addScaledVector(fr.ez, s * (halfW + bandDepth / 2 + proud * k)); // inner face at halfW, stepping proud
         parapetGeos.push(g.applyMatrix4(rot.clone().setPosition(off)));
       }
-      const cg = new THREE.BoxGeometry(bandLen, capH, capDepth + (curved ? flareCurved : 0));  // rounded coping cap
-      const coff = f.mid.clone()
-        .addScaledVector(f.ey, parapetH + 0.02)
-        .addScaledVector(f.ez, s * (halfW + proud * nBands));
+      const cg = new THREE.BoxGeometry(bandLen, capH, capDepth);     // rounded coping cap
+      const coff = fr.p.clone()
+        .addScaledVector(fr.ey, parapetH + capH / 2)
+        .addScaledVector(fr.ez, s * (halfW + bandDepth / 2 + proud * nBands));
       parapetGeos.push(cg.applyMatrix4(rot.clone().setPosition(coff)));
     }
   }
   const parapetMat = bmat(0xc6c2b9, { map: brushTex(), side: THREE.DoubleSide });
   root.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(parapetGeos, false), parapetMat));
 
-  // ==================== 2. WOOD PLANK RIBBON ==========================
-  // Thin dark cross-seams across the deck that FOLLOW THE SERPENTINE: a
-  // Catmull-Rom spline through the ramp/rise/crest nodes (NODE 0..3 only, so
-  // the treads stop AT the walkable crest ~x205,z810 and never spill onto the
-  // closed east landing). Treads are placed at ~1.3 m arc-length intervals and
-  // each is oriented by the LOCAL curve tangent at its station — the seams
-  // sweep smoothly around the curve instead of jacknifing at the node joints.
-  // 0.04 proud of the deck. Subtle; folds to +0 (shared wood color, merged).
-  const plankGeo = new THREE.BoxGeometry(0.1, 0.06, 2 * halfW - 0.1);   // X thin (travel), Z span (across deck)
-  const deckCurve = new THREE.CatmullRomCurve3(
-    NODES.slice(0, 4).map(n => new THREE.Vector3(n.x, n.y, n.z)), false, 'catmullrom', 0.5);
-  const deckLen = deckCurve.getLength();
-  const nP = Math.max(2, Math.round(deckLen / 1.3));
-  const worldUp = new THREE.Vector3(0, 1, 0);
-  for (let i = 0; i < nP; i++) {
-    const t = (i + 0.5) / nP;
-    const p = deckCurve.getPointAt(t);                                  // arc-length station on the curve
-    const fwd = deckCurve.getTangentAt(t).normalize();                 // local travel dir (span is perp to this)
-    const up = worldUp.clone().addScaledVector(fwd, -worldUp.dot(fwd)).normalize();  // deck-normal (pitches on ramp)
-    const lat = new THREE.Vector3().crossVectors(fwd, up);             // across the deck = plank long (Z) axis
-    const q = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(fwd, up, lat));
-    const plank = new THREE.Mesh(plankGeo, woodMat);                    // box X->fwd (thin), Y->up, Z->lat (span)
-    plank.position.copy(p.addScaledVector(up, 0.04)); plank.quaternion.copy(q); root.add(plank);
+  // ==================== 3. WOOD-PLANK TREADS ==========================
+  // Thin dark cross-seams across the deck following the serpentine end to
+  // end: placed at ~1.3 m arc-length intervals (subtle hand-laid jitter from
+  // the local rng), each oriented by the curve tangent, span ≤ the parapet
+  // inner lateral so no tread clips the balustrade on the turns. 0x8f6836
+  // (pritzker firDk) reads a shade darker than the deck and folds +0.
+  const treadGeo = new THREE.BoxGeometry(0.1, 0.06, 2 * (halfW - 0.1));  // X thin (travel), Z span (across deck)
+  const treadMat = toon(0x8f6836);
+  const nT = Math.max(2, Math.round(curveLen / 1.3));
+  for (let i = 0; i < nT; i++) {
+    const t = Math.min(1, Math.max(0, (i + 0.5 + rr(-0.12, 0.12)) / nT)); // subtle hand-laid spacing
+    const fr = frameAt(t);
+    const q = new THREE.Quaternion().setFromRotationMatrix(
+      new THREE.Matrix4().makeBasis(fr.ex, fr.ey, fr.ez));           // X->fwd(thin), Y->up, Z->lat(span)
+    const plank = new THREE.Mesh(treadGeo, treadMat);
+    plank.position.copy(fr.p.clone().addScaledVector(fr.ey, 0.02 + 0.04)); // proud of the deck (deck at +0.02)
+    plank.quaternion.copy(q); root.add(plank);
   }
 
-  // ============= 3. EAST GATE + HEDGE OVERLOOK + TREETOPS ==============
-  // The deck lands at the crest end and turns you back: a QUIET CLOSED gate
-  // (NO "future entrance" signage — owner rule), flanked by hedge stubs, with
-  // Maggie Daley treetops peeking past it. Gate/bars/rail fold to +0 (dark
-  // steel), hedges + treetops fold to +0 (hedge green).
-  const f3 = pieceFrame(NODES[3], NODES[4]);
-  const gAlong = new THREE.Vector3(f3.dx, 0, f3.dz).normalize();       // horizontal travel dir at the landing
-  const gAcross = new THREE.Vector3(f3.dz, 0, -f3.dx).normalize();     // across the deck (perp)
-  const gUp = new THREE.Vector3(0, 1, 0);
-  const gateRot = new THREE.Matrix4().makeBasis(gAcross, gUp, gAlong); // X=across, Y=up, Z=along
-  const gateQ = new THREE.Quaternion().setFromRotationMatrix(gateRot);
-  const gateCtr = new THREE.Vector3(206.5, 4.94, 810.6);              // x~206.5, deckY~4.94 (past the walkable crest ~205)
-  const gateBox = (uAcross, yUp, w, h, d, mat) => {
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);  // X=across(w), Y=up(h), Z=along(d)
-    mesh.position.copy(gateCtr.clone()
-      .addScaledVector(gAcross, uAcross).addScaledVector(gUp, yUp));
-    mesh.quaternion.copy(gateQ); root.add(mesh);
+  // ==================== 4. THE COLUMBUS TRENCH ========================
+  // The road passes BENEATH the crossing in a CUT (visual only — never
+  // walkable; walkability is all in data). A dark asphalt floor at floorY,
+  // short retaining walls along the two curb lines (x0/x1) rising floorY->0,
+  // and end walls at z0/z1. The grade carpet was already carved and the
+  // Columbus road plane split around this rect (index.js/streets.js), so the
+  // cut shows from the crest above. Road folds into the streets asphalt
+  // bucket, walls into the rink retaining-wall bucket (+0 each).
+  const T = C.trench;                             // {x0,x1,z0,z1,floorY}
+  const spanX = T.x1 - T.x0, spanZ = T.z1 - T.z0;
+  const midX = (T.x0 + T.x1) / 2, midZ = (T.z0 + T.z1) / 2;
+  root.add(flatGrid(spanX, spanZ, T.floorY, 0x45454d, midX, midZ));  // sunken roadbed (streets RD asphalt)
+  const wallH = -T.floorY, wallY = T.floorY + wallH / 2;             // floorY .. 0
+  const wallMat = toon(COL.wall);
+  const wbox = (w, h, d, x, y, z) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wallMat);
+    m.position.set(x, y, z); root.add(m);
   };
-  gateBox(-2.6, 1.0, 0.2, 2.0, 0.22, steelDkMat);                    // west post
-  gateBox( 2.6, 1.0, 0.2, 2.0, 0.22, steelDkMat);                    // east post
-  for (const u of [-1.55, -0.52, 0.52, 1.55]) gateBox(u, 0.925, 0.09, 1.85, 0.09, steelDkMat);  // vertical bars
-  gateBox(0, 1.9, 5.2, 0.14, 0.16, steelDkMat);                      // top rail (spans the deck width)
-  collide(gateCtr.x, gateCtr.z, 1.7);                                // closed — no passage past the landing
-  gateBox(-3.5, 0.6, 1.6, 1.2, 1.7, hedgeMat);                       // west flanking hedge stub
-  gateBox( 3.5, 0.6, 1.6, 1.2, 1.7, hedgeMat);                       // east flanking hedge stub
-
-  // Maggie Daley treetops beyond the closed gate — a chunky blocky chibi
-  // GROVE clustered just past the gate, its crowns riding ABOVE the gate's top
-  // rail (~y6.9) so they clearly peek over the closed overlook (deck y5).
-  // Two-tone (hedge + a lighter canopy green already static-pooled) for depth;
-  // BoxGeometry -> folds to +0.
-  const canopyLt = toon(0x5f8a48);   // pritzker lawn stripe / index lawn — static pool
-  for (let i = 0; i < 13; i++) {
-    const x = rr(208, 217), z = rr(812, 825), s = rr(2.2, 3.9), cy = rr(4.8, 6.6);
-    const mat = i % 3 ? hedgeMat : canopyLt;
-    const top = new THREE.Mesh(new THREE.BoxGeometry(s, s * rr(0.7, 1.0), s * rr(0.8, 1.1)), mat);
-    top.position.set(x, cy, z); top.rotation.y = rr(0, 6.28); root.add(top);
-  }
+  wbox(0.5, wallH, spanZ, T.x0, wallY, midZ);     // west curb retaining wall
+  wbox(0.5, wallH, spanZ, T.x1, wallY, midZ);     // east curb retaining wall
+  wbox(spanX, wallH, 0.5, midX, wallY, T.z0);     // north end wall
+  wbox(spanX, wallH, 0.5, midX, wallY, T.z1);     // south end wall
 }

@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-12T06:03:44.995Z",
- "count": 101,
+ "generated": "2026-07-12T10:32:21.926Z",
+ "count": 105,
  "waypoints": [
   {
    "id": "spawn",
@@ -2633,35 +2633,138 @@
    "expectation": "A low wood boardwalk runs beside a thin water rill through drifts of purple and gold planting, all enclosed by a tall clipped hedge wall growing inside a dark steel frame, with the Gehry ribbons and towers peeking over its shoulder."
   },
   {
-   "id": "mp-bp-bridge-crest",
+   "id": "mp-bp-crossing",
    "area": "millennium",
    "cell": "millennium",
-   "x": 199,
-   "z": 806.5,
+   "x": 231.5,
+   "z": 800,
    "framings": [
     {
-     "x": 199,
-     "z": 806.5,
-     "yaw": -2.07,
-     "pitch": 0.02,
-     "dist": 5.5
-    },
-    {
-     "x": 193,
-     "z": 802,
-     "yaw": -1.93,
+     "x": 231.5,
+     "z": 800,
+     "yaw": 2.8,
      "pitch": 0.02,
      "dist": 5
     },
     {
-     "x": 198,
-     "z": 806,
-     "yaw": 1.07,
+     "x": 203,
+     "z": 791,
+     "yaw": -1.35,
+     "pitch": 0.02,
+     "dist": 5.5
+    },
+    {
+     "x": 206,
+     "z": 791.6,
+     "yaw": 1.3,
      "pitch": 0.02,
      "dist": 5.5
     }
    ],
-   "expectation": "A wood-plank deck curves ahead between chest-high brushed-steel shingle parapets, snaking over a road below and back toward the stainless pavilion ribbons and the skyline wall."
+   "expectation": "A wood-plank deck snakes over a sunken roadway (Columbus in a trench) between chest-high brushed-steel shingle parapets that FOLLOW THE CURVE with no jacknifed corners; it crests, hairpins twice as it descends, and lands in Maggie Daley — the west view frames the stainless pavilion ribbons + Bean + skyline, the east view the descent into the park with white criss-cross X-mast light towers and the glassy fieldhouse."
+  },
+  {
+   "id": "mp-ribbon",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 252,
+   "z": 757,
+   "framings": [
+    {
+     "x": 252,
+     "z": 757,
+     "yaw": -2.2,
+     "pitch": 0.05,
+     "dist": 6
+    },
+    {
+     "x": 224,
+     "z": 760,
+     "yaw": 0.5,
+     "pitch": 0.05,
+     "dist": 5
+    },
+    {
+     "x": 252,
+     "z": 734,
+     "yaw": 2.6,
+     "pitch": 0.1,
+     "dist": 6
+    }
+   ],
+   "expectation": "A pale serpentine ribbon-skating PATH (bed, not a sheet — 059 flips it to ice) loops around a central climbing-wall island, edged by white pipe railings and chunky rockwork rims with planting; rounded switchbacks sweep through the frame with X-mast light towers and the fieldhouse beyond, matching the owner's aerial (lobes + island + hut)."
+  },
+  {
+   "id": "mp-climbing-walls",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 240,
+   "z": 756,
+   "framings": [
+    {
+     "x": 240,
+     "z": 756,
+     "yaw": 1,
+     "pitch": 0.06,
+     "dist": 5.5
+    },
+    {
+     "x": 250,
+     "z": 768,
+     "yaw": -2.4,
+     "pitch": 0.06,
+     "dist": 6
+    }
+   ],
+   "expectation": "Two sculpted GRAY FACETED rock-climbing towers (a taller crescent + a lower prow) rise from the ribbon's island — angular crystalline panels studded with candy-colored holds and backed by exposed steel truss, chibi-scaled, with the skyline giants behind."
+  },
+  {
+   "id": "mp-play-garden",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 279,
+   "z": 851,
+   "framings": [
+    {
+     "x": 279,
+     "z": 851,
+     "yaw": -2.32,
+     "pitch": 0.08,
+     "dist": 8
+    },
+    {
+     "x": 296,
+     "z": 858,
+     "yaw": 2.45,
+     "pitch": 0.08,
+     "dist": 7
+    },
+    {
+     "x": 302,
+     "z": 830,
+     "yaw": -2.12,
+     "pitch": 0.06,
+     "dist": 9
+    }
+   ],
+   "expectation": "The fantastical toon PLAY GARDEN on blue-green wave rubber: a red-and-white striped LIGHTHOUSE with a curling stainless tube slide, a navy play SHIP with red rope nets and a wind-vane mast, a timber fort with an orange rope suspension bridge, and a string-lit enchanted mini-forest at dusk — chibi-heaven, the skyline giants NW behind."
+  },
+  {
+   "id": "mp-cancer-survivors",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 330,
+   "z": 760,
+   "framings": [
+    {
+     "x": 330,
+     "z": 760,
+     "yaw": 3.14,
+     "pitch": 0.05,
+     "dist": 6
+    }
+   ],
+   "expectation": "The Cancer Survivors' Garden on the LSD overlook: two tall white Corinthian columns and two black-steel open-lattice pavilion frames over purple-and-green planting beds and crabapple trees, with the giants-east skyline band and the lake beyond."
   }
  ]
 }

@@ -203,9 +203,11 @@ export function buildStreetwall() {
 
   // ==================================================================
   // 3. EAST LOOP BAND — lower cool mid-rises across Columbus, front face
-  //    at x214 (faces west), bodies reaching east to x238.
+  //    at x214 (faces west), bodies reaching east to x238. RETIRED when
+  //    Maggie is live (058): that band sits inside Maggie Daley's footprint;
+  //    the real park + the giants-east/lake bands (maggie.js) replace it.
   // ==================================================================
-  {
+  if (!M.OPEN_GRANT.maggie) {
     const e = M.BACKDROP_M.east, cx = (e.x0 + e.x1) / 2, d = e.x1 - e.x0;
     let z = e.z0;
     while (z < e.z1 - 3) {

@@ -66,7 +66,7 @@ export const cellKind  = () => { const c = cells[activeId]; return (c && c.kindA
 //     displacement (baking a world transform would shift its phase: water)
 // Only buckets with >=2 members merge; unique textured signs stay untouched.
 // ---------------------------------------------------------------------
-export function mergeCellStatic(root, bandW = 240) {
+export function mergeCellStatic(root, bandW = 240, bandX = Infinity) {
   if (!root) return;
   root.updateMatrixWorld(true);
   const rootInv = root.matrixWorld.clone().invert();
@@ -95,8 +95,13 @@ export function mergeCellStatic(root, bandW = 240) {
     // to a ~220 m depth bubble, so fine bands no longer buy culling — they just
     // leave sparse same-material props as unmerged singletons, one per band.
     // Compact cells (Wrigleyville, ~200 m deep and invisible from elsewhere)
-    // pass a huge bandW: one bucket per material.
-    const key = o.material.uuid + '|' + Math.floor(_c.z / bandW) + '|' + sig;
+    // pass a huge bandW: one bucket per material. bandX defaults to Infinity
+    // (no x-split) — a GROWN cell (Millennium's Grant expansion, ~300×340 m,
+    // task 058) passes bandX 240 too so each material merges into ≤240×240 m
+    // TILES: any in-cell view holds ≤4 in-frustum tiles per material and the
+    // far tiles fog-cull, instead of one giant span-the-cell bucket that never
+    // culls (P1, refs/millennium-park/BRIEF.md perf plan).
+    const key = o.material.uuid + '|' + Math.floor(_c.z / bandW) + '|' + Math.floor(_c.x / bandX) + '|' + sig;
     let b = buckets.get(key); if (!b) buckets.set(key, b = []);
     b.push(o);
   });

@@ -368,6 +368,18 @@ few turns to find; keep each to one line of symptom + fix.
   (tag ≥6 s) so every load catches mid-pursuit — and aim the yaw ~0.4 rad OFF
   the pursuer's bearing or the mayor pins dead-center in front of him (the 047
   occlusion pitfall applies to MOVING subjects too).
+- A cell sub-builder that reads an index.js EXPORT at MODULE TOP LEVEL hits a
+  circular-import TDZ and crashes the WHOLE app at load: index.js imports the
+  sub-builder (maggie.js) BEFORE its own `export const COL = {...}` initializes,
+  so maggie.js's module-scope `const C = { lawn: COL.lawn }` threw "Cannot access
+  'COL' before initialization" (task 058). The crash aborts main.js before its
+  canary echo — so it masquerades as the foreign-:5173 canary trap (walkthrough
+  reported "canary FAILED"); `npm run build` and walkprobe both PASS (neither
+  executes the builder). Diagnose by loading the page on an OWN strict clean port
+  and reading page.on('pageerror'). Fix: only reference an index.js export INSIDE
+  the build function (runs at onWorldReady, after init), or inline the literal
+  values. Rule: sub-builders touch shared index exports at CALL time, never at
+  module scope.
 - An OSM way's ENDPOINTS are its ordered first/last NODES, never its bbox
   corners: the 039 brief cited the BP bridge "launch (172.6, 787.9)" — a
   bbox min/min corner — and the 046 deck shipped on that wrong line; the

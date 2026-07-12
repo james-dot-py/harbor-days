@@ -301,3 +301,19 @@ cut becomes a revert task.
   (nameable from the great lawn), the dark-capped Prudential slab — and the Chase
   allee thins at its head so the dead-end opens onto them. — Crown pool
   (69.8, 864), great lawn skyline (Aon x172), Chase Promenade — task 056
+- THE BP BRIDGE FINALLY GOES SOMEWHERE. The serpentine deck no longer dead-ends
+  at a polite hedge — it completes the real S-curve: rises over Columbus in its
+  cut, crests at deck-y5 with the road passing in a trench beneath, then
+  double-hairpins down into Maggie Daley. Walk it end to end between the
+  brushed-steel shingle parapets that FOLLOW THE CURVE, and it lands you facing
+  a park that wasn't there before — white X-mast light towers, the faceted
+  climbing walls, the striped lighthouse. — BP crossing (launch 172.6/834.9 →
+  landing 247/807.5), Columbus trench (x190-200, z783-799) — task 058
+- MAGGIE DALEY, THE PLAYGROUND EVERY CHICAGO KID BEGS TO VISIT. Across the bridge:
+  a red-and-white striped LIGHTHOUSE with a curling stainless tube slide spiraling
+  down onto blue-green wave rubber; a navy play SHIP with red rope nets and a
+  wind-vane mast; a timber FORT with an orange rope suspension bridge; a string-lit
+  enchanted mini-forest; a splash pad. Two sculpted GRAY FACETED climbing towers
+  studded with candy-colored holds rise from the island the ~250 m skating-ribbon
+  bed loops around (059 flips it to ice). — Play Garden (lighthouse 303/849, ship
+  272/845), climbing walls (242-268/744-763), Skating Ribbon (loop) — task 058

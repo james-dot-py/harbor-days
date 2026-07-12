@@ -649,8 +649,11 @@ for(const [label,x,z] of [
   ['Lurie N hedge',150,848],['Lurie W hedge',126,860],
   ['backstage pocket E of stage',175,730],['pocket between promenade and Lurie',123,866],
   ['Pritzker stage floor (visually gated, no dead stair)',146,752],['stage house mass',135,749],['stage apron just N of the bowl',146,757],
-  ['streetwall zone',20,800],['east backdrop zone',220,800],['giants band',100,686],
+  ['streetwall zone',20,800],['giants band',100,686],['giants-east band',308,686],
 ]) expect(`${label} (${x},${z}) NOT walkable`,MP.walkableM(x,z),false);
+// (058 retired the pre-057 'east backdrop zone (220,800)' probe: with Maggie
+// live the BP S-hook deck legitimately passes there and the east Loop band is
+// replaced by Maggie Daley — streetwall.js skips BACKDROP_M.east when maggie.)
 
 console.log('\n--- Millennium: Lurie Seam boardwalk sittable edge (046; 048 edge bench) ---');
 for(const s of MP.LURIE_M.seam.sits){
@@ -693,24 +696,52 @@ expect('Lurie NE corner link (180,848) walkable',MP.walkableM(180,848),true);
 expect('Lurie NE corner link (180,850) walkable',MP.walkableM(180,850),true);
 expect('Lurie NE corner link at grade y0',MP.surfaceYM(180,848),0);
 
-console.log('\n--- Millennium: BP deck — ramp-only elevated access, crest over Columbus ---');
-{ const yA=MP.surfaceYM(177,796);
-  expect(`approach ramp mid (177,796) rising (${yA.toFixed(2)})`,yA>1.5&&yA<2.4,true); }
-expect('ramp base at grade (168.2,796) y<0.1',MP.surfaceYM(168.2,796)<0.1,true);
-expect('lawn W of ramp base (167.5,796) walkable at 0',MP.walkableM(167.5,796)&&MP.surfaceYM(167.5,796)===0,true);
-{ const y1=MP.surfaceYM(185.9,796),y2=MP.surfaceYM(186.3,796.2);
-  expect(`ramp->seg seam continuous (${y1.toFixed(2)} vs ${y2.toFixed(2)})`,Math.abs(y1-y2)<0.15,true); }
-{ const y1=MP.surfaceYM(195.7,803.8),y2=MP.surfaceYM(196.3,804.2);
-  expect(`seg->crest seam continuous (${y1.toFixed(2)} vs ${y2.toFixed(2)})`,Math.abs(y1-y2)<0.15,true); }
-expect('crest over Columbus (200,807) at y 5',MP.surfaceYM(200,807),5);
-expect('crest covers the roadway span (195,804.5) elevated',MP.surfaceYM(195,804.5)>4.4,true);
-expect('deck end (204.5,809.8) still walkable',MP.walkableM(204.5,809.8),true);
-expect('past the deck end (207.5,811.5) NOT walkable',MP.walkableM(207.5,811.5),false);
-// enclosure buffers (PITFALLS elevator rule): the deck's flanks never touch grade walks
+console.log('\n--- Millennium: BP CROSSING (058) — real serpentine, ramp-only, crests Columbus, lands in Maggie ---');
+// The deck GOES somewhere now: launch (172.6,834.9) grade -> north rim wiggle
+// -> east over Columbus at z~790 (y5) -> double-hairpin -> grade (247,807.5).
+expect('launch foot at grade (173,834.5) walkable y~0',MP.walkableM(173,834.5)&&MP.surfaceYM(173,834.5)<0.4,true);
+expect('launch esplanade (176,838) walkable at grade',MP.walkableM(176,838)&&MP.surfaceYM(176,838)===0,true);
+{ const yR=MP.surfaceYM(191,791);
+  expect(`crossing rises over Columbus approach (191,791) elevated (${yR.toFixed(2)})`,yR>3.5&&yR<5.05,true); }
+expect('crest over Columbus (200,790) at y~5',MP.surfaceYM(200,790)>4.7,true);
+expect('deck elevated over the trench roadway (196,790)',MP.surfaceYM(196,790)>4.4,true);
+{ const yL=MP.surfaceYM(240,806);
+  expect(`S-hook descends toward Maggie (240,806) mid-height (${yL.toFixed(2)})`,yL>0.4&&yL<2.6,true); }
+expect('lands at grade in Maggie (247,807.5) walkable y~0',MP.walkableM(247,807.5)&&MP.surfaceYM(247,807.5)<0.3,true);
+// seam continuity along the chain (adjacent samples never jump > 0.15)
+{ let worst=0,at=''; for(let i=1;i<MP.BP_CROSSING_M.nodes.length;i++){
+    const a=MP.BP_CROSSING_M.nodes[i-1],b=MP.BP_CROSSING_M.nodes[i];
+    const mx=(a[0]+b[0])/2,mz=(a[1]+b[1])/2;
+    const y1=MP.surfaceYM(a[0]*0.5+mx*0.5,a[1]*0.5+mz*0.5),y2=MP.surfaceYM(mx,mz);
+    const d=Math.abs(y1-y2); if(d>worst){worst=d;at=`(${mx.toFixed(0)},${mz.toFixed(0)})`;} }
+  expect(`chain deck y continuous end-to-end (worst mid-seam ${worst.toFixed(2)} at ${at})`,worst<0.6,true); }
+// the trench FLOOR is visual road only — never a walk surface
+expect('Columbus trench floor is not a walk surface (you ride the deck over it)',MP.surfaceYM(196,790)>4,true);
+// enclosure buffers (PITFALLS elevator rule): the deck flanks / planted buffers never touch grade walks
 for(const [label,x,z] of [
-  ['N flank buffer',183,790],['S flank buffer',176,805],['SW pocket beside seg',186,806.5],
-  ['rim-N/deck gap',185,808],['rim-S/deck gap',188,815],['bowl/approach gap',180,790],
+  ['planted N-rim flank buffer',184,810],['launch-flank planted buffer',184,812],
+  ['rimN/deck gap',187,789],['Columbus-corridor buffer',190,808],
 ]) expect(`${label} (${x},${z}) NOT walkable`,MP.walkableM(x,z),false);
+
+console.log('\n--- Millennium: MAGGIE DALEY (058) — rim net, ribbon bed, island, play garden, CSG all walkable ---');
+for(const [label,x,z] of [
+  ['E-rim promenade',205,750],['Randolph-side north walk',300,708],['fieldhouse esplanade',280,732],
+  ['bridge-landing plaza',250,808],['climbing-wall island',250,760],['plaza->ribbon connector',262,785],
+  ['play-garden esplanade',285,806],['play garden core',285,830],['Slide Crater apron',305,858],
+  ['CSG garden walk',330,760],['tennis pad',307,720],['Monroe-side south rim',270,882],['LSD overlook',334,830],
+]) expect(`${label} (${x},${z}) walkable at grade`,MP.walkableM(x,z)&&MP.surfaceYM(x,z)===0,true);
+// the Skating Ribbon BED is walkable now; kind is NULL until 059 flips ribbonIce
+{ const P=MP.RIBBON_M.loop[0];   // (276.1,738.9) on the ribbon centerline
+  expect(`ribbon bed (${P[0]},${P[1]}) walkable (058 paved bed)`,MP.walkableM(P[0],P[1]),true);
+  expect('ribbon bed is NOT ice yet (059 flips ribbonIce)',MP.kindAtM(P[0],P[1]),null); }
+// building footprints SEALED (052 law — data carve, not circular colliders)
+for(const [label,x,z] of [
+  ['climbing wall A footprint',250,748],['play ship footprint',272,845],['lighthouse footprint',303,849],
+  ['fort tower footprint',289,822],['CSG pavilion frame',329.5,746],['fieldhouse footprint',264,720],
+]) expect(`${label} (${x},${z}) sealed (NOT walkable)`,MP.walkableM(x,z),false);
+// the CSG Federal Building COLUMNS stay collider-pattern (small piers standing
+// ON the garden walk, like the Crown towers / peristyle) — walkable in data.
+expect('CSG columns are colliders on walkable ground (327.4,714.5)',MP.walkableM(327.4,714.5),true);
 
 console.log('\n--- Millennium: flood fill from the spawn — one connected network, no elevators ---');
 {
@@ -750,7 +781,11 @@ console.log('\n--- Millennium: flood fill from the spawn — one connected netwo
   for(const [label,x,z] of [
     ['peristyle plaza',67,730],['Bean plaza',87,798],['Crown pool',70,864],
     ['seating bowl',147,777],['Great Lawn',150,820],['Seam boardwalk',159,862],
-    ['BP crest',200,807],['NW corner',50,709],['NE corner',185,715],['SE corner',185,884],['SW corner',50,890],
+    ['BP crest',200,790],['NW corner',50,709],['SW corner',50,890],
+    // Maggie Daley (058) — every zone reached ONLY over the BP crossing
+    ['BP landing plaza',250,808],['ribbon bed',276,738],['climbing island',250,760],
+    ['play garden',285,830],['Slide Crater',305,858],['CSG',330,760],['fieldhouse esplanade',280,732],
+    ['Maggie NE corner',336,708],['Maggie SE corner',336,884],['LSD overlook',334,830],
   ]) expect(`${label} (${x},${z}) reached`,seen[(z-z0)*W+(x-x0)]===1,true);
 }
 
