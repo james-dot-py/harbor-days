@@ -4,14 +4,17 @@
 //       green posts, a gold glint bobbing over each uncollected one. Walk
 //       within 2.2m -> collected (rising chime + toast w/ lore + glint off).
 //       journalSection('signs','Honorary Chicago') tracks n/12 + Divvy metres.
-//    2. DIVVY NETWORK — FIVE docks (kiosk + sign + rack + 3 racked bikes,
-//       all shared InstancedMeshes) across the map: harbor (40,-40), Belmont
-//       plaza (24,110), dog beach (80,-330), fieldhouse/golf (92,-452), AIDS
-//       Garden (95,145). Grab at ANY dock to MOUNT: a pale-blue bike appears
-//       under the mayor (spinning spoked wheels, forward pose). On-trail =
-//       fast (x1.9), off-trail = slow + wobble (x0.8). R = bell. E anywhere =
-//       hop off -> the bike slides back to the NEAREST dock. Journal tracks
-//       Divvy metres ridden + docks discovered (n/5, first pass within 6 m).
+//    2. DIVVY NETWORK — EIGHT docks (kiosk + sign + rack + 3 racked bikes,
+//       all shared InstancedMeshes): FIVE on the lakefront + THREE in the
+//       Wrigleyville cell (Addison stop, Gallagher Way edge, the Cubby corner
+//       at Clark & Addison — see the cell-tagged DOCKS table). Grab at ANY
+//       dock to MOUNT: a pale-blue bike appears under the mayor (spinning
+//       spoked wheels, forward pose). On-trail = fast (x1.9), off-trail = slow
+//       + wobble (x0.8). R = bell. E anywhere = hop off -> the bike slides back
+//       to the nearest dock IN THE SAME CELL (nearestDockIn); a cell change
+//       while riding (boarding the Red Line, any cell exit) auto-docks it in
+//       the origin cell first. Journal tracks Divvy metres + docks discovered
+//       (n/total = DOCKS.length, first pass within 6 m).
 //    3. BOOMBOX RADIO — a chunky 80s boombox on a towel at the rocks
 //       (x145 z162). Borrow it (holdItem) and R cycles stations:
 //       LOFI (the score) -> WBMX HOUSE -> CHECKERBOARD BLUES -> OFF -> LOFI.
@@ -19,7 +22,7 @@
 //       through a private radio bus; speaker cones pulse with the beat.
 //
 //  Only-my-file rules: this module + one import line in packs/index.js. No
-//  shared source is edited. Colliders for the sign posts + the 5 dock kiosks
+//  shared source is edited. Colliders for the sign posts + every dock kiosk
 //  are ADDED via props.collide() (documented). Radio ducking uses the exported
 //  getAudioCtx().musicBus (no audio.js edit). All gameplay jitter uses
 //  Math.random (never the world rng). All audio is synthesized + actx-guarded.
@@ -44,6 +47,7 @@ import { collide } from '../props.js';
 import { pathSamples } from '../paths.js';
 import { coastQuery, tierAt } from '../coast.js';
 import { keys } from '../input.js';
+import { activeCell } from '../cells.js';
 
 // ------------------------------ scratch (no per-frame alloc) -----------
 const _m = new THREE.Matrix4(), _v = new THREE.Vector3(), _s = new THREE.Vector3(1,1,1);
@@ -141,7 +145,7 @@ function updateSigns(dt,player){
         if(SIGNS.every(g=>g.collected)) toast('HONORARY CHICAGOAN','you know every corner now');
       }
     }
-    // docks discovered — cheap n/5 check on the same throttle
+    // docks discovered — cheap n/total check on the same throttle
     for(const D of DOCKS){
       if(D.discovered)continue;
       const dx=player.x-D.x,dz=player.z-D.z;
@@ -168,23 +172,30 @@ function updateGlints(t){
 // ===================================================================== //
 //  2) DIVVY BIKE
 // ===================================================================== //
-// FIVE docks — the real Divvy network. Each on grass, >=3 m off the trail
+// The real Divvy network (cell-tagged). Lakefront docks each on grass, >=3 m off the trail
 // ribbon, clear of structures/signs (verified by screenshot). Original harbor
 // dock kept first; return-to-dock picks the nearest of these.
 const DOCKS=[
-  {x:40, z:-40 },   // Belmont Harbor west inner park (original)
-  {x:24, z:110 },   // Belmont underpass plaza (moved to the z≈105 stop)
-  {x:80, z:-330},   // dog beach — on grass west of the cove
-  {x:150, z:-436},  // golf/sanctuary corridor — south of the course fence, off the trail crossing
-  {x:95, z:145 },   // AIDS Garden south lawn
+  {x:40, z:-40 , cell:'lakefront'},   // Belmont Harbor west inner park (original)
+  {x:24, z:110 , cell:'lakefront'},   // Belmont underpass plaza (moved to the z≈105 stop)
+  {x:80, z:-330, cell:'lakefront'},   // dog beach — on grass west of the cove
+  {x:150, z:-436, cell:'lakefront'},  // golf/sanctuary corridor — south of the course fence, off the trail crossing
+  {x:95, z:145 , cell:'lakefront'},   // AIDS Garden south lawn
+  {x:-160, z:-410, cell:'wrigleyville'},   // Addison stop, south sidewalk near the Red Line station
+  {x:-303, z:-486, cell:'wrigleyville'},   // Gallagher Way edge (Clark-side plaza frontage)
+  {x:-300, z:-389, cell:'wrigleyville'},   // Clark & Addison corner (Addison north sidewalk by Cubby)
 ];
-function nearestDock(x,z){
-  let best=DOCKS[0],bd=Infinity;
-  for(const D of DOCKS){ const dx=D.x-x,dz=D.z-z,d=dx*dx+dz*dz; if(d<bd){bd=d;best=D;} }
-  return best;
+// wrigley docks sit in the flat y=0 cell — coastQuery is meaningless there.
+function dockY(D){ return D.cell && D.cell!=='lakefront' ? 0 : groundY(D.x,D.z); }
+// CELL-AWARE: only ever return to a dock in the SAME cell the bike is ridden in.
+function nearestDockIn(x,z,cell){
+  let best=null,bd=Infinity;
+  for(const D of DOCKS){ if(D.cell!==cell) continue; const dx=D.x-x,dz=D.z-z,d=dx*dx+dz*dz; if(d<bd){bd=d;best=D;} }
+  return best || DOCKS[0];
 }
+function nearestDock(x,z){ return nearestDockIn(x,z,activeCell()); }
 const bike={mounted:false,returning:false,retT:0,group:null,spins:[],wheelA:0,
-            onTrail:true,checkT:0,wob:0,bellCd:0,grabs:[],off:null,retDock:DOCKS[0]};
+            onTrail:true,checkT:0,wob:0,bellCd:0,grabs:[],off:null,retDock:DOCKS[0],mountCell:'lakefront'};
 
 // --- on-trail test: bucket pathSamples into a coarse grid, scan 3x3 ---
 const GRID=new Map(), CELL=2.6;
@@ -272,7 +283,7 @@ function divvyTex(){
   g.fillStyle='#8fd6f2'; g.font='700 22px "Trebuchet MS",sans-serif'; g.fillText('grab a bike',128,120);
   const t=new THREE.CanvasTexture(cv); t.anisotropy=4; return t;
 }
-// Build ALL 5 docks as shared InstancedMeshes so the whole network is ~11 draw
+// Build ALL docks as shared InstancedMeshes so the whole network is ~11 draw
 // calls total (fewer than the old single looped dock): 1 deck + 1 kiosk + 1
 // sign + 1 rack, plus one per parked-bike component (7 parts x 15 bikes).
 function buildDocks(){
@@ -293,7 +304,7 @@ function buildDocks(){
   const bikeWorld=new THREE.Matrix4(), bikeQ=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,Math.PI/2,0.1));
   let ri=0,bi=0;
   DOCKS.forEach((D,di)=>{
-    const DX=D.x,DZ=D.z,gy=groundY(DX,DZ);
+    const DX=D.x,DZ=D.z,gy=dockY(D);
     _m.compose(_v.set(DX,     gy+0.06,DZ     ),idQ,_s.set(1,1,1)); bases.setMatrixAt(di,_m);   // deck
     _m.compose(_v.set(DX-2.5, gy+0.81,DZ     ),idQ,_s.set(1,1,1)); kiosks.setMatrixAt(di,_m);  // kiosk
     collide(DX-2.5,DZ,0.5);
@@ -316,16 +327,18 @@ function buildDocks(){
 function mount(player){
   if(bike.mounted)return;
   bike.mounted=true; bike.returning=false; bike.wheelA=0; bike.wob=0;
+  bike.mountCell=activeCell();
   bike.group.visible=true;
   for(const g of bike.grabs) g.enabled=false; bike.off.enabled=true;
   bike.off.x=player.x; bike.off.z=player.z;
   toast("DIVVY'D","R = bell · trail = fast · E = hop off");
 }
-function dismount(){
+function dismount(dockCell){
   if(!bike.mounted)return;
   bike.mounted=false; bike.returning=true; bike.retT=0;
   _retFrom.copy(bike.group.position);
-  bike.retDock=nearestDock(bike.group.position.x,bike.group.position.z);   // slide back to the nearest dock
+  // park in the cell being LEFT (dockCell) so a cell-change auto-dock never strands the bike
+  bike.retDock=nearestDockIn(bike.group.position.x,bike.group.position.z,dockCell||activeCell());
   // restore rig + speed
   mparts.armL.rotation.z=-0.25; mparts.armR.rotation.z=0.25; mayor.rotation.z=0;
   setBikeFactor(1);
@@ -365,7 +378,7 @@ function updateBike(dt,player){
     bikePose();
   }else if(bike.returning){
     bike.retT+=dt; const u=Math.min(1,bike.retT/0.6);
-    _dockV.set(bike.retDock.x,groundY(bike.retDock.x,bike.retDock.z),bike.retDock.z);
+    _dockV.set(bike.retDock.x,dockY(bike.retDock),bike.retDock.z);
     bike.group.position.lerpVectors(_retFrom,_dockV,u);
     bike.group.rotation.set(0,Math.PI/2,0);
     bike.wheelA-=6*dt*(1-u); for(const sp of bike.spins) sp.rotation.z=bike.wheelA;
@@ -637,6 +650,8 @@ onWorldReady(player=>{
 
   // per-frame: R context key + signs + glints + bike + radio visuals
   registerUpdate((dt,t,pl)=>{
+    // cell changed while riding (e.g. boarding the Red Line) -> auto-dock in the origin cell
+    if(bike.mounted && activeCell()!==bike.mountCell){ dismount(bike.mountCell); }
     const rNow=keys.has('r'), rPress=rNow&&!_prevR; _prevR=rNow;
     if(rPress && game.running){
       if(radio.carrying) cycleStation();                              // radio wins (bell yields)

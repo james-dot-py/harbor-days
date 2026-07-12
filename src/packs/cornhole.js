@@ -78,13 +78,16 @@ onWorldReady((player)=>{
   const SITE=clearPath(130,272);                       // south lawn, empty per site-check shots
   const GAP=8;                                          // board-to-board (acceptance: ~8 m)
   const TILT=0.23, W=0.72, L=1.32, DECKH=0.07;
-  // Boards LEAN TOWARD each other (owner 2026-07-10, deliberately non-regulation):
-  // each board's RAISED hole-end faces the partner, the low lip sits on the outside.
-  // The −TILT euler below flips the incline; hole/star/leg offsets are re-derived
-  // from the same basis so the decals + legs stay on the (now inward) high end.
+  // Boards face each other the REGULATION way (owner correction 2026-07-11,
+  // issue 019 — supersedes the 2026-07-10 read that made the raised ends meet):
+  // each board's LOW lip faces the gap/opposite thrower and its RAISED hole-end
+  // sits OUTBOARD over its own near thrower — a bag arcs across, lands low and
+  // rides UP to the hole. This is a pure position/orientation swap of the two
+  // boards (yaws exchanged 0<->π, deck colours stay put); the hole/star/leg
+  // offsets re-derive from the same basis, staying on the (now outboard) high end.
   const BOARDS=[
-    {x:SITE.x, z:SITE.z-GAP/2, yaw:0,       deck:0x55aedd},   // Chicago-flag light blue (saturated for toon)
-    {x:SITE.x, z:SITE.z+GAP/2, yaw:Math.PI, deck:0xf3eddd},   // cream
+    {x:SITE.x, z:SITE.z-GAP/2, yaw:Math.PI, deck:0x55aedd},   // Chicago-flag light blue (saturated for toon)
+    {x:SITE.x, z:SITE.z+GAP/2, yaw:0,        deck:0xf3eddd},   // cream
   ];
   // throwers stand beside + behind their board, facing the far board
   const THROWERS=[
@@ -106,23 +109,23 @@ onWorldReady((player)=>{
   // per-board basis for landing math: deck-top center + right/fwd/up units
   const starMats=[],holeMats=[],legMats=[];
   BOARDS.forEach(b=>{
-    E.set(-TILT,b.yaw,0,'YXZ');Q.setFromEuler(E);       // −TILT: raised (hole) end faces the partner
-    const cy=Math.sin(TILT)*(L/2)+0.05;                 // outer lip kisses the grass (magnitude only)
+    E.set(-TILT,b.yaw,0,'YXZ');Q.setFromEuler(E);       // −TILT + yaw: raised (hole) end sits outboard, over the near thrower
+    const cy=Math.sin(TILT)*(L/2)+0.05;                 // low lip kisses the grass on the gap side (magnitude only)
     const deck=new THREE.Mesh(new THREE.BoxGeometry(W,DECKH,L),toon(b.deck));
     deck.position.set(b.x,cy,b.z);deck.quaternion.copy(Q);scene.add(deck);
     b.q=Q.clone();
     b.right=new THREE.Vector3(1,0,0).applyQuaternion(Q);
-    b.fwd  =new THREE.Vector3(0,0,1).applyQuaternion(Q); // up-slope now, toward partner (raised end)
+    b.fwd  =new THREE.Vector3(0,0,1).applyQuaternion(Q); // up-slope, toward the outboard raised (hole) end
     b.up   =new THREE.Vector3(0,1,0).applyQuaternion(Q);
     b.top  =new THREE.Vector3(b.x,cy,b.z).addScaledVector(b.up,DECKH/2);
-    // hole up-slope (inward high end), star decal mid-deck (both lie flat on the deck plane)
+    // hole up-slope (outboard high end), star decal mid-deck (both lie flat on the deck plane)
     Q.multiply(flatUp);
     V.copy(b.top).addScaledVector(b.fwd,0.40).addScaledVector(b.up,0.008);
     M.compose(V,Q,S.set(1,1,1));holeMats.push(M.clone());
     b.hole=V.clone();
     V.copy(b.top).addScaledVector(b.fwd,-0.22).addScaledVector(b.up,0.008);
     M.compose(V,Q,S.set(1,1,1));starMats.push(M.clone());
-    // two rear legs (vertical, under the raised INWARD corners)
+    // two rear legs (vertical, under the raised OUTBOARD corners)
     const c=Math.cos(b.yaw),s=Math.sin(b.yaw);
     for(const lx of [-(W/2-0.08),W/2-0.08]){
       const lz=(L/2-0.07);

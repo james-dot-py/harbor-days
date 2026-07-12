@@ -347,7 +347,7 @@ onWorldReady((player) => {
     const bumpQ=new THREE.Quaternion();                    // scratch during build
     const flatUp=new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2,0,0));
     const BOARDL=1.9, BOARDW=0.9, TILT=-0.2;
-    function makeBoard(bx,bz,gy,yaw){                       // yaw faces the partner board
+    function makeBoard(bx,bz,gy,yaw){                       // yaw sets the raised (hole) end OUTBOARD; low lip faces the gap (issue 019)
       E.set(TILT,yaw,0,'YXZ'); Q.setFromEuler(E);
       M.compose(V.set(bx,gy+0.16,bz),Q,S.set(BOARDW,0.08,BOARDL)); boardMats.push(M.clone());
       // hole near the high (far) end, lying on the board surface
@@ -366,11 +366,11 @@ onWorldReady((player) => {
       let a,b,ta,tb;                                        // board A/B centers + thrower spots
       if(cfg.axis==='z'){
         a={x:c.x,z:c.z-4.5}; b={x:c.x,z:c.z+4.5};
-        makeBoard(a.x,a.z,gy,0); makeBoard(b.x,b.z,gy,Math.PI);
+        makeBoard(a.x,a.z,gy,Math.PI); makeBoard(b.x,b.z,gy,0);   // issue 019: low lips face the gap, raised ends outboard
         ta={x:c.x,z:c.z-6.6,ry:0}; tb={x:c.x,z:c.z+6.6,ry:Math.PI};
       }else{
         a={x:c.x-4.5,z:c.z}; b={x:c.x+4.5,z:c.z};
-        makeBoard(a.x,a.z,gy,Math.PI/2); makeBoard(b.x,b.z,gy,-Math.PI/2);
+        makeBoard(a.x,a.z,gy,-Math.PI/2); makeBoard(b.x,b.z,gy,Math.PI/2);   // issue 019: low lips face the gap, raised ends outboard
         ta={x:c.x-6.6,z:c.z,ry:Math.PI/2}; tb={x:c.x+6.6,z:c.z,ry:-Math.PI/2};
       }
       throwerAt(ta.x,ta.z,gy,ta.ry); throwerAt(tb.x,tb.z,gy,tb.ry);

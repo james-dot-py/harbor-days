@@ -125,6 +125,19 @@ function buildMinimapBase() {
     p.forEach((q, i) => { const [mx, my] = wm(q[0], q[1]); i ? g.lineTo(mx, my) : g.moveTo(mx, my); });
     g.closePath(); g.fill();
   }
+  { // Gallagher office block (task 052 / issue 020) — the limestone mass closing
+    // the plaza's NW corner; without it the minimap read as a void where the
+    // player stood (they'd sunk into the office's stray base band). Rotated
+    // rect on the Clark-sheared frame, matching buildGallagherOffice.
+    const O = WV.OFFICE_W, zc = (O.z0 + O.z1) / 2, cx = WV.clarkX(zc) + 27;
+    const co = Math.cos(WV.clarkYaw), si = Math.sin(WV.clarkYaw), h = 12;   // half dep/wid
+    g.fillStyle = '#8f8a86'; g.beginPath();
+    [[-h, -h], [h, -h], [h, h], [-h, h]].forEach(([lx, lz], i) => {
+      const [mx, my] = wm(cx + lx * co + lz * si, zc - lx * si + lz * co);
+      i ? g.lineTo(mx, my) : g.moveTo(mx, my);
+    });
+    g.closePath(); g.fill();
+  }
   { // Red Line embankment
     const S = WV.STATION_W.embank;
     const [ax, ay] = wm(S.x0, S.z0), [bx, by] = wm(S.x1, S.z1);

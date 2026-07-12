@@ -338,3 +338,18 @@ few turns to find; keep each to one line of symptom + fix.
   dump settled it instantly). Text gets its OWN canvas + measureText-FITTED
   font (the 028 word-sign law), atlases stay letter-free with padded regions,
   and when a texture bug defies uv math, DUMP THE CANVAS to a PNG and look.
+- A "mayor SINKS INTO it" report is a WALKABILITY bug, not a geometry-cosmetics
+  bug — fix the walk data, never just nudge the mesh (issue 020 / task 052).
+  A prior pass "fixed" the Gallagher office black base band by ROTATING it to
+  the building frame; that cleared the OWNER'S ONE reported coordinate but a
+  footprint-vs-walkableW grid probe still found 36 walkable points UNDER the
+  band. Cause: the building's CIRCULAR collide(cx,cz,11)
+  never covered the 24×24 SQUARE footprint's corners (~17 m out), and walkableW's
+  plaza wedge + Clark para both extended UNDER the rotated south corner (which
+  pokes ~2 m past the z=-520 walk boundary). Real fix: carve the rotated
+  footprint OUT of walkableW in the shared data module (inOfficeBlock → false),
+  so engine + walkprobe stay lockstep and the building reads SOLID. Rule: a
+  circular collider can't seal a rectangular building; when a report says "sink"
+  or "clip through," probe the whole footprint against walkableW, don't trust a
+  screenshot of the single reported spot. (Also: never close a sink report by
+  reproducing only the owner's exact x,z — sweep a grid.)

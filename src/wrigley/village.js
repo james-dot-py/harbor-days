@@ -950,7 +950,7 @@ function buildGallagherOffice() {
   sgn.position.set(0, 12.2, wid / 2 + 0.06); g.add(sgn);
   g.updateMatrixWorld(true); atlasPlane(sgn, false);   // bake the GALLAGHER WAY crown into the shared atlas (detaches it from g)
   add(g);   // add() snapshots the group's remaining meshes NOW — must come after every g.add
-  A.base.push({ pos: [cx, 0.4, zc], scale: [dep + 0.2, 0.8, wid + 0.2], color: 0x2c211d });   // dark base band (shares Cubby's bucket)
+  A.base.push({ pos: [cx, 0.4, zc], yaw: clarkYaw, scale: [dep + 0.2, 0.8, wid + 0.2], color: 0x2c211d });   // dark base band, ROTATED to the office frame (issue 020): axis-aligned it jutted ~2 m past the Clark east curb into the walkable sidewalk (off < 14) and the mayor sank in — rotated it sits flush under the wall (off ≥ 14.9, blocked). Shares Cubby's bucket, +0 draws.
   // warm window GRID: three storeys on the SOUTH face (plaza) and WEST face (Clark), baked to world via yrot
   for (const y of [3.2, 6.4, 9.6]) {
     for (const lx of [-8, -4, 0, 4, 8]) {            // SOUTH face columns (local +z)
@@ -1018,7 +1018,7 @@ function buildGallagher() {
   bistroSet(clarkX(-506) + 16, -506, 'x');
   bistroSet(clarkX(-488) + 16, -488, 'z');
   bistroSet(clarkX(-452) + 18.5, -452, 'x');
-  cornhole();   // (g) the flagship pair on the lawn, raised hole-ends facing each other
+  cornhole();   // (g) the cornhole pair on the lawn — low lips face the gap, raised ends outboard (issue 019)
 }
 // trunk + three-lobe canopy (planter street tree); side lobes offset along clarkYaw
 function gallagherTree(x, z, cr, sr) {
@@ -1052,13 +1052,16 @@ function starGeo(R, r) {
   for (let i = 0; i < 12; i++) { const a = i * Math.PI / 6, rad = (i % 2) ? r : R, x = Math.sin(a) * rad, y = Math.cos(a) * rad; i ? sh.lineTo(x, y) : sh.moveTo(x, y); }
   sh.closePath(); return new THREE.ShapeGeometry(sh);
 }
-// the proper cornhole pair on the lawn: two flag boards leaning TOWARD each other,
-// raised hole-ends meeting in the middle (deliberately non-regulation — owner 2026-07-10)
+// the proper cornhole pair on the lawn: two flag boards facing each other the
+// REGULATION way — LOW lips meet at the gap centre, raised hole-ends OUTBOARD
+// (owner correction 2026-07-11, issue 019 — supersedes the 2026-07-10 read)
 function cornhole() {
   const W = 0.72, L = 1.32, DECKH = 0.07, TILT = 0.23, X = -295, LAWNY = 0.045;
-  const yBase = LAWNY + Math.sin(TILT) * L / 2 + 0.03;     // front lip kisses the grass (≈0.225)
-  // hs = +1 → raised toward +z (south), −1 → raised toward −z (north): both point at their partner
-  for (const [z, rx, deckC, hs] of [[-508, -TILT, 0x0e4c92, 1], [-500, TILT, 0xf2eee4, -1]]) {
+  const yBase = LAWNY + Math.sin(TILT) * L / 2 + 0.03;     // low lip kisses the grass (≈0.225)
+  // hs = +1 → raised toward +z (south), −1 → raised toward −z (north); rx pairs
+  // with hs. Both raised ends point OUTWARD (away from the partner) so a thrower
+  // at either end faces a board whose low edge faces them.
+  for (const [z, rx, deckC, hs] of [[-508, TILT, 0x0e4c92, -1], [-500, -TILT, 0xf2eee4, 1]]) {
     const g = new THREE.Group(); g.position.set(X, yBase, z); g.rotation.x = rx;
     g.add(M(new THREE.BoxGeometry(W, DECKH, L), toon(deckC), 0, 0, 0));                                                  // tilted plywood deck
     g.add(M(new THREE.CircleGeometry(0.13, 14), toon(0x241f1c), 0, DECKH / 2 + 0.008, hs * 0.40, -Math.PI / 2, 0, 0));   // hole up-slope, on the high end

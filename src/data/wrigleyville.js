@@ -422,7 +422,24 @@ function inQuad(q, x, z) {
   if (q.para) { const c = clarkX(z); return x >= c + q.off0 && x <= c + q.off1; }
   return x >= q.x0 && x <= q.x1;
 }
+// The Gallagher office block (issue 020) is a SOLID building: its rotated
+// footprint is carved OUT of walkability so the mayor can't sink into its dark
+// base band where the SW corner overhangs the plaza wedge + Clark para (the
+// r=11 circular collider never covered the square's corners). Same frame the
+// builder (village.js buildGallagherOffice) and the minimap (wrigley/index.js)
+// use — centre clarkX(zc)+27, 24×24 on clarkYaw; half 12.4 covers the band
+// (dep+0.2 → 12.1) plus a wall standoff, and clears the nearest walkable test
+// (statue-row / plaza-north-edge sit at local |z| ≥ 13.7).
+const OFC = (() => {
+  const cz = (OFFICE_W.z0 + OFFICE_W.z1) / 2;
+  return { cx: clarkX(cz) + 27, cz, half: 12.4, c: Math.cos(clarkYaw), s: Math.sin(clarkYaw) };
+})();
+export function inOfficeBlock(x, z) {
+  const dx = x - OFC.cx, dz = z - OFC.cz;
+  return Math.abs(dx * OFC.c - dz * OFC.s) <= OFC.half && Math.abs(dx * OFC.s + dz * OFC.c) <= OFC.half;
+}
 export function walkableW(x, z) {
+  if (inOfficeBlock(x, z)) return false;   // solid building — never a ghost you sink into (issue 020)
   for (const q of WALK_W) if (inQuad(q, x, z)) return true;
   return false;
 }
