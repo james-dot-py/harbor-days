@@ -36,6 +36,12 @@ feasibility inside perf + single-file constraints.
   Michigan Ave streetwall as the west backdrop wall. Sources per standing
   rules: refs/millennium-park/ osm.json + Wikimedia; Google imagery banned;
   owner photos gold when supplied.
+  **EXPANSION (owner-directed 2026-07-11 evening, queue 057-062):** the cell
+  grows into Grant Park proper — the Art Institute (lions + Nichols
+  Bridgeway), Butler Field with LOLLAPALOOZA live, ALL of Maggie Daley Park
+  (play garden, climbing walls, skating ribbon = unparked 059), and the BP
+  bridge fully built out across Columbus. Scout/layout 057 → builds 058-061
+  → polish + sign-off addendum 062.
 
 ## Candidates (famous Chicago spots, seeded per §5.3)
 
@@ -46,7 +52,11 @@ feasibility inside perf + single-file constraints.
   Wrigleyville's Shipped scope when 055 is green.
 
 - Montrose Harbor and the Magic Hedge — adjacent north; extends the contiguous
-  lakefront world; birding + harbor variety.
+  lakefront world; birding + harbor variety. **OWNER-PICKED NEXT (2026-07-11):
+  after the Grant Park expansion (queue 057-062) ships, the next planner run
+  selects THIS — build the lakefront north to Montrose per the original plan
+  (contiguous 1:2 growth, no hard cell: the map itself extends past the
+  Irving Park gate). Do not re-litigate the roster.**
 - North Avenue Beach — adjacent south; the chess pavilion + boat-shaped
   beach house silhouette.
 - Lincoln Park Zoo and conservatory — adjacent south-west; free zoo, iconic

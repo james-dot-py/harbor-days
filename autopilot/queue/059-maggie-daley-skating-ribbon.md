@@ -1,10 +1,15 @@
 ---
-id: 056
+id: 059
 area: millennium
 type: build
 model: fable
 title: Maggie Daley Skating Ribbon — the serpentine crown jewel NE of the BP bridge
 acceptance: >
+  UNPARKED 2026-07-11 (renumbered 056→059): the owner directed the Grant Park
+  expansion, so the eastward growth this task was waiting on arrives in 058
+  (BP bridge crossing + Maggie Daley terrain incl. the ribbon BED) — this
+  task runs AFTER 058 and activates skating on the ribbon, reusing 049's
+  glide verbatim.
   SEEDED BY TASK 049 (stretch goal deliberately NOT half-shipped — the main
   McCormick rink + the glide movement shipped there; this is the second act).
   Owner reference is gold: refs/millennium-park/owner-skating-ribbon-northeast.webp
