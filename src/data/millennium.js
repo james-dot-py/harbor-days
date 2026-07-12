@@ -266,7 +266,7 @@ export const BACKDROP_M = {
 //   butler       → 061 (Butler Field + Lolla + street closure east/south)
 // =====================================================================
 export const OPEN_GRANT = {
-  maggie: true, ribbonIce: false, artInstitute: false, nichols: false, butler: false,   // 058: BP crossing + all of Maggie Daley LIVE
+  maggie: true, ribbonIce: true, artInstitute: false, nichols: false, butler: false,   // 058: Maggie LIVE · 059: ribbon ICE live (kindAtM 'ice' on the strip)
 };
 const G = OPEN_GRANT;
 
@@ -363,8 +363,9 @@ export const MAGGIE_M = {
   xmasts: [[214, 744], [246, 776], [272, 730], [258, 850], [300, 800]], // white X-crossed floodlight masts (signature)
 };
 // The Skating Ribbon (osm way 524270342 VERBATIM, closed loop, 66 pts).
-// 058 builds the BED (paved pre-ice + rockwork rims); 059 flips ribbonIce →
-// kindAtM 'ice' over the strip and the 049 glide just works.
+// 058 built the BED (rockwork rims + rails); 059 flipped ribbonIce → the
+// strip renders as ICE (maggie.js), kindAtM returns 'ice' over it and the
+// 049 glide just works (skaters live in packs/ribbon-skaters.js).
 export const RIBBON_M = { halfW: 2.7, loop: [
   [276.1,738.9],[276.9,737.5],[277.1,736],[276.8,734.5],[276,733.2],[274.9,732.2],
   [273.4,731.7],[273,731.7],[271.9,731.7],[270.4,732.3],[268,734],[265.3,735.2],

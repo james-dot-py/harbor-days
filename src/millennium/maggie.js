@@ -107,21 +107,18 @@ export function buildMaggie() {
   }
 
   // =====================================================================
-  // C. SKATING RIBBON BED — pale serpentine + white pipe rails + rockwork +
-  //    warming hut. (059 flips the strip to ice; we build ONLY the bed.)
+  // C. SKATING RIBBON — soil rim + white pipe rails + rockwork + warming
+  //    hut; the strip surface is ICE once OPEN_GRANT.ribbonIce (059) and
+  //    the pale pre-ice bed before that (058).
   // =====================================================================
   const N = 65, U = L.slice(0, N);                                 // 65 unique loop verts (closed)
   let cx = 0, cz = 0; for (const p of U) { cx += p[0]; cz += p[1]; } cx /= N; cz /= N;
-  // planting/soil rim under the ribbon, then the PALE bed on top
+  // planting/soil rim under the ribbon
   for (let i = 0; i < N; i++) {
     const a = U[i], b = U[(i + 1) % N];
     segStrip(a, b, HW + 1.6, 0.018, 0.018, C.soil);                // soil/planting-bed rim
   }
-  for (let i = 0; i < N; i++) {
-    const a = U[i], b = U[(i + 1) % N];
-    segStrip(a, b, HW, 0.035, 0.035, C.ribbon);                    // the pale paved ribbon bed
-  }
-  // per-vertex edge offsets (rails follow BOTH loop edges)
+  // per-vertex edge offsets (the ice ring + rails all follow BOTH loop edges)
   const nrm = i => {
     const a = U[(i - 1 + N) % N], b = U[(i + 1) % N];
     let tx = b[0] - a[0], tz = b[1] - a[1]; const l = Math.hypot(tx, tz) || 1; tx /= l; tz /= l;
@@ -129,14 +126,71 @@ export function buildMaggie() {
   };
   const edgeL = [], edgeR = [];
   for (let i = 0; i < N; i++) { const [nx, nz] = nrm(i); edgeL.push([U[i][0] + nx * HW, U[i][1] + nz * HW]); edgeR.push([U[i][0] - nx * HW, U[i][1] - nz * HW]); }
-  // WHITE PIPE RAILINGS — posts (every other vert) + a continuous top rail
+  if (M.OPEN_GRANT.ribbonIce) {
+    // 059: THE RIBBON IS ICE. One closed ring strip over the edge offsets (no
+    // chord gaps at the hairpins) + skate scratches strung along the flow —
+    // merged into ONE self-lit vertexColors bmat mesh, the rink.js ice recipe
+    // (toon would pick up green ground-bounce at grazing angles). Own LOCAL
+    // rng ('RBNI') so the 058 rock/shrub/tree scatter stays byte-identical.
+    const ir = mulberry32(0x52424e49);
+    const irr = (a, b) => a + (b - a) * ir();
+    const cA = [0.918, 0.945, 0.961], cB = [0.847, 0.895, 0.922];  // #eaf1f5 base · #d8e4eb mottle
+    const geos = [];
+    { const P = [], Cv = [], Uv = [], Ix = [];                     // the ring strip
+      for (let i = 0; i < N; i++)
+        for (const e of [edgeL[i], edgeR[i]]) {
+          const m = 0.5 + 0.5 * Math.sin(e[0] * 2.1 + e[1] * 0.7) * Math.sin(e[1] * 1.3 - e[0] * 0.9);
+          P.push(e[0], 0.035, e[1]); Uv.push(0, 0);
+          Cv.push(cA[0] + (cB[0] - cA[0]) * m * 0.55, cA[1] + (cB[1] - cA[1]) * m * 0.55, cA[2] + (cB[2] - cA[2]) * m * 0.55);
+        }
+      for (let i = 0; i < N; i++) {                                // (a,c,b)/(b,c,d): +y winding
+        const a = i * 2, b = a + 1, c2 = ((i + 1) % N) * 2, d = c2 + 1;
+        Ix.push(a, c2, b, b, c2, d);
+      }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+      g.setAttribute('color', new THREE.Float32BufferAttribute(Cv, 3));
+      g.setAttribute('uv', new THREE.Float32BufferAttribute(Uv, 2));   // uv keeps the merge signature whole (019 law)
+      g.setIndex(Ix); g.computeVertexNormals();
+      geos.push(g); }
+    { const cum = [0]; let per = 0;                                // scratches by arclength
+      for (let i = 0; i < N; i++) { per += Math.hypot(U[(i + 1) % N][0] - U[i][0], U[(i + 1) % N][1] - U[i][1]); cum.push(per); }
+      for (let k = 0; k < 64; k++) {
+        const s = irr(0, per);
+        let i = 0; while (cum[i + 1] < s) i++;
+        const f = (s - cum[i]) / (cum[i + 1] - cum[i]), a = U[i], b = U[(i + 1) % N];
+        const head = Math.atan2(b[0] - a[0], b[1] - a[1]), lat = irr(-HW + 0.6, HW - 0.6);
+        const g = new THREE.PlaneGeometry(0.045, irr(0.7, 2.2), 1, 1);
+        g.rotateX(-Math.PI / 2); g.rotateY(head + irr(-0.3, 0.3));
+        const n2 = g.attributes.position.count, sc = new Float32Array(n2 * 3);
+        const white = ir() < 0.55;
+        for (let m2 = 0; m2 < n2; m2++) { sc[m2 * 3] = white ? 0.973 : 0.784; sc[m2 * 3 + 1] = white ? 0.984 : 0.851; sc[m2 * 3 + 2] = white ? 0.992 : 0.895; }
+        g.setAttribute('color', new THREE.BufferAttribute(sc, 3));
+        g.translate(a[0] + (b[0] - a[0]) * f - Math.cos(head) * lat, 0.042 + (k % 4) * 0.003,
+                    a[1] + (b[1] - a[1]) * f + Math.sin(head) * lat);
+        geos.push(g);
+      } }
+    const merged = BufferGeometryUtils.mergeBufferGeometries(geos, false);
+    root.add(new THREE.Mesh(merged, bmat(0xffffff, { vertexColors: true })));
+  } else {
+    for (let i = 0; i < N; i++) {
+      const a = U[i], b = U[(i + 1) % N];
+      segStrip(a, b, HW, 0.035, 0.035, C.ribbon);                  // the pale pre-ice paved bed (058)
+    }
+  }
+  // WHITE PIPE RAILINGS — posts (every other vert) + a continuous top rail,
+  // with a GATE GAP in the outer south lip (x 258.5–268.5, z > 769) where the
+  // plaza→ribbon connector walk meets the ice: the honest way onto the skate
+  // loop (059 — entering used to clip through the rail). Inner rail continues.
   const postGeo = new THREE.CylinderGeometry(0.055, 0.055, 1.0, 6); postGeo.translate(0, 0.5, 0);
   const railGeo = new THREE.BoxGeometry(0.07, 0.07, 1);
   const posts = [], rails = [];
+  const inGate = (x, z) => x > 258.5 && x < 268.5 && z > 769;
   for (const edge of [edgeL, edgeR]) {
     for (let i = 0; i < N; i++) {
-      if (i % 2 === 0) posts.push({ pos: [edge[i][0], 0, edge[i][1]], color: C.rail });
+      if (i % 2 === 0 && !inGate(edge[i][0], edge[i][1])) posts.push({ pos: [edge[i][0], 0, edge[i][1]], color: C.rail });
       const a = edge[i], b = edge[(i + 1) % N], dx = b[0] - a[0], dz = b[1] - a[1], len = Math.hypot(dx, dz);
+      if (inGate(a[0], a[1]) || inGate(b[0], b[1])) continue;
       rails.push({ pos: [(a[0] + b[0]) / 2, 0.95, (a[1] + b[1]) / 2], yaw: Math.atan2(dx, dz), scale: [1, 1, len], color: C.rail });
     }
   }

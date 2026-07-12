@@ -317,3 +317,11 @@ cut becomes a revert task.
   studded with candy-colored holds rise from the island the ~250 m skating-ribbon
   bed loops around (059 flips it to ice). — Play Garden (lighthouse 303/849, ship
   272/845), climbing walls (242-268/744-763), Skating Ribbon (loop) — task 058
+- THE RIBBON IS ICE. Walk through the rail gate off the bridge-landing plaza and
+  the skates snap on — a quarter mile of white ice you STEER, banking through the
+  double switchbacks around the climbing walls while the glide carries you (SPACE
+  for a twirl mid-run). Seven chibi loopers ride the loop one-way — a hands-behind
+  speed skater, a spinner — and a teal-puffer beginner inches along the rail, arms
+  straight out, freezing mid-near-fall ("ope — the rail is my copilot"). Bump a
+  passing skater and they ope right past you. — Maggie Daley Skating Ribbon
+  (loop x 222-279, z 732-771; gate ~(263,772)) — task 059

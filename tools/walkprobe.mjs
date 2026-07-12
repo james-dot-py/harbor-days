@@ -730,10 +730,19 @@ for(const [label,x,z] of [
   ['play-garden esplanade',285,806],['play garden core',285,830],['Slide Crater apron',305,858],
   ['CSG garden walk',330,760],['tennis pad',307,720],['Monroe-side south rim',270,882],['LSD overlook',334,830],
 ]) expect(`${label} (${x},${z}) walkable at grade`,MP.walkableM(x,z)&&MP.surfaceYM(x,z)===0,true);
-// the Skating Ribbon BED is walkable now; kind is NULL until 059 flips ribbonIce
-{ const P=MP.RIBBON_M.loop[0];   // (276.1,738.9) on the ribbon centerline
-  expect(`ribbon bed (${P[0]},${P[1]}) walkable (058 paved bed)`,MP.walkableM(P[0],P[1]),true);
-  expect('ribbon bed is NOT ice yet (059 flips ribbonIce)',MP.kindAtM(P[0],P[1]),null); }
+// 059: ribbonIce LIVE — the strip kinds 'ice' end to end (the 049 glide
+// contract on the serpentine). Even loop indices are stride-2 chord ENDPOINTS
+// of RIBBON_SEGS_M, so they sit exactly on the kind quads; walk and kind read
+// the SAME quads, so anywhere you can stand on the strip the skates are on.
+for(const i of [0,12,24,34,44,54]){ const P=MP.RIBBON_M.loop[i];
+  expect(`ribbon strip (${P[0]},${P[1]}) walkable`,MP.walkableM(P[0],P[1]),true);
+  expect(`ribbon strip (${P[0]},${P[1]}) kinds ICE (059 ribbonIce)`,MP.kindAtM(P[0],P[1]),'ice'); }
+// ...and the skates come OFF at the lip: island / connector / landing / rims
+// are walkable but kind-null (no glide on the plaza, no class leak).
+for(const [label,x,z] of [
+  ['climbing-wall island plaza',250,757],['plaza->ribbon connector',262,785],
+  ['bridge-landing plaza',250,808],['fieldhouse esplanade',280,732],['E-rim promenade',205,750],
+]) expect(`${label} (${x},${z}) walkable but NOT ice`,MP.walkableM(x,z)&&MP.kindAtM(x,z)===null,true);
 // building footprints SEALED (052 law — data carve, not circular colliders)
 for(const [label,x,z] of [
   ['climbing wall A footprint',250,748],['play ship footprint',272,845],['lighthouse footprint',303,849],
