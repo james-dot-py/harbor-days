@@ -325,3 +325,18 @@ cut becomes a revert task.
   straight out, freezing mid-near-fall ("ope — the rail is my copilot"). Bump a
   passing skater and they ope right past you. — Maggie Daley Skating Ribbon
   (loop x 222-279, z 732-771; gate ~(263,772)) — task 059
+- THE LIONS ARE ON DUTY. Michigan Ave now runs south to the Art Institute's
+  beaux-arts face — frieze lettering, painter name-bands, three invented show
+  banners (SEEING SPOTS · DEEP DISH · THE BIG OPE) — and the two verdigris
+  bronzes flank the grand staircase in their real stances: north lion ON THE
+  PROWL (head low, foreleg advanced), south lion IN AN ATTITUDE OF DEFIANCE
+  (chest up, jaw open, tail high). Wish either luck (E) and get a toast
+  ("somewhere a tiny helmet waits for him"); a lunch pair sits on the treads
+  with sandwiches ("ope — best lunch spot in the loop") and the mayor can sit
+  down beside them; the portico sandwich board promises FREE DAY TOMORROW; the
+  ROUTE 66 BEGINS HERE sign stands at the curb. Then the NICHOLS BRIDGEWAY — a
+  slim white boat-hull span — rises off the Great Lawn, soars over closed
+  Monroe and the rail cut, and lands on the Modern Wing terrace: the best
+  skyline porch in the game. — Art Institute (steps x53-57, z963.5-978; lions
+  54.4/962.4 + 54.4/979.4), Nichols Bridgeway (lawn ~112/852 → terrace
+  ~128/916) — task 060

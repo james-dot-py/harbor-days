@@ -26,6 +26,9 @@ import { buildRink } from './rink.js';
 import { buildWrigleyMonument } from './wrigleymonument.js';
 import { buildMaggie } from './maggie.js';
 import { buildPlayGarden } from './playgarden.js';
+import { buildArtInstitute } from './artinstitute.js';
+import { buildLions } from './lions.js';
+import { buildNichols } from './nichols.js';
 
 const _r = mulberry32(0x4d0000 ^ M.SEED_M);
 export const grand = (a = 0, b = 1) => a + (b - a) * _r();
@@ -148,12 +151,19 @@ function buildGround() {
   // law) or it occludes the cut from the crest above (bridge.js builds the
   // sunken roadbed + retaining walls; streets.js splits the Columbus plane).
   const TR = M.BP_CROSSING_M.trench;
-  const baseHoles = G.maggie ? [...HOLES, TR] : HOLES;
+  // The AI RAIL TRENCH (060): the open Metra cut (floor y −3) must be carved
+  // out of the grade carpet (041 pit law) or the fill occludes it from above
+  // (artinstitute.js builds the sunken roadbed, walls, catenary + parked EMU).
+  const baseHoles = [...HOLES,
+    ...(G.maggie ? [TR] : []),
+    ...(G.artInstitute ? [M.ART_M.trench] : [])];
   // 0. base fill over the whole cell footprint (kills any seam void) — carved
   //    around the subway pit + the sunken cafe (+ the Columbus trench when
-  //    Maggie is live) so each reads as a real opening. Grown east to the LSD
-  //    frame (x 346) when the Grant expansion is open.
-  paveRegion(6, G.maggie ? 346 : 238, 680, 938, -0.06, COL.base, baseHoles);
+  //    Maggie is live, + the AI rail trench when the Art Institute is live) so
+  //    each reads as a real opening. Grown east to the LSD frame (x 346) when
+  //    the Grant expansion is open, south to the South Loop band (z 1080) when
+  //    the Art Institute block is open.
+  paveRegion(6, G.maggie ? 346 : 238, 680, G.artInstitute ? 1080 : 938, -0.06, COL.base, baseHoles);
   // 1. park lawn carpet (interior inside the frame sidewalks)
   paveRegion(48, 189, 705, 894, -0.02, COL.lawn, HOLES);
 
@@ -310,6 +320,40 @@ function buildMinimapBase() {
     dot(272, 845, '#3a72c4', 3);                            // play ship
     dot(250, 752, '#8b9098', 3);                            // climbing walls
   }
+
+  // ---- Art Institute block (060, flag artInstitute) ----
+  if (M.OPEN_GRANT.artInstitute) {
+    const AI = M.ART_M;
+    // scenery roads south: Michigan extension + Jackson band
+    rect(32, 48, 935, 1044, '#5a5750'); rect(32, 346, 1032, 1044, '#5a5750');
+    // closed Monroe (festival street, walkable curb to curb)
+    rect(48, 190, 894, 908, '#9a9384');
+    // spine extension + east rim + forecourt paving
+    g.fillStyle = '#9a9384';
+    rect(48, 57, 908, 1032, '#9a9384'); rect(181, 189, 908, 1032, '#9a9384');
+    rect(48, 57.2, 958, 984, '#b7b0a0');                    // forecourt + grand steps
+    // gardens
+    rect(AI.northGarden.x0, AI.northGarden.x1, AI.northGarden.z0, AI.northGarden.z1, '#5b7a44');
+    rect(AI.southGarden.x0, AI.southGarden.x1, AI.southGarden.z0, AI.southGarden.z1, '#5b7a44');
+    // the open rail trench (dark cut), then the masses that bridge it
+    rect(AI.trench.x0, AI.trench.x1, AI.trench.z0, AI.trench.z1, '#2c2e33');
+    // museum masses (warm stone) + Modern Wing (pale) + east pool strip
+    rect(AI.westBlock.x0, AI.westBlock.x1, AI.westBlock.z0, AI.westBlock.z1, '#a89a82');
+    rect(AI.waist.x0, AI.waist.x1, AI.waist.z0, AI.waist.z1, '#a89a82');
+    for (const e of AI.eastCampus) rect(e.x0, e.x1, e.z0, e.z1, '#a89a82');
+    rect(AI.modernWing.x0, AI.modernWing.x1, AI.modernWing.z0, AI.modernWing.z1, '#cfcabb');
+    rect(AI.pool.x0, AI.pool.x1, AI.pool.z0, AI.pool.z1, '#3d5a6e');
+    // south loop backdrop band
+    rect(48, 330, 1050, 1080, '#6d6a63');
+    // Nichols Bridgeway (white ribbon over Monroe)
+    if (M.OPEN_GRANT.nichols) {
+      g.strokeStyle = '#e8e6de'; g.lineWidth = 2.5; g.beginPath();
+      M.NICHOLS2_M.nodes.forEach((n, i) => { const [mx, my] = wm(n[0], n[1]); i ? g.lineTo(mx, my) : g.moveTo(mx, my); });
+      g.stroke();
+    }
+    // THE LIONS — verdigris dots at the steps
+    for (const l of AI.lions) dot(l.x, l.z, '#4da28c', 3);
+  }
   return cv;
 }
 
@@ -331,6 +375,11 @@ export function buildMillennium() {
   if (M.OPEN_GRANT.maggie) {
     buildMaggie();     // MAGGIE DALEY — ribbon bed, climbing walls, fieldhouse, tennis, CSG, landforms, X-masts, backdrop east (task 058)
     buildPlayGarden(); // THE PLAY GARDEN — lighthouse+tube slide, ship, fort+rope bridge, enchanted forest, slide crater, swings, splash (task 058)
+  }
+  if (M.OPEN_GRANT.artInstitute) {
+    buildArtInstitute(); // THE ART INSTITUTE — beaux-arts west block, grand steps, banners, gardens, rail trench, Modern Wing, arch (task 060)
+    buildLions();        // THE LIONS — the two bronze guardians flanking the steps (task 060, the hero meshes)
+    buildNichols();      // NICHOLS BRIDGEWAY — white boat-hull span, lawn → Bluhm terrace (task 060, flag nichols = walkable)
   }
   flushPool();         // emit the shared instanced pool (P2) — cross-zone repeats fold to one bucket each
   // Grown Grant-expansion cell (~300×340 m): merge into ≤240×240 m TILES per

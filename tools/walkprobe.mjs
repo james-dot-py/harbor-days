@@ -613,7 +613,10 @@ console.log('\n--- Task 023: spawn on the forecourt, clear of the monument colli
 console.log('\n--- Millennium: the park network is walkable at grade ---');
 for(const [label,x,z] of [
   ['Michigan spine @ spawn',55,800],['Michigan spine N',52,710],['Michigan spine S',52,890],
-  ['Randolph sidewalk',120,709],['Monroe sidewalk',120,890],
+  ['Randolph sidewalk',120,709],
+  // 060: the Nichols slot (x115.8-122.2) carves the Monroe sidewalk under the
+  // bridgeway, so (120,890) is now non-walk — probe either flank instead.
+  ['Monroe sidewalk W of the bridgeway',110,890],['Monroe sidewalk E of the bridgeway',130,890],
   ['Columbus rim N',185,750],['Columbus rim S',185,850],
   ['Wrigley Sq plaza (peristyle foot)',67,730],['Wrigley Sq entrance corner',58,714],
   ['Chase Promenade N',108,720],['Chase Promenade mid',108,800],['Chase Promenade S',108,880],
@@ -642,7 +645,10 @@ console.log('\n--- Millennium: Bean geometry discipline (043) ---');
 
 console.log('\n--- Millennium: roads/cafe/planting are NOT walkable ---');
 for(const [label,x,z] of [
-  ['Michigan roadway',40,800],['Randolph roadway',100,700],['Monroe roadway',100,900],['Columbus roadway',195,750],
+  ['Michigan roadway',40,800],['Randolph roadway',100,700],
+  // 060: CLOSURE_M.monroeWest (x48-190) is now the walkable festival street, so
+  // (100,900) walks; monroeEast (x200-336) stays gated on `butler` (false).
+  ['Monroe roadway east of the closure',210,900],['Columbus roadway',195,750],
   ['rink boards gap W',61.3,790],['rink boards gap E',73,800],['rink boards gap N',66,779.5],['rink boards gap S',67,818.5],
   ['rink rim buffer W',58,780],['rink rim buffer E (Park Grill band)',75.5,800],['rink rim buffer N',66,773],['rink rim buffer S',66,825.5],['rink stair cheek',59,798],
   ['Lurie light plate',153.6,852.5],['Lurie dark plate',167.7,870.7],
@@ -751,6 +757,61 @@ for(const [label,x,z] of [
 // the CSG Federal Building COLUMNS stay collider-pattern (small piers standing
 // ON the garden walk, like the Crown towers / peristyle) — walkable in data.
 expect('CSG columns are colliders on walkable ground (327.4,714.5)',MP.walkableM(327.4,714.5),true);
+
+// ===== Millennium: ART INSTITUTE + NICHOLS (task 060) — flags artInstitute +
+// nichols LIVE. The AI block (steps ramp, gardens, east rim), the closed-Monroe
+// festival crossing and the Nichols Bridgeway (elevated deck lawn->Bluhm) join
+// the network. walkableM/surfaceYM/kindAtM are the SAME funcs the engine uses.
+console.log('\n--- Millennium: ART INSTITUTE + NICHOLS (task 060) ---');
+// WALKABLE — spine extension, forecourt/steps/portico, gardens, closed Monroe,
+// east rim, the Nichols launch pad + the elevated Bluhm terrace.
+for(const [label,x,z] of [
+  ['spine extension N',52,930],['spine extension S',52,1010],
+  ['forecourt apron',50,970],['steps mid',55,970],['portico landing',58.4,970],
+  ['North Garden',67,925],['North Garden street overlap',70,907],
+  ['South Garden N',60,1005],['South Garden S',75,1025],
+  ['closed Monroe crossing',100,901],['spine crossing closed Monroe',52,901],
+  ['east rim N',185,930],['east rim S',185,1000],
+  ['Nichols launch pad',117,836],['Bluhm terrace',128,915],
+]) expect(`${label} (${x},${z}) walkable`,MP.walkableM(x,z),true);
+// surfaceY — the steps ramp lerps 0->1.9 W->E; portico + Bluhm are flat decks;
+// the Nichols deck rises along its node chain (over Monroe, over the slot).
+for(const [label,x,z,want,tol] of [
+  ['steps ramp mid',55,970,0.855,0.15],['steps ramp upper',56.8,970,1.71,0.15],
+  ['portico landing',58.4,970,1.9,0],['Bluhm terrace',128,915,13,0],
+  ['Nichols deck mid',117.9,872,4.6,0.3],['Nichols deck over Monroe',118.6,899,8.7,0.5],
+]){ const y=MP.surfaceYM(x,z); expect(`${label} surfaceY (${x},${z})=${y.toFixed(3)} ~ ${want} (±${tol})`,Math.abs(y-want)<=tol,true); }
+{ const y=MP.surfaceYM(119,890);     // the deck flies OVER the carved slot — elevated, not grade
+  expect(`Nichols deck over the slot (119,890) elevated y=${y.toFixed(2)} > 6.5`,y>6.5,true); }
+// grade elsewhere on the AI network stays y0
+for(const [x,z] of [[52,930],[100,901]]) expect(`grade y0 at (${x},${z})`,MP.surfaceYM(x,z),0);
+// NOT walkable — urn-bed flanks, the west gallery block, the Metra trench, the
+// carved fountain, the reflecting pool, the slot OUTSIDE the deck chain, the
+// roadway edges + the garden/trench annex lip.
+for(const [label,x,z] of [
+  ['urn bed N',56,960],['urn bed S',56,981],['west gallery block',75,970],
+  ['rail trench N',110,950],['rail trench S',110,1020],
+  ['South Garden fountain carve',84,1012],['east reflecting pool carve',180,970],
+  ['Monroe slot outside the deck chain',116.2,889],
+  ['Michigan roadway south',40,1000],['Jackson roadway',100,1038],
+  ['garden/trench annex lip',95.5,1015],
+]) expect(`${label} (${x},${z}) NOT walkable`,MP.walkableM(x,z),false);
+// CHAIN CONTINUITY (BP-chain pattern) — walk the Nichols node chain. The deck
+// follows its node heights end to end (no grade hole / seam jump). Nichols' 7
+// nodes span y0->13 with steep per-seg deltas, so we compare each sample to its
+// node-lerp expectation (not to an adjacent sample). Sample the SEG INTERIORS
+// (t=.25/.5/.75) — never the exact shared node, where along==hl is a float
+// knife-edge that inQuadM can miss (the player never stands sub-micron on a
+// vertex; the BP test samples interiors for the same reason). Worst dev < 0.6.
+{ const nd=MP.NICHOLS2_M.nodes; let worst=0,at='';
+  for(let i=1;i<nd.length;i++) for(const t of [0.25,0.5,0.75]){
+    const x=nd[i-1][0]+(nd[i][0]-nd[i-1][0])*t, z=nd[i-1][1]+(nd[i][1]-nd[i-1][1])*t;
+    const ey=nd[i-1][2]+(nd[i][2]-nd[i-1][2])*t;     // node-lerp expectation on this seg
+    const d=Math.abs(MP.surfaceYM(x,z)-ey);
+    if(d>worst){worst=d;at=`(${x.toFixed(1)},${z.toFixed(1)})`;} }
+  expect(`Nichols deck follows its nodes end-to-end (worst mid-seam ${worst.toFixed(2)} at ${at} < 0.6)`,worst<0.6,true); }
+// KIND — no ice anywhere in the AI zone (the rink + ribbon are north)
+expect('kindAtM(52,970) === null (no ice in the AI zone)',MP.kindAtM(52,970),null);
 
 console.log('\n--- Millennium: flood fill from the spawn — one connected network, no elevators ---');
 {

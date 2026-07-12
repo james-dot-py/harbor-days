@@ -386,3 +386,21 @@ few turns to find; keep each to one line of symptom + fix.
   real way STARTS at (172.6, 834.9), runs north, and crosses Columbus at
   z≈790 (47 units off). Dump the ordered point list (tmp-grant-inspect geom)
   before citing any endpoint or bearing from an extract.
+- `Object.assign(new THREE.Mesh(...), { position: v })` THROWS in r128 —
+  Object3D.position is a getter-only accessor — and framework.js's onWorldReady
+  try/catch downgrades the throw to console.warn, so ONE bad line killed the
+  whole millennium cell build while every error gate stayed green (task 060:
+  the z>700 dev spawn quietly fell back to the lakefront jetski; shot.mjs saw
+  zero console.errors). Symptom to trust: a deep-cell spawn landing on the
+  lakefront = the cell builder threw. Diagnose with tools/tmp-warnprobe.mjs
+  (own-port load, captures console.warn + pageerror); set transforms via
+  .position.set()/.copy(), never Object.assign onto an Object3D.
+- tools/shots/baseline.png only compares under its CANONICAL capture params —
+  `play=1&quiet=1` at 3500 ms (flake-calibrate.mjs): a title-CLICK start shot
+  diffs ~34% against it (intro camera pose + HUD state) and reads exactly like
+  catastrophic world drift (task 060 burned a false determinism alarm on it;
+  flags-off triage showed the identical 34%, proving it inherited). At canonical
+  params the same tree diffed 2.31% — all HUD hint bar, wandering beach NPCs,
+  flower AA. tools/tmp-diffmap.mjs writes the diff MAP: read WHERE the pixels
+  are before concluding drift. Rule: reproduce baseline.png's exact query
+  params before comparing anything against it.

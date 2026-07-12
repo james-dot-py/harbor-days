@@ -15,7 +15,8 @@
 // bodies reach back to z 680 exactly — never past it).
 // =====================================================================
 import * as THREE from 'three';
-import { millenniumRoot, emitInstanced } from './index.js';
+import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { millenniumRoot, emitInstanced, poolInstanced } from './index.js';
 import { toon, bmat, mulberry32 } from '../core.js';
 import * as M from '../data/millennium.js';
 
@@ -83,8 +84,11 @@ export function buildStreetwall() {
     winsX(FRONT, +1, cz, w, h);
   };
 
-  const placeAnchor = (a) => {
-    const c = pick(PAL), w = a.w, h = a.h, cz = a.z;
+  const placeAnchor = (a, opts = {}) => {
+    const w = a.w, h = a.h, cz = a.z;
+    // body colour: warm limestone (pick keeps the section-1 rng order) except the
+    // south-extension slabs — cool glass (Blue Cross hex) / white terra-cotta.
+    const c = a.style === 'glass' ? 0x66aecb : a.style === 'santafe' ? 0xeef0f2 : pick(PAL);
     box(BACKx, h / 2, cz, DEPTH, h, w, c);                        // the body mass
 
     if (a.style === 'colonnade') {
@@ -103,7 +107,45 @@ export function buildStreetwall() {
       box(BACKx, colH + 3.2, cz, DEPTH + 0.4, 1.6, w, PALE);      // architrave beam
       box(BACKx, h + 1.3, cz, DEPTH + 1, 2.6, w + 1.2, PALE);     // heavy cornice cap
       box(BACKx, h + 3.6, cz, DEPTH, 2.2, w * 0.5, PALE);         // central attic / pediment block
+      if (opts.inscription) {                                     // ORCHESTRA HALL frieze (Symphony Center)
+        const tex = wordTex(opts.inscription, '#e6ddc8', '#3a352a', 'Georgia,serif', 512, 64);
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.8, 2.4), bmat(0xffffff, { map: tex }));
+        plane.position.set(FRONT + 0.2, h - 6, cz); plane.rotation.y = Math.PI / 2;  // FrontSide faces EAST; the body box is the solid rear
+        millenniumRoot.add(plane);
+      }
       return;                                                     // (few windows: classical)
+    }
+    if (a.style === 'glass') {
+      // BORG-WARNER — cool glass slab: thin pale mullion fins + a modest lit scatter.
+      const nfin = Math.max(3, Math.round(w / 3));
+      for (let i = 0; i < nfin; i++) {
+        const z = cz - w / 2 + (i + 0.5) * (w / nfin);
+        box(FRONT + 0.12, h / 2 + 1, z, 0.2, h * 0.94, 0.35, PALE);   // slim pale mullion fin
+      }
+      box(BACKx, h + 0.6, cz, DEPTH + 0.3, 1.0, w + 0.4, COPING);     // slim coping cap
+      winsX(FRONT, +1, cz, w, h, { prob: 0.3 });
+      return;
+    }
+    if (a.style === 'santafe') {
+      // RAILWAY EXCHANGE — white terra-cotta: fine pale pier rhythm, heavy cornice,
+      // and the ROOFTOP "SANTA FE" skyline sign (self-lit, reads at 150 m).
+      const npier = Math.max(6, Math.round(w / 2.2));
+      for (let i = 0; i < npier; i++) {
+        const z = cz - w / 2 + (i + 0.5) * (w / npier);
+        box(FRONT + 0.15, 1 + (h - 4) / 2, z, 0.5, h - 4, 0.55, 0xeef0f2);   // fine pale pier
+      }
+      box(BACKx, h + 1.1, cz, DEPTH + 0.6, 2.4, w + 0.9, 0xeef0f2);          // heavy cornice
+      const sw = 14, sh = 4, sy = h + 3, sx = FRONT + 0.6;
+      const stex = wordTex('SANTA FE', '#17335c', '#f4f6fa', 'Arial,Helvetica,sans-serif', 448, 128);
+      const front = new THREE.Mesh(new THREE.PlaneGeometry(sw, sh), bmat(0xffffff, { map: stex }));
+      front.position.set(sx, sy, cz); front.rotation.y = Math.PI / 2; millenniumRoot.add(front);  // FrontSide faces EAST
+      const back = new THREE.Mesh(new THREE.PlaneGeometry(sw, sh), bmat(0x17335c));                // solid dark rear (no lone-DoubleSide mirror)
+      back.material.side = THREE.BackSide;
+      back.position.set(sx, sy, cz); back.rotation.y = Math.PI / 2; millenniumRoot.add(back);
+      for (const dz of [-sw * 0.32, 0, sw * 0.32])                          // 3 thin dark support posts above the roof
+        box(FRONT + 0.4, h + 1.5, cz + dz, 0.28, 3.0, 0.28, ACC);
+      winsX(FRONT, +1, cz, w, h, { prob: 0.28 });
+      return;
     }
     if (a.style === 'gothic') {
       // VENETIAN GOTHIC (Chicago Athletic Assn) — task 056 item 4: pale
@@ -220,9 +262,12 @@ export function buildStreetwall() {
 
   // ==================================================================
   // 4. SOUTH BACKDROP — low continuous stone band across Monroe, front
-  //    face at z914 (faces north). Art Institute + Stock Exchange Arch.
+  //    face at z914 (faces north). Art Institute + Stock Exchange Arch cameo.
+  //    RETIRES when the flag flips: the REAL Zone C (artinstitute.js, task
+  //    060 — beaux-arts block, gardens, arch at its real spot) replaces it
+  //    (GEOGRAPHY.md: "BACKDROP_M.south retires when the flag flips").
   // ==================================================================
-  {
+  if (!M.OPEN_GRANT.artInstitute) {
     const s = M.BACKDROP_M.south, d = s.z1 - s.z0, cz = (s.z0 + s.z1) / 2;
     // low continuous fill so the south view never gaps
     { let x = s.x0;
@@ -244,9 +289,79 @@ export function buildStreetwall() {
   }
 
   // ==================================================================
+  // 4b. MICHIGAN CLIFF EXTENSION — the wall the LIONS face (task 060). Same
+  //     band x6-30, front at x30; the same generic-fill + anchor march as
+  //     section 1 over z 935..1080 with the ART_M.cliffS anchors (glass Borg-
+  //     Warner, ORCHESTRA HALL colonnade, white terra-cotta Railway Exchange
+  //     with its rooftop SANTA FE sign, McCormick tower). APPENDED AFTER the
+  //     giants so sections 1-2 rng call order is byte-identical.
+  // ==================================================================
+  if (M.OPEN_GRANT.artInstitute) {
+    const band = { z0: 935, z1: 1080 };
+    const A = M.ART_M.cliffS.slice().sort((p, q) => p.z - q.z);
+    let z = band.z0, i = 0;
+    while (z < band.z1 - 0.5) {
+      const a = A[i], lead = a ? a.z - a.w / 2 : band.z1;
+      if (a && z >= lead - 0.01) {                               // reached an anchor
+        placeAnchor(a, a.style === 'colonnade' ? { inscription: 'ORCHESTRA HALL' } : {});
+        z = Math.max(z, a.z + a.w / 2) + rr(0.2, 1.0);
+        i++;
+      } else {                                                    // tile the gap solidly
+        const span = lead - z;
+        if (span < 3) { z = lead; continue; }
+        const n = Math.max(1, Math.round(span / 13)), cw = span / n;
+        for (let k = 0; k < n; k++)
+          placeGeneric(z + cw * (k + 0.5), cw + 1.4, rr(35, 64));
+        z = lead;
+      }
+    }
+  }
+
+  // ==================================================================
+  // 4c. SOUTH LOOP BACKDROP BAND — a quiet low grey band beyond Jackson
+  //     (z 1050..1080), sparse NORTH-facing lit windows + a street-tree row
+  //     in front (z 1046, shared 'mg-tree' pool → +0 buckets). FAR SOUTH —
+  //     the z<680 billboard floor is a NORTH law; everything here is z<=1080.
+  // ==================================================================
+  if (M.OPEN_GRANT.artInstitute || M.OPEN_GRANT.butler) {
+    const sl = M.BACKDROP_GRANT.southLoop, cz = (sl.z0 + sl.z1) / 2, d = sl.z1 - sl.z0;
+    const zFace = sl.z0 - 0.05;                                  // windows sit just north of the front face
+    let x = sl.x0;
+    while (x < sl.x1 - 3) {
+      const w = rr(14, 26), floors = Math.round(rr(sl.floors[0], sl.floors[1])), h = floors * 3.4;
+      box(x + w / 2, h / 2, cz, w, h, d, pick(GREYS));
+      box(x + w / 2, h + 0.5, cz, w + 0.5, 1.0, d, 0x6f7a8e);   // slim cool cap (GREYS tone → folds)
+      // sparse NORTH-facing lit windows (yaw PI faces -z, toward the park)
+      const nC = Math.max(1, Math.floor((w - 1) / 3)), wx0 = x + w / 2 - (nC - 1) * 3 / 2;
+      for (let c = 0; c < nC; c++) { const wx = wx0 + c * 3;
+        for (let y = 5; y < h - 4; y += 3.6)
+          if (R() < 0.15) wins.push({ pos: [wx, y, zFace], scale: [0.8, 1.1, 1], color: WIN, yaw: Math.PI }); }
+      x += w + rr(0.3, 1.0);
+    }
+    // street trees in front — copy maggie.js's EXACT trunk/canopy recipe so the
+    // shared 'mg-tree-*' pool keys fold into one bucket each (+0 draws).
+    const trunkGeo = new THREE.CylinderGeometry(0.28, 0.4, 3.2, 7); trunkGeo.translate(0, 1.6, 0);
+    const canopyGeo = BufferGeometryUtils.mergeBufferGeometries(
+      [[0, 0.15, 0, 1.75], [0.95, 0.2, 0.2, 1.25], [-0.85, 0.1, -0.3, 1.2], [0.15, 0.6, -0.55, 1.1]]
+        .map(([px, py, pz, r]) => { const s = new THREE.SphereGeometry(r, 8, 6); s.translate(px, py, pz); return s; }), false);
+    const trunks = [], canopies = [];
+    for (let tx = 66; tx <= 312; tx += 40) {                     // 7 street trees along z 1046
+      const s = rr(0.85, 1.2), jx = rr(-1, 1);
+      trunks.push({ pos: [tx + jx, 0, 1046], yaw: rr(0, 6.28), color: 0x6b4a30 });
+      canopies.push({ pos: [tx + jx, 4.2 + rr(-0.2, 0.4), 1046], yaw: rr(0, 6.28), scale: [s, s, s], color: 0x3f7d3a });
+    }
+    poolInstanced('mg-tree-trunk', trunkGeo, trunks);
+    poolInstanced('mg-tree-canopy', canopyGeo, canopies);
+  }
+
+  // ==================================================================
   // 5. ALL LIT WINDOWS — one instanced bucket, single warm colour.
   // ==================================================================
-  const CAP = 680;
+  // CAP bounds the single warm-window bucket (still ONE InstancedMesh / one draw
+  // — every record is the WIN colour). Raised for the Art Institute cliff/south
+  // extension (~340 more) so the pre-existing cliff+giants windows (the first 640,
+  // pushed by sections 1-2) never get decimated — the guard view stays identical.
+  const CAP = 1100;
   let recs = wins;
   if (recs.length > CAP) { const k = Math.ceil(recs.length / CAP); recs = recs.filter((_, i) => i % k === 0); }
   emitInstanced(new THREE.PlaneGeometry(1, 1), recs, { basic: true });
@@ -259,5 +374,19 @@ function signTex(text, bg, fg) {
   g.fillStyle = bg; g.fillRect(0, 0, 512, 96);
   g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.font = '700 46px Arial,Helvetica,sans-serif'; g.fillText(text, 256, 52);
+  const t = new THREE.CanvasTexture(cv); t.anisotropy = 4; return t;
+}
+
+// word sign on its OWN canvas, measureText-FITTED font (028/050 law: headless
+// Chromium's serif fallback measures wide, so fit the drawn font to the canvas).
+// Caller pairs it with a solid rear so the back never shows mirrored text.
+function wordTex(text, bg, fg, font, cw = 512, ch = 96) {
+  const cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
+  const g = cv.getContext('2d');
+  g.fillStyle = bg; g.fillRect(0, 0, cw, ch);
+  g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'middle';
+  let fs = ch * 0.72; g.font = '700 ' + fs + 'px ' + font;
+  while (g.measureText(text).width > cw * 0.9 && fs > 8) { fs -= 3; g.font = '700 ' + fs + 'px ' + font; }
+  g.fillText(text, cw / 2, ch / 2);
   const t = new THREE.CanvasTexture(cv); t.anisotropy = 4; return t;
 }

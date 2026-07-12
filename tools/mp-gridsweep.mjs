@@ -5,6 +5,18 @@
 // cell boundary). Also reports the two owner-reported coords explicitly and the
 // worst adjacent elevation step (the elevator guard). Pure JS — imports the same
 // walkableM/surfaceYM the engine uses.
+//
+// BLESSED CANDIDATE CENSUS (task 060, all OPEN_GRANT flags on): the sweep
+// reports 70 interior-hole candidates and every one is an INTENDED non-walk
+// pocket, audited individually in 060 — 39 are the skating-ribbon rim/rink
+// set blessed in 059; the BP-bridge flank buffers at (230,792), (180,832),
+// (244,746); the Nichols chain-ledge columns near x=116/122 plus (124,920)
+// per the 057 walk contract; the rest are planting beds / urn flanks ringed
+// by pavement by design. The "worst adjacent step 13.00 at (126,908)" is a
+// 2 m-grid ARTIFACT: the grid straddles the 1.5 m non-walk strip between
+// closed Monroe (y0) and the Bluhm terrace (y13) — no walkable 1 m path
+// crosses that edge (tmp-grant-verify's 1 m flood fill reports zero adjacent
+// steps > 0.6). Re-audit only holes that appear BEYOND this census.
 import * as MP from '../src/data/millennium.js';
 
 const STEP = 2;

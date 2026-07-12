@@ -812,6 +812,21 @@ const VOLS_M = [];
     vol(SH.x0, SH.x1, SH.z0, SH.z1, 5);
     for (const [xx, zz] of MG.xmasts) vol(xx - 0.6, xx + 0.6, zz - 0.6, zz + 0.6, 11);
   }
+  // Art Institute block masses (060) — museum campus, lions, arch, cliff
+  // extension. The Nichols deck arches OVERHEAD (bean/trellis precedent) —
+  // only its slim piers block, too small to model. Trench is a PIT, no vol.
+  if (M.OPEN_GRANT.artInstitute) {
+    const A2 = M.ART_M;
+    vol(A2.westBlock.x0, A2.westBlock.x1, A2.westBlock.z0, A2.westBlock.z1, A2.pedimentH);
+    vol(A2.portico.x0 - 0.4, A2.portico.x1, A2.portico.z0, A2.portico.z1, 16);    // proud portico bay
+    vol(A2.waist.x0, A2.waist.x1, A2.waist.z0, A2.waist.z1, A2.waist.h);          // Gunsaulus waist
+    vol(A2.modernWing.x0, A2.modernWing.x1, A2.modernWing.z0, A2.modernWing.z1, A2.modernWing.h + 1);
+    for (const e of A2.eastCampus) vol(e.x0, e.x1, e.z0, e.z1, e.h);
+    vol(95, 96.5, 999, 1032, 9);                                                  // South Garden annex screen wall
+    for (const l of A2.lions) vol(l.x - 1.7, l.x + 1.7, l.z - 1.1, l.z + 1.1, 3.9); // lion plinths (yawed: long axis E-W)
+    vol(182, 186, 930, 940, 11);                                                  // Stock Exchange Arch piers
+    vol(M.STREETWALL_M.band.x0, M.STREETWALL_M.band.x1, 935, 1080, 80);           // cliff extension south
+  }
 }
 function camPosM(px, pz, f) {
   const down = Math.max(0, f.pitch), up = Math.max(0, -f.pitch);
@@ -942,7 +957,12 @@ addM('mp-bp-crossing', [
 addM('mp-ribbon', [
   { x: 252, z: 757, yaw: -2.2, pitch: 0.05, dist: 6 },      // SW lobe sweeping around the rockwork, wall shoulder in-frame
   { x: 224, z: 760, yaw: 0.5, pitch: 0.05, dist: 5 },       // ON the ribbon: down-path switchback read
-  { x: 252, z: 734, yaw: 2.6, pitch: 0.1, dist: 6 },        // along the north lobe (SW), rails + rockwork sweeping
+  // f2 re-framed (060): the old (252,734) yaw 2.6 stand parked the chase cam
+  // in the loop's outer-rim rockwork — the frame was the back of the mayor's
+  // head. From the connector looking NNW the east lobes + wall B + skaters
+  // read clean (island interiors are mostly climbing-wall mass — no camera
+  // lands there).
+  { x: 262, z: 775, yaw: -2.9, pitch: 0.06, dist: 6.5 },    // east lobes sweep + wall B holds + rails + skaters
 ]);
 addM('mp-climbing-walls', [
   { x: 240, z: 756, yaw: 1.0, pitch: 0.06, dist: 5.5 },     // wall A faceted face + holds, truss edge of wall B, towers behind
@@ -955,6 +975,34 @@ addM('mp-play-garden', [
 ]);
 addM('mp-cancer-survivors', [
   { x: 330, z: 760, yaw: Math.PI, pitch: 0.05, dist: 6 },   // column pair + pavilion frames + beds, giants-east band behind
+]);
+// 060: THE ART INSTITUTE. The lions are the most-checked detail of the whole
+// block — three-quarter pair read, the head-on portico axis (long dist so the
+// pediment fits), and one close per beast (subject 20–40° off-axis so the
+// mayor doesn't eclipse it — the 047 occlusion law). Stands hug the spine /
+// forecourt / steps; Michigan road west of x48 is open scenery air.
+addM('mp-lions', [
+  { x: 51.5, z: 981, yaw: 2.75, pitch: 0.02, dist: 7 },     // 3/4 from the S: both lions + steps + facade stack
+  { x: 50, z: 971, yaw: 1.5708, pitch: -0.10, dist: 12 },   // head-on portico axis: lions flank, banners + frieze (tilt up — pediment apex honestly crops at this distance)
+  { x: 56.2, z: 964.5, yaw: 2.62, pitch: -0.04, dist: 5.5 },// north lion close ("on the prowl", stalk paw)
+  { x: 50.6, z: 977, yaw: 0.85, pitch: -0.06, dist: 5 },    // south lion close ("defiance", roaring head up)
+]);
+addM('mp-south-garden', [
+  { x: 74, z: 1021, yaw: 2.30, pitch: 0.04, dist: 6 },      // bosque grid + fountain against the annex wall
+  { x: 78.5, z: 1018, yaw: 1.9, pitch: -0.02, dist: 5 },    // Fountain of the Great Lakes close (shells + water threads)
+]);
+addM('mp-monroe-crossing', [
+  { x: 52.5, z: 899, yaw: 0.25, pitch: 0.03, dist: 6 },     // the arrival read: crossing the closed street toward the lions
+  { x: 60, z: 901, yaw: 1.35, pitch: 0.03, dist: 5 },       // down the closed street: LOLLA LOAD-IN (fences, cones, pallet)
+]);
+// Nichols: down-the-deck framings only at deck level (mesh parapets are low
+// but the L-car axis doctrine still composes best); f0 reads the hull belly
+// from the allee. camWarnM may advisory-flag the on-deck stands (it models
+// camera y as absolute ~1.7 — the deck is at y 5–13; documented, task 046).
+addM('mp-nichols', [
+  { x: 112, z: 852, yaw: 0.30, pitch: 0.02, dist: 6 },      // the boat-hull belly + nameplate rising over the stone bed
+  { x: 118.2, z: 885, yaw: 0.05, pitch: -0.06, dist: 4.5 }, // ON deck, down-deck south to the Modern Wing landing
+  { x: 128, z: 916, yaw: -2.51, pitch: 0.05, dist: 5 },     // from the Bluhm terrace back NW: deck, park, ribbons, skyline
 ]);
 
 /* --------------------------- expectations ---------------------------- */

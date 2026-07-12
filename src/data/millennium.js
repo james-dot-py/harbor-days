@@ -266,7 +266,7 @@ export const BACKDROP_M = {
 //   butler       → 061 (Butler Field + Lolla + street closure east/south)
 // =====================================================================
 export const OPEN_GRANT = {
-  maggie: true, ribbonIce: true, artInstitute: false, nichols: false, butler: false,   // 058: Maggie LIVE · 059: ribbon ICE live (kindAtM 'ice' on the strip)
+  maggie: true, ribbonIce: true, artInstitute: true, nichols: true, butler: false,   // 058: Maggie LIVE · 059: ribbon ICE live · 060: ART INSTITUTE + NICHOLS LIVE (bridgeway walkable)
 };
 const G = OPEN_GRANT;
 

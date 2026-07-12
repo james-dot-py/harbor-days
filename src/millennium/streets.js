@@ -42,17 +42,26 @@ export function buildStreets() {
   } else {
     millenniumRoot.add(flatGrid(10, 216, -0.04, RD, 195, 800));  // Columbus   x190-200 z692-908
   }
+  if (G.artInstitute) {
+    millenniumRoot.add(flatGrid(16, 109, -0.04, RD, 40, 989.5));   // Michigan S ext  x32-48  z935-1044
+    millenniumRoot.add(flatGrid(314, 12, -0.04, RD, 189, 1038));   // Jackson band    x32-346 z1032-1044
+  }
 
   // ------------------------------------------------------------------
   // 2. CURBS — thin light-grey box along the PARK-SIDE edge of each road
   //    (one instanced bucket, colour 0x9c968a)
   // ------------------------------------------------------------------
-  emitInstanced(UBOX, [
+  const curbs = [
     { pos: [48, 0.07, 799.5], scale: [0.3, 0.14, 189], color: 0x9c968a },   // Michigan x48
     { pos: [118.5, 0.07, 704], scale: [141, 0.14, 0.3], color: 0x9c968a },  // Randolph z704
     { pos: [118.5, 0.07, 894], scale: [141, 0.14, 0.3], color: 0x9c968a },  // Monroe   z894
     { pos: [190, 0.07, 799.5], scale: [0.3, 0.14, 173], color: 0x9c968a },  // Columbus x190
-  ]);
+  ];
+  if (G.artInstitute) {   // same bucket, extended records (+0 buckets)
+    curbs.push({ pos: [48, 0.07, 970], scale: [0.3, 0.14, 124], color: 0x9c968a });   // Michigan park-side x48 z908-1032
+    curbs.push({ pos: [189, 0.07, 1032], scale: [282, 0.14, 0.3], color: 0x9c968a });  // Jackson north  z1032 x48-330
+  }
+  emitInstanced(UBOX, curbs);
 
   // ------------------------------------------------------------------
   // 3. PARK FENCE (dark iron posts + top rail) + STONE PLANTERS along every
@@ -65,7 +74,19 @@ export function buildStreets() {
   const tops = [];         // planter tops   (colour GREEN)
   const CX = 118.5, CZ = 799.5;   // park interior centre (for the outward road-side normal)
 
-  for (const seg of M.BARRIER_M) {
+  const segs = [...M.BARRIER_M];
+  if (G.artInstitute) {
+    // Monroe is CLOSED + walkable curb-to-curb (festival ground) — drop its z894
+    // fence entirely (executor A's LOLLA LOAD-IN dressing carries the read).
+    const iM = segs.findIndex(s => s.a[0] === 48 && s.a[1] === 894);
+    if (iM >= 0) segs.splice(iM, 1);
+    // spine-front fence of the AI block (gap at the forecourt apron z958-984 where
+    // the museum's sidewalk opens to the road) + a south end-cap at Jackson.
+    segs.push({ a: [48, 908], b: [48, 958] });    // vertical x48 < CX → planters west onto the road (matches Michigan segs)
+    segs.push({ a: [48, 984], b: [48, 1032] });
+    segs.push({ a: [48, 1032], b: [57, 1032] });  // south end-cap
+  }
+  for (const seg of segs) {
     const [ax, az] = seg.a, [bx, bz] = seg.b;
     const dx = bx - ax, dz = bz - az, len = Math.hypot(dx, dz);
     const ux = dx / len, uz = dz / len;
@@ -123,6 +144,10 @@ export function buildStreets() {
   for (const ex of [98, 118]) for (let z = 720; z <= 872; z += 28) lamps.push({ x: ex, z, banner: true }); // promenade edges
   for (let x = 60; x <= 180; x += 30) lamps.push({ x, z: 710, banner: false });   // Randolph walk
   for (let x = 60; x <= 180; x += 30) lamps.push({ x, z: 890, banner: false });   // Monroe walk
+  if (G.artInstitute) {                                                            // Art Institute block (before the pole/globe/pennant emits)
+    for (let z = 915; z <= 1030; z += 25) lamps.push({ x: M.STREETWALL_M.lampX, z, banner: true });  // Michigan spine S ext (pennants auto-span the closed-Monroe z890->915 gap)
+    for (let z = 920; z <= 1020; z += 33) lamps.push({ x: 185, z, banner: false });                  // AI east rim
+  }
 
   const poles = [], globes = [], pennants = [];
   const PENN = [0xd23b2e, 0xf2c14e, 0x3a72c4];     // red / yellow / blue
@@ -193,6 +218,8 @@ export function buildStreets() {
     [110, 901, EW],                                // Monroe
     [195, 740, NS], [195, 860, NS],                // Columbus
   ];
+  // APPEND (never insert) so the pre-existing cars consume the same pick() draws.
+  if (G.artInstitute) cars.push([44, 950, NS], [36, 1012, NS], [120, 1040, EW]);   // Michigan S + Jackson
   for (const [x, z, yaw] of cars) kit.car({ x, z, yaw, type: pick(TYP), color: pick(PAL) });
   kit.emitMerged({ solid: (g, mat) => millenniumRoot.add(new THREE.Mesh(g, mat)), collide });
 

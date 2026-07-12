@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-12T11:27:34.791Z",
- "count": 105,
+ "generated": "2026-07-12T13:01:53.738Z",
+ "count": 109,
  "waypoints": [
   {
    "id": "spawn",
@@ -2685,11 +2685,11 @@
      "dist": 5
     },
     {
-     "x": 252,
-     "z": 734,
-     "yaw": 2.6,
-     "pitch": 0.1,
-     "dist": 6
+     "x": 262,
+     "z": 775,
+     "yaw": -2.9,
+     "pitch": 0.06,
+     "dist": 6.5
     }
    ],
    "expectation": "A pale serpentine ribbon-skating PATH (bed, not a sheet — 059 flips it to ice) loops around a central climbing-wall island, edged by white pipe railings and chunky rockwork rims with planting; rounded switchbacks sweep through the frame with X-mast light towers and the fieldhouse beyond, matching the owner's aerial (lobes + island + hut)."
@@ -2765,6 +2765,123 @@
     }
    ],
    "expectation": "The Cancer Survivors' Garden on the LSD overlook: two tall white Corinthian columns and two black-steel open-lattice pavilion frames over purple-and-green planting beds and crabapple trees, with the giants-east skyline band and the lake beyond."
+  },
+  {
+   "id": "mp-lions",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 51.5,
+   "z": 981,
+   "framings": [
+    {
+     "x": 51.5,
+     "z": 981,
+     "yaw": 2.75,
+     "pitch": 0.02,
+     "dist": 7
+    },
+    {
+     "x": 50,
+     "z": 971,
+     "yaw": 1.57,
+     "pitch": -0.1,
+     "dist": 12
+    },
+    {
+     "x": 56.2,
+     "z": 964.5,
+     "yaw": 2.62,
+     "pitch": -0.04,
+     "dist": 5.5
+    },
+    {
+     "x": 50.6,
+     "z": 977,
+     "yaw": 0.85,
+     "pitch": -0.06,
+     "dist": 5
+    }
+   ],
+   "expectation": "Two verdigris green-bronze LIONS on granite plinths flank a broad limestone grand staircase — subtly different beasts: the north one head-level 'on the prowl' with a forepaw advanced, the south one chest-up with its mouth open 'in defiance', both gazing west over Michigan Ave; behind them the beaux-arts front stacks rusticated base, arched entries, hanging exhibition banners (invented shows), the THE ART INSTITVTE OF CHICAGO frieze and a pediment. A local should stop at the steps and grin."
+  },
+  {
+   "id": "mp-south-garden",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 74,
+   "z": 1021,
+   "framings": [
+    {
+     "x": 74,
+     "z": 1021,
+     "yaw": 2.3,
+     "pitch": 0.04,
+     "dist": 6
+    },
+    {
+     "x": 78.5,
+     "z": 1018,
+     "yaw": 1.9,
+     "pitch": -0.02,
+     "dist": 5
+    }
+   ],
+   "expectation": "The museum's South Garden: a quiet grid of small hawthorn trees over soil beds south of the annex, and the Fountain of the Great Lakes — a verdigris bronze group of robed figures lifting shells that spill water threads into a raised basin — set against a limestone annex wall, with the open rail cut beyond."
+  },
+  {
+   "id": "mp-monroe-crossing",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 52.5,
+   "z": 899,
+   "framings": [
+    {
+     "x": 52.5,
+     "z": 899,
+     "yaw": 0.25,
+     "pitch": 0.03,
+     "dist": 6
+    },
+    {
+     "x": 60,
+     "z": 901,
+     "yaw": 1.35,
+     "pitch": 0.03,
+     "dist": 5
+    }
+   ],
+   "expectation": "Closed E Monroe reads as festival LOAD-IN, not a live road: pipe crowd-fence sections going up, orange traffic cones and a stacked pallet on open walkable asphalt, a bare scaffold arch at the park crossing — and south across the street the Art Institute's pedimented facade with its two bronze lions rising over the forecourt."
+  },
+  {
+   "id": "mp-nichols",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 112,
+   "z": 852,
+   "framings": [
+    {
+     "x": 112,
+     "z": 852,
+     "yaw": 0.3,
+     "pitch": 0.02,
+     "dist": 6
+    },
+    {
+     "x": 118.2,
+     "z": 885,
+     "yaw": 0.05,
+     "pitch": -0.06,
+     "dist": 4.5
+    },
+    {
+     "x": 128,
+     "z": 916,
+     "yaw": -2.51,
+     "pitch": 0.05,
+     "dist": 5
+    }
+   ],
+   "expectation": "NICHOLS BRIDGEWAY: a slim white footbridge with a smooth boat-hull belly rises from the lawn over a river-stone bed, soars over the closed street and the open rail cut, and lands on the Modern Wing's white-and-glass terrace; on deck, thin mesh parapets with a warm cap rail frame the view back to the park — trellis arcs, stainless ribbons, the skyline wall."
   }
  ]
 }

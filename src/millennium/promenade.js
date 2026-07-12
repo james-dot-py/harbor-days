@@ -152,18 +152,25 @@ export function buildPromenade() {
   // ---- 6. NICHOLS BRIDGEWAY — white ribbon rising off the south edge -------
   // Scenery only (no walkability): a few segment boxes stepping up in y along
   // a->b, leaving the frame over Monroe toward the Art Institute.
-  const na = M.NICHOLS_M.a, nb = M.NICHOLS_M.b;      // [x, z, y]
-  const nMat = toon(0xeceae4), NSEG = 8;
-  const Z1 = new THREE.Vector3(0, 0, 1), dir = new THREE.Vector3();
-  for (let i = 0; i < NSEG; i++) {
-    const t0 = i / NSEG, t1 = (i + 1) / NSEG;
-    const p = (t) => [na[0] + (nb[0] - na[0]) * t, na[2] + (nb[2] - na[2]) * t, na[1] + (nb[1] - na[1]) * t]; // [x,y,z]
-    const a = p(t0), b = p(t1);
-    const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
-    const seg = new THREE.Mesh(new THREE.BoxGeometry(M.NICHOLS_M.w, 0.35, Math.hypot(dx, dy, dz)), nMat);
-    seg.quaternion.setFromUnitVectors(Z1, dir.set(dx, dy, dz).normalize());
-    seg.position.set((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2);
-    root.add(seg);
+  // GATED (060, flag artInstitute): the REAL bridgeway (src/millennium/nichols.js)
+  // now ships on the true osm alignment (NICHOLS2_M) — this old placeholder
+  // line sits on the wrong path and would clip the new Art Institute rail
+  // trench, so it only builds pre-flip. (No rng in this block — the file's only
+  // rng is the allee scatter above — so a plain gate is determinism-safe.)
+  if (!M.OPEN_GRANT.artInstitute) {
+    const na = M.NICHOLS_M.a, nb = M.NICHOLS_M.b;      // [x, z, y]
+    const nMat = toon(0xeceae4), NSEG = 8;
+    const Z1 = new THREE.Vector3(0, 0, 1), dir = new THREE.Vector3();
+    for (let i = 0; i < NSEG; i++) {
+      const t0 = i / NSEG, t1 = (i + 1) / NSEG;
+      const p = (t) => [na[0] + (nb[0] - na[0]) * t, na[2] + (nb[2] - na[2]) * t, na[1] + (nb[1] - na[1]) * t]; // [x,y,z]
+      const a = p(t0), b = p(t1);
+      const dx = b[0] - a[0], dy = b[1] - a[1], dz = b[2] - a[2];
+      const seg = new THREE.Mesh(new THREE.BoxGeometry(M.NICHOLS_M.w, 0.35, Math.hypot(dx, dy, dz)), nMat);
+      seg.quaternion.setFromUnitVectors(Z1, dir.set(dx, dy, dz).normalize());
+      seg.position.set((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2);
+      root.add(seg);
+    }
   }
 
   // ---- 7. McDONALD'S CYCLE CENTER — glassy bike depot in the NE pocket -----
