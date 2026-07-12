@@ -22,3 +22,13 @@
   Millennium sign-off (task 053) to weigh, or a dedicated backdrop-polish task.
   NB: the peristyle gap the same critic flagged is already owned by task 050
   (Wrigley Square Monument).
+- 053 SIGN-OFF WEIGHED IT (2026-07-11): confirmed against two authored
+  expectations (mp-promenade / mp-great-lawn named-tower clauses read only as
+  generic pale giants from the allee/lawn — tree occlusion + frame crop; the
+  content EXISTS: PRUDENTIAL signTex + diamond-spire cone + Aon fins in
+  src/millennium/streetwall.js, and the diamond top reads from the BP bridge
+  f1). The independent 053 evocation reviewer corroborated ("skyline is
+  generic... none of the rooflines Chicagoans navigate by") while still
+  grading the area unmistakable/yes-instantly. Ruled NON-BLOCKING per this
+  issue's own analysis; actionable fix now owned by queue task 056
+  (millennium-evocation-polish, items 3-4).

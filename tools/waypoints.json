@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-11T22:22:27.415Z",
+ "generated": "2026-07-12T01:06:04.265Z",
  "count": 95,
  "waypoints": [
   {
@@ -2342,7 +2342,7 @@
      "dist": 7
     }
    ],
-   "expectation": "Two glass-block towers face each other across a long, wet black reflecting pool that mirrors their amber glow; the near tower shows a giant face, and a water arc spouts from its mouth into the pool where figures splash. (041 SHELL: the long wet black-granite plaza + pool and the elm-bosque flanks must read; the LED face-towers are deferred to 045 — judge ground + backdrop only, empty pad expected.)"
+   "expectation": "Two glass-block towers face each other across a long, wet black reflecting pool that mirrors their amber glow; the near tower shows a giant face, and a water arc spouts from its mouth into the pool where figures splash. (Spout timing: the ~40 s local cycle holds its first spout ~7 s after load — the walkthrough's 2.6 s wait lands before it, so judge the spout clause from a supplemental waitMs>=7200 shot, e.g. tools/crown-soak.mjs.)"
   },
   {
    "id": "mp-promenade",
