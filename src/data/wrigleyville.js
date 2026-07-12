@@ -178,13 +178,22 @@ export const ROOFTOPS_W = {
     { x0: -178, x1: -163, z0: -588, z1: -574 },     // task 020: NE Sheffield & Waveland corner house (closes the bare corner; APPEND-ONLY — earlier indexes are load-bearing)
   ],
   sheffield: [                                      // east side, front x −178
-    { x0: -178, x1: -164, z0: -534, z1: -518 },
+    { x0: -178, x1: -164, z0: -534, z1: -518, access: true },  // S0 north (by the Bleacher-Gate corner) — THE climbable Sheffield rooftop (task 054): its SW sightline clears the low chamfer into right field
     { x0: -178, x1: -164, z0: -518, z1: -502 },
     { x0: -178, x1: -164, z0: -502, z1: -486 },
   ],
   roofY: 9.6,
   stair: { x0: -208, x1: -205, z0: -586, z1: -574, yTop: 9.6, yBot: 0.9 },
   stairLanding: { x0: -208, x1: -205, z0: -574, z1: -571 },
+  // task 054: the climbable Sheffield rooftop (sheffield[0]). An exterior steel
+  // stair up the WEST (Sheffield-street) face descends to the sidewalk; its deck
+  // faces the park — the hero read is SW over the low Bleacher-Gate chamfer into
+  // right field (the 12 m RF grandstand wall blocks the due-west floor). Anchors
+  // shared by rooftops.js (mesh + colliders) and tools/walkprobe.mjs (walk grid)
+  // — never forked. sheffStair ramps along z (z0 = top/roof/north, z1 = bottom/
+  // sidewalk/south); the bottom mouth opens south onto the Sheffield sidewalk.
+  sheffStair: { x0: -181, x1: -178, z0: -532, z1: -521.5, yTop: 9.6, yBot: 0 },
+  sheffLanding: { x0: -181, x1: -178, z0: -534, z1: -532 },   // stair-top → deck bridge (y roofY)
 };
 
 // -------------------- Sluggers rooftop batting cage -------------------
@@ -380,6 +389,9 @@ export const WALK_W = [
   { x0: S.platform.x0, x1: S.platform.x1, z0: S.platform.z0, z1: S.platform.z1, y: S.platform.y },
   { ...R.stair, ramp: true },                                        // rooftop stair
   { x0: R.waveland[1].x0, x1: R.waveland[1].x1, z0: R.waveland[1].z0, z1: R.waveland[1].z1, y: R.roofY },
+  { ...R.sheffStair, ramp: true },                                   // task 054: Sheffield rooftop stair (west face)
+  { x0: R.sheffLanding.x0, x1: R.sheffLanding.x1, z0: R.sheffLanding.z0, z1: R.sheffLanding.z1, y: R.roofY },  // stair-top → deck bridge
+  { x0: R.sheffield[0].x0, x1: R.sheffield[0].x1, z0: R.sheffield[0].z0, z1: R.sheffield[0].z1, y: R.roofY },  // Sheffield rooftop deck (S0)
   { x0: S.landing.x0, x1: S.landing.x1, z0: S.landing.z0, z1: S.landing.z1, y: 0 },
   { x0: R.stairLanding.x0, x1: R.stairLanding.x1, z0: R.stairLanding.z0, z1: R.stairLanding.z1, y: 0 },
   { x0: T.addison.x0,  x1: T.addison.x1,  z0: T.addison.z0,  z1: T.addison.z1,  y: 0 },

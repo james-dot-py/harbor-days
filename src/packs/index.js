@@ -31,6 +31,7 @@ import './wrigley-sluggers.js';   // the Sluggers batting-cage minigame
 import '../wrigley/deepcuts.js';   // Wrigleyville "deep cuts" signage layer
 import './wrigley-toys.js';   // Wrigleyville live props — rooftop binoculars + throwable ball
 import './wrigley-vendors.js';   // Wrigleyville street-festival — vendors, ticket queue, fan streams, splash pad
+import './wrigley-rooftop.js';   // the climbable Sheffield rooftop deck — sit spots + fans (task 054)
 import './about.js';   // About / credits — OpenStreetMap ODbL attribution
 import './kofi.js';   // Ko-fi support — diegetic rooftop billboard (task 011)
 import './suggestions.js';   // Neighborhood suggestion box on the AIDS Garden spawn plaza (task 013, relocated task 023)

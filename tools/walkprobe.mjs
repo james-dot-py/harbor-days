@@ -469,6 +469,25 @@ console.log('\n--- Wrigleyville: the Sluggers rooftop cage (task 009) ---');
   expect('Clark corridor @z-480 still walkable at grade',WV.walkableW(WV.clarkX(-480),-480)&&WV.surfaceYW(WV.clarkX(-480),-480)===0,true);
 }
 
+console.log('\n--- Wrigleyville: the climbable Sheffield rooftop (task 054) ---');
+{ const R=WV.ROOFTOPS_W, b=R.sheffield[0], SS=R.sheffStair, SL=R.sheffLanding;
+  const dcx=(b.x0+b.x1)/2, dcz=(b.z0+b.z1)/2, sx=(SS.x0+SS.x1)/2, lx=(SL.x0+SL.x1)/2, lz=(SL.z0+SL.z1)/2;
+  expect('Sheffield deck centre walkable',WV.walkableW(dcx,dcz),true);
+  expect(`Sheffield deck at roofY (${R.roofY})`,WV.surfaceYW(dcx,dcz),R.roofY);
+  expect('deck SW corner (park side) walkable',WV.walkableW(b.x0+1,b.z1-1),true);   // -177,-519
+  expect('deck NE corner walkable',WV.walkableW(b.x1-1,b.z0+1),true);               // -165,-533
+  { const y=WV.surfaceYW(sx,(SS.z0+SS.z1)/2);
+    expect(`Sheffield stair mid (${y.toFixed(2)}) between floors`,y>1&&y<R.roofY-0.5,true); }
+  expect('Sheffield stair bottom ~sidewalk',WV.surfaceYW(sx,SS.z1)<0.4,true);
+  expect(`Sheffield stair top ~roofY`,WV.surfaceYW(sx,SS.z0),R.roofY);
+  expect('stair-top landing walkable at roofY',WV.walkableW(lx,lz)&&WV.surfaceYW(lx,lz)===R.roofY,true);
+  // enclosure — the sidewalk west of the stair stays at grade; the neighbour
+  // roofs (S1/S2) and the building interior are NOT walkable (only S0 is open)
+  expect('Sheffield sidewalk west of the stair still grade',WV.walkableW(-186,-525)&&WV.surfaceYW(-186,-525)===0,true);
+  expect('neighbour roof S1 (-171,-510) NOT walkable',WV.walkableW(-171,-510),false);
+  expect('neighbour roof S2 (-171,-494) NOT walkable',WV.walkableW(-171,-494),false);
+}
+
 console.log('\n--- Wrigleyville: Gallagher Way is a WEDGE — Clark curb to the bowl wall (task 019) ---');
 expect('plaza @ z-480 (clark+25) walkable',WV.walkableW(WV.clarkX(-480)+25,-480),true);
 expect('east of the bowl wall @ z-480 (clark+31) NOT walkable',WV.walkableW(WV.clarkX(-480)+31,-480),false);

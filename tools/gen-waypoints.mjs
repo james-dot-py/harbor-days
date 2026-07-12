@@ -461,6 +461,18 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-196, -550]
   add('wv-rooftop-view', 'wrigleyville', 'wrigleyville', R(xc), R(zc),
     spread(yawTo(xc, zc, ST.scoreboard.x, ST.scoreboard.z), 0.15, 10));
 }
+{ // THE climbable SHEFFIELD rooftop (task 054) — stand on the deck; the hero
+  // read is SW over the low Bleacher-Gate chamfer INTO right field (the 12 m RF
+  // grandstand wall blocks the due-west floor, so the payoff is the SW opening +
+  // the scoreboard/towers over the wall, NOT a straight-west field floor —
+  // hand-authored framings, verified against the refs). f2 frames the deck
+  // itself: drink rail, sittable bleacher rows, rooftop fans.
+  add('wv-rooftop-bleachers', 'wrigleyville', 'wrigleyville', -170, -526, [
+    { x: -167, z: -526, yaw: -1.5,  pitch: 0.17, dist: 8 },    // HERO: mayor at the drink rail (string lights), a fan alongside; the dressed green scoreboard + EAMUS CATULI + grandstand + light towers read over the right-field wall
+    { x: -172, z: -524, yaw: -1.4,  pitch: 0.42, dist: 11.5 }, // FIELD GLIMPSE: the follow-cam lifts over the 12 m RF wall — grandstand seats + a sliver of green field + EAMUS CATULI read past the ivy; the deck frames the foreground
+    { x: -166, z: -520, yaw: -1.72, pitch: 0.15, dist: 7 },    // the deck: drink rail + sittable bleacher rows, scoreboard + EAMUS CATULI over the wall to the WNW
+  ]);
+}
 { // THE Sluggers rooftop batting cage (task 009). Stand ON the deck; the west
   // backdrop band blocks east-facing cameras, so shoot from the EAST (camera
   // out over open Clark), down the deck at the cage — an elevated small space,

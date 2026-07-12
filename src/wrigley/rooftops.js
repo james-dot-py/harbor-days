@@ -169,7 +169,7 @@ const BLD = [
   { x0: -226, x1: -217, z0: -588, z1: -574, face: 'S', arch: 'brick', cap: ['S', 'N', 'W'] },              // W0
   { x0: -217, x1: -208, z0: -588, z1: -574, face: 'S', arch: 'grey', cap: ['S', 'N'], climb: true },       // W1 — climbable
   { x0: -208, x1: -199, z0: -588, z1: -574, face: 'S', arch: 'brown', cap: ['S', 'N', 'E'] },              // W2
-  { x0: -178, x1: -164, z0: -534, z1: -518, face: 'W', arch: 'grey', cap: ['W', 'E', 'N'] },               // S0
+  { x0: -178, x1: -164, z0: -534, z1: -518, face: 'W', arch: 'grey', cap: ['W', 'E', 'N'], access: true },  // S0 — task 054: THE climbable Sheffield rooftop (west-face stair; ROOFTOPS_W.sheffStair)
   { x0: -178, x1: -164, z0: -518, z1: -502, face: 'W', arch: 'brick', cap: ['W', 'E'] },                   // S1
   { x0: -178, x1: -164, z0: -502, z1: -486, face: 'W', arch: 'brown', cap: ['W', 'E', 'S'] },              // S2
   // task 020: NE Sheffield & Waveland corner house (ROOFTOPS_W.waveland[3]) —
@@ -224,7 +224,7 @@ function buildBuilding(b) {
     if (b.face === 'W') collide(b.x0 - 0.8, cz + u, 0.6, 12);
   }
 
-  if (!b.climb) wallColliders(b, 12);                         // climbable one is walled by its roof railing
+  if (!b.climb && !b.access) wallColliders(b, 12);            // climbable roofs are walled by their own roof railing (buildClimbable / buildSheffieldExtras)
 }
 
 // exposed END-face windows on the four row-end buildings (seen down-street)
@@ -370,6 +370,80 @@ function buildClimbable(b) {
 }
 
 // =====================================================================
+// task 054 — the climbable SHEFFIELD rooftop (S0). Exterior WEST-face stair up
+// to a park-facing deck: 4 bleacher rows (built by the main loop above), a
+// park-facing DRINK RAIL, safety railing on the other three edges. Reuses the
+// existing COL buckets (steel/tan/dark/red) → +0 draw calls; folds into emit().
+// RNG-FREE — it runs mid-loop, so any rng() here would shift the later roofs'
+// scatter. Walkability + colliders share ROOFTOPS_W.sheffStair/sheffLanding
+// with tools/walkprobe.mjs (the shared data module — never forked).
+//   local frame: the stair runs in z up the west face (x −181..−178); the deck
+//   is x −178..−164, z −534..−518; viewers on the bleachers face −x (the park).
+function buildSheffieldExtras(b) {
+  const SS = ROOFTOPS_W.sheffStair, SL = ROOFTOPS_W.sheffLanding, e = 0.25;
+  const xIn = SS.x0 + 0.3, xOut = SS.x1 - 0.3, xMid = (SS.x0 + SS.x1) / 2;    // -180.7 (outer/street), -178.3 (inner/deck), -179.5
+  const zTop = SS.z0, zBot = SS.z1;                                            // -532 (roof, north), -521.5 (sidewalk, south)
+  const ssY = z => SS.yTop + (SS.yBot - SS.yTop) * (z - SS.z0) / (SS.z1 - SS.z0);
+
+  // --- external steel stair: 2 stringers + 14 treads + risers (span x) ---
+  seg(xIn, SS.yBot, zBot, xIn, SS.yTop, zTop, 0.22, COL.steel);
+  seg(xOut, SS.yBot, zBot, xOut, SS.yTop, zTop, 0.22, COL.steel);
+  const nT = 14;
+  for (let i = 0; i < nT; i++) {
+    const z = (zBot + 1) + ((zTop - 0.5) - (zBot + 1)) * i / (nT - 1), y = ssY(z);
+    boxes.push({ pos: [xMid, y - 0.06, z], scale: [2.5, 0.12, 0.78], color: COL.steel });        // tread
+    boxes.push({ pos: [xMid, y - 0.4, z + 0.36], scale: [2.5, 0.62, 0.08], color: COL.steel });  // riser (down-slope is +z)
+  }
+  // --- stair handrails both sides (posts + sloped rail) + ramp enclosure
+  //     colliders (inner = xOut, toward the deck; opens at the top mouth). ---
+  for (const [x, inner] of [[xOut, true], [xIn, false]]) {
+    for (let z = zBot - 0.6; z >= zTop + 0.6; z -= 1.45) {
+      const y = ssY(z);
+      cyls.push({ pos: [x, y + 0.5, z], scale: [0.09, 1.0, 0.09] });
+      const topMouth = inner && z <= zTop + 2.4;              // where the inner rail meets the roof landing
+      const atBottom = z >= zBot - 1.6;                       // sidewalk mouth
+      if (!topMouth && !atBottom) collide(x, z, 0.4, 12);
+    }
+    seg(x, ssY(zBot - 0.6) + 1.0, zBot - 0.6, x, ssY(zTop + 0.6) + 1.0, zTop + 0.6, 0.05, COL.steel);
+  }
+  // landing (stair-top → deck bridge) enclosure: block grade access from the
+  // north + west so the elevated bridge is reachable only up the stair.
+  for (const z of [SL.z0 + 0.3, (SL.z0 + SL.z1) / 2]) collide(SS.x0, z, 0.4, 12);   // west of the landing
+  for (const x of [SS.x0, xMid]) collide(x, SL.z0 + 0.2, 0.4, 12);                  // north end of the landing
+
+  // --- deck safety railing (N/S/E edges): posts (h 1.1) + top rail; the h-12
+  //     colliders DOUBLE as the grade wall that stops a sidewalk→deck elevator
+  //     (PITFALLS elevated-rect rule) AND the deck walk-off guard. ---
+  const railRun = (ax, az, bx, bz) => {
+    const len = Math.hypot(bx - ax, bz - az), n = Math.max(1, Math.round(len / 1.5));
+    for (let k = 0; k <= n; k++) {
+      const t = k / n, px = ax + (bx - ax) * t, pz = az + (bz - az) * t;
+      cyls.push({ pos: [px, ROOF_Y + 0.55, pz], scale: [0.08, 1.1, 0.08] });
+      collide(px, pz, 0.4, 12);
+    }
+    seg(ax, ROOF_Y + 1.05, az, bx, ROOF_Y + 1.05, bz, 0.05, COL.steel);
+  };
+  railRun(b.x1 - e, b.z0 + e, b.x1 - e, b.z1 - e);            // E (back, x −164)
+  railRun(b.x0 + e, b.z1 - e, b.x1 - e, b.z1 - e);            // S (z −518)
+  railRun(b.x0 + 2.0, b.z0 + e, b.x1 - e, b.z0 + e);          // N (z −534) — start east of the NW stair mouth
+
+  // --- park-facing DRINK RAIL on the west edge (counter height): the lean-and-
+  //     watch spot. Runs z −518→−531, leaving the NW mouth (z −531→−534) open
+  //     for the stair. Its posts (h 12) wall the west grade edge too. ---
+  const drX = b.x0 + 0.34, drTop = ROOF_Y + 1.02;            // -177.66
+  for (let z = b.z1 - 0.4; z >= -531; z -= 1.5) {
+    cyls.push({ pos: [drX, ROOF_Y + 0.5, z], scale: [0.07, 1.0, 0.07] });
+    collide(drX, z, 0.4, 12);
+  }
+  seg(drX, drTop, b.z1 - 0.4, drX, drTop, -531, 0.06, COL.steel);           // rail bar
+  seg(drX, drTop - 0.42, b.z1 - 0.4, drX, drTop - 0.42, -531, 0.05, COL.steel);  // lower rung
+  for (const z of [-520.5, -524, -527.5]) boxes.push({ pos: [drX + 0.12, drTop + 0.1, z], scale: [0.12, 0.19, 0.12], color: COL.red });  // cups on the rail
+
+  // --- string lights strung along the back (east) eave, over the deck ---
+  strand(b.x1 - 0.4, 10.5, b.z0 + 0.4, b.x1 - 0.4, 10.5, b.z1 - 0.4, 8, 0.26);
+}
+
+// =====================================================================
 export function buildRooftops() {
   for (const b of BLD) buildBuilding(b);
 
@@ -383,13 +457,16 @@ export function buildRooftops() {
 
   for (const b of BLD) {
     if (b.climb) { buildClimbable(b); continue; }
-    buildBleachers(b, 3 + (R() < 0.5 ? 1 : 0));
+    const rows = 3 + (R() < 0.5 ? 1 : 0);                     // draw the row rng for EVERY roof so the access roof never shifts the later ones
+    buildBleachers(b, b.access ? 4 : rows);                   // task 054: the climbable Sheffield roof (S0) gets a fixed 4 sittable rows
     const cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2;
     if (b.face === 'S') { cooler(cx + 2.4, b.z0 + 2.0); chair(cx - 2.6, b.z0 + 2.4, 0.4); }
     else { cooler(b.x1 - 2.2, cz + 3.0); chair(b.x1 - 2.4, cz - 3.4, -1.2); }
-    if (R() < 0.6) umbrella(b.face === 'S' ? cx - 2.6 : b.x1 - 2.4, b.face === 'S' ? b.z0 + 2.6 : cz - 2.6);
+    const umb = R() < 0.6;                                    // draw the umbrella rng for EVERY roof (same reason)
+    if (umb && !b.access) umbrella(b.face === 'S' ? cx - 2.6 : b.x1 - 2.4, b.face === 'S' ? b.z0 + 2.6 : cz - 2.6);   // S0 skips the umbrella (it'd block the bleacher view) but keeps the draw
     if (b.face === 'S') strand(b.x0 + 0.4, 10.5, b.z1 - 0.3, b.x1 - 0.4, 10.5, b.z1 - 0.3, 7, 0.26);
     else strand(b.x0 + 0.4, 10.5, b.z0 + 0.3, b.x0 + 0.4, 10.5, b.z1 - 0.3, 8, 0.26);
+    if (b.access) buildSheffieldExtras(b);                    // task 054: exterior stair, deck railings, park-facing drink rail
   }
 
   emit();

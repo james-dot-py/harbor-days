@@ -271,3 +271,10 @@ cut becomes a revert task.
   ("downtown crowd — everybody off at Monroe"). — Red Line stops: Belmont
   (16, 107), Addison platform (−138.5, −442), Monroe kiosk (54.5, 800) —
   task 051
+- The Sheffield rooftop clubs are REACHABLE now: an exterior steel stair up the
+  street face of the north brownstone climbs to a deck you actually stand on —
+  four sittable bleacher rows and a park-facing DRINK RAIL strung with lights,
+  two fans leaning on it ("best seat that's not in the stadium, ope"). Take a
+  seat and the camera drifts across the dressed green scoreboard, EAMUS CATULI
+  and the grandstand riding over the right-field wall. — climbable Sheffield
+  rooftop (deck ~−171, −526, y 9.6; stair base ~−179.5, −521) — task 054

@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-12T01:06:04.265Z",
- "count": 95,
+ "generated": "2026-07-12T02:24:49.853Z",
+ "count": 96,
  "waypoints": [
   {
    "id": "spawn",
@@ -1102,21 +1102,21 @@
    "id": "wv-murphys",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -178,
-   "z": -541,
+   "x": -170,
+   "z": -533,
    "framings": [
     {
-     "yaw": 1.57,
+     "yaw": 3.14,
      "pitch": 0.2,
      "dist": 12
     },
     {
-     "yaw": 2.17,
+     "yaw": 3.74,
      "pitch": 0.2,
      "dist": 9
     },
     {
-     "yaw": 0.97,
+     "yaw": 2.54,
      "pitch": 0.28,
      "dist": 14
     }
@@ -1447,6 +1447,37 @@
     }
    ],
    "expectation": "From THE climbable Waveland rooftop (y 9.6): rooftop bleacher rows looking over Waveland INTO the park — outfield, scoreboard and light towers visible over the LF wall; EAMUS CATULI building nearby. The scoreboard's near (back) face is DRESSED (012 legibility liberty): round clock + compact line-score panel read from up here; ivy legible on the outfield wall; no floating roof-ring slabs over the grandstand rim."
+  },
+  {
+   "id": "wv-rooftop-bleachers",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -170,
+   "z": -526,
+   "framings": [
+    {
+     "x": -167,
+     "z": -526,
+     "yaw": -1.5,
+     "pitch": 0.17,
+     "dist": 8
+    },
+    {
+     "x": -172,
+     "z": -524,
+     "yaw": -1.4,
+     "pitch": 0.42,
+     "dist": 11.5
+    },
+    {
+     "x": -166,
+     "z": -520,
+     "yaw": -1.72,
+     "pitch": 0.15,
+     "dist": 7
+    }
+   ],
+   "expectation": "From THE climbable SHEFFIELD rooftop (task 054, y 9.6) — the reachable right-field rooftop club. You are UP on the deck: a park-facing DRINK RAIL and 4 sittable bleacher rows in the foreground, a rooftop fan or two watching. The look INTO the park READS: looking SW over the low Bleacher-Gate chamfer you glimpse the grandstand/right-field bowl, the EAMUS CATULI sign and the white lattice LIGHT TOWERS; the green scoreboard + towers ride over the red-brick RF wall to the WNW (the 12 m wall honestly blocks the due-west field floor — the payoff is the SW opening, not a straight-west field, and never faked). 'Best seat that's not in the stadium.'"
   },
   {
    "id": "wv-sluggers-cage",
