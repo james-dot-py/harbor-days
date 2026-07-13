@@ -68,7 +68,10 @@ export const BASIN_W_PARAMS    = { z0:-20, z1:-328, step:3, fx:z=>85+Math.sin(z*
 // (4 steps) applies since every z here is outside the Rocks band (zMin 20).
 export const montroseFx = z => 234 + Math.sin(z*0.016)*2.2 + Math.sin(z*0.041+0.7)*1.3;
 export const COAST_MTR_LAWN_PARAMS   = { z0:-800,  z1:-1088, fx:montroseFx };  // honest shore south of the harbor mouth (ships as-is)
-export const COAST_MTR_HARBOR_PARAMS = { z0:-1091, z1:-1300, fx:montroseFx };  // 070 carves the Montrose Harbor basin here
+// COAST_MTR_HARBOR is no longer a straight stub — task 070 carves the Montrose
+// Harbor basin + hook mole here. Its pieces (MTR_HARBOR_MOUTH / mtBasin*Line /
+// mtMoleWestSeawall / MTR_HOOK_TIP / COAST_MTR_HARBOR_PTS) are defined below,
+// after crChain (the Montrose-harbor block near the Belmont basin functions).
 export const COAST_MTR_POINT_PARAMS  = { z0:-1303, z1:-1362, fx:montroseFx };  // 071 pushes Montrose Point + the Magic Hedge east
 export const COAST_MTR_BEACH_PARAMS  = { z0:-1365, z1:-1500, fx:montroseFx };  // 072 lays Montrose Beach sand + the dunes here
 // NE-corner map-edge closure: the revetment wraps from the beach's north end
@@ -114,6 +117,33 @@ function peninsulaWestLine(P_START){ return crChain([[158,-326],[160,-260],[160,
 function peninsulaWestSeawall(){ return crChain([[158,-326],[160,-260],[160,-160],[160,-70],[161,-40],[166,-24]],2.5); }
 export function peninsulaTipLine(P_START){ return crChain([[166,-24],[176,-17],[186,-18],P_START],2.5); }
 
+// ---- MONTROSE HARBOR + THE HOOK (v0.6, task 070) --------------------------
+// A bigger sibling of Belmont Harbor, laid with the SAME basin + peninsula +
+// terraced-tip + south-mouth topology (BASIN_W / peninsulaWestLine / COAST_TIP /
+// COAST_MOUTH), Montrose coords, and a STONE breakwater where Belmont has a
+// grassy spit. Replaces the 069 COAST_MTR_HARBOR stub (z -1091..-1300). All
+// densified via crChain (no rng). East-west COMPRESSED to fit xMax 244 (the
+// standing liberty — order is the law, not raw osm x). Determinism-safe: every
+// scatter loop caps at z>=-800, so this LAND carve is scatter-free (069 proved
+// it, 0.34% spawn). Water is WATER_N (y -2.32) showing through the concave LAND.
+//
+// TERRACED pieces (walkable steps via QUERY_SEGS + folded terraces/piles/faces,
+// the COAST_TIP precedent). Ordered so each seaward normal points to the water:
+export const MTR_HARBOR_MOUTH = crChain([[montroseFx(-1088),-1091],[231,-1097],[216,-1104],[201,-1110],[191,-1114],[186,-1117]],2.5);  // mouth SW entrance shore (LAWN end -> basin SW jamb)
+export const MTR_HOOK_TIP     = crChain([[228,-1129],[232,-1121],[238,-1120],[242,-1127],[242,-1138],[239,-1148],[237,-1154]],1.7);  // hook curl at the south tip (terraces face the LAKE only; light on top)
+export const COAST_MTR_HARBOR_PTS = crChain([[237,-1154],[238,-1200],[238,-1262],[236,-1300]],2.5);  // mole LAKE(outer) terraced face -> continues to the Point (the swapped 070 piece)
+// SEAWALLS (flush sheet-pile bulkheads; the basin's west + north walls and the
+// mole's inner/basin face — which WRAPS down to the apex so the terraced tip only
+// faces open water, no walkable shelf pokes into the mouth). Added to seawallLines().
+export function mtBasinWestLine(){  return crChain([[186,-1117],[185,-1160],[185,-1224],[186,-1286]],2.5); }  // mainland promenade edge (docks + launch root here)
+export function mtBasinNorthLine(){ return crChain([[186,-1288],[197,-1289],[208,-1289],[217,-1287]],2.5); }  // basin north wall -> mole root
+export function mtMoleWestSeawall(){return crChain([[217,-1287],[219,-1240],[219,-1180],[220,-1150],[224,-1137],[228,-1129]],2.5); }  // mole inner(basin) face: north root -> down and around to the SW apex
+// harbor entrance light on the hook-tip apex (Belmont HARBOR_LIGHT register)
+export const MT_HARBOR_LIGHT = { pos:[239,-1130], towerH:2.6, r:0.44, white:0xf2ece0, red:0xd23b34, glow:0xffd98a };
+// mole STONE-paved walk cap (the breakwater top reads as concrete, not the LAND
+// lawn). A flat filled polygon over the mole footprint (frustum-culled, +0 far views).
+export const MT_MOLE_PAVE = [[220,-1150],[224,-1137],[228,-1129],[233,-1123],[240,-1127],[241,-1140],[238,-1150],[238,-1300],[219,-1300],[219,-1150]];  // footprint (inner seawall x219 -> apex curl -> lake face x238 -> north)
+
 // The park outline as one polygon: SW corner, up the rocks (COAST_MAIN),
 // around the harbor mouth along its terraced revetment (COAST_MOUTH) to the
 // basin west seawall (BASIN_W), around the rounded dog-beach cove + basin
@@ -141,7 +171,16 @@ export function buildLAND({ COAST_CORNER, COAST_MAIN, COAST_PEN, COAST_GOLF, COA
   // from the golf's end (~232,-800) to the map edge. Each piece is separate so
   // 070-072 replace one (harbor basin / Point / beach) without touching the rest.
   P.push(...COAST_MTR_LAWN);                                // shore south of the harbor mouth
-  P.push(...COAST_MTR_HARBOR);                              // 070: Montrose Harbor basin
+  // 070: Montrose Harbor — a concave south-opening basin with an east breakwater
+  // MOLE (the hook). Traced like Belmont's basin+peninsula: mouth SW entrance
+  // shore -> basin west seawall -> basin north -> DOWN the mole's inner face ->
+  // around the terraced hook TIP -> UP the mole's lake face (COAST_MTR_HARBOR).
+  P.push(...MTR_HARBOR_MOUTH);                              // mouth SW entrance shore
+  P.push(...mtBasinWestLine());                            // basin west seawall (N)
+  P.push(...mtBasinNorthLine());                           // basin north seawall (E)
+  P.push(...mtMoleWestSeawall());                          // mole inner(basin) seawall (S toward the tip)
+  P.push(...MTR_HOOK_TIP);                                 // hook curl (terraced south tip)
+  P.push(...COAST_MTR_HARBOR);                             // mole lake(outer) terraced face (N)
   P.push(...COAST_MTR_POINT);                               // 071: Montrose Point + Magic Hedge
   P.push(...COAST_MTR_BEACH);                               // 072: Montrose Beach + dunes
   P.push(...COAST_MTR_CLOSE);                               // NE-corner closure (~201,-1514.5)
@@ -191,6 +230,9 @@ export function seawallLines({ P_START, BASIN_W }){
     BASIN_W,                            // basin west seawall (top -> north tip)
     basinNorthLine(),                   // basin north shore (east of the cove)
     peninsulaWestSeawall(),             // peninsula west bulkhead (root -> SW turn; tip is terraced)
+    mtBasinWestLine(),                  // MONTROSE (070): harbor basin west seawall
+    mtBasinNorthLine(),                 // MONTROSE (070): harbor basin north seawall
+    mtMoleWestSeawall(),                // MONTROSE (070): the hook mole's inner(basin) face
   ];
 }
 
@@ -317,9 +359,12 @@ export const TRAIL_CONNECTOR=[[16,105],[34,108],[54,112],[70,116],[79,120]];
 // only. Starts ~z-770 (overlapping TRAIL_MAIN's end so the ribbons join with no
 // gap) and runs to z-1460, holding x~200-211 (clear of the revetment x~234 and the
 // west hedge x14). 070-073 re-route locally as the harbor/Point/beach carve in.
+// 070 re-routes the harbor stretch WEST of the basin (the basin water sits x186-218,
+// z-1113..-1288) so the promenade hugs the mainland harbor edge and never crosses
+// water; determinism-safe (pathSamples2, merged after buildProps; scatter caps z>=-800).
 export const TRAIL_MONTROSE=[
-  [211,-770],[211,-812],[209,-872],[206,-942],[203,-1012],[202,-1082],
-  [201,-1152],[201,-1216],[202,-1286],[205,-1352],[208,-1412],[210,-1460],
+  [211,-770],[211,-812],[205,-890],[198,-985],[188,-1072],[172,-1135],
+  [158,-1200],[160,-1265],[180,-1312],[199,-1360],[206,-1414],[210,-1460],
 ];
 // Dual-path styling. walkOff (paths.js) = bike/2 + gap + walk/2 = 4.0 m, so
 // the two ribbons run parallel with a ~1.2 m grass strip between them.
@@ -474,6 +519,35 @@ export const FINGER_DOCKS = {
   hulls:[0xf7f3ea,0xff9d94,0x7fc8f0,0xfbe3a0,0xbfe0b0,0xffd0a0,0xf0d0e0,0x9edcff,0xf3e0c0,0xffb1c9,0xcfe8f7,0xf7f3ea],
   sails:[0xffffff,0xffd98a,0x9edcff,0xffb1c9,0xffffff,0xe0c0f0,0xffffff,0xffd98a,0x9edcff,0xffffff,0xffb1c9,0xffffff],
 };
+
+// ---- MONTROSE HARBOR west-shore content (task 070) ------------------------
+// Finger docks root FLUSH on the basin west seawall (x186, mtBasinWestLine) and
+// reach EAST into the basin. Deck y derives from SEAWALL_Y.top (issue 016 — a
+// coast reshape carries the docks). props.js builds them as individual
+// frustum-culled meshes (plankDeck vocabulary) — ZERO new InstancedMesh buckets;
+// the moored boats ride the moorings.js buckets (LOCAL seed), never makeBoat
+// (which draws world rng). Each deck is a walkRect (walkable boardwalk).
+export const MT_FINGER_DOCKS = {
+  x0:186, len:15, halfW:0.95,
+  rows:[-1150,-1190,-1228,-1262],        // 4 finger groups down the west shore
+  seawallX:-186,                          // |x| of the basin west seawall (deck sits on grade west of it, on posts east of it)
+};
+// public boat LAUNCH ramp — a wide pale slab sloping from the shore into the basin.
+export const MT_LAUNCH = { x0:186, x1:204, z0:-1300, z1:-1286, topY:0.05, botY:-2.05, color:0xb9b3a2 };
+// Park Bait Shop — the real bait/tackle shop (small, signed). On the mainland
+// WEST of the basin, facing the water (east). structures.js builds it (frustum-
+// culled shack + a two-sided canvas sign). The map's north-harbor "you are here".
+export const PARK_BAIT = { x:176, z:-1176, w:6.4, d:4.6, h:2.7, ry:0, wall:0xcfc7b4, roof:0x9c5340, trim:0x7d6b52, sign:'PARK BAIT' };
+// the HOOK fishing-pier RAILING — the mole's inner(basin) walk edge + around the
+// terraced tip, so the player leans on it and never falls into the basin. Posts
+// sit INBOARD on the walkable mole top; structures.js fenceRun feeds the SHARED
+// POSTS/RAILS buckets (+0 buckets). Small collider (keeps the player on-deck, no trap).
+export const MT_HOOK_RAIL = { spacing:3.0, postH:0.95, color:0x7d8790, collideR:0.5,
+  line:[[219.7,-1284],[220.1,-1240],[220.1,-1182],[220.9,-1152],[224.6,-1139],[228.8,-1131],[233.4,-1125],[239,-1129]] };
+// Montrose harbor wooden signs (register: SIGNS above). Faces its approach.
+export const MT_SIGNS = [
+  { text:'MONTROSE HARBOR', x:184, z:-1120, ry:Math.PI },   // at the mouth/promenade south, facing the arriving trail
+];
 
 // wooden signs (text + placement).
 // (task 023: the 'AIDS GARDEN' plate was removed — the entrance monument

@@ -20,11 +20,13 @@ const BASIN_W=[];for(let z=CH.BASIN_W_PARAMS.z0;z>=CH.BASIN_W_PARAMS.z1;z-=CH.BA
 // MONTROSE north stub pieces (task 069) — mirror coast.js exactly (genCoast per piece,
 // polyline for the NE-corner closure) so LAND + QUERY_SEGS stay lockstep with the engine.
 const COAST_MTR_LAWN  =genCoast(CH.COAST_MTR_LAWN_PARAMS.z0,  CH.COAST_MTR_LAWN_PARAMS.z1,  CH.COAST_MTR_LAWN_PARAMS.fx);
-const COAST_MTR_HARBOR=genCoast(CH.COAST_MTR_HARBOR_PARAMS.z0,CH.COAST_MTR_HARBOR_PARAMS.z1,CH.COAST_MTR_HARBOR_PARAMS.fx);
+const COAST_MTR_HARBOR=CH.COAST_MTR_HARBOR_PTS;                                                    // 070: hook mole lake face (polyline)
 const COAST_MTR_POINT =genCoast(CH.COAST_MTR_POINT_PARAMS.z0, CH.COAST_MTR_POINT_PARAMS.z1, CH.COAST_MTR_POINT_PARAMS.fx);
 const COAST_MTR_BEACH =genCoast(CH.COAST_MTR_BEACH_PARAMS.z0, CH.COAST_MTR_BEACH_PARAMS.z1, CH.COAST_MTR_BEACH_PARAMS.fx);
 const COAST_MTR_CLOSE =CH.COAST_MTR_CLOSE_PTS;
-const COAST_MTR=[COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE];
+const COAST_MTR_MOUTH =CH.MTR_HARBOR_MOUTH;    // 070: mouth entrance shore (terraced)
+const COAST_MTR_HOOKTIP=CH.MTR_HOOK_TIP;       // 070: hook tip curl (terraced)
+const COAST_MTR=[COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE,COAST_MTR_MOUTH,COAST_MTR_HOOKTIP];
 const LAND=CH.buildLAND({COAST_CORNER,COAST_MAIN,COAST_PEN,COAST_GOLF,COAST_MOUTH,BASIN_W,
   COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE});
 const P_START=COAST_PEN[0];
@@ -1078,12 +1080,23 @@ console.log('\n--- Task 069: the Montrose trail runs on the new lawn ---');
 for(const [x,z] of [CH.TRAIL_MONTROSE[1],CH.TRAIL_MONTROSE[3],CH.TRAIL_MONTROSE[6],CH.TRAIL_MONTROSE[9],CH.TRAIL_MONTROSE[11]])
   expect(`Montrose trail (${x},${z})`,walkable(x,z),true);
 
-console.log('\n--- Task 069: Montrose revetment top walkable, open water beyond NOT ---');
-for(const z of [-900,-1100,-1250,-1400]){
+console.log('\n--- Task 069: Montrose LAWN/BEACH revetment top walkable, open water beyond NOT ---');
+for(const z of [-900,-1400]){   // (-1100,-1250 are now the 070 harbor basin — probed below)
   const tx=CH.montroseFx(z);
   expect(`revetment top inboard (${(tx-0.6).toFixed(1)},${z})`,walkable(tx-0.6,z),true);
   expect(`open water beyond top (${(tx+14).toFixed(1)},${z}) NOT walkable`,walkable(tx+14,z),false);
 }
+
+console.log('\n--- Task 070: Montrose Harbor basin water NOT walkable (concave LAND carve) ---');
+for(const [x,z] of [[200,-1160],[200,-1200],[205,-1250],[195,-1280],[210,-1145]]) expect(`basin (${x},${z})`,walkable(x,z),false);
+
+console.log('\n--- Task 070: the HOOK mole (breakwater) walkable end to end ---');
+for(const [x,z] of [[228,-1290],[228,-1240],[230,-1190],[231,-1160],[230,-1133]]) expect(`hook mole (${x},${z})`,walkable(x,z),true);
+expect('mole north root (solid land) (210,-1295)',walkable(210,-1295),true);
+expect('open lake east of the mole (252,-1200) NOT walkable',walkable(252,-1200),false);
+
+console.log('\n--- Task 070: harbor west shore (mainland) walkable ---');
+for(const [x,z] of [[176,-1176],[172,-1230],[168,-1205]]) expect(`west shore (${x},${z})`,walkable(x,z),true);
 
 console.log('\n--- Task 069: Montrose underpass berm (x<14, outside LAND) NOT walkable ---');
 for(const [x,z] of [[7,-1207],[10,-1207]]) expect(`berm behind the fence (${x},${z}) NOT walkable`,walkable(x,z),false);

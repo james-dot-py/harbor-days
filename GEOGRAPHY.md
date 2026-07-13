@@ -83,6 +83,52 @@ off the Point; beach north-running; dunes between beach and Point. **070** build
 the harbor + hook + Park Bait, **071** the Magic Hedge hero, **072** the beach +
 dunes + beach house + The Dock, **073** Cricket Hill.
 
+#### Montrose Harbor + the HOOK (070) — canonical game coords
+
+Chicago's big north harbor, laid as a **bigger sibling of Belmont Harbor**: the same
+basin + peninsula + terraced-tip + south-mouth topology (chicago.js `BASIN_W` /
+`peninsulaWestLine` / `COAST_TIP` / `COAST_MOUTH`), just with Montrose coords and a
+**stone breakwater** where Belmont has a grassy spit. It replaces the 069
+`COAST_MTR_HARBOR` stub (z −1091…−1300). East–west distance is COMPRESSED to fit
+`xMax` 244 (the standing liberty); the topological arrangement is the law, not raw
+osm x (osm harbor water spans x −230…75, breakwater to osm x 243 — squeezed here).
+
+- **BASIN** (a south-opening inlet carved into the land; water y −2.3 via `WATER_N`):
+  - **West seawall / promenade** (`MT_BASIN_W`, bulkhead) x ≈ 186, z −1113…−1286 —
+    the mainland harbor edge; finger docks + the launch root here.
+  - **North seawall** (`MT_BASIN_N`) z ≈ −1288, x 186→216.
+  - **Mouth**: the SOUTH opening (z ≈ −1120), between the basin SW jamb (186,−1113)
+    and the hook tip (~231,−1118); the mouth-entrance shore (`MTR_HARBOR_MOUTH`,
+    terraced) sweeps NW from the LAWN end (~234,−1091) to the SW jamb.
+  - Basin water region ≈ x 186…218, z −1120…−1288 (mooring field + slips).
+- **THE HOOK** (the signature silhouette — a long stone breakwater/fishing pier,
+  the east barrier of the basin, WALKABLE end to end): a peninsula-pattern **mole**
+  (part of LAND, flat stone-paved top) rooted at the NORTH (basin-N z −1287 and the
+  Point-bound shore z −1300), reaching SOUTH with a hooked, curling TIP:
+  - Mole basin (inner/west) face `MT_MOLE_W` seawall x ≈ 219, z −1287→−1142.
+  - **Hook TIP** `MTR_HOOK_TIP` — a terraced horseshoe curl at the south tip
+    (COAST_TIP precedent), x 220→237 around z −1118, the tip apex carrying the
+    **harbor entrance light** (`MT_HARBOR_LIGHT` ≈ 236,−1128, white tower / red cap /
+    warm bulb, the Belmont-mouth-light register).
+  - Mole lake (outer/east) terraced face `COAST_MTR_HARBOR` (the swapped 070 piece)
+    x ≈ 237, z −1150→−1300, stepping down to the open lake (riprap toe = the folded
+    pile/face/wet-band + revetment steps). Rail run along the inner walk edge
+    (structures.js `fenceRun`, through the shared POSTS/RAILS buckets).
+  - mt-hook stands **mid-mole** (~z −1215) looking SOUTH down the pier toward the
+    curling tip + light + open lake past the mouth (down-the-length axis camera).
+- **WEST SHORE**: finger docks (`MT_FINGER_DOCKS`, x0 186, reaching east into the
+  basin — REUSE the Belmont dock deck/post + boat vocabulary, zero new InstancedMesh
+  buckets), the public boat **LAUNCH** ramp (a wide slab sloping into the water,
+  ~x186 z −1250), and **Park Bait** (`PARK_BAIT`, the real bait/tackle shop — small,
+  signed, on the mainland ~176,−1180, facing the basin). **Mooring cans + rows +
+  star docks** mid-basin (moorings.js Montrose field, the existing hull/mast/can
+  buckets grown; LOCAL seed).
+- **Trail**: `TRAIL_MONTROSE` re-routes locally WEST of the basin (x ≈ 168–182) so
+  the harbor promenade never crosses basin water; determinism-safe (`pathSamples2`).
+- **Determinism**: all scatter (tufts/trees/grass) caps at z ≥ −800, so the LAND
+  carve here is scatter-free (069 proved it, 0.34% spawn). Mole terraces fold via
+  the LOCAL xorshift; moorings/docks/launch/bait use LOCAL seeds; no shared rng.
+
 **The stub shore (069, `COAST_MTR_*` — the COAST_TIP determinism precedent).** The
 Montrose shore is FIVE separate revetment pieces, each kept OUT of the shared
 `COAST_SEGS` (props.js beach-life iterates that with the world rng — appending

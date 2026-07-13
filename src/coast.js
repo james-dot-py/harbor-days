@@ -27,11 +27,16 @@ export const BASIN_W=[];for(let z=CH.BASIN_W_PARAMS.z0;z>=CH.BASIN_W_PARAMS.z1;z
 // buckets with a LOCAL xorshift (zero new InstancedMesh buckets, zero shared-rng
 // draws — the COAST_TIP precedent). Separate arrays so 070-072 swap one piece.
 export const COAST_MTR_LAWN  =genCoast(CH.COAST_MTR_LAWN_PARAMS.z0,  CH.COAST_MTR_LAWN_PARAMS.z1,  CH.COAST_MTR_LAWN_PARAMS.fx);   // shore south of the harbor
-export const COAST_MTR_HARBOR=genCoast(CH.COAST_MTR_HARBOR_PARAMS.z0,CH.COAST_MTR_HARBOR_PARAMS.z1,CH.COAST_MTR_HARBOR_PARAMS.fx); // 070 basin
+export const COAST_MTR_HARBOR=CH.COAST_MTR_HARBOR_PTS;                                                                            // 070: the hook mole's LAKE(outer) terraced face (polyline)
 export const COAST_MTR_POINT =genCoast(CH.COAST_MTR_POINT_PARAMS.z0, CH.COAST_MTR_POINT_PARAMS.z1, CH.COAST_MTR_POINT_PARAMS.fx);  // 071 Point
 export const COAST_MTR_BEACH =genCoast(CH.COAST_MTR_BEACH_PARAMS.z0, CH.COAST_MTR_BEACH_PARAMS.z1, CH.COAST_MTR_BEACH_PARAMS.fx);  // 072 beach
 export const COAST_MTR_CLOSE =CH.COAST_MTR_CLOSE_PTS;                                                                             // NE-corner map-edge closure (polyline)
-export const COAST_MTR=[COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE];
+// 070: two EXTRA terraced harbor pieces — the mouth-entrance shore + the hook TIP
+// curl. Both walkable (QUERY_SEGS) + folded terraces (the COAST_TIP precedent).
+// Appended AFTER the swap pieces so COAST_MTR[0..4] stay the piece-swap slots.
+export const COAST_MTR_MOUTH  =CH.MTR_HARBOR_MOUTH;
+export const COAST_MTR_HOOKTIP=CH.MTR_HOOK_TIP;
+export const COAST_MTR=[COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE,COAST_MTR_MOUTH,COAST_MTR_HOOKTIP];
 
 export const LAND=CH.buildLAND({COAST_CORNER,COAST_MAIN,COAST_PEN,COAST_GOLF,COAST_MOUTH,BASIN_W,
   COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE});
@@ -401,6 +406,25 @@ export function buildCoast(){
     const cap=new THREE.Mesh(new THREE.CylinderGeometry(L.r*0.92,L.r*0.92,0.5,10),toon(L.red));cap.position.y=L.towerH+0.25;g.add(cap);
     const bulb=new THREE.Mesh(new THREE.SphereGeometry(L.r*0.6,10,8),bmat(L.glow));bulb.position.y=L.towerH+0.6;g.add(bulb);
     g.position.set(lx,0,lz);scene.add(g);
+  }
+  // MONTROSE (070) harbor entrance light — on the hook-tip apex (same register).
+  {
+    const L=CH.MT_HARBOR_LIGHT,lx=L.pos[0],lz=L.pos[1];
+    const g=new THREE.Group();
+    const tower=new THREE.Mesh(new THREE.CylinderGeometry(L.r*0.78,L.r,L.towerH,10),toon(L.white));tower.position.y=L.towerH/2;g.add(tower);
+    const cap=new THREE.Mesh(new THREE.CylinderGeometry(L.r*0.92,L.r*0.92,0.5,10),toon(L.red));cap.position.y=L.towerH+0.25;g.add(cap);
+    const bulb=new THREE.Mesh(new THREE.SphereGeometry(L.r*0.6,10,8),bmat(L.glow));bulb.position.y=L.towerH+0.6;g.add(bulb);
+    g.position.set(lx,0,lz);scene.add(g);
+  }
+  // MONTROSE (070) mole STONE walk cap — the breakwater top reads as concrete, not
+  // the LAND lawn. A flat filled polygon over the mole footprint (a lone frustum-
+  // culled Mesh -> +0 draws unless the far-north hook is framed).
+  {
+    const P=CH.MT_MOLE_PAVE,s=new THREE.Shape();
+    s.moveTo(P[0][0],-P[0][1]);for(let i=1;i<P.length;i++)s.lineTo(P[i][0],-P[i][1]);s.closePath();
+    const g=new THREE.ShapeGeometry(s);g.rotateX(-Math.PI/2);
+    const m=new THREE.Mesh(g,curveMat(new THREE.MeshToonMaterial({color:0xb7b1a2,gradientMap:gmap})));
+    m.position.y=0.06;scene.add(m);
   }
 
   // sheet-pile walls — the sawtooth steel edge from the photo

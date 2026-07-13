@@ -197,6 +197,24 @@ add('mt-gate', 'lakefront', 'lakefront', 34, -1207, [
   { yaw: -1.74, pitch: 0.14, dist: 12 },   // angled the other way
 ]);
 
+// MONTROSE HARBOR (task 070): the basin + moored boats, the HOOK breakwater pier,
+// and Park Bait. All on walkable ground (west promenade / the mole top via LAND).
+add('mt-harbor', 'lakefront', 'lakefront', 182, -1210, [
+  { yaw: 1.42, pitch: 0.14, dist: 13 },    // east/NE across the basin -> moorings + masts + the hook beyond
+  { yaw: 1.15, pitch: 0.13, dist: 14 },    // NE toward the mole/hook + entrance light + star docks
+  { yaw: 1.55, pitch: 0.20, dist: 16 },    // wider basin overview (seawall water + docks)
+]);
+add('mt-hook', 'lakefront', 'lakefront', 229, -1212, [
+  { yaw: 0.0,  pitch: 0.09, dist: 10 },    // SOUTH straight down the pier -> the curling tip + light + open lake
+  { yaw: 0.30, pitch: 0.07, dist: 11 },    // SSE: the hook curl + light with open lake to the left
+  { yaw: 0.0,  pitch: 0.14, dist: 13 },    // from further, wider down-pier (rail + riprap read)
+]);
+add('mt-baitshop', 'lakefront', 'lakefront', 183, -1172, [
+  { yaw: -1.33, pitch: 0.05, dist: 8 },    // WNW at Park Bait's signed front (shop off-centre, sign reads)
+  { yaw: -1.75, pitch: 0.06, dist: 8 },    // WSW from the other side (roof + shack form)
+  { yaw: -1.55, pitch: 0.13, dist: 11 },   // wider: shop on the mainland + basin/docks context
+]);
+
 // Diversey ENTERABLE bay (task 028): stand on the ground hitting deck at a
 // middle bay's hitting spot and look NORTH down the range — the axis-aligned
 // interior framing for the bay pocket (a cross-body camera sits in a divider);

@@ -702,6 +702,7 @@ export function buildProps(){
   }
 
   for(const s of CH.SIGNS)makeSign(s.text,s.x,s.z,s.ry);
+  for(const s of CH.MT_SIGNS)makeSign(s.text,s.x,s.z,s.ry);   // Montrose harbor wooden sign (no rng — makeSign is rng-free)
 
   // ---- waterline foam sparkle along the sheet-pile ----
   {
@@ -736,5 +737,48 @@ export function buildProps(){
     g.setAttribute('aColor',new THREE.BufferAttribute(aC,3));
     g.setAttribute('aSize',new THREE.BufferAttribute(aS,1));
     fireflies.pts=new THREE.Points(g,pointsMat());scene.add(fireflies.pts);
+  }
+
+  // ---- Montrose Harbor west shore: finger docks + boat launch ramp -------------
+  // All INDIVIDUAL frustum-culled meshes (the plankDeck wood vocabulary) — ZERO new
+  // InstancedMesh buckets, and ZERO shared world rng: no rng()/rand(), no makeBoat
+  // (which draws world rng), no jitter. Every value comes from the data consts, so
+  // the game's determinism gate stays bit-for-bit. Moored boats are handled by
+  // moorings.js (local seed). Placed LAST in buildProps so it runs after every
+  // world-rng consumer above (it consumes none, but this is belt-and-suspenders).
+  {
+    const MD=CH.MT_FINGER_DOCKS;
+    const deckY=CH.SEAWALL_Y.top+0.08;                 // low boardwalk flush on the shore grade (~0.12)
+    const postH=deckY+2.9;                             // deck underside down to ~-2.8 (below the basin water ~-2.32)
+    const deckMat=toon(0x8a6a44),woodMat=toon(0x9c6a3a);
+    const deckGeo=new THREE.BoxGeometry(MD.len,0.24,MD.halfW*2);   // shared: every finger deck is identical
+    const postGeo=new THREE.CylinderGeometry(0.14,0.14,postH,6);
+    const knobGeo=new THREE.SphereGeometry(0.17,7,6);
+    const railGeo=new THREE.BoxGeometry(3.4,0.09,0.09);
+    const grp=new THREE.Group();
+    for(const zc of MD.rows){
+      const deck=new THREE.Mesh(deckGeo,deckMat);deck.position.set(MD.x0+MD.len/2,deckY,zc);grp.add(deck);
+      for(let px=MD.x0+1.2;px<MD.x0+MD.len;px+=3.4){
+        if(px<=186)continue;                           // posts ONLY on the over-water span (east of the x=186 seawall)
+        for(const pz of[zc-MD.halfW,zc+MD.halfW]){
+          const post=new THREE.Mesh(postGeo,woodMat);post.position.set(px,deckY-postH/2+0.02,pz);grp.add(post);   // top flush with deck underside
+          const knob=new THREE.Mesh(knobGeo,woodMat);knob.position.set(px,deckY+0.34,pz);grp.add(knob);          // piling cap
+          if(px+3.4<MD.x0+MD.len+1){const rail=new THREE.Mesh(railGeo,woodMat);rail.position.set(px+1.7,deckY+0.5,pz);grp.add(rail);}  // rail to the next piling
+        }
+      }
+      walkRects.push({x1:MD.x0,x2:MD.x0+MD.len,z1:zc-MD.halfW,z2:zc+MD.halfW,h:deckY});   // walkable boardwalk (same array the Belmont fingers use)
+    }
+    scene.add(grp);
+
+    // public boat LAUNCH ramp — one wide pale slab tilting from the shore (west edge
+    // at topY) down into the basin (east edge submerged at botY). No walkRect (ramp
+    // into water). Single frustum-culled Box rotated about z so it reads as concrete.
+    {
+      const L=CH.MT_LAUNCH,w=L.x1-L.x0;
+      const ramp=new THREE.Mesh(new THREE.BoxGeometry(w,0.2,L.z1-L.z0),toon(L.color));
+      ramp.position.set((L.x0+L.x1)/2,(L.topY+L.botY)/2,(L.z0+L.z1)/2);
+      ramp.rotation.z=Math.atan2(L.botY-L.topY,w);     // west (+topY) high, east (+botY) low → slopes into the water
+      scene.add(ramp);
+    }
   }
 }

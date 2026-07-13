@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-13T06:08:11.721Z",
- "count": 117,
+ "generated": "2026-07-13T07:14:38.121Z",
+ "count": 120,
  "waypoints": [
   {
    "id": "spawn",
@@ -422,6 +422,81 @@
     }
    ],
    "expectation": "The Montrose Avenue underpass (z-1207, x0-14): a fenced dead-end portal through the LSD berm matching the Belmont/Addison/Irving register — a voussoir stone arch over a dark recessed door, limestone posts/lintel, warm lanterns, flanked by the perimeter hedge with the gap aligned to the mouth, and the low-rise Lakeview brick backdrop rising behind the berm. NO gag sign. Reads as a real neighborhood gate, sealed for now."
+  },
+  {
+   "id": "mt-harbor",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 182,
+   "z": -1210,
+   "framings": [
+    {
+     "yaw": 1.42,
+     "pitch": 0.14,
+     "dist": 13
+    },
+    {
+     "yaw": 1.15,
+     "pitch": 0.13,
+     "dist": 14
+    },
+    {
+     "yaw": 1.55,
+     "pitch": 0.2,
+     "dist": 16
+    }
+   ],
+   "expectation": "MONTROSE HARBOR (task 070): standing on the west-shore promenade looking east/NE across the harbor BASIN — sheltered blue-green water at grade below a seawall, with a mooring field of moored sailboats (white hulls + masts + a few star-dock clusters) reading as a real marina, finger docks reaching out from the near shore, and the long stone HOOK breakwater with its entrance light closing the far (east) side. Reads unmistakably as Chicago's big north harbor; NOT an empty pond, NOT a hole, the boats present and upright, water contained by the seawalls."
+  },
+  {
+   "id": "mt-hook",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 229,
+   "z": -1212,
+   "framings": [
+    {
+     "yaw": 0,
+     "pitch": 0.09,
+     "dist": 10
+    },
+    {
+     "yaw": 0.3,
+     "pitch": 0.07,
+     "dist": 11
+    },
+    {
+     "yaw": 0,
+     "pitch": 0.14,
+     "dist": 13
+    }
+   ],
+   "expectation": "THE HOOK (task 070): mid-pier on the curling stone breakwater, looking SOUTH down its length toward open water — the walkable promenade runs ahead with a fishing railing along the harbor (inner) edge, riprap/terraced stone stepping down to the water on the lake side, the pier curving to its hooked tip where the red-capped harbor entrance light stands, and the open lake beyond the harbor mouth. Reads as a long low arc of stone curling into the lake, fisherfolk-ready and WALKABLE end to end; NOT a floating slab, NOT blocked, NO shelf on open water."
+  },
+  {
+   "id": "mt-baitshop",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 183,
+   "z": -1172,
+   "framings": [
+    {
+     "yaw": -1.33,
+     "pitch": 0.05,
+     "dist": 8
+    },
+    {
+     "yaw": -1.75,
+     "pitch": 0.06,
+     "dist": 8
+    },
+    {
+     "yaw": -1.55,
+     "pitch": 0.13,
+     "dist": 11
+    }
+   ],
+   "expectation": "PARK BAIT (task 070): the little Montrose Harbor bait & tackle shop on the west shore — a small one-storey shack with a pitched roof and a legible 'PARK BAIT' sign facing the harbor, sitting on the mainland just back from the promenade with the basin water and docks beyond. The map's north-harbor landmark shop; reads small, signed, and endearing (the bar-likeness register), NOT a generic box, the sign readable and not mirrored."
   },
   {
    "id": "dv-bay-deck",

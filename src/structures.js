@@ -1031,6 +1031,66 @@ function buildEntranceMonument(){
   scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(specks.map(g2=>g2.toNonIndexed())),toon(0x8a7f70)));
 }
 
+// ---- Park Bait Shop — a small signed bait/tackle shack facing the basin ----
+// Individual frustum-culled meshes; fully deterministic (fixed numbers only,
+// no shared rng). Sits on existing LAND west of the basin; the EAST (+x) face
+// looks out at the harbor promenade, so door / windows / sign all live there.
+function buildParkBait(){
+  const B=CH.PARK_BAIT,grp=new THREE.Group();
+  const w=B.w,d=B.d,h=B.h;
+  const wallM=toon(B.wall),roofM=toon(B.roof),trimM=toon(B.trim);
+  const darkM=toon(0x2c241d),glowM=bmat(0xffe1a0);
+  const ex=w/2;                                        // east wall plane (local +x = harbor)
+
+  // grounding plinth + walls + a header/fascia band under the eave
+  const plinth=new THREE.Mesh(new THREE.BoxGeometry(w+0.24,0.3,d+0.24),trimM);plinth.position.y=0.15;grp.add(plinth);
+  const body=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallM);body.position.y=h/2;grp.add(body);
+  const fascia=new THREE.Mesh(new THREE.BoxGeometry(w+0.14,0.26,d+0.14),trimM);fascia.position.y=h-0.13;grp.add(fascia);
+
+  // pitched gable roof: ridge runs E–W (along x), slopes face N/S, gable ends
+  // (triangles) face the harbor (+x) and inland (−x). Two slanted slope boxes
+  // + two flat gable-fill triangles in the wall colour.
+  const oh=0.35,rise=1.15,run=d/2+oh,slopeLen=Math.hypot(run,rise),a=Math.atan2(rise,run),ridgeY=h+rise;
+  for(const s of[1,-1]){                              // s=+1 south slope, s=-1 north slope
+    const slope=new THREE.Mesh(new THREE.BoxGeometry(w+2*oh,0.14,slopeLen),roofM);
+    slope.rotation.x=s*a;slope.position.set(0,h+rise/2,s*run/2);grp.add(slope);
+  }
+  const gable=new THREE.Shape();gable.moveTo(-d/2,0);gable.lineTo(d/2,0);gable.lineTo(0,rise);gable.closePath();
+  const gg=new THREE.ShapeGeometry(gable);
+  for(const s of[1,-1]){                              // +x harbor gable, −x inland gable
+    const tri=new THREE.Mesh(gg,wallM);tri.position.set(s*w/2,h,0);tri.rotation.y=s*Math.PI/2;grp.add(tri);
+  }
+  const ridge=new THREE.Mesh(new THREE.BoxGeometry(w+2*oh,0.16,0.22),roofM);ridge.position.set(0,ridgeY,0);grp.add(ridge);
+
+  // EAST face (harbor side): a dark door + two warm-glow windows, each framed.
+  const door=new THREE.Mesh(new THREE.BoxGeometry(0.12,2.0,1.1),darkM);door.position.set(ex+0.02,1.0,-1.2);grp.add(door);
+  const dframe=new THREE.Mesh(new THREE.BoxGeometry(0.06,2.16,1.28),trimM);dframe.position.set(ex+0.01,1.02,-1.2);grp.add(dframe);
+  for(const wz of[0.4,1.7]){
+    const wframe=new THREE.Mesh(new THREE.BoxGeometry(0.06,1.04,1.0),trimM);wframe.position.set(ex+0.01,1.55,wz);grp.add(wframe);
+    const pane=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.86,0.82),glowM);pane.position.set(ex+0.03,1.55,wz);grp.add(pane);
+  }
+
+  // SIGN 'PARK BAIT' mounted high on the EAST face, reading from the promenade
+  // ~8 m east. Own CanvasTexture, font shrink-to-fit so it never clips. To dodge
+  // the mirrored-from-behind DoubleSide trap: FrontSide text plane + a solid
+  // trim backing box (its rear face is plain trim, never reversed text).
+  const cv=document.createElement('canvas');cv.width=512;cv.height=128;const g=cv.getContext('2d');
+  g.fillStyle='#1f3d34';g.fillRect(0,0,512,128);                          // painted board
+  g.strokeStyle='#e9dcc0';g.lineWidth=8;g.strokeRect(10,10,492,108);
+  g.fillStyle='#f5ecd6';g.textAlign='center';g.textBaseline='middle';
+  let fs=68;g.font=`800 ${fs}px "Trebuchet MS",sans-serif`;
+  while(g.measureText(B.sign).width>452&&fs>18){fs-=2;g.font=`800 ${fs}px "Trebuchet MS",sans-serif`;}
+  g.fillText(B.sign,256,70);
+  const stex=new THREE.CanvasTexture(cv);stex.anisotropy=4;
+  const sw=3.6,sh=0.9,sgrp=new THREE.Group();
+  const frame=new THREE.Mesh(new THREE.BoxGeometry(sw+0.18,sh+0.18,0.08),trimM);frame.position.z=-0.05;sgrp.add(frame);
+  const board=new THREE.Mesh(new THREE.PlaneGeometry(sw,sh),curveMat(new THREE.MeshBasicMaterial({map:stex})));sgrp.add(board);
+  sgrp.position.set(ex+0.09,2.2,0.2);sgrp.rotation.y=Math.PI/2;grp.add(sgrp);   // rotate to face +x (harbor); FrontSide stays un-mirrored
+
+  grp.position.set(B.x,0,B.z);grp.rotation.y=B.ry;scene.add(grp);
+  collide(B.x,B.z,3.6);                                // footprint (modest; clears the trail to the west)
+}
+
 export function buildStructures(){
   const POSTS=[],RAILS=[];
   buildDogFence(POSTS,RAILS);
@@ -1039,8 +1099,10 @@ export function buildStructures(){
   buildTennis(POSTS,RAILS);
   buildDiversey(POSTS,RAILS);
   buildCornerPark(POSTS,RAILS);
+  fenceRun(CH.MT_HOOK_RAIL.line, {spacing:CH.MT_HOOK_RAIL.spacing, postH:CH.MT_HOOK_RAIL.postH, color:CH.MT_HOOK_RAIL.color, collideR:CH.MT_HOOK_RAIL.collideR}, POSTS, RAILS);
   emitFences(POSTS,RAILS);
   buildFieldhouse();
+  buildParkBait();
   buildYachtClub();
   buildGolfClubhouse();
   buildChevron();

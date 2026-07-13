@@ -377,3 +377,10 @@ cut becomes a revert task.
   in a gentle 1.5x sprint and a matching FOV lean. Speed is the whole fantasy
   of grabbing a Divvy. — lakefront/Wrigleyville (src/packs/progression.js)
   — task 066
+- WALK OUT ON THE HOOK. Montrose Harbor's signature: a long low arc of stone
+  curling into the lake that you can stroll end to end — moored sailboats
+  bobbing in the sheltered basin on one side, open lake on the other, a
+  fishing rail down the harbor edge, and a tiny red-capped lighthouse waiting
+  at the curled tip. The real Montrose "walk out and fish" moment, plus Park
+  Bait signed and waiting on the shore. — Montrose Harbor (src/coast.js hook
+  mole + entrance light, src/data/chicago.js basin) — task 070

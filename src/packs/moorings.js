@@ -1,5 +1,8 @@
 // =====================================================================
-//  MOORINGS — Belmont Harbor's mooring field. The real basin reads two
+//  MOORINGS — Belmont Harbor's mooring field (plus a second, smaller
+//  MONTROSE Harbor field laid at the bottom of onWorldReady from its own
+//  local rng seed 7071, reusing every instanced mesh below → ZERO new
+//  draw calls). The real basin reads two
 //  ways from the air: tidy north-south rows of sailboats on cans, AND
 //  distinctive STAR DOCKS — radial clusters where 8-9 boats moor nose-in
 //  around a little central float, blooming like flowers among the rows.
@@ -167,6 +170,74 @@ onWorldReady(() => {
     });
   }
 
+  // =====================================================================
+  //  MONTROSE HARBOR — a second, smaller mooring field in the new basin.
+  //  Laid here (after Belmont populates boats[]/spokes[], before N is taken)
+  //  so it rides the SAME instanced meshes below → ZERO new draw calls. Its
+  //  own local rng (seed 7071) keeps it independent of Belmont's draw order.
+  //  Basin water x192..216, z-1145..-1282; finger docks root x186 reaching
+  //  east to ~x201 at deck rows z-1150/-1190/-1228/-1262; hook mole at x>=219.
+  //  We moor in the slips beside the fingers and across the open east half.
+  // =====================================================================
+  const belmontBoatCount = boats.length;   // Belmont's rnd draws end here; Montrose is rnd2 only
+  const rnd2 = m32(7071);
+
+  const M_ROWS = [199, 208, 214];                       // 2 open-water rows (208/214) + 1 slip row (199)
+  const M_Z0 = -1152, M_Z1 = -1276, M_ZSTEP = 13.8, M_STAGGER = 2.5;
+  const MONTROSE_CLUSTERS = [{ x: 203, z: -1180, n: 8 }, { x: 207, z: -1240, n: 7 }];
+  const M_DOCK_Z = [-1150, -1190, -1228, -1262];        // finger-dock deck rows (planks x186..201)
+  const M_DOCK_XMAX = 202, M_DOCK_SKIP_Z = 4.5;         // keep a slip-row boat off the planks
+
+  const nearMontroseCluster = (x, z) => {
+    for (const c of MONTROSE_CLUSTERS){ const dx = x - c.x, dz = z - c.z; if (dx * dx + dz * dz < SKIP_R * SKIP_R) return true; }
+    return false;
+  };
+  const onMontroseDock = (x, z) => {
+    if (x > M_DOCK_XMAX) return false;
+    for (const dz of M_DOCK_Z){ if (Math.abs(z - dz) < M_DOCK_SKIP_Z) return true; }
+    return false;
+  };
+
+  // ---- Montrose straight rows (bow ~north, staggered like the Belmont rows) ----
+  M_ROWS.forEach((rx, r) => {
+    const zoff = (r & 1) ? M_STAGGER : 0;
+    for (let z = M_Z0 - zoff; z >= M_Z1; z -= M_ZSTEP){
+      if (nearMontroseCluster(rx, z) || onMontroseDock(rx, z)) continue;   // clear water for clusters + docks
+      boats.push({
+        x: rx + (rnd2() * 2 - 1) * JITTER_X,
+        z: z + (rnd2() * 2 - 1) * JITTER_Z,
+        ry: BASE_HEAD + (rnd2() * 2 - 1) * JITTER_H,
+        ph: rnd2() * Math.PI * 2,
+        jib: -1,
+        can: true,                                       // row boats ride an individual mooring can
+      });
+    }
+  });
+
+  // ---- Montrose star docks: 7-8 boats nose-in around each central float ----
+  MONTROSE_CLUSTERS.forEach(c => {
+    const a0 = rnd2() * Math.PI * 2;
+    for (let k = 0; k < c.n; k++){
+      const ang = a0 + (k / c.n) * Math.PI * 2 + (rnd2() * 2 - 1) * CL_JIT_A;
+      const rr  = CL_R + (rnd2() * 2 - 1) * CL_JIT_R;
+      const px  = c.x + Math.cos(ang) * rr;
+      const pz  = c.z + Math.sin(ang) * rr;
+      boats.push({
+        x: px, z: pz,
+        ry: Math.atan2(c.x - px, c.z - pz) + (rnd2() * 2 - 1) * CL_JIT_H,   // bow -> float centre
+        ph: rnd2() * Math.PI * 2,
+        jib: -1,
+        can: false,                                      // moored to the shared float, not a can
+      });
+      spokes.push({ cx: c.x, cz: c.z, ang, len: rr });
+    }
+  });
+
+  // Belmont + Montrose star-dock floats share one InstancedMesh
+  const ALL_CLUSTERS = [...CLUSTERS, ...MONTROSE_CLUSTERS];
+  // a few loose Montrose cans out in the open east water
+  const montroseLooseCans = [[212, -1160], [211, -1212], [213, -1268]];
+
   const N = boats.length;
 
   // a few ROW boats get a small furled-jib triangle (they read most clearly)
@@ -189,7 +260,7 @@ onWorldReady(() => {
 
   // ---- cans: one ahead of every ROW bow + a few loose extras ----
   const looseCans = [[120, -58], [138, -155], [104, -235], [130, -100]];
-  const cans = new THREE.InstancedMesh(new THREE.SphereGeometry(0.26, 8, 6), toon(0xffffff), rowCount + looseCans.length);
+  const cans = new THREE.InstancedMesh(new THREE.SphereGeometry(0.26, 8, 6), toon(0xffffff), boats.filter(b => b.can).length + looseCans.length + montroseLooseCans.length);
   cans.frustumCulled = false;
 
   // ---- a few tiny gray dinghies drifting in the gaps ----
@@ -198,7 +269,7 @@ onWorldReady(() => {
   dinghies.frustumCulled = false;
 
   // ---- star-dock central floats (1 draw call) ----
-  const floats = new THREE.InstancedMesh(new THREE.CylinderGeometry(FLOAT_R, FLOAT_R, FLOAT_H, 8), toon(0x8a6a44), CLUSTERS.length);
+  const floats = new THREE.InstancedMesh(new THREE.CylinderGeometry(FLOAT_R, FLOAT_R, FLOAT_H, 8), toon(0x8a6a44), ALL_CLUSTERS.length);
   floats.frustumCulled = false;
 
   // ---- star-dock radial spokes: thin planks from float out under each bow (1 draw call) ----
@@ -214,7 +285,8 @@ onWorldReady(() => {
     setPart(masts, i, mastLocal);
     setPart(booms, i, boomLocal);
     if (b.jib >= 0) setPart(jibs, b.jib, jibLocal);
-    const hex = (rnd() < DARK_PROB) ? DARK[(rnd() * DARK.length) | 0] : LIGHT[(rnd() * LIGHT.length) | 0];
+    const crng = (i < belmontBoatCount) ? rnd : rnd2;   // Belmont draws stay bit-identical; Montrose from rnd2
+    const hex = (crng() < DARK_PROB) ? DARK[(crng() * DARK.length) | 0] : LIGHT[(crng() * LIGHT.length) | 0];
     hulls.setColorAt(i, _col.setHex(hex));
     if (b.can){
       const fx = Math.sin(b.ry), fz = Math.cos(b.ry), d = HULL_HALF_LEN + 0.9;   // can just ahead of the bow
@@ -226,14 +298,18 @@ onWorldReady(() => {
     _mP.compose(_v.set(x, WATER_Y + 0.14, z), _IDENT, _v2.set(1, 0.8, 1));
     cans.setMatrixAt(canIdx++, _mP);
   });
+  montroseLooseCans.forEach(([x, z]) => {
+    _mP.compose(_v.set(x, WATER_Y + 0.14, z), _IDENT, _v2.set(1, 0.8, 1));
+    cans.setMatrixAt(canIdx++, _mP);
+  });
   dinghySpots.forEach(([x, z, ry], k) => {
     _qh.setFromAxisAngle(_yAxis, ry);
     _mP.compose(_v.set(x, WATER_Y + 0.02, z), _qh, _v2.set(0.55, 0.22, 0.95));
     dinghies.setMatrixAt(k, _mP);
   });
 
-  // ---- write star-dock floats + spokes ----
-  CLUSTERS.forEach((c, k) => {
+  // ---- write star-dock floats + spokes (Belmont + Montrose) ----
+  ALL_CLUSTERS.forEach((c, k) => {
     _mP.compose(_v.set(c.x, WATER_Y + 0.16, c.z), _IDENT, _one);
     floats.setMatrixAt(k, _mP);
   });
