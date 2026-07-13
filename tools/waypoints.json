@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-13T09:40:33.772Z",
+ "generated": "2026-07-13T11:53:06.922Z",
  "count": 125,
  "waypoints": [
   {
@@ -350,7 +350,7 @@
   },
   {
    "id": "mt-arrival",
-   "area": "lakefront",
+   "area": "montrose",
    "cell": "lakefront",
    "x": 175,
    "z": -812,
@@ -375,7 +375,7 @@
   },
   {
    "id": "mt-trail",
-   "area": "lakefront",
+   "area": "montrose",
    "cell": "lakefront",
    "x": 205,
    "z": -1000,
@@ -400,7 +400,7 @@
   },
   {
    "id": "mt-gate",
-   "area": "lakefront",
+   "area": "montrose",
    "cell": "lakefront",
    "x": 34,
    "z": -1207,
@@ -425,7 +425,7 @@
   },
   {
    "id": "mt-harbor",
-   "area": "lakefront",
+   "area": "montrose",
    "cell": "lakefront",
    "x": 182,
    "z": -1210,
@@ -450,7 +450,7 @@
   },
   {
    "id": "mt-hook",
-   "area": "lakefront",
+   "area": "montrose",
    "cell": "lakefront",
    "x": 229,
    "z": -1212,
@@ -475,7 +475,7 @@
   },
   {
    "id": "mt-baitshop",
-   "area": "lakefront",
+   "area": "montrose",
    "cell": "lakefront",
    "x": 183,
    "z": -1172,
@@ -500,7 +500,7 @@
   },
   {
    "id": "mt-beach",
-   "area": "lakefront",
+   "area": "montrose",
    "cell": "lakefront",
    "x": 215,
    "z": -1456,
@@ -525,7 +525,7 @@
   },
   {
    "id": "mt-dunes",
-   "area": "lakefront",
+   "area": "montrose",
    "cell": "lakefront",
    "x": 222,
    "z": -1421,
@@ -550,7 +550,7 @@
   },
   {
    "id": "mt-dock",
-   "area": "lakefront",
+   "area": "montrose",
    "cell": "lakefront",
    "x": 216,
    "z": -1473,
@@ -575,7 +575,7 @@
   },
   {
    "id": "mt-crickethill-summit",
-   "area": "lakefront",
+   "area": "montrose",
    "cell": "lakefront",
    "x": 112,
    "z": -1315,
@@ -600,7 +600,7 @@
   },
   {
    "id": "mt-crickethill-base",
-   "area": "lakefront",
+   "area": "montrose",
    "cell": "lakefront",
    "x": 112,
    "z": -1272,

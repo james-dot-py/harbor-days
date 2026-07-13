@@ -181,17 +181,17 @@ add('redline-belmont', 'lakefront', 'lakefront', 26, 106, [
 // grew. All lakefront lawn (walkable via LAND) — north-looking reveals + the
 // underpass gate. Interim SHELL: barren lawn + the dual trail + the stub
 // revetment; 070-073 fill in the harbor/hedge/beach/hill.
-add('mt-arrival', 'lakefront', 'lakefront', 175, -812, [
+add('mt-arrival', 'montrose', 'lakefront', 175, -812, [
   { yaw: 3.14, pitch: 0.15, dist: 13 },    // due NORTH over the old z-812 fence line: the new lawn opens
   { yaw: 2.84, pitch: 0.12, dist: 13 },    // angled NE toward the continuing trail + open lake
   { yaw: 3.14, pitch: 0.28, dist: 16 },    // higher/wider reveal of the north growth
 ]);
-add('mt-trail', 'lakefront', 'lakefront', 205, -1000, [
+add('mt-trail', 'montrose', 'lakefront', 205, -1000, [
   { yaw: 3.14, pitch: 0.12, dist: 11 },    // NORTH down the new dual Lakefront Trail stretch
   { yaw: 0.5,  pitch: 0.06, dist: 10 },    // ENE across the trail to the lake + stub revetment
   { yaw: 3.0,  pitch: 0.16, dist: 13 },    // north, wider (both ribbons + lawn)
 ]);
-add('mt-gate', 'lakefront', 'lakefront', 34, -1207, [
+add('mt-gate', 'montrose', 'lakefront', 34, -1207, [
   { yaw: -1.57, pitch: 0.12, dist: 11 },   // due WEST at the Montrose Ave underpass portal
   { yaw: -1.4,  pitch: 0.1,  dist: 10 },   // angled: portal + flanking hedge + Lakeview backdrop
   { yaw: -1.74, pitch: 0.14, dist: 12 },   // angled the other way
@@ -199,17 +199,17 @@ add('mt-gate', 'lakefront', 'lakefront', 34, -1207, [
 
 // MONTROSE HARBOR (task 070): the basin + moored boats, the HOOK breakwater pier,
 // and Park Bait. All on walkable ground (west promenade / the mole top via LAND).
-add('mt-harbor', 'lakefront', 'lakefront', 182, -1210, [
+add('mt-harbor', 'montrose', 'lakefront', 182, -1210, [
   { yaw: 1.42, pitch: 0.14, dist: 13 },    // east/NE across the basin -> moorings + masts + the hook beyond
   { yaw: 1.15, pitch: 0.13, dist: 14 },    // NE toward the mole/hook + entrance light + star docks
   { yaw: 1.55, pitch: 0.20, dist: 16 },    // wider basin overview (seawall water + docks)
 ]);
-add('mt-hook', 'lakefront', 'lakefront', 229, -1212, [
+add('mt-hook', 'montrose', 'lakefront', 229, -1212, [
   { yaw: 0.0,  pitch: 0.09, dist: 10 },    // SOUTH straight down the pier -> the curling tip + light + open lake
   { yaw: 0.30, pitch: 0.07, dist: 11 },    // SSE: the hook curl + light with open lake to the left
   { yaw: 0.0,  pitch: 0.14, dist: 13 },    // from further, wider down-pier (rail + riprap read)
 ]);
-add('mt-baitshop', 'lakefront', 'lakefront', 183, -1172, [
+add('mt-baitshop', 'montrose', 'lakefront', 183, -1172, [
   { yaw: -1.33, pitch: 0.05, dist: 8 },    // WNW at Park Bait's signed front (shop off-centre, sign reads)
   { yaw: -1.75, pitch: 0.06, dist: 8 },    // WSW from the other side (roof + shack form)
   { yaw: -1.55, pitch: 0.13, dist: 11 },   // wider: shop on the mainland + basin/docks context
@@ -219,17 +219,17 @@ add('mt-baitshop', 'lakefront', 'lakefront', 183, -1172, [
 // after the harbor's masts and the Point's intimacy. All on walkable SAND (beachH).
 // mt-beach: the long open sand + beach house; mt-dunes: the roped plover natural
 // area (quiet, protective); mt-dock: the seasonal beach bar + beachgoers.
-add('mt-beach', 'lakefront', 'lakefront', 215, -1456, [
+add('mt-beach', 'montrose', 'lakefront', 215, -1456, [
   { yaw: -0.7, pitch: 0.06, dist: 12 },    // SW at the beach house's rounded solarium prow — anchors the far end, sand foreground, lake low-left
   { yaw: 0.0,  pitch: 0.05, dist: 14 },    // due SOUTH down the long sand toward the dune, beach house to the right
   { yaw: 0.35, pitch: 0.09, dist: 16 },    // SSE, wide — open sand sweep + low lake horizon (breadth)
 ]);
-add('mt-dunes', 'lakefront', 'lakefront', 222, -1421, [
+add('mt-dunes', 'montrose', 'lakefront', 222, -1421, [
   { yaw: 0.0,  pitch: 0.05, dist: 10 },    // SOUTH into the roped dune — sign + the plover pair + chick, rope line, grasses + mounds
   { yaw: -0.4, pitch: 0.05, dist: 9 },     // SSW at the 'PIPING PLOVER NESTING AREA' sign + the west plover (sign reads)
   { yaw: 0.28, pitch: 0.09, dist: 12 },    // SSE toward the east plover + dune mounds + the lake edge (breadth)
 ]);
-add('mt-dock', 'lakefront', 'lakefront', 216, -1473, [
+add('mt-dock', 'montrose', 'lakefront', 216, -1473, [
   { yaw: 3.14, pitch: 0.08, dist: 10 },    // NORTH at The Dock's south front — canvas 'THE DOCK' sign, awning, umbrellas
   { yaw: 2.85, pitch: 0.06, dist: 9 },     // NNE angle — the L bar counter + beachgoers + umbrella colors
   { yaw: 3.14, pitch: 0.15, dist: 12 },    // wider/higher — the deck + bar on the sand, beach context
@@ -245,12 +245,12 @@ add('mt-dock', 'lakefront', 'lakefront', 216, -1473, [
 // the kites aloft against the sky.
 {
   const H = CH.CRICKET_HILL;
-  add('mt-crickethill-summit', 'lakefront', 'lakefront', H.cx, H.cz, [
+  add('mt-crickethill-summit', 'montrose', 'lakefront', H.cx, H.cz, [
     { yaw: 0.72, pitch: 0.16, dist: 15 },  // SSE down over the harbor HOOK breakwater + basin water, flyers flanking, open lake left
     { yaw: 0.95, pitch: 0.15, dist: 16 },  // S-SE: harbor + Park Bait shack + open lake (a kite-flyer's raised arm foreground)
     { yaw: 0.90, pitch: 0.20, dist: 18 },  // wider/higher — the whole earned vista (harbor + trail + open lake below)
   ]);
-  add('mt-crickethill-base', 'lakefront', 'lakefront', H.cx, H.cz + 43, [
+  add('mt-crickethill-base', 'montrose', 'lakefront', H.cx, H.cz + 43, [
     { yaw: 3.14, pitch: 0.06, dist: 16 },  // due NORTH at the dome SILHOUETTE — 3 kites aloft w/ tails against the sky
     { yaw: 2.88, pitch: 0.06, dist: 15 },  // NNE — the mound + kites + the low sun, flyers on the ridge
     { yaw: 3.14, pitch: 0.13, dist: 19 },  // wider/higher — the whole broad grassy mound, flyers + kites on the crest

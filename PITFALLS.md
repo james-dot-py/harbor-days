@@ -507,3 +507,16 @@ few turns to find; keep each to one line of symptom + fix.
   logged a "stall" (task 065): a solid post you step AROUND is not a trap — route
   bot paths BESIDE point colliders (or ±1 the post's z), and read the stall coord
   before believing a walkability regression (the player there was free N/S/W).
+- The lakefront (incl. all of Montrose) has NO anti-trap CRAWL escape — that is
+  HARD-cell-only (main.js gates BOTH the crawl AND `__hd.setTrap`'s effect on
+  `cellWalk()`, line 145/259). On the lakefront `setTrap` is a NO-OP and any
+  non-walkable spot reads as WATER (wade/jetski), so a Montrose trap test asserts
+  "never FROZEN" = displacement > ~1 m with input held, NOT the crawl escape
+  (task 075 tmp-montrose-bot). The only true FREEZE risk on the lakefront is a
+  non-water, non-walkable LAND island (a `pip(LAND)` interior carve — building
+  hall, etc.) a collider could push you into; keep colliders inboard (the 052/065
+  laws still apply). And a steering bot must ROUTE AROUND data-carved non-walk
+  blocks (the roped plover DUNE x210-233 / z-1362..-1414; beach-house hall) — a
+  bot path THROUGH one logs a false "incomplete/stall", not a walkability bug
+  (065's "route beside point colliders" extends to area carves; the real
+  Montrose harbor→beach route goes up the west sand strip x~205 around the dune).

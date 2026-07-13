@@ -275,7 +275,7 @@ export const MONTROSE_BEACH = {
   bounds:{ x0:200, x1:240, z0:-1500, z1:-1360 },   // sand footprint (walkable except the roped dune)
   slope:{ ref:227, span:14, depth:-2.7 },          // dry (h~0) at x<=227, dips under the lake by x~241
   mesh:{ cx:219, cz:-1430, w:46, d:146, segW:36, segD:58 },   // sand render plane (frustum-culled) x196..242
-  sand:0xe8d9b5,
+  sand:0xd9c087,   // task 075: warmed from near-white 0xe8d9b5 — the flat beach read as snow/concrete under the toon sun; a golden tan reads as warm Chicago sand (matches the dune mounds; lone frustum-culled Mesh, +0 draws, no rng)
 };
 // dune natural area — the roped, protected SE corner abutting the Point. Its
 // INTERIOR is NON-WALKABLE (montroseBeachH covers it -> beachWalkable returns
