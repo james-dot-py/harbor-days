@@ -408,3 +408,29 @@ cut becomes a revert task.
   lake lay out below — the earned view Chicagoans climb it for. Walk up and it
   tells you it's the north side's favorite kite (and winter-sled) spot. —
   Cricket Hill (src/data/chicago.js cricketHillH, src/packs/cricket-hill.js) — task 073
+- FLY A KITE. Nothing else in the game flies. Climb Cricket Hill, press E / ✋ at
+  the summit and HOLD to wind up the launch — release and your kite climbs out over
+  the lake on the wind, the line running from your hand, the diamond sail and its
+  bow tail swaying against the dusk sky beside the ambient flyers' kites. A session
+  camera (the driving-range swing precedent) frames you small at the base with the
+  kite riding high; reel it in with E / ✋ (or it reels itself after a while) and the
+  camera eases back onto the chase cam. The north side's actual kite mound, finally
+  flyable. — Cricket Hill summit (src/packs/montrose-kite.js) — task 074
+- OFF THE HOOK: a breakwater FISHERMAN. Walk out the Montrose hook and a bucket-
+  hatted angler is working the lake edge — rod out over open water, a perch always
+  flopping in the pail beside him, and on a slow loop he gets a bite, reels a
+  wriggling one up the line and drops it in the bucket ("dinner!"). Ask about the
+  fishing (E / ✋) and he points you to Park Bait up the shore. The real Montrose
+  perch ritual. — Montrose Harbor hook mole (src/packs/montrose-harbor-life.js) — task 074
+- PARK BAIT SELLS CRICKETS. A hand-lettered styrofoam bait cooler outside the real
+  Park Bait shop chirps softly with live crickets, swelling as you approach (100%
+  synth, actx-guarded). Peek in the cooler (E / ✋): "Crickets, a dozen for a buck —
+  Cricket Hill up the shore is named for the swarms." The bait-shop/hill geography
+  wink, grounded in the real thing. — Park Bait (src/packs/montrose-harbor-life.js) — task 074
+- MONTY & ROSE. The heart of the dunes: a fluffy piping-plover CHICK peeks and bobs
+  at the nest between its two parents (always at least partly visible — a living
+  brood, not a diorama), and "meet the plovers" (E / ✋) tells Chicago's real story
+  — Monty & Rose nested here in 2019, the first plovers in the city in ~70 years,
+  and their descendant Imani nests on; fewer than ~80 Great Lakes pairs remain. A
+  journal note keeps the story. — Montrose dunes (src/packs/montrose-beach.js,
+  static chick retired from src/props.js) — task 074

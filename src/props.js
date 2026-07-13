@@ -877,10 +877,7 @@ export function buildProps(){
       const bh=CH.montroseBeachH(p.x,p.z),pl=mkPlover(1.6,false,true);   // chibi-chunky so they read from the beach (small birds vanish)
       pl.position.set(p.x,(bh==null?0:bh)+0.02,p.z);pl.rotation.y=p.ry;scene.add(pl);
     }
-    {   // the chick — smaller, paler, fluffier; body + head only, no neckband
-      const c=CH.MONTROSE_DUNE.chick,bh=CH.montroseBeachH(c.x,c.z),pl=mkPlover(1.0,true,false);
-      pl.position.set(c.x,(bh==null?0:bh)+0.02,c.z);scene.add(pl);
-    }
+    // the chick is now an ANIMATED peek-out chick built in packs/montrose-beach.js
     // honest info sign — own CanvasTexture placard on a post, faces the beach
     {
       const SG=CH.MONTROSE_DUNE.sign;

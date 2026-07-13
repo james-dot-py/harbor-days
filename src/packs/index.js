@@ -48,3 +48,5 @@ import './lolla.js';   // LOLLAPALOOZA live — crowd, band, festival set, dance
 import './wrigley-game.js';   // GAME DAY inside the bowl — the ball game, crowd, seats, stretch (task 064)
 import './montrose-beach.js';   // Montrose Beach life — wandering beachgoers + piping-plover sign (task 072)
 import './cricket-hill.js';   // Cricket Hill — the walkable kite mound + flyers/kites tableau (task 073)
+import './montrose-harbor-life.js';   // Montrose Harbor delight — the hook fisherman's catch + Park Bait cricket chirp (task 074)
+import './montrose-kite.js';   // FLY A KITE on Cricket Hill — hold-to-launch, session cam, reel-in (task 074)
