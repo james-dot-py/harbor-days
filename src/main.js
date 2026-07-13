@@ -127,6 +127,13 @@ function splash(k){
       Math.cos(a)*rand(1,2.5),rand(1.5,3.2),Math.sin(a)*rand(1,2.5),0.75,0.92,1,0.5,1.6,4,2);}
   sPop();
 }
+// ---- anti-trap escape (issue 025): the game must never HARD-STICK the player.
+// 8 probe dirs + expanding search rings for the nearest open ground; module
+// constants → zero per-frame allocation. TRAP_TEST is a debug-only synthetic
+// block (window.__hd.setTrap) that verifies the escape rule in-engine.
+const ESC_DIRS=[[1,0],[0.7071,0.7071],[0,1],[-0.7071,0.7071],[-1,0],[-0.7071,-0.7071],[0,-1],[0.7071,-0.7071]];
+const ESC_RINGS=[0.6,1.2,2.0,3.0,4.2];
+let TRAP_TEST=null;
 // movement gate: on land = walkable; on water = open water; transitions gated
 function canMove(nx,nz){
   if(jsk.on)return isWater(nx,nz)||(walkable(nx,nz)&&surfaceY(nx,nz)<=-0.55);  // beach at low shores only
@@ -135,7 +142,7 @@ function canMove(nx,nz){
 }
 function onRect(x,z){for(const r of walkRects)if(x>=r.x1&&x<=r.x2&&z>=r.z1&&z<=r.z2)return r;return null}
 function walkable(x,z){
-  const cw=cellWalk();if(cw)return cw(x,z);   // active cell owns walkability
+  const cw=cellWalk();if(cw)return TRAP_TEST&&x>=TRAP_TEST.x0&&x<=TRAP_TEST.x1&&z>=TRAP_TEST.z0&&z<=TRAP_TEST.z1?false:cw(x,z);   // active cell owns walkability (TRAP_TEST: debug-only synthetic block, issue 025)
   if(onRect(x,z))return true;
   const bh=beachH(x,z);if(bh!==null)return z>CH.DOG_BEACH.walkZMin;
   if(pip(x,z,LAND))return true;
@@ -177,6 +184,7 @@ const _tp0=performance.now();
 worldReady(player);
 window.__hd.player=player;   // debug/tools only: live player handle (act.mjs E2E reads coords / teleports within a cell)
 window.__hd.input={joy,cam}; // debug/tools only: steering-bot access (062 hold-forward crossing assertions)
+window.__hd.setTrap=r=>{TRAP_TEST=r||null;}; // debug/tools only: inject a synthetic non-walk block to verify the anti-trap escape (issue 025)
 window.__hd.buildMs={build:Math.round(_tm0-_tb0),merge:Math.round(_tm1-_tm0),packs:Math.round(performance.now()-_tp0)};
 console.log('[perf] world build '+window.__hd.buildMs.build+'ms · mergeCellStatic '+window.__hd.buildMs.merge+'ms · packs '+window.__hd.buildMs.packs+'ms');
 
@@ -239,6 +247,22 @@ function frame(now){
     if(player.y>c.h)continue;   // airborne over a low obstacle (fences are jumpable)
     const dx=player.x-c.x,dz=player.z-c.z,R=c.r+0.34,d2=dx*dx+dz*dz;
     if(d2<R*R&&d2>1e-6){const d=Math.sqrt(d2);player.x=c.x+dx/d*R;player.z=c.z+dz/d*R}
+  }
+  // ---- anti-trap escape (issue 025) — HARD cells only (cellWalk() non-null is
+  // the SAME gate as the issue-017 water guard, so lakefront jetski/wade stays
+  // untouched): if our spot is unwalkable (a collider shoved us into a gap, or a
+  // future placement bug) OR we're fully enclosed (all 8 probe dirs blocked),
+  // crawl toward the nearest open ground so the game can never freeze the player.
+  if(cellWalk()&&!jsk.on&&game.running){
+    let trapped=!walkable(player.x,player.z);
+    if(!trapped){trapped=true;for(let d=0;d<8;d++)if(walkable(player.x+ESC_DIRS[d][0]*0.6,player.z+ESC_DIRS[d][1]*0.6)){trapped=false;break;}}
+    if(trapped){
+      let bestScore=1e9,bestDist=0,ex=0,ez=0;
+      for(let d=0;d<8;d++){const ux=ESC_DIRS[d][0],uz=ESC_DIRS[d][1];
+        for(let r=0;r<5;r++){const rr=ESC_RINGS[r];
+          if(walkable(player.x+ux*rr,player.z+uz*rr)){const sc=rr-(ux*mvx+uz*mvz)*0.2;if(sc<bestScore){bestScore=sc;bestDist=rr;ex=ux;ez=uz;}break;}}}
+      if(bestScore<1e9){const step=Math.min(bestDist,0.28);player.x+=ex*step;player.z+=ez*step;player.vx=0;player.vz=0;}   // decisive crawl onto open ground
+    }
   }
   const CLW=cellClamp()||CH.WORLD_CLAMP;
   player.x=clamp(player.x,CLW.xMin,CLW.xMax);player.z=clamp(player.z,CLW.zMin,CLW.zMax);

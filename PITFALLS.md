@@ -482,3 +482,28 @@ few turns to find; keep each to one line of symptom + fix.
   white set (bars + stop lines) in ONE InstancedMesh (draw budget unchanged) and
   do all per-bar wear deterministically (no rng — streets.js's local R lays the
   lamps/hydrants/backdrop and must not shift).
+- A HARD-STUCK player ("can't move at all") can be a COLLIDER WEDGE, not a walk
+  islet — and the flood-fill reachability sweep CAN'T catch it (reachability sees
+  only walk data, never colliders). The Lolla Columbus arch (issue 025 / task 065)
+  had two leg colliders (r0.6 → player-radius 0.94) sitting 0.14 m past the
+  walkable Columbus strip (x190-200) into flanking non-walk seams (the lawn's
+  x0 202 left a 2 m curb seam); the collider ring pushed the player into the seam
+  and every ~0.07 m micro-step out was blocked → frozen. Rule: a collider whose
+  ring (r + 0.34) can reach non-walkable ground is a latent trap — keep colliders
+  inboard on walkable ground OR close the seam. Reproduce collider traps by
+  SIMULATING the movement gate + the specific colliders (tools/tmp-arch-trap.mjs),
+  not by reachability (which passed green while the owner was pinned).
+- The permanent fix for stuck-anywhere is the ANTI-TRAP ESCAPE in main.js's
+  movement gate (issue 025): after the slide + collider push, in HARD cells only
+  (gate on `cellWalk()` — the SAME condition as the issue-017 water guard, so the
+  lakefront jetski/wade path is untouched), if the spot is unwalkable OR all 8
+  probe dirs are blocked, crawl toward the nearest open ground (8 dirs × expanding
+  rings, module-const arrays = zero per-frame alloc). It converts any future
+  placement/collider trap from a reload into a shrug. Verify it in-engine with a
+  synthetic non-walk block: `window.__hd.setTrap({x0,x1,z0,z1})` → the player must
+  escape even with ZERO input (tools/tmp-trapbot.mjs). Don't gate it on the
+  lakefront — "surrounded by non-walkable" is NORMAL there (wade into the water).
+- A straight-line steering BOT walked dead into a 1.2 m gateway POST collider and
+  logged a "stall" (task 065): a solid post you step AROUND is not a trap — route
+  bot paths BESIDE point colliders (or ±1 the post's z), and read the stall coord
+  before believing a walkability regression (the player there was free N/S/W).

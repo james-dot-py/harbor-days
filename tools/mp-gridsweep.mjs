@@ -72,5 +72,55 @@ for (let gz = 0; gz < H; gz++) for (let gx = 0; gx < W; gx++) {
   }
 }
 console.log(`\nworst adjacent elevation step: ${worst.toFixed(2)} at ${worstAt} (2 m grid; ramp ~0.42/2m ok)`);
-console.log(holes.length ? `\nRESULT: ${holes.length} candidate hole(s) to review` : '\nRESULT: no interior holes');
-process.exit(0);
+
+// ============================ CONNECTIVITY (issue 025) =====================
+// Flood-fill reachability from the cell SPAWN: EVERY walkable cell must be
+// reachable, or it is a disconnected walkable ISLET — a hard-stuck trap in
+// waiting (you can only get there by clipping in, then you can't leave). This
+// catches the whole trap CLASS after any placement change. 4-connected (the
+// engine moves x/z independently, so a diagonal corner-touch is NOT passable)
+// on a 1 m grid (fine enough that a 3.2 m-wide bridge deck stays connected).
+console.log('\n=== connectivity: flood-fill reachability from spawn (1 m grid, 4-conn) ===');
+{
+  const RS = 1;                                            // reachability grid step
+  const rxs = [], rzs = [];
+  for (let x = Math.floor(C.xMin); x <= Math.ceil(C.xMax); x += RS) rxs.push(x);
+  for (let z = Math.floor(C.zMin); z <= Math.ceil(C.zMax); z += RS) rzs.push(z);
+  const RW = rxs.length, RH = rzs.length;
+  const rwalk = new Uint8Array(RW * RH);
+  let total = 0;
+  for (let gz = 0; gz < RH; gz++) for (let gx = 0; gx < RW; gx++)
+    if (MP.walkableM(rxs[gx], rzs[gz])) { rwalk[gz * RW + gx] = 1; total++; }
+  const sgx = Math.round(MP.SPAWN_M.x) - rxs[0], sgz = Math.round(MP.SPAWN_M.z) - rzs[0];
+  const seen = new Uint8Array(RW * RH), stack = [];
+  if (rwalk[sgz * RW + sgx]) { seen[sgz * RW + sgx] = 1; stack.push(sgz * RW + sgx); }
+  let reach = 0;
+  while (stack.length) {
+    const i = stack.pop(); reach++;
+    const gx = i % RW, gz = (i - gx) / RW;
+    for (const [dx, dz] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+      const nx = gx + dx, nz = gz + dz;
+      if (nx < 0 || nz < 0 || nx >= RW || nz >= RH) continue;
+      const j = nz * RW + nx;
+      if (rwalk[j] && !seen[j]) { seen[j] = 1; stack.push(j); }
+    }
+  }
+  const islets = [];
+  for (let gz = 0; gz < RH; gz++) for (let gx = 0; gx < RW; gx++)
+    if (rwalk[gz * RW + gx] && !seen[gz * RW + gx]) islets.push([rxs[gx], rzs[gz]]);
+  console.log(`spawn (${MP.SPAWN_M.x}, ${MP.SPAWN_M.z}) walkable=${!!rwalk[sgz * RW + sgx]}  reachable ${reach}/${total} walkable cells`);
+  if (islets.length) {
+    // cluster-report: print each islet's bbox + a sample coord (not 1000 rows)
+    console.log(`UNREACHABLE walkable cells (disconnected islets): ${islets.length}`);
+    const shown = islets.slice(0, 60);
+    for (const [x, z] of shown) console.log(`  ISLET (${x}, ${z})`);
+    if (islets.length > shown.length) console.log(`  ... and ${islets.length - shown.length} more`);
+  } else {
+    console.log('every walkable cell is reachable from spawn — no islets');
+  }
+  console.log(islets.length ? `\nRESULT(connectivity): ${islets.length} unreachable islet cell(s) — FAIL`
+                            : `\nRESULT(connectivity): fully connected — PASS`);
+  console.log(holes.length ? `RESULT(holes): ${holes.length} candidate hole(s) to review`
+                           : `RESULT(holes): no interior holes`);
+  process.exit(islets.length ? 1 : 0);
+}

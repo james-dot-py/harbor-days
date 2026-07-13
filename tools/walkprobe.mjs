@@ -916,6 +916,15 @@ console.log('\n--- Millennium: flood fill from the spawn — one connected netwo
       const j=nz*W+nx;if(walk[j]&&!seen[j]){seen[j]=1;Q.push(j);}
     }}
   expect(`spawn cell (${MP.SPAWN_M.x},${MP.SPAWN_M.z}) walkable`,walk[Q.length?0:(Math.round(MP.SPAWN_M.z)-z0)*W+(Math.round(MP.SPAWN_M.x)-x0)]===1,true);
+  // list the disconnected islets (issue 025) so a future trap is actionable, not
+  // just a count — every walkable cell unreachable from spawn is a hard-stuck trap.
+  if(reach!==total){
+    const islets=[];
+    for(let gz=0;gz<H;gz++)for(let gx=0;gx<W;gx++)if(walk[gz*W+gx]&&!seen[gz*W+gx])islets.push([x0+gx,z0+gz]);
+    console.log(`  ${islets.length} UNREACHABLE walkable islet cell(s):`);
+    for(const [x,z] of islets.slice(0,40))console.log(`    ISLET (${x}, ${z})`);
+    if(islets.length>40)console.log(`    ... and ${islets.length-40} more`);
+  }
   expect(`whole network reachable from the spawn (${reach}/${total} cells)`,reach,total);
   expect(`network area sane (${total} cells > 8000)`,total>8000,true);
   // key destinations reachable (grid cells): peristyle, bean, crown pool,

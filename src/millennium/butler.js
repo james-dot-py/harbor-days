@@ -343,8 +343,12 @@ export function buildButler() {
     for (const lz of [895.5, 906.5]) { box(1.2, 5.5, 1.2, 240, 2.75, lz, C.plum); collide(240, lz, 0.6); }
     box(1.0, 0.95, 11.9, 240, 5.4, 901, C.plum);
     bannerPair(240, 4.75, 901, 10.4, 1.15, 'x');
-    // (195, 925) over closed Columbus — legs E/W, banner faces N/S
-    for (const lx of [190.8, 199.2]) { box(1.2, 5.5, 1.2, lx, 2.75, 925, C.plum); collide(lx, 925, 0.6); }
+    // (195, 925) over closed Columbus — legs E/W, banner faces N/S. Leg centres
+    // pulled INBOARD to 191.4/198.6 so each collider ring (r0.6 + player 0.34 =
+    // 0.94) sits fully inside the walkable Columbus strip x190-200 — the old
+    // 190.8/199.2 poked 0.14 into the flanking non-walk seams and wedged the
+    // player against the arch (issue 025). Top beam + banner still overhang them.
+    for (const lx of [191.4, 198.6]) { box(1.2, 5.5, 1.2, lx, 2.75, 925, C.plum); collide(lx, 925, 0.6); }
     box(9.0, 0.95, 1.0, 195, 5.4, 925, C.plum);
     bannerPair(195, 4.75, 925, 7.6, 1.15, 'z');
     // (52, 901) the 060 spine scaffold — hang a banner on its beam (y≈5.2)

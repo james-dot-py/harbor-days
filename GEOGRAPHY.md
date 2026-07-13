@@ -722,7 +722,11 @@ Field x 198.6–326, z 900.7–1032.6 (osm 139013800).
 - LSD scenery road x 332–346 with a **lake-glint + sail-silhouette backdrop
   band beyond (x 348–362)** — downtown finally shows its lake (Monroe Harbor).
 - Walks: field lawn (Petrillo + booth carved), closed Monroe + Columbus, LSD
-  rim walk x 324–331, three fence-gate knits from Maggie's south rim.
+  rim walk x 324–331, three fence-gate knits from Maggie's south rim. The
+  festival grounds walk **edge to edge** — the closed Columbus strip (x 190–202)
+  meets the lawn (x0 202) with no curb seam, so you cross from street to grass
+  anywhere; the entry-arch leg colliders sit inboard on walkable ground (the old
+  seam + poking legs hard-stuck the player at the Columbus arch — issue 025).
 
 ### Backdrop growth
 - **Giants band extends EAST over Maggie's north rim** (flag maggie), z 680–692,

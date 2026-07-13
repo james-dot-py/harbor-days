@@ -613,7 +613,9 @@ const AI_WALK = [
 ];
 const BUTLER_WALK = [
   { x0: 200, x1: 336, z0: 894, z1: 908, y: 0 },   // closed Monroe east (festival street)
-  { x0: 190, x1: 200, z0: 894, z1: 1040, y: 0 },  // closed Columbus (festival street; z1 = clamp zMax)
+  { x0: 190, x1: 202, z0: 894, z1: 1040, y: 0 },  // closed Columbus (festival street; x1 202 MEETS the lawn — the
+  //   old x1 200 left a 2 m non-walk seam vs the lawn's x0 202 that pinned the player
+  //   against the entry-arch leg colliders — issue 025, the field walks edge to edge)
   { x0: 202, x1: 324, z0: 902, z1: 968, y: 0 },   // Butler lawn N (booth carved below)
   { x0: 202, x1: 258, z0: 968, z1: 976, y: 0 },
   { x0: 266, x1: 324, z0: 968, z1: 976, y: 0 },
