@@ -177,6 +177,26 @@ add('redline-belmont', 'lakefront', 'lakefront', 26, 106, [
   { yaw: -1.42, pitch: 0.06, dist: 9 },    // angled toward the MONROE board (south)
 ]);
 
+// MONTROSE north growth (v0.6, task 069): the first mt-* stands proving the map
+// grew. All lakefront lawn (walkable via LAND) — north-looking reveals + the
+// underpass gate. Interim SHELL: barren lawn + the dual trail + the stub
+// revetment; 070-073 fill in the harbor/hedge/beach/hill.
+add('mt-arrival', 'lakefront', 'lakefront', 175, -812, [
+  { yaw: 3.14, pitch: 0.15, dist: 13 },    // due NORTH over the old z-812 fence line: the new lawn opens
+  { yaw: 2.84, pitch: 0.12, dist: 13 },    // angled NE toward the continuing trail + open lake
+  { yaw: 3.14, pitch: 0.28, dist: 16 },    // higher/wider reveal of the north growth
+]);
+add('mt-trail', 'lakefront', 'lakefront', 205, -1000, [
+  { yaw: 3.14, pitch: 0.12, dist: 11 },    // NORTH down the new dual Lakefront Trail stretch
+  { yaw: 0.5,  pitch: 0.06, dist: 10 },    // ENE across the trail to the lake + stub revetment
+  { yaw: 3.0,  pitch: 0.16, dist: 13 },    // north, wider (both ribbons + lawn)
+]);
+add('mt-gate', 'lakefront', 'lakefront', 34, -1207, [
+  { yaw: -1.57, pitch: 0.12, dist: 11 },   // due WEST at the Montrose Ave underpass portal
+  { yaw: -1.4,  pitch: 0.1,  dist: 10 },   // angled: portal + flanking hedge + Lakeview backdrop
+  { yaw: -1.74, pitch: 0.14, dist: 12 },   // angled the other way
+]);
+
 // Diversey ENTERABLE bay (task 028): stand on the ground hitting deck at a
 // middle bay's hitting spot and look NORTH down the range — the axis-aligned
 // interior framing for the bay pocket (a cross-body camera sits in a divider);

@@ -19,7 +19,22 @@ export const P_START=COAST_PEN[0];                                           // 
 export const COAST_TIP=CH.peninsulaTipLine(P_START);
 
 export const BASIN_W=[];for(let z=CH.BASIN_W_PARAMS.z0;z>=CH.BASIN_W_PARAMS.z1;z-=CH.BASIN_W_PARAMS.step)BASIN_W.push([CH.BASIN_W_PARAMS.fx(z),z]);
-export const LAND=CH.buildLAND({COAST_CORNER,COAST_MAIN,COAST_PEN,COAST_GOLF,COAST_MOUTH,BASIN_W});
+
+// MONTROSE north growth (v0.6, task 069): the stub-shore revetment pieces. Each
+// is kept OUT of the shared COAST_SEGS (props.js beach-life iterates that with the
+// world rng — appending there moves every towel); coast.js appends them to
+// QUERY_SEGS (walkability) + folds their terraces/piles/faces into the EXISTING
+// buckets with a LOCAL xorshift (zero new InstancedMesh buckets, zero shared-rng
+// draws — the COAST_TIP precedent). Separate arrays so 070-072 swap one piece.
+export const COAST_MTR_LAWN  =genCoast(CH.COAST_MTR_LAWN_PARAMS.z0,  CH.COAST_MTR_LAWN_PARAMS.z1,  CH.COAST_MTR_LAWN_PARAMS.fx);   // shore south of the harbor
+export const COAST_MTR_HARBOR=genCoast(CH.COAST_MTR_HARBOR_PARAMS.z0,CH.COAST_MTR_HARBOR_PARAMS.z1,CH.COAST_MTR_HARBOR_PARAMS.fx); // 070 basin
+export const COAST_MTR_POINT =genCoast(CH.COAST_MTR_POINT_PARAMS.z0, CH.COAST_MTR_POINT_PARAMS.z1, CH.COAST_MTR_POINT_PARAMS.fx);  // 071 Point
+export const COAST_MTR_BEACH =genCoast(CH.COAST_MTR_BEACH_PARAMS.z0, CH.COAST_MTR_BEACH_PARAMS.z1, CH.COAST_MTR_BEACH_PARAMS.fx);  // 072 beach
+export const COAST_MTR_CLOSE =CH.COAST_MTR_CLOSE_PTS;                                                                             // NE-corner map-edge closure (polyline)
+export const COAST_MTR=[COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE];
+
+export const LAND=CH.buildLAND({COAST_CORNER,COAST_MAIN,COAST_PEN,COAST_GOLF,COAST_MOUTH,BASIN_W,
+  COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE});
 
 // --------------------- terraces (the revetment) ------------------------
 export function tierProfile(zc){
@@ -78,7 +93,12 @@ export const COAST_SEGS=[buildSegs(COAST_MAIN),buildSegs(COAST_PEN),buildSegs(CO
 // + the tip's own DETERMINISTIC terrace mesh in buildCoast) scan this extra piece, which
 // consumes no shared rng. Everything else in the world stays bit-for-bit identical.
 export const TIP_SEGS=buildSegs(COAST_TIP);
-const QUERY_SEGS=[...COAST_SEGS,TIP_SEGS];
+// MONTROSE stub pieces: segs built here (buildSegs is rng-free) and added ONLY to
+// QUERY_SEGS — walkability (coastQuery/tierAt) + water color (SHORE_SEGS below) —
+// never to COAST_SEGS. Their terraces/piles/faces render inside buildCoast via a
+// local xorshift folded into the existing buckets.
+export const MTR_SEGS=COAST_MTR.map(buildSegs);
+const QUERY_SEGS=[...COAST_SEGS,TIP_SEGS,...MTR_SEGS];
 export function coastQuery(x,z){
   let best=null,bd2=1e9;
   for(const C of QUERY_SEGS)for(const s of C){
@@ -211,7 +231,11 @@ export function buildCoast(){
   weld(VTS[0],VTS[0].length-1,VTS[3],0);   // rocks north tip -> mouth shore
   weld(VTS[4],VTS[4].length-1,VTS[0],0);   // corner SE join -> rocks south end
   weld(VT_TIP,VT_TIP.length-1,VTS[1],0);   // tip SE arc -> peninsula lake edge
-  const openRuns=[...COAST_SEGS.map((s,i)=>[s,VTS[i]]),[TIP_SEGS,VT_TIP]];
+  // MONTROSE stub pieces: their own welded-per-piece tangents, added to openRuns
+  // so the wet-stain band / sheet-piles / wall-faces (all rng-free, iterating
+  // openRuns) include them — those InstancedMeshes just grow (zero new buckets).
+  const VT_MTR=MTR_SEGS.map(vertexTangents);
+  const openRuns=[...COAST_SEGS.map((s,i)=>[s,VTS[i]]),[TIP_SEGS,VT_TIP],...MTR_SEGS.map((s,i)=>[s,VT_MTR[i]])];
 
   // terrace blocks — instanced, jittered for the uneven limestone look.
   // Warm-GRAY concrete family (the real Belmont revetment is a warm gray, not the
@@ -256,6 +280,38 @@ export function buildCoast(){
             };
             if(!inPierChannel(bx,bz))boxes.push(box);            // carve the pier slip (rng already consumed)
             acc+=p.w[i];
+          }
+        }
+      }
+    }
+    // MONTROSE stub terraces — FOLDED into THIS bucket (zero new draw calls).
+    // A LOCAL xorshift (NOT the shared rng) jitters them, so appending after the
+    // shared-rng loop above never shifts the world's rng order — every towel/tree
+    // downstream stays bit-for-bit. TIER_DEFAULT (4 steps; z outside the Rocks
+    // band). 070-072 replace a piece by editing its COAST_MTR_* array only.
+    {
+      let hm=0x53c1a7f9>>>0;
+      const mr=()=>{hm^=hm<<13;hm>>>=0;hm^=hm>>>17;hm^=hm<<5;hm>>>=0;return hm/4294967296;};
+      const mj=a=>(mr()*2-1)*a;
+      for(let ci=0;ci<MTR_SEGS.length;ci++){
+        const segs=MTR_SEGS[ci],VT=VT_MTR[ci];
+        for(let j=0;j<segs.length;j++){
+          const s=segs[j],a=VT[j],b=VT[j+1];
+          const turn=Math.acos(clamp(a[0]*b[0]+a[1]*b[1],-1,1)),xtra=Math.min(1.3,turn*3.0);
+          for(let t=0;t<s.len;t+=2.2){
+            const u=t/s.len;let tgx=a[0]+(b[0]-a[0])*u,tgz=a[1]+(b[1]-a[1])*u;const tl=Math.hypot(tgx,tgz)||1;tgx/=tl;tgz/=tl;
+            const nsx=-tgz,nsz=tgx,srot=Math.atan2(tgx,tgz);
+            const cx=s.ax+s.tx*t,cz=s.az+s.tz*t;
+            const p=tierProfile(cz);let acc=0;
+            for(let i=0;i<p.w.length;i++){
+              const w=p.w[i]+mj(0.25);
+              const off=acc+p.w[i]/2+mj(0.12);
+              boxes.push({x:cx+nsx*off, z:cz+nsz*off,
+                y:-i*p.step-0.4+mj(0.03), l:2.4+xtra*(1+off*0.14)+mj(0.45), w,
+                rot:srot+mj(0.035),
+                c:cols[i<2?(mr()*3|0):(2+(mr()*3|0))]});
+              acc+=p.w[i];
+            }
           }
         }
       }
@@ -465,6 +521,24 @@ export function buildCoast(){
   water=new THREE.Mesh(wgeo,livingWaterMat(0x2fa3b5));
   water.userData.live=true;              // animated (uTime) + local-position swell — exempt from the cell merge
   water.position.set(CH.WATER.cx,WATER_Y,CH.WATER.cz);scene.add(water);   // centered on the tall map so the lake never runs out
+
+  // MONTROSE north stub water: a SECOND living-water plane for the new north
+  // stretch (the main plane's north edge is only z-1085). Own material (uTime
+  // stays 0 — a calm frozen swell; imperceptible far north with no content yet),
+  // same shore-banded look via aShore. Sits WATER_N.yOff (0.02 m) LOWER so the
+  // existing plane wins in the z-overlap (no seam / z-fight) and the EXISTING lake
+  // surface — including the spawn view — stays BIT-IDENTICAL (the determinism
+  // gate). A lone Mesh (frustum-culled) -> 0 draws unless the far north is framed.
+  {
+    const N=CH.WATER_N;
+    const ng=new THREE.PlaneGeometry(N.size,N.size,N.seg,N.seg);ng.rotateX(-Math.PI/2);
+    const pos=ng.attributes.position,nn=pos.count,aSh=new Float32Array(nn);
+    for(let i=0;i<nn;i++)aSh[i]=shoreDist(pos.getX(i)+N.cx,pos.getZ(i)+N.cz);
+    ng.setAttribute('aShore',new THREE.BufferAttribute(aSh,1));
+    const wn=new THREE.Mesh(ng,livingWaterMat(0x2fa3b5));
+    wn.userData.live=true;               // exempt from the cell static merge (curved/shader mesh)
+    wn.position.set(N.cx,WATER_Y+N.yOff,N.cz);scene.add(wn);
+  }
 
   // dog beach — sloped sand down to the basin water
   {

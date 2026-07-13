@@ -17,14 +17,24 @@ const COAST_GOLF=genCoast(CH.COAST_GOLF_PARAMS.z0,CH.COAST_GOLF_PARAMS.z1,CH.COA
 const COAST_MOUTH=genCoast(CH.COAST_MOUTH_PARAMS.z0,CH.COAST_MOUTH_PARAMS.z1,CH.COAST_MOUTH_PARAMS.fx);
 const COAST_CORNER=genCoast(CH.COAST_CORNER_PARAMS.z0,CH.COAST_CORNER_PARAMS.z1,CH.COAST_CORNER_PARAMS.fx);
 const BASIN_W=[];for(let z=CH.BASIN_W_PARAMS.z0;z>=CH.BASIN_W_PARAMS.z1;z-=CH.BASIN_W_PARAMS.step)BASIN_W.push([CH.BASIN_W_PARAMS.fx(z),z]);
-const LAND=CH.buildLAND({COAST_CORNER,COAST_MAIN,COAST_PEN,COAST_GOLF,COAST_MOUTH,BASIN_W});
+// MONTROSE north stub pieces (task 069) — mirror coast.js exactly (genCoast per piece,
+// polyline for the NE-corner closure) so LAND + QUERY_SEGS stay lockstep with the engine.
+const COAST_MTR_LAWN  =genCoast(CH.COAST_MTR_LAWN_PARAMS.z0,  CH.COAST_MTR_LAWN_PARAMS.z1,  CH.COAST_MTR_LAWN_PARAMS.fx);
+const COAST_MTR_HARBOR=genCoast(CH.COAST_MTR_HARBOR_PARAMS.z0,CH.COAST_MTR_HARBOR_PARAMS.z1,CH.COAST_MTR_HARBOR_PARAMS.fx);
+const COAST_MTR_POINT =genCoast(CH.COAST_MTR_POINT_PARAMS.z0, CH.COAST_MTR_POINT_PARAMS.z1, CH.COAST_MTR_POINT_PARAMS.fx);
+const COAST_MTR_BEACH =genCoast(CH.COAST_MTR_BEACH_PARAMS.z0, CH.COAST_MTR_BEACH_PARAMS.z1, CH.COAST_MTR_BEACH_PARAMS.fx);
+const COAST_MTR_CLOSE =CH.COAST_MTR_CLOSE_PTS;
+const COAST_MTR=[COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE];
+const LAND=CH.buildLAND({COAST_CORNER,COAST_MAIN,COAST_PEN,COAST_GOLF,COAST_MOUTH,BASIN_W,
+  COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE});
 const P_START=COAST_PEN[0];
 const COAST_TIP=CH.peninsulaTipLine(P_START);   // peninsula south-tip terraced arc (matches coast.js)
 
 function buildSegs(pts){const segs=[];for(let i=0;i<pts.length-1;i++){const ax=pts[i][0],az=pts[i][1],bx=pts[i+1][0],bz=pts[i+1][1];const dx=bx-ax,dz=bz-az,len=Math.hypot(dx,dz);const tx=dx/len,tz=dz/len;segs.push({ax,az,tx,tz,nx:-tz,nz:tx,len})}return segs}
 const COAST_SEGS=[buildSegs(COAST_MAIN),buildSegs(COAST_PEN),buildSegs(COAST_GOLF),buildSegs(COAST_MOUTH),buildSegs(COAST_CORNER)];
 const TIP_SEGS=buildSegs(COAST_TIP);
-const QUERY_SEGS=[...COAST_SEGS,TIP_SEGS];      // coastQuery scans the tip too (COAST_SEGS stays 5 for props/beach-life)
+const MTR_SEGS=COAST_MTR.map(buildSegs);        // Montrose stub revetment tops (task 069) — mirror coast.js
+const QUERY_SEGS=[...COAST_SEGS,TIP_SEGS,...MTR_SEGS];  // coastQuery scans the tip + Montrose too (COAST_SEGS stays 5 for props/beach-life)
 function tierProfile(zc){const R=CH.TIER_ROCKS;if(zc>R.zMin&&zc<R.zMax){if(zc>R.cornerZ0){const f=clamp((zc-R.cornerZ0)/(R.cornerZ1-R.cornerZ0),0,1);const w=R.w.slice();w[w.length-1]=R.w[w.length-1]+(R.cornerPromW-R.w[w.length-1])*f;return{w,step:R.step}}return{w:R.w,step:R.step}}return{w:CH.TIER_DEFAULT.w,step:CH.TIER_DEFAULT.step}}
 function profileTotal(zc){const p=tierProfile(zc);let s=0;for(const w of p.w)s+=w;return s}
 function inPierChannel(x,z){const P=CH.PIER_CHANNEL;if(!P)return false;if(x<P.x0||x>P.x1||z>P.zMax)return false;const topZ=P.topZ0+(P.topZ1-P.topZ0)*(x-P.x0)/(P.x1-P.x0);return z>=topZ}
@@ -1059,6 +1069,28 @@ console.log('\n--- Wrigley bowl: field / track / wall / gates / concourse / wedg
   expect('bowl clamp outside WORLD_CLAMP',C.zMax<CH.WORLD_CLAMP.zMin||C.xMax<CH.WORLD_CLAMP.xMin,true);
   expect('dev-spawn box unambiguous vs wrigleyville (zMax < its zMin)',C.zMax< WV.CLAMP_W.zMin,true);
 }
+
+// ===== Task 069: MONTROSE north growth — new lawn/trail/revetment walkable, edges sealed =====
+console.log('\n--- Task 069: Montrose new lawn is walkable (north extension via LAND pip) ---');
+for(const [x,z] of [[100,-1000],[60,-1300],[180,-900],[150,-1450]]) expect(`Montrose lawn (${x},${z})`,walkable(x,z),true);
+
+console.log('\n--- Task 069: the Montrose trail runs on the new lawn ---');
+for(const [x,z] of [CH.TRAIL_MONTROSE[1],CH.TRAIL_MONTROSE[3],CH.TRAIL_MONTROSE[6],CH.TRAIL_MONTROSE[9],CH.TRAIL_MONTROSE[11]])
+  expect(`Montrose trail (${x},${z})`,walkable(x,z),true);
+
+console.log('\n--- Task 069: Montrose revetment top walkable, open water beyond NOT ---');
+for(const z of [-900,-1100,-1250,-1400]){
+  const tx=CH.montroseFx(z);
+  expect(`revetment top inboard (${(tx-0.6).toFixed(1)},${z})`,walkable(tx-0.6,z),true);
+  expect(`open water beyond top (${(tx+14).toFixed(1)},${z}) NOT walkable`,walkable(tx+14,z),false);
+}
+
+console.log('\n--- Task 069: Montrose underpass berm (x<14, outside LAND) NOT walkable ---');
+for(const [x,z] of [[7,-1207],[10,-1207]]) expect(`berm behind the fence (${x},${z}) NOT walkable`,walkable(x,z),false);
+
+console.log('\n--- Task 069: north map edge is sealed ---');
+expect('inside the north lawn (150,-1000) walkable',walkable(150,-1000),true);
+expect('past the north map edge (150,-1600) NOT walkable',walkable(150,-1600),false);
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 process.exit(fail?1:0);

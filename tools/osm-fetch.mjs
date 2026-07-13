@@ -316,6 +316,17 @@ async function fetchTarget(bbox) {
   node["tourism"]["name"](${b});
   node["historic"]["name"](${b});
   node["leisure"]["name"](${b});
+  way["man_made"~"^(pier|breakwater|groyne|lighthouse)$"](${b});
+  way["natural"~"^(beach|sand|dune|scrub|grassland|wood|shrubbery)$"](${b});
+  way["leisure"~"^(nature_reserve|marina|slipway|beach_resort)$"](${b});
+  relation["leisure"~"^(nature_reserve|marina|beach_resort)$"](${b});
+  relation["boundary"="protected_area"](${b});
+  relation["natural"~"^(beach|sand|dune|scrub|grassland|wood)$"](${b});
+  way["barrier"="hedge"](${b});
+  way["amenity"~"^(bar|restaurant|cafe|fast_food)$"]["name"](${b});
+  node["amenity"~"^(bar|restaurant|cafe|fast_food)$"]["name"](${b});
+  node["man_made"~"^(lighthouse|beacon)$"](${b});
+  node["shop"]["name"](${b});
 );
 out geom;`;
   return (await overpass(q)).elements;
@@ -367,9 +378,12 @@ function classify(el, proj, bbox) {
             out.buildings.push({ id: e.id, name: t.name, role: m.role, tags: t, points: run });
         }
       }
-      // park / garden relations (Millennium Park and Lurie Garden are relations):
-      // outer members carry the boundary.
-      if (t.leisure === 'park' || t.leisure === 'garden') {
+      // park / garden / nature-reserve / marina / protected-area / natural-area
+      // relations (Millennium Park, Lurie Garden, Montrose Point Bird Sanctuary,
+      // Montrose Beach Dunes): outer members carry the boundary.
+      if (t.leisure === 'park' || t.leisure === 'garden' || t.leisure === 'nature_reserve' ||
+          t.leisure === 'marina' || t.leisure === 'beach_resort' ||
+          t.boundary === 'protected_area' || (t.natural && t.natural !== 'water' && !t.water)) {
         for (const m of e.members || []) {
           if (!m.geometry || m.role === 'inner') continue;
           for (const run of clipRuns(m.geometry, bbox, proj))
@@ -385,7 +399,8 @@ function classify(el, proj, bbox) {
     else if (t.natural === 'water' || t.water) out.water.push(rec);
     else if (t.waterway) out.waterways.push(rec);
     else if (t.highway) out.highways.push({ ...rec, highway: t.highway });
-    else if (t.leisure === 'park' || t.leisure === 'garden') out.parks.push(rec);
+    else if (t.leisure === 'park' || t.leisure === 'garden' || t.leisure === 'nature_reserve' ||
+             t.leisure === 'marina' || t.leisure === 'beach_resort') out.parks.push(rec);
     else if (t.building || t.leisure === 'stadium') out.buildings.push(rec);
     else if (t.tourism || t.historic || t.amenity === 'fountain') out.landmarks.push(rec);
     else out.other.push(rec);

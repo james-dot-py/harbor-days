@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-13T02:39:22.878Z",
- "count": 114,
+ "generated": "2026-07-13T06:08:11.721Z",
+ "count": 117,
  "waypoints": [
   {
    "id": "spawn",
@@ -347,6 +347,81 @@
     }
    ],
    "expectation": "The Belmont Red Line stop cluster and its DESTINATION PICKER (task 051): a red-header 'RED LINE · BELMONT · lakefront stop' identity pylon (white transit disc) flanked by two lollipop DEPARTURE BOARDS, each its own boarding point you walk up to — '→ ADDISON / Wrigley Field / Howard-bound' and '→ MONROE / Millennium Park / 95th / Dan Ryan-bound'. Text crisp and UPRIGHT (never mirrored), posts end below the panels (no bisected text), and the read stays uncluttered beside the existing blue Belmont Harbor park sign."
+  },
+  {
+   "id": "mt-arrival",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 175,
+   "z": -812,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.15,
+     "dist": 13
+    },
+    {
+     "yaw": 2.84,
+     "pitch": 0.12,
+     "dist": 13
+    },
+    {
+     "yaw": 3.14,
+     "pitch": 0.28,
+     "dist": 16
+    }
+   ],
+   "expectation": "THE MAP GREW NORTH (task 069 shell): standing at the old z-812 fence line looking north, the new Montrose lawn opens ahead — a continuous, walkable, honest SHELL (barren by design; 070-073 add the harbor/Magic Hedge/beach/Cricket Hill). The dual Lakefront Trail continues up the lake (east/right) side, open blue lake to the east, the LSD berm + Lakeview brick backdrop to the west. NO hole, NO seam or wall at the old fence line — the ground reads unbroken from the golf into Montrose. Emptiness is expected; a HOLE, a floating edge, or a hard wall across the lawn is NOT."
+  },
+  {
+   "id": "mt-trail",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 205,
+   "z": -1000,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.12,
+     "dist": 11
+    },
+    {
+     "yaw": 0.5,
+     "pitch": 0.06,
+     "dist": 10
+    },
+    {
+     "yaw": 3,
+     "pitch": 0.16,
+     "dist": 13
+    }
+   ],
+   "expectation": "The dual Lakefront Trail CONTINUES north on the new Montrose stretch: the asphalt bike ribbon with yellow center dashes plus the crushed-limestone walking ribbon beside it, both running to the horizon; lawn on both sides, open lake to the east. It must read continuous with TRAIL_MAIN (no gap/jog at the golf-end join) and both ribbons present — not a single path, not a dead end."
+  },
+  {
+   "id": "mt-gate",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 34,
+   "z": -1207,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.12,
+     "dist": 11
+    },
+    {
+     "yaw": -1.4,
+     "pitch": 0.1,
+     "dist": 10
+    },
+    {
+     "yaw": -1.74,
+     "pitch": 0.14,
+     "dist": 12
+    }
+   ],
+   "expectation": "The Montrose Avenue underpass (z-1207, x0-14): a fenced dead-end portal through the LSD berm matching the Belmont/Addison/Irving register — a voussoir stone arch over a dark recessed door, limestone posts/lintel, warm lanterns, flanked by the perimeter hedge with the gap aligned to the mouth, and the low-rise Lakeview brick backdrop rising behind the berm. NO gag sign. Reads as a real neighborhood gate, sealed for now."
   },
   {
    "id": "dv-bay-deck",

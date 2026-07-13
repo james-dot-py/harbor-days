@@ -18,6 +18,8 @@ extend this document first.
 
 | Street line | Real | In-game z |
 |---|---|---|
+| Wilson Ave (4600 N) | +1.75 mi | **−1409** (Montrose beach/dunes latitude) |
+| Montrose Ave (4400 N) | +1.5 mi | **−1207** (Montrose underpass gate; osm West Montrose Ave z −1208) |
 | Irving Park Rd (4000 N) | +1 mi | **−800** |
 | Waveland Ave (3700 N) | +0.625 mi | **−500** |
 | Addison St (3600 N) | +0.5 mi | **−400** |
@@ -27,8 +29,10 @@ extend this document first.
 | Diversey/Fullerton point (~2800 N) | −0.2 mi | **+340…+403** (the corner wrap) |
 | South map edge (~2750 N) | | **+415** |
 
-Map bounds: **x −10…245, z −850…+415** (≈ 255 × 1,265 m). Player clamp a few m
-inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
+Map bounds: **x −10…245, z −1520…+415** (≈ 255 × 1,935 m) as of the Montrose
+growth (v0.6). Player clamp a few m inside (WORLD_CLAMP.zMin = −1520, zMax = 408).
+Minimap aspect follows (MAP.z0 = −1560, MAP.h = 1985 — the north growth reshapes
+the HUD minimap; this is the ONE baseline.png regen the growth requires).
 
 ## The strip, west → east (constant for the whole map)
 
@@ -42,9 +46,11 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
    park. Instanced boxes like the skyline treatment, but nearer/lower
    (`LAKEVIEW_BAND` in chicago.js, built in sky.js).
    **Underpasses** (future neighborhood gates + Divvy/foot entrances) at
-   Belmont z +105, Addison z −400, Irving Park z −800: short tunnels through the
-   berm, fenced dead-end doors for now (the "FUTURE ENTRANCE →" gag signs were
-   removed in task 030 per owner feedback — the portals stay, the signs are gone).
+   Belmont z +105, Addison z −400, Irving Park z −800, **Montrose z −1207**: short
+   tunnels through the berm, fenced dead-end doors for now (the "FUTURE ENTRANCE →"
+   gag signs were removed in task 030 per owner feedback — the portals stay, the
+   signs are gone). The berm, road, L-track backdrop and Lakeview band all run the
+   full new map length (z −1520…+418).
    The Belmont stop moved from z 0 to z +105 to sit on the AIDS-garden/Keith-Haring
    axis; a short paved connector links its mouth (~x 14, z 105) east to the loop.
 2. **x 14–~85 — inner parkland**: lawns, meadows, tree groves, the inner branch of
@@ -52,6 +58,71 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
 3. **East of that, by section (see below): harbor, golf, garden — then open lake.**
 
 ## Sections, north → south
+
+### Montrose, z −800…−1520 (the v0.6 north growth — 068 layout, applied by 069+)
+
+The map's first contiguous growth since v0.5. Everything here sits NORTH of the
+Marovitz golf (which ends at z −800 / Irving Park). Coordinates cite
+`refs/montrose/osm.json` (fetched at 1:2, z anchored to Belmont; see the z table
+above — West Montrose Ave osm z −1208 lands on the game's Montrose line −1207).
+**069 ships this as a walkable SHELL** — the whole stretch is lawn/meadow + a
+plain stepped-revetment shore + the trail + backdrop; the named features below
+are STUBBED as interim revetment and carved in by 070–073.
+
+**Relative arrangement (the law — §the aerial, do not reorder).** North from the
+golf: open Montrose lawn → **Montrose Harbor basin** (a big south-opening basin cut
+into the land, z −1090…−1300, west of the shore; west-shore docks/launch + **Park
+Bait** shop) with **Cricket Hill** inland-WEST of it (the map's first walkable
+hill, an analytic mound, ≈ z −1315) → **Montrose Point** jutting NE with **the
+Magic Hedge** (the Montrose Point Bird Sanctuary hedgerow + meadow + sanctuary
+paths, osm z −1200…−1345) ON it and the curling **HOOK pier** off its tip →
+**Montrose Beach** running north (z −1300…−1500) with the **DUNES** natural area
+pinched between the beach and the Point at the beach's SE, a **beach house** + **The
+Dock** bar. Mouth at the harbor's SOUTH; hill WEST of the harbor; Point NE; hook
+off the Point; beach north-running; dunes between beach and Point. **070** builds
+the harbor + hook + Park Bait, **071** the Magic Hedge hero, **072** the beach +
+dunes + beach house + The Dock, **073** Cricket Hill.
+
+**The stub shore (069, `COAST_MTR_*` — the COAST_TIP determinism precedent).** The
+Montrose shore is FIVE separate revetment pieces, each kept OUT of the shared
+`COAST_SEGS` (props.js beach-life iterates that with the world rng — appending
+there moves every towel) and added only to `QUERY_SEGS` (walkability) + rendered
+by folding into the EXISTING terrace/pile/face/wet-band buckets with a LOCAL
+xorshift (zero new InstancedMesh buckets, zero shared-rng draws). Each is its own
+const so 070–072 replace one without touching the others:
+`COAST_MTR_LAWN` (z −800…−1088, ships as the honest south-of-harbor shore),
+`COAST_MTR_HARBOR` (−1088…−1300 → 070 carves the basin here),
+`COAST_MTR_POINT` (−1300…−1362 → 071 pushes the Point east),
+`COAST_MTR_BEACH` (−1362…−1500 → 072 lays the sand), and `COAST_MTR_CLOSE`
+(the NE-corner map-edge closure). All use `TIER_DEFAULT` (4-step) — z outside the
+Rocks band. The stubs read as plain stepped revetment from the trail (honest
+interim shoreline, not holes).
+
+**The strip continues.** LSD berm + road + the L-track backdrop + the Lakeview
+band all extend north to the new edge (data: `LSD.berm.z0`, `LAKEVIEW_BAND.zr`;
+ambient.js `Z_N`). The dual **Lakefront Trail** continues from its golf-lakeside
+north end as a NEW ribbon (`TRAIL_MONTROSE`, registered via `pathSamples2` — never
+reshape `TRAIL_MAIN`) running the lawn up toward the Point. The **Montrose Ave
+underpass gate** (x 0–14, z −1207) matches the Belmont/Addison/Irving register
+(fenced dead-end door, no gag sign). North map edge z −1516 with the north-cap
+hedge; `WATER` plane grown so the far-north lake never runs out.
+
+**x-frame / EAST-REACH compression (STANDING LIBERTY).** osm z is the game z
+(1:2, Belmont origin — clean). osm x is NOT: LSD drifts west going north (osm
+DuSable-LSD x −393 at Montrose vs −347 at Irving), and the real east reach (the
+Point + breakwater push past osm x 200) will not fit 1:2 inside `xMax` 244. So the
+game holds LSD at x 0–14 and COMPRESSES the east reach to fit; the stub shore
+holds x ≈ 231–237 (a smooth continuation of the golf revetment). 070–073 finalize
+each feature's game x by topological order (§5.4 arrangement above), NOT by raw
+osm x. The Point's true east extent is a recorded compression — order survives,
+distance is squeezed.
+
+**PLOVER TENSION (068 ruling, recorded liberty).** The real Monty & Rose /
+Imani-generation piping-plover story lives at the **Montrose dunes** (072: a roped
+nest area at the beach SE). The already-shipped dog-beach "Monty & Rose" pen at
+the Belmont basin stays as a recorded liberty (it reads as a local homage; the
+canonical plovers are the dunes ones). Do not relocate the dunes plovers to the
+dog beach or vice-versa.
 
 ### Golf: Sydney R. Marovitz, z −800…−440 (real: 71 ac, 9 holes, 3,265 yd)
 - Fenced course **x 60–205, z −790…−440** (≈ 145 × 350 m): east edge pulled in
@@ -262,7 +333,10 @@ inside (WORLD_CLAMP.zMax = 408). Minimap aspect follows (MAP.h = 1275).
 - Everything whimsical (boat puns, ope-NPCs, Malört) — style, not geography.
 
 ## Future growth (do not build yet, leave room)
-- North: Montrose Harbor + bird hill beyond z −850.
+- North: Montrose (harbor, Magic Hedge, beach + dunes, Cricket Hill) is BUILDING
+  as of v0.6 — see the Montrose section above (069 shell, 070–073 features). Beyond
+  the north edge (z −1520 / ~Wilson Ave), the real Lakefront Trail continues to
+  Foster/Ardmore — the next north growth.
 - South: the Diversey range + mini golf are BUILT inland at z +242…+306; the
   south lawn, corner-wrap revetment, Chevron and pier are BUILT to z +415. Further
   Diversey/Lincoln Park growth beyond the SW terminus (the trail ends at a future

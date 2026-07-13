@@ -55,6 +55,28 @@ export const COAST_MOUTH_PARAMS= { z0:16,  z1:-20, fx:z=>127.5+1.76*z-0.018*z*z+
 // west seawall of the harbor basin (own loop: z0 down to z1 by step) — gentle
 export const BASIN_W_PARAMS    = { z0:-20, z1:-328, step:3, fx:z=>85+Math.sin(z*0.040)*0.8+Math.sin(z*0.088+0.7)*0.5 };
 
+// ---- MONTROSE north growth (v0.6, task 069): the STUB SHORE ----------------
+// Five plain-revetment pieces continuing the golf revetment north to the map
+// edge. Each is kept OUT of the shared COAST_SEGS (props.js beach-life iterates
+// that with the WORLD rng — appending there moves every towel): coast.js +
+// walkprobe append them to QUERY_SEGS (walkability) and coast.js folds their
+// terraces/piles/faces into the EXISTING buckets with a LOCAL xorshift (zero new
+// InstancedMesh buckets, zero shared-rng draws — the COAST_TIP precedent). They
+// are SEPARATE consts so 070-072 swap one piece (harbor basin / Point / beach
+// sand) without touching the others' arrays. One shared gentle meander (x ~231-
+// 237, well under xMax 244) keeps the whole shore continuous; TIER_DEFAULT
+// (4 steps) applies since every z here is outside the Rocks band (zMin 20).
+export const montroseFx = z => 234 + Math.sin(z*0.016)*2.2 + Math.sin(z*0.041+0.7)*1.3;
+export const COAST_MTR_LAWN_PARAMS   = { z0:-800,  z1:-1088, fx:montroseFx };  // honest shore south of the harbor mouth (ships as-is)
+export const COAST_MTR_HARBOR_PARAMS = { z0:-1091, z1:-1300, fx:montroseFx };  // 070 carves the Montrose Harbor basin here
+export const COAST_MTR_POINT_PARAMS  = { z0:-1303, z1:-1362, fx:montroseFx };  // 071 pushes Montrose Point + the Magic Hedge east
+export const COAST_MTR_BEACH_PARAMS  = { z0:-1365, z1:-1500, fx:montroseFx };  // 072 lays Montrose Beach sand + the dunes here
+// NE-corner map-edge closure: the revetment wraps from the beach's north end
+// (matches COAST_MTR_BEACH's last point) west into the north-cap hedge line. A
+// polyline (not fx(z)); coast.js densifies it. Ordered shore->west so the terrace
+// normal points N/NE into the edge water.
+export const COAST_MTR_CLOSE_PTS = [[montroseFx(-1500),-1500],[233,-1506],[228,-1510],[217,-1513],[201,-1514.5]];
+
 /* -------------------------------- LAND ------------------------------- */
 // Catmull-Rom densifier: a smooth polyline through `ctrl` at ~`step` m
 // spacing. Used to ROUND the hand-built corners (harbor mouth, peninsula
@@ -101,7 +123,8 @@ export function peninsulaTipLine(P_START){ return crChain([[166,-24],[176,-17],[
 // x 0-14 sits OUTSIDE it). The harbor basin is a concave inlet (open south via
 // the mouth), not a hole. Corners are 6-10-point arc sweeps so the aerial reads
 // as smooth, curvy shoreline.
-export function buildLAND({ COAST_CORNER, COAST_MAIN, COAST_PEN, COAST_GOLF, COAST_MOUTH, BASIN_W }){
+export function buildLAND({ COAST_CORNER, COAST_MAIN, COAST_PEN, COAST_GOLF, COAST_MOUTH, BASIN_W,
+                            COAST_MTR_LAWN, COAST_MTR_HARBOR, COAST_MTR_POINT, COAST_MTR_BEACH, COAST_MTR_CLOSE }){
   const P_START=COAST_PEN[0], P_END=COAST_PEN[COAST_PEN.length-1];
   const P=[[14,415]];                                      // new SW corner (map extended south; the SW terminus of the corner revetment is ~[55,403], so [14,415]->[55,403] is the SW grass edge toward Diversey)
   P.push(...COAST_CORNER);                                 // curved south-facing revetment (SW terminus -> SE join with the rocks)
@@ -114,8 +137,16 @@ export function buildLAND({ COAST_CORNER, COAST_MAIN, COAST_PEN, COAST_GOLF, COA
   P.push(...COAST_PEN);                                    // peninsula lake edge (curvy)
   P.push(...crChain([P_END,[210,-356],[222,-380],COAST_GOLF[0]],2.5)); // Addison reach (smooth)
   P.push(...COAST_GOLF);                                   // golf revetment (curvy)
-  P.push([232,-812],[14,-812]);                            // north edge
-  P.push([14,-400],[14,0]);                                // west park edge (closes to [14,415])
+  // MONTROSE north growth (v0.6): the stub revetment continues the shore north
+  // from the golf's end (~232,-800) to the map edge. Each piece is separate so
+  // 070-072 replace one (harbor basin / Point / beach) without touching the rest.
+  P.push(...COAST_MTR_LAWN);                                // shore south of the harbor mouth
+  P.push(...COAST_MTR_HARBOR);                              // 070: Montrose Harbor basin
+  P.push(...COAST_MTR_POINT);                               // 071: Montrose Point + Magic Hedge
+  P.push(...COAST_MTR_BEACH);                               // 072: Montrose Beach + dunes
+  P.push(...COAST_MTR_CLOSE);                               // NE-corner closure (~201,-1514.5)
+  P.push([14,-1516]);                                       // north edge (west end; north-cap hedge)
+  P.push([14,-812],[14,-400],[14,0]);                      // west park edge (closes to [14,415])
   return P;
 }
 
@@ -166,6 +197,14 @@ export function seawallLines({ P_START, BASIN_W }){
 // lake water plane (big enough to cover the tall map + horizon; centered
 // near the map's middle so the golf's lake never runs out of water)
 export const WATER = { size:1650, seg:180, cx:110, cz:-260 };
+// MONTROSE north growth: a SECOND water plane covering the new north stretch
+// (the main WATER plane's north edge is only z -1085). Kept SEPARATE (not a
+// resized WATER) so the existing lake surface — including the spawn view — stays
+// BIT-IDENTICAL for the determinism gate. Built with the same living-water mat +
+// aShore in coast.js; overlaps the main plane in z -1000..-1085 and sits 0.02 m
+// LOWER so the existing plane wins there (no z-fight, no seam). Frustum-culled
+// (a lone Mesh) so it costs 0 draws in any view not looking at the far north.
+export const WATER_N = { size:1000, seg:84, cx:190, cz:-1500, yOff:-0.02 };
 
 // dog beach — sloped sand cove at the basin's NORTH tip. beachH (coast.js)
 // reads t = (z - ref)/span so it is 0 (dry) at the north edge and dips to
@@ -271,6 +310,17 @@ export const TRAIL_ENTRANCE=[
 // LOOP's WEST point (79,120) — a clean radial T-junction, no crossing through.
 // Styled like the loop (crushed limestone).
 export const TRAIL_CONNECTOR=[[16,105],[34,108],[54,112],[70,116],[79,120]];
+// MONTROSE north growth (v0.6, task 069): the dual Lakefront Trail CONTINUES from
+// TRAIL_MAIN's golf-lakeside north end (~211,-782) up the new Montrose lawn toward
+// the Point. A NEW ribbon (never reshape TRAIL_MAIN — pathSamples is phase-
+// sensitive); paths.js draws it LAST and registers its samples in pathSamples2
+// only. Starts ~z-770 (overlapping TRAIL_MAIN's end so the ribbons join with no
+// gap) and runs to z-1460, holding x~200-211 (clear of the revetment x~234 and the
+// west hedge x14). 070-073 re-route locally as the harbor/Point/beach carve in.
+export const TRAIL_MONTROSE=[
+  [211,-770],[211,-812],[209,-872],[206,-942],[203,-1012],[202,-1082],
+  [201,-1152],[201,-1216],[202,-1286],[205,-1352],[208,-1412],[210,-1460],
+];
 // Dual-path styling. walkOff (paths.js) = bike/2 + gap + walk/2 = 4.0 m, so
 // the two ribbons run parallel with a ~1.2 m grass strip between them.
 export const TRAIL_STYLE = {
@@ -307,7 +357,7 @@ export const ZONES=[
 // Rocks steps and the lake. Monument wall front-right of the view, suggestion
 // box ahead-right, Divvy dock behind-left across the trail. Camera due west.
 export const SPAWN = { player:{ x:109.5, z:156.6 }, yaw:1.57, camera:{ x:87.5, y:4.5, z:156.6 } };
-export const WORLD_CLAMP = { xMin:14, xMax:244, zMin:-822, zMax:408 };   // zMax 408: reaches the new south lawn + pier tip (z406) but well short of the skyline billboard (z504+)
+export const WORLD_CLAMP = { xMin:14, xMax:244, zMin:-1520, zMax:408 };   // zMin -1520 (was -822): the MONTROSE north growth (v0.6). zMax 408: the south lawn + pier tip (z406), short of the skyline billboard (z504+)
 
 /* ------------------------------- PROPS ------------------------------- */
 
@@ -339,8 +389,8 @@ export const HEDGES = {
   // west-fence gaps line up with the three underpasses (Belmont MOVED to z105,
   // so its gap moved to [95,115] — this also clears the paved CONNECTOR that
   // leaves the underpass mouth at (16,105); Addison z-400, Irving Park z-800).
-  west:{ x:14, z0:-812, z1:412, step:5.5, gaps:[[95,115],[-410,-390],[-810,-790]] },   // west perimeter now runs to the new SW corner
-  north:{ z:-812, x0:14, x1:232, step:5.5 },
+  west:{ x:14, z0:-1516, z1:412, step:5.5, gaps:[[95,115],[-410,-390],[-810,-790],[-1217,-1197]] },   // z0 -1516: MONTROSE growth; 4th gap = the Montrose underpass (z-1207)
+  north:{ z:-1515, x0:14, x1:200, step:5.5 },   // north cap MOVED to the new map edge (was z-812); caps the lawn x14-200, the closure revetment is the shore east of it
   cap:{ z:406, x0:14, x1:23, step:5.5 },   // SW corner cap only (x14-23): the aerial-canonical trail now exits the map at (30,406) — the cap stops short of the gate so the ribbon passes clear
   scale:[3,2.2,2.8], y:1.1, color:0x4c9a55,
 };
@@ -498,7 +548,8 @@ export const BENCHES = [
 // never touched.
 export const LAKEVIEW_BAND = {
   front:-16,                 // band front line (the L track is the backdrop at x~-8)
-  zr:[-812,408],             // the full map length
+  zr:[-812,408],             // the ORIGINAL span — marched FIRST with the original seed so every existing block stays byte-identical
+  zrN:[-1516,-812],          // MONTROSE growth: the north extension, marched SECOND with its OWN seed (existing band unperturbed; same 3 InstancedMeshes -> 0 new buckets)
   spacing:[15,30],           // street-ish gaps between buildings
   depth:[8,14],              // how far the blocks extend west
   w:[10,22],                 // frontage widths
@@ -555,10 +606,10 @@ export const DOG_PROPS = {
 // Toon cars slide N/S in
 // the `lsd.js` content pack; the static berm/road/portals build here.
 export const LSD = {
-  berm:{ x0:0, x1:14, z0:-846, z1:418, h:1.0, color:0x6f9e5c },   // z1 418: berm/road extend past the new south lawn so the west edge reads continuous
+  berm:{ x0:0, x1:14, z0:-1530, z1:418, h:1.0, color:0x6f9e5c },   // z0 -1530 (was -846): MONTROSE growth — berm/road run the full new length; z1 418 past the south lawn
   road:{ x0:2.5, x1:11.5, y:1.02, color:0x8f9298 },
   lane:{ color:0xf2ede0, w:0.16, len:2.4, gap:3.2, count:7 },   // dashed center lines
-  underpasses:[105, -400, -800],                               // Belmont stop moved to z105 (on the AIDS-garden/statue axis)
+  underpasses:[105, -400, -800, -1207],                        // Belmont z105, Addison -400, Irving -800, Montrose -1207 (v0.6 growth)
   portal:{ w:7, h:4.2, recess:0x211f22, arch:0xd8cbb0 },
 };
 

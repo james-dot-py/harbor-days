@@ -173,9 +173,6 @@ export function buildSky(){
 // 3 draw calls total: bodies + cornice caps + lit windows.
 function buildLakeviewBand(){
   const B=CH.LAKEVIEW_BAND;
-  let hs=0x2f6b1c07>>>0;                                   // local deterministic jitter (no shared rng)
-  const jr=()=>{hs^=hs<<13;hs>>>=0;hs^=hs>>>17;hs^=hs<<5;hs>>>=0;return hs/4294967296;};
-  const rr=(a,b)=>a+(b-a)*jr();
   const front=B.front;
 
   const bodies=[], caps=[], wins=[];                       // collected records -> instanced meshes
@@ -183,35 +180,47 @@ function buildLakeviewBand(){
   const WIN_CAP=600, floorH=3.2;
 
   // march z: each block = a body (frontage w along z, depth d west, height h),
-  // then a street gap before the next.
-  let z=B.zr[0];
-  for(;;){
-    const w=rr(B.w[0],B.w[1]);
-    if(z+w>B.zr[1]) break;                                 // last block fully inside the range
-    const tall=jr()<B.tallProb;
-    const h=tall?rr(B.tallH[0],B.tallH[1]):rr(B.h[0],B.h[1]);
-    const d=rr(B.depth[0],B.depth[1]);
-    const col=new THREE.Color(B.colors[(jr()*B.colors.length)|0]);
-    const zc=z+w/2, xc=front-d/2;                          // east face at x=front, extends west
-    bodies.push({w,h,d,x:xc,z:zc,c:col});
-    caps.push({w,h,d,x:xc,z:zc,c:col.clone().lerp(white,0.34)});   // limestone cornice lip
+  // then a street gap before the next. Run as a helper so the ORIGINAL span
+  // (B.zr, original seed) tiles FIRST — byte-identical to before — and the
+  // MONTROSE north extension (B.zrN, its OWN seed) tiles SECOND into the SAME
+  // arrays: the existing backdrop never re-tiles, and the 3 InstancedMeshes just
+  // grow (zero new draw calls). WIN_CAP is shared, so the south band claims its
+  // windows first exactly as before; the north extension adds windows only if room.
+  const march=(z0,z1,seed)=>{
+    let hs=seed>>>0;
+    const jr=()=>{hs^=hs<<13;hs>>>=0;hs^=hs>>>17;hs^=hs<<5;hs>>>=0;return hs/4294967296;};
+    const rr=(a,b)=>a+(b-a)*jr();
+    let z=z0;
+    for(;;){
+      const w=rr(B.w[0],B.w[1]);
+      if(z+w>z1) break;                                    // last block fully inside the range
+      const tall=jr()<B.tallProb;
+      const h=tall?rr(B.tallH[0],B.tallH[1]):rr(B.h[0],B.h[1]);
+      const d=rr(B.depth[0],B.depth[1]);
+      const col=new THREE.Color(B.colors[(jr()*B.colors.length)|0]);
+      const zc=z+w/2, xc=front-d/2;                        // east face at x=front, extends west
+      bodies.push({w,h,d,x:xc,z:zc,c:col});
+      caps.push({w,h,d,x:xc,z:zc,c:col.clone().lerp(white,0.34)});   // limestone cornice lip
 
-    // sparse warm dusk windows on the EAST face (facing the park)
-    if(wins.length<WIN_CAP){
-      const floors=Math.max(1,Math.round(h/floorH));
-      const cols=Math.max(1,Math.min(4,Math.round(w/5)));
-      const fh=h/floors;
-      for(let f=0;f<floors&&wins.length<WIN_CAP;f++){
-        for(let c=0;c<cols&&wins.length<WIN_CAP;c++){
-          if(jr()>=B.winLitProb) continue;
-          const zz=(zc-w/2)+((c+1)/(cols+1))*w+(jr()*2-1)*0.18;
-          const yy=(f+0.5)*fh+(jr()*2-1)*0.12;
-          wins.push({x:front+0.08,y:yy,z:zz});
+      // sparse warm dusk windows on the EAST face (facing the park)
+      if(wins.length<WIN_CAP){
+        const floors=Math.max(1,Math.round(h/floorH));
+        const cols=Math.max(1,Math.min(4,Math.round(w/5)));
+        const fh=h/floors;
+        for(let f=0;f<floors&&wins.length<WIN_CAP;f++){
+          for(let c=0;c<cols&&wins.length<WIN_CAP;c++){
+            if(jr()>=B.winLitProb) continue;
+            const zz=(zc-w/2)+((c+1)/(cols+1))*w+(jr()*2-1)*0.18;
+            const yy=(f+0.5)*fh+(jr()*2-1)*0.12;
+            wins.push({x:front+0.08,y:yy,z:zz});
+          }
         }
       }
+      z+=w+rr(B.spacing[0],B.spacing[1]);
     }
-    z+=w+rr(B.spacing[0],B.spacing[1]);
-  }
+  };
+  march(B.zr[0],B.zr[1],0x2f6b1c07);                       // original span, original seed -> byte-identical
+  if(B.zrN) march(B.zrN[0],B.zrN[1],0x6d21f8a3);           // MONTROSE north extension, own seed
 
   const M=new THREE.Matrix4(),V=new THREE.Vector3(),Q=new THREE.Quaternion(),S=new THREE.Vector3();
 

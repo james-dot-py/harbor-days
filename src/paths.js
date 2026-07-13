@@ -92,10 +92,17 @@ export function buildPaths(){
   // and the ENTRANCE→LAKE path from the monument forecourt to the revetment top.
   ribbonOn(curveOf(CH.TRAIL_LOOP),st.loop.width,st.loop.color,st.loop.y,0,pathSamples2);
   ribbonOn(curveOf(CH.TRAIL_ENTRANCE),st.loop.width,st.loop.color,st.loop.y,0,pathSamples2);
-  // yellow center dashes on the paved BIKE path + the SPUR (not the walkway)
+  // MONTROSE north growth (v0.6, task 069): the dual Lakefront Trail CONTINUES
+  // north as a NEW ribbon — walk ribbon then bike centerline, same styling as
+  // MAIN — registered in pathSamples2 ONLY so pathSamples stays byte-identical
+  // (the phase-sensitive tree scan never sees it; determinism holds). Drawn LAST.
+  const montroseCurve=curveOf(CH.TRAIL_MONTROSE);
+  ribbonOn(montroseCurve,st.walk.width,st.walk.color,st.walk.y,walkOff,pathSamples2);
+  ribbonOn(montroseCurve,st.bike.width,st.bike.color,st.bike.y,0,pathSamples2);
+  // yellow center dashes on the paved BIKE path + the SPUR + Montrose (not the walkway)
   {
     const dashes=[];
-    for(const cv of[mainCurve,spurCurve]){
+    for(const cv of[mainCurve,spurCurve,montroseCurve]){
       const L=cv.getLength(),n=Math.floor(L/st.dash.spacing);
       for(let i=0;i<n;i++){
         const u=(i+0.5)/n,p=cv.getPoint(u),tg=cv.getTangent(u);
