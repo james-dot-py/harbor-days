@@ -1,6 +1,7 @@
 // =====================================================================
 // INSIDE WRIGLEY (task 055) — get a ticket, walk the honest door, roam
-// the quiet-cathedral bowl, and the field-trespass ref chase.
+// the bowl (game day live — see wrigley-game.js, 064), and the
+// field-trespass ref chase.
 //
 // The owner's design, implemented exactly: the field is physically
 // enterable (three open gates in the low wall — no invisible walls);
@@ -18,7 +19,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { toon, bmat, lerpAngle } from '../core.js';
-import { onWorldReady, registerUpdate, addInteraction, addSitSpot, makeNPC,
+import { onWorldReady, registerUpdate, addInteraction, makeNPC,
          toast, journalSection, state, screenFx, holdItem, getAudioCtx } from '../framework.js';
 import { setActiveCell, activeCell } from '../cells.js';
 import { camCtl } from '../main.js';
@@ -130,8 +131,8 @@ function enterBowl(p) {
     } },
     { at: 1.6, fn: () => {
       transiting = false;
-      if (state.bowlVisits === 1) toast('WRIGLEY FIELD', 'open house — the quiet cathedral');
-      else toast('WRIGLEY FIELD', 'open house — welcome back');
+      if (state.bowlVisits === 1) toast('WRIGLEY FIELD', 'game day — the friendly confines');
+      else toast('WRIGLEY FIELD', 'game day — welcome back');
     } },
   ]);
 }
@@ -163,6 +164,14 @@ function exitBowl(p, ejected) {
 // return → post. Tag radius 1.05. All movement in plain scalars — no
 // per-frame allocations.
 let ref = null, refState = 'post', refT = 0;
+// ?slowref=1 (headless-shot knob, like ?gd=): page game-time at screenshot
+// varies wildly under vite/SwiftShader contention (2.6 s .. 15 s+ observed),
+// and the ump TAGS a dev-spawned trespasser before slow shots land — wb-chase
+// frames came back post-eject exterior (055 pitfall, re-hit in 064; slowing
+// him wasn't enough — a 16 s page still tagged). With the knob he sprints at
+// full speed but PULLS UP 2.2 m short and never tags: any load timing yields
+// a mid-pursuit (or looming-right-behind) frame. Gameplay untouched.
+const SHOT_NOTAG = !!new URLSearchParams(location.search).get('slowref');
 const REF_V = 6.9, RETURN_V = 2.7, TAG_R = 1.05;
 const POST = (() => {
   const th = BACK_B + 0.3, [x, z] = at(rWallB(th) - 1.3, th);
@@ -204,8 +213,13 @@ function updateRef(dt, p) {
       return;
     }
     const dx = p.x - g.position.x, dz = p.z - g.position.z, d = Math.hypot(dx, dz);
-    if (d < TAG_R) {                                             // TAGGED
-      whistle(true);
+    if (d < (SHOT_NOTAG ? 2.2 : TAG_R)) {
+      if (SHOT_NOTAG) {                                          // shot knob: loom, never tag
+        ref.sp = REF_V;
+        g.rotation.y = lerpAngle(g.rotation.y, Math.atan2(dx, dz), 1 - Math.exp(-12 * dt));
+        return;
+      }
+      whistle(true);                                             // TAGGED
       state.ejections = (state.ejections || 0) + 1;
       exitBowl(p, true);
       return;
@@ -255,18 +269,18 @@ onWorldReady((player) => {
   // the whole stadium block during the stretch window.
   addInteraction({
     x: BOX_OFFICE.x, z: BOX_OFFICE.z, r: 2.6, priority: 8,
-    label: 'get a ticket — open house today',
+    label: 'get a ticket — game day today',
     onUse: () => {
       if (state.wrigleyTicket) { toast("you've got yours", 'gates at Clark & Addison'); return; }
       grantTicket();
-      toast('ONE TICKET', 'open house — enter at the Marquee Gate');
+      toast('ONE TICKET', 'game day — enter at the Marquee Gate');
     },
   });
 
   // the MARQUEE GATE — an honest door at last
   addInteraction({
     x: MARQUEE_GATE.x, z: MARQUEE_GATE.z, r: 2.8, priority: 8,
-    label: 'enter Wrigley Field — open house',
+    label: 'enter Wrigley Field — game day',
     onUse: p => enterBowl(p),
   });
 
@@ -276,18 +290,10 @@ onWorldReady((player) => {
     addInteraction({ x, z, r: 2.4, priority: 8, label: 'leave the ballpark — Clark & Addison', onUse: p => exitBowl(p, false) });
   }
 
-  // sit spots in the climbable wedges — take in the view
-  for (const [s, row] of [[-0.55, 6], [-0.82, 6], [0.66, 4]]) {   // inside WEDGES_B spans
-    const th = BACK_B + s;
-    const rS0 = rWallB(th) + WALL_T_B + CONC_W_B;
-    const r = rS0 + row * ROWS_B.dr + ROWS_B.dr / 2 + 0.42;
-    const [x, z] = at(r, th);
-    const y = ROWS_B.y0 + row * ROWS_B.dy;
-    addSitSpot({ x, z, y: y + 0.12, ry: wrapA(th + Math.PI), r: 1.6, label: 'take in the view' });
-  }
+  // seats: game-day spectator seats are owned by wrigley-game.js (task 064)
 
   journalSection('wrigley-bowl', 'The Friendly Confines', () => `
-    <div class="jrow"><span>Open-house visits</span><b>${state.bowlVisits || 0}</b></div>
+    <div class="jrow"><span>Games attended</span><b>${state.bowlVisits || 0}</b></div>
     <div class="jrow"><span>Tickets torn</span><b>${state.wrigleyTickets || 0}</b></div>
     <div class="jrow"><span>Clean getaways</span><b>${state.refEscapes || 0}</b></div>
     <div class="jrow"><span>Ejections</span><b>${state.ejections || 0}</b></div>

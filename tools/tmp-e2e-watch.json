@@ -1,0 +1,14 @@
+[
+  ["goto", -275.88, -846.67],
+  ["wait", 700],
+  ["key", "e"],
+  ["wait", 1200],
+  ["eval", "JSON.stringify({seated: window.__wgame.seated, ph: window.__wgame.phase, watched: window.__wgame.watched})"],
+  ["wait", 60000],
+  ["eval", "JSON.stringify({seated: window.__wgame.seated, ph: window.__wgame.phase, half: window.__wgame.half, inning: window.__wgame.inning, watched: window.__wgame.watched})"],
+  ["wait", 60000],
+  ["eval", "JSON.stringify({seated: window.__wgame.seated, ph: window.__wgame.phase, half: window.__wgame.half, inning: window.__wgame.inning, watched: window.__wgame.watched})"],
+  ["wait", 60000],
+  ["eval", "JSON.stringify({seated: window.__wgame.seated, ph: window.__wgame.phase, half: window.__wgame.half, inning: window.__wgame.inning, watched: window.__wgame.watched})"],
+  ["shot", "e2e-watch-half"]
+]

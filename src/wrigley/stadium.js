@@ -1107,10 +1107,10 @@ export function buildStadium() {
   const gx = S.gates.gallagher.x, gz = S.gates.gallagher.z;
   const gnx = -0.99963, gnz = 0.02726, gYaw = Math.atan2(gnx, gnz);   // faces the plaza
   // task 055: the Marquee Gate is an HONEST DOOR now — the 017 teaser kept
-  // its promise. OPEN HOUSE placard (same green house style, new ribbon);
+  // its promise. GAME DAY placard (064: the lights are on inside);
   // the interaction lives in packs/wrigley-bowl.js.
   gateAt(S.gates.marquee.x, S.gates.marquee.z, S.gates.marquee.yaw, 'MARQUEE GATE', 4.4, // on the curve apex
-    { big: ['GATES OPEN', 'TODAY'], wink: 'tickets at the box office', ribbon: 'O P E N   H O U S E' });
+    { big: ['GATES OPEN', 'TODAY'], wink: 'tickets at the box office', ribbon: 'G A M E   D A Y' });
   gateAt(gx - gnx * 0.42, gz - gnz * 0.42, gYaw, 'GALLAGHER WAY GATE', 4.4, // recessed 0.42 into the bowl wall
     { big: ['WALK THE', 'WARNING TRACK'], wink: 'enter at the Marquee Gate', ribbon: 'T H E   I V Y   I S   I N' });
   gateAt(-212.28, -537.72, S.gates.bleacher.yaw, 'BLEACHERS', 7, // hero gate on the chamfer, Caray plaza in front

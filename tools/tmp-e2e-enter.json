@@ -1,0 +1,20 @@
+[
+  ["goto", -280, -416.5],
+  ["wait", 900],
+  ["key", "e"],
+  ["wait", 600],
+  ["shot", "e2e-enter-01-refused"],
+  ["eval", "(()=>{const pts=[[-290,-416.5],[-290,-447],[-284.3,-447.9]];let i=0;const H=window.__hd,joy=H.input.joy,cam=H.input.cam,pl=H.player;window.__botDone=false;const t=setInterval(()=>{if(i>=pts.length){joy.x=0;joy.z=0;joy.len=0;clearInterval(t);window.__botDone=true;return;}const dx=pts[i][0]-pl.x,dz=pts[i][1]-pl.z,d=Math.hypot(dx,dz);if(d<1.0){i++;return;}cam.yaw=Math.atan2(dx,dz);joy.x=0;joy.z=-1;joy.len=0.9;},50);return 'bot1'})()"],
+  ["wait", 15000],
+  ["eval", "JSON.stringify({done: window.__botDone, px: Math.round(window.__hd.player.x), pz: Math.round(window.__hd.player.z)})"],
+  ["key", "e"],
+  ["wait", 700],
+  ["shot", "e2e-enter-02-ticket"],
+  ["eval", "(()=>{const pts=[[-290,-447],[-290,-416.5],[-279.3,-417.0]];let i=0;const H=window.__hd,joy=H.input.joy,cam=H.input.cam,pl=H.player;window.__botDone=false;const t=setInterval(()=>{if(i>=pts.length){joy.x=0;joy.z=0;joy.len=0;clearInterval(t);window.__botDone=true;return;}const dx=pts[i][0]-pl.x,dz=pts[i][1]-pl.z,d=Math.hypot(dx,dz);if(d<1.0){i++;return;}cam.yaw=Math.atan2(dx,dz);joy.x=0;joy.z=-1;joy.len=0.9;},50);return 'bot2'})()"],
+  ["wait", 15000],
+  ["eval", "JSON.stringify({done: window.__botDone, px: Math.round(window.__hd.player.x), pz: Math.round(window.__hd.player.z)})"],
+  ["key", "e"],
+  ["wait", 2500],
+  ["eval", "JSON.stringify({px: Math.round(window.__hd.player.x), pz: Math.round(window.__hd.player.z), wg: window.__wgame ? window.__wgame.phase : 'none'})"],
+  ["shot", "e2e-enter-03-inside"]
+]

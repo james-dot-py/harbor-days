@@ -1,0 +1,12 @@
+[
+  ["goto", -225.6, -927.5],
+  ["wait", 400],
+  ["keydown", "w"], ["wait", 1600], ["keyup", "w"],
+  ["wait", 1600],
+  ["eval", "JSON.stringify({px: Math.round(window.__hd.player.x), pz: Math.round(window.__hd.player.z)})"],
+  ["shot", "e2e-eject-01-escaped"],
+  ["keydown", "s"], ["wait", 2000], ["keyup", "s"],
+  ["wait", 14000],
+  ["eval", "JSON.stringify({px: Math.round(window.__hd.player.x), pz: Math.round(window.__hd.player.z)})"],
+  ["shot", "e2e-eject-02-ejected"]
+]

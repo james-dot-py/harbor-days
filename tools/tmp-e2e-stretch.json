@@ -1,0 +1,10 @@
+[
+  ["goto", -275.88, -846.67],
+  ["wait", 700],
+  ["key", "e"],
+  ["wait", 1400],
+  ["eval", "JSON.stringify({seated: window.__wgame.seated, mode: window.__wgame.mode, ph: window.__wgame.phase})"],
+  ["key", "e"],
+  ["wait", 800],
+  ["shot", "e2e-stretch-sing"]
+]

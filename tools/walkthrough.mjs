@@ -80,6 +80,7 @@ try {
       const sx = f.x ?? w.x, sz = f.z ?? w.z;
       const q = new URLSearchParams({ play: '1', x: sx, z: sz, canary: runId });
       for (const k of ['yaw', 'pitch', 'dist']) if (f[k] !== undefined) q.set(k, f[k]);
+      if (w.q) for (const [k, v] of new URLSearchParams(w.q)) q.set(k, v);
       const name = w.id + '-f' + i;
       // one shot must never kill the run: retry once, then record the failure
       let r;

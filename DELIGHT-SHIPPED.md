@@ -357,3 +357,18 @@ cut becomes a revert task.
   boombox radio cycle, live from Butler Field. — Butler Field (stage 214-230 x
   z1002-1017, crowd 225-300 x 940-1005, dance circle 272/971.5, poster 206/910)
   — task 061
+- GAME DAY at Wrigley: buy a ticket, walk the Marquee Gate, and the Cubbies
+  are PLAYING — a looping chibi ballgame (windup → pitch → take / foul /
+  groundout / single / HOMER with runners actually running the bases), a
+  hand-turned line score with outs lamps and an at-bat triangle, and walk-off
+  wins that hoist the W flag inside AND over the exterior board with
+  fireworks. ~450 seated fans do the wave, erupt on Cubs homers, groan at Sox
+  ones, and hum "Take Me Out to the Ball Game" (1908, public domain) through
+  a swaying SEVENTH-INNING STRETCH — organ + crowd-hum synth, everybody
+  leaning together. Take any wedge seat and a spectator camera settles in;
+  stay a whole half-inning for the scorecard journal moment. A hot-dog vendor
+  works the concourse ("no ketchup. don't ask."). Trespass mid-game and the
+  crowd ooohs the chase, laughs your escape, and mock-cheers your ejection —
+  the streaker gag, cozy edition. — the wrigley-bowl pocket cell (seats in
+  the climbable wedges, scoreboard in CF; src/packs/wrigley-game.js)
+  — task 064

@@ -45,3 +45,4 @@ import './skating.js';   // McCormick rink — NPC skaters, mayor skates + blade
 import './ribbon-skaters.js';   // Maggie Daley Skating Ribbon — arclength loopers + wobbly beginner (task 059)
 import './artinstitute.js';   // the Art Institute — steps lunch pair, lion luck, sandwich board, Route 66 (task 060)
 import './lolla.js';   // LOLLAPALOOZA live — crowd, band, festival set, dance circle (task 061)
+import './wrigley-game.js';   // GAME DAY inside the bowl — the ball game, crowd, seats, stretch (task 064)

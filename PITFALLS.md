@@ -453,6 +453,17 @@ few turns to find; keep each to one line of symptom + fix.
   and per-sign (the 050 shared-atlas font-spill law still applies), apply
   rotateY/tiltX to the GEOMETRY before translate, and call flushPlates()
   before the pool flush so the mesh joins the cell root.
+- Headless shot pages run FAR more game time than waitMs suggests: shot.mjs
+  waits networkidle0 + waitMs, but cold-vite transforms + SwiftShader
+  contention stretch the pre-shot window past 15 s (055 measured 2.6–5.5 s;
+  064 measured worse) — so ANY time-coupled actor can finish its arc before
+  the frame: the ump TAGGED every wb-chase shot (post-eject 400-draw exterior
+  frames), and the patrolling hot-dog vendor parked INSIDE a concourse framing.
+  Fix the CLASS, not the timing: give pursuit NPCs a shot knob that disables
+  the TERMINAL transition (?slowref=1 → the ump sprints full speed but pulls
+  up 2.2 m short and never tags — every load timing yields a pursuit frame),
+  and keep patrol ARCS clear of waypoint stands. Slowing the pursuer and
+  deepening the stands both lost to a 16 s page (task 064).
 - A "crosswalks are just sidewalks" report can be a SIDEWALK-OVERLAP bug, NOT a
   crosswalk-material bug (issue 018 reopened / task 063): the white crosswalk
   bars were already correct paint, but streets.js's sidewalk slab rows

@@ -1,11 +1,12 @@
 // =====================================================================
-// WRIGLEY BOWL — the stadium INTERIOR builder (task 055). A pocket cell
-// (the redline-car pattern): own root, own clamp/walk/spawn/minimap from
-// src/data/wrigley-bowl.js (THE shared definition — never forked). The
-// register is QUIET CATHEDRAL: an empty open-house Wrigley — no game-day
-// crowd, just the ivy, the hand-turned scoreboard, the rooftops over the
-// wall and the mow lines. All geometry hand-modeled in the house toon
-// style; every mesh uses toon()/bmat() (world-curve contract).
+// WRIGLEY BOWL — the stadium INTERIOR builder (task 055; game day 064). A
+// pocket cell (the redline-car pattern): own root, own clamp/walk/spawn/
+// minimap from src/data/wrigley-bowl.js (THE shared definition — never
+// forked). This file builds the EMPTY park — ivy, live hand-turned
+// scoreboard (bowlScoreboard), W flag, rooftops, mow lines; the crowd,
+// the ball game and the seats live in packs/wrigley-game.js. All geometry
+// hand-modeled in the house toon style; every mesh uses toon()/bmat()
+// (world-curve contract).
 // Determinism: ONE local mulberry32 — never the shared world rng.
 // =====================================================================
 import * as THREE from 'three';
@@ -29,7 +30,15 @@ const mergeGeos = arr => BufferGeometryUtils.mergeBufferGeometries(arr.map(g => 
 const PALE = 0xd9d2c4, BRICK = 0x8a4a3a, GREEN = 0x1e4d38, DARKROOF = 0x3c4038;
 const CREAM = 0xbfb7a6, CONCRETE = 0x8f8a82, SEATG = 0x2f5544, DIRT = 0xa8794a;
 
+// SINGLE SOURCE for the two scenery decks (buildStands upper + buildOutfield
+// bleachers). The game pack imports these; the builders read them so no drift.
+export const STANDS_B = {
+  upper:     { rMax: 26.5, off0: 0.8, dr: 1.35, y0: 10.4, dy: 0.78, rows: 5, sMax: 1.5, step: 0.14 },
+  bleachers: { r0: 75.5, dr: 1.75, y0: 3.9, dy: 0.62, rows: 7, sHalf: 0.66 },
+};
+
 let bowlRoot = null;
+let wFlag = null;                          // the center-mast W flag (live mesh)
 const add = m => { bowlRoot.add(m); return m; };
 function inst(geo, mat, items) {
   const m = new THREE.InstancedMesh(geo, mat, items.length);
@@ -91,30 +100,84 @@ function ivyTexB() {
   }
   return new THREE.CanvasTexture(cv);
 }
-function scoreboardTexB() {
-  const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 512;
-  const g = cv.getContext('2d');
+// LIVE hand-turned scoreboard (task 064). ONE module canvas + ONE CanvasTexture
+// (created lazily on first access, so bowlScoreboard() is safe before OR after
+// buildWrigleyBowl). paintScoreboard(data) redraws the WHOLE face; the game
+// pack calls bowlScoreboard(state) a few times a minute — a full repaint is fine.
+let sbCanvas = null, sbTex = null;
+function ensureScoreboard() {
+  if (sbTex) return;
+  sbCanvas = document.createElement('canvas'); sbCanvas.width = 1024; sbCanvas.height = 512;
+  sbTex = new THREE.CanvasTexture(sbCanvas); sbTex.anisotropy = 4;
+}
+function scoreboardTexB() { ensureScoreboard(); return sbTex; }
+function paintScoreboard(data = {}) {
+  ensureScoreboard();
+  const g = sbCanvas.getContext('2d');
+  const vis = data.vis || [], cubs = data.cubs || [];
+  const half = data.half === 'bot' ? 'bot' : 'top';
+  const outs = Math.max(0, Math.min(2, data.outs || 0));
+  const msg1 = data.msg1 || '', msg2 = data.msg2 || '';
+  // dark-green board + border (the opaque fill clears the whole face)
   g.fillStyle = '#1c4534'; g.fillRect(0, 0, 1024, 512);
   g.strokeStyle = '#0f2b20'; g.lineWidth = 12; g.strokeRect(6, 6, 1012, 500);
-  g.fillStyle = '#f2ece0'; g.textAlign = 'center';
-  g.strokeStyle = '#f2ece0'; g.lineWidth = 6;                    // dot clock
+  // dot clock (unchanged)
+  g.fillStyle = '#f2ece0'; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+  g.strokeStyle = '#f2ece0'; g.lineWidth = 6;
   g.beginPath(); g.arc(512, 104, 68, 0, 7); g.stroke();
   for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; g.beginPath(); g.arc(512 + Math.sin(a) * 54, 104 - Math.cos(a) * 54, 4.4, 0, 7); g.fill(); }
   g.lineWidth = 8; g.beginPath(); g.moveTo(512, 104); g.lineTo(512 + Math.sin(3.85) * 32, 104 - Math.cos(3.85) * 32); g.stroke();
   g.lineWidth = 6; g.beginPath(); g.moveTo(512, 104); g.lineTo(512 + Math.sin(1.15) * 48, 104 - Math.cos(1.15) * 48); g.stroke();
-  g.font = '700 34px "Courier New",monospace'; g.textAlign = 'left';
-  g.fillText('VISITORS  · · · · · · ·', 60, 248);
-  g.fillText('CUBS      · · · · · ·', 60, 308);
+  // OUTS lamps: two circles right of the clock (lit = amber fill, unlit = outline)
+  for (let i = 0; i < 2; i++) {
+    g.beginPath(); g.arc(640 + i * 36, 96, 9, 0, 7);
+    if (i < outs) { g.fillStyle = '#e8b64c'; g.fill(); }
+    else { g.strokeStyle = '#f2ece0'; g.lineWidth = 2.5; g.stroke(); }
+  }
+  // team labels + AT-BAT amber triangle just left of the batting team's label
+  g.fillStyle = '#f2ece0'; g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  g.font = '700 34px "Courier New",monospace';
+  g.fillText('VISITORS', 60, 248);
+  g.fillText('CUBS', 60, 308);
+  { const ty = half === 'bot' ? 298 : 238;
+    g.fillStyle = '#e8b64c'; g.beginPath();
+    g.moveTo(40, ty - 8); g.lineTo(40, ty + 8); g.lineTo(54, ty); g.closePath(); g.fill(); }
+  // the 10-box line-score grid (existing geometry) + per-inning digits
   g.strokeStyle = '#f2ece0'; g.lineWidth = 2;
   for (let i = 0; i < 10; i++) { g.strokeRect(392 + i * 44, 212, 40, 44); g.strokeRect(392 + i * 44, 272, 40, 44); }
-  g.textAlign = 'center';
+  g.fillStyle = '#f2ece0'; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.font = '700 30px "Courier New",monospace';
+  for (let i = 0; i < 10; i++) {
+    const cx = 392 + i * 44 + 20;
+    if (vis[i] != null) g.fillText(String(vis[i]), cx, 234);
+    if (cubs[i] != null) g.fillText(String(cubs[i]), cx, 294);
+  }
+  // R  H  E header + run totals (sum of non-null entries) per team
+  g.textBaseline = 'alphabetic';
   g.fillText('R  H  E', 924, 192);
-  g.font = '700 38px "Courier New",monospace';
-  g.fillText('OPEN HOUSE — NO GAME TODAY', 512, 398);
-  g.font = '700 30px "Courier New",monospace';
-  g.fillText('THE FRIENDLY CONFINES WELCOME YOU', 512, 452);
-  const t = new THREE.CanvasTexture(cv); t.anisotropy = 4; return t;
+  const total = a => a.reduce((s, v) => s + (v == null ? 0 : v), 0);
+  g.fillText(String(total(vis)), 924, 248);
+  g.fillText(String(total(cubs)), 924, 308);
+  // message lines (replace the OPEN HOUSE copy)
+  g.font = '700 38px "Courier New",monospace'; g.fillText(msg1, 512, 398);
+  g.font = '700 30px "Courier New",monospace'; g.fillText(msg2, 512, 452);
+}
+// repaint the live scoreboard face; safe before or after the bowl is built.
+export function bowlScoreboard(data) { paintScoreboard(data); sbTex.needsUpdate = true; }
+// the Cubs 'W' flag — white field, big royal-blue W (symmetric → DoubleSide safe)
+function wFlagTex() {
+  const cv = document.createElement('canvas'); cv.width = 240; cv.height = 160;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#f6f4ee'; g.fillRect(0, 0, 240, 160);
+  g.fillStyle = '#0e3386'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '900 110px Arial,sans-serif'; g.fillText('W', 120, 84);
+  return new THREE.CanvasTexture(cv);
+}
+// raise/lower the W flag: t 0 → furled low (topY+0.9), t 1 → flown high (topY+4.9).
+export function bowlWFlagSet(t) {
+  if (!wFlag) return;                                            // not built yet — no-op
+  const tt = Math.max(0, Math.min(1, t));
+  wFlag.position.y = SCOREBOARD_B.topY + 0.9 + tt * 4.0;
 }
 function markerTex(txt) {
   const cv = document.createElement('canvas'); cv.width = 128; cv.height = 96;
@@ -344,15 +407,16 @@ function buildStands() {
   if (rails.length) add(new THREE.Mesh(mergeGeos(rails), toon(0xd8d5cf)));
 
   // upper deck (scenery): fascia, risers, columns, roof — behind-home arc
+  const U = STANDS_B.upper;
   const fascia = [], uprows = [], cols = [], roof = [];
-  for (let s = -1.5 + 0.14 / 2; s <= 1.5; s += 0.14) {
+  for (let s = -U.sMax + U.step / 2; s <= U.sMax; s += U.step) {
     const th = BACK_B + s, pr = polyRadiusB(th);
-    const rF = Math.min(26.5, pr - 4.5);
+    const rF = Math.min(U.rMax, pr - 4.5);
     const chord = 2 * rF * Math.sin(0.07) + 0.3;
     const [fx, fz] = at(rF, th);
     fascia.push({ pos: [fx, 9.6, fz], yaw: th, scale: [chord / 3, 1, 1] });
-    for (let k = 0; k < 5; k++) {
-      const r = rF + 0.8 + k * 1.35, y = 10.4 + k * 0.78;
+    for (let k = 0; k < U.rows; k++) {
+      const r = rF + U.off0 + k * U.dr, y = U.y0 + k * U.dy;
       if (r > pr - 1.4) continue;
       const [x, z] = at(r, th);
       uprows.push({ pos: [x, y, z], yaw: th, scale: [chord / 3, 1, 1] });
@@ -405,12 +469,13 @@ function buildOutfield() {
   // continuous bench arcs (the exterior's checkered slabs read as loose
   // boxes in an EMPTY bowl — quiet cathedral wants unbroken green rows)
   const bl = [];
-  for (let ri = 0; ri < 7; ri++) {
-    const r = 75.5 + ri * 1.75, y = 3.9 + ri * 0.62;
-    const n = Math.round(r * 1.32 / 3.0);
-    const chord = r * 1.32 / n + 0.25;
+  const B = STANDS_B.bleachers, span = B.sHalf * 2;
+  for (let ri = 0; ri < B.rows; ri++) {
+    const r = B.r0 + ri * B.dr, y = B.y0 + ri * B.dy;
+    const n = Math.round(r * span / 3.0);
+    const chord = r * span / n + 0.25;
     for (let k = 0; k <= n; k++) {
-      const th = AXIS_B - 0.66 + (k / n) * 1.32;
+      const th = AXIS_B - B.sHalf + (k / n) * span;
       if (r > polyRadiusB(th) - 1.2) continue;
       const [x, z] = at(r, th);
       bl.push({ pos: [x, y, z], yaw: th, scale: [chord / 3.2, 1, 1] });
@@ -446,9 +511,19 @@ function buildOutfield() {
     items.forEach((p, i) => { M.setPosition(p[0], p[1], 0); m.setMatrixAt(i, M); });
     m.instanceMatrix.needsUpdate = true; grp.add(m);
   }
+  // W FLAG on the CENTER mast (mx 0): plane 1.7×1.1, hoist edge AT the mast
+  // (translate +0.85 so it flies to one side), flat/tangent to the board face.
+  // Furled low (t=0); the game pack raises it via bowlWFlagSet. userData.live
+  // exempts it from mergeCellStatic so the pack can animate its height.
+  wFlag = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 1.1).translate(0.85, 0, 0),
+    bmat(0xffffff, { map: wFlagTex(), side: THREE.DoubleSide, transparent: false }));
+  wFlag.position.set(0, topY + 0.9, 0);
+  wFlag.userData.live = true; grp.add(wFlag);
   grp.position.set(SCOREBOARD_B.x, 0, SCOREBOARD_B.z);
   grp.rotation.y = BACK_B;                                       // face looks back at home
   add(grp);
+  // default GAME-DAY face (the pack paints the real line score at world-ready)
+  bowlScoreboard({ msg1: 'GAME DAY AT THE CONFINES', msg2: 'CUBS vs SOX · TODAY 7:05' });
 }
 
 // light towers on the roof rim + outfield wings (exterior placements, so the
@@ -584,7 +659,7 @@ function buildMinimapBase() {
   g.font = '700 18px "Trebuchet MS",sans-serif';
   g.fillText('WRIGLEY FIELD', M.cw / 2, 30);
   g.font = 'italic 600 14px Georgia,serif';
-  g.fillText('open house — stay off the grass', M.cw / 2, 52);
+  g.fillText('game day — stay off the grass', M.cw / 2, 52);
   return cv;
 }
 

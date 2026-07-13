@@ -1,16 +1,8 @@
 [
- ["goto",16,109],
- ["tapSel","#btnAct"],
- ["wait",18000],
- ["eval","(()=>{const p=window.__hd.player;return {x:+p.x.toFixed(1),z:+p.z.toFixed(1)}})()"],
- ["shot","062e2e-m1-arrive"],
- ["goto",87,806],
- ["shot","062e2e-m2-bean"],
- ["goto",272.5,745],
- ["wait",900],
- ["shot","062e2e-m3-ribbon"],
- ["goto",272,973.5],
- ["tapSel","#btnAct"],
- ["wait",1800],
- ["shot","062e2e-m4-dance"]
+  ["goto", -275.88, -846.67],
+  ["wait", 1200],
+  ["tapSel", "#prompt"],
+  ["wait", 1600],
+  ["eval", "JSON.stringify({seated: window.__wgame.seated})"],
+  ["shot", "e2e-mobile-seated"]
 ]

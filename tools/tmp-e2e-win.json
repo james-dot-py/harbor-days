@@ -1,0 +1,10 @@
+[
+  ["goto", -256.75, -852.55],
+  ["wait", 900],
+  ["eval", "JSON.stringify({ph: window.__wgame.phase, sc: window.__wgame.score, outs: window.__wgame.outs})"],
+  ["wait", 7500],
+  ["eval", "JSON.stringify({ph: window.__wgame.phase, sc: window.__wgame.score, mode: window.__wgame.mode})"],
+  ["shot", "e2e-win"],
+  ["wait", 2500],
+  ["eval", "JSON.stringify({ph: window.__wgame.phase})"]
+]

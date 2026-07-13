@@ -27,6 +27,7 @@ import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtil
 import { onWorldReady, registerUpdate, addInteraction, makeNPC, registerBumpable,
          toast, journalSection, state, screenFx, getAudioCtx, createChibi, bakeChibiRig } from '../framework.js';
 import { toon, mulberry32, clamp, lerp, lerpAngle } from '../core.js';
+import { CROWD_SHIRT, CROWD_SKIN, crowdGeos, makeCrowd, stampCrowd } from '../crowd.js';
 import { mayor, mparts } from '../character.js';
 import { activeCell } from '../cells.js';
 import { millenniumRoot } from '../millennium/index.js';
@@ -35,13 +36,7 @@ import { OPEN_GRANT, BUTLER_M } from '../data/millennium.js';
 // ---- determinism: LOCAL rng only, consumed only inside onWorldReady ----
 const R = mulberry32(19910808);                  // first Lolla — never the shared world rng
 
-// ---- hoisted per-frame scratch (zero allocation in registerUpdate) -----
-const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(),
-      V = new THREE.Vector3(), S = new THREE.Vector3(1, 1, 1);
-
-// ---- shared colors -----------------------------------------------------
-const SHIRT = [0x1c3f6e, 0xb03a2e, 0xe8e4da, 0xc9a36a, 0x5a7d9a, 0x3f7d3a];  // 6 shirt buckets
-const SKIN  = [0xcaa07a, 0x8a5a3c, 0xf0c8a0];                                 // 3 skin buckets
+// ---- shared crowd tech (buckets/geos/re-stamp) lives in ../crowd.js ----
 const STAGE_MOUTH = { x: 224, z: 1006 };         // the crowd faces this
 const DANCE = BUTLER_M.dance;                     // {x:272,z:971.5,r:3}
 const DECK_Y = BUTLER_M.petrillo.deckY;           // 1.6 (band floats until A's stage lands)
@@ -69,9 +64,7 @@ const RAIL_LINES = [
 // =====================================================================
 const CROWD = BUTLER_M.crowd;                     // {x0:225,x1:300,z0:940,z1:1005}
 const people = [];                                // {x,z,yaw,sc,phase,amp,shirt,skin,bi,hi}
-const bodyBuckets = [[], [], [], [], [], []];
-const headBuckets = [[], [], []];
-let bodyMesh = [], headMesh = [];
+let crowd = null;                                 // makeCrowd() bundle: {people,bodyMesh,headMesh,...}
 const SWAY_A = 0.09;                               // bounce amplitude (m)
 let musicBeats = 0, curProx = 0, prevProx = 0;
 
@@ -82,20 +75,8 @@ let danceInter = null;
 const gator = { grp: null, s: 0, hy: 0, lap: 0, counted: false, pauseT: 0 };
 
 // =====================================================================
-//  CROWD — placement + geometry
+//  CROWD — placement + geometry (geos/buckets/re-stamp via ../crowd.js)
 // =====================================================================
-function bodyGeo() {
-  const parts = [
-    new THREE.SphereGeometry(0.34, 8, 6).scale(1, 1.35, 1).translate(0, 0.62, 0),   // squat torso
-    new THREE.SphereGeometry(0.11, 6, 5).translate(-0.38, 0.78, 0),                  // arm nubs
-    new THREE.SphereGeometry(0.11, 6, 5).translate(0.38, 0.78, 0),
-    new THREE.BoxGeometry(0.15, 0.5, 0.16).translate(-0.12, 0.25, 0),                // leg stubs
-    new THREE.BoxGeometry(0.15, 0.5, 0.16).translate(0.12, 0.25, 0),
-  ];
-  return BufferGeometryUtils.mergeBufferGeometries(parts, false);
-}
-function headGeo() { return new THREE.SphereGeometry(0.27, 8, 6).translate(0, 1.18, 0); }  // BIG chibi head
-
 // keep-clear + density
 const AISLES = [
   { ax: 236, az: 940, bx: 248, bz: 999, w: 1.4 },   // two organic aisle gaps
@@ -142,44 +123,24 @@ function buildCrowd() {
       shirt: (R() * 6) | 0, skin: (R() * 3) | 0, bi: 0, hi: 0,
     });
   }
-  // bucket + index
-  for (const p of people) {
-    p.bi = bodyBuckets[p.shirt].length; bodyBuckets[p.shirt].push(p);
-    p.hi = headBuckets[p.skin].length;  headBuckets[p.skin].push(p);
-  }
-  const BG = bodyGeo(), HG = headGeo();
-  bodyMesh = SHIRT.map((c, i) => {
-    const m = new THREE.InstancedMesh(BG, toon(c), Math.max(1, bodyBuckets[i].length));
-    m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); m.frustumCulled = false;
-    m.name = 'lolla-crowd-body'; millenniumRoot.add(m); return m;
-  });
-  headMesh = SKIN.map((c, i) => {
-    const m = new THREE.InstancedMesh(HG, toon(c), Math.max(1, headBuckets[i].length));
-    m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); m.frustumCulled = false;
-    m.name = 'lolla-crowd-head'; millenniumRoot.add(m); return m;
-  });
+  crowd = makeCrowd(millenniumRoot, people, 'standing', 'lolla-crowd');  // 6 body + 3 head buckets
   updateCrowd(0.5);   // initial stamp so the field is correct even before the first update tick
 }
 
-// per-frame matrix re-stamp — the perf boss fight kept to one compose/person
+// per-frame matrix re-stamp — one compose/person (bArg/lArg set before the call
+// so the module-scope poseFn closes over them with zero per-frame allocation)
+let _bArg = 0, _lArg = 0;
+function crowdPose(p, E, V, S) {
+  const y = p.amp * SWAY_A * Math.max(0, Math.sin(_bArg + p.phase));          // bounce ON the beat
+  const lean = 0.07 * Math.sin(_lArg + p.phase);
+  E.set(0, p.yaw, lean, 'YXZ');
+  V.set(p.x, y, p.z);
+  S.set(p.sc, p.sc, p.sc);
+}
 function updateCrowd(rate) {
-  const bArg = 2 * Math.PI * musicBeats * rate;
-  const lArg = 2 * Math.PI * musicBeats * rate * 0.5;
-  for (let sBucket = 0; sBucket < 6; sBucket++) {
-    const bucket = bodyBuckets[sBucket], mesh = bodyMesh[sBucket];
-    for (let i = 0; i < bucket.length; i++) {
-      const p = bucket[i];
-      const y = p.amp * SWAY_A * Math.max(0, Math.sin(bArg + p.phase));       // bounce ON the beat
-      const lean = 0.07 * Math.sin(lArg + p.phase);
-      E.set(0, p.yaw, lean, 'YXZ'); Q.setFromEuler(E);
-      V.set(p.x, y, p.z); S.set(p.sc, p.sc, p.sc);
-      M.compose(V, Q, S);
-      mesh.setMatrixAt(p.bi, M);
-      headMesh[p.skin].setMatrixAt(p.hi, M);
-    }
-    mesh.instanceMatrix.needsUpdate = true;
-  }
-  for (let i = 0; i < 3; i++) headMesh[i].instanceMatrix.needsUpdate = true;
+  _bArg = 2 * Math.PI * musicBeats * rate;
+  _lArg = 2 * Math.PI * musicBeats * rate * 0.5;
+  stampCrowd(crowd, crowdPose);
 }
 
 // =====================================================================

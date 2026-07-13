@@ -691,7 +691,7 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-196, -550]
     const [tx, tz] = atB(B.rWallB(BK - 0.05) + 2.6, BK - 0.05);  // toward the tunnel mouth
     add('wb-concourse', 'wrigleyville', 'wrigley-bowl', px, pz, [
       { yaw: R(th), pitch: 0.1, dist: 7 },                        // outward: ring, low wall, seats+deck rising
-      { yaw: yawTo(px, pz, tx, tz), pitch: 0.08, dist: 7 },       // along the ring to the tunnel portal
+      { yaw: yawTo(px, pz, tx, tz), pitch: 0.08, dist: 4.2 },     // along the ring to the tunnel portal (064: dist 7's straight-line pull-back left the CURVING ring and parked the lens inside a seated row-0 crowd instance — the '034 new-mass invalidates framings' pitfall, crowd edition)
       { yaw: R(th + 0.55), pitch: 0.14, dist: 9 },                // oblique outward: wedge B rises frame-left
     ]); }
   // BOWL FROM THE SEATS — wedge B rows. Cameras verified against polyRadiusB
@@ -715,11 +715,12 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-196, -550]
       { yaw: yawTo(px, pz, mx, mz), pitch: -0.14, dist: 10 },     // up: ivy → bleachers → rooftops
     ]); }
   // CHASE MOMENT — stand ON THE GRASS: the dev spawn trips the ump (whistle
-  // + 0.38 s windup, then 6.9 m/s from his post by the home gate). Stands sit
-  // ~40–44 m of chase path from the post (frame-calc.mjs): at the shot
-  // (~3–5.5 s of game time depending on load) he is mid-sprint 8–25 m out,
-  // dead ahead — and can NEVER tag before ~6.2 s (no black post-eject frame,
-  // the first-run mound stand's failure mode). Yaws face his charge line.
+  // + 0.38 s windup, then he charges from his post by the home gate). Stands
+  // sit ~40–44 m of chase path from the post (frame-calc.mjs). q=slowref=1
+  // (055-pack shot knob, 064): contended page game-time at the shot ranges
+  // ~2.6 s to 15 s+, and the ump TAGGED before slow shots — frames came back
+  // post-eject exterior. The knob keeps his full 6.9 m/s sprint but he PULLS
+  // UP 2.2 m short and never tags: every load timing yields a pursuit frame.
   // Yaws aim ~0.4 rad OFF the post bearing (the 047 pitfall: yaw straight at
   // the subject pins the mayor dead-center IN FRONT of it — first run hid the
   // charging ump behind the player in all three frames).
@@ -729,7 +730,33 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-196, -550]
       { yaw: R(yawTo(...s0, ...post) + 0.42), pitch: 0.05, dist: 6 },                 // charge line beside the mayor
       { x: s1[0], z: s1[1], yaw: R(yawTo(...s1, ...post) - 0.45), pitch: 0.08, dist: 8.5 },  // wider, other side
       { x: s2[0], z: s2[1], yaw: R(yawTo(...s2, ...post) + 0.38), pitch: 0.03, dist: 5.5 },  // low + close
+    ], { q: 'slowref=1' }); }
+  // 064 GAME DAY — the seated view, the scoreboard read, the stretch moment
+  // wb-seated: bg=seat auto-sits the mayor at the first bench seat at world-ready
+  // and the game pack's spectator camera OVERRIDES yaw/pitch/dist — the framing
+  // params are just the pre-override fallback.
+  { const th = BK - 0.55, r = rS0(th) + 6 * 1.4 + 0.7 + 0.42, [sx, sz] = atB(r, th);
+    add('wb-seated', 'wrigleyville', 'wrigley-bowl', sx, sz, [
+      { yaw: yawTo(sx, sz, B.HP_B[0], B.HP_B[1]), pitch: 0.24, dist: 5.5 },
+    ], { q: 'bg=seat' }); }
+  // wb-scoreboard-game: from the CF warning track looking up at the live board
+  { const th = AX + 0.06, [px, pz] = atB(B.rWallB(th) - 1.6, th);
+    add('wb-scoreboard-game', 'wrigleyville', 'wrigley-bowl', px, pz, [
+      { yaw: R(AX), pitch: -0.34, dist: 8 },
+      { yaw: R(AX + 0.18), pitch: -0.3, dist: 10 },
     ]); }
+  // wb-stretch: bg=stretch preloads the 7th-inning stretch mid-sway at ready
+  { const th = BK + 0.66, r = rS0(th) + 4 * 1.4 + 0.7 + 0.42, [sx, sz] = atB(r, th);
+    const [tx, tz] = atB(rS0(BK - 0.7) + 3 * 1.4, BK - 0.7);
+    // f1 stands on the CF warning track (the wb-scoreboard-game composition):
+    // the board's STRETCH message + the bleacher crowd leaning in sync over the
+    // ivy in one frame. (Seat-side board framings kept burying the camera in a
+    // near-row fan's head / the enclosure — behind-home poly depth is ~30.)
+    const thT = AX + 0.06, [px, pz] = atB(B.rWallB(thT) - 1.6, thT);
+    add('wb-stretch', 'wrigleyville', 'wrigley-bowl', sx, sz, [
+      { yaw: yawTo(sx, sz, tx, tz), pitch: 0.14, dist: 7 },     // across the bowl: swaying sections
+      { x: px, z: pz, yaw: R(AX), pitch: -0.3, dist: 9 },       // the STRETCH message on the board + syncing bleachers
+    ], { q: 'bg=stretch' }); }
 }
 
 /* ---------------------------- millennium ----------------------------- */

@@ -1,0 +1,9 @@
+[
+  ["goto", -243.91, -890.81],
+  ["eval", "JSON.stringify({px: window.__hd && window.__hd.player ? Math.round(window.__hd.player.x) : null, pz: window.__hd && window.__hd.player ? Math.round(window.__hd.player.z) : null, wg: window.__wgame ? window.__wgame.phase : 'none'})"],
+  ["wait", 800],
+  ["eval", "JSON.stringify({px: Math.round(window.__hd.player.x), pz: Math.round(window.__hd.player.z)})"],
+  ["wait", 1200],
+  ["eval", "JSON.stringify({px: Math.round(window.__hd.player.x), pz: Math.round(window.__hd.player.z)})"],
+  ["shot", "tmp-chaseprobe"]
+]

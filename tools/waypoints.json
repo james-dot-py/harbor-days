@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-12T18:58:48.957Z",
- "count": 111,
+ "generated": "2026-07-13T02:39:22.878Z",
+ "count": 114,
  "waypoints": [
   {
    "id": "spawn",
@@ -2112,7 +2112,7 @@
      "dist": 10
     }
    ],
-   "expectation": "INSIDE WRIGLEY, the arrival reveal (task 055): standing on the brown warning track behind home plate, the empty bowl opens up — real GRASS field with mow arcs and the infield diamond ahead, the dark-green IVY wall arcing across the outfield, green bleachers rising behind it, and the tall hand-turned green SCOREBOARD (clock + line grid, OPEN HOUSE line) high over center field. Quiet cathedral: NO crowd anywhere. Camera passes clean through the open home-plate field gate — no wall clipping."
+   "expectation": "GAME DAY arrival on the warning track behind home: the field opens ahead with the ball game ON — chibi players at their positions (home-white pinstripe-suggestion figures with blue caps vs road-grey figures), a battery near the plate/mound, the ivy outfield wall, and the green scoreboard with a LIVE line score across the bowl; the grandstand sections behind hold a seated chibi crowd. Never a black frame, never the empty cathedral."
   },
   {
    "id": "wb-concourse",
@@ -2129,7 +2129,7 @@
     {
      "yaw": 0.86,
      "pitch": 0.08,
-     "dist": 7
+     "dist": 4.2
     },
     {
      "yaw": -0.59,
@@ -2137,7 +2137,7 @@
      "dist": 9
     }
    ],
-   "expectation": "The field-level CONCOURSE ring behind home: concrete walkway underfoot, the low brick field wall with its pale cap on the field side, and the seating bowl rising behind — green bench rows on concrete steps, green steel columns, the upper deck + tilted roof overhead, the dark entry-tunnel portal with its MARQUEE GATE → CLARK & ADDISON sign. Reads as a real walkable ring, not scenery; empty of people."
+   "expectation": "The field-level CONCOURSE ring behind home on game day: concrete walkway underfoot, the low brick field wall with its pale cap, and the seating bowl rising behind — now POPULATED with a seated chibi crowd on the green bench rows; green steel columns, the upper deck + tilted roof, the dark entry-tunnel portal with its MARQUEE GATE → CLARK & ADDISON sign. A hot-dog vendor chibi may be working the ring. Reads as a real walkable ring on game day."
   },
   {
    "id": "wb-bowl-from-seats",
@@ -2166,7 +2166,7 @@
      "dist": 7
     }
    ],
-   "expectation": "From a climbable seating section's upper rows (bench rows stepping down below, handrail line visible): the whole bowl reads in one frame — the green field with the diamond, the ivy outfield wall, and the green scoreboard with clock/pennants across the bowl. The under-deck soffit may frame the top of shot (the classic under-the-upper-deck Wrigley view)."
+   "expectation": "From a climbable seating section's upper rows: the GAME-DAY bowl in one frame — neighboring sections filled with rows of seated chibi crowd (colored torsos), the green field with the diamond and chibi fielders at their positions, the ivy outfield wall, and the scoreboard with a live line score across the bowl. The under-deck soffit may frame the top of shot."
   },
   {
    "id": "wb-ivy",
@@ -2220,7 +2220,67 @@
      "dist": 5.5
     }
    ],
-   "expectation": "THE CHASE MOMENT: the mayor is trespassing ON THE GRASS in the outfield, and the ump — a dark-suited chibi official — is visibly EN ROUTE across the grass toward the camera from his home-plate post (mid-field, mid-sprint, 8-25 m out depending on load timing; limbs swinging); the empty grandstand + upper deck rise behind his charge line. Reads as playground tag, not menace. NEVER a black/post-eject frame (stands sit ~40 m of chase path from the post)."
+   "expectation": "THE CHASE MOMENT: the mayor is trespassing ON THE GRASS in the outfield, and the ump — a dark-suited chibi official — is visibly IN PURSUIT: mid-sprint across the grass, anywhere from just off his home-plate post to looming right behind the mayor (load timing varies; limbs swinging either way); the CROWDED grandstand + upper deck rise behind his charge line (the crowd reacts to the trespass), and game-day fielders may stand in frame. Reads as playground tag, not menace. NEVER a black/post-eject frame (the walkthrough passes slowref=1, which lets him sprint but never land the tag during shots).",
+   "q": "slowref=1"
+  },
+  {
+   "id": "wb-seated",
+   "area": "wrigleyville",
+   "cell": "wrigley-bowl",
+   "x": -275.88,
+   "z": -846.67,
+   "framings": [
+    {
+     "yaw": 2.2,
+     "pitch": 0.24,
+     "dist": 5.5
+    }
+   ],
+   "expectation": "THE SEATED SPECTATOR FRAME (auto-sit via bg=seat): the mayor SITS on a green bench in the climbable wedge, framed by a settled spectator camera that holds both the seated mayor and the field beyond — the game visible on the diamond (fielders/battery), seated crowd in neighboring sections, the scoreboard across the bowl. Must NOT read as the default chase cam staring at a standing mayor's back; the mayor is visibly seated and the field is the subject.",
+   "q": "bg=seat"
+  },
+  {
+   "id": "wb-scoreboard-game",
+   "area": "wrigleyville",
+   "cell": "wrigley-bowl",
+   "x": -228.33,
+   "z": -932.42,
+   "framings": [
+    {
+     "yaw": 2.75,
+     "pitch": -0.34,
+     "dist": 8
+    },
+    {
+     "yaw": 2.93,
+     "pitch": -0.3,
+     "dist": 10
+    }
+   ],
+   "expectation": "THE SCOREBOARD READ from the center-field warning track, looking up: the green hand-turned board fills the upper frame with a LEGIBLE line score — inning digits in the VISITORS and CUBS box rows, run totals under R, the amber at-bat indicator, outs lamps by the clock, and a game-day message line. Clock + pennant masts + the W flag (furled or flying) up top. Digits crisp enough to read numbers."
+  },
+  {
+   "id": "wb-stretch",
+   "area": "wrigleyville",
+   "cell": "wrigley-bowl",
+   "x": -244.91,
+   "z": -838.07,
+   "framings": [
+    {
+     "yaw": -2.04,
+     "pitch": 0.14,
+     "dist": 7
+    },
+    {
+     "x": -228.33,
+     "z": -932.42,
+     "yaw": 2.75,
+     "pitch": -0.3,
+     "dist": 9
+    }
+   ],
+   "expectation": "THE SEVENTH-INNING STRETCH (bg=stretch preloads mid-stretch): the seated crowd sways in visible SYNCHRONY — torsos leaning together across whole sections (a coherent shared lean, not idle jitter) — and the scoreboard message area shows the stretch line (e.g. 7TH INNING STRETCH). Golden dusk, full bowl; the coziest frame in the game.",
+   "q": "bg=stretch"
   },
   {
    "id": "mp-arrival",

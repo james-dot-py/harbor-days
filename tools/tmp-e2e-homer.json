@@ -1,0 +1,16 @@
+[
+  ["goto", -275.88, -846.67],
+  ["wait", 700],
+  ["eval", "JSON.stringify({sc: window.__wgame.score, ph: window.__wgame.phase})"],
+  ["key", "e"],
+  ["wait", 1600],
+  ["eval", "JSON.stringify({seated: window.__wgame.seated})"],
+  ["shot", "e2e-homer-01-seated"],
+  ["wait", 9000],
+  ["eval", "JSON.stringify({sc: window.__wgame.score, ph: window.__wgame.phase, mode: window.__wgame.mode})"],
+  ["shot", "e2e-homer-02-after"],
+  ["keydown", "w"], ["wait", 400], ["keyup", "w"],
+  ["wait", 900],
+  ["eval", "JSON.stringify({seated: window.__wgame.seated})"],
+  ["shot", "e2e-homer-03-stood"]
+]
