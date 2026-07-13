@@ -138,7 +138,7 @@ let TRAP_TEST=null;
 function canMove(nx,nz){
   if(jsk.on)return isWater(nx,nz)||(walkable(nx,nz)&&surfaceY(nx,nz)<=-0.55);  // beach at low shores only
   if(walkable(nx,nz))return true;
-  return isWater(nx,nz)&&(jphys.air||jsk.wadeT>0.35)&&(state.speedMult||1)<=1.05; // jump/wade in (not on a Divvy)
+  return isWater(nx,nz)&&(jphys.air||jsk.wadeT>0.35)&&!(state.rideSpeed>0)&&(state.speedMult||1)<=1.05; // jump/wade in (not on a Divvy: rideSpeed>0 = mounted; speedMult keeps the pre-existing hot-dog-buff no-wade)
 }
 function onRect(x,z){for(const r of walkRects)if(x>=r.x1&&x<=r.x2&&z>=r.z1&&z<=r.z2)return r;return null}
 function walkable(x,z){
@@ -214,7 +214,8 @@ function frame(now){
   const kAt=cellKind();
   skate.on=!!(kAt&&kAt(player.x,player.z)==='ice');
   state.onIce=skate.on;
-  const spd=(jsk.on?(runF?12:8):(runF?9.5:4.2)*(state.speedMult||1))*(game.running?1:0);
+  const rideSpd=state.rideSpeed||0;   // >0 only while mounted on a Divvy — the bike owns its absolute m/s, decoupled from the 4.2/9.5 walk-run base so riding always out-paces walking (task 066)
+  const spd=(rideSpd>0?rideSpd:(jsk.on?(runF?12:8):(runF?9.5:4.2)*(state.speedMult||1)))*(game.running?1:0);
   let leanT=0;
   if(skate.on){
     const cur=Math.hypot(player.vx,player.vz);
@@ -394,7 +395,7 @@ function frame(now){
   const shx=(Math.random()-0.5)*fw.shake*0.5,shy=(Math.random()-0.5)*fw.shake*0.5,shz=(Math.random()-0.5)*fw.shake*0.5;
   camera.position.set(camPos.x+shx,camPos.y+shy,camPos.z+shz);
   camera.lookAt(pvx,pvy+0.1+Math.tan(upT)*horiz*1.35,pvz);
-  const fovT=50+(runF&&sp>6?4:0)+(jphys.air?1.2:0);   // gentle speed/air FOV kick
+  const fovT=50+(rideSpd>0?clamp((sp-7)*0.7,0,6):(runF&&sp>6?4:0))+(jphys.air?1.2:0);   // gentle speed/air FOV kick (+ a matching bike tier: eases from ~+2.5 cruising to +6 sprinting)
   if(Math.abs(camera.fov-fovT)>0.02){camera.fov=lerp(camera.fov,fovT,1-Math.exp(-5*dt));camera.updateProjectionMatrix()}
   skyGroup.position.set(camera.position.x,0,camera.position.z);
   fw.shake=Math.max(0,fw.shake-dt*1.6);

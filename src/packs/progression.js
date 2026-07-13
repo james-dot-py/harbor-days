@@ -9,8 +9,12 @@
 //       Wrigleyville cell (Addison stop, Gallagher Way edge, the Cubby corner
 //       at Clark & Addison — see the cell-tagged DOCKS table). Grab at ANY
 //       dock to MOUNT: a pale-blue bike appears under the mayor (spinning
-//       spoked wheels, forward pose). On-trail = fast (x1.9), off-trail = slow
-//       + wobble (x0.8). R = bell. E anywhere = hop off -> the bike slides back
+//       spoked wheels, forward pose). Riding always OUT-PACES walking: on-trail
+//       cruise 10.5 m/s (beats the 9.5 shift-run), off-trail 6.6 (sluggish +
+//       wobble, still > the 4.2 walk); SHIFT / full-joystick adds a gentle
+//       1.5x sprint tier. Speed is decoupled from the walk/run base — main.js
+//       reads state.rideSpeed while mounted (task 066). R = bell. E anywhere =
+//       hop off -> the bike slides back
 //       to the nearest dock IN THE SAME CELL (nearestDockIn); a cell change
 //       while riding (boarding the Red Line, any cell exit) auto-docks it in
 //       the origin cell first. Journal tracks Divvy metres + docks discovered
@@ -46,7 +50,7 @@ import { mayor, mparts } from '../character.js';
 import { collide } from '../props.js';
 import { pathSamples } from '../paths.js';
 import { coastQuery, tierAt } from '../coast.js';
-import { keys } from '../input.js';
+import { keys, joy } from '../input.js';
 import { activeCell } from '../cells.js';
 
 // ------------------------------ scratch (no per-frame alloc) -----------
@@ -63,6 +67,7 @@ function groundY(x,z){                    // terrace height (rocks) else park y=
 //  session state
 // ===================================================================== //
 state.divvyMeters = state.divvyMeters || 0;
+state.rideSpeed = 0;   // >0 ONLY while mounted (main.js reads it as the bike's absolute m/s, decoupled from walk/run)
 
 // ===================================================================== //
 //  1) HONORARY STREET SIGNS
@@ -195,7 +200,7 @@ function nearestDockIn(x,z,cell){
 }
 function nearestDock(x,z){ return nearestDockIn(x,z,activeCell()); }
 const bike={mounted:false,returning:false,retT:0,group:null,spins:[],wheelA:0,
-            onTrail:true,checkT:0,wob:0,bellCd:0,grabs:[],off:null,retDock:DOCKS[0],mountCell:'lakefront'};
+            onTrail:true,checkT:0,wob:0,sprint:0,bellCd:0,grabs:[],off:null,retDock:DOCKS[0],mountCell:'lakefront'};
 
 // --- on-trail test: bucket pathSamples into a coarse grid, scan 3x3 ---
 const GRID=new Map(), CELL=2.6;
@@ -215,14 +220,15 @@ function nearTrail(px,pz){
   return false;
 }
 
-// --- speedMult composition (see header) ---
-let _spmBike=1,_spmLast=null;
-function setBikeFactor(f){
-  let base;
-  if(_spmLast!==null && state.speedMult===_spmLast) base=state.speedMult/_spmBike;  // nobody else touched it
-  else base=state.speedMult;                                                         // buff (etc.) set a fresh base
-  state.speedMult=base*f; _spmBike=f; _spmLast=state.speedMult;
-}
+// --- bike speed (decoupled from the walk/run base) ---
+// A bike must always out-pace being on foot, so the Divvy carries its OWN absolute
+// speed (m/s) rather than a multiplier on the 4.2/9.5 walk base — otherwise the
+// walk-run's 9.5 base let a SHIFT-runner outrun a non-shift rider (owner, task 066).
+// main.js consults state.rideSpeed while mounted; the walk/jetski path is untouched.
+const BIKE_ONTRAIL=10.5;      // trail cruise — clearly beats the 9.5 shift-run
+const BIKE_OFFTRAIL=6.6;      // grass: sluggish + wobble, still faster than the 4.2 walk
+const BIKE_SPRINT=1.5;        // SHIFT / full-joystick sprint tier (x base) — within the 1.4-1.6 brief
+const BIKE_SPRINT_RATE=3.5;   // gentle spin-up / spin-down (~0.65 s to ~90%; no instant velocity step)
 
 // --- geometry: a spinning wheel (torus rim + spokes + hub) ---
 function makeWheel(R){
@@ -326,12 +332,13 @@ function buildDocks(){
 
 function mount(player){
   if(bike.mounted)return;
-  bike.mounted=true; bike.returning=false; bike.wheelA=0; bike.wob=0;
+  bike.mounted=true; bike.returning=false; bike.wheelA=0; bike.wob=0; bike.sprint=0;
   bike.mountCell=activeCell();
   bike.group.visible=true;
+  state.rideSpeed=BIKE_ONTRAIL;   // seed a >0 ride speed at once so main.js switches to the bike model this frame
   for(const g of bike.grabs) g.enabled=false; bike.off.enabled=true;
   bike.off.x=player.x; bike.off.z=player.z;
-  toast("DIVVY'D","R = bell · trail = fast · E = hop off");
+  toast("DIVVY'D","SHIFT to sprint · R = bell · E = hop off");
 }
 function dismount(dockCell){
   if(!bike.mounted)return;
@@ -341,7 +348,7 @@ function dismount(dockCell){
   bike.retDock=nearestDockIn(bike.group.position.x,bike.group.position.z,dockCell||activeCell());
   // restore rig + speed
   mparts.armL.rotation.z=-0.25; mparts.armR.rotation.z=0.25; mayor.rotation.z=0;
-  setBikeFactor(1);
+  state.rideSpeed=0; bike.sprint=0;   // back on foot — main.js reverts to the walk/run model
   for(const g of bike.grabs) g.enabled=true; bike.off.enabled=false;
   toast('docked','rolled back to the nearest dock');
 }
@@ -359,8 +366,12 @@ function updateBike(dt,player){
   if(bike.mounted){
     // throttle the on-trail probe
     bike.checkT-=dt; if(bike.checkT<=0){ bike.checkT=0.12; bike.onTrail=nearTrail(player.x,player.z); }
-    const factor=bike.onTrail?1.9:0.8;
-    setBikeFactor(factor);
+    // sprint: SHIFT (desktop) or full-deflection joystick (mobile) — the SAME run
+    // mapping main.js uses — ramps a gentle 0->1 spin factor so top speed eases in.
+    const sprinting=keys.has('shift')||joy.len>0.92;
+    bike.sprint+=((sprinting?1:0)-bike.sprint)*(1-Math.exp(-BIKE_SPRINT_RATE*dt));
+    const base=bike.onTrail?BIKE_ONTRAIL:BIKE_OFFTRAIL;
+    state.rideSpeed=base*(1+(BIKE_SPRINT-1)*bike.sprint);   // absolute m/s (main.js reads this while mounted)
     // wobble target: gentle lean when off-trail
     const speed=Math.hypot(player.vx,player.vz);
     const wobTgt=bike.onTrail?0:Math.sin(game.tNow*7)*0.11*clamp(speed/3,0.15,1);

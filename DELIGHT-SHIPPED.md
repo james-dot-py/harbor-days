@@ -372,3 +372,8 @@ cut becomes a revert task.
   the streaker gag, cozy edition. — the wrigley-bowl pocket cell (seats in
   the climbable wedges, scoreboard in CF; src/packs/wrigley-game.js)
   — task 064
+- The Divvy finally FEELS like a bike: grab one and you cruise at 10.5 m/s —
+  faster than a full-tilt run — with SHIFT (or a full joystick shove) kicking
+  in a gentle 1.5x sprint and a matching FOV lean. Speed is the whole fantasy
+  of grabbing a Divvy. — lakefront/Wrigleyville (src/packs/progression.js)
+  — task 066
