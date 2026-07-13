@@ -27,42 +27,42 @@ feasibility inside perf + single-file constraints.
     silhouettes — and the field-trespass REF CHASE (grass → the ump chases at
     6.9 m/s; tagged → EJECTED outside, ticket gone; cozy re-entry loop).
 
+- **Millennium Park + Grant Park** ("millennium") — hard cell via the ridable
+  Red Line (Belmont ⇄ Addison ⇄ Monroe; downtown Red Line is the State St
+  subway, the kiosk-at-the-park-edge compression a recorded standing
+  liberty). Queue 039–049 + 050-056 polish: Cloud Gate homage, Pritzker
+  ribbons + Great Lawn + trellis, Crown Fountain face-towers + splash play,
+  Lurie Garden, BP bridge serpentine, Michigan Ave streetwall. **SIGNED OFF
+  2026-07-11** (task 053, refs/millennium-park/SIGNOFF.md). Grant Park EXPANSION
+  (owner-directed 2026-07-11, queue 057-062): Art Institute (lions + Nichols
+  Bridgeway), Butler Field with Lollapalooza live, all of Maggie Daley Park
+  (play garden, climbing walls, skating ribbon), BP bridge across Columbus.
+  **SHIPPED + SIGNED OFF 2026-07-12** (task 062 — SIGNOFF.md addendum;
+  22-waypoint walkthrough green, worst view 478/480). Polish continues only
+  on owner report.
+
 ## In progress
 
-- **Millennium Park** — OWNER-PICKED 2026-07-11; planner pipeline generated
-  2026-07-11 as queue 039–049 (SCOUT 039 → LAYOUT 040 → BUILD 041 cell shell /
-  042 Red Line downtown extension / 043 Cloud Gate hero / 044 Pritzker +
-  Great Lawn / 045 Crown Fountain / 046 Lurie + BP bridge → DELIGHT 047 →
-  POLISH 048 → SIGNOFF 049). Hard cell reached via the ridable Red Line
-  extended Belmont ⇄ Addison ⇄ Monroe (downtown Red Line is the State St
-  subway; the kiosk-at-the-park-edge compression is a recorded standing
-  liberty). Anchor set: Cloud Gate (playful toon "bean" — copyrighted
-  artwork, homage not replica, same register as the bar likenesses),
-  Pritzker Pavilion ribbons + Great Lawn + trellis, Crown Fountain
-  face-towers + splash play, Lurie Garden, the BP bridge serpentine,
-  Michigan Ave streetwall as the west backdrop wall. Sources per standing
-  rules: refs/millennium-park/ osm.json + Wikimedia; Google imagery banned;
-  owner photos gold when supplied.
-  **EXPANSION (owner-directed 2026-07-11 evening, queue 057-062):** the cell
-  grows into Grant Park proper — the Art Institute (lions + Nichols
-  Bridgeway), Butler Field with LOLLAPALOOZA live, ALL of Maggie Daley Park
-  (play garden, climbing walls, skating ribbon = unparked 059), and the BP
-  bridge fully built out across Columbus. Scout/layout 057 → builds 058-061
-  → polish + sign-off addendum 062. **SHIPPED + SIGNED OFF 2026-07-12
-  (task 062 — refs/millennium-park/SIGNOFF.md addendum): all four owner
-  punch-list items closed (walls-as-islands, BP band walkability, Nichols
-  entrance + landing), 22-waypoint walkthrough green, worst view 478/480.
-  Millennium+Grant polish continues only on owner report; the next planner
-  run selects Montrose per the owner pick below.**
+- **Montrose Harbor and the Magic Hedge** ("montrose") — OWNER-PICKED
+  2026-07-11; planner pipeline generated 2026-07-13 as queue 067–076
+  (SCOUT 067 → LAYOUT 068 → BUILD 069 map-extension shell / 070 harbor +
+  the hook / 071 Magic Hedge hero / 072 beach + dunes + plovers /
+  073 Cricket Hill → DELIGHT 074 → POLISH 075 → SIGNOFF 076). CONTIGUOUS
+  1:2 growth per the owner directive — no hard cell: the lakefront map
+  itself extends north past the z −812 fence line toward Montrose Ave
+  (4400 N ≈ z −1200). Anchor set: the Magic Hedge on Montrose Point
+  (hero — hedgerow + birders + scopes + open-lake horizon), Montrose
+  Harbor with its south mouth + the curling fishing HOOK pier, Cricket
+  Hill (the first walkable hill), Montrose Beach + beach house + The Dock
+  + the dunes natural area (the real piping-plover home — the shipped
+  dog-beach Monty & Rose liberty gets ruled on in 068). Determinism law
+  for the growth: own coast pieces out of shared COAST_SEGS, new ribbons
+  via pathSamples2, local seeds, zero new instanced buckets (millennium's
+  worst view sits at 478/480 and instanced buckets draw globally).
+  Sources per standing rules: refs/montrose/ osm.json + Wikimedia in the
+  WORLD frame; Google imagery banned; owner photos gold when supplied.
 
 ## Candidates (famous Chicago spots, seeded per §5.3)
-
-- Montrose Harbor and the Magic Hedge — adjacent north; extends the contiguous
-  lakefront world; birding + harbor variety. **OWNER-PICKED NEXT (2026-07-11):
-  after the Grant Park expansion (queue 057-062) ships, the next planner run
-  selects THIS — build the lakefront north to Montrose per the original plan
-  (contiguous 1:2 growth, no hard cell: the map itself extends past the
-  Irving Park gate). Do not re-litigate the roster.**
 - North Avenue Beach — adjacent south; the chess pavilion + boat-shaped
   beach house silhouette.
 - Lincoln Park Zoo and conservatory — adjacent south-west; free zoo, iconic
