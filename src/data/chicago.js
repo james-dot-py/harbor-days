@@ -875,7 +875,7 @@ export const SKYLINE_TOWERS = {
 // minimap world->canvas mapping and landmark dots. The world is very tall
 // now (z -850..320); px/unit is kept near-uniform (mild ~1.5x horizontal
 // spread for legibility) so shapes read true and the open lake letterboxes.
-export const MAP = { x0:-170, z0:-850, w:576, h:1275, cw:304, ch:412 };   // h 1170->1275 so the new south lawn/corner (to z~415) fits; ch/cw unchanged (canvas keeps its aspect, the tall map just packs a touch tighter vertically)
+export const MAP = { x0:-170, z0:-1560, w:576, h:1985, cw:304, ch:412 };   // MONTROSE growth (v0.6): z0 -850->-1560, h 1275->1985 so the north stretch (to z~-1516) fits; bottom stays z+425; ch/cw unchanged -> the taller map packs tighter vertically (the HUD minimap aspect flip -> baseline.png regen)
 export const MAP_GOLF = { x0:60, x1:205, z0:-790, z1:-440, color:'#8fce74' };
 export const MAP_LANDMARKS = [
   { x:60,  z:-100, c:'#d0705c', r:6 },   // harbor house
