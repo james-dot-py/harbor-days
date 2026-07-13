@@ -47,3 +47,4 @@ import './artinstitute.js';   // the Art Institute — steps lunch pair, lion lu
 import './lolla.js';   // LOLLAPALOOZA live — crowd, band, festival set, dance circle (task 061)
 import './wrigley-game.js';   // GAME DAY inside the bowl — the ball game, crowd, seats, stretch (task 064)
 import './montrose-beach.js';   // Montrose Beach life — wandering beachgoers + piping-plover sign (task 072)
+import './cricket-hill.js';   // Cricket Hill — the walkable kite mound + flyers/kites tableau (task 073)

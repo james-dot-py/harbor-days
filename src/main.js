@@ -157,6 +157,7 @@ function walkable(x,z){
 function surfaceY(x,z){
   const cs=cellSurf();if(cs)return cs(x,z);   // active cell owns surface height
   const r=onRect(x,z);if(r)return r.h;
+  const hh=CH.cricketHillH(x,z);if(hh!==null)return hh;   // task 073: Cricket Hill analytic mound (on LAND, walkable via pip)
   const bh=beachH(x,z);if(bh!==null)return bh;
   const q=coastQuery(x,z);
   if(q&&q.ae<1.2&&q.lat>0.15){const t=tierAt(q.lat,q.z);if(t)return t.h}

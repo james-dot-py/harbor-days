@@ -400,3 +400,11 @@ cut becomes a revert task.
   teal canvas awning, colorful umbrellas, string lights, 'THE DOCK' on the sign,
   and beachgoers milling with a drink — the north-beach hangout. — The Dock at
   Montrose Beach (src/structures.js buildTheDock) — task 072
+- CLIMB CRICKET HILL. The map's first walkable HILL: a broad grassy mound above
+  the harbor you can actually walk UP — all 8 directions, jump and land on the
+  slope, no cliff, no elevator. Kite-flyers stand on the summit with red, yellow
+  and blue diamond kites swaying on their strings against the sunset, bow tails
+  trailing. From the top the harbor's hook breakwater, the basin, and the open
+  lake lay out below — the earned view Chicagoans climb it for. Walk up and it
+  tells you it's the north side's favorite kite (and winter-sled) spot. —
+  Cricket Hill (src/data/chicago.js cricketHillH, src/packs/cricket-hill.js) — task 073

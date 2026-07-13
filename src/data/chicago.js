@@ -361,6 +361,34 @@ export function beachWalkable(x,z){                // the beachH!==null path (do
   return true;                                     // Montrose sand (dune/building carves handled earlier in walkable)
 }
 
+// ---- CRICKET HILL (v0.6, task 073) — the map's first walkable HILL ---------
+// Chicago's kite mound, inland-WEST of Montrose Harbor (comfort station osm
+// z-1319; here at game z-1315, clear WEST of the re-routed trail x160-180 and
+// EAST of the LSD berm). An ANALYTIC grassy dome in the beachH/tierAt lineage:
+// a SINGLE shared surface function so the engine (main.js/coast.js surfaceY) and
+// tools/walkprobe.mjs never fork. The profile is a radial smoothstep — FLAT top
+// (a standable summit) + ZERO-slope rim — so the mound blends seamlessly into the
+// y=0 lawn carpet with NO cliff seam, and there is NO walk RECT anywhere on it
+// (the whole footprint sits on LAND, already walkable via pip(LAND); only the
+// SURFACE HEIGHT is added). Zero-slope rim + gentle max grade (~H*1.5/min(rx,rz)
+// ≈ 0.39) means the base has no step-up "elevator" and walking down never trips
+// main.js's player.y-surf>0.5 airborne check. The dome MESH + dressing live in
+// packs/cricket-hill.js; this module owns only the surface math (+ the footprint
+// the pack and gen-waypoints cite). Height ~7 m (the "~7 m class" from the brief).
+export const CRICKET_HILL = {
+  cx:112, cz:-1315,          // summit centre (inland-west of the harbor basin at x186)
+  rx:31, rz:27,              // elliptical base radii — footprint x81..143, z-1288..-1342
+  height:7.0,                // summit height (m)
+  grass:0x77c268,            // a touch deeper/cooler than lawn 0x7ecb6f so the mass reads, but blends at the rim
+};
+export function cricketHillH(x,z){                  // height (m) on the mound, or null off it
+  const H=CRICKET_HILL;
+  const dx=(x-H.cx)/H.rx, dz=(z-H.cz)/H.rz, u=Math.hypot(dx,dz);
+  if(u>=1)return null;                              // off the mound -> fall through to lawn/coast/beach
+  const s=1-u;                                      // 1 at summit, 0 at rim
+  return H.height*s*s*(3-2*s);                      // smoothstep dome: flat top + zero-slope rim
+}
+
 // scattered mottled-grass circles across the whole park
 export const GRASS_PATCHES = { count:45, xr:[16,225], zr:[-790,300], radius:[2.5,7], scaleX:[1,1.8], tries:40, segs:18, color:0x72c163 };
 

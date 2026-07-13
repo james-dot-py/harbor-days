@@ -235,6 +235,28 @@ add('mt-dock', 'lakefront', 'lakefront', 216, -1473, [
   { yaw: 3.14, pitch: 0.15, dist: 12 },    // wider/higher — the deck + bar on the sand, beach context
 ]);
 
+// CRICKET HILL (task 073): the map's FIRST walkable HILL, inland-west of the
+// harbor. Two hand-authored stands (elevated summit + lawn base). The summit
+// camera pulls back DOWNHILL (behind the look direction) into clear air, never
+// into the slope. mt-crickethill-summit stands ON the mound (surfaceY lifts the
+// player to ~7 m); the earned view looks SSE/SE down over the harbor's hook
+// breakwater + basin + the open lake, kite-flyers flanking. mt-crickethill-base
+// stands on the lawn SOUTH of the mound looking NORTH at its dome silhouette with
+// the kites aloft against the sky.
+{
+  const H = CH.CRICKET_HILL;
+  add('mt-crickethill-summit', 'lakefront', 'lakefront', H.cx, H.cz, [
+    { yaw: 0.72, pitch: 0.16, dist: 15 },  // SSE down over the harbor HOOK breakwater + basin water, flyers flanking, open lake left
+    { yaw: 0.95, pitch: 0.15, dist: 16 },  // S-SE: harbor + Park Bait shack + open lake (a kite-flyer's raised arm foreground)
+    { yaw: 0.90, pitch: 0.20, dist: 18 },  // wider/higher — the whole earned vista (harbor + trail + open lake below)
+  ]);
+  add('mt-crickethill-base', 'lakefront', 'lakefront', H.cx, H.cz + 43, [
+    { yaw: 3.14, pitch: 0.06, dist: 16 },  // due NORTH at the dome SILHOUETTE — 3 kites aloft w/ tails against the sky
+    { yaw: 2.88, pitch: 0.06, dist: 15 },  // NNE — the mound + kites + the low sun, flyers on the ridge
+    { yaw: 3.14, pitch: 0.13, dist: 19 },  // wider/higher — the whole broad grassy mound, flyers + kites on the crest
+  ]);
+}
+
 // Diversey ENTERABLE bay (task 028): stand on the ground hitting deck at a
 // middle bay's hitting spot and look NORTH down the range — the axis-aligned
 // interior framing for the bay pocket (a cross-body camera sits in a divider);

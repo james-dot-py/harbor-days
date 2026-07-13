@@ -68,6 +68,7 @@ function walkable(x,z){
 }
 function surfaceY(x,z){
   const r=onRect(x,z);if(r)return r.h;
+  const hh=CH.cricketHillH(x,z);if(hh!==null)return hh;   // task 073: Cricket Hill analytic mound (mirror of main.js surfaceY)
   const bh=beachH(x,z);if(bh!==null)return bh;
   const q=coastQuery(x,z);
   if(q&&q.ae<1.2&&q.lat>0.15){const t=tierAt(q.lat,q.z);if(t)return t.h}
@@ -1128,6 +1129,61 @@ for(const [x,z] of [[199,-1440],[196,-1445],[202,-1432]]) expect(`beach house ha
 for(const [x,z] of [[206,-1440],[192,-1440]]) expect(`sand/lawn just outside the beach house (${x},${z}) walkable`,walkable(x,z),true);
 for(const [x,z] of [[216,-1484],[212,-1482],[220,-1486]]) expect(`The Dock deck (${x},${z}) walkable`,walkable(x,z),true);
 expect('The Dock deck surface at deckY',surfaceY(216,-1484),CH.THE_DOCK.deckY);
+
+// ===== Task 073: CRICKET HILL — the walkable analytic mound (engine <-> probe lockstep) =====
+console.log('\n--- Task 073: Cricket Hill is walkable everywhere (no cliff/hole; whole mound on LAND) ---');
+{
+  const H=CH.CRICKET_HILL;
+  // grid: summit + rings at r/rx = 0.25,0.5,0.75,0.95 over all 8 bearings -> every
+  // sample must be walkable (the mound never carves a hole) AND surfaceY must equal
+  // cricketHillH (engine <-> probe share the one definition).
+  const BEAR=[[1,0],[0.7071,0.7071],[0,1],[-0.7071,0.7071],[-1,0],[-0.7071,-0.7071],[0,-1],[0.7071,-0.7071]];
+  let bad=0,mism=0;
+  for(const rf of [0,0.25,0.5,0.75,0.95]) for(const [bx,bz] of BEAR){
+    const x=H.cx+bx*H.rx*rf, z=H.cz+bz*H.rz*rf;
+    if(!walkable(x,z))bad++;
+    const want=CH.cricketHillH(x,z); if(want!==null&&Math.abs(surfaceY(x,z)-want)>1e-9)mism++;
+  }
+  expect(`whole mound grid walkable (${bad} unwalkable of 33)`,bad,0);
+  expect(`surfaceY == cricketHillH across the mound (${mism} mismatches)`,mism,0);
+  expect('summit walkable',walkable(H.cx,H.cz),true);
+  expect(`summit at full height (${H.height} m)`,+surfaceY(H.cx,H.cz).toFixed(3),H.height);
+}
+console.log('\n--- Task 073: the dome slopes DOWN monotonically to grade in all 8 directions, no cliff, rim blends to lawn ---');
+{
+  const H=CH.CRICKET_HILL;
+  const BEAR=[[1,0],[0.7071,0.7071],[0,1],[-0.7071,0.7071],[-1,0],[-0.7071,-0.7071],[0,-1],[0.7071,-0.7071]];
+  // sample at the WORST-CASE per-frame stride (max run 9.5 m/s * clamped dt 0.05 =
+  // 0.475 m) — main.js's "stepped off an edge" airborne check (player.y-surf>0.5)
+  // fires per FRAME, so the gentle mound is safe iff no single 0.475 m step drops
+  // more than 0.5 m. Step out to just past the rim on all 8 bearings.
+  const STRIDE=0.475, STEPS=Math.ceil((Math.max(H.rx,H.rz)+2)/STRIDE);
+  let allMono=true, maxStep=0;
+  for(const [bx,bz] of BEAR){
+    let prev=surfaceY(H.cx,H.cz);
+    for(let r=1;r<=STEPS;r++){
+      const rr=r*STRIDE;
+      const y=surfaceY(H.cx+bx*rr, H.cz+bz*rr);
+      if(y>prev+1e-6)allMono=false;                  // must never rise going outward
+      maxStep=Math.max(maxStep,prev-y);              // biggest single-frame drop
+      prev=y;
+    }
+  }
+  expect('mound steps down monotonically outward on all 8 bearings',allMono,true);
+  // no false-airborne / no cliff seam: no single per-frame stride drops > 0.5 m.
+  expect(`no cliff: max per-frame drop ${maxStep.toFixed(3)} m < 0.5`,maxStep<0.5,true);
+  // rim blends to the lawn: just OUTSIDE the footprint the surface is flat grade
+  expect('lawn just outside the west rim is grade 0',surfaceY(H.cx-H.rx-2,H.cz),0);
+  expect('lawn just outside the north rim is grade 0',surfaceY(H.cx,H.cz-H.rz-2),0);
+  expect('cricketHillH null off the mound',CH.cricketHillH(H.cx+H.rx+2,H.cz),null);
+}
+console.log('\n--- Task 073: the base is clear of TRAIL_MONTROSE (no trail on the mound) ---');
+{
+  const H=CH.CRICKET_HILL;
+  let onMound=0;
+  for(const [x,z] of CH.TRAIL_MONTROSE){const dx=(x-H.cx)/H.rx,dz=(z-H.cz)/H.rz;if(Math.hypot(dx,dz)<1)onMound++;}
+  expect(`no TRAIL_MONTROSE node on the mound footprint (${onMound})`,onMound,0);
+}
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 process.exit(fail?1:0);
