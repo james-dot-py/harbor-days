@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-13T07:14:38.121Z",
- "count": 120,
+ "generated": "2026-07-13T08:33:11.362Z",
+ "count": 123,
  "waypoints": [
   {
    "id": "spawn",
@@ -497,6 +497,81 @@
     }
    ],
    "expectation": "PARK BAIT (task 070): the little Montrose Harbor bait & tackle shop on the west shore — a small one-storey shack with a pitched roof and a legible 'PARK BAIT' sign facing the harbor, sitting on the mainland just back from the promenade with the basin water and docks beyond. The map's north-harbor landmark shop; reads small, signed, and endearing (the bar-likeness register), NOT a generic box, the sign readable and not mirrored."
+  },
+  {
+   "id": "mt-beach",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 215,
+   "z": -1456,
+   "framings": [
+    {
+     "yaw": -0.7,
+     "pitch": 0.06,
+     "dist": 12
+    },
+    {
+     "yaw": 0,
+     "pitch": 0.05,
+     "dist": 14
+    },
+    {
+     "yaw": 0.35,
+     "pitch": 0.09,
+     "dist": 16
+    }
+   ],
+   "expectation": "MONTROSE BEACH (task 072): the city's big wild beach — standing on broad walkable SAND looking down its length, the composition OPENS UP: a long low sweep of pale sand, open blue lake with a low horizon to one side, and the historic Montrose Beach House (a long cream two-storey pavilion with a rounded ship-like solarium 'prow' + terracotta roof + rooftop deck rail) anchoring the far end. A scatter of colorful towels/umbrellas/coolers dots the dry sand (endearing beach life), the roped dune area sits off toward the Point. Reads unmistakably as Chicago's north beach — SAND (not lawn, not revetment steps), continuous and walkable down to a gentle waterline; NOT a hole, NOT a concrete edge, the beach house present and ship-like (not a plain box)."
+  },
+  {
+   "id": "mt-dunes",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 222,
+   "z": -1421,
+   "framings": [
+    {
+     "yaw": 0,
+     "pitch": 0.05,
+     "dist": 10
+    },
+    {
+     "yaw": -0.4,
+     "pitch": 0.05,
+     "dist": 9
+    },
+    {
+     "yaw": 0.28,
+     "pitch": 0.09,
+     "dist": 12
+    }
+   ],
+   "expectation": "THE MONTROSE DUNES + PLOVERS (task 072): the quiet, protective natural area at the beach's SE corner by the Point — a low rope-and-post line rings a patch of raised sand mounds tufted with tall dune grasses, a small honest 'PIPING PLOVER NESTING AREA' sign reads on the rope line, and a pair of little piping plovers (pale sandy birds, black neckband, orange legs) with a fluffy chick nest inside. Cozy and understated (rope + grasses + two small birds + one sign) — NOT a zoo exhibit, NOT walk-through: the roped interior is clearly set apart, the birds read as birds at this distance, the sign is legible and not mirrored."
+  },
+  {
+   "id": "mt-dock",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 216,
+   "z": -1473,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.08,
+     "dist": 10
+    },
+    {
+     "yaw": 2.85,
+     "pitch": 0.06,
+     "dist": 9
+    },
+    {
+     "yaw": 3.14,
+     "pitch": 0.15,
+     "dist": 12
+    }
+   ],
+   "expectation": "THE DOCK AT MONTROSE BEACH (task 072): the seasonal open-air beach BAR at the beach's north end — a raised weathered-wood deck with an L-shaped bar counter under a teal canvas awning, colorful beach umbrellas, warm string-light glow, and a legible 'THE DOCK' canvas sign facing the sand. A few beachgoer NPCs mill around it. The bar-likeness register (canvas signage + umbrellas, no interior needed); reads endearing and unmistakably a beach bar on the sand, the sign readable and not mirrored, NOT a generic box, NOT floating."
   },
   {
    "id": "dv-bay-deck",

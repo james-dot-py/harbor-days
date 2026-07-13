@@ -1091,6 +1091,133 @@ function buildParkBait(){
   collide(B.x,B.z,3.6);                                // footprint (modest; clears the trail to the west)
 }
 
+// ---- Montrose Beach House — the historic ship-like bathing pavilion --------
+// A long two-storey cream hall (axis N-S) with a ROUNDED solarium "prow"
+// bulging EAST toward the lake, a low terracotta hip roof + ship-deck rail, an
+// arched glow-window band on the lake face, and an atlas-folded name sign.
+// Individual frustum-culled meshes; zero rng (all numbers from CH.BEACH_HOUSE).
+// Local +x = EAST (lake). The closed hall is carved from walk in chicago.js
+// (footRect); only the round prow gets a collider (052 law).
+function buildBeachHouse(){
+  const B=CH.BEACH_HOUSE,grp=new THREE.Group();
+  const hw=B.hallW,hd=B.hallD,hh=B.hallH,pr=B.prowR,ex=hw/2;
+  const wallM=toon(B.wall),roofM=toon(B.roof),trimM=toon(B.trim),glowM=bmat(B.glow),drM=toon(B.deckRail);
+
+  // plinth + main hall + belt course + top cornice
+  const plinth=new THREE.Mesh(new THREE.BoxGeometry(hw+0.3,0.4,hd+0.3),trimM);plinth.position.y=0.2;grp.add(plinth);
+  const hall=new THREE.Mesh(new THREE.BoxGeometry(hw,hh,hd),wallM);hall.position.y=hh/2;grp.add(hall);
+  const belt=new THREE.Mesh(new THREE.BoxGeometry(hw+0.14,0.22,hd+0.14),trimM);belt.position.y=hh*0.5;grp.add(belt);
+  const cornice=new THREE.Mesh(new THREE.BoxGeometry(hw+0.14,0.22,hd+0.14),trimM);cornice.position.y=hh-0.15;grp.add(cornice);
+
+  // rounded solarium PROW on the EAST end, centred on the hall length. A cream
+  // cylinder + a wraparound glass band (open-ended glow ring) + a terracotta cap.
+  const prow=new THREE.Mesh(new THREE.CylinderGeometry(pr,pr,hh*0.82,16),wallM);prow.position.set(ex,hh*0.41,0);grp.add(prow);
+  const glass=new THREE.Mesh(new THREE.CylinderGeometry(pr+0.05,pr+0.05,1.4,16,1,true),glowM);glass.position.set(ex,hh*0.55,0);grp.add(glass);
+  const cap=new THREE.Mesh(new THREE.ConeGeometry(pr,1.0,16),roofM);cap.position.set(ex,hh*0.82+0.5,0);grp.add(cap);
+
+  // low hip roof: a broad terracotta slab + a smaller box on top (suggests pitch)
+  const hip=new THREE.Mesh(new THREE.BoxGeometry(hw+1.0,0.4,hd+1.0),roofM);hip.position.y=hh+0.2;grp.add(hip);
+  const hipTop=new THREE.Mesh(new THREE.BoxGeometry(hw-2.0,0.5,hd-2.0),roofM);hipTop.position.y=hh+0.6;grp.add(hipTop);
+
+  // rooftop deck rail (the ship-deck signature): thin posts round the perimeter +
+  // a thin top rail on each side. Individual meshes, frustum-culled.
+  const rx=ex,rz=hd/2,ry0=hh+0.6,postG=new THREE.BoxGeometry(0.08,0.7,0.08);
+  for(const sx of[-1,1])for(let k=0;k<=3;k++){
+    const p=new THREE.Mesh(postG,drM);p.position.set(sx*rx,ry0,-rz+2*rz*k/3);grp.add(p);
+  }
+  for(const sz of[-1,1]){const p=new THREE.Mesh(postG,drM);p.position.set(0,ry0,sz*rz);grp.add(p);}
+  for(const sx of[-1,1]){const r=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.06,2*rz),drM);r.position.set(sx*rx,ry0+0.33,0);grp.add(r);}
+  for(const sz of[-1,1]){const r=new THREE.Mesh(new THREE.BoxGeometry(2*rx,0.06,0.06),drM);r.position.set(0,ry0+0.33,sz*rz);grp.add(r);}
+
+  // arched glow-window band on the EAST (lake) face, upper storey — flanking the
+  // solarium (north + south of the prow). Each = a framed glow pane.
+  for(const wz of[-8.5,-6.8,6.8,8.5]){
+    const wf=new THREE.Mesh(new THREE.BoxGeometry(0.06,1.7,1.1),trimM);wf.position.set(ex+0.01,hh*0.62,wz);grp.add(wf);
+    const pane=new THREE.Mesh(new THREE.BoxGeometry(0.12,1.5,0.9),glowM);pane.position.set(ex+0.04,hh*0.62,wz);grp.add(pane);
+  }
+
+  // NAME SIGN on the EAST face above the prow, reading from the sand/lake. Own
+  // CanvasTexture, font shrink-to-fit; FrontSide plane + solid trim backing box
+  // (its rear face is plain trim, never mirrored text). Rotated PI/2 to face +x.
+  const cv=document.createElement('canvas');cv.width=720;cv.height=128;const g=cv.getContext('2d');
+  g.fillStyle='#2c3e50';g.fillRect(0,0,720,128);
+  g.strokeStyle='#e9dcc0';g.lineWidth=8;g.strokeRect(10,10,700,108);
+  g.fillStyle='#f5ecd6';g.textAlign='center';g.textBaseline='middle';
+  let fs=72;g.font=`800 ${fs}px "Trebuchet MS",sans-serif`;
+  while(g.measureText(B.sign).width>660&&fs>18){fs-=2;g.font=`800 ${fs}px "Trebuchet MS",sans-serif`;}
+  g.fillText(B.sign,360,70);
+  const stex=new THREE.CanvasTexture(cv);stex.anisotropy=4;
+  const sw=4.5,sh=0.8,sgrp=new THREE.Group();
+  const frame=new THREE.Mesh(new THREE.BoxGeometry(sw+0.18,sh+0.18,0.08),trimM);frame.position.z=-0.05;sgrp.add(frame);
+  const board=new THREE.Mesh(new THREE.PlaneGeometry(sw,sh),curveMat(new THREE.MeshBasicMaterial({map:stex})));sgrp.add(board);
+  sgrp.position.set(ex+0.1,hh+1.0,0);sgrp.rotation.y=Math.PI/2;grp.add(sgrp);   // faces +x (lake); sign lifted above the roofline so it clears the hip slab
+
+  grp.position.set(B.x,0,B.z);grp.rotation.y=B.ry;scene.add(grp);
+  collide(B.x+B.hallW/2,B.z,B.prowR);                 // round prow only (hall carved from walk in chicago.js)
+}
+
+// ---- The Dock — the seasonal open-air beach BAR (canvas signage + umbrellas,
+// NO interior). A raised weathered-wood deck (WALKABLE) + an L-shaped bar
+// counter under a teal canvas awning, colourful umbrellas, string-light glow,
+// and a 'THE DOCK' canvas sign. Individual frustum-culled meshes; zero rng.
+// Group ry=PI (faces SOUTH, world +z, toward arriving players).
+function buildTheDock(){
+  const D=CH.THE_DOCK,grp=new THREE.Group();
+  const dw=D.deckW,dd=D.deckD,dy=D.deckY;
+  const woodM=toon(D.wood),barM=toon(D.bar),awnM=toon(D.awning),trimM=toon(D.trim),glowM=bmat(D.glow);
+  const wtoX=lx=>D.x-lx,wtoZ=lz=>D.z-lz;             // group is ry=PI: world = D - local
+
+  // raised wood deck (top at y=deckY) + a darker edge fascia skirt
+  const deck=new THREE.Mesh(new THREE.BoxGeometry(dw,0.3,dd),woodM);deck.position.y=dy-0.15;grp.add(deck);
+  const fascia=new THREE.Mesh(new THREE.BoxGeometry(dw+0.15,0.28,dd+0.15),barM);fascia.position.y=dy-0.14;grp.add(fascia);
+  // register the deck as WALKABLE (this rect is mirrored in tools/walkprobe.mjs — keep identical)
+  walkRects.push({x1:D.deckRect.x0,x2:D.deckRect.x1,z1:D.deckRect.z0,z2:D.deckRect.z1,h:D.deckY});
+
+  // L-shaped bar counter (two boxes, ~0.9 tall) with a lighter trim countertop.
+  // Colliders sit INBOARD on the deck so they never strand the player (065 law).
+  const bh=0.9,by=dy+bh/2,inA=dd/2-1.75,inB=dw/2-1.5;
+  const cA=new THREE.Mesh(new THREE.BoxGeometry(dw-2.0,bh,0.7),barM);cA.position.set(0,by,inA);grp.add(cA);
+  const capA=new THREE.Mesh(new THREE.BoxGeometry(dw-1.8,0.1,0.9),trimM);capA.position.set(0,by+bh/2+0.05,inA);grp.add(capA);
+  const cB=new THREE.Mesh(new THREE.BoxGeometry(0.7,bh,dd-3.5),barM);cB.position.set(inB,by,-0.4);grp.add(cB);
+  const capB=new THREE.Mesh(new THREE.BoxGeometry(0.9,0.1,dd-3.3),trimM);capB.position.set(inB,by+bh/2+0.05,-0.4);grp.add(capB);
+  collide(wtoX(2.5),wtoZ(inA),0.9);collide(wtoX(-2.5),wtoZ(inA),0.9);   // counter A
+  collide(wtoX(inB),wtoZ(1.5),0.9);collide(wtoX(inB),wtoZ(-1.5),0.9);   // counter B
+
+  // canvas awning on 4 thin posts over the bar, + two string-light glow bulbs
+  const awZ0=inA+0.2,awZ1=inA-2.8,awX=dw/2-1.0;
+  for(const[px,pz]of[[awX,awZ0],[-awX,awZ0],[awX,awZ1],[-awX,awZ1]]){
+    const post=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,2.7,8),woodM);post.position.set(px,dy+1.35,pz);grp.add(post);
+  }
+  const awn=new THREE.Mesh(new THREE.BoxGeometry(dw-1.6,0.12,(awZ0-awZ1)+0.6),awnM);awn.position.set(0,dy+2.75,(awZ0+awZ1)/2);awn.rotation.x=0.09;grp.add(awn);
+  for(const sx of[-1,1]){const b=new THREE.Mesh(new THREE.SphereGeometry(0.14,8,6),glowM);b.position.set(sx*2.5,dy+2.3,(awZ0+awZ1)/2);grp.add(b);}
+
+  // 4 beach umbrellas just off the deck edges (on the sand); each a small collider
+  const ub=[[dw/2+1.5,2.5],[dw/2+1.5,-2.5],[-dw/2-1.5,2.5],[-dw/2-1.5,-2.5]];
+  ub.forEach(([lx,lz],i)=>{
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,2.4,8),toon(0xd9cbb2));pole.position.set(lx,1.2,lz);grp.add(pole);
+    const can=new THREE.Mesh(new THREE.ConeGeometry(1.2,0.55,10),toon(D.umbCols[i%D.umbCols.length]));can.position.set(lx,2.1,lz);can.rotation.z=0.12;grp.add(can);
+    collide(wtoX(lx),wtoZ(lz),0.35);
+  });
+
+  // 'THE DOCK' sign, high on the awning's south face. FrontSide + solid backing.
+  // Group ry=PI already; sign rotated PI more → net world 0 → FrontSide faces +z
+  // (SOUTH, toward arriving players). Own canvas, shrink-to-fit font.
+  const cv=document.createElement('canvas');cv.width=600;cv.height=128;const g=cv.getContext('2d');
+  g.fillStyle='#1c4b45';g.fillRect(0,0,600,128);
+  g.strokeStyle='#ece3cf';g.lineWidth=8;g.strokeRect(10,10,580,108);
+  g.fillStyle='#f6efe0';g.textAlign='center';g.textBaseline='middle';
+  let fs=80;g.font=`800 ${fs}px "Trebuchet MS",sans-serif`;
+  while(g.measureText(D.sign).width>540&&fs>18){fs-=2;g.font=`800 ${fs}px "Trebuchet MS",sans-serif`;}
+  g.fillText(D.sign,300,70);
+  const stex=new THREE.CanvasTexture(cv);stex.anisotropy=4;
+  const sw=4.0,sh=0.85,sgrp=new THREE.Group();
+  const frame=new THREE.Mesh(new THREE.BoxGeometry(sw+0.18,sh+0.18,0.08),trimM);frame.position.z=-0.05;sgrp.add(frame);
+  const board=new THREE.Mesh(new THREE.PlaneGeometry(sw,sh),curveMat(new THREE.MeshBasicMaterial({map:stex})));sgrp.add(board);
+  sgrp.position.set(0,dy+2.55,awZ1-0.2);sgrp.rotation.y=Math.PI;grp.add(sgrp);
+
+  grp.position.set(D.x,0,D.z);grp.rotation.y=D.ry;scene.add(grp);
+}
+
 export function buildStructures(){
   const POSTS=[],RAILS=[];
   buildDogFence(POSTS,RAILS);
@@ -1100,9 +1227,12 @@ export function buildStructures(){
   buildDiversey(POSTS,RAILS);
   buildCornerPark(POSTS,RAILS);
   fenceRun(CH.MT_HOOK_RAIL.line, {spacing:CH.MT_HOOK_RAIL.spacing, postH:CH.MT_HOOK_RAIL.postH, color:CH.MT_HOOK_RAIL.color, collideR:CH.MT_HOOK_RAIL.collideR}, POSTS, RAILS);
+  fenceRun(CH.MONTROSE_DUNE.fence, {spacing:2.6, postH:0.5, color:0xcbb994, collide:false}, POSTS, RAILS);   // low rope line, NO colliders (dune interior blocked by walk data — 065 law)
   emitFences(POSTS,RAILS);
   buildFieldhouse();
   buildParkBait();
+  buildBeachHouse();
+  buildTheDock();
   buildYachtClub();
   buildGolfClubhouse();
   buildChevron();

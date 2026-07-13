@@ -46,3 +46,4 @@ import './ribbon-skaters.js';   // Maggie Daley Skating Ribbon — arclength loo
 import './artinstitute.js';   // the Art Institute — steps lunch pair, lion luck, sandwich board, Route 66 (task 060)
 import './lolla.js';   // LOLLAPALOOZA live — crowd, band, festival set, dance circle (task 061)
 import './wrigley-game.js';   // GAME DAY inside the bowl — the ball game, crowd, seats, stretch (task 064)
+import './montrose-beach.js';   // Montrose Beach life — wandering beachgoers + piping-plover sign (task 072)

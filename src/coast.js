@@ -103,7 +103,7 @@ export const TIP_SEGS=buildSegs(COAST_TIP);
 // never to COAST_SEGS. Their terraces/piles/faces render inside buildCoast via a
 // local xorshift folded into the existing buckets.
 export const MTR_SEGS=COAST_MTR.map(buildSegs);
-const QUERY_SEGS=[...COAST_SEGS,TIP_SEGS,...MTR_SEGS];
+const QUERY_SEGS=[...COAST_SEGS,TIP_SEGS,...MTR_SEGS.filter((_,i)=>i!==3)];  // task 072: BEACH (idx 3) is SAND (beachH), not a revetment
 export function coastQuery(x,z){
   let best=null,bd2=1e9;
   for(const C of QUERY_SEGS)for(const s of C){
@@ -131,7 +131,7 @@ export function tierAt(lat,zc){       // height on the terraces, or null past th
 // makes basin water read shallow/light (its nearest edge is always close),
 // matching the aerial's greener harbor. One flat list for the hot loop.
 // buildSegs uses NO shared rng -> deterministic; the world's rng order is untouched.
-const SHORE_SEGS=[].concat(...QUERY_SEGS, ...CH.seawallLines({P_START,BASIN_W}).map(buildSegs));
+const SHORE_SEGS=[].concat(...QUERY_SEGS, MTR_SEGS[3], ...CH.seawallLines({P_START,BASIN_W}).map(buildSegs));  // task 072: beach shoreline kept for water color only
 export function shoreDist(x,z){        // approx Euclidean distance (m) to the nearest shoreline
   let bd2=1e18;
   for(let i=0;i<SHORE_SEGS.length;i++){
@@ -147,12 +147,7 @@ export function shoreDist(x,z){        // approx Euclidean distance (m) to the n
 // dog beach — sloped sand cove: dry (h=0) at the north edge, dipping to
 // `depth` at the south waterline. t rises with z (south) so the slope faces
 // the basin water south of the cove.
-export function beachH(x,z){
-  const b=CH.DOG_BEACH.bounds,s=CH.DOG_BEACH.slope;
-  if(x<b.x0||x>b.x1||z<b.z0||z>b.z1)return null;
-  const t=clamp((z-s.ref)/s.span,0,1);
-  return s.depth*smooth(t);
-}
+export function beachH(x,z){const b=CH.DOG_BEACH.bounds,s=CH.DOG_BEACH.slope;if(x>=b.x0&&x<=b.x1&&z>=b.z0&&z<=b.z1){const t=clamp((z-s.ref)/s.span,0,1);return s.depth*smooth(t)}return CH.montroseBeachH(x,z)}
 
 // water mesh (populated by buildCoast; read by the main loop for uTime)
 export let water=null;
@@ -240,7 +235,7 @@ export function buildCoast(){
   // so the wet-stain band / sheet-piles / wall-faces (all rng-free, iterating
   // openRuns) include them — those InstancedMeshes just grow (zero new buckets).
   const VT_MTR=MTR_SEGS.map(vertexTangents);
-  const openRuns=[...COAST_SEGS.map((s,i)=>[s,VTS[i]]),[TIP_SEGS,VT_TIP],...MTR_SEGS.map((s,i)=>[s,VT_MTR[i]])];
+  const openRuns=[...COAST_SEGS.map((s,i)=>[s,VTS[i]]),[TIP_SEGS,VT_TIP],...MTR_SEGS.map((s,i)=>[s,VT_MTR[i]]).filter((_,i)=>i!==3)];  // task 072: beach (idx 3) = sand, no revetment features
 
   // terrace blocks — instanced, jittered for the uneven limestone look.
   // Warm-GRAY concrete family (the real Belmont revetment is a warm gray, not the
@@ -299,6 +294,7 @@ export function buildCoast(){
       const mr=()=>{hm^=hm<<13;hm>>>=0;hm^=hm>>>17;hm^=hm<<5;hm>>>=0;return hm/4294967296;};
       const mj=a=>(mr()*2-1)*a;
       for(let ci=0;ci<MTR_SEGS.length;ci++){
+        if(ci===3)continue;   // task 072: BEACH is sand — no terraces
         const segs=MTR_SEGS[ci],VT=VT_MTR[ci];
         for(let j=0;j<segs.length;j++){
           const s=segs[j],a=VT[j],b=VT[j+1];
@@ -607,6 +603,26 @@ export function buildCoast(){
       pm.position.set((px0+px1)/2,-2.05,-330.5);scene.add(pm);
     }
   }
+
+    // Montrose Beach — the big sand sweep (task 072). A LONE frustum-culled Mesh
+    // (0 draws unless the beach is framed). Height via montroseBeachH: dry inland,
+    // sloping UNDER the lake at the EAST (waterline) edge. The roped dune mounds +
+    // grasses + buildings sit on top (props.js / structures.js); walkability is
+    // beachWalkable + the beachCarved carves (main.js). No shared rng, 0 new bucket.
+    {
+      const MB=CH.MONTROSE_BEACH,m=MB.mesh;
+      const g=new THREE.PlaneGeometry(m.w,m.d,m.segW,m.segD);g.rotateX(-Math.PI/2);
+      const pos=g.attributes.position;
+      for(let i=0;i<pos.count;i++){
+        const wx=pos.getX(i)+m.cx,wz=pos.getZ(i)+m.cz;
+        const h=CH.montroseBeachH(wx,wz);
+        // outside the sand bounds: the EAST fringe keeps dipping below the lake
+        // (no phantom sand wall at the foot); other fringes meet grade at 0.
+        pos.setY(i,h===null?(wx>MB.bounds.x1?MB.slope.depth-0.3:0):h+0.03);
+      }
+      g.computeVertexNormals();
+      const mesh=new THREE.Mesh(g,toon(MB.sand,{}));mesh.position.set(m.cx,0,m.cz);scene.add(mesh);
+    }
 
   // mottled grass patches (instanced — one draw call). Reject any placement
   // outside the LAND polygon (pip test PER TRY); if no land point turns up

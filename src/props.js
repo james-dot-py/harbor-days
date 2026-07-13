@@ -114,6 +114,10 @@ function makeBuoy(x,z,c){
 }
 
 export function buildProps(){
+  // LOCAL xorshift for all Montrose beach/dune content — seeded per data const
+  // so it NEVER touches the shared world rng() (the determinism gate). Zero
+  // shared-rng draws: Montrose only grows buckets AFTER their frozen fill loops.
+  const mkrng=seed=>{let s=(seed>>>0)||1;return()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};};
   // ---- trees ----
   {
     const T=CH.TREES;
@@ -261,7 +265,7 @@ export function buildProps(){
   // ---- grass tufts (small, dense — human scale) ----
   {
     const TU=CH.TUFTS,n=TU.count,tm=toon(TU.color);
-    const tuft=new THREE.InstancedMesh(new THREE.ConeGeometry(0.09,0.3,5),tm,n);
+    const tuft=new THREE.InstancedMesh(new THREE.ConeGeometry(0.09,0.3,5),tm,n+CH.MONTROSE_DUNE.grass.count);
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
     // no grass poking through the entrance monument's decomposed-granite pad
     // (task 023): the scaleY rand is still drawn (rng order frozen), the tuft
@@ -272,6 +276,26 @@ export function buildProps(){
     while(placed<n&&guard++<TU.guard){const x=rand(TU.xr[0],TU.xr[1]),z=rand(TU.zr[0],TU.zr[1]);if(!pip(x,z,LAND))continue;
       const sy=rand(TU.scaleY[0],TU.scaleY[1]);
       M.compose(V.set(x,0.14,z),Q.identity(),onPad(x,z)?S.set(0,0,0):S.set(1,sy,1));tuft.setMatrixAt(placed++,M)}
+    // ---- Montrose DUNE marram grass: grow the tuft bucket in place with a
+    // LOCAL xorshift (zero shared rng — placed already sits at the park-tuft
+    // count above). Taller than park tufts so it reads as beach/dune grass; the
+    // bucket is one green material (r128 toon ignores setColorAt) so grass.color
+    // is expressed via height only. Spills a little onto the sand via grass.fringe.
+    {
+      const DG=CH.MONTROSE_DUNE.grass,db=CH.MONTROSE_DUNE.bounds,fr=DG.fringe,dr=mkrng(DG.seed);
+      const inFringe=(x,z)=>x>=db.x0-fr&&x<=db.x1+fr&&z>=db.z0-fr&&z<=db.z1+fr;
+      for(let k=0;k<DG.count;k++){
+        let x=0,z=0;
+        for(let tries=0;tries<8;tries++){
+          x=db.x0-fr+dr()*(db.x1-db.x0+2*fr);z=db.z0-fr+dr()*(db.z1-db.z0+2*fr);
+          if(CH.inMontroseDune(x,z)||inFringe(x,z))break;
+        }
+        const sy=DG.scaleY[0]+(DG.scaleY[1]-DG.scaleY[0])*dr();
+        const bh=CH.montroseBeachH(x,z),y=(bh==null?0:bh)+0.14;
+        M.compose(V.set(x,y,z),Q.identity(),S.set(1,sy,1));tuft.setMatrixAt(placed++,M);
+      }
+    }
+    tuft.count=placed;                                   // trim any unfilled tail (no stray tuft at origin)
     tuft.instanceMatrix.needsUpdate=true;scene.add(tuft);
   }
 
@@ -423,6 +447,10 @@ export function buildProps(){
     const BL=CH.BEACH_LIFE;
     const twlCols=BL.towelColors.map(c=>new THREE.Color(c));
     const spots=[];
+    // Montrose beach LIFE — ONE local xorshift drives every Montrose spot/color
+    // below (towels + umbrella/cooler picks). Zero shared rng: the rocks fills
+    // stay byte-identical, the Montrose portion comes strictly AFTER.
+    const MBL=CH.MONTROSE_BEACH_LIFE,mr=mkrng(MBL.seed),mspots=[];
     const segs=COAST_SEGS[0];
     for(const s of segs){
       if(s.az<BL.towel.zMin||s.az>BL.towel.zMax)continue;
@@ -434,7 +462,21 @@ export function buildProps(){
         spots.push({x:cx+s.nx*off,z:cz+s.nz*off,y:-tier*p.step+0.045,rot:rand(0,Math.PI*2)});
       }
     }
-    const inst=new THREE.InstancedMesh(new THREE.PlaneGeometry(1.8,0.95),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap,side:THREE.DoubleSide})),spots.length);
+    // dry-sand Montrose towel spots (local rng): dryish sand, clear of the roped
+    // dune / beach house, and off The Dock deck (deckRect expanded 1 m).
+    {
+      const rg=MBL.region,dk=CH.THE_DOCK.deckRect;
+      const onDeck=(x,z)=>x>=dk.x0-1&&x<=dk.x1+1&&z>=dk.z0-1&&z<=dk.z1+1;
+      let tries=0;
+      while(mspots.length<MBL.towels&&tries++<600){
+        const x=rg.xr[0]+mr()*(rg.xr[1]-rg.xr[0]),z=rg.zr[0]+mr()*(rg.zr[1]-rg.zr[0]);
+        const h=CH.montroseBeachH(x,z);
+        if(h===null||h<=-0.5)continue;                   // wet/underwater sand — skip
+        if(CH.beachCarved(x,z)||onDeck(x,z))continue;
+        mspots.push({x,z,y:h+0.05,rot:mr()*6.283});
+      }
+    }
+    const inst=new THREE.InstancedMesh(new THREE.PlaneGeometry(1.8,0.95),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap,side:THREE.DoubleSide})),spots.length+mspots.length);
     const M=new THREE.Matrix4(),S=new THREE.Vector3(1,1,1),V=new THREE.Vector3();
     const tilt=new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2,0,0));
     spots.forEach((d,i)=>{
@@ -442,13 +484,19 @@ export function buildProps(){
       M.compose(V.set(d.x,d.y,d.z),q,S);inst.setMatrixAt(i,M);
       inst.setColorAt(i,twlCols[rng()*twlCols.length|0]);
     });
+    // Montrose towels appended AFTER the rocks fill (local rng, same tilt idiom)
+    mspots.forEach((d,i)=>{
+      const q=new THREE.Quaternion().setFromEuler(new THREE.Euler(0,d.rot,0)).multiply(tilt);
+      M.compose(V.set(d.x,d.y,d.z),q,S);inst.setMatrixAt(spots.length+i,M);
+      inst.setColorAt(spots.length+i,twlCols[(mr()*twlCols.length)|0]);
+    });
     inst.instanceMatrix.needsUpdate=true;inst.instanceColor.needsUpdate=true;scene.add(inst);
 
     // umbrellas (instanced: poles + canopies)
     {
       const umbCols=BL.umbrellaColors.map(c=>new THREE.Color(c)),nU=BL.umbrella.count;
-      const poles=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.045,0.045,2.1,6),toon(0xd9cbb2),nU);
-      const cans=new THREE.InstancedMesh(new THREE.ConeGeometry(1.15,0.55,9),toon(0xffffff,{}),nU);
+      const poles=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.045,0.045,2.1,6),toon(0xd9cbb2),nU+MBL.umbrellas);
+      const cans=new THREE.InstancedMesh(new THREE.ConeGeometry(1.15,0.55,9),toon(0xffffff,{}),nU+MBL.umbrellas);
       const Mu=new THREE.Matrix4(),Qu=new THREE.Quaternion(),Su=new THREE.Vector3(1,1,1),Vu=new THREE.Vector3(),Eu=new THREE.Euler(),Ou=new THREE.Vector3();
       let pu=0;
       for(let i=0;i<nU&&spots.length;i++){
@@ -459,12 +507,22 @@ export function buildProps(){
         Ou.set(0,2.05,0).applyQuaternion(Qu);Mu.compose(Vu.set(bx+Ou.x,by+Ou.y,bz+Ou.z),Qu,Su);cans.setMatrixAt(pu,Mu);
         cans.setColorAt(pu,umbCols[i%umbCols.length]);collide(bx,bz,BL.umbrella.collide);pu++;
       }
+      // Montrose umbrellas at a local-rng subset of mspots (zero shared rng),
+      // same pole/canopy idiom; keep incrementing pu so counts stay correct.
+      for(let i=0;i<MBL.umbrellas&&mspots.length;i++){
+        const d=mspots[(mr()*mspots.length)|0];
+        const bx=d.x+(mr()*2-1)*BL.umbrella.jitter,bz=d.z+(mr()*2-1)*BL.umbrella.jitter,tl=(mr()*2-1)*BL.umbrella.tilt,by=d.y+BL.umbrella.yOff;
+        Eu.set(0,0,tl);Qu.setFromEuler(Eu);
+        Ou.set(0,1.05,0).applyQuaternion(Qu);Mu.compose(Vu.set(bx+Ou.x,by+Ou.y,bz+Ou.z),Qu,Su);poles.setMatrixAt(pu,Mu);
+        Ou.set(0,2.05,0).applyQuaternion(Qu);Mu.compose(Vu.set(bx+Ou.x,by+Ou.y,bz+Ou.z),Qu,Su);cans.setMatrixAt(pu,Mu);
+        cans.setColorAt(pu,umbCols[(mr()*umbCols.length)|0]);collide(bx,bz,BL.umbrella.collide);pu++;
+      }
       poles.count=cans.count=pu;poles.instanceMatrix.needsUpdate=cans.instanceMatrix.needsUpdate=true;cans.instanceColor.needsUpdate=true;scene.add(poles,cans);
     }
     // coolers (instanced)
     {
       const coolCols=BL.coolerColors.map(c=>new THREE.Color(c)),nC=BL.cooler.count;
-      const cool=new THREE.InstancedMesh(new THREE.BoxGeometry(0.55,0.4,0.35),toon(0xffffff,{}),nC);
+      const cool=new THREE.InstancedMesh(new THREE.BoxGeometry(0.55,0.4,0.35),toon(0xffffff,{}),nC+MBL.coolers);
       const Mc=new THREE.Matrix4(),Qc=new THREE.Quaternion(),Sc=new THREE.Vector3(1,1,1),Vc=new THREE.Vector3(),Ec=new THREE.Euler();
       let pc=0;
       for(let i=0;i<nC&&spots.length;i++){
@@ -472,6 +530,13 @@ export function buildProps(){
         const cx=d.x+rand(-BL.cooler.jitter,BL.cooler.jitter),cz=d.z+rand(-BL.cooler.jitter,BL.cooler.jitter),ry=rand(0,3);
         Ec.set(0,ry,0);Qc.setFromEuler(Ec);Mc.compose(Vc.set(cx,d.y+BL.cooler.yOff,cz),Qc,Sc);cool.setMatrixAt(pc,Mc);
         cool.setColorAt(pc,coolCols[i%2?0:1]);pc++;
+      }
+      // Montrose coolers at a local-rng subset of mspots (zero shared rng)
+      for(let i=0;i<MBL.coolers&&mspots.length;i++){
+        const d=mspots[(mr()*mspots.length)|0];
+        const cx=d.x+(mr()*2-1)*BL.cooler.jitter,cz=d.z+(mr()*2-1)*BL.cooler.jitter,ry=mr()*3;
+        Ec.set(0,ry,0);Qc.setFromEuler(Ec);Mc.compose(Vc.set(cx,d.y+BL.cooler.yOff,cz),Qc,Sc);cool.setMatrixAt(pc,Mc);
+        cool.setColorAt(pc,coolCols[(mr()*coolCols.length)|0]);pc++;
       }
       cool.count=pc;cool.instanceMatrix.needsUpdate=true;cool.instanceColor.needsUpdate=true;scene.add(cool);
     }
@@ -779,6 +844,69 @@ export function buildProps(){
       ramp.position.set((L.x0+L.x1)/2,(L.topY+L.botY)/2,(L.z0+L.z1)/2);
       ramp.rotation.z=Math.atan2(L.botY-L.topY,w);     // west (+topY) high, east (+botY) low → slopes into the water
       scene.add(ramp);
+    }
+  }
+
+  // ---- Montrose DUNE natural area: sand mounds + piping-plover story + sign ---
+  // All INDIVIDUAL frustum-culled meshes (fixed CH coords) → +0 draws unless the
+  // dune is framed. ZERO rng of any kind — every value comes from CH data.
+  // No colliders inside the roped block (065 law); only the sign post collides.
+  {
+    // low dune sand mounds — warm-sand top hemispheres, base flush at grade
+    for(const m of CH.MONTROSE_DUNE.mounds){
+      const dome=new THREE.Mesh(new THREE.SphereGeometry(1,12,8,0,Math.PI*2,0,Math.PI/2),toon(0xe0cfa4));
+      dome.scale.set(m.rx,m.h,m.rz);dome.position.set(m.x,0,m.z);scene.add(dome);
+    }
+    // chibi-chunky piping plover (realistic tiny birds vanish at this scale)
+    const mkPlover=(scale,pale,adult)=>{
+      const grp=new THREE.Group();
+      const bodyC=pale?0xeee2c9:0xdcc7a8,headC=pale?0xf2e8d2:0xe8dcc4;
+      const body=new THREE.Mesh(new THREE.SphereGeometry(0.14,8,7),toon(bodyC));body.scale.set(1,0.85,1.4);body.position.y=0.16;grp.add(body);
+      const head=new THREE.Mesh(new THREE.SphereGeometry(0.09,8,7),toon(headC));head.position.set(0,0.26,0.14);grp.add(head);
+      if(adult){
+        const band=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,0.05,10),toon(0x33302a));band.position.set(0,0.22,0.02);grp.add(band);  // black neckband collar
+        const beak=new THREE.Mesh(new THREE.ConeGeometry(0.02,0.07,6),toon(0xe8922e));beak.rotation.x=Math.PI/2;beak.position.set(0,0.24,0.24);grp.add(beak);  // points +z (forward)
+        for(const sx of[-0.05,0.05]){
+          const leg=new THREE.Mesh(new THREE.CylinderGeometry(0.012,0.012,0.13,5),toon(0xe8922e));leg.position.set(sx,0.06,0);grp.add(leg);
+          const eye=new THREE.Mesh(new THREE.SphereGeometry(0.017,6,6),toon(0x1a1712));eye.position.set(sx*0.85,0.29,0.19);grp.add(eye);
+        }
+      }
+      grp.scale.setScalar(scale);return grp;
+    };
+    for(const p of CH.MONTROSE_DUNE.plovers){
+      const bh=CH.montroseBeachH(p.x,p.z),pl=mkPlover(1.6,false,true);   // chibi-chunky so they read from the beach (small birds vanish)
+      pl.position.set(p.x,(bh==null?0:bh)+0.02,p.z);pl.rotation.y=p.ry;scene.add(pl);
+    }
+    {   // the chick — smaller, paler, fluffier; body + head only, no neckband
+      const c=CH.MONTROSE_DUNE.chick,bh=CH.montroseBeachH(c.x,c.z),pl=mkPlover(1.0,true,false);
+      pl.position.set(c.x,(bh==null?0:bh)+0.02,c.z);scene.add(pl);
+    }
+    // honest info sign — own CanvasTexture placard on a post, faces the beach
+    {
+      const SG=CH.MONTROSE_DUNE.sign;
+      const cv=document.createElement('canvas');cv.width=360;cv.height=260;const g=cv.getContext('2d');
+      g.fillStyle='#efe4c8';g.fillRect(0,0,360,260);                       // sand/cream ground
+      g.strokeStyle='#8a7a5c';g.lineWidth=8;g.strokeRect(12,12,336,236);   // thin border
+      // tiny plover glyph (dark silhouette) top-centre
+      g.fillStyle='#4a3b2f';
+      g.beginPath();g.ellipse(180,52,25,15,0,0,Math.PI*2);g.fill();        // body
+      g.beginPath();g.arc(201,40,10,0,Math.PI*2);g.fill();                 // head
+      g.beginPath();g.moveTo(209,40);g.lineTo(222,42);g.lineTo(209,45);g.closePath();g.fill();  // beak
+      g.strokeStyle='#4a3b2f';g.lineWidth=3;
+      g.beginPath();g.moveTo(174,66);g.lineTo(174,80);g.moveTo(186,66);g.lineTo(186,80);g.stroke();  // legs
+      g.textAlign='center';g.textBaseline='middle';
+      const ys=[124,166,206];
+      for(let i=0;i<SG.lines.length;i++){
+        let fs=34;g.font=`700 ${fs}px "Trebuchet MS",sans-serif`;
+        while(g.measureText(SG.lines[i]).width>300&&fs>12){fs-=2;g.font=`700 ${fs}px "Trebuchet MS",sans-serif`;}   // shrink-to-fit
+        g.fillStyle=i===2?'#7a5a3a':'#4a3b2f';g.fillText(SG.lines[i],180,ys[i]);
+      }
+      const tex=new THREE.CanvasTexture(cv);
+      const grp=new THREE.Group();
+      const post=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.9,0.08),toon(0x6b5a3f));post.position.y=0.45;grp.add(post);
+      const backing=new THREE.Mesh(new THREE.BoxGeometry(1.66,1.21,0.06),toon(0x8a7a5c));backing.position.set(0,1.25,-0.05);grp.add(backing);  // solid back — never mirrored text
+      const placard=new THREE.Mesh(new THREE.PlaneGeometry(1.6,1.15),curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide})));placard.position.y=1.25;grp.add(placard);
+      grp.position.set(SG.x,0,SG.z);grp.rotation.y=SG.ry;scene.add(grp);collide(SG.x,SG.z,0.35);   // thin post — walk around
     }
   }
 }

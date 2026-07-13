@@ -36,13 +36,13 @@ function buildSegs(pts){const segs=[];for(let i=0;i<pts.length-1;i++){const ax=p
 const COAST_SEGS=[buildSegs(COAST_MAIN),buildSegs(COAST_PEN),buildSegs(COAST_GOLF),buildSegs(COAST_MOUTH),buildSegs(COAST_CORNER)];
 const TIP_SEGS=buildSegs(COAST_TIP);
 const MTR_SEGS=COAST_MTR.map(buildSegs);        // Montrose stub revetment tops (task 069) — mirror coast.js
-const QUERY_SEGS=[...COAST_SEGS,TIP_SEGS,...MTR_SEGS];  // coastQuery scans the tip + Montrose too (COAST_SEGS stays 5 for props/beach-life)
+const QUERY_SEGS=[...COAST_SEGS,TIP_SEGS,...MTR_SEGS.filter((_,i)=>i!==3)];  // coastQuery scans the tip + Montrose (COAST_SEGS stays 5); task 072: BEACH (idx 3) is SAND (beachH), NOT a revetment — excluded so no walkable tier lingers off the sand
 function tierProfile(zc){const R=CH.TIER_ROCKS;if(zc>R.zMin&&zc<R.zMax){if(zc>R.cornerZ0){const f=clamp((zc-R.cornerZ0)/(R.cornerZ1-R.cornerZ0),0,1);const w=R.w.slice();w[w.length-1]=R.w[w.length-1]+(R.cornerPromW-R.w[w.length-1])*f;return{w,step:R.step}}return{w:R.w,step:R.step}}return{w:CH.TIER_DEFAULT.w,step:CH.TIER_DEFAULT.step}}
 function profileTotal(zc){const p=tierProfile(zc);let s=0;for(const w of p.w)s+=w;return s}
 function inPierChannel(x,z){const P=CH.PIER_CHANNEL;if(!P)return false;if(x<P.x0||x>P.x1||z>P.zMax)return false;const topZ=P.topZ0+(P.topZ1-P.topZ0)*(x-P.x0)/(P.x1-P.x0);return z>=topZ}
 function coastQuery(x,z){let best=null,bd2=1e9;for(const C of QUERY_SEGS)for(const s of C){const px=x-s.ax,pz=z-s.az;let t=px*s.tx+pz*s.tz;t=clamp(t,0,s.len);const cx=s.ax+s.tx*t,cz=s.az+s.tz*t;const ddx=x-cx,ddz=z-cz,d2=ddx*ddx+ddz*ddz;if(d2<bd2){bd2=d2;best={lat:ddx*s.nx+ddz*s.nz,d2,z:cz}}}if(!best)return null;best.ae=Math.sqrt(Math.max(0,best.d2-best.lat*best.lat));if(inPierChannel(x,z))best.lat=1e3;return best}
 function tierAt(lat,zc){const p=tierProfile(zc);let acc=0;for(let i=0;i<p.w.length;i++){acc+=p.w[i];if(lat<=acc)return{h:-i*p.step,i,edge:acc}}return null}
-function beachH(x,z){const b=CH.DOG_BEACH.bounds,s=CH.DOG_BEACH.slope;if(x<b.x0||x>b.x1||z<b.z0||z>b.z1)return null;const t=clamp((z-s.ref)/s.span,0,1);return s.depth*smooth(t)}
+function beachH(x,z){const b=CH.DOG_BEACH.bounds,s=CH.DOG_BEACH.slope;if(x>=b.x0&&x<=b.x1&&z>=b.z0&&z<=b.z1){const t=clamp((z-s.ref)/s.span,0,1);return s.depth*smooth(t)}return CH.montroseBeachH(x,z)}  // task 072: Montrose beach too (shared helper)
 
 // walkRects: finger docks + pier decks (from data)
 const walkRects=[];
@@ -53,11 +53,14 @@ for(const d of CH.DECKS)walkRects.push(d.walk);
   for(const st of D.stairs)walkRects.push({x1:st.x0,x2:st.x1,z1:st.z0,z2:st.z1,h:st.h}); }
 { const B=CH.DIVERSEY.bays.deckRect;              // Diversey ground-tier hitting deck (matches structures.js walkRects.push)
   walkRects.push({x1:B.x0,x2:B.x1,z1:B.z0,z2:B.z1,h:B.h}); }
+{ const D=CH.THE_DOCK.deckRect;                   // task 072: The Dock raised wood deck (matches structures.js walkRects.push)
+  walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:CH.THE_DOCK.deckY}); }
 function onRect(x,z){for(const r of walkRects)if(x>=r.x1&&x<=r.x2&&z>=r.z1&&z<=r.z2)return r;return null}
 
 function walkable(x,z){
   if(onRect(x,z))return true;
-  const bh=beachH(x,z);if(bh!==null)return z>CH.DOG_BEACH.walkZMin;
+  if(CH.beachCarved(x,z))return false;             // task 072: roped dune + beach-house hall (data carve, no collider)
+  const bh=beachH(x,z);if(bh!==null)return CH.beachWalkable(x,z);   // task 072: dog + Montrose sand
   if(pip(x,z,LAND))return true;
   const q=coastQuery(x,z);
   if(q&&q.ae<0.9&&q.lat>-0.6){const t=tierAt(q.lat,q.z);if(t&&q.lat<profileTotal(q.z)-0.3)return true;}
@@ -1080,8 +1083,8 @@ console.log('\n--- Task 069: the Montrose trail runs on the new lawn ---');
 for(const [x,z] of [CH.TRAIL_MONTROSE[1],CH.TRAIL_MONTROSE[3],CH.TRAIL_MONTROSE[6],CH.TRAIL_MONTROSE[9],CH.TRAIL_MONTROSE[11]])
   expect(`Montrose trail (${x},${z})`,walkable(x,z),true);
 
-console.log('\n--- Task 069: Montrose LAWN/BEACH revetment top walkable, open water beyond NOT ---');
-for(const z of [-900,-1400]){   // (-1100,-1250 are now the 070 harbor basin — probed below)
+console.log('\n--- Task 069: Montrose LAWN revetment top walkable, open water beyond NOT ---');
+for(const z of [-900,-1340]){   // (-1100,-1250 are the 070 harbor basin; -1360.. is the 072 beach — probed below)
   const tx=CH.montroseFx(z);
   expect(`revetment top inboard (${(tx-0.6).toFixed(1)},${z})`,walkable(tx-0.6,z),true);
   expect(`open water beyond top (${(tx+14).toFixed(1)},${z}) NOT walkable`,walkable(tx+14,z),false);
@@ -1104,6 +1107,27 @@ for(const [x,z] of [[7,-1207],[10,-1207]]) expect(`berm behind the fence (${x},$
 console.log('\n--- Task 069: north map edge is sealed ---');
 expect('inside the north lawn (150,-1000) walkable',walkable(150,-1000),true);
 expect('past the north map edge (150,-1600) NOT walkable',walkable(150,-1600),false);
+
+console.log('\n--- Task 072: Montrose Beach sand walkable (beachH), roped dune interior NOT ---');
+for(const [x,z] of [[214,-1470],[224,-1450],[230,-1432],[212,-1490],[236,-1400]]) expect(`beach sand (${x},${z}) walkable`,walkable(x,z),true);
+for(const [x,z] of [[218,-1392],[224,-1385],[220,-1405],[228,-1395]]) expect(`dune interior (${x},${z}) BLOCKED`,walkable(x,z),false);
+expect('beach just NORTH of the dune (222,-1420) walkable',walkable(222,-1420),true);
+expect('beach WEST of the dune (208,-1390) walkable',walkable(208,-1390),true);
+expect('beach EAST of the dune (236,-1390) walkable',walkable(236,-1390),true);   // the sand WRAPS the dune (no walk-island)
+expect('wet sand at the waterline (239,-1455) walkable (wade)',walkable(239,-1455),true);
+expect('open lake east of the beach (243,-1455) NOT walkable',walkable(243,-1455),false);
+
+console.log('\n--- Task 072: beach sand slopes DOWN to the lake (dry inland, wet at the waterline) ---');
+console.log(`  montroseBeachH x=214:${CH.montroseBeachH(214,-1450).toFixed(2)}  x=232:${CH.montroseBeachH(232,-1450).toFixed(2)}  x=240:${CH.montroseBeachH(240,-1450).toFixed(2)}  (should trend 0 -> negative)`);
+expect('dry sand inland is ~grade (>-0.2)',CH.montroseBeachH(214,-1450)>-0.2,true);
+expect('sand is underwater at x240 (<-2.0)',CH.montroseBeachH(240,-1450)<-2.0,true);
+expect('montroseBeachH null outside the sand (250,-1450)',CH.montroseBeachH(250,-1450),null);
+
+console.log('\n--- Task 072: beach house hall BLOCKED (solid), The Dock deck WALKABLE ---');
+for(const [x,z] of [[199,-1440],[196,-1445],[202,-1432]]) expect(`beach house hall (${x},${z}) BLOCKED`,walkable(x,z),false);
+for(const [x,z] of [[206,-1440],[192,-1440]]) expect(`sand/lawn just outside the beach house (${x},${z}) walkable`,walkable(x,z),true);
+for(const [x,z] of [[216,-1484],[212,-1482],[220,-1486]]) expect(`The Dock deck (${x},${z}) walkable`,walkable(x,z),true);
+expect('The Dock deck surface at deckY',surfaceY(216,-1484),CH.THE_DOCK.deckY);
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 process.exit(fail?1:0);

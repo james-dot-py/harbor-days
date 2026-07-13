@@ -259,6 +259,108 @@ export const DOG_BEACH = {
   walkZMin:-343,
 };
 
+// ---- MONTROSE BEACH + DUNES (v0.6, task 072) ------------------------------
+// The city's big wild beach, NORTH of the Point. Replaces the 069
+// COAST_MTR_BEACH revetment stub (z -1365..-1500) with SAND: a beachH-style
+// sloped cove (the DOG_BEACH machinery at scale), shared by engine + walkprobe.
+// The sand is dry (h~0) inland (x <= slope.ref) and slopes DOWN in +x (east)
+// tucking UNDER the lake by x~x1 — the waterline. Walkable everywhere in bounds
+// EXCEPT the roped DUNE interior (blocked by DATA, no collider ring — 065 law).
+// Determinism: the sand mesh is a LONE frustum-culled Mesh (0 draws unless the
+// beach is framed); towels/umbrellas/tufts GROW existing instanced buckets via
+// LOCAL seeds (zero new buckets); COAST_MTR_BEACH stays the LAND/QUERY/SHORE
+// boundary but its terraces are EXCLUDED from the coast fold (coast.js) so no
+// concrete renders on the sand.
+export const MONTROSE_BEACH = {
+  bounds:{ x0:200, x1:240, z0:-1500, z1:-1360 },   // sand footprint (walkable except the roped dune)
+  slope:{ ref:227, span:14, depth:-2.7 },          // dry (h~0) at x<=227, dips under the lake by x~241
+  mesh:{ cx:219, cz:-1430, w:46, d:146, segW:36, segD:58 },   // sand render plane (frustum-culled) x196..242
+  sand:0xe8d9b5,
+};
+// dune natural area — the roped, protected SE corner abutting the Point. Its
+// INTERIOR is NON-WALKABLE (montroseBeachH covers it -> beachWalkable returns
+// false via inMontroseDune; NO collider, so no ring-trap). Raised sand mounds +
+// dune grasses (tuft-bucket grow, local seed) + a rope-and-post line (fenceRun,
+// collide:false) + the piping-plover story (2 adults + 1 chick + ONE honest
+// sign). Quiet + protective, not a zoo exhibit.
+export const MONTROSE_DUNE = {
+  bounds:{ x0:210, x1:233, z0:-1414, z1:-1362 },   // BLOCKED interior (no collider)
+  // rope line: E edge (x233) -> N edge (z-1414, faces the beach) -> W edge (x210).
+  // South (z-1362) is the natural Point-side edge, left open. collide:false.
+  fence:[ [233,-1362],[233,-1414],[210,-1414],[210,-1362] ],
+  mounds:[ {x:217,z:-1394,rx:5.5,rz:6.0,h:1.05}, {x:226,z:-1380,rx:4.6,rz:5.2,h:0.8}, {x:220,z:-1407,rx:4.2,rz:4.6,h:0.62} ],
+  grass:{ count:130, seed:0x0d0e17, scaleY:[1.5,2.8], color:0x9fb56b, fringe:5 },  // taller/paler than park tufts; in bounds + a small fringe
+  plovers:[ {x:214,z:-1407,ry:0.6}, {x:225,z:-1405,ry:2.3} ],   // near the NORTH rope so they READ from the mt-dunes stand
+  chick:{ x:219, z:-1408 },
+  sign:{ x:218, z:-1415.5, ry:Math.PI, lines:['PIPING PLOVER','NESTING AREA','— please keep out —'] },  // central on the N rope; faces N (the beach); FrontSide + backing
+};
+// Montrose beach LIFE — towels/umbrellas/coolers scattered on the DRY sand north
+// of the dune, GROWN into the existing rocks beach-life buckets with a LOCAL seed
+// (zero new buckets; the world rng order is untouched). props.js gates each spot
+// on beachWalkable + clearance from the buildings.
+export const MONTROSE_BEACH_LIFE = {
+  seed:0x7205a1,
+  region:{ xr:[209,231], zr:[-1498,-1420] },       // dry-to-mid sand, north of the dune
+  towels:22, umbrellas:8, coolers:5,
+};
+// Montrose Beach House — the historic ship-like bathing pavilion (1920s). Honest
+// toon massing: a long two-storey cream hall (axis N-S) with a ROUNDED solarium
+// "prow" bulging EAST toward the lake, a low terracotta hip roof + rooftop deck
+// rail, an arched window band on the lake face, and an atlas-folded name sign.
+// structures.js builds it (merged statics + frustum-culled). Set back inland
+// (west) of the sand; anchors the beach's south-central end.
+export const BEACH_HOUSE = {
+  x:199, z:-1440, ry:0,          // long axis N-S; solarium/prow + windows face EAST (+x, the sand/lake)
+  hallW:9, hallD:22, hallH:6.2,  // hallW = E-W depth, hallD = N-S length, hallH = two storeys
+  prowR:5.2,                     // rounded solarium radius (east end, lake-facing)
+  wall:0xe7dcc2, roof:0xb15f3e, trim:0x9a8a6a, glow:0xffe1a0, deckRail:0xb7a888,
+  sign:'MONTROSE BEACH HOUSE',
+  footRect:{ x0:194, x1:204, z0:-1452, z1:-1428 },   // closed hall — carved from walk (052 law; prow gets a collider)
+};
+// The Dock at Montrose Beach — the seasonal open-air beach BAR (bar-likeness
+// register: canvas signage, umbrellas, NO interior). A raised weathered-wood
+// deck + an L-shaped bar counter under a canvas awning, colorful umbrellas,
+// string-light glow, and a 'THE DOCK' canvas sign. On the sand at the beach's
+// north end. structures.js builds it (frustum-culled + shared POSTS via fenceRun
+// if needed). Beach NPCs (makeNPC) cluster here (packs/montrose-beach.js).
+export const THE_DOCK = {
+  x:216, z:-1484, ry:Math.PI,    // faces SOUTH down the beach (toward arriving players)
+  deckW:12, deckD:8.5, deckY:0.36,
+  wood:0x9c7a4e, bar:0x6b4e32, awning:0x2fb6a8, trim:0xece3cf, glow:0xffdf9a,
+  umbCols:[0xff6b6b,0xffd93d,0x54a0ff,0x2fb6a8],
+  sign:'THE DOCK',
+  deckRect:{ x0:210, x1:222, z0:-1488, z1:-1480 },   // raised wood deck — WALKABLE (structures.js walkRect + walkprobe mirror)
+};
+// beach walkability helpers — SHARED by engine (main.js/coast.js) and
+// tools/walkprobe.mjs so the two never fork (PITFALLS: walkprobe + engine must
+// share walk definitions). montroseBeachH mirrors beachH's contract: height (m)
+// or null outside the sand. inMontroseDune gates the roped block. beachWalkable
+// answers "is this beach point walkable" for BOTH beaches (dog + Montrose).
+export function montroseBeachH(x,z){
+  const b=MONTROSE_BEACH.bounds,s=MONTROSE_BEACH.slope;
+  if(x<b.x0||x>b.x1||z<b.z0||z>b.z1)return null;
+  const t=Math.max(0,Math.min(1,(x-s.ref)/s.span));
+  return s.depth*(t*t*(3-2*t));                    // smoothstep, matching coast.js smooth()
+}
+export function inMontroseDune(x,z){
+  const d=MONTROSE_DUNE.bounds;
+  return x>=d.x0&&x<=d.x1&&z>=d.z0&&z<=d.z1;
+}
+export function inBeachBuilding(x,z){              // beach house closed hall (The Dock deck is a walkRect, not blocked)
+  const b=BEACH_HOUSE.footRect;
+  return x>=b.x0&&x<=b.x1&&z>=b.z0&&z<=b.z1;
+}
+// blocked BEFORE the sand test in walkable() (works whether or not the spot is
+// on sand): the roped dune + the beach-house hall. No collider -> no ring-trap
+// (065 law). The dune fence rope + the beach-house prow carry their own visual
+// colliders/rope only where they can't strand the player.
+export function beachCarved(x,z){ return inMontroseDune(x,z)||inBeachBuilding(x,z); }
+export function beachWalkable(x,z){                // the beachH!==null path (dog + Montrose sand)
+  const dg=DOG_BEACH.bounds;
+  if(x>=dg.x0&&x<=dg.x1&&z>=dg.z0&&z<=dg.z1)return z>DOG_BEACH.walkZMin;  // dog beach: whole cove walkable
+  return true;                                     // Montrose sand (dune/building carves handled earlier in walkable)
+}
+
 // scattered mottled-grass circles across the whole park
 export const GRASS_PATCHES = { count:45, xr:[16,225], zr:[-790,300], radius:[2.5,7], scaleX:[1,1.8], tries:40, segs:18, color:0x72c163 };
 

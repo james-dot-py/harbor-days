@@ -384,3 +384,19 @@ cut becomes a revert task.
   at the curled tip. The real Montrose "walk out and fish" moment, plus Park
   Bait signed and waiting on the shore. — Montrose Harbor (src/coast.js hook
   mole + entrance light, src/data/chicago.js basin) — task 070
+- THE BIG SAND OPENS UP. Round the Point and the world BREATHES: a long low
+  sweep of Montrose Beach sand, the lake horizon dropping away to the side, the
+  historic ship-like Beach House (rounded solarium prow, terracotta roof,
+  rooftop deck rail, its name up top) anchoring the far end, colorful towels +
+  umbrellas dotting the dry sand. The city's big wild beach. — Montrose Beach
+  (src/coast.js sand mesh, src/structures.js buildBeachHouse) — task 072
+- THE PLOVER DUNES. A hushed roped corner by the Point: low sand mounds tufted
+  with dune grass, a rope-and-post line, and a pair of little piping plovers with
+  a fluffy chick nesting inside behind one honest 'PIPING PLOVER NESTING AREA'
+  sign. Chicago's real Monty & Rose story, cozy — not a zoo. Walk up and the
+  sign tells you fewer than ~80 Great Lakes pairs remain; give 'em room. —
+  Montrose Dunes (src/props.js dune + plovers, src/packs/montrose-beach.js) — task 072
+- THE DOCK. The seasonal beach bar on the sand: a weathered-wood deck under a
+  teal canvas awning, colorful umbrellas, string lights, 'THE DOCK' on the sign,
+  and beachgoers milling with a drink — the north-beach hangout. — The Dock at
+  Montrose Beach (src/structures.js buildTheDock) — task 072

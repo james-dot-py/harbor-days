@@ -215,6 +215,26 @@ add('mt-baitshop', 'lakefront', 'lakefront', 183, -1172, [
   { yaw: -1.55, pitch: 0.13, dist: 11 },   // wider: shop on the mainland + basin/docks context
 ]);
 
+// MONTROSE BEACH (task 072): the city's big wild beach north of the Point — BREADTH
+// after the harbor's masts and the Point's intimacy. All on walkable SAND (beachH).
+// mt-beach: the long open sand + beach house; mt-dunes: the roped plover natural
+// area (quiet, protective); mt-dock: the seasonal beach bar + beachgoers.
+add('mt-beach', 'lakefront', 'lakefront', 215, -1456, [
+  { yaw: -0.7, pitch: 0.06, dist: 12 },    // SW at the beach house's rounded solarium prow — anchors the far end, sand foreground, lake low-left
+  { yaw: 0.0,  pitch: 0.05, dist: 14 },    // due SOUTH down the long sand toward the dune, beach house to the right
+  { yaw: 0.35, pitch: 0.09, dist: 16 },    // SSE, wide — open sand sweep + low lake horizon (breadth)
+]);
+add('mt-dunes', 'lakefront', 'lakefront', 222, -1421, [
+  { yaw: 0.0,  pitch: 0.05, dist: 10 },    // SOUTH into the roped dune — sign + the plover pair + chick, rope line, grasses + mounds
+  { yaw: -0.4, pitch: 0.05, dist: 9 },     // SSW at the 'PIPING PLOVER NESTING AREA' sign + the west plover (sign reads)
+  { yaw: 0.28, pitch: 0.09, dist: 12 },    // SSE toward the east plover + dune mounds + the lake edge (breadth)
+]);
+add('mt-dock', 'lakefront', 'lakefront', 216, -1473, [
+  { yaw: 3.14, pitch: 0.08, dist: 10 },    // NORTH at The Dock's south front — canvas 'THE DOCK' sign, awning, umbrellas
+  { yaw: 2.85, pitch: 0.06, dist: 9 },     // NNE angle — the L bar counter + beachgoers + umbrella colors
+  { yaw: 3.14, pitch: 0.15, dist: 12 },    // wider/higher — the deck + bar on the sand, beach context
+]);
+
 // Diversey ENTERABLE bay (task 028): stand on the ground hitting deck at a
 // middle bay's hitting spot and look NORTH down the range — the axis-aligned
 // interior framing for the bay pocket (a cross-body camera sits in a divider);

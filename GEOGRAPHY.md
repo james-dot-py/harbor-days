@@ -129,6 +129,41 @@ osm x (osm harbor water spans x −230…75, breakwater to osm x 243 — squeeze
   carve here is scatter-free (069 proved it, 0.34% spawn). Mole terraces fold via
   the LOCAL xorshift; moorings/docks/launch/bait use LOCAL seeds; no shared rng.
 
+#### Montrose Beach + the DUNES + The Dock (072) — canonical game coords
+
+The city's big wild beach NORTH of the Point (replaces the 069 `COAST_MTR_BEACH`
+revetment stub, z −1360…−1500). Built with the DOG_BEACH `beachH` machinery at
+SCALE: a walkable SAND sweep, dry inland and sloping DOWN in +x (east) to the
+waterline via `montroseBeachH` (chicago.js, shared by engine + `walkprobe.mjs`).
+East–west COMPRESSED per the standing liberty; the beach's job in the composition
+is BREADTH after the harbor's masts + the Point's intimacy.
+
+- **SAND** (`MONTROSE_BEACH`): footprint x 200…240, z −1360…−1500; slope ref x227
+  span 14 depth −2.7 (grade inland → tucks under the lake ≈ x241). A LONE
+  frustum-culled sand Mesh (coast.js). `COAST_MTR_BEACH` stays the LAND/SHORE
+  boundary but is EXCLUDED from `QUERY_SEGS` + the terrace/pile/face fold (no
+  concrete). Towels/umbrellas/coolers REUSE the rocks beach-life buckets
+  (local-seeded, +0 InstancedMesh buckets).
+- **THE DUNES** (`MONTROSE_DUNE`, the SE natural area abutting the Point): a roped
+  block x 210…233, z −1362…−1414 — INTERIOR NON-WALKABLE (data carve, NO collider
+  — 065 law). Low sand mounds + dune grasses (tuft-bucket grow, local seed) + a
+  rope-and-post line (`fence`, `fenceRun` collide:false) + the PLOVER story: 2
+  adults + 1 chick (chibi-chunky so they read) near the north rope + ONE honest
+  'PIPING PLOVER NESTING AREA' sign. The canonical Monty & Rose home (068 ruling);
+  the Belmont dog-beach pen stays a recorded local homage.
+- **BEACH HOUSE** (`BEACH_HOUSE`, x199, z−1440, faces E): the historic ship-like
+  bathing pavilion — a long two-storey cream hall, a rounded solarium "prow" east,
+  terracotta hip roof + rooftop deck rail, glow-window band, atlas name sign.
+  Anchors the south-central end. Hall footprint carved from walk; prow collider.
+- **THE DOCK** (`THE_DOCK`, x216, z−1484, faces S): the seasonal open-air beach BAR
+  (bar-likeness register) — a raised WALKABLE wood deck (`deckRect`) + L bar counter
+  + teal canvas awning + umbrellas + a 'THE DOCK' canvas sign; beachgoer NPCs +
+  a plover-fact interaction (`packs/montrose-beach.js`).
+- **Waypoints**: `mt-beach` (215,−1456 — long sand + beach house), `mt-dunes`
+  (222,−1421 — roped dune + plovers + sign), `mt-dock` (216,−1473 — the bar).
+- **Determinism**: +0 InstancedMesh buckets, +0 draws to any non-beach view; all
+  scatter local-seeded; spawn shot 0.29% vs baseline (noise). Beach views ≤ 272 draws.
+
 **The stub shore (069, `COAST_MTR_*` — the COAST_TIP determinism precedent).** The
 Montrose shore is FIVE separate revetment pieces, each kept OUT of the shared
 `COAST_SEGS` (props.js beach-life iterates that with the world rng — appending

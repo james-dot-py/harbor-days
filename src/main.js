@@ -144,7 +144,8 @@ function onRect(x,z){for(const r of walkRects)if(x>=r.x1&&x<=r.x2&&z>=r.z1&&z<=r
 function walkable(x,z){
   const cw=cellWalk();if(cw)return TRAP_TEST&&x>=TRAP_TEST.x0&&x<=TRAP_TEST.x1&&z>=TRAP_TEST.z0&&z<=TRAP_TEST.z1?false:cw(x,z);   // active cell owns walkability (TRAP_TEST: debug-only synthetic block, issue 025)
   if(onRect(x,z))return true;
-  const bh=beachH(x,z);if(bh!==null)return z>CH.DOG_BEACH.walkZMin;
+  if(CH.beachCarved(x,z))return false;             // task 072: roped plover dune + beach-house hall (data carve, no collider — 065 law)
+  const bh=beachH(x,z);if(bh!==null)return CH.beachWalkable(x,z);   // dog + Montrose beaches
   if(pip(x,z,LAND))return true;
   const q=coastQuery(x,z);
   if(q&&q.ae<0.9&&q.lat>-0.6){
