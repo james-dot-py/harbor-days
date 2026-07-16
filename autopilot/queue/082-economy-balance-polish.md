@@ -1,5 +1,5 @@
 ---
-id: 081
+id: 082
 area: global
 type: polish
 model: opus
@@ -27,7 +27,7 @@ acceptance: >
   passes; both inputs.
 refs:
   - ECONOMY.md (rates table to finalize)
-  - the 077-080 close-outs (deferred items to burn down)
+  - the 078-081 close-outs (deferred items to burn down)
   - tools/walkprobe.mjs (new save round-trip section), tools/budgets.json
 ---
 

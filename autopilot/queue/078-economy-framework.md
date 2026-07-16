@@ -1,5 +1,5 @@
 ---
-id: 077
+id: 078
 area: global
 type: build
 model: fable
@@ -24,22 +24,23 @@ acceptance: >
   adapter — try localStorage, silently fall back to in-memory when
   unavailable (claude.ai artifact context) — feature-detect ONCE, never
   throw, never nag; save on change (debounced), load on boot, schema
-  version field for future migration. (3) FRAMEWORK (framework.js +
-  index.html shell): `wallet` (earnDibs/spendDibs + coin toast), `bag`
-  (add/remove/has + tote UI, desktop key B + touch button), `favors`
-  (register/offer/advance/complete + journal to-do wiring + turn-in
-  celebrate). (4) PILOT LOOP, end to end, to prove it's fun before 078-080
-  scale it: skip-stones and cornhole pay dibs; a BEACH KIOSK shop at the
-  dog beach sells 3 items (tennis ball — throw fetch for ANY dog anywhere;
-  popcorn bag — crumbs attract bingo birds close; a bucket hat the mayor
-  actually WEARS — first cosmetic, mayor-only rig addition per the 022
-  rules); ONE full favor: the Malört guy asks you to fetch him an Old Style
-  from Sluggers (rides the L! cross-neighborhood!) → reward: dibs + his
-  'burnt band-aid' toast unlocks a duet line. (5) Constraints: UI in the
-  shell (no game logic in index.html — wiring in framework), draw budget
-  ~0 (DOM UI + existing holdItem meshes), determinism untouched, save
-  never contains coords/derived world state (survives layout reworks),
-  both inputs end-to-end (buy, hold, favor round trip), single-file build
+  version field for future migration; adopt/absorb 077's "seen onboarding"
+  flag into the same adapter. (3) FRAMEWORK (framework.js + index.html
+  shell): `wallet` (earnDibs/spendDibs + coin toast), `bag` (add/remove/
+  has + tote UI, desktop key B + touch button), `favors` (register/offer/
+  advance/complete + journal to-do wiring + turn-in celebrate). (4) PILOT
+  LOOP, end to end, to prove it's fun before 079-081 scale it:
+  skip-stones and cornhole pay dibs; a BEACH KIOSK shop at the dog beach
+  sells 3 items (tennis ball — throw fetch for ANY dog anywhere; popcorn
+  bag — crumbs attract bingo birds close; a bucket hat the mayor actually
+  WEARS — first cosmetic, mayor-only rig addition per the 022 rules); ONE
+  full favor: the Malört guy asks you to fetch him an Old Style from
+  Sluggers (rides the L! cross-neighborhood!) → reward: dibs + his 'burnt
+  band-aid' toast unlocks a duet line. (5) Constraints: UI in the shell
+  (no game logic in index.html — wiring in framework), draw budget ~0
+  (DOM UI + existing holdItem meshes), determinism untouched, save never
+  contains coords/derived world state (survives layout reworks), both
+  inputs end-to-end (buy, hold, favor round trip), single-file build
   passes, walkprobe green.
 refs:
   - src/framework.js (state/journal/holdItem/addInteraction/toast — extend, don't fork)

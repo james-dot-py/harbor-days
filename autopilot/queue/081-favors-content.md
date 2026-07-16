@@ -1,12 +1,12 @@
 ---
-id: 080
+id: 081
 area: global
 type: build
 model: fable
 turns: 140
 title: THE FUN LAYER, part 4 — favors across the city + the Mayor-for-Real questline
 acceptance: >
-  Per ECONOMY.md + the 077 favors framework. (1) TEN-ISH hand-authored
+  Per ECONOMY.md + the 078 favors framework. (1) TEN-ISH hand-authored
   FAVORS spread across all four neighborhoods, each a small funny errand
   with named cast, using existing systems as verbs (ride/skate/throw/
   carry/find). Seeds — refine freely, keep the register: the birder lost
@@ -31,12 +31,12 @@ acceptance: >
   sax guy plays) → reward: the MAYORAL REGALIA returns — the retired
   sash + star (022's redesign removed them) as an equippable cosmetic
   over the suit; journal page: the certificate. (4) Persistence via the
-  077 save (favor + stamp state); determinism (favor cast at fixed
+  078 save (favor + stamp state); determinism (favor cast at fixed
   coords, date-seed isolated from world rng — NEVER touches mulberry32);
   budget ~0 (cast reuses makeNPC); both inputs; verify 3 favors + one
   full stamp end-to-end with shots; single-file build; walkprobe green.
 refs:
-  - ECONOMY.md + 077 favors API
+  - ECONOMY.md + 078 favors API
   - src/packs/ casts (birder, ump, vendors, Malört guy, boaters — reuse, don't duplicate)
   - autopilot/queue/done/022-mayor-fidelity-sax-orientation.md (the retired regalia — the questline's crown)
 ---

@@ -1,5 +1,5 @@
 ---
-id: 079
+id: 080
 area: global
 type: build
 model: fable
@@ -8,7 +8,7 @@ title: THE FUN LAYER, part 3 — shops, the item catalog, and HATS
 acceptance: >
   Per ECONOMY.md. (1) SHOPS — four, each diegetic (a counter + keeper NPC,
   the framework `shop` UI listing items/prices/owned): the beach kiosk
-  (077's pilot, expand), the Sluggers counter (Wrigleyville), the Lolla
+  (078's pilot, expand), the Sluggers counter (Wrigleyville), the Lolla
   merch tent (Butler Field), a Michigan-Ave museum cart (by the lions).
   (2) ITEM CATALOG (tote items, each DOES something): hot dog (hold+eat,
   crumbs gag, "no ketchup" toast), Old Style (the favor prop + rooftop
@@ -30,7 +30,7 @@ acceptance: >
   green); both inputs (buy/equip/use each item class once, shots READ);
   single-file build passes.
 refs:
-  - ECONOMY.md + 077 framework (wallet/bag/shop APIs)
+  - ECONOMY.md + 078 framework (wallet/bag/shop APIs)
   - src/character.js (mayor rig — the hat attachment per 022's mayor-only pattern)
   - src/packs/progression.js (radio/R-key for the boombox), watertoys (skip stones)
   - refs/ per-POI dirs for shop-siting reads

@@ -1,12 +1,12 @@
 ---
-id: 078
+id: 079
 area: global
 type: build
 model: opus
 turns: 120
 title: THE FUN LAYER, part 2 — every activity pays dibs
 acceptance: >
-  Per ECONOMY.md (077). Instrument EVERY existing activity with dibs
+  Per ECONOMY.md (078). Instrument EVERY existing activity with dibs
   payouts through wallet.earnDibs — first-time completion bonus + modest
   repeat trickle, rates from the doc (no grind walls, no inflation):
   skip stones (skips ≥ N), cornhole (bags in the hole), mini golf (par or
@@ -25,8 +25,8 @@ acceptance: >
   desktop + touch with shots; determinism untouched (payouts are pure
   state); single-file build; walkprobe green.
 refs:
-  - ECONOMY.md (077's rates — the source of truth)
-  - src/framework.js wallet API (077)
+  - ECONOMY.md (078's rates — the source of truth)
+  - src/framework.js wallet API (078)
   - the activity packs: nature (bingo), cornhole, badminton, diversey (range/golf), progression (Divvy/radio), watertoys, millennium packs (rink/ribbon), wrigley packs (game/cage), moorings
 ---
 
