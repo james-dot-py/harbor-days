@@ -80,8 +80,10 @@ paths, osm z −1200…−1345) ON it and the curling **HOOK pier** off its tip 
 pinched between the beach and the Point at the beach's SE, a **beach house** + **The
 Dock** bar. Mouth at the harbor's SOUTH; hill WEST of the harbor; Point NE; hook
 off the Point; beach north-running; dunes between beach and Point. **070** builds
-the harbor + hook + Park Bait, **071** the Magic Hedge hero, **072** the beach +
-dunes + beach house + The Dock, **073** Cricket Hill.
+the harbor + hook + Park Bait (SHIPPED), **071** the Magic Hedge hero (PENDING —
+its canonical coords are staged below), **072** the beach + dunes + beach house +
+The Dock (SHIPPED), **073** Cricket Hill (SHIPPED; 074 delight + 075 polish also
+shipped — 071 is the one unbuilt piece, then the 076 sign-off).
 
 #### Montrose Harbor + the HOOK (070) — canonical game coords
 
@@ -129,6 +131,56 @@ osm x (osm harbor water spans x −230…75, breakwater to osm x 243 — squeeze
   carve here is scatter-free (069 proved it, 0.34% spawn). Mole terraces fold via
   the LOCAL xorshift; moorings/docks/launch/bait use LOCAL seeds; no shared rng.
 
+#### Montrose Point + the Magic Hedge (071) — canonical game coords (STAGED by 068)
+
+The sanctuary peninsula NE of the harbor (osm way 23946659: real z −1200…−1345,
+east tip x 229.8 osm ≈ 623 game-x east of LSD — `osm.json` provenance.scout067).
+Two recorded compressions place it in-game: the east reach squeezes ~2.8× (the
+standing liberty), and the sanctuary band slides NORTH to sit beyond the hook
+mole (game z −1296…−1362) instead of beside the basin — side-by-side will not
+fit inside xMax 244; the ORDER survives (harbor, then the Point NE of it, dunes
++ beach north of that). Staged data: chicago.js `COAST_MTR_POINT_PTS` +
+`MONTROSE_POINT` (pure, unconsumed — the world stays bit-identical until 071
+flips the piece in coast.js + walkprobe.mjs in ONE commit; never fork the two).
+
+- **COAST piece** (the piece-swap slot idx 2, z −1300…−1362): starts at the mole
+  lake-face end (236,−1300), bulges EAST to the tip apex **(243,−1330)** — the
+  map's eastmost land, 1 m inside WORLD_CLAMP.xMax 244 — and returns to
+  (234.9,−1362) to meet the beach stub (montroseFx(−1365) = 234.92).
+  TIER_DEFAULT terraces face the open lake; own piece OUT of COAST_SEGS
+  (COAST_TIP precedent), folded via the LOCAL xorshift like its neighbors.
+- **SANCTUARY wedge** east of the trail (the trail crosses x 180→199 over
+  z −1312…−1360): meadow region x 188…241, z −1358…−1296 — prairie-grass carpet
+  + goldenrod/wildflower drifts (LOCAL seed), clipped to LAND and ≥2 m clear of
+  every ribbon (the trail cuts the region's NW corner).
+- **THE HEDGE**: polyline (194,−1326)→(206,−1329)→(220,−1332)→(231,−1336) — a
+  ~38 m green wall, h ≈ 2.6 — with birder GAPS at (207,−1329) + (222,−1332.5);
+  birders/scopes cluster on the gaps' SOUTH (path) side. Built from existing
+  instanced shrub/tuft buckets + merged statics (zero new InstancedMesh buckets).
+- **Timber GATEWAY** (191,−1318) just east of the trail's walk ribbon (~x 187) —
+  the scout likeness: two posts + header beam, MONTROSE POINT BIRD SANCTUARY in
+  chunky YELLOW routed letters, split-rail flanks, dark rules board. The name
+  panel is SEPARATE: the cream 'The Magic Hedge — A migrant magnet' interpretive
+  panel at (200,−1320.5) beside the entrance path.
+- **PATHS** (both NEW crushed-limestone ribbons via pathSamples2): the entrance
+  path gate → along the hedge's south flank → around its east end (232,−1338);
+  the tip loop (232,−1338) → the tip clearing (scope spot ~(236,−1334), future
+  land) → back SW along the south shore edge to the mole-root walk (~206,−1299.5)
+  — one continuous trail→gate→hedge→tip→hook connectivity loop, no dead ends.
+- **PHYSICS RULING (waypoint expectations)**: the downtown skyline canNOT render
+  from the Point — the camera far plane is 900 (core.js) and the fog:false
+  skyline backdrop sits ≥ 1,600 m away; likewise the harbor entrance light
+  (239,−1130) is 208 m from the tip stand with fog fully opaque at 210 m.
+  mt-point's final string promises the hook's stone ARM (its near half, 40–190 m,
+  reads through the haze) + the open-lake horizon — NOT the skyline or the light
+  (mt-hook owns the light read at 85 m). Final strings: refs/montrose/BRIEF.md
+  §WAYPOINTS (final).
+- **Waypoints**: `mt-hedge` stand (203,−1319) — hedge + gaps + birders to the NE,
+  lake horizon past the wall; `mt-point` stand (229,−1341) — tip meadow SE over
+  open water, the arm reaching south; optional `mt-hedge-gate` (186,−1316) —
+  east through the gateway. All three stands are lawn TODAY (staged walkprobe
+  expects lock them in).
+
 #### Montrose Beach + the DUNES + The Dock (072) — canonical game coords
 
 The city's big wild beach NORTH of the Point (replaces the 069 `COAST_MTR_BEACH`
@@ -163,6 +215,35 @@ is BREADTH after the harbor's masts + the Point's intimacy.
   (222,−1421 — roped dune + plovers + sign), `mt-dock` (216,−1473 — the bar).
 - **Determinism**: +0 InstancedMesh buckets, +0 draws to any non-beach view; all
   scatter local-seeded; spawn shot 0.29% vs baseline (noise). Beach views ≤ 272 draws.
+
+#### Cricket Hill (073) — canonical game coords (SHIPPED)
+
+The kite mound inland-WEST of the harbor (the landform is unmapped in OSM — only
+its comfort station, osm z −1312…−1326). An ANALYTIC walkable dome, the map's
+first hill: `CRICKET_HILL` cx 112, cz −1315, rx 31, rz 27 (footprint x 81…143,
+z −1342…−1288), height 7.0. `cricketHillH` (chicago.js) is a radial smoothstep
+with a FLAT standable summit and a ZERO-SLOPE rim — no cliff seam, no false
+airborne (max grade ≈ 0.39; no 0.475 m stride drops > 0.5 m) — SHARED by the
+engine (main.js surfaceY) and tools/walkprobe.mjs, the beachH lineage. The whole
+footprint sits on LAND, so only HEIGHT is added (no walk rects). Clear WEST of
+the trail (x 160–180 there) and EAST of the LSD berm. Dome mesh + kites +
+kite-flyer NPCs: packs/cricket-hill.js (073/074). Waypoints:
+`mt-crickethill-summit` (112,−1315), `mt-crickethill-base` (112,−1272).
+
+#### Standing liberties (Montrose — deliberate, keep)
+
+- **East-reach compression ~2.8×** beyond the 1:2 base: the real Point tip /
+  breakwater need ~623–636 game-x east of LSD; the map has ~230 (x-frame
+  paragraph below + `osm.json` provenance.scout067 for the measured numbers).
+  Topological order preserved; distance squeezed.
+- **The hook curl relocated**: the real breakwater's terminal hook curls at the
+  beach's NORTH end (~z −1577, past the map cap −1516); the game curls it at the
+  harbor MOUTH (070) so the signature silhouette survives inside the bounds.
+- **The sanctuary band slides north** (beside-the-basin → beyond-the-mole,
+  z −1296…−1362) — see the Point subsection (071).
+- **Plovers in two places**: the canonical Monty & Rose / Imani story lives at
+  the DUNES (072); the Belmont dog-beach pen stays a recorded local homage —
+  the PLOVER TENSION ruling below.
 
 **The stub shore (069, `COAST_MTR_*` — the COAST_TIP determinism precedent).** The
 Montrose shore is FIVE separate revetment pieces, each kept OUT of the shared
@@ -414,10 +495,11 @@ dog beach or vice-versa.
 - Everything whimsical (boat puns, ope-NPCs, Malört) — style, not geography.
 
 ## Future growth (do not build yet, leave room)
-- North: Montrose (harbor, Magic Hedge, beach + dunes, Cricket Hill) is BUILDING
-  as of v0.6 — see the Montrose section above (069 shell, 070–073 features). Beyond
-  the north edge (z −1520 / ~Wilson Ave), the real Lakefront Trail continues to
-  Foster/Ardmore — the next north growth.
+- North: Montrose is BUILT as of v0.6 (069 shell, 070 harbor + hook, 072 beach +
+  dunes, 073 Cricket Hill, 074 delight, 075 polish) except **071 the Magic Hedge**
+  (canonical coords staged in the Montrose section above; then the 076 sign-off).
+  Beyond the north edge (z −1520 / ~Wilson Ave), the real Lakefront Trail
+  continues to Foster/Ardmore — the next north growth.
 - South: the Diversey range + mini golf are BUILT inland at z +242…+306; the
   south lawn, corner-wrap revetment, Chevron and pier are BUILT to z +415. Further
   Diversey/Lincoln Park growth beyond the SW terminus (the trail ends at a future

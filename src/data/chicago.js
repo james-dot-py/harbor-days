@@ -389,6 +389,40 @@ export function cricketHillH(x,z){                  // height (m) on the mound, 
   return H.height*s*s*(3-2*s);                      // smoothstep dome: flat top + zero-slope rim
 }
 
+// ---- MONTROSE POINT + THE MAGIC HEDGE (v0.6, task 071 — STAGED by 068) -----
+// Layout truth staged by task 068 (GEOGRAPHY.md § Montrose Point — read it
+// first). NOTHING here is consumed by a builder yet: the world stays
+// bit-identical until 071 flips COAST_MTR_POINT from the genCoast stub to
+// COAST_MTR_POINT_PTS in BOTH src/coast.js and tools/walkprobe.mjs (one commit,
+// never fork) and builds the sanctuary from MONTROSE_POINT. Pure data — crChain
+// is deterministic, no rng at import time.
+//
+// The pushed-east Point shore (piece-swap slot idx 2, z -1300..-1362): starts
+// at COAST_MTR_HARBOR_PTS' end (236,-1300), bulges to the tip apex (243,-1330)
+// — the map's eastmost land, 1 m inside WORLD_CLAMP.xMax — and returns to
+// (234.9,-1362) to meet the beach stub start (montroseFx(-1365)=234.92).
+// TIER_DEFAULT terraces face the open lake; own piece OUT of COAST_SEGS
+// (COAST_TIP precedent), folded via the LOCAL xorshift like its neighbors.
+export const COAST_MTR_POINT_PTS = crChain([[236,-1300],[239,-1308],[242,-1318],[243,-1330],[241.5,-1342],[238.5,-1352],[236,-1358],[234.9,-1362]],2.5);
+// The sanctuary itself. Compass care: -z is NORTH; the band's south edge
+// (z -1296) meets the mole-root neck, its north edge (z -1362) the roped dune.
+// Everything at x <= ~231 sits on TODAY's lawn (walkable now — staged walkprobe
+// expects lock it); 'scope'/the tip-loop east arc sit on the FUTURE bulge.
+export const MONTROSE_POINT = {
+  meadow:{ x0:188, x1:241, z0:-1358, z1:-1296 },   // prairie carpet + wildflower drifts (LOCAL seed; clip to LAND, >=2 m clear of every ribbon — the trail cuts the NW corner)
+  gate:{ x:191, z:-1318 },                         // timber gateway just E of the trail's walk ribbon (~x187): posts + header beam, chunky YELLOW routed letters, split-rail flanks, rules board; spans the entrance path (071 sets ry to face arrivals from the trail)
+  panel:{ x:200, z:-1320.5 },                      // the SEPARATE cream 'The Magic Hedge — A migrant magnet' interpretive panel, south side of the entrance path
+  hedge:{ pts:[[194,-1326],[206,-1329],[220,-1332],[231,-1336]], h:2.6, w:2.2,   // the green wall (~38 m), WSW->ENE
+          gaps:[[207,-1329],[222,-1332.5]] },      // birder clearings ON the line; scopes/birders cluster on the gaps' SOUTH (path) side
+  paths:{                                          // both NEW crushed-limestone ribbons via pathSamples2 (never touch TRAIL_MONTROSE's points)
+    entrance:[[191,-1318],[198,-1322],[207,-1325.5],[217,-1328.5],[227,-1331],[232,-1338]],   // gate -> hedge's S flank -> around its east end
+    loop:[[232,-1338],[237,-1333],[239,-1327],[236,-1319],[230,-1312],[222,-1306],[214,-1302],[206,-1299.5]],   // tip clearing -> S shore edge -> the mole-root walk (trail-gate-hedge-tip-hook connectivity, no dead ends)
+  },
+  scope:{ x:236, z:-1334 },                        // tip-clearing tripod-scope spot (FUTURE land: east of today's stub shore, inside the staged piece)
+  trees:[[210,-1344],[223,-1349],[236,-1326]],     // low tree-cluster anchors (refs: scattered clusters in open meadow; keep the hedge sightlines clear)
+  stands:{ hedge:[203,-1319], point:[229,-1341], gate:[186,-1316] },   // the mt-* waypoint stands — all lawn TODAY (GEOGRAPHY §Point waypoints; final strings in refs/montrose/BRIEF.md)
+};
+
 // scattered mottled-grass circles across the whole park
 export const GRASS_PATCHES = { count:45, xr:[16,225], zr:[-790,300], radius:[2.5,7], scaleX:[1,1.8], tries:40, segs:18, color:0x72c163 };
 

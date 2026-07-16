@@ -221,3 +221,66 @@ a recorded local homage. 067 concurs; nothing to relitigate.
 3. **Cricket Hill** (073, shipped).
 4. **Montrose Beach + dunes + beach house + The Dock** (072, shipped).
 5. Park Bait (070/074, shipped) — texture, not silhouette.
+
+---
+
+# 068 LAYOUT ADDENDUM (re-run 2026-07-16) — the Point staged, 071 unblocked
+
+068 originally parked in the Fable outage; 069 authored this plan inline and
+070–075 shipped against it. This re-run closed the layout debt for **the one
+unbuilt piece**: GEOGRAPHY.md § "Montrose Point + the Magic Hedge (071)" is now
+the canonical-coords law (plus a Cricket Hill 073 subsection and a consolidated
+Montrose standing-liberties block), and chicago.js STAGES the 071 layout as
+pure, unconsumed data — `COAST_MTR_POINT_PTS` (the pushed-east shore: mole end
+(236,−1300) → apex (243,−1330) → beach join (234.9,−1362)) and `MONTROSE_POINT`
+(meadow, hedge + gaps, gateway, panel, paths, scope, tree anchors, stands).
+walkprobe carries a staged 068 block proving the piece joins its neighbors and
+every "today's lawn" element is walkable now; its stub-guard expect FAILS on
+purpose the moment 071 flips the piece — replace the block with the real Point
+rules then.
+
+## 071 mechanical checklist (bound by the determinism plan above)
+
+1. Flip `COAST_MTR_POINT` from the genCoast stub to `CH.COAST_MTR_POINT_PTS` in
+   **BOTH** src/coast.js (~line 31) and tools/walkprobe.mjs (~line 24), same
+   commit. Replace walkprobe's staged 068 block with real Point expects.
+2. Sanctuary content from `MONTROSE_POINT` — LOCAL seeds only; ribbons via
+   pathSamples2; zero new InstancedMesh buckets (shrub/tuft/tree/POSTS growth +
+   merge-pool statics with colors already in the pool).
+3. Wire `mt-hedge` + `mt-point` (+ optional `mt-hedge-gate`) into
+   gen-waypoints.mjs and tools/waypoints.expect.json TOGETHER (gen-waypoints
+   exits 1 on an expect id with no waypoint).
+4. Spawn shot at canonical params must diff ≈noise vs baseline.png (the LAND
+   change north of z −1300 must not touch any shared-rng consumer — scatter caps
+   at z ≥ −800, so it won't if the rules above hold).
+
+## WAYPOINTS (final) — stands + framings + expectation strings
+
+Physics constraints measured this task (see GEOGRAPHY §Point PHYSICS RULING):
+camera far plane 900 → the downtown skyline (≥1,600 m) can NOT render from the
+Point, and fog is opaque at 210 m → the harbor light (208 m from the tip stand)
+can't read either. The scout's draft strings are amended accordingly — the
+skyline + light clauses are replaced by the hook's stone ARM (near half 40–190 m,
+reads through the haze) and the open-lake horizon. Everything else survives.
+
+- **mt-hedge** — stand **(203,−1319)** (south of the entrance path, hedge NE).
+  Framings: f0 yaw 2.36 pitch 0.12 dist 10 (NE — camera lands in open meadow SW,
+  no canopy trap); f1 yaw 1.90 pitch 0.10 dist 11 (ENE, down-the-length).
+  EXPECT (final): "A long dense hedgerow runs the meadow like a green wall, with
+  birders at its gaps — tripod scopes and binoculars aimed into the shrubs;
+  chunky bright songbirds perch in the near clearing; a cream interpretive sign
+  on a wood post stands beside a pale crushed-stone path with white
+  rope-and-post lines; past the meadow, open lake to the horizon."
+- **mt-point** — stand **(229,−1341)** (tip meadow, on today's lawn).
+  Framings: f0 yaw 0.79 pitch 0.12 dist 10 (SE over open water); f1 yaw 0.45
+  pitch 0.12 dist 10 (SSE, centers the hook arm). EXPECT (final): "An open
+  prairie meadow on a point over the lake: tall straw-and-green grasses with
+  yellow wildflower drifts inside rope-and-post lines, scattered low tree
+  clusters, and open water running to the horizon; to the south, the hook's
+  long stone arm reaches away down the lake."
+- **mt-hedge-gate** (optional, 071's call) — stand **(186,−1316)** looking east
+  through the gateway (yaw 1.62 pitch 0.10 dist 10; camera on the lawn west of
+  the trail). EXPECT: "A weathered timber gateway spans the sanctuary path —
+  MONTROSE POINT BIRD SANCTUARY in chunky yellow letters on the header beam,
+  split-rail fence at its flanks and a dark rules board at the jamb; beyond it
+  the path curves into meadow and hedge."

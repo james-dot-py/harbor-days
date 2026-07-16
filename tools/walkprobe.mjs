@@ -1185,5 +1185,41 @@ console.log('\n--- Task 073: the base is clear of TRAIL_MONTROSE (no trail on th
   expect(`no TRAIL_MONTROSE node on the mound footprint (${onMound})`,onMound,0);
 }
 
+// ===== Task 068 (STAGED for 071): Montrose Point layout data — pure-data checks =====
+// The Point piece is still the 069 stub; chicago.js stages the 071 layout
+// (COAST_MTR_POINT_PTS + MONTROSE_POINT, consumed by nothing). These expects
+// prove the staged data is sound TODAY: the piece joins its neighbors, stays
+// inside the clamp, and every sanctuary element promised as "on today's lawn"
+// is walkable right now. 071: when you flip COAST_MTR_POINT (line ~24 above +
+// src/coast.js) to COAST_MTR_POINT_PTS, REPLACE this block with the real Point
+// walkability rules + expects (the stub-guard expect below will fail on purpose
+// to remind you).
+console.log('\n--- Task 068 (staged for 071): the Point piece joins its neighbors; sanctuary sits on today\'s lawn ---');
+{
+  const P=CH.COAST_MTR_POINT_PTS, MP=CH.MONTROSE_POINT;
+  const first=P[0], last=P[P.length-1];
+  expect('staged Point piece starts at the mole lake-face end (236,-1300)',Math.hypot(first[0]-236,first[1]+1300)<0.01,true);
+  const bx=CH.montroseFx(-1362);
+  expect(`staged Point piece ends on the stub meander (~${bx.toFixed(1)},-1362) for the beach join`,Math.hypot(last[0]-bx,last[1]+1362)<0.6,true);
+  const maxX=Math.max(...P.map(p=>p[0]));
+  expect(`staged Point apex ${maxX.toFixed(1)} stays >=0.5 inside WORLD_CLAMP.xMax ${CH.WORLD_CLAMP.xMax}`,maxX<CH.WORLD_CLAMP.xMax-0.5,true);
+  expect('staged Point piece runs north monotonically (no LAND tangle; CR overshoot tol 0.3)',P.every((p,i)=>!i||p[1]<P[i-1][1]+0.3),true);
+  expect('staged Point data is finite',P.every(p=>Number.isFinite(p[0])&&Number.isFinite(p[1])),true);
+  // stub guard: the engine/probe piece must still be the 069 stub (max x < 238).
+  // When 071 flips it to COAST_MTR_POINT_PTS this fails -> replace this block.
+  expect('COAST_MTR_POINT is still the 069 stub (071 not yet applied)',Math.max(...COAST_MTR_POINT.map(p=>p[0]))<238,true);
+  // everything staged as "on today's lawn" must be walkable TODAY:
+  const today=[[MP.gate.x,MP.gate.z],[MP.panel.x,MP.panel.z],...MP.hedge.pts,...MP.hedge.gaps,...MP.paths.entrance,MP.stands.hedge,MP.stands.point,MP.stands.gate];
+  let bad=0; for(const [x,z] of today) if(!walkable(x,z))bad++;
+  expect(`staged sanctuary content on today's lawn is walkable (${bad} bad of ${today.length})`,bad,0);
+  // nothing staged strays into the roped dune (z -1362..-1414 is the dune band)
+  let onDune=0; for(const [x,z] of [...MP.hedge.pts,...MP.paths.entrance,...MP.paths.loop]) if(CH.inMontroseDune(x,z))onDune++;
+  expect(`no staged hedge/path node inside the roped dune (${onDune})`,onDune,0);
+  // the future-land elements sit INSIDE the staged piece's reach (west of its
+  // meander at their z) but EAST of today's stub (they need the push):
+  expect('scope spot is on the future bulge (east of today\'s shore)',MP.scope.x>CH.montroseFx(MP.scope.z),true);
+  expect('scope spot is inside the staged apex reach',MP.scope.x<maxX,true);
+}
+
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 process.exit(fail?1:0);
