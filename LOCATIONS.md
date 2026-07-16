@@ -41,26 +41,30 @@ feasibility inside perf + single-file constraints.
   22-waypoint walkthrough green, worst view 478/480). Polish continues only
   on owner report.
 
+- **Montrose Harbor and the Magic Hedge** ("montrose") — OWNER-PICKED
+  2026-07-11; pipeline 067–076 (shell 069, harbor + the HOOK 070, Magic
+  Hedge hero 071, beach + dunes + plovers 072, Cricket Hill 073, delight
+  074, polish 075). CONTIGUOUS 1:2 growth, no hard cell: the lakefront map
+  extends north past z −812 to the map edge at z −1516 — one uncut walk
+  Belmont Rocks → Montrose Beach, verified literally at sign-off (single
+  page load, 0 stalls, jetski never mounted). **SIGNED OFF 2026-07-16**
+  (task 076, refs/montrose/SIGNOFF.md; evocation blind-named "Montrose
+  Harbor / Montrose Point, Chicago" with confidence "Unmistakable";
+  12 delight moments logged; worst mt view 348/480 draws). Standing
+  liberties worth knowing (GEOGRAPHY.md consolidated block): EAST-REACH
+  COMPRESSION (LSD held at x 0–14, the real east reach compressed inside
+  xMax 244 — topological order preserved, distance squeezed); the
+  DOWNTOWN-SKYLINE PHYSICS RULING (far plane 900 m + fog opaque at 210 m
+  → no skyline renders from Montrose; the Point's money view is the
+  hook's stone arm + open-lake horizon instead); the dog-beach
+  "Monty & Rose" pen at Belmont stays a recorded local homage while the
+  Montrose DUNES hold the canonical plover story; issue 026 (basin water
+  foam-blobs) root-caused and fixed at sign-off (e4a4d55).
+
 ## In progress
 
-- **Montrose Harbor and the Magic Hedge** ("montrose") — OWNER-PICKED
-  2026-07-11; planner pipeline generated 2026-07-13 as queue 067–076
-  (SCOUT 067 → LAYOUT 068 → BUILD 069 map-extension shell / 070 harbor +
-  the hook / 071 Magic Hedge hero / 072 beach + dunes + plovers /
-  073 Cricket Hill → DELIGHT 074 → POLISH 075 → SIGNOFF 076). CONTIGUOUS
-  1:2 growth per the owner directive — no hard cell: the lakefront map
-  itself extends north past the z −812 fence line toward Montrose Ave
-  (4400 N ≈ z −1200). Anchor set: the Magic Hedge on Montrose Point
-  (hero — hedgerow + birders + scopes + open-lake horizon), Montrose
-  Harbor with its south mouth + the curling fishing HOOK pier, Cricket
-  Hill (the first walkable hill), Montrose Beach + beach house + The Dock
-  + the dunes natural area (the real piping-plover home — the shipped
-  dog-beach Monty & Rose liberty gets ruled on in 068). Determinism law
-  for the growth: own coast pieces out of shared COAST_SEGS, new ribbons
-  via pathSamples2, local seeds, zero new instanced buckets (millennium's
-  worst view sits at 478/480 and instanced buckets draw globally).
-  Sources per standing rules: refs/montrose/ osm.json + Wikimedia in the
-  WORLD frame; Google imagery banned; owner photos gold when supplied.
+- (none — the queue is empty and Montrose has a SIGNOFF.md; the §5.3
+  planner picks next.)
 
 ## Candidates (famous Chicago spots, seeded per §5.3)
 - North Avenue Beach — adjacent south; the chess pavilion + boat-shaped

@@ -518,6 +518,15 @@ few turns to find; keep each to one line of symptom + fix.
   off the loop centerline while control-point math said ~1.4 (071). walkprobe's
   071 (k) block does it right (crSample) — copy that, and expect staged coords
   authored by control-point math to need a nudge.
+- A shore-distance water-COLOR field SATURATES in a narrow bulkhead basin: the
+  ~31 m Montrose basin sat entirely in the 0-14 m "beach shallows" band (+1.4x
+  glint boost) and read as a garish cyan pond with foam blobs (issue 026 / 076).
+  Flush bulkheads should NOT feed the color field (beach/revetment shores only —
+  coast.js SHORE_SEGS slices seawallLines); and a boat hull floated flush with
+  the water (centre y~0.05) reads as a white LILY-PAD side-on — give hulls real
+  freeboard + a dark waterline band as a 2nd instance in the SAME InstancedMesh
+  (+0 draws, rng untouched). Also: a "frozen" copy of an animated shader
+  (uTime never ticked) turns its glint interference into STATIC white patches.
 - The lakefront (incl. all of Montrose) has NO anti-trap CRAWL escape — that is
   HARD-cell-only (main.js gates BOTH the crawl AND `__hd.setTrap`'s effect on
   `cellWalk()`, line 145/259). On the lakefront `setTrap` is a NO-OP and any
