@@ -14,7 +14,8 @@
 //    built and BEFORE the first frame. rng() (core.js) is safe to call inside
 //    onWorldReady builders; never at import time.
 //  * Per-frame work goes through registerUpdate(fn) — fn(dt,t,player).
-//  * No localStorage/sessionStorage anywhere (artifact constraint).
+//  * Never touch localStorage/sessionStorage directly — the artifact sandbox
+//    throws on ACCESS. Persist through src/store.js (getFlag/setFlag) only.
 //  * All new meshes must use toon()/bmat()/curveMat from core.js so they bend
 //    with the curved world. Cache vectors — no per-frame allocations.
 //
@@ -43,6 +44,7 @@ export const state={
   distanceWalked:0,          // metres walked this session
   zonesVisited:new Set(),    // zone names entered
   speedMult:1,               // movement multiplier (buffs/vehicles) — main.js consults it
+  interactionsUsed:0,        // E / ✋ presses that actually fired an onUse (onboarding reads it)
 };
 
 // --------------------- update registry + world-ready -------------------
@@ -146,7 +148,7 @@ function scanInteractions(player,actPressed){
     if(!best||it.priority>best.priority||(it.priority===best.priority&&d2<best._d2)){best=it;best._d2=d2;}
   }
   if(best)showPrompt(best);else hidePrompt();
-  if(actPressed&&best)try{best.onUse(player);}catch(e){console.warn('[framework] interaction onUse error',e);}
+  if(actPressed&&best){state.interactionsUsed++;try{best.onUse(player);}catch(e){console.warn('[framework] interaction onUse error',e);}}
 }
 
 // ------------------------------ charge / throw -------------------------

@@ -9,7 +9,8 @@ import { mayor, mparts, buildMayor, updateCharacter, updateChibiShadows } from '
 import { updateFogCull, fogCullStats } from './fogcull.js';
 import { FX, DUST, PASTELS, fw, rockets, scheduled, boomLights, setType, updateFireworks } from './fx.js';
 import { initAudio, audioDbg, audioCtx, installAudioResumeNet, sStep, sChime, sPop, updateAmbience } from './audio.js';
-import { cam, keys, joy, jump, initInput } from './input.js';
+import { cam, keys, joy, jump, initInput, updateCam } from './input.js';
+import { initOnboarding, updateOnboarding } from './onboard.js';
 import { mmInit, mmDraw, initMinimapToggle } from './minimap.js';
 import * as CH from './data/chicago.js';
 import { worldReady, runUpdates, state } from './framework.js';
@@ -200,7 +201,17 @@ let last=performance.now();
 
 function frame(now){
   requestAnimationFrame(frame);
-  const dt=Math.min(0.05,(now-last)/1000||0.016);last=now;game.tNow+=dt;
+  // dt is clamped at BOTH ends. The upper cap (0.05) has always been here — it
+  // stops a backgrounded tab from teleporting the player on return. The lower
+  // clamp is task 077: the first rAF timestamp PREDATES the world build, so
+  // frame 1's (now-last) is ~-(build time) — measured at -3.7 s headless. That
+  // fed `camPos.lerp(camTarget, 1-Math.exp(-8*dt))` an alpha of -7e12 and hurled
+  // the chase camera to a garbage coordinate it then crawled back from for
+  // seconds: an intermittent underground/rolled view for the first thing a new
+  // player ever sees. camCtl.snap hid it whenever it landed on frame 1 exactly
+  // (camPos==camTarget makes any alpha a no-op), which is why it read as a rare
+  // flake rather than a bug. It also started game.tNow seconds in the past.
+  const dt=clamp((now-last)/1000||0.016,0,0.05);last=now;game.tNow+=dt;
   const t=game.tNow;
 
   // ---- input → camera-relative movement ----
@@ -364,6 +375,7 @@ function frame(now){
   }
 
   // ---- camera ---- (orbit moved to Z/C so E is free for framework interact)
+  updateCam(dt);   // touch look-inertia coast (no-op on desktop / while dragging)
   if(keys.has('z')){cam.yaw+=1.9*dt;cam.freeT=0.8}
   if(keys.has('c')){cam.yaw-=1.9*dt;cam.freeT=0.8}
   cam.freeT=Math.max(0,cam.freeT-dt);
@@ -453,6 +465,7 @@ function frame(now){
   runUpdates(dt,t,player);
   updateChibiShadows();   // after runUpdates: rigs have moved; one InstancedMesh re-stamp
   updateFogCull(dt);      // hide fully-fogged meshes (pixel-neutral draw-call cut)
+  updateOnboarding(dt);   // touch coach marks — after runUpdates so state.distanceWalked/interactionsUsed are current
 
   if(DBG.get('dbg')==='1'&&performance.now()>dbgHud.holdT){const h=$('hint');h.style.display='block';h.classList.remove('hide');
     const s=`x=${player.x.toFixed(1)} z=${player.z.toFixed(1)} y=${player.y.toFixed(2)} mag=${mag.toFixed(2)} mvx=${mvx.toFixed(2)} wadeT=${jsk.wadeT.toFixed(2)} on=${jsk.on?1:0} walk=${walkable(player.x,player.z)?1:0} iw07=${isWater(player.x+mvx*0.7,player.z+mvz*0.7)?1:0} walk07=${walkable(player.x+mvx*0.7,player.z+mvz*0.7)?1:0}`;
@@ -473,22 +486,34 @@ function runStart(){
   $('mini').style.display='block';
   if(!QUIET){
     const h=$('hint');h.style.display='block';
+    // touch: walk + look are NOT listed — the coach marks teach those by doing
+    // (task 077), and the full seven-item line was too long to fit a phone at
+    // all. What is left is the stuff no ghost thumb can mime.
     h.textContent=document.body.classList.contains('touch')
-      ?'left stick walk · drag to look · ⬆️ jump · ✋ interact · 📖 journal · ✨ type · 🎆 launch'
+      ?'⬆️ jump · ✋ interact · 📖 journal · ✨ type · 🎆 launch'
       :'WASD move · SPACE jump · Z/C orbit · SHIFT run · E interact · J journal · 1–4 firework · F launch';
     setTimeout(()=>h.classList.add('hide'),9000);
   }
   $('btnHelp').style.display='flex';   // the hint auto-hides; the "?" button is the permanent way back
   $('btnKofi').style.display='flex';   // ♥ Ko-fi support button, beside "?"
+  initOnboarding();    // touch only: ghost thumbs teach walk / look / interact (task 077)
 }
 
 // ---- "?" controls card: always-discoverable version of the hint bar ----
 {
   const card=$('ctl'),body=$('ctlBody'),btn=$('btnHelp');
   const row=(k,v)=>`<div class="ctlrow"><b>${k}</b><span>${v}</span></div>`;
+  // the touch card opens with the same three ghost thumbs the coach marks use —
+  // a player who dismissed the lesson too fast gets it back, in one glance,
+  // in the language they already saw (task 077)
+  const ghosts='<div class="ctltouch">'
+    +'<div class="ctlg"><div class="ctlgi ctlgw"><div class="cring"></div><div class="cthumb"></div></div><b>walk</b></div>'
+    +'<div class="ctlg"><div class="ctlgi ctlgl"><div class="ctrail"></div><div class="cthumb"></div></div><b>look</b></div>'
+    +'<div class="ctlg"><div class="ctlgi ctlga"><div class="cripple"></div><div class="cthumb"></div></div><b>interact</b></div>'
+    +'</div>';
   function fill(){
     body.innerHTML=(document.body.classList.contains('touch')
-      ? row('left stick','walk')+row('drag','look around')+row('⬆️','jump')+row('✋','interact')
+      ? ghosts+row('left stick','walk')+row('drag','look around')+row('⬆️','jump')+row('✋','interact')
         +row('📖','journal')+row('✨','pick firework')+row('🎆','launch firework')
         +row('🔔','Divvy bell / radio (riding)')
       : row('W A S D','walk')+row('SHIFT','run')+row('SPACE','jump')+row('E','interact')

@@ -24,7 +24,11 @@ jobs:
         with: { node-version: 22 }
       - run: npm ci
       - run: npm run build
-      - run: cp dist/index.html dist/404.html && echo playope.com > dist/CNAME
+      # `npm run build` stays strictly single-file (copyPublicDir:false — dist/ is
+      # exactly index.html, still shareable as one artifact). The PWA extras ride
+      # along as separate Pages files, copied in here. public/ goes FIRST so
+      # nothing can overwrite the built dist/index.html; 404.html is then the game.
+      - run: cp -r public/. dist/ && cp dist/index.html dist/404.html && echo playope.com > dist/CNAME
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with: { path: dist }

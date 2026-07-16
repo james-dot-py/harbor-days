@@ -2,10 +2,31 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<!-- viewport-fit=cover lets the world run under the notch/home indicator; the
+     HUD is then held off them by the safe-area insets below. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Ope! — north side, chicago</title>
+
+<!-- ---- install to the home screen (task 077) ------------------------------
+     The manifest / icons / sw are NOT part of the single-file build: `npm run
+     build` still emits exactly one shareable dist/index.html, and the deploy
+     workflow copies public/ alongside it so Pages serves these at the site
+     root. Opened as a lone HTML file they simply 404 and the game does not
+     care — no code path depends on them. -->
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#ffb98a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Ope!">
 <style>
-  :root{--cream:#fdf6e6;--ink:#4a3b2f;--peach:#ffb98a;--teal:#2fa3b5;}
+  :root{--cream:#fdf6e6;--ink:#4a3b2f;--peach:#ffb98a;--teal:#2fa3b5;
+    /* notch + home-indicator insets. env() resolves to 0px on desktop and on
+       anything without safe areas, so every calc() below collapses to the
+       original number and the desktop HUD stays pixel-identical. */
+    --sat:env(safe-area-inset-top,0px);--sar:env(safe-area-inset-right,0px);
+    --sab:env(safe-area-inset-bottom,0px);--sal:env(safe-area-inset-left,0px);}
   html,body{margin:0;padding:0;overflow:hidden;
     background:radial-gradient(120% 120% at 50% 20%, #ffd9b0 0%, #ffb98a 45%, #e98f7d 100%);
     font-family:ui-rounded,"SF Pro Rounded","Hiragino Maru Gothic ProN","Arial Rounded MT Bold","Trebuchet MS",sans-serif;
@@ -62,14 +83,16 @@
   #vig{position:fixed;inset:0;z-index:10;pointer-events:none;
     background:radial-gradient(130% 105% at 50% 42%, rgba(0,0,0,0) 58%, rgba(84,44,58,.16) 82%, rgba(60,28,44,.32) 100%);}
 
-  .pill{position:fixed;top:14px;left:14px;z-index:20;display:flex;align-items:center;gap:9px;
+  .pill{position:fixed;top:calc(14px + var(--sat));left:calc(14px + var(--sal));z-index:20;display:flex;align-items:center;gap:9px;
     background:rgba(253,246,230,.92);border-radius:999px;padding:9px 16px 9px 12px;color:var(--ink);
     font-size:14px;letter-spacing:.06em;box-shadow:0 4px 0 rgba(122,62,44,.18);}
   .pill .dot{width:13px;height:13px;border-radius:50%;background:#ff9ec7;box-shadow:0 0 8px 1px rgba(255,158,199,.8)}
   .pill .key{opacity:.5;font-size:12px;margin-left:2px}
-  #hint{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:20;color:#fff;
+  /* pointer-events:none — the hint is a transient label, never a tap target. It
+     hangs over the touch HUD's top rail for 9 s and used to eat those taps. */
+  #hint{position:fixed;bottom:calc(16px + var(--sab));left:50%;transform:translateX(-50%);z-index:20;color:#fff;
     background:rgba(74,59,47,.55);padding:8px 18px;border-radius:999px;font-size:13px;letter-spacing:.05em;
-    transition:opacity 1.2s ease;white-space:nowrap;}
+    transition:opacity 1.2s ease;white-space:nowrap;pointer-events:none;}
   #hint.hide{opacity:0}
   /* ?dbg=1: coords are selectable + click-to-copy (main.js wires the click) */
   #hint.dbg{-webkit-user-select:text;user-select:text;cursor:copy;pointer-events:auto;}
@@ -78,43 +101,152 @@
     font-size:clamp(16px,3.4vw,22px);letter-spacing:.14em;box-shadow:0 5px 0 rgba(122,62,44,.2);
     transition:opacity .5s ease, transform .5s ease;pointer-events:none;text-align:center;}
   #banner.show{opacity:1;transform:translate(-50%,0)}
+  /* touch: the minimap (z 21) sits exactly where a centred banner lands on a
+     390px screen — "now entering The Belmo…" was sliced in half. The banner is
+     transient and solid, so let it ride over the map for its 2 s. */
+  body.touch #banner{z-index:22;max-width:82vw}
   #banner .z{display:block;font-size:10px;letter-spacing:.3em;color:#c48f5f;margin-bottom:2px}
-  #mark{position:fixed;bottom:10px;right:14px;z-index:20;color:rgba(255,255,255,.55);font-size:11px;letter-spacing:.1em}
+  #mark{position:fixed;bottom:calc(10px + var(--sab));right:calc(14px + var(--sar));z-index:20;color:rgba(255,255,255,.55);font-size:11px;letter-spacing:.1em}
   /* ?audiodbg=1 — live AudioContext-state probe (owner reads it on-device) */
-  #audiodbg{position:fixed;bottom:34px;right:14px;z-index:22;display:none;color:#fff;pointer-events:none;
+  #audiodbg{position:fixed;bottom:calc(34px + var(--sab));right:calc(14px + var(--sar));z-index:22;display:none;color:#fff;pointer-events:none;
     font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;background:rgba(20,24,30,.62);padding:4px 9px;border-radius:8px;letter-spacing:.02em}
 
   /* ---------- minimap ---------- */
-  #mini{position:fixed;top:14px;right:14px;z-index:21;width:152px;height:206px;border-radius:18px;overflow:hidden;
+  #mini{position:fixed;top:calc(14px + var(--sat));right:calc(14px + var(--sar));z-index:21;width:152px;height:206px;border-radius:18px;overflow:hidden;
     box-shadow:0 5px 0 rgba(122,62,44,.22), 0 10px 24px rgba(122,62,44,.25);background:#2fa3b5;
     transition:width .28s ease,height .28s ease,border-radius .28s ease;}
   #mini canvas{width:100%;height:100%;display:block;transition:opacity .2s ease}
   #mmt{position:absolute;top:5px;right:5px;width:26px;height:26px;border:none;border-radius:50%;cursor:pointer;
     background:rgba(253,246,230,.92);color:var(--ink);font-size:14px;line-height:1;box-shadow:0 2px 0 rgba(122,62,44,.25);
     display:flex;align-items:center;justify-content:center;padding:0}
+  /* touch: every control is a thumb target, so nothing may be under 44 px —
+     the 26 px map toggle was the one hold-out (task 077) */
+  body.touch #mmt{width:44px;height:44px;font-size:18px}
   #mini.min{width:44px;height:44px;border-radius:50%}
   #mini.min canvas{opacity:0}
   #mini.min #mmt{top:0;right:0;width:44px;height:44px;font-size:20px;background:rgba(253,246,230,.95)}
 
+  /* ---------- touch controls (task 077 mobile-first pass) ----------
+     --jx/--jy  the joystick's resting anchor (idle ghost + the walk coach mark
+                orbit the same point, so the lesson lands where the thumb goes)
+     --lx/--ly  where the "look around" coach mark sits, in open canvas
+     --ax/--ay  the hand button's CENTRE, so the act coach mark rides it
+     All are offsets from the edge named by each rule; the landscape block at
+     the bottom of this file re-points them. */
+  body.touch{--jx:96px;--jy:200px;--lx:88px;--ly:250px;--ax:145px;--ay:61px;--jzw:50vw;--jzh:56vh}
   #jzone,#btnFire,#btnType,#btnJump{display:none}
-  body.touch #jzone{display:block;position:fixed;left:0;bottom:0;width:46vw;height:58vh;z-index:15}
-  body.touch #stick{position:absolute;width:96px;height:96px;border-radius:50%;border:3px solid rgba(255,255,255,.5);
-    background:rgba(255,255,255,.12);transform:translate(-50%,-50%);display:none}
+  body.touch #jzone{display:block;position:fixed;left:0;bottom:0;width:var(--jzw);height:var(--jzh);z-index:15}
+  /* #stick is position:FIXED, not absolute. It is a child of #jzone, but the JS
+     assigns it raw clientX/clientY — and #jzone is anchored bottom:0, so its
+     top edge sits ~42vh down the screen. As an absolute child, top:650px meant
+     650px BELOW that edge: the stick rendered at y≈1004 on an 844px phone and
+     was never once visible on a real device. You touched, the mayor walked, and
+     nothing appeared under your thumb — the single biggest reason walking did
+     not read as discoverable (measured, task 077). Fixed positioning makes
+     left/top mean exactly what the handler thinks they mean: viewport coords. */
+  body.touch #stick{position:fixed;width:96px;height:96px;border-radius:50%;border:3px solid rgba(255,255,255,.5);
+    background:rgba(255,255,255,.12);transform:translate(-50%,-50%);display:none;pointer-events:none}
   body.touch #nub{position:absolute;left:50%;top:50%;width:44px;height:44px;border-radius:50%;
     background:rgba(255,255,255,.75);transform:translate(-50%,-50%)}
-  body.touch #btnFire{display:flex;position:fixed;right:20px;bottom:26px;width:76px;height:76px;border-radius:50%;
+  body.touch #btnFire{display:flex;position:fixed;right:calc(20px + var(--sar));bottom:calc(26px + var(--sab));width:76px;height:76px;border-radius:50%;
     align-items:center;justify-content:center;font-size:34px;z-index:16;background:rgba(253,246,230,.9);
     box-shadow:0 5px 0 rgba(122,62,44,.25);border:none}
-  body.touch #btnType{display:flex;position:fixed;right:34px;bottom:118px;width:52px;height:52px;border-radius:50%;
+  body.touch #btnType{display:flex;position:fixed;right:calc(34px + var(--sar));bottom:calc(118px + var(--sab));width:52px;height:52px;border-radius:50%;
     align-items:center;justify-content:center;font-size:22px;z-index:16;background:rgba(253,246,230,.75);
     box-shadow:0 4px 0 rgba(122,62,44,.2);border:none}
-  body.touch #btnJump{display:flex;position:fixed;right:112px;bottom:112px;width:58px;height:58px;border-radius:50%;
+  body.touch #btnJump{display:flex;position:fixed;right:calc(112px + var(--sar));bottom:calc(112px + var(--sab));width:58px;height:58px;border-radius:50%;
     align-items:center;justify-content:center;font-size:26px;z-index:16;background:rgba(253,246,230,.85);
     box-shadow:0 4px 0 rgba(122,62,44,.22);border:none}
-  body.touch #hint{bottom:auto;top:58px}
+  /* The touch hint ran off BOTH edges at 390px ("· drag to look · ⬆️ jump · ✋
+     inte…"). It now wraps, drops walk/look to the coach marks (which teach them
+     far better than a line of text), and left-aligns under the pill so it stops
+     sliding under the minimap at the top-right. */
+  body.touch #hint{bottom:auto;top:calc(58px + var(--sat));left:calc(12px + var(--sal));transform:none;
+    white-space:normal;max-width:50vw;text-align:left;line-height:1.7}
+
+  /* ---------- idle stick ghost: where the thumb goes, at rest ----------
+     Only for a player's first session, and retired for good once they have
+     walked 20 m (src/onboard.js) — by then they know, and the HUD goes quiet. */
+  /* The breathing animation lives on the CHILDREN, never the root. A running
+     CSS animation outranks plain declarations AND inline styles, so with
+     jBreathe on the root both hide paths (.gone, and style.opacity while the
+     thumb is down) were silently overridden every frame — the ghost simply
+     never went away. Root = position + opacity; children = the visuals. */
+  #jghost{display:none}
+  body.touch #jghost{display:block;position:fixed;z-index:14;pointer-events:none;
+    left:calc(var(--jx) + var(--sal));bottom:calc(var(--jy) + var(--sab));margin:0 0 -46px -46px;
+    width:92px;height:92px;transition:opacity .8s ease}
+  body.touch #jghost .jgring{position:absolute;inset:0;border-radius:50%;
+    border:3px solid rgba(255,255,255,.30);background:rgba(255,255,255,.08)}
+  body.touch #jghost .jgnub{position:absolute;left:50%;top:50%;width:42px;height:42px;margin:-21px 0 0 -21px;
+    border-radius:50%;background:rgba(255,255,255,.34)}
+  body.touch #jghost .jgring,body.touch #jghost .jgnub{animation:jBreathe 3.4s ease-in-out infinite}
+  #jghost.gone{opacity:0}
+  @keyframes jBreathe{0%,100%{opacity:.5}50%{opacity:.92}}
+
+  /* ---------- coach marks: ghost thumbs, in the cozy register ----------
+     Each is a 140px box CENTRED on its anchor (the negative margins do the
+     centring against right/bottom edges). pointer-events:none throughout — a
+     coach mark must never eat the very gesture it is teaching. */
+  .cmark{position:fixed;z-index:24;width:140px;height:140px;pointer-events:none;display:none;opacity:0;
+    transition:opacity .45s ease,transform .45s ease}
+  .cmark.on{display:block;opacity:1}
+  .cmark.gone{opacity:0;transform:scale(1.3)}   /* the poof, on dismissal */
+  #coachWalk{left:calc(var(--jx) + var(--sal));bottom:calc(var(--jy) + var(--sab));margin:0 0 -70px -70px}
+  #coachLook{right:calc(var(--lx) + var(--sar));bottom:calc(var(--ly) + var(--sab));margin:0 -70px -70px 0}
+  #coachAct{right:calc(var(--ax) + var(--sar));bottom:calc(var(--ay) + var(--sab));margin:0 -70px -70px 0}
+  /* the ghost thumb itself: a soft cream fingertip with the house's coral ring
+     and 0 3px 0 drop — the same language as the pill and the buttons */
+  .cthumb{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;
+    background:radial-gradient(circle at 38% 34%, rgba(255,255,255,.96), rgba(253,246,230,.74) 62%, rgba(253,246,230,.52));
+    border:2px solid rgba(224,118,106,.55);
+    box-shadow:0 3px 0 rgba(122,62,44,.18), 0 0 0 7px rgba(255,255,255,.14)}
+  .clabel{position:absolute;left:50%;top:-10px;transform:translateX(-50%);white-space:nowrap;
+    background:rgba(253,246,230,.94);color:var(--ink);border-radius:999px;padding:5px 13px;font-size:12.5px;
+    letter-spacing:.07em;box-shadow:0 3px 0 rgba(122,62,44,.18)}
+  /* the dashed path circles OUTSIDE the 92px idle stick ghost the mark sits on
+     top of — at the ghost's own diameter the two rings read as one muddy
+     doubled circle instead of "your thumb goes around this thing" */
+  #coachWalk .cring{position:absolute;left:50%;top:50%;width:118px;height:118px;margin:-59px 0 0 -59px;
+    border-radius:50%;border:2px dashed rgba(253,246,230,.55)}
+  #coachWalk .cthumb{animation:cOrbit 2.8s linear infinite}
+  @keyframes cOrbit{from{transform:rotate(0deg) translateX(44px) rotate(0deg)}
+                    to{transform:rotate(360deg) translateX(44px) rotate(-360deg)}}
+  #coachLook .ctrail{position:absolute;left:50%;top:50%;width:92px;height:3px;margin:-1.5px 0 0 -46px;
+    border-radius:2px;background:linear-gradient(90deg,rgba(253,246,230,0),rgba(253,246,230,.6),rgba(253,246,230,0))}
+  #coachLook .cthumb{animation:cSwipe 3s ease-in-out infinite}
+  @keyframes cSwipe{0%{transform:translateX(-34px);opacity:.35}12%{opacity:1}
+                    50%{transform:translateX(34px);opacity:1}64%{opacity:.35}
+                    100%{transform:translateX(-34px);opacity:.35}}
+  /* the act mark rides the ✋ button, and a label ABOVE it lands squarely on the
+     ⬆️ jump button — so this one label sits to the LEFT of its thumb instead */
+  #coachAct .clabel{left:auto;right:calc(50% + 32px);top:50%;transform:translateY(-50%)}
+  #coachAct .cripple{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;
+    border-radius:50%;border:2px solid rgba(224,118,106,.5);animation:cRipple 1.9s ease-out infinite}
+  #coachAct .cthumb{animation:cTap 1.9s ease-in-out infinite}
+  @keyframes cTap{0%,62%,100%{transform:scale(1)}74%{transform:scale(.82)}86%{transform:scale(1.05)}}
+  @keyframes cRipple{0%,62%{transform:scale(1);opacity:0}74%{opacity:.75}100%{transform:scale(2.1);opacity:0}}
+
+  /* ---------- iOS: add to home screen ----------
+     Sits bottom-LEFT so it clears the 🎆 cluster, with a caret aimed down at
+     Safari's share button in the toolbar just below the viewport. */
+  #a2hs{position:fixed;z-index:23;display:none;align-items:center;gap:10px;box-sizing:border-box;
+    left:calc(10px + var(--sal));bottom:calc(14px + var(--sab));max-width:min(70vw,272px);
+    background:var(--cream);color:var(--ink);border-radius:18px;padding:11px 12px 11px 14px;
+    box-shadow:0 5px 0 rgba(122,62,44,.24),0 14px 30px rgba(122,62,44,.22);
+    opacity:0;transform:translateY(8px);transition:opacity .45s ease,transform .45s ease}
+  #a2hs.show{display:flex;opacity:1;transform:none}
+  #a2hs::after{content:'';position:absolute;left:34px;bottom:-8px;border:8px solid transparent;
+    border-top-color:var(--cream);border-bottom:0}
+  #a2hs .a2i{font-size:21px;line-height:1}
+  #a2hs .a2t b{display:block;font-size:13px;letter-spacing:.03em;font-weight:700}
+  #a2hs .a2t span{display:block;font-size:11px;color:#9c8168;letter-spacing:.02em;margin-top:2px;line-height:1.4}
+  /* 44px like every other touch control — a dismiss you have to aim at is a nag */
+  #a2x{flex:0 0 auto;width:44px;height:44px;border:none;border-radius:50%;cursor:pointer;align-self:center;
+    background:#e0766a;color:#fff;font-size:19px;line-height:1;box-shadow:0 2px 0 rgba(122,62,44,.3);padding:0}
 
   /* ---------- framework HUD (interactions / toast / journal / power) ---------- */
-  #prompt{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:20;display:none;
+  #prompt{position:fixed;bottom:calc(60px + var(--sab));left:50%;transform:translateX(-50%);z-index:20;display:none;
     align-items:center;gap:8px;background:rgba(253,246,230,.94);color:var(--ink);border-radius:999px;
     padding:8px 17px;font-size:14px;letter-spacing:.05em;box-shadow:0 4px 0 rgba(122,62,44,.18);white-space:nowrap;
     pointer-events:none;}   /* desktop: inert — E is primary; clicks pass through to the canvas */
@@ -122,12 +254,22 @@
   /* touch: the pill IS the action button — tap it to fire the interaction
      (framework.js). Raised clear of the right-hand button cluster so it never
      sits on top of the ✋ hand button (issue 013 / task 026); a soft coral ring
-     reads "tappable", and a pressed state confirms the tap. */
-  body.touch #prompt{pointer-events:auto;cursor:pointer;bottom:190px;padding:10px 19px;
+     reads "tappable", and a pressed state confirms the tap.
+     RIGHT-ALIGNED, not centred (task 077): centred, a long label ("suggest a
+     neighborhood") spanned x 79-311 while the joystick zone is x 0-195 — a
+     116px overlap right in the left thumb's arc, and the pill (z 20) beats the
+     zone (z 15) in the hit test. Reaching down to WALK fired the interaction
+     instead, throwing a full-screen modal over the game. Zone arbitration is
+     not only about the look-camera: nothing tappable may sit over the stick.
+     The width cap keys off --jzw so it can never creep back over the zone, and
+     the label wraps rather than overflowing the cap. */
+  body.touch #prompt{pointer-events:auto;cursor:pointer;left:auto;transform:none;box-sizing:border-box;
+    right:calc(14px + var(--sar));bottom:calc(190px + var(--sab));padding:10px 17px;font-size:13px;
+    white-space:normal;text-align:left;max-width:calc(100vw - var(--jzw) - 30px - var(--sar));
     box-shadow:0 4px 0 rgba(122,62,44,.18),0 0 0 2px rgba(224,118,106,.30);}
-  body.touch #prompt.pressed{transform:translateX(-50%) scale(.95);filter:brightness(.97);
+  body.touch #prompt.pressed{transform:scale(.95);filter:brightness(.97);
     box-shadow:0 2px 0 rgba(122,62,44,.18),0 0 0 2px rgba(224,118,106,.45);}
-  #pwrmeter{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);z-index:20;width:180px;height:12px;
+  #pwrmeter{position:fixed;bottom:calc(96px + var(--sab));left:50%;transform:translateX(-50%);z-index:20;width:180px;height:12px;
     border-radius:999px;background:rgba(74,59,47,.35);overflow:hidden;display:none;box-shadow:0 3px 0 rgba(122,62,44,.18);}
   #pwrfill{height:100%;width:0%;background:linear-gradient(90deg,#8fce74,#ffd166,#e0766a);border-radius:999px}
   #toast{position:fixed;top:20%;left:50%;transform:translate(-50%,-14px);z-index:22;opacity:0;pointer-events:none;
@@ -160,15 +302,15 @@
   .jrow b{color:#c4622f}
 
   /* ---------- controls help: pinned "?" button + card ---------- */
-  #btnHelp{position:fixed;left:14px;bottom:12px;width:34px;height:34px;border:none;border-radius:50%;cursor:pointer;
+  #btnHelp{position:fixed;left:calc(14px + var(--sal));bottom:calc(12px + var(--sab));width:34px;height:34px;border:none;border-radius:50%;cursor:pointer;
     z-index:21;background:rgba(253,246,230,.92);color:var(--ink);font-size:17px;font-weight:700;line-height:1;
     box-shadow:0 3px 0 rgba(122,62,44,.22);display:none;align-items:center;justify-content:center;padding:0}
-  body.touch #btnHelp{left:auto;right:14px;top:284px;bottom:auto;width:44px;height:44px;font-size:20px}
+  body.touch #btnHelp{left:auto;right:calc(14px + var(--sar));top:calc(284px + var(--sat));bottom:auto;width:44px;height:44px;font-size:20px}
   /* ♥ support button beside the "?" help button (same HUD styling family) */
-  #btnKofi{position:fixed;left:54px;bottom:12px;width:34px;height:34px;border:none;border-radius:50%;cursor:pointer;
+  #btnKofi{position:fixed;left:calc(54px + var(--sal));bottom:calc(12px + var(--sab));width:34px;height:34px;border:none;border-radius:50%;cursor:pointer;
     z-index:21;background:rgba(253,246,230,.92);color:#e0766a;font-size:16px;line-height:1;text-decoration:none;
     box-shadow:0 3px 0 rgba(122,62,44,.22);display:none;align-items:center;justify-content:center;padding:0}
-  body.touch #btnKofi{left:auto;right:14px;top:334px;bottom:auto;width:44px;height:44px;font-size:20px}
+  body.touch #btnKofi{left:auto;right:calc(14px + var(--sar));top:calc(334px + var(--sat));bottom:auto;width:44px;height:44px;font-size:20px}
   #ctl{position:fixed;inset:0;z-index:27;display:none;align-items:center;justify-content:center;
     background:rgba(74,59,47,.38)}
   #ctl.show{display:flex}
@@ -183,13 +325,60 @@
     line-height:1.6;color:rgba(74,59,47,.9)}
   #ctlClose{position:absolute;top:12px;right:14px;width:30px;height:30px;border:none;border-radius:50%;cursor:pointer;
     background:#e0766a;color:#fff;font-size:16px;line-height:1;box-shadow:0 2px 0 rgba(122,62,44,.3);padding:0}
+  /* thumb targets: the two modal ✕ buttons were the last sub-44px controls */
+  body.touch #ctlClose,body.touch #journalClose{width:44px;height:44px;font-size:21px}
+  /* the "?" card's touch section — the same ghost iconography as the coach
+     marks, so the card reads as a reminder of the lesson, not a new language */
+  .ctltouch{display:flex;justify-content:space-around;gap:8px;margin:2px 0 12px;padding:12px 4px 10px;
+    background:rgba(255,236,214,.5);border-radius:16px}
+  .ctlg{flex:1 1 0;text-align:center}
+  .ctlgi{position:relative;width:56px;height:56px;margin:0 auto 6px}
+  .ctlgi .cthumb{width:26px;height:26px;margin:-13px 0 0 -13px;box-shadow:0 2px 0 rgba(122,62,44,.16),0 0 0 4px rgba(255,255,255,.16)}
+  .ctlgi .cring{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;
+    border:2px dashed rgba(196,98,47,.4)}
+  .ctlgi .ctrail{position:absolute;left:50%;top:50%;width:46px;height:3px;margin:-1.5px 0 0 -23px;border-radius:2px;
+    background:linear-gradient(90deg,rgba(196,98,47,0),rgba(196,98,47,.35),rgba(196,98,47,0))}
+  .ctlgi .cripple{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;
+    border:2px solid rgba(224,118,106,.45);animation:cRipple 1.9s ease-out infinite}
+  .ctlgw .cthumb{animation:cOrbitS 2.8s linear infinite}
+  .ctlgl .cthumb{animation:cSwipeS 3s ease-in-out infinite}
+  .ctlga .cthumb{animation:cTap 1.9s ease-in-out infinite}
+  @keyframes cOrbitS{from{transform:rotate(0deg) translateX(16px) rotate(0deg)}
+                     to{transform:rotate(360deg) translateX(16px) rotate(-360deg)}}
+  @keyframes cSwipeS{0%{transform:translateX(-16px);opacity:.35}12%{opacity:1}
+                     50%{transform:translateX(16px);opacity:1}64%{opacity:.35}
+                     100%{transform:translateX(-16px);opacity:.35}}
+  .ctlg b{display:block;font-size:11.5px;color:#c4622f;letter-spacing:.05em}
   #btnAct,#btnJournal{display:none}
-  body.touch #btnAct{display:none;position:fixed;right:110px;bottom:26px;width:70px;height:70px;border-radius:50%;
+  body.touch #btnAct{display:none;position:fixed;right:calc(110px + var(--sar));bottom:calc(26px + var(--sab));width:70px;height:70px;border-radius:50%;
     align-items:center;justify-content:center;font-size:30px;z-index:16;background:rgba(253,246,230,.9);
     box-shadow:0 5px 0 rgba(122,62,44,.25);border:none}
-  body.touch #btnJournal{display:flex;position:fixed;right:14px;top:228px;width:44px;height:44px;border-radius:50%;
+  body.touch #btnJournal{display:flex;position:fixed;right:calc(14px + var(--sar));top:calc(228px + var(--sat));width:44px;height:44px;border-radius:50%;
     align-items:center;justify-content:center;font-size:22px;z-index:21;background:rgba(253,246,230,.92);
     box-shadow:0 4px 0 rgba(122,62,44,.22);border:none}
+
+  /* ---------- landscape (two-handed) touch layout ----------
+     390px of height cannot stack a 206px minimap, a 3-button utility rail AND
+     the action cluster down the right edge: 🎆/⬆️/✨/📖/?/♥ all landed on top of
+     one another (measured, task 077). So: shrink the map, keep ONLY the action
+     cluster in the right thumb's arc, and move the utility trio to a row under
+     the pill at top-left — clear of the (shorter, wider) joystick zone. */
+  @media (orientation:landscape){
+    body.touch{--jx:110px;--jy:110px;--lx:30vw;--ly:50vh;--ax:126px;--ay:46px;--jzw:40vw;--jzh:70vh}
+    body.touch #mini{width:116px;height:158px;top:calc(10px + var(--sat));right:calc(10px + var(--sar))}
+    /* landscape has no room under the pill, so the hint sits BESIDE it: right of
+       the pill (~135px), left of the minimap, above the utility row */
+    body.touch #hint{top:calc(12px + var(--sat));left:calc(176px + var(--sal));max-width:52vw}
+    body.touch #btnFire{right:calc(16px + var(--sar));bottom:calc(14px + var(--sab));width:68px;height:68px;font-size:30px}
+    body.touch #btnAct{right:calc(94px + var(--sar));bottom:calc(14px + var(--sab));width:64px;height:64px;font-size:28px}
+    body.touch #btnJump{right:calc(16px + var(--sar));bottom:calc(90px + var(--sab));width:52px;height:52px;font-size:23px}
+    body.touch #btnType{right:calc(94px + var(--sar));bottom:calc(90px + var(--sab));width:48px;height:48px;font-size:20px}
+    body.touch #prompt{bottom:calc(150px + var(--sab))}
+    body.touch #pwrmeter{bottom:calc(62px + var(--sab))}
+    body.touch #btnJournal{top:calc(60px + var(--sat));right:auto;left:calc(14px + var(--sal))}
+    body.touch #btnHelp{top:calc(60px + var(--sat));right:auto;left:calc(64px + var(--sal))}
+    body.touch #btnKofi{top:calc(60px + var(--sat));right:auto;left:calc(114px + var(--sal))}
+  }
 </style>
 </head>
 <body>
@@ -212,6 +401,7 @@
 <div id="audiodbg"></div>
 <div id="mini" style="display:none"><canvas id="mmc" width="304" height="412"></canvas><button id="mmt">&#9662;</button></div>
 <div id="jzone"><div id="stick"><div id="nub"></div></div></div>
+<div id="jghost"><div class="jgring"></div><div class="jgnub"></div></div>
 <button id="btnFire">&#127878;</button>
 <button id="btnType">&#10024;</button>
 <button id="btnJump">&#11014;&#65039;</button>
@@ -227,7 +417,30 @@
 <a id="btnKofi" href="https://ko-fi.com/jimbobuildsope" target="_blank" rel="noopener" aria-label="Support development on Ko-fi" title="Support development">&hearts;</a>
 <div id="ctl"><div class="ctlcard"><button id="ctlClose">&times;</button><h1>CONTROLS</h1><div id="ctlBody"></div></div></div>
 
+<!-- coach marks (touch only; src/onboard.js shows each one and kills it the
+     moment the player performs that gesture) -->
+<div id="coachWalk" class="cmark"><div class="cring"></div><div class="cthumb"></div><div class="clabel">walk</div></div>
+<div id="coachLook" class="cmark"><div class="ctrail"></div><div class="cthumb"></div><div class="clabel">look around</div></div>
+<div id="coachAct" class="cmark"><div class="cripple"></div><div class="cthumb"></div><div class="clabel">interact</div></div>
+<!-- iOS Safari has no install prompt — the share sheet is the only door -->
+<div id="a2hs"><span class="a2i">&#11014;&#65039;</span>
+  <div class="a2t"><b>add Ope! to your home screen</b><span>tap share below, then &ldquo;Add to Home Screen&rdquo; &mdash; it plays fullscreen</span></div>
+  <button id="a2x" aria-label="dismiss">&times;</button></div>
+
 <script type="module" src="/src/main.js"></script>
+<!-- Service worker: a no-op pass-through whose only job is to exist, so the
+     game qualifies as installable on Android/Chrome (iOS needs none — the
+     apple-* meta tags above carry it). It caches NOTHING by design; a cache
+     would serve a stale build after a deploy. Served by Pages next to
+     index.html; absent from the standalone single-file artifact, where the
+     registration simply fails and is swallowed. -->
+<script>
+  if ('serviceWorker' in navigator) {
+    addEventListener('load', () => {
+      try { navigator.serviceWorker.register('/sw.js').catch(() => {}); } catch (e) {}
+    });
+  }
+</script>
 <!-- Owner analytics (GoatCounter): daily visitor counts for playope.com.
      Privacy-friendly — no cookies, no localStorage (game constraint 5 holds).
      Counts nothing until the owner registers the 'playope' code at

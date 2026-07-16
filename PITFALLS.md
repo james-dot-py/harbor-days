@@ -540,3 +540,50 @@ few turns to find; keep each to one line of symptom + fix.
   bot path THROUGH one logs a false "incomplete/stall", not a walkability bug
   (065's "route beside point colliders" extends to area carves; the real
   Montrose harbor→beach route goes up the west sand strip x~205 around the dune).
+- main.js's per-frame `dt` is clamped at BOTH ends now — it used to be capped
+  only ABOVE (`Math.min(0.05, ...)`). The first rAF timestamp PREDATES the world
+  build, so frame 1 delivered `now-last` = -(build time): measured at **-3.7 s**
+  headless (077). Two consequences, one invisible and one not. Invisible:
+  `game.tNow` started seconds in the past — harmless, because every consumer
+  reads DIFFERENCES. Not invisible: `camPos.lerp(camTarget, 1-Math.exp(-8*dt))`
+  got an alpha of **-7e12** and hurled the chase camera to a garbage coordinate
+  it then crawled back from for seconds — an intermittent underground/rolled view
+  as the first thing a new player saw. It read as a rare flake because
+  `camCtl.snap` masks it whenever it lands on frame 1 exactly (camPos==camTarget
+  makes ANY alpha a no-op). If you add a `dt` ACCUMULATOR anywhere, remember this
+  class: a single negative frame silently puts your timer in the past and your
+  beats never fire (exactly how 077's coach marks failed — `t` sat at -1.6 and
+  climbed). Fixing it moved the spawn shot only 0.320% vs baseline (gate 0.828%)
+  — no regen needed.
+- A running CSS `animation` BEATS a plain `opacity` declaration AND an inline
+  `style.opacity` — so a fade-out on an element that also breathes/pulses is
+  silently ignored (077's idle stick ghost: `#jghost.gone{opacity:0}` did nothing
+  while `jBreathe` looped). Do NOT reach for `!important` or `animation:none`
+  (which fights the transition): put the looping animation on a CHILD and leave
+  the root's opacity free for the fade.
+- `max-width` on a HUD element is a CONTENT-box cap unless you say otherwise: a
+  165px cap + `padding:10px 17px` renders 199px and still overlapped the very
+  thing the cap existed to clear (077, twice — the prompt pill and the a2hs
+  card). Any touch-HUD width computed to clear another zone needs
+  `box-sizing:border-box`, and should key off a CSS var shared with the thing it
+  clears (`--jzw`) so it cannot drift back.
+- TOUCH ZONE ARBITRATION IS NOT ONLY ABOUT THE LOOK-CAMERA. #jzone being a real
+  element stacked over the canvas already protects walking from the orbit drag —
+  but ANY tappable HUD element sitting over the stick beats it (higher z-index
+  wins the hit test; #jzone is only z 15). The interaction pill (z 20,
+  `pointer-events:auto` on touch since 026) was CENTRED, so a long label
+  ("suggest a neighborhood") spanned x 79-311 against a joystick zone of x 0-195:
+  a 116px overlap in the left thumb's arc, where reaching down to WALK fired the
+  interaction and threw a full-screen modal over the game (077). On touch keep
+  every tap target on the RIGHT with the ✋, and MEASURE it
+  (`getBoundingClientRect` of the pill vs #jzone) — a drag coordinate that looks
+  safely bottom-left is inside the pill the moment a label gets long.
+- The on-screen joystick VISUAL was never once visible on a real phone until 077.
+  `#stick` was `position:absolute` inside `#jzone`, but input.js assigns it raw
+  `clientX/clientY` — and #jzone is anchored `bottom:0`, so its top edge sits
+  ~42vh down: `top:650px` rendered the stick at y≈1004 on an 844px phone. You
+  touched, the mayor walked, and NOTHING appeared under your thumb — the single
+  biggest reason walking did not read as discoverable. Fixed with
+  `position:fixed` (viewport coords = what the handler already means). A HUD
+  element positioned from JS with client coords must be `fixed`, or its offset
+  parent silently eats the difference — and no desktop test can ever see it.

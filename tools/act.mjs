@@ -9,6 +9,10 @@
 //     ["keyup","e"]       release a held key
 //     ["wait",800]        wait ms
 //     ["shot","name"]     screenshot -> tools/shots/name.png
+//     ["swipe",{x,y,dx,dy,steps=12,ms=240,hold=90}]  held touch drag across frames (look-camera)
+//     ["drag",{x,y,dx,dy,steps=8,ms=160,hold=700}]   drag then HOLD deflected, then release (joystick)
+//   swipe/drag need --mobile (they drive page.touchscreen, which needs hasTouch:true).
+//   --landscape with --mobile → 844x390 instead of 390x844 (no-op without --mobile).
 //   baseQuery (optional) extra params merged into every goto, e.g. "yaw=3.1&dist=9"
 // Prints console/page errors at the end (non-zero exit if any).
 import puppeteer from 'puppeteer';
@@ -32,12 +36,16 @@ const STRICT = process.argv.includes('--strict-autoplay') || !!process.env.STRIC
 // on-screen HUD (joystick + hand button + tappable pill) is exercised (task 026).
 // Enables the `tap`/`tapSel` ops (page.touchscreen needs hasTouch:true).
 const MOBILE = process.argv.includes('--mobile') || !!process.env.MOBILE;
-const launchArgs = [MOBILE ? '--window-size=390,844' : '--window-size=1280,720', '--mute-audio'];
+// --landscape (or LANDSCAPE=1) → rotate the mobile viewport to 844x390 (task 077).
+// Only meaningful with --mobile; on the desktop viewport it is a no-op.
+const LANDSCAPE = process.argv.includes('--landscape') || !!process.env.LANDSCAPE;
+const MOBILE_W = LANDSCAPE ? 844 : 390, MOBILE_H = LANDSCAPE ? 390 : 844;
+const launchArgs = [MOBILE ? '--window-size=' + MOBILE_W + ',' + MOBILE_H : '--window-size=1280,720', '--mute-audio'];
 if (STRICT) launchArgs.push('--autoplay-policy=user-gesture-required');
 const browser = await puppeteer.launch({ headless: 'new', args: launchArgs });
 const page = await browser.newPage();
 await page.setViewport(MOBILE
-  ? { width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true }
+  ? { width: MOBILE_W, height: MOBILE_H, deviceScaleFactor: 2, isMobile: true, hasTouch: true }
   : { width: 1280, height: 720 });
 
 const errors = [], canary = [];
@@ -60,6 +68,26 @@ async function holdTap(x, y, ms = 160) {
   await page.touchscreen.touchStart(x, y);
   await sleep(ms);
   await page.touchscreen.touchEnd();
+}
+// Same frame rule as holdTap, applied to a moving touch: hold before the first
+// move (the drag handler needs a starting sample to diff against), then spread
+// the moves over real time so frames observe the motion instead of one teleport.
+async function touchDrag(x, y, dx, dy, steps, ms, preHold, postHold) {
+  await page.touchscreen.touchStart(x, y);
+  await sleep(preHold);
+  for (let i = 1; i <= steps; i++) {
+    await page.touchscreen.touchMove(x + dx * (i / steps), y + dy * (i / steps));
+    await sleep(ms / steps);
+  }
+  await sleep(postHold);
+  await page.touchscreen.touchEnd();
+}
+// Guard: page.touchscreen without hasTouch:true dies with an opaque puppeteer stack.
+function needMobile(op) {
+  if (MOBILE) return true;
+  console.log(op.toUpperCase() + ' requires --mobile');
+  process.exitCode = 1;
+  return false;
 }
 async function nav(x, z) {
   const q = new URLSearchParams('play=1');
@@ -95,6 +123,20 @@ for (const [op, a, b] of actions) {
     else if (op === 'wait') await sleep(a);
     else if (op === 'eval') { const r = await page.evaluate(a); console.log('EVAL ' + JSON.stringify(r)); }
     else if (op === 'tap') { await holdTap(a, b); console.log('TAP @' + a + ',' + b); }
+    else if (op === 'swipe') {   // held multi-step drag — the look-camera gesture (task 077)
+      if (needMobile(op)) {
+        const { x, y, dx = 0, dy = 0, steps = 12, ms = 240, hold = 90 } = a;
+        await touchDrag(x, y, dx, dy, steps, ms, hold, hold);
+        console.log('SWIPE @' + x + ',' + y + ' +' + dx + ',+' + dy + ' (steps=' + steps + ' over ' + ms + 'ms)');
+      }
+    }
+    else if (op === 'drag') {   // drag, then HOLD deflected so the joystick keeps walking (task 077)
+      if (needMobile(op)) {
+        const { x, y, dx = 0, dy = 0, steps = 8, ms = 160, hold = 700 } = a;
+        await touchDrag(x, y, dx, dy, steps, ms, 0, hold);
+        console.log('DRAG @' + x + ',' + y + ' +' + dx + ',+' + dy + ' hold=' + hold + 'ms');
+      }
+    }
     else if (op === 'click') {   // trusted mouse click at a selector's centre (start-gesture tests)
       const r = await page.evaluate(sel => {
         const el = document.querySelector(sel); if (!el) return null;

@@ -59,7 +59,15 @@ unprompted"); until then everything stays in this repo. Photo mode: explicitly r
    No per-frame allocations in update loops.
 4. **Audio**: 100% synthesized WebAudio, zero assets. `getAudioCtx().actx` is null
    until the user clicks start — always guard.
-5. **No localStorage/sessionStorage** (artifact constraint). Session-only state.
+5. **Storage goes through `src/store.js` — nowhere else.** The old rule was a
+   flat "no localStorage/sessionStorage": in the claude.ai artifact sandbox the
+   ACCESS ITSELF throws, so a bare `localStorage.getItem` killed the game. The
+   owner's 2026-07-16 directive (persist progress; tasks 077/078) relaxes it
+   through one guarded door: `getFlag`/`setFlag` probe once, never throw, and
+   silently fall back to an in-memory map — so the artifact context degrades to
+   session-only instead of dying. Never touch `localStorage` directly, never
+   branch on whether it worked, never nag the player about it. Task 078's save
+   adapter grows this module; keys are `ope.<thing>.v<n>`.
 6. **Three r128 gotchas**: shader patches match exact anchor strings
    (`gl_Position = projectionMatrix * mvPosition;`, `#include <common>`,
    `#include <begin_vertex>`); RGBFormat DataTexture toon ramp; no CapsuleGeometry/
@@ -72,7 +80,11 @@ unprompted"); until then everything stays in this repo. Photo mode: explicitly r
 ## Dev workflow
 
 - `npm run dev` → http://localhost:5173 (often already running; check before starting).
-- Debug URL params: `?play=1` skips title; `?x=&z=` spawn; `?yaw=&pitch=&dist=` camera.
+- Debug URL params: `?play=1` skips title; `?x=&z=` spawn; `?yaw=&pitch=&dist=` camera;
+  `?coach=1` force the touch coach marks (ignore the seen flag) / `?coach=0` suppress;
+  `?a2hs=1` force the iOS install hint (invisible to headless Chrome otherwise).
+  Touch shots need `node tools/act.mjs … --mobile` (390x844) or `--mobile --landscape`
+  (844x390); `--file=` takes an actions JSON (`swipe`/`drag` ops drive the look + stick).
 - `node tools/shot.mjs <name> "play=1&x=..&z=.." [waitMs]` — headless screenshot to
   tools/shots/<name>.png + console-error report. READ the PNG and look at it.
 - `node tools/act.mjs` — scripted actions (goto/key/wait/shot) for interaction tests.

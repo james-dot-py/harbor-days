@@ -450,3 +450,15 @@ cut becomes a revert task.
   scarlet tanager, an indigo bunting, a Baltimore oriole — dives in and out of
   the hedge windows on short flitting arcs: "the Magic Hedge — they dive in and
   out, like magic." — Montrose Point (src/packs/montrose-point.js) — task 071
+- THE GAME TEACHES YOU WITH ITS HANDS, NOT ITS WORDS. Scan the QR at a bar, and
+  two soft ghost thumbs fade up over the live world in the game's own cozy
+  register: one circles the joystick — "walk" — and one swipes the open right
+  side — "look around". No modal, no "tap to continue", nothing to read; the
+  lakefront keeps living behind them. Move the stick and the walk thumb poofs
+  mid-orbit, the instant you do the thing. Drag to look and its twin poofs too.
+  Walk up to your first interactable and a third thumb taps the ✋ button until
+  you tap it yourself. Every mark exists only to be destroyed by the player
+  doing the thing it is miming — it never outstays its welcome, and it never
+  comes back. Underneath, the joystick finally DRAWS under your thumb (it had
+  been rendering 160px below the bottom of every phone since touch shipped). —
+  first touch session (index.html + src/onboard.js) — task 077

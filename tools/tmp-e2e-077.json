@@ -1,0 +1,17 @@
+[
+  ["goto"],
+  ["wait", 1600],
+  ["eval", "({phase:'1-fresh-load', ob:window.__hd.onboard(), seen:String(localStorage.getItem('ope.onboard.v1')), walkOn:document.getElementById('coachWalk').classList.contains('on'), lookOn:document.getElementById('coachLook').classList.contains('on'), ghostGone:document.getElementById('jghost').classList.contains('gone')})"],
+  ["shot", "077-e2e-1-marks-up"],
+  ["drag", {"x": 95, "y": 650, "dx": 0, "dy": -60, "hold": 1100}],
+  ["eval", "({phase:'2-after-walk', ob:window.__hd.onboard(), walkGone:document.getElementById('coachWalk').classList.contains('gone'), lookOn:document.getElementById('coachLook').classList.contains('on'), dist:+window.__hd.player.x.toFixed(1)})"],
+  ["shot", "077-e2e-2-walk-dismissed"],
+  ["swipe", {"x": 300, "y": 300, "dx": -140, "dy": 0}],
+  ["wait", 700],
+  ["eval", "({phase:'3-after-look', ob:window.__hd.onboard(), lookGone:document.getElementById('coachLook').classList.contains('gone'), seen:String(localStorage.getItem('ope.onboard.v1'))})"],
+  ["shot", "077-e2e-3-both-dismissed"],
+  ["goto"],
+  ["wait", 1600],
+  ["eval", "({phase:'4-second-session', seen:String(localStorage.getItem('ope.onboard.v1')), walkOn:document.getElementById('coachWalk').classList.contains('on'), lookOn:document.getElementById('coachLook').classList.contains('on'), ghostGone:document.getElementById('jghost').classList.contains('gone'), onboardHook:typeof window.__hd.onboard})"],
+  ["shot", "077-e2e-4-returning-player"]
+]
