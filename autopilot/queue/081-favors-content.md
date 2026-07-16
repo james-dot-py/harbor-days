@@ -35,6 +35,10 @@ acceptance: >
   coords, date-seed isolated from world rng — NEVER touches mulberry32);
   budget ~0 (cast reuses makeNPC); both inputs; verify 3 favors + one
   full stamp end-to-end with shots; single-file build; walkprobe green.
+  SEQUENCING NOTE: task 084 (montrose compression) reshapes the north
+  stretch and may run after this — place any Montrose favor cast/steps
+  relative to DATA ANCHORS (harbor/hedge/beach zone rects), never
+  absolute coords, so the favors survive the re-cut.
 refs:
   - ECONOMY.md + 078 favors API
   - src/packs/ casts (birder, ump, vendors, Malört guy, boaters — reuse, don't duplicate)
