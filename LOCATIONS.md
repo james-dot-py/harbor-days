@@ -63,8 +63,11 @@ feasibility inside perf + single-file constraints.
 
 ## In progress
 
-- (none — the queue is empty and Montrose has a SIGNOFF.md; the §5.3
-  planner picks next.)
+- (no location build in flight — Montrose signed off 2026-07-16. The queue
+  carries the owner's cross-cutting direction next: 077 mobile-first
+  experience, 078–082 the fun layer (economy/dibs/tote/favors), 083 the
+  App Store rail. The §5.3 next-location planner runs when the queue
+  empties.)
 
 ## Candidates (famous Chicago spots, seeded per §5.3)
 - North Avenue Beach — adjacent south; the chess pavilion + boat-shaped
