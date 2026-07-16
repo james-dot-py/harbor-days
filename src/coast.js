@@ -131,7 +131,15 @@ export function tierAt(lat,zc){       // height on the terraces, or null past th
 // makes basin water read shallow/light (its nearest edge is always close),
 // matching the aerial's greener harbor. One flat list for the hot loop.
 // buildSegs uses NO shared rng -> deterministic; the world's rng order is untouched.
-const SHORE_SEGS=[].concat(...QUERY_SEGS, MTR_SEGS[3], ...CH.seawallLines({P_START,BASIN_W}).map(buildSegs));  // task 072: beach shoreline kept for water color only
+// Montrose basin bulkheads (seawallLines[3..5]) are EXCLUDED from the color
+// field (task 076 / issue 026): the basin is only ~31 m wall-to-wall, so with
+// them included every drop of basin water sat in the brightest 0-14 m "beach
+// shallows" band (+1.4x glint boost) — a garish cyan pond where white hulls
+// read as foam blobs. A flush bulkhead marina reads DEEP to the wall; without
+// its walls the basin measures to the mole's outer lake face (~33 m) and lands
+// in the sheltered aqua/teal bands. Belmont's wider basin keeps its walls (the
+// aerial's greener-harbor read there is deliberate and shipped).
+const SHORE_SEGS=[].concat(...QUERY_SEGS, MTR_SEGS[3], ...CH.seawallLines({P_START,BASIN_W}).slice(0,3).map(buildSegs));  // task 072: beach shoreline kept for water color only
 export function shoreDist(x,z){        // approx Euclidean distance (m) to the nearest shoreline
   let bd2=1e18;
   for(let i=0;i<SHORE_SEGS.length;i++){
@@ -149,8 +157,12 @@ export function shoreDist(x,z){        // approx Euclidean distance (m) to the n
 // the basin water south of the cove.
 export function beachH(x,z){const b=CH.DOG_BEACH.bounds,s=CH.DOG_BEACH.slope;if(x>=b.x0&&x<=b.x1&&z>=b.z0&&z<=b.z1){const t=clamp((z-s.ref)/s.span,0,1);return s.depth*smooth(t)}return CH.montroseBeachH(x,z)}
 
-// water mesh (populated by buildCoast; read by the main loop for uTime)
+// water meshes (populated by buildCoast; read by the main loop for uTime).
+// waterN is the Montrose north plane — 069 shipped it frozen (uTime 0) when
+// the far north was empty; with the harbor/beach built, dead-still water read
+// wrong (issue 026), so main.js ticks both now.
 export let water=null;
+export let waterN=null;
 
 // Living toon water. A MeshToonMaterial patched via onBeforeCompile: the same
 // world-curve as curveMat, plus (1) a gentle 2-octave swell, (2) sparse warm
@@ -543,8 +555,8 @@ export function buildCoast(){
   water.position.set(CH.WATER.cx,WATER_Y,CH.WATER.cz);scene.add(water);   // centered on the tall map so the lake never runs out
 
   // MONTROSE north stub water: a SECOND living-water plane for the new north
-  // stretch (the main plane's north edge is only z-1085). Own material (uTime
-  // stays 0 — a calm frozen swell; imperceptible far north with no content yet),
+  // stretch (the main plane's north edge is only z-1085). Own material, ticked
+  // by main.js like the main plane (069 froze it while the north was empty),
   // same shore-banded look via aShore. Sits WATER_N.yOff (0.02 m) LOWER so the
   // existing plane wins in the z-overlap (no seam / z-fight) and the EXISTING lake
   // surface — including the spawn view — stays BIT-IDENTICAL (the determinism
@@ -558,6 +570,7 @@ export function buildCoast(){
     const wn=new THREE.Mesh(ng,livingWaterMat(0x2fa3b5));
     wn.userData.live=true;               // exempt from the cell static merge (curved/shader mesh)
     wn.position.set(N.cx,WATER_Y+N.yOff,N.cz);scene.add(wn);
+    waterN=wn;
   }
 
   // dog beach — sloped sand down to the basin water

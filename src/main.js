@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { renderer, scene, camera, amb, clamp, lerp, lerpAngle, hexRGB, pip, rng, rand, $, game, toon } from './core.js';
 import { skyGroup, clouds, buildSky } from './sky.js';
-import { buildCoast, water, coastQuery, profileTotal, tierAt, beachH, LAND } from './coast.js';
+import { buildCoast, water, waterN, coastQuery, profileTotal, tierAt, beachH, LAND } from './coast.js';
 import { buildPaths, pathSamples, pathSamples2 } from './paths.js';
 import { buildProps, colliders, walkRects, bobbers, drifter, dogTail, foam, fireflies } from './props.js';
 import { buildStructures } from './structures.js';
@@ -405,6 +405,7 @@ function frame(now){
 
   // ---- world life ----
   if(water.material.userData.sh)water.material.userData.sh.uniforms.uTime.value=t;
+  if(waterN&&waterN.material.userData.sh)waterN.material.userData.sh.uniforms.uTime.value=t;   // the Montrose plane swells too (issue 026: it shipped frozen)
   for(const b of bobbers){
     b.position.y=b.userData.by+Math.sin(t*1.1+b.userData.ph)*0.09;
     b.rotation.z=Math.sin(t*0.9+b.userData.ph)*0.05;

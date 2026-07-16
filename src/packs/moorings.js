@@ -78,7 +78,14 @@ const _IDENT = new THREE.Quaternion();
 // per-part LOCAL matrices (relative to a boat sitting at the waterline)
 const _qBoom = new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.PI / 2, 0, 0)); // cylinder y -> z (fore-aft)
 const _qJib  = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, Math.PI / 2, 0));  // triangle faces the beam
-const hullLocal = new THREE.Matrix4().compose(new THREE.Vector3(0, 0.05, 0), _IDENT, HULL_S);
+// Topsides ride HIGH (task 076 / issue 026): the old hull sat centre y0.05 —
+// a 0.6 m dome flush with the water that read as a white lily-pad blob from
+// the basin promenades. Freeboard ~0.9 m + a dark waterline band underneath
+// (second instance in the SAME mesh, +0 draws) makes the lens silhouette sit
+// ON the water like the reference boats instead of floating in it.
+const hullLocal = new THREE.Matrix4().compose(new THREE.Vector3(0, 0.34, 0), _IDENT, new THREE.Vector3(0.80, 0.60, 2.3));
+const wlineLocal = new THREE.Matrix4().compose(new THREE.Vector3(0, 0.02, 0), _IDENT, new THREE.Vector3(0.86, 0.22, 2.36));
+const WLINE_HEX = 0x33404d;   // shadowed antifouling band at the water
 const mastLocal = new THREE.Matrix4().compose(new THREE.Vector3(0, 2.8, 0),  _IDENT, new THREE.Vector3(1, 4.5, 1));
 const boomLocal = new THREE.Matrix4().compose(new THREE.Vector3(0, 1.3, 0),  _qBoom, new THREE.Vector3(1, 1.9, 1));
 const jibLocal  = new THREE.Matrix4().compose(new THREE.Vector3(0, 0.62, 1.5), _qJib, _one);
@@ -247,7 +254,9 @@ onWorldReady(() => {
 
   // ---- instanced boat meshes (4 draw calls) ----
   const hullMat = toon(0xffffff, {});   // white base; per-instance colour tints it
-  hulls = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), hullMat, N);
+  // 2N instances: [0..N) topsides in the palette colours, [N..2N) the dark
+  // waterline band under each — one bucket, one draw call, no extra rng.
+  hulls = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 8), hullMat, N * 2);
   masts = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.055, 0.055, 1, 6), toon(0x9a8a6e), N);
   booms = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05, 0.05, 1, 6), toon(0x9a8a6e), N);
   jibs  = new THREE.InstancedMesh(jibTriGeo(), toon(0xf3ecdd, { mat: { side: THREE.DoubleSide } }), Math.max(1, jibList.length));
@@ -282,12 +291,14 @@ onWorldReady(() => {
     const b = boats[i];
     boatWorld(b, 0);
     setPart(hulls, i, hullLocal);
+    setPart(hulls, N + i, wlineLocal);
     setPart(masts, i, mastLocal);
     setPart(booms, i, boomLocal);
     if (b.jib >= 0) setPart(jibs, b.jib, jibLocal);
     const crng = (i < belmontBoatCount) ? rnd : rnd2;   // Belmont draws stay bit-identical; Montrose from rnd2
     const hex = (crng() < DARK_PROB) ? DARK[(crng() * DARK.length) | 0] : LIGHT[(crng() * LIGHT.length) | 0];
     hulls.setColorAt(i, _col.setHex(hex));
+    hulls.setColorAt(N + i, _col.setHex(WLINE_HEX));   // setColorAt zero-fills unset instances -> every slot set explicitly
     if (b.can){
       const fx = Math.sin(b.ry), fz = Math.cos(b.ry), d = HULL_HALF_LEN + 0.9;   // can just ahead of the bow
       _mP.compose(_v.set(b.x + fx * d, WATER_Y + 0.14, b.z + fz * d), _IDENT, _v2.set(1, 0.8, 1));
@@ -340,6 +351,7 @@ onWorldReady(() => {
       const b = boats[i];
       boatWorld(b, t);
       setPart(hulls, i, hullLocal);
+      setPart(hulls, N + i, wlineLocal);
       setPart(masts, i, mastLocal);
       setPart(booms, i, boomLocal);
       if (b.jib >= 0) setPart(jibs, b.jib, jibLocal);
