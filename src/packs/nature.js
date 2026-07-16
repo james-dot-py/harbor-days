@@ -918,3 +918,5 @@ onWorldReady(player => {
     updSong(dt, pl);
   });
 });
+
+export { SPECIES, makeBird, birdCall };   // task 071: the Magic Hedge pack reuses the bird machinery (species palettes, chibi geometry, synthesized voices) — no parallel bird system

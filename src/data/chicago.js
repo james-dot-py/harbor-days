@@ -410,17 +410,45 @@ export const COAST_MTR_POINT_PTS = crChain([[236,-1300],[239,-1308],[242,-1318],
 // expects lock it); 'scope'/the tip-loop east arc sit on the FUTURE bulge.
 export const MONTROSE_POINT = {
   meadow:{ x0:188, x1:241, z0:-1358, z1:-1296 },   // prairie carpet + wildflower drifts (LOCAL seed; clip to LAND, >=2 m clear of every ribbon — the trail cuts the NW corner)
-  gate:{ x:191, z:-1318 },                         // timber gateway just E of the trail's walk ribbon (~x187): posts + header beam, chunky YELLOW routed letters, split-rail flanks, rules board; spans the entrance path (071 sets ry to face arrivals from the trail)
-  panel:{ x:200, z:-1320.5 },                      // the SEPARATE cream 'The Magic Hedge — A migrant magnet' interpretive panel, south side of the entrance path
+  gate:{ x:191, z:-1318 },                         // timber gateway just E of the trail's walk ribbon (~x187): posts + header beam, chunky YELLOW routed letters, split-rail flanks, rules board; opening faces WEST (arrivals from the trail), beam runs N-S
+  panel:{ x:200, z:-1320.5, ry:-0.55 },            // the SEPARATE cream 'The Magic Hedge — A migrant magnet' interpretive panel, south side of the entrance path; front faces WNW so both the gate approach and the mt-hedge f0 camera catch the cream face
   hedge:{ pts:[[194,-1326],[206,-1329],[220,-1332],[231,-1336]], h:2.6, w:2.2,   // the green wall (~38 m), WSW->ENE
           gaps:[[207,-1329],[222,-1332.5]] },      // birder clearings ON the line; scopes/birders cluster on the gaps' SOUTH (path) side
   paths:{                                          // both NEW crushed-limestone ribbons via pathSamples2 (never touch TRAIL_MONTROSE's points)
     entrance:[[191,-1318],[198,-1322],[207,-1325.5],[217,-1328.5],[227,-1331],[232,-1338]],   // gate -> hedge's S flank -> around its east end
     loop:[[232,-1338],[237,-1333],[239,-1327],[236,-1319],[230,-1312],[222,-1306],[214,-1302],[206,-1299.5]],   // tip clearing -> S shore edge -> the mole-root walk (trail-gate-hedge-tip-hook connectivity, no dead ends)
+    width:2.4,                                     // crushed limestone, TRAIL_STYLE.walk color/y
   },
-  scope:{ x:236, z:-1334 },                        // tip-clearing tripod-scope spot (FUTURE land: east of today's stub shore, inside the staged piece)
-  trees:[[210,-1344],[223,-1349],[236,-1326]],     // low tree-cluster anchors (refs: scattered clusters in open meadow; keep the hedge sightlines clear)
+  scope:{ x:238.1, z:-1336.4 },                    // tip-clearing tripod-scope spot on the 071 bulge, EAST of the loop's tip arc (the CR-sampled loop passes ~0.8 m from the staged 235.5,-1335 — tripod legs overlapped the hero path; here it clears the centerline by >=2.8 m)
+  trees:[[210,-1344],[211,-1352],[236,-1326]],     // low tree-cluster anchors (refs: scattered clusters in open meadow; keep the hedge sightlines clear). Anchor 1 moved W of the staged (223,-1349): mt-point's pull-back cameras land at (221.9,-1348)/(224.7,-1350) and a canopy there is the 034/047 camera-trap
   stands:{ hedge:[203,-1319], point:[229,-1341], gate:[186,-1316] },   // the mt-* waypoint stands — all lawn TODAY (GEOGRAPHY §Point waypoints; final strings in refs/montrose/BRIEF.md)
+  // ---- 071 build params (ALL local seeds — zero shared rng; consumed by
+  // props.js / structures.js / paths.js / packs/montrose-point.js) ----
+  prairie:{ seed:0x51ab17, tufts:420, tuftScaleY:[1.5,2.8],       // tuft-bucket growth: taller straw-length meadow grass (green; height carries the read, the dune-grass precedent)
+            straw:760, strawH:[0.45,0.95], strawColor:0xcfba7e,   // ONE merged frustum-culled Mesh of thin straw cones — the straw half of the prairie palette
+            clearD:2.0 },                                         // min distance to every ribbon centerline (trail + sanctuary paths)
+  flowers:{ seed:0x601d70,                                        // grows the AIDS-garden stems+heads buckets in place (setColorAt heads)
+            drifts:[[234,-1344,4],[228,-1336,3.5],[210,-1340,4],[199,-1330,3],[216,-1352,4]], perDrift:18, goldenrod:0xf2c14e,
+            asters:[[224,-1342,3],[204,-1334,2.5]], perAster:14, aster:0xb48ae0 },
+  hedgeFill:{ seed:0x8ed6e1, step:1.1, jitter:0.35,               // grows the HEDGES InstancedMesh: overlapping blobs along hedge.pts
+              sx:[1.5,2.1], sy:[1.05,1.35], sz:1.15, y:1.3,       // per-instance yaw follows the segment tangent; top ~2.4-2.7 m (h 2.6)
+              gapR:1.7,                                           // skip blobs within gapR of each gaps[] point — the birder windows
+              ragged:{ off:[0.8,1.6], step:2.7, sy:[0.5,0.75] } },// sparse low second row on the S (path) side — the refs' ragged front
+  treeFill:{ seed:0x7ee3a1, per:[3,2,1], spread:[4.5,3.5,0.1], scale:[1.7,2.2] },   // clusters per anchor (kept clear of ribbons/hedge/dune by rejection)
+  ropes:[                                                         // white rope-and-post lines (fenceRun collide:false; the refs' path fencing)
+    [[196,-1324],[203,-1326.2]],                                  // entrance path, hedge side (stops W of gap 1 — birders stand in the window)
+    [[231,-1348],[236,-1343],[239,-1337]],                        // tip meadow shore-edge run (mt-point f0 foreground)
+  ],
+  gateway:{ span:3.8, postW:0.26, postH:2.9, beamY:2.45, beamH:0.5, beamLen:5.2,   // posts at z -1316.1/-1319.9; beam spans them N-S
+            wood:0x9a8d78, letters:0xe8c11c,                      // weathered gray timber, chunky routed-yellow letters (FrontSide canvas on the beam's W face; the beam box is the solid rear)
+            rail:{ len:4.2, postH:1.0 },                          // split-rail flanks running N/S from each post along x=191
+            rules:{ w:1.5, h:1.0, bg:0x2b2723 } },                // dark rules board ('Open from dawn to dusk'), W-facing at the S jamb
+  birders:[                                                       // the devotees (pack: makeNPC wander:0, aim = look target; probe: footprint clearance)
+    { x:206.0, z:-1327.4, aim:[207,-1329] },                      // gap-1 pair, peering into the window
+    { x:208.6, z:-1326.7, aim:[207.5,-1329.5], scope:true },      // ...one on a tripod scope
+    { x:221.6, z:-1330.6, aim:[222,-1332.5], binocs:true },       // gap-2, binoculars raised
+    { x:237.8, z:-1336.8, aim:[245,-1327], scope:true },          // tip clearing (east of the loop arc, just inside the shore rope), scope aimed SE over the open lake
+  ],
 };
 
 // scattered mottled-grass circles across the whole park

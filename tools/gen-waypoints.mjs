@@ -257,6 +257,32 @@ add('mt-dock', 'montrose', 'lakefront', 216, -1473, [
   ]);
 }
 
+// THE MAGIC HEDGE / MONTROSE POINT (task 071): the signature-landmark hero.
+// Stands from CH.MONTROSE_POINT.stands (all meadow lawn); framings are the 068
+// BRIEF finals (refs/montrose/BRIEF.md §WAYPOINTS (final)) — the PHYSICS RULING
+// bounds every promise: far plane 900 kills the downtown skyline, fog (opaque
+// 210 m) kills the harbor light, so the strings promise the hook's stone ARM +
+// the open-lake horizon instead. Cameras verified against the canopy anchors
+// (the middle tree cluster was moved west of the mt-point pull-back zone).
+{
+  const S = CH.MONTROSE_POINT.stands;
+  add('mt-hedge', 'montrose', 'lakefront', S.hedge[0], S.hedge[1], [
+    { yaw: 2.36, pitch: 0.12, dist: 10 },  // NE — hedge wall + gap-1 birders left, cream panel right, lake glinting over the wall (camera pulls back into open meadow SW)
+    { yaw: 1.90, pitch: 0.10, dist: 11 },  // ENE down-the-length — the whole green wall + both gaps + scopes
+    { yaw: 2.85, pitch: 0.10, dist: 12 },  // NNE straight into the gap-1 window — birders + clustered songbirds dead ahead
+  ]);
+  add('mt-point', 'montrose', 'lakefront', S.point[0], S.point[1], [
+    { yaw: 0.79, pitch: 0.12, dist: 10 },  // SE over the open water — prairie + rope line + wildflower drifts foreground
+    { yaw: 0.15, pitch: 0.12, dist: 10 },  // S-SSE — centers the hook's stone arm (bearing ~0.07-0.19 from the stand; the staged 0.45 stared into the tip tree cluster at bearing 0.44)
+    { yaw: 0.60, pitch: 0.16, dist: 13 },  // wider/higher — the whole tip meadow + arm + horizon
+  ]);
+  add('mt-hedge-gate', 'montrose', 'lakefront', S.gate[0], S.gate[1], [
+    { yaw: 1.62, pitch: 0.10, dist: 10 },  // EAST through the gateway — yellow routed letters + split-rail flanks + rules board
+    { yaw: 1.45, pitch: 0.08, dist: 9 },   // ENE angled — beam + flank + the path curving into the meadow beyond
+    { yaw: 1.62, pitch: 0.16, dist: 12 },  // wider/higher — gateway in its meadow context, hedge line behind
+  ]);
+}
+
 // Diversey ENTERABLE bay (task 028): stand on the ground hitting deck at a
 // middle bay's hitting spot and look NORTH down the range — the axis-aligned
 // interior framing for the bay pocket (a cross-body camera sits in a divider);

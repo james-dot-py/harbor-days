@@ -50,3 +50,4 @@ import './montrose-beach.js';   // Montrose Beach life — wandering beachgoers 
 import './cricket-hill.js';   // Cricket Hill — the walkable kite mound + flyers/kites tableau (task 073)
 import './montrose-harbor-life.js';   // Montrose Harbor delight — the hook fisherman's catch + Park Bait cricket chirp (task 074)
 import './montrose-kite.js';   // FLY A KITE on Cricket Hill — hold-to-launch, session cam, reel-in (task 074)
+import './montrose-point.js';   // THE MAGIC HEDGE — Montrose Point sanctuary life: birders + scopes + clustered chibi migrants + graded birdsong (task 071)

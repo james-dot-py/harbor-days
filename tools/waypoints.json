@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-13T11:53:06.922Z",
- "count": 125,
+ "generated": "2026-07-16T21:02:19.487Z",
+ "count": 128,
  "waypoints": [
   {
    "id": "spawn",
@@ -622,6 +622,81 @@
     }
    ],
    "expectation": "CRICKET HILL — THE MOUND + KITES (task 073): standing on the lawn just SOUTH of the hill looking NORTH, a broad grassy toon mound rises against the sunset sky and blends seamlessly into the surrounding lawn carpet (NO cliff, NO seam, NO hard edge where the slope meets grade). A few kite-flyer NPCs stand on the crest with colorful diamond KITES aloft on their strings — little bow tails trailing — silhouetted against the sky. Faint worn desire-path + sparse grass tufts on the slopes. Reads as Chicago's kite hill: an inviting, climbable green mound topped with kites; NOT a flat bump, NOT a walled/terraced mass, the kites clearly flying above the summit."
+  },
+  {
+   "id": "mt-hedge",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 203,
+   "z": -1319,
+   "framings": [
+    {
+     "yaw": 2.36,
+     "pitch": 0.12,
+     "dist": 10
+    },
+    {
+     "yaw": 1.9,
+     "pitch": 0.1,
+     "dist": 11
+    },
+    {
+     "yaw": 2.85,
+     "pitch": 0.1,
+     "dist": 12
+    }
+   ],
+   "expectation": "THE MAGIC HEDGE (task 071, the hero): a long dense hedgerow runs the meadow like a green wall, with birders at its gaps — tripod scopes and binoculars aimed into the shrubs; chunky bright songbirds perch in the near clearing; a cream interpretive sign on a wood post stands beside a pale crushed-stone path with white rope-and-post lines; past the meadow, open lake to the horizon. The register is OPEN SKY + one focal hedge line + scopes-and-rarities buzz — distinct from Jarvis's enclosed room. The hedge must read as a WALL (continuous, ~2.5 m, with clear birder windows), the birders as devotees clustered AT the gaps, the birds chibi-chunky and visible (not lost specks); NOT a row of lollipop shrubs, NOT empty meadow, sign text not mirrored."
+  },
+  {
+   "id": "mt-point",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 229,
+   "z": -1341,
+   "framings": [
+    {
+     "yaw": 0.79,
+     "pitch": 0.12,
+     "dist": 10
+    },
+    {
+     "yaw": 0.15,
+     "pitch": 0.12,
+     "dist": 10
+    },
+    {
+     "yaw": 0.6,
+     "pitch": 0.16,
+     "dist": 13
+    }
+   ],
+   "expectation": "MONTROSE POINT TIP (task 071): an open prairie meadow on a point over the lake — tall straw-and-green grasses with yellow wildflower drifts inside rope-and-post lines, scattered low tree clusters, and open water running to the horizon; to the south, the hook's long stone arm reaches away down the lake. Reads as the calm, windswept CONTRAST to the hedge's density: prairie texture (straw + green + goldenrod, not plain lawn), the rope line honest and low, the arm visible through the haze (its near half), open-lake horizon east. NOT plain empty lawn, NOT the downtown skyline (far plane physics), no floating props."
+  },
+  {
+   "id": "mt-hedge-gate",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 186,
+   "z": -1316,
+   "framings": [
+    {
+     "yaw": 1.62,
+     "pitch": 0.1,
+     "dist": 10
+    },
+    {
+     "yaw": 1.45,
+     "pitch": 0.08,
+     "dist": 9
+    },
+    {
+     "yaw": 1.62,
+     "pitch": 0.16,
+     "dist": 12
+    }
+   ],
+   "expectation": "THE SANCTUARY GATEWAY (task 071): a weathered timber gateway spans the sanctuary path — MONTROSE POINT BIRD SANCTUARY in chunky yellow letters on the header beam, split-rail fence at its flanks and a dark rules board at the jamb; beyond it the pale crushed-limestone path curves into meadow and hedge. The likeness register: two heavy posts + header beam (not an arch), routed-yellow lettering LEGIBLE and not mirrored, rails reading as split timber; a chibi songbird greeter on the beam is a plus. NOT a generic sign on a stick, NOT floating, the path visibly passing under it."
   },
   {
    "id": "dv-bay-deck",

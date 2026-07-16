@@ -28,7 +28,7 @@ export const BASIN_W=[];for(let z=CH.BASIN_W_PARAMS.z0;z>=CH.BASIN_W_PARAMS.z1;z
 // draws — the COAST_TIP precedent). Separate arrays so 070-072 swap one piece.
 export const COAST_MTR_LAWN  =genCoast(CH.COAST_MTR_LAWN_PARAMS.z0,  CH.COAST_MTR_LAWN_PARAMS.z1,  CH.COAST_MTR_LAWN_PARAMS.fx);   // shore south of the harbor
 export const COAST_MTR_HARBOR=CH.COAST_MTR_HARBOR_PTS;                                                                            // 070: the hook mole's LAKE(outer) terraced face (polyline)
-export const COAST_MTR_POINT =genCoast(CH.COAST_MTR_POINT_PARAMS.z0, CH.COAST_MTR_POINT_PARAMS.z1, CH.COAST_MTR_POINT_PARAMS.fx);  // 071 Point
+export const COAST_MTR_POINT =CH.COAST_MTR_POINT_PTS;                                                                             // 071: the pushed-east Point (polyline, apex 243,-1330 — the map's eastmost land)
 export const COAST_MTR_BEACH =genCoast(CH.COAST_MTR_BEACH_PARAMS.z0, CH.COAST_MTR_BEACH_PARAMS.z1, CH.COAST_MTR_BEACH_PARAMS.fx);  // 072 beach
 export const COAST_MTR_CLOSE =CH.COAST_MTR_CLOSE_PTS;                                                                             // NE-corner map-edge closure (polyline)
 // 070: two EXTRA terraced harbor pieces — the mouth-entrance shore + the hook TIP

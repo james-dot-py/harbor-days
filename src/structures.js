@@ -1218,6 +1218,161 @@ function buildTheDock(){
   grp.position.set(D.x,0,D.z);grp.rotation.y=D.ry;scene.add(grp);
 }
 
+// ---- Montrose Point / the Magic Hedge sanctuary (task 071) -----------------
+// The refs' timber BIRD SANCTUARY gateway (opening faces WEST, arrivals from the
+// Lakefront Trail — the entrance path leaves EAST), split-rail flanks, a dark
+// rules board, white rope-and-post path fencing, the cream 'Magic Hedge'
+// interpretive panel, and the tripod spotting-scopes the birders share. Every
+// value from CH.MONTROSE_POINT; 100% rng-free (individual frustum-culled toon
+// meshes, no InstancedMesh beyond the appended POSTS/RAILS, no walkRects).
+// Fences append to the tail of POSTS/RAILS so every earlier instance index is
+// unchanged (determinism holds). Word-sign laws (tasks 028/032/050): each text
+// gets its OWN canvas (never a shared atlas), the font is measureText-FITTED
+// (headless Chromium's fallback font measures wider — fitting is mandatory), a
+// FrontSide plane only, and a solid rear (the beam box, or a BackSide solid
+// plane at the same transform) so no mirrored-text artifact can ever show.
+function buildMontrosePoint(POSTS,RAILS){
+  const MP=CH.MONTROSE_POINT,G=MP.gateway;
+
+  // (a) WHITE ROPE-AND-POST lines — the refs' low path fencing. NO colliders
+  // (waist-high rope, purely visual; the birders/probe never collide with it).
+  for(const line of MP.ropes)
+    fenceRun(line,{spacing:2.6,postH:0.5,color:0xd8d0bd,collide:false},POSTS,RAILS);
+
+  // (b) SPLIT-RAIL FLANKS running N/S from each gateway post along x=191
+  // (posts sit at z -1316.1 / -1319.9 = gate.z ± span/2). Weathered timber,
+  // solid colliders (collideR 0.9) so the player is channelled through the gap.
+  fenceRun([[191,-1316.1],[191,-1311.9]],{spacing:2.1,postH:G.rail.postH,color:G.wood,collideR:0.5},POSTS,RAILS);
+  fenceRun([[191,-1319.9],[191,-1322.6]],{spacing:2.1,postH:G.rail.postH,color:G.wood,collideR:0.5},POSTS,RAILS);
+  // south flank SHORTENED (-1324.1 -> -1322.6) + both collideR 0.5: the Montrose
+  // walk ribbon bows to x~189.8 by z-1324, and a 0.9 collider there reached onto
+  // the ribbon (soft-push on the approach path — the issue-025 ring law).
+
+  // (c) THE TIMBER GATEWAY at MP.gate (191,-1318). Opening faces WEST; the beam
+  // runs N-S over two posts. Individual toon meshes, world coords direct.
+  const woodM=toon(G.wood);
+  const zN=MP.gate.z+G.span/2,zS=MP.gate.z-G.span/2;   // -1316.1 (north) / -1319.9 (south)
+  for(const pz of[zN,zS]){
+    const post=new THREE.Mesh(new THREE.BoxGeometry(G.postW,G.postH,G.postW),woodM);
+    post.position.set(MP.gate.x,G.postH/2,pz);scene.add(post);
+    collide(MP.gate.x,pz,0.4);
+  }
+  const beamY=G.beamY+G.beamH/2;                        // beam box centre-y
+  const beam=new THREE.Mesh(new THREE.BoxGeometry(0.22,G.beamH,G.beamLen),woodM);
+  beam.position.set(MP.gate.x,beamY,MP.gate.z);scene.add(beam);
+
+  // ROUTED-YELLOW letters on the beam's WEST face. Own wide canvas painted the
+  // beam wood tone so the board blends into the timber; fitted bold letters with
+  // a darker outline for the carved-in look. FrontSide plane only — the solid
+  // beam box behind it is the 'solid rear' (no BackSide plane needed here).
+  {
+    const cv=document.createElement('canvas');cv.width=1024;cv.height=96;const g=cv.getContext('2d');
+    g.fillStyle='#8f8470';g.fillRect(0,0,1024,96);                       // beam-wood ground (blends)
+    g.textAlign='center';g.textBaseline='middle';
+    const txt='MONTROSE POINT BIRD SANCTUARY';
+    let fs=46;g.font=`800 ${fs}px "Trebuchet MS",sans-serif`;
+    while(g.measureText(txt).width>988&&fs>10){fs-=2;g.font=`800 ${fs}px "Trebuchet MS",sans-serif`;}
+    g.lineWidth=2;g.strokeStyle='#5f5010';g.strokeText(txt,512,52);      // subtle darker outline (routed)
+    g.fillStyle='#'+G.letters.toString(16).padStart(6,'0');g.fillText(txt,512,52);
+    const ltex=new THREE.CanvasTexture(cv);ltex.anisotropy=4;
+    const lp=new THREE.Mesh(new THREE.PlaneGeometry(G.beamLen-0.4,G.beamH-0.14),
+      curveMat(new THREE.MeshBasicMaterial({map:ltex,side:THREE.FrontSide})));
+    lp.position.set(MP.gate.x-0.115-0.015,beamY,MP.gate.z);lp.rotation.y=-Math.PI/2;   // faces -x (west)
+    scene.add(lp);
+  }
+
+  // THE RULES BOARD — dark, W-facing, at the south jamb; hangs on the S flank
+  // line (the flank posts carry it — no post of its own). Own canvas: two rows
+  // of three white pictogram circles + the fitted 'Open from dawn to dusk.'.
+  // FrontSide plane + a BackSide solid rear at the same transform (free-standing
+  // sign law) so the reverse never shows mirrored text.
+  {
+    const rw=G.rules.w,rh=G.rules.h;
+    const cv=document.createElement('canvas');cv.width=384;cv.height=256;const g=cv.getContext('2d');
+    g.fillStyle='#2b2723';g.fillRect(0,0,384,256);
+    g.fillStyle='#e8e4dc';                                                // pictogram circles
+    for(let row=0;row<2;row++)for(let col=0;col<3;col++){g.beginPath();g.arc(96+col*96,58+row*64,24,0,7);g.fill();}
+    g.fillStyle='#f2efe8';g.textAlign='center';g.textBaseline='middle';
+    const rtxt='Open from dawn to dusk.';
+    let rfs=34;g.font=`700 ${rfs}px "Trebuchet MS",sans-serif`;
+    while(g.measureText(rtxt).width>360&&rfs>10){rfs-=2;g.font=`700 ${rfs}px "Trebuchet MS",sans-serif`;}
+    g.fillText(rtxt,192,222);
+    const rtex=new THREE.CanvasTexture(cv);rtex.anisotropy=4;
+    const rp=new THREE.Mesh(new THREE.PlaneGeometry(rw,rh),
+      curveMat(new THREE.MeshBasicMaterial({map:rtex,side:THREE.FrontSide})));
+    rp.position.set(190.9,1.05,-1321.6);rp.rotation.y=-Math.PI/2;scene.add(rp);
+    const rear=new THREE.Mesh(new THREE.PlaneGeometry(rw,rh),toon(G.rules.bg,{mat:{side:THREE.BackSide}}));
+    rear.position.set(190.9,1.05,-1321.6);rear.rotation.y=-Math.PI/2;scene.add(rear);   // solid rear
+  }
+
+  // (d) THE INTERPRETIVE PANEL at MP.panel (front faces WNW per MP.panel.ry).
+  // Lollipop law (issue 014): the post ENDS at the panel's BOTTOM edge — a post
+  // run full height through panel centre-depth would BISECT the text. FrontSide
+  // cream panel + BackSide solid-cream rear at the same transform.
+  {
+    const P=MP.panel;
+    const post=new THREE.Mesh(new THREE.BoxGeometry(0.12,0.83,0.12),toon(0x6b5c48));
+    post.position.set(P.x,0.415,P.z);scene.add(post);                    // base at ground, top at y 0.83 = panel bottom
+    const cv=document.createElement('canvas');cv.width=512;cv.height=384;const g=cv.getContext('2d');
+    g.fillStyle='#efe6cd';g.fillRect(0,0,512,384);                       // cream board
+    g.fillStyle='#2d4a2a';g.textAlign='left';g.textBaseline='alphabetic';
+    let tfs=52;g.font=`800 ${tfs}px "Trebuchet MS",sans-serif`;
+    const title='The Magic Hedge';
+    while(g.measureText(title).width>430&&tfs>14){tfs-=2;g.font=`800 ${tfs}px "Trebuchet MS",sans-serif`;}
+    g.fillText(title,28,72);
+    g.fillStyle='#4a5c46';g.font='italic 28px "Trebuchet MS",sans-serif';
+    g.fillText('A migrant magnet',30,110);                               // subtitle
+    // yellow-warbler silhouette glyph, top-right
+    g.fillStyle='#e8c11c';
+    g.beginPath();g.ellipse(452,60,26,16,0,0,7);g.fill();                // body
+    g.beginPath();g.arc(478,50,11,0,7);g.fill();                        // head
+    g.fillStyle='#d8a800';g.beginPath();g.moveTo(488,50);g.lineTo(502,47);g.lineTo(488,55);g.closePath();g.fill();   // beak
+    g.fillStyle='#c9c3b4';                                               // fake paragraph body lines
+    for(let i=0;i<7;i++){g.fillRect(30,152+i*26,i===6?250:440,9);}
+    g.fillStyle='#3a3428';g.textAlign='center';
+    const band='CHICAGO PARK DISTRICT';
+    let bfs=26;g.font=`700 ${bfs}px "Trebuchet MS",sans-serif`;
+    while(g.measureText(band).width>470&&bfs>10){bfs-=2;g.font=`700 ${bfs}px "Trebuchet MS",sans-serif`;}
+    g.textBaseline='middle';g.fillText(band,256,364);
+    const ptex=new THREE.CanvasTexture(cv);ptex.anisotropy=4;
+    const panel=new THREE.Mesh(new THREE.PlaneGeometry(1.15,0.85),
+      curveMat(new THREE.MeshBasicMaterial({map:ptex,side:THREE.FrontSide})));
+    panel.position.set(P.x,1.25,P.z);panel.rotation.y=P.ry;scene.add(panel);
+    const rear=new THREE.Mesh(new THREE.PlaneGeometry(1.15,0.85),toon(0xe6dcc0,{mat:{side:THREE.BackSide}}));
+    rear.position.set(P.x,1.25,P.z);rear.rotation.y=P.ry;scene.add(rear);   // solid cream rear
+    collide(P.x,P.z,0.35);
+  }
+
+  // (e) TRIPOD SCOPES for the two scope:true birders. Each stands 0.55 m from
+  // the birder TOWARD their aim; ONE merged geometry per scope (three splayed
+  // legs meeting at the apex + a horizontal tube yawed at the aim + an eyepiece
+  // knob at the back). Merged so each scope is a single frustum-culled draw.
+  const scopeM=toon(0x3a3f45);
+  for(const b of MP.birders){
+    if(!b.scope)continue;
+    const dx=b.aim[0]-b.x,dz=b.aim[1]-b.z,d=Math.hypot(dx,dz)||1;
+    const px=b.x+0.55*dx/d,pz=b.z+0.55*dz/d;
+    const yaw=Math.atan2(b.aim[0]-px,b.aim[1]-pz);
+    const parts=[];
+    for(let i=0;i<3;i++){                                                // three legs, splayed ~0.35 rad at 120 deg
+      const leg=new THREE.CylinderGeometry(0.02,0.02,1.25,6);
+      leg.translate(0,-0.625,0);                                        // top -> local origin (the apex pivot)
+      leg.rotateX(0.35);leg.rotateY(i*2*Math.PI/3);                     // splay + distribute
+      leg.translate(0,1.18,0);                                          // lift apex to y 1.18
+      parts.push(leg);
+    }
+    const tube=new THREE.CylinderGeometry(0.055,0.075,0.42,10);
+    tube.rotateX(Math.PI/2);tube.rotateY(yaw);tube.translate(0,1.28,0); // horizontal, yawed toward the aim
+    parts.push(tube);
+    const knob=new THREE.SphereGeometry(0.045,8,6);
+    knob.translate(-0.24*Math.sin(yaw),1.28,-0.24*Math.cos(yaw));       // eyepiece at the back (opposite aim)
+    parts.push(knob);
+    const scope=new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(parts),scopeM);
+    scope.position.set(px,0,pz);scene.add(scope);
+    collide(px,pz,0.3);
+  }
+}
+
 export function buildStructures(){
   const POSTS=[],RAILS=[];
   buildDogFence(POSTS,RAILS);
@@ -1228,6 +1383,7 @@ export function buildStructures(){
   buildCornerPark(POSTS,RAILS);
   fenceRun(CH.MT_HOOK_RAIL.line, {spacing:CH.MT_HOOK_RAIL.spacing, postH:CH.MT_HOOK_RAIL.postH, color:CH.MT_HOOK_RAIL.color, collideR:CH.MT_HOOK_RAIL.collideR}, POSTS, RAILS);
   fenceRun(CH.MONTROSE_DUNE.fence, {spacing:2.6, postH:0.5, color:0xcbb994, collide:false}, POSTS, RAILS);   // low rope line, NO colliders (dune interior blocked by walk data — 065 law)
+  buildMontrosePoint(POSTS,RAILS);   // task 071: sanctuary gateway/flanks/ropes append to POSTS/RAILS tail (indices unchanged); statics drawn directly
   emitFences(POSTS,RAILS);
   buildFieldhouse();
   buildParkBait();

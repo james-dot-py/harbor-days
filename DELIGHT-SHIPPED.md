@@ -434,3 +434,19 @@ cut becomes a revert task.
   and their descendant Imani nests on; fewer than ~80 Great Lakes pairs remain. A
   journal note keeps the story. — Montrose dunes (src/packs/montrose-beach.js,
   static chick retired from src/props.js) — task 074
+- THE MAGIC HEDGE GREETS YOU. Step off the trail through the timber gateway onto
+  Montrose Point — the Midwest's most famous migrant trap — and a red Cardinal is
+  perched right on the gateway beam to welcome you, eye level, the endearing
+  "a bird lands to say hi" moment at the door of the sanctuary. — Montrose Point
+  gateway (191, −1317; src/packs/montrose-point.js) — task 071
+- BIRDERS ON THE HEDGE. Devotees line the gap windows — one with binoculars
+  raised into a clearing, others leaning on spotting scopes trained down the
+  line, trading the register ("that's a LIFER", "radar was UNREAL last night",
+  and the Nike missile-base aside "the Army left, the honeysuckles stayed").
+  Bump the one on the scope and he waves you in — "ope — scope's free, take a
+  look." — Montrose Point hedge gaps (src/packs/montrose-point.js) — task 071
+- INTO THE MAGIC. Cross into the sanctuary band and the world opens to open-sky
+  birdsong while a clustered flock of chibi migrants — cardinal, goldfinches, a
+  scarlet tanager, an indigo bunting, a Baltimore oriole — dives in and out of
+  the hedge windows on short flitting arcs: "the Magic Hedge — they dive in and
+  out, like magic." — Montrose Point (src/packs/montrose-point.js) — task 071

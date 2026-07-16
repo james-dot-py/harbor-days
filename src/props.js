@@ -118,6 +118,13 @@ export function buildProps(){
   // so it NEVER touches the shared world rng() (the determinism gate). Zero
   // shared-rng draws: Montrose only grows buckets AFTER their frozen fill loops.
   const mkrng=seed=>{let s=(seed>>>0)||1;return()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};};
+  // ---- Montrose Point sanctuary (071): shared LOCAL geometry helpers (pure
+  // math, zero rng) + a one-time prefilter of the ribbon samples to the Point's
+  // own ribbons (z < -1280). Reused by every 071 growth block below so the
+  // pathSamples2 scan runs once, not per candidate. ----
+  const mpSeg2=(px,pz,ax,az,bx,bz)=>{const dx=bx-ax,dz=bz-az,L=dx*dx+dz*dz;let t=L?((px-ax)*dx+(pz-az)*dz)/L:0;t=t<0?0:t>1?1:t;const cx=ax+t*dx,cz=az+t*dz;return (px-cx)**2+(pz-cz)**2;};
+  const mpPoly2=(px,pz,pts)=>{let m=Infinity;for(let i=0;i<pts.length-1;i++){const d=mpSeg2(px,pz,pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1]);if(d<m)m=d;}return m;};
+  const mpN=[];for(let i=0;i<pathSamples2.length;i++)if(pathSamples2[i][1]<-1280)mpN.push(pathSamples2[i]);
   // ---- trees ----
   {
     const T=CH.TREES;
@@ -150,6 +157,27 @@ export function buildProps(){
       const deckClear={x0:stX-5,x1:D.x1+8,z0:D.z0-3.5,z1:D.z1+4};   // x≈160.9–183, z≈−402–−390
       for(let i=treeSpots.length-1;i>=0;i--)
         if(inRect(treeSpots[i],CH.TENNIS.block)||inRect(treeSpots[i],CH.DIVERSEY.range)||inRect(treeSpots[i],deckClear)||near2(treeSpots[i]))treeSpots.splice(i,1);
+    }
+
+    // ---- Montrose Point tree clusters (071): grown into the SHARED tree buckets
+    // in place — appended to treeSpots AFTER the post-filter and BEFORE n is
+    // taken, so +0 InstancedMesh buckets and +0 draws (they flow through the
+    // archetype/collider loop below untouched). LOCAL tr rng only; rejection keeps
+    // clusters off the ribbons, the hedge line and the dune so sightlines stay open.
+    {
+      const MP=CH.MONTROSE_POINT,TF=MP.treeFill,tr=mkrng(TF.seed);
+      for(let k=0;k<MP.trees.length;k++){
+        const ax=MP.trees[k][0],az=MP.trees[k][1],sp=TF.spread[k];
+        for(let t=0;t<TF.per[k];t++){
+          for(let tries=0;tries<20;tries++){
+            const x=ax+(tr()*2-1)*sp,z=az+(tr()*2-1)*sp;
+            if(!pip(x,z,LAND)||CH.inMontroseDune(x,z))continue;
+            let bad=false;for(const p of mpN)if((p[0]-x)**2+(p[1]-z)**2<6.25){bad=true;break}   // >=2.5 m off every ribbon
+            if(bad||mpPoly2(x,z,MP.hedge.pts)<4)continue;                                        // >=2.0 m off the hedge line
+            treeSpots.push([x,z,TF.scale[0]+tr()*(TF.scale[1]-TF.scale[0]),false]);break;
+          }
+        }
+      }
     }
 
     const n=treeSpots.length,M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3(),Eu=new THREE.Euler();
@@ -256,16 +284,50 @@ export function buildProps(){
     for(let z=H.west.z0;z<=H.west.z1;z+=H.west.step){if(inGap(z))continue;spots.push([H.west.x,z]);}
     for(let x=H.north.x0;x<=H.north.x1;x+=H.north.step)spots.push([x,H.north.z]);
     if(H.cap)for(let x=H.cap.x0;x<=H.cap.x1;x+=H.cap.step)spots.push([x,H.cap.z]);
-    const hedge=new THREE.InstancedMesh(new THREE.SphereGeometry(1,9,8),hm,spots.length);
-    const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
+    // ---- Montrose Point (071): THE MAGIC HEDGE — grown into THIS same bucket in
+    // place (mspots appended after the frozen Jarvis spots → +0 InstancedMesh
+    // buckets, +0 draws). LOCAL hr rng only. Overlapping blobs follow the
+    // hedge.pts tangent (per-instance yaw), skip the birder windows (gaps) + the
+    // hero-path edge; a sparse ragged low front row on the S (+z, path) side reads
+    // as the refs' rough hedge foot. Full-height wall blobs collide (r 0.85, ring
+    // inside the path margin); the ragged row stays soft (no collider).
+    const MP=CH.MONTROSE_POINT,HF=MP.hedgeFill,GP=MP.hedge,hr=mkrng(HF.seed),mspots=[];
+    const gapHit=(x,z)=>{for(const g of GP.gaps)if((g[0]-x)**2+(g[1]-z)**2<HF.gapR*HF.gapR)return true;return false;};
+    const pathHit=(x,z)=>mpPoly2(x,z,MP.paths.entrance)<6.0025||mpPoly2(x,z,MP.paths.loop)<6.0025;   // >=2.45 m to either ribbon
+    const emitAlong=(pts,step,cb)=>{                     // walk a control polyline, emit at arclength intervals
+      let d=0,segStart=0;
+      for(let i=0;i<pts.length-1;i++){
+        const ax=pts[i][0],az=pts[i][1],dx=pts[i+1][0]-ax,dz=pts[i+1][1]-az,L=Math.hypot(dx,dz);if(L<1e-9)continue;
+        const tx=dx/L,tz=dz/L;
+        while(d<=segStart+L+1e-9){const s=d-segStart;cb(ax+tx*s,az+tz*s,tx,tz);d+=step;}
+        segStart+=L;
+      }
+    };
+    emitAlong(GP.pts,HF.step,(bx,bz,tx,tz)=>{            // full-height green wall
+      const j=(hr()*2-1)*HF.jitter,x=bx-tz*j,z=bz+tx*j;                       // lateral jitter along the perpendicular
+      const sx=HF.sx[0]+hr()*(HF.sx[1]-HF.sx[0]),sy=HF.sy[0]+hr()*(HF.sy[1]-HF.sy[0]);
+      if(gapHit(x,z)||pathHit(x,z))return;
+      mspots.push({x,z,yaw:Math.atan2(tx,tz),sx,sy,sz:HF.sz,wall:true});
+    });
+    const RG=HF.ragged;
+    emitAlong(GP.pts,RG.step,(bx,bz,tx,tz)=>{            // ragged low front row on the +z (path) side
+      let px=-tz,pz=tx;if(pz<0){px=-px;pz=-pz;}                               // perpendicular pointing to the path side
+      const off=RG.off[0]+hr()*(RG.off[1]-RG.off[0]),x=bx+px*off,z=bz+pz*off;
+      const sy=RG.sy[0]+hr()*(RG.sy[1]-RG.sy[0]),sx=1.0+hr()*0.4;
+      if(gapHit(x,z)||pathHit(x,z))return;
+      mspots.push({x,z,yaw:Math.atan2(tx,tz),sx,sy,sz:1.0,wall:false});
+    });
+    const hedge=new THREE.InstancedMesh(new THREE.SphereGeometry(1,9,8),hm,spots.length+mspots.length);
+    const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3(),E=new THREE.Euler();
     spots.forEach((p,i)=>{M.compose(V.set(p[0],H.y,p[1]),Q.identity(),S.set(H.scale[0],H.scale[1],H.scale[2]));hedge.setMatrixAt(i,M)});
+    mspots.forEach((b,i)=>{E.set(0,b.yaw,0);Q.setFromEuler(E);M.compose(V.set(b.x,HF.y,b.z),Q,S.set(b.sx,b.sy,b.sz));hedge.setMatrixAt(spots.length+i,M);if(b.wall)collide(b.x,b.z,0.85);});
     hedge.instanceMatrix.needsUpdate=true;scene.add(hedge);
   }
 
   // ---- grass tufts (small, dense — human scale) ----
   {
     const TU=CH.TUFTS,n=TU.count,tm=toon(TU.color);
-    const tuft=new THREE.InstancedMesh(new THREE.ConeGeometry(0.09,0.3,5),tm,n+CH.MONTROSE_DUNE.grass.count);
+    const tuft=new THREE.InstancedMesh(new THREE.ConeGeometry(0.09,0.3,5),tm,n+CH.MONTROSE_DUNE.grass.count+CH.MONTROSE_POINT.prairie.tufts);
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
     // no grass poking through the entrance monument's decomposed-granite pad
     // (task 023): the scaleY rand is still drawn (rng order frozen), the tuft
@@ -295,6 +357,47 @@ export function buildProps(){
         M.compose(V.set(x,y,z),Q.identity(),S.set(1,sy,1));tuft.setMatrixAt(placed++,M);
       }
     }
+    // ---- Montrose POINT prairie (071): taller straw-length meadow grass — grown
+    // into the SAME tuft bucket in place (placed continues past the dune grass →
+    // +0 InstancedMesh buckets, +0 draws). LOCAL pr rng; rejection-sampled in the
+    // meadow rect, clear of the ribbons, the hedge line and every gate/panel/
+    // scope/birder footprint. Plus the STRAW half of the palette: ONE merged
+    // frustum-culled Mesh of thin cones (+1 draw ONLY when the Point is framed).
+    {
+      const MP=CH.MONTROSE_POINT,PR=MP.prairie,me=MP.meadow;
+      const near=[[MP.gate.x,MP.gate.z,3],[MP.panel.x,MP.panel.z,1.2],[MP.scope.x,MP.scope.z,1]];
+      for(const b of MP.birders)near.push([b.x,b.z,1]);
+      const cd2=PR.clearD*PR.clearD;
+      const blocked=(x,z)=>{
+        if(!pip(x,z,LAND)||CH.inMontroseDune(x,z))return true;
+        for(const p of mpN)if((p[0]-x)**2+(p[1]-z)**2<cd2)return true;
+        if(mpPoly2(x,z,MP.hedge.pts)<2.56)return true;                 // >=1.6 m to the hedge line
+        for(const q of near)if((q[0]-x)**2+(q[1]-z)**2<q[2]*q[2])return true;
+        return false;
+      };
+      const pr=mkrng(PR.seed);
+      for(let i=0;i<PR.tufts;i++){
+        for(let tries=0;tries<8;tries++){
+          const x=me.x0+pr()*(me.x1-me.x0),z=me.z0+pr()*(me.z1-me.z0);
+          if(blocked(x,z))continue;
+          const sy=PR.tuftScaleY[0]+pr()*(PR.tuftScaleY[1]-PR.tuftScaleY[0]);
+          M.compose(V.set(x,0.14,z),Q.identity(),S.set(1,sy,1));tuft.setMatrixAt(placed++,M);break;
+        }
+      }
+      // straw cones — clone one base geo, tilt/scale each, merge into ONE Mesh
+      const sr=mkrng(PR.seed^0x9e3779b9),base=new THREE.ConeGeometry(0.05,1,4),parts=[];
+      for(let i=0;i<PR.straw;i++){
+        for(let tries=0;tries<8;tries++){
+          const x=me.x0+sr()*(me.x1-me.x0),z=me.z0+sr()*(me.z1-me.z0);
+          if(blocked(x,z))continue;
+          const h=PR.strawH[0]+sr()*(PR.strawH[1]-PR.strawH[0]),g=base.clone();
+          g.scale(1,h,1);g.rotateX((sr()*2-1)*0.12);g.rotateZ((sr()*2-1)*0.12);g.translate(x,h*0.5,z);
+          parts.push(g);break;
+        }
+      }
+      base.dispose();
+      if(parts.length)scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(parts),toon(PR.strawColor)));
+    }
     tuft.count=placed;                                   // trim any unfilled tail (no stray tuft at origin)
     tuft.instanceMatrix.needsUpdate=true;scene.add(tuft);
   }
@@ -305,8 +408,11 @@ export function buildProps(){
     const beds=GA.beds;
     const cols=GA.colors.map(c=>new THREE.Color(c));
     const n=GA.count;
-    const stems=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05,0.05,0.55,5),toon(0x4f9f52,{}),n);
-    const heads=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.19,0),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),n);
+    // Montrose Point (071): grow BOTH flower buckets in place by M = the wildflower
+    // drift total (goldenrod + aster) — +0 InstancedMesh buckets, +0 draws.
+    const MP=CH.MONTROSE_POINT,FL=MP.flowers,mpM=FL.drifts.length*FL.perDrift+FL.asters.length*FL.perAster;
+    const stems=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05,0.05,0.55,5),toon(0x4f9f52,{}),n+mpM);
+    const heads=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.19,0),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),n+mpM);
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
     for(let i=0;i<n;i++){
       let x,z;
@@ -316,6 +422,29 @@ export function buildProps(){
       M.compose(V.set(x,0.28*s,z),Q.identity(),S.set(1,s,1));stems.setMatrixAt(i,M);
       M.compose(V.set(x,0.62*s,z),Q.identity(),S.set(1,0.8,1));heads.setMatrixAt(i,M);
       heads.setColorAt(i,cols[rng()*cols.length|0]);
+    }
+    // ---- Montrose POINT wildflowers (071): goldenrod + aster drifts — grown into
+    // the SAME AIDS-garden stems+heads buckets in place (idx continues past n → +0
+    // InstancedMesh buckets, +0 draws). LOCAL fr rng; radial drifts kept off the
+    // Point ribbons; heads.setColorAt tints each species. Zero shared rng. ----
+    {
+      const fr=mkrng(FL.seed),gcol=new THREE.Color(FL.goldenrod),acol=new THREE.Color(FL.aster);
+      let idx=n;
+      const drift=(cx,cz,r,col)=>{
+        for(let tries=0;tries<6;tries++){
+          const a=fr()*Math.PI*2,rr=Math.sqrt(fr())*r,x=cx+Math.cos(a)*rr,z=cz+Math.sin(a)*rr;
+          if(!pip(x,z,LAND)||CH.inMontroseDune(x,z))continue;
+          let bad=false;for(const p of mpN)if((p[0]-x)**2+(p[1]-z)**2<2.25){bad=true;break}   // >=1.5 m to the Point ribbons
+          if(bad)continue;
+          const s=0.9+fr()*0.5;
+          M.compose(V.set(x,0.28*s,z),Q.identity(),S.set(1,s,1));stems.setMatrixAt(idx,M);
+          M.compose(V.set(x,0.62*s,z),Q.identity(),S.set(1,0.8,1));heads.setMatrixAt(idx,M);
+          heads.setColorAt(idx,col);idx++;return;
+        }
+      };
+      for(const d of FL.drifts)for(let k=0;k<FL.perDrift;k++)drift(d[0],d[1],d[2],gcol);
+      for(const d of FL.asters)for(let k=0;k<FL.perAster;k++)drift(d[0],d[1],d[2],acol);
+      stems.count=heads.count=idx;
     }
     stems.instanceMatrix.needsUpdate=heads.instanceMatrix.needsUpdate=true;heads.instanceColor.needsUpdate=true;
     scene.add(stems,heads);

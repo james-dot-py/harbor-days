@@ -507,6 +507,17 @@ few turns to find; keep each to one line of symptom + fix.
   logged a "stall" (task 065): a solid post you step AROUND is not a trap — route
   bot paths BESIDE point colliders (or ±1 the post's z), and read the stall coord
   before believing a walkability regression (the player there was free N/S/W).
+- A pack bird PERCHED ON A STRUCTURE (sign, beam) needs PINNED spots, not random
+  air-jitter alternates: jitter floats the bird in front of the face, and a perch
+  y is the chibi's BODY CENTER (±0.37·size m of body) — y at "the top edge" parks
+  the body ACROSS the letter band (071: the Cardinal covered 'SANCTUARY', the
+  goldfinch the panel title). Perch at surface + ~0.37·size, alternates on other
+  structure points; reserve jitter for foliage/ground birds.
+- Prop clearance vs a CatmullRom ribbon must be measured against the SAMPLED
+  curve, not the control polyline: the CR bulge put the staged tip scope 0.8 m
+  off the loop centerline while control-point math said ~1.4 (071). walkprobe's
+  071 (k) block does it right (crSample) — copy that, and expect staged coords
+  authored by control-point math to need a nudge.
 - The lakefront (incl. all of Montrose) has NO anti-trap CRAWL escape — that is
   HARD-cell-only (main.js gates BOTH the crawl AND `__hd.setTrap`'s effect on
   `cellWalk()`, line 145/259). On the lakefront `setTrap` is a NO-OP and any

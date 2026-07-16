@@ -117,4 +117,10 @@ export function buildPaths(){
       M.compose(V.set(d.x,st.dash.y,d.z),q,S);inst.setMatrixAt(i,M);});
     inst.instanceMatrix.needsUpdate=true;scene.add(inst);
   }
+  // MONTROSE POINT sanctuary paths (task 071): gate -> hedge south flank -> around
+  // the east end, + the tip loop back to the mole-root walk. Crushed limestone
+  // (walk styling); NEW ribbons -> pathSamples2 ONLY (ribbonOn is rng-free).
+  const MP=CH.MONTROSE_POINT;
+  ribbonOn(curveOf(MP.paths.entrance),MP.paths.width,st.walk.color,st.walk.y,0,pathSamples2);
+  ribbonOn(curveOf(MP.paths.loop),MP.paths.width,st.walk.color,st.walk.y,0,pathSamples2);
 }
