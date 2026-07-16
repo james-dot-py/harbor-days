@@ -76,3 +76,33 @@ doors · Wrigley's Spearmint ad inside the L car.
 - [proposed] Metra ghost: the parked silver EMU in the Art Institute rail
   trench sounds a far-off horn when you lean on the rim rail — Grant Park —
   the trench is alive. (source: task 057; osm-grant Metra corridor)
+- [proposed] RARE BIRD ALERT at the Magic Hedge: a walkie squawk ("chat at
+  the hedge!") and birder NPCs SPRINT in from the paths, cluster at a hedge
+  gap and go dead quiet; peek and a chunky YELLOW-BREASTED CHAT sits in the
+  shrubs — Montrose Point — the real rarity-chase culture of the most famous
+  birding spot in the Midwest. (source: task 067; refs/montrose Icteria
+  photos ×2 shot AT the sanctuary; 071's birder register)
+- [proposed] Peek through a birder's scope: E / ✋ at a parked tripod scope
+  borrows a session-camera vignette — a soft round zoom mask on one chibi
+  warbler preening in the hedge; the owner murmurs "lifer." — Montrose Point
+  — every birder shares the eyepiece. (source: task 067; the interpretive
+  sign's "bird watchers at the hedge" inset; nature.js binocular precedent)
+- [proposed] Moonrise at the Point: stand at the real "Montrose Moonrise
+  Observation Point" (osm node 13046958064, harbor mouth) as a huge low moon
+  lifts out of the lake at dusk; a couple of thermos NPCs gather and watch
+  with you — Montrose Point — the north side's actual moonrise-watch spot.
+  (source: task 067; osm.json named node)
+- [proposed] Goose flotilla in the basin: a paddling wedge of Canada geese
+  drifts between the moored sailboats and honk-scatters if you wade or
+  jetski through — Montrose Harbor — straight from the reference aerial.
+  (source: task 067; 2006-06-03 harbor photo, geese among the cans)
+- [proposed] Smelt-net night on the hook: a lantern-lit smelt rig (dip net +
+  bucket + folding chair) parked on the pier rail near the curl; its keeper
+  explains April smelt season and comes up empty every pull, cheerfully —
+  Montrose hook — the old Chicago smelt ritual, distinct from 074's rod
+  fisherman. (source: task 067; Chicago smelt-fishing tradition; hook refs)
+- [proposed] The Dock's beach-bar radio: a small counter radio murmurs a
+  synth-surf set that swells as you near the bar and ducks under the lake wind
+  at the sand line; the bartender hums along off-key — The Dock at Montrose
+  Beach — beach-bar ambience without a speaker in sight. (source: task 067;
+  The Dock register, 072 build)
