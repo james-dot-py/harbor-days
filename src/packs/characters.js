@@ -42,6 +42,12 @@ import { pourMalort, oldStyleTex } from './malort.js';   // shared Malört swig 
 
 const SAX_TEST = /[?&]saxtest=1/.test(location.search);
 
+// task 078 (favors-pilot): a tiny hook object the favor pack fills in. This file
+// only PUBLISHES the Malört guy + his interaction/swig state and calls the hooks
+// if present; all favor logic (offer/turn-in/duet) lives in favors-pilot.js so
+// this cast file stays "minimal hooks only".
+export const malortHooks = {};
+
 // beach cove / rock terrace / park height (so figures rest ON the ground)
 function groundY(x,z){
   const b = beachH(x,z); if(b!==null) return b;
@@ -112,18 +118,23 @@ onWorldReady(() => {
     // you can: straight to the shot, no ceremony (that's the Handshake regular's
     // bit down the rocks). Shares the swig routine; his own short cooldown/label.
     const swig = {busy:false, cool:0};
-    const guyInter = addInteraction({x:X, z:Z, r:2.4, label:'burnt band-aid?', onUse:()=>{
+    const guyInter = addInteraction({x:X, z:Z, r:2.4, label:'burnt band-aid?', onUse:(player)=>{
+      if(malortHooks.intercept && malortHooks.intercept(player)) return;   // task 078: favor turn-in / duet takes the press
       if(swig.busy||swig.cool>0) return; swig.busy=true;
       guy.say('attaboy — down the hatch', 2);
       pourMalort({npc:guy, react:'builds character, told ya',
         toastMain:'BURNT BAND-AID', toastSub:"Jeppson's Malört",
-        onDone:()=>{ swig.busy=false; swig.cool=28; guyInter.setLabel('...one more?'); }});
+        onDone:()=>{ swig.busy=false; swig.cool=28; guyInter.setLabel('...one more?');
+          if(malortHooks.onSwigDone) malortHooks.onSwigDone(); }});   // task 078: the first shared shot earns the errand
     }});
+    // task 078: publish the guy / his interaction / swig state for favors-pilot.js
+    malortHooks.guy = guy; malortHooks.inter = guyInter; malortHooks.swig = swig;
 
-    rePose.push((dt) => {
+    rePose.push((dt, t) => {
       guy.parts.armR.rotation.x = -1.05; guy.parts.armR.rotation.z = -0.12;
       guy.parts.armL.rotation.x = -0.25;
       if(swig.cool>0){ swig.cool-=dt; if(swig.cool<=0) guyInter.setLabel('burnt band-aid?'); }
+      if(malortHooks.rePose) malortHooks.rePose(dt, t);   // task 078: favor pack's per-frame hook (duet arm + label)
     });
   }
 

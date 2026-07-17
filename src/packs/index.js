@@ -51,3 +51,5 @@ import './cricket-hill.js';   // Cricket Hill — the walkable kite mound + flye
 import './montrose-harbor-life.js';   // Montrose Harbor delight — the hook fisherman's catch + Park Bait cricket chirp (task 074)
 import './montrose-kite.js';   // FLY A KITE on Cricket Hill — hold-to-launch, session cam, reel-in (task 074)
 import './montrose-point.js';   // THE MAGIC HEDGE — Montrose Point sanctuary life: birders + scopes + clustered chibi migrants + graded birdsong (task 071)
+import './favors-pilot.js';   // THE ECONOMY's pilot favor — "an Old Style for the Malört guy" (task 078)
+import './economy-pilot.js';   // THE ECONOMY's beach kiosk + pilot toys — popcorn/tennis ball/bucket hat (task 078)

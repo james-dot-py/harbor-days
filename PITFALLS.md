@@ -578,6 +578,27 @@ few turns to find; keep each to one line of symptom + fix.
   every tap target on the RIGHT with the ✋, and MEASURE it
   (`getBoundingClientRect` of the pill vs #jzone) — a drag coordinate that looks
   safely bottom-left is inside the pill the moment a label gets long.
+- PERSISTENCE DECISION (owner directive 2026-07-16, tasks 077/078): the old flat
+  "no localStorage" constraint is RELAXED through exactly one door — src/store.js.
+  The artifact-sandbox reality is unchanged (bare localStorage ACCESS throws), so
+  the adapter contract is: feature-detect ONCE with a real write+read+remove
+  probe, NEVER throw (every entry try/catch'd, silent in-memory Map fallback),
+  NEVER nag or branch gameplay on availability. The save is ONE versioned JSON
+  blob (`ope.save.v1` — dibs/bag/worn/favors/zones/counters/flags), loaded once
+  at boot, debounce-written (~600 ms) + flushed on pagehide. It may NEVER
+  contain coords or derived world state — only names, ids, numbers — so saves
+  survive map reworks (084 moves the whole north shore). Bad JSON / unknown
+  version → fresh save, silently. Packs never touch storage directly; they go
+  through framework wallet/bag/favors or the whitelisted state-counter snapshot.
+- A modal opened by a touch INTERACTION closes ITSELF on the tap's release: the
+  pill/✋ path fires onUse in the rAF loop BETWEEN touchstart and touchend, so
+  the modal is already covering the screen when the release's synthesized click
+  fires — the click lands on the BACKDROP, and a naive backdrop-click-closes
+  handler shuts the card the same gesture that opened it (078's kiosk shop;
+  repro'd headless at 80/200 ms into the hold). Guard tap-outside-closes on the
+  gesture's ORIGIN: close only when pointerdown AND click both hit the backdrop
+  (framework.js initDom). Modals opened by a BUTTON's click are immune (the
+  open happens on the click itself, so no second click follows).
 - The on-screen joystick VISUAL was never once visible on a real phone until 077.
   `#stick` was `position:absolute` inside `#jzone`, but input.js assigns it raw
   `clientX/clientY` — and #jzone is anchored `bottom:0`, so its top edge sits

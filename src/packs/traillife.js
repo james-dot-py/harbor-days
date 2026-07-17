@@ -27,8 +27,8 @@
 //    leashes(1)                                            = 1   -> 10 total.
 // =====================================================================
 import * as THREE from 'three';
-import { onWorldReady, registerUpdate, makeNPC, getAudioCtx } from '../framework.js';
-import { scene, toon } from '../core.js';
+import { onWorldReady, registerUpdate, makeNPC, getAudioCtx, registerFetchDog } from '../framework.js';
+import { scene, toon, lerpAngle } from '../core.js';
 import { mainCurve } from '../paths.js';
 
 // ---- local deterministic rng (unused for layout, kept for parity) ----
@@ -270,6 +270,12 @@ const DOG_COL = [0xd8b48a, 0x8a8f96];
 const JOG_LINES = ['on your left!', 'ope', 'nice night for it', 'this humidity, though', 'six more miles'];
 const CYC_LINES = ['on your left!', "ope — comin' through!"];
 const WALK_LINES = ['ope', 'nice night for a walk', "say hi to your ma", "that's a real nice pup, eh"];
+// leashed-dog LUNGE at a thrown tennis ball (fetch-dog adapter): the dog never
+// fetches — it strains toward the ball for ~1.8 s while the walker holds, then
+// the ball is abandoned (api.abort). Offset eases in, holds, decays; no payout.
+const LUNGE_STRAIN = 1.8, LUNGE_DECAY = 0.5, LUNGE_MAX = 1.2;
+const lungeEase = u => u * u * (3 - 2 * u);
+const LUNGE_SAY = ["ope — he's friendly!", "leave it. LEAVE it.", "someone's got a fan"];
 
 // =====================================================================
 //  movers
@@ -313,7 +319,24 @@ onWorldReady((player) => {
     walkers.push({ npc, d0: Math.max(4, a.c - a.half), d1: Math.min(TOT - 4, a.c + a.half),
       d: a.c, dir: Math.random() < 0.5 ? 1 : -1, sp: 1.5, spCur: 1.5, walkT: Math.random() * 6.28,
       dogTrot: Math.random() * 6.28, sniff: 0, sniffing: false, timer: 4 + Math.random() * 4,
-      side: a.side, lead: 1.4 });
+      side: a.side, lead: 1.4,
+      dogX: 0, dogZ: 0,                                 // last drawn dog world pos (canReach/pos)
+      lungeT: -1, lungeApi: null, lungeAborted: false, lungeTX: 0, lungeTZ: 0 });
+  }
+
+  // ---- fetch-dog adapters: the two leashed trail dogs LUNGE (never fetch) ----
+  for (let i = 0; i < walkers.length; i++){
+    const w = walkers[i];
+    registerFetchDog({
+      name: 'trail-dog-' + i,
+      pos(out){ out.x = w.dogX; out.z = w.dogZ; },
+      available(){ return true; },
+      canReach(x, z){ const dx = x - w.dogX, dz = z - w.dogZ; return dx * dx + dz * dz < 49; },  // 7 m
+      fetch(x, z, api){
+        w.lungeT = 0; w.lungeApi = api; w.lungeAborted = false; w.lungeTX = x; w.lungeTZ = z;
+        w.npc.say(LUNGE_SAY[(Math.random() * LUNGE_SAY.length) | 0]);
+      },
+    });
   }
 
   // =============================== per-frame ============================
@@ -394,13 +417,35 @@ onWorldReady((player) => {
       sampleAt(dogD, _pos2, _tan2);
       const dnx = -_tan2.z, dnz = _tan2.x;
       const dx0 = _pos2.x - dnx * 0.5 * w.side, dz0 = _pos2.z - dnz * 0.5 * w.side;
-      const dyaw = Math.atan2(_tan2.x * w.dir, _tan2.z * w.dir) + (w.sniff > 0.5 ? 0.5 : 0); // sniff turns aside
-      composeWorld(dx0, dz0, dyaw, 0, _m);
+      let dyaw = Math.atan2(_tan2.x * w.dir, _tan2.z * w.dir) + (w.sniff > 0.5 ? 0.5 : 0); // sniff turns aside
+      // LUNGE: strain the DOG's drawn transform toward a thrown ball while the
+      // walker holds. Offsets only the dog + leash endpoint — the walker's path
+      // (wx/wz/g.position) is untouched. abort() fires once at the strain's end.
+      let ddx = dx0, ddz = dz0;
+      if (w.lungeT >= 0){
+        w.lungeT += dt;
+        if (!w.lungeAborted && w.lungeT >= LUNGE_STRAIN){
+          if (w.lungeApi && w.lungeApi.abort) w.lungeApi.abort();
+          w.lungeAborted = true;
+        }
+        let mag;
+        if (w.lungeT < 0.6) mag = LUNGE_MAX * lungeEase(w.lungeT / 0.6);
+        else if (w.lungeT < LUNGE_STRAIN) mag = LUNGE_MAX;
+        else if (w.lungeT < LUNGE_STRAIN + LUNGE_DECAY) mag = LUNGE_MAX * (1 - lungeEase((w.lungeT - LUNGE_STRAIN) / LUNGE_DECAY));
+        else { mag = 0; w.lungeT = -1; }
+        if (mag > 0){
+          let ox = w.lungeTX - dx0, oz = w.lungeTZ - dz0; const ol = Math.hypot(ox, oz) || 1;
+          ddx = dx0 + ox / ol * mag; ddz = dz0 + oz / ol * mag;
+          dyaw = lerpAngle(dyaw, Math.atan2(ox, oz), Math.min(1, mag / LUNGE_MAX));   // head toward the ball
+        }
+      }
+      w.dogX = ddx; w.dogZ = ddz;
+      composeWorld(ddx, ddz, dyaw, 0, _m);
       w.dogTrot += w.spCur * dt * 4.5;
       drawDog(i, w.dogTrot, w.spCur > 0.3 ? 1 : 0, w.sniff);
-      // leash: walker's leading hand -> dog collar
+      // leash: walker's leading hand -> dog collar (stretches taut on a lunge)
       const hx = wx + Math.sin(yaw) * 0.25, hy = 1.02, hz = wz + Math.cos(yaw) * 0.25;
-      drawLeash(i, hx, hy, hz, dx0, 0.5 - 0.2 * w.sniff, dz0);
+      drawLeash(i, hx, hy, hz, ddx, 0.5 - 0.2 * w.sniff, ddz);
     }
     dogBody.instanceMatrix.needsUpdate = true;
     dogHead.instanceMatrix.needsUpdate = true;

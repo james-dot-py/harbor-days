@@ -20,7 +20,8 @@
 // =====================================================================
 import * as THREE from 'three';
 import { onWorldReady, registerUpdate, addInteraction, chargeThrow, camForward,
-         holdItem, toast, journalSection, state, getAudioCtx, makeNPC, registerBumpable } from '../framework.js';
+         holdItem, toast, journalSection, state, getAudioCtx, makeNPC, registerBumpable,
+         wallet, registerFetchDog, fetchDogs } from '../framework.js';
 import { scene, toon, curveMat, clamp, lerp, lerpAngle, pip, WATER_Y } from '../core.js';
 import { coastQuery, profileTotal, tierAt, beachH, LAND } from '../coast.js';
 import { FX } from '../fx.js';
@@ -179,6 +180,10 @@ onWorldReady(player=>{
     const n=s.skips; if(n>state.bests.skips)state.bests.skips=n;
     const sub = n>=7?'LEGENDARY':n>=4?'nice arm':n>=2?'not bad':'plonk.';
     toast(n>0?`${n} skip${n>1?'s':''}!`:(onLand?'plop.':'plonk!'), sub);
+    // payout lands at the moment of delight: a real skip (>=3), a beauty (>=6).
+    // pay() owns the first-time bonus, the session throttle, the chip pop + save.
+    if(n>=3) wallet.pay({key:'stones', first:5, repeat:n>=6?3:2,
+      reason:n>=6?'skipped a beauty':'a good skip', firstReason:'first good skip!'});
   }
   function updateStones(dt){
     for(let i=stones.length-1;i>=0;i--){
@@ -324,7 +329,8 @@ onWorldReady(player=>{
   const reachable=(x,z)=>x>89.4&&x<110.6&&z>-344.6&&z<-329.4;   // safely inside clamp+GRAB
 
   const fetch={phase:'idle', bx:ball.position.x, by:ball.position.y, bz:ball.position.z,
-               bvx:0,bvy:0,bvz:0, restT:0, respawnT:0, whineT:0, boostT:0, chaseT:0};
+               bvx:0,bvy:0,bvz:0, restT:0, respawnT:0, whineT:0, boostT:0, chaseT:0,
+               gApi:null, gbx:0, gbz:0, gStage:'go', gT:0};   // 'guest' = driving a thrown tennis ball (079 adapter)
 
   // drive the dog toward a clamped target with a leg-less bound; returns reached
   function dogPursue(dt,t,tx,tz,speed){
@@ -425,6 +431,29 @@ onWorldReady(player=>{
       return;
     }
 
+    if(ph==='guest'){                                  // driving a THROWN tennis ball back (079 adapter)
+      const api=fetch.gApi;
+      fetch.gT+=dt;
+      if(fetch.gT>10){ if(api&&api.abort)api.abort(); fetch.phase='idle'; fetch.gApi=null; return; }  // watchdog
+      if(fetch.gStage==='go'){
+        if(dogPursue(dt,t,fetch.gbx,fetch.gbz,5.5)){    // reached the ball
+          if(api&&api.grab)api.grab();
+          fetch.gStage='back';
+        }
+      }else{                                            // carry it to the player
+        const reached=dogPursue(dt,t,player.x,player.z,4.5);
+        const ry=dog.rotation.y, by=dogBaseY(dog.position.x,dog.position.z)+0.9;  // ball rides the mouth
+        if(api&&api.at)api.at(dog.position.x+Math.sin(ry)*0.85, by, dog.position.z+Math.cos(ry)*0.85);
+        const dp=dog.position, pdx=player.x-dp.x, pdz=player.z-dp.z;
+        if(reached||pdx*pdx+pdz*pdz<1.44){              // at the player (or the cove's fence line)
+          const d=Math.hypot(pdx,pdz)||1;
+          if(api&&api.done)api.done(clX(dp.x+pdx/d*0.6), clZ(dp.z+pdz/d*0.6));   // drop 0.6 m in front
+          fetch.phase='idle'; fetch.gApi=null;
+        }
+      }
+      return;
+    }
+
     // idle: bob a floating ball; trot the dog home; wag-boost excitement
     const g=groundAt(fetch.bx,fetch.bz);
     if(g.water) ball.position.y=g.y+0.28+Math.sin(t*2.5)*0.04;
@@ -440,6 +469,21 @@ onWorldReady(player=>{
       }else dog.rotation.z+=(0-dog.rotation.z)*Math.min(1,dt*6);
     }
   }
+
+  // fetch-dog adapter: the hero beach dog answers a thrown tennis ball (079).
+  // Self-sufficient — it drives itself through the api; canReach = the cove
+  // window (same one the beach-ball fetch uses, so a reachable ball is grabbable).
+  registerFetchDog({
+    name:'hero-beach-dog',
+    pos(out){ if(dog){ out.x=dog.position.x; out.z=dog.position.z; } },
+    available(){ return !!dog && fetch.phase==='idle'; },
+    canReach(x,z){ return reachable(x,z); },
+    fetch(x,z,api){
+      if(!dog||fetch.phase!=='idle')return;
+      fetch.gApi=api; fetch.gbx=x; fetch.gbz=z; fetch.gStage='go'; fetch.gT=0;
+      fetch.phase='guest';   // the idle-branch dog-trot pauses; the beach ball stays put
+    },
+  });
 
   // ------------------------- 4. DOG PARK ------------------------------ //
   // Two neighbours run continuous, offset-phase fetch loops on the cove
@@ -485,7 +529,8 @@ onWorldReady(player=>{
     return { idx,owner,home,clampX,clampZ,scale:scl,ball,
       x:home.x,z:home.z,y:beachH(home.x,home.z)??0,ry:owner.group.rotation.y,
       pitch:0,legPh:Math.random()*6,tailWag:0,swimming:false,rippleT:0,armT:0,
-      phase:'idle',waitT,flight:null,landX:0,landZ:0,landY:0,waterThrow:false };
+      phase:'idle',waitT,flight:null,landX:0,landZ:0,landY:0,waterThrow:false,
+      gApi:null,gbx:0,gbz:0,gStallT:0,gRefX:0,gRefZ:0 };   // 'guestGo'/'guestBack' = 079 adapter
   }
   const dogs=[
     makeDog(0,ownerA,{x:91,z:-338},[88,96],[-340,-324],0.82,0xd4e34a,0.6),
@@ -498,6 +543,22 @@ onWorldReady(player=>{
   for(const d of dogs){
     d.bumpGroup={position:new THREE.Vector3(d.x,d.y,d.z)};
     registerBumpable(d.bumpGroup, 0.92*d.scale+0.45, DOG_BUMP, 0.9);
+  }
+  // fetch-dog adapters: each park dog answers a thrown tennis ball STRICTLY
+  // inside its own clamp; its owner's throw loop pauses while it guests (the
+  // owner's ball stays parked in hand). clampDog keeps the pursuit pen-safe.
+  for(const d of dogs){
+    registerFetchDog({
+      name:'dogpark-dog-'+d.idx,
+      pos(out){ out.x=d.x; out.z=d.z; },
+      available(){ return d.phase==='idle'; },
+      canReach(x,z){ return x>d.clampX[0]&&x<d.clampX[1]&&z>d.clampZ[0]&&z<d.clampZ[1]; },
+      fetch(x,z,api){
+        if(d.phase!=='idle')return;
+        d.gApi=api; d.gbx=x; d.gbz=z; d.gStallT=0; d.gRefX=d.x; d.gRefZ=d.z;
+        d.phase='guestGo';
+      },
+    });
   }
 
   function clampDog(d,x,z){ return avoidPen(clamp(x,d.clampX[0],d.clampX[1]),clamp(z,d.clampZ[0],d.clampZ[1])); }
@@ -534,12 +595,34 @@ onWorldReady(player=>{
     return dist<=0.55;
   }
 
-  function updDogPair(d,dt,t){
+  function updDogPair(d,dt,t,player){
     const owner=d.owner, og=owner.group;
     // owner watches the ball/dog + a throw-arm swing on release
     const fx=d.ball.position.x-og.position.x, fz=d.ball.position.z-og.position.z;
     if(fx*fx+fz*fz>0.05) og.rotation.y=lerpAngle(og.rotation.y,Math.atan2(fx,fz),1-Math.exp(-5*dt));
     if(d.armT>0){ d.armT-=dt; owner.parts.armR.rotation.x=-1.8*clamp(d.armT/0.4,0,1); }
+
+    if(d.phase==='guestGo'||d.phase==='guestBack'){    // driving a THROWN tennis ball (079 adapter)
+      const api=d.gApi;
+      d.ball.position.set(og.position.x,1.12,og.position.z);   // owner's own ball stays in hand
+      if(d.phase==='guestGo'){
+        if(runDog(d,dt,t,d.gbx,d.gbz,false)){          // reached the ball
+          if(api&&api.grab)api.grab();
+          d.phase='guestBack'; d.gStallT=0; d.gRefX=d.x; d.gRefZ=d.z;
+        }
+      }else{                                            // carry toward the player each frame
+        runDog(d,dt,t,player.x,player.z,false);
+        if(api&&api.at)api.at(d.x+Math.sin(d.ry)*0.5, d.y+0.5, d.z+Math.cos(d.ry)*0.5);  // mouth-carry
+        const rd=Math.hypot(d.x-d.gRefX,d.z-d.gRefZ);
+        if(rd<0.05) d.gStallT+=dt; else { d.gRefX=d.x; d.gRefZ=d.z; d.gStallT=0; }        // stall watch
+        const pdx=player.x-d.x, pdz=player.z-d.z;
+        if(pdx*pdx+pdz*pdz<1.44 || d.gStallT>=1.2){    // at the player OR brought it to the fence line
+          if(api&&api.done)api.done(d.x,d.z);
+          d.phase='idle'; d.waitT=0.8+Math.random()*1.4; d.gApi=null;
+        }
+      }
+      return;
+    }
 
     if(d.phase==='idle'){
       const hd=Math.hypot(d.x-d.home.x,d.z-d.home.z);
@@ -610,13 +693,20 @@ onWorldReady(player=>{
       part(legIM,idx*4+l,h[0],0.42,h[1],Math.sin(d.legPh+h[2])*amp,0,0); }
     if(d.bumpGroup) d.bumpGroup.position.set(d.x,d.y,d.z);   // keep the bump anchor on the dog
   }
-  function updateDogPark(dt,t){
-    for(const d of dogs){ updDogPair(d,dt,t); writeDog(d); }
+  function updateDogPark(dt,t,player){
+    for(const d of dogs){ updDogPair(d,dt,t,player); writeDog(d); }
     for(const m of dogIMs) m.instanceMatrix.needsUpdate=true;
   }
   for(const d of dogs) writeDog(d);                    // seed matrices so nothing flashes at the origin
   for(const m of dogIMs) m.instanceMatrix.needsUpdate=true;
 
   // ------------------------------ per frame --------------------------- //
-  registerUpdate((dt,t,pl)=>{ updateStones(dt); updateFetch(dt,t,pl); updateDogPark(dt,t); });
+  // debug-only: expose the framework's fetch-dog registry for the 078/079
+  // probes. Set on the FIRST update frame (main.js clobbers window.__hd
+  // wholesale at boot, after onWorldReady — same reason econUpdate defers).
+  let _dbgOnce=false;
+  registerUpdate((dt,t,pl)=>{
+    if(!_dbgOnce){ _dbgOnce=true; try{ window.__hd=window.__hd||{}; window.__hd.fetchDogs=fetchDogs; }catch(e){} }
+    updateStones(dt); updateFetch(dt,t,pl); updateDogPark(dt,t,pl);
+  });
 });

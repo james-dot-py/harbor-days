@@ -1,0 +1,11 @@
+[
+  ["goto", 100, -350],
+  ["wait", 1500],
+  ["eval", "({label: document.getElementById('promptlabel').textContent, shop: document.getElementById('shop').classList.contains('show'), coach: !!document.querySelector('.coachmark, #coach, [class*=coach]')})"],
+  ["tapSel", "#prompt"],
+  ["eval", "({shopAfterTap: document.getElementById('shop').classList.contains('show')})"],
+  ["wait", 120],
+  ["eval", "({shop120: document.getElementById('shop').classList.contains('show')})"],
+  ["wait", 500],
+  ["eval", "({shop620: document.getElementById('shop').classList.contains('show')})"]
+]

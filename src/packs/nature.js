@@ -37,6 +37,15 @@ const rr = (a, b) => a + (b - a) * Math.random();
 const moving = () => keys.has('w') || keys.has('a') || keys.has('s') || keys.has('d') ||
   keys.has('arrowup') || keys.has('arrowdown') || keys.has('arrowleft') || keys.has('arrowright') || joy.len > 0.2;
 
+// ---------------------------- crumb lure (task 078) --------------------
+// The popcorn bag (packs/economy-pilot.js) publishes a lure point via
+// setCrumbLure(()=>({x,z})) while it's held, setCrumbLure(null) when stowed.
+// The sanctuary flock diverts a few SONG/GROUND birds to peck near it, then
+// rotates back to normal life. Module-scoped so the pack can toggle it without
+// reaching into onWorldReady's closure; the bird update below reads _crumbLure.
+let _crumbLure = null;
+export function setCrumbLure(fn) { _crumbLure = (typeof fn === 'function') ? fn : null; }
+
 // ---------------------------- session state ----------------------------
 state.birdsSeen = state.birdsSeen || new Set();
 state.fishLog = state.fishLog || {};
@@ -403,6 +412,10 @@ onWorldReady(player => {
   // busy/calm wave + cull state
   let busy = true, waveT = 12, birdRelocT = 1.2, birdsShown = false, flockPassT = 0;
   function queueFlockPass() { flockPassT = 0.15; }
+  // crumb-lure state (task 078): last recruit point + throttles (hoisted — no
+  // per-frame alloc; fn() is only called on lureScan ticks, never every frame).
+  const LURE_R = 82, LURE_MAX = 4;   // recruit radius (m): the sanctuary flock you're standing beside (gate→far clearings ~80 m); up to 4 birds
+  let lureScan = 0, lureRetgT = 0, lureX = 0, lureZ = 0, lureOn = false;
 
   function placePerch(b, p) {
     const u = b.userData;
@@ -416,10 +429,10 @@ onWorldReady(player => {
     const target = clamp((busy ? 11 : 5) + ((Math.random() * 3) | 0), 0, pool.length);
     const idx = pool.map((_, i) => i);
     for (let i = idx.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; const tmp = idx[i]; idx[i] = idx[j]; idx[j] = tmp; }
-    pool.forEach(b => (b.visible = false));
+    pool.forEach(b => { if (!b.userData.lured) b.visible = false; });   // lured birds keep pecking; never re-scattered
     const clusterAt = {};                                   // species → last perch, for flocking twos & threes
     for (let k = 0; k < target; k++) {
-      const b = pool[idx[k]], u = b.userData; let p;
+      const b = pool[idx[k]], u = b.userData; if (u.lured) continue; let p;
       if (u.spec.flock && clusterAt[u.name] && Math.random() < 0.8) { const c = clusterAt[u.name]; p = { x: clamp(c.x + rr(-2.5, 2.5), ROOM.x0, ROOM.x1), z: clamp(c.z + rr(-2.5, 2.5), ROOM.z0, ROOM.z1), y: Math.max(0.28, c.y + rr(-0.4, 0.4)) }; }
       else p = perchFor(u.layer);
       clusterAt[u.name] = p; placePerch(b, p); b.visible = true;
@@ -428,7 +441,7 @@ onWorldReady(player => {
     // they linger longer before flitting, and face side-on so plumage reads.
     const railN = Math.min(2, target);
     for (let k = 0; k < railN; k++) {
-      const b = pool[idx[k]]; if (!b.visible) continue;
+      const b = pool[idx[k]]; if (!b.visible || b.userData.lured) continue;
       placePerch(b, RAILP[k % RAILP.length]);
       b.rotation.y = k % 2 ? 0.7 : -0.7; b.userData.perchT = rr(9, 15);
     }
@@ -450,9 +463,60 @@ onWorldReady(player => {
     u.flyT = 0; u.flyDur = long ? 2.8 + Math.random() : circ ? 2.4 + Math.random() * 0.8 : 0.9 + Math.random() * 0.6;
     u.state = 'fly'; b.rotation.y = Math.atan2(dx, dz);
   }
+  // --- crumb lure (task 078): divert a SONG/GROUND bird to peck near the popcorn
+  // point (which may be OUTSIDE ROOM — the player's feet), then rotate home. All
+  // Math.random; reuses the fly arc + ground-peck idioms; zero new meshes. ---
+  const lureGroundY = (x, z) => Math.max(-0.4, (beachH(x, z) ?? 0) + 0.05);   // the grass/sand the player stands on; never far below ground
+  function lureRingPoint(u, lx, lz) {                       // a ground point 1.0-2.2 m ring around the lure
+    const a = rr(0, 6.283), r = rr(1.0, 2.2);
+    u.tx = lx + Math.cos(a) * r; u.tz = lz + Math.sin(a) * r; u.ty = lureGroundY(u.tx, u.tz);
+  }
+  function startLure(b, lx, lz) {
+    const u = b.userData; u.lured = true; u.lureT = rr(8, 12);
+    u.sx = b.position.x; u.sy = b.position.y; u.sz = b.position.z;
+    lureRingPoint(u, lx, lz);
+    const d = Math.hypot(u.tx - u.sx, u.tz - u.sz);
+    u.flyT = 0; u.flyDur = clamp(d * 0.09, 0.7, 3.5); u.arcH = clamp(d * 0.06, 0.7, 2.2);   // ~11 m/s swoop in from the trees, not a blur
+    u.state = 'lurefly'; b.rotation.y = Math.atan2(u.tx - u.sx, u.tz - u.sz);
+  }
+  function retargetLure(b, lx, lz) {                        // player moved > 2 m — hop to a fresh ring point
+    const u = b.userData;
+    u.sx = b.position.x; u.sy = b.position.y; u.sz = b.position.z;
+    lureRingPoint(u, lx, lz);
+    u.flyT = 0; u.flyDur = 0.5 + Math.random() * 0.4; u.arcH = 0.35;
+    u.state = 'lurefly'; b.rotation.y = Math.atan2(u.tx - u.sx, u.tz - u.sz);
+  }
+  function releaseLure(b) {                                 // back to normal life: fly home to a fresh in-room perch
+    const u = b.userData; u.lured = false;
+    const p = perchFor(u.layer);
+    u.sx = b.position.x; u.sy = b.position.y; u.sz = b.position.z;
+    u.tx = p.x; u.ty = p.y; u.tz = p.z;
+    u.flyT = 0; u.flyDur = 1.0 + Math.random() * 0.6; u.arcH = 0.7;
+    u.state = 'fly'; b.rotation.y = Math.atan2(u.tx - u.sx, u.tz - u.sz);
+  }
+  function updLureFly(b, dt) {
+    const u = b.userData; u.flyT += dt; let uu = u.flyT / u.flyDur; if (uu > 1) uu = 1;
+    const s = Math.sin(uu * Math.PI);
+    b.position.set(u.sx + (u.tx - u.sx) * uu, u.sy + (u.ty - u.sy) * uu + s * u.arcH, u.sz + (u.tz - u.sz) * uu);
+    u.flapPh += dt * 22; const flap = Math.sin(u.flapPh) * 0.7;
+    if (u.wings.length) { u.wings[0].rotation.x = -1.3 + flap; u.wings[1].rotation.x = -1.3 + flap; }
+    u.head.rotation.z = 0; u.head.rotation.x = 0.1;
+    if (uu >= 1) { u.px = u.tx; u.py = u.ty; u.pz = u.tz; if (u.wings.length) u.wings[0].rotation.x = u.wings[1].rotation.x = -1.3; u.state = 'lurepeck'; u.peckT = rr(0.3, 0.9); }
+  }
+  function updLurePeck(b, dt, t) {
+    const u = b.userData;
+    b.position.set(u.px, u.py + Math.abs(Math.sin(t * 6 + u.hopPh)) * 0.03, u.pz);   // hop at the crumbs
+    u.peckT -= dt;
+    if (u.peckT <= 0) { u.peckT = rr(0.5, 1.2); u.head.rotation.x = 0.9; if (Math.random() < 0.3) birdCall(u.spec.call[0], u.spec.call[1]); }
+    else u.head.rotation.x += (0.15 - u.head.rotation.x) * Math.min(1, dt * 8);     // ease back up between pecks
+    u.head.rotation.z = Math.sin(t * 3 + u.tiltPh) * 0.25;
+    u.lureT -= dt; if (u.lureT <= 0) releaseLure(b);
+  }
   function updPerchBird(b, dt, t, chorus) {
     if (!b.visible) return; const u = b.userData;
     if (u.state === 'pass') { updPass(b, dt); return; }
+    if (u.state === 'lurefly') { updLureFly(b, dt); return; }
+    if (u.state === 'lurepeck') { updLurePeck(b, dt, t); return; }
     if (u.state === 'perch') {
       if (chorus) { u.callT -= dt; if (u.callT <= 0) { birdCall(u.spec.call[0], u.spec.call[1]); u.callT = 7 + Math.random() * 11; } }
       const bob = u.kind === 'ground' ? 0.02 : 0.04;
@@ -531,11 +595,35 @@ onWorldReady(player => {
   }
   function updBirds(dt, t, pl) {
     const d2 = (pl.x - 150) ** 2 + (pl.z + 388) ** 2;   // sanctuary centre ≈ (150,−388)
-    if (d2 > 135 * 135) { if (birdsShown) { [...pool, ...dedicated].forEach(b => (b.visible = false)); birdsShown = false; } return; }
+    if (d2 > 135 * 135) { if (birdsShown) { for (const b of pool) b.userData.lured = false; [...pool, ...dedicated].forEach(b => (b.visible = false)); birdsShown = false; lureOn = false; } return; }
     if (!birdsShown) { birdsShown = true; birdRelocT = 0.2; }   // re-seed the flock on approach
     const chorus = d2 < 95 * 95;
     waveT -= dt; if (waveT <= 0) { busy = !busy; waveT = busy ? 16 + Math.random() * 10 : 14 + Math.random() * 10; relocateBirds(); if (busy && Math.random() < 0.6) queueFlockPass(); }
     birdRelocT -= dt; if (birdRelocT <= 0) relocateBirds();
+    // --- crumb lure recruit / release (throttled; _crumbLure() only called here) ---
+    lureScan -= dt; lureRetgT -= dt;
+    if (lureScan <= 0) {
+      lureScan = 0.4;
+      const lp = _crumbLure ? _crumbLure() : null;
+      if (lp && lp.x !== undefined) {
+        const moved = Math.hypot(lp.x - lureX, lp.z - lureZ) > 2;
+        lureX = lp.x; lureZ = lp.z; lureOn = true;
+        let n = 0; for (const b of pool) if (b.userData.lured) n++;
+        for (const b of pool) {
+          if (n >= LURE_MAX) break;
+          const u = b.userData;
+          if (u.lured || !b.visible || u.state === 'pass') continue;
+          if (u.kind !== 'song' && u.kind !== 'ground') continue;   // never wade/raptor/hover/cling/flock
+          const dx = b.position.x - lureX, dz = b.position.z - lureZ;
+          if (dx * dx + dz * dz > LURE_R * LURE_R) continue;
+          startLure(b, lureX, lureZ); n++;
+        }
+        if (moved && lureRetgT <= 0) { lureRetgT = 2; for (const b of pool) if (b.userData.lured) retargetLure(b, lureX, lureZ); }
+      } else if (lureOn) {                                    // lure went null — resume normal life cleanly
+        lureOn = false;
+        for (const b of pool) if (b.userData.lured) releaseLure(b);
+      }
+    }
     for (const b of pool) updPerchBird(b, dt, t, chorus);
     updFlockPass(dt);
     updHeron(nightHeron, dt, t); updHeron(greatBlue, dt, t);

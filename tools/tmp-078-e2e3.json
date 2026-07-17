@@ -1,0 +1,41 @@
+[
+  ["goto", 153, 89.5],
+  ["wait", 400],
+  ["key", "e"],
+  ["wait", 4000],
+
+  ["goto", -325.5, -481.5],
+  ["wait", 1300],
+  ["eval", "({has:window.__hd.econ.bag.has('old-style'),step:window.__hd.econ.favors.at('oldstyle').step})"],
+  ["key", "e"],
+  ["wait", 800],
+  ["eval", "(function(){var c=window.__hd.input.cam;c.yaw=-1.4;c.pitch=0.09;c.dist=4;return 0;})()"],
+  ["keydown", "s"],
+  ["wait", 360],
+  ["shot", "078-s2-hand-a"],
+  ["wait", 140],
+  ["shot", "078-s2-hand-b"],
+  ["wait", 140],
+  ["shot", "078-s2-hand-c"],
+  ["wait", 140],
+  ["shot", "078-s2-hand-d"],
+  ["keyup", "s"],
+
+  ["goto", 153, 89.5],
+  ["wait", 1100],
+  ["key", "e"],
+  ["wait", 900],
+  ["eval", "({dib:window.__hd.econ.save().dibs,favor:window.__hd.econ.favors.at('oldstyle'),guyHasCan:window.__hd.oldstyle.guyHasCan()})"],
+
+  ["goto", 154.5, 93.5],
+  ["wait", 1100],
+  ["eval", "(function(){var c=window.__hd.input.cam;c.yaw=2.19;c.pitch=0.04;c.dist=3.5;return 0;})()"],
+  ["wait", 500],
+  ["shot", "078-s3-guycan-c"],
+
+  ["goto", 156.8, 92.5],
+  ["wait", 1100],
+  ["eval", "(function(){var c=window.__hd.input.cam;c.yaw=3.0;c.pitch=0.03;c.dist=3.6;return 0;})()"],
+  ["wait", 500],
+  ["shot", "078-s3-guycan-d"]
+]

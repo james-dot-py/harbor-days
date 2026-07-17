@@ -462,3 +462,37 @@ cut becomes a revert task.
   comes back. Underneath, the joystick finally DRAWS under your thumb (it had
   been rendering 160px below the bottom of every phone since touch shipped). —
   first touch session (index.html + src/onboard.js) — task 077
+- THE COIN IS A FOLDING LAWN CHAIR. The game's currency is "dibs" — the
+  parking-chair joke — and the HUD chip wears a tiny avocado-webbed lawn chair.
+  Your first earn gets the gold banner: "your first dibs! · claimed, like a
+  shoveled parking spot." Payouts land at the moment of delight — the +2 hits
+  on the third splash of a skipped stone, the +5 when you're standing close
+  enough to call the bago. — everywhere (src/framework.js wallet) — task 078
+- THE BEACH KIOSK. A little striped-awning stand on the dog-beach approach —
+  "SNACKS · POP · TENNIS BALLS" hand-painted over the counter, a teen keeper
+  with a green visor ("pop's in the cooler", "we take dibs"), a warm popcorn
+  machine and a pyramid of tennis balls. — dog beach (100,−353;
+  src/packs/economy-pilot.js) — task 078
+- BIRDER HERESY. Buy the popcorn bag, hold it, and crumbs fall as you walk —
+  the bird-bingo cast breaks sanctuary discipline to mob your feet and peck,
+  then drifts guiltily back to the hedge when you put it away. First hold:
+  "birder heresy · the flock forgives you." — near the Bill Jarvis sanctuary
+  (src/packs/economy-pilot.js + nature.js crumb lure) — task 078
+- EVERY DOG'S BEST DAY. Throw the kiosk tennis ball and the nearest free dog
+  claims it — the hero beach dog or a dog-park regular runs it down and drops
+  it at your feet ("good dog · the goodest"); a LEASHED trail dog can only
+  strain to the end of its leash while the walker holds on — "leave it. LEAVE
+  it." — anywhere a dog is (src/packs/economy-pilot.js + activities1/traillife
+  adapters) — task 078
+- AN OLD STYLE FOR THE MALÖRT GUY. Share a shot with him and he asks the favor:
+  "do me a solid? a COLD Old Style — from Sluggers, up at Wrigley. take the L."
+  You ride the L holding a beer for a man who drinks paint thinner
+  recreationally; the Sluggers counter sends it with "for HIM? …tell him he
+  still owes me." Deliver it for +12 dibs, the BURNT BAND-AID banner, and the
+  duet unlock — from then on he'll sometimes offer to split one WITH you: the
+  Chicago handshake, reversed. — Belmont Rocks ⇄ Sluggers
+  (src/packs/favors-pilot.js) — task 078
+- THE MAYOR ACTUALLY WEARS THE HAT. The bucket hat isn't a sticker in a menu —
+  equip it from the tote and it sits on the grey afro through walking, jumping,
+  bench-sitting and popcorn-holding, and it's still on his head next session.
+  — the mayor (src/packs/economy-pilot.js, mparts.head) — task 078

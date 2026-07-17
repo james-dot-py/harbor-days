@@ -1,0 +1,5 @@
+[
+  {"name":"verify-spawn","query":"play=1","waitMs":3000},
+  {"name":"verify-dogbeach","query":"play=1&quiet=1&x=100&z=-347&yaw=3.1&pitch=0.22&dist=13","waitMs":3000},
+  {"name":"verify-rocks","query":"play=1&quiet=1&x=152&z=95&yaw=0.9&pitch=0.2&dist=12","waitMs":3000}
+]

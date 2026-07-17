@@ -300,6 +300,84 @@
   .jrow{display:flex;justify-content:space-between;gap:16px;padding:5px 0;border-bottom:1px dashed #e3d3b4;
     color:var(--ink);font-size:14px}
   .jrow b{color:#c4622f}
+  .jrow.jdone span{color:#7a9e4f}
+
+  /* ---------- the economy: dibs chip · register pop · tote · shop (task 078)
+     House style throughout — cream cards, coral accents, 0 4px 0 drops. Every
+     element is HIDDEN at boot so the desktop spawn (baseline.png) never moves;
+     the chip reveals on the first earned dib, the tote button is touch-only,
+     the modals open on demand. */
+  /* the dibs chip: lawn chair + count, top-left BELOW the pill. The pulse /
+     shake live on the .dibsinner CHILD, never the root — a running animation on
+     the root would beat the reveal's display/opacity (PITFALLS: 077 idle stick
+     ghost). Root owns position + reveal; child owns the motion. */
+  #dibs{position:fixed;top:calc(60px + var(--sat));left:calc(14px + var(--sal));z-index:20;display:none;
+    align-items:center;pointer-events:none;background:rgba(253,246,230,.92);border-radius:999px;
+    padding:6px 13px 6px 9px;color:var(--ink);box-shadow:0 4px 0 rgba(122,62,44,.18);}
+  #dibs.on{display:flex}
+  #dibs .dibsinner{display:flex;align-items:center;gap:6px}
+  #dibs.pulse .dibsinner{animation:dibsPulse .5s ease}
+  #dibs.short .dibsinner{animation:dibsShake .5s ease}
+  #dibs .dibschair{display:block;flex:0 0 auto}
+  #dibsN{font-weight:700;color:#c4622f;font-size:15px;letter-spacing:.02em;min-width:11px;text-align:center}
+  @keyframes dibsPulse{0%{transform:scale(1)}35%{transform:scale(1.24)}100%{transform:scale(1)}}
+  @keyframes dibsShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}
+    40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
+  /* the register: small + dry, just below the chip. Repeat earns reset its
+     text + timer; this is the high-frequency channel (never the gold toast). */
+  #dibsPop{position:fixed;top:calc(99px + var(--sat));left:calc(14px + var(--sal));z-index:20;display:none;
+    pointer-events:none;color:#6b4d1e;font-size:12px;letter-spacing:.03em;white-space:nowrap;
+    background:rgba(255,244,214,.94);padding:5px 11px;border-radius:12px;box-shadow:0 3px 0 rgba(176,132,32,.26);}
+  #dibsPop.show{display:block;animation:dibsPopFade 1.6s ease forwards}
+  @keyframes dibsPopFade{0%{opacity:0;transform:translateY(4px)}12%{opacity:1;transform:none}
+    78%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-4px)}}
+  /* the tote button: touch-only (desktop uses key B), in the right utility rail
+     BELOW ♥ (334). Nothing here goes near #jzone (left/bottom). */
+  #btnTote{display:none}
+  body.touch #btnTote{display:flex;position:fixed;right:calc(14px + var(--sar));top:calc(384px + var(--sat));
+    width:44px;height:44px;border-radius:50%;align-items:center;justify-content:center;font-size:22px;z-index:21;
+    background:rgba(253,246,230,.92);box-shadow:0 4px 0 rgba(122,62,44,.22);border:none}
+  /* tote (z 28) + shop (z 27): journal-family modal cards */
+  #tote,#shop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(74,59,47,.42)}
+  #tote{z-index:28}#shop{z-index:27}
+  #tote.show,#shop.show{display:flex}
+  #tote .jcard{width:min(440px,88vw);box-sizing:border-box}
+  #shop .jcard{width:min(460px,90vw);box-sizing:border-box}
+  #toteClose,#shopClose{position:absolute;top:14px;right:16px;width:34px;height:34px;border:none;border-radius:50%;cursor:pointer;
+    background:#e0766a;color:#fff;font-size:20px;line-height:1;box-shadow:0 3px 0 rgba(122,62,44,.3);padding:0}
+  body.touch #toteClose,body.touch #shopClose{width:44px;height:44px;font-size:21px}
+  .tgrid{display:grid;grid-template-columns:repeat(auto-fill,64px);gap:12px;justify-content:center;margin:10px 0 4px;min-height:72px}
+  .ttile{position:relative;box-sizing:border-box;width:64px;cursor:pointer;text-align:center;border-radius:14px;padding:7px 2px 6px;
+    background:rgba(255,236,214,.55);box-shadow:0 2px 0 rgba(122,62,44,.12);transition:transform .1s ease}
+  .ttile:hover{transform:translateY(-2px)}
+  .ttile.active{box-shadow:0 0 0 2px #e0766a,0 2px 0 rgba(122,62,44,.12)}
+  .ttile .ticon{height:34px;display:flex;align-items:center;justify-content:center;font-size:30px;line-height:1}
+  .ttile .ticon svg{display:block}
+  .ttile .tname{display:block;font-size:10.5px;color:var(--ink);letter-spacing:.02em;margin-top:3px;line-height:1.2}
+  .ttile .tcount{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:#e0766a;color:#fff;
+    font-size:11px;font-weight:700;line-height:18px;padding:0 4px;box-shadow:0 2px 0 rgba(122,62,44,.25)}
+  .ttile .tmark{position:absolute;bottom:-7px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#7a9e4f;color:#fff;
+    font-size:9px;letter-spacing:.04em;padding:1px 6px;border-radius:8px;box-shadow:0 2px 0 rgba(122,62,44,.2)}
+  .tcap{margin-top:12px;padding-top:10px;border-top:1px dashed #e3d3b4;color:rgba(74,59,47,.9);font-size:13px;
+    line-height:1.5;min-height:32px}
+  .tempty{color:#9c8168;font-size:14.5px;text-align:center;padding:16px 6px 8px;line-height:1.6}
+  .tempty span{display:block;font-size:12px;color:#b39d85;margin-top:6px}
+  .skeeper{margin:-2px 0 8px;color:#9c8168;font-size:13px;font-style:italic;letter-spacing:.02em}
+  .srow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed #e3d3b4}
+  .srow .sicon{flex:0 0 34px;width:34px;text-align:center;font-size:28px;line-height:1}
+  .srow .sicon svg{display:inline-block;vertical-align:middle}
+  .srow .sinfo{flex:1 1 auto;min-width:0}
+  .srow .sinfo b{display:block;color:var(--ink);font-size:14px}
+  .srow .sinfo span{display:block;color:rgba(74,59,47,.7);font-size:11.5px;line-height:1.4}
+  .srow .sbuy{flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+  .sprice{display:flex;align-items:center;gap:3px;color:#c4622f;font-weight:700;font-size:13px}
+  .sbtn{border:none;border-radius:999px;cursor:pointer;background:#5db06b;color:#fff;font-family:inherit;
+    font-size:13px;letter-spacing:.04em;padding:7px 18px;box-shadow:0 3px 0 #3f8a4d;transition:transform .1s ease,box-shadow .1s ease}
+  .sbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #3f8a4d}
+  body.touch .sbtn{min-height:44px;padding:0 20px}
+  .sowned{color:#7a9e4f;font-size:12.5px;font-weight:700;letter-spacing:.03em;white-space:nowrap}
+  .srow.refuse{animation:sRefuse .4s ease}
+  @keyframes sRefuse{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 
   /* ---------- controls help: pinned "?" button + card ---------- */
   #btnHelp{position:fixed;left:calc(14px + var(--sal));bottom:calc(12px + var(--sab));width:34px;height:34px;border:none;border-radius:50%;cursor:pointer;
@@ -378,6 +456,9 @@
     body.touch #btnJournal{top:calc(60px + var(--sat));right:auto;left:calc(14px + var(--sal))}
     body.touch #btnHelp{top:calc(60px + var(--sat));right:auto;left:calc(64px + var(--sal))}
     body.touch #btnKofi{top:calc(60px + var(--sat));right:auto;left:calc(114px + var(--sal))}
+    /* the tote button joins the top-left utility row (clear of the joystick zone
+       at bottom-left) rather than the right action cluster */
+    body.touch #btnTote{top:calc(60px + var(--sat));right:auto;left:calc(164px + var(--sal))}
   }
 </style>
 </head>
@@ -407,6 +488,7 @@
 <button id="btnJump">&#11014;&#65039;</button>
 <button id="btnAct">&#9995;</button>
 <button id="btnJournal">&#128214;</button>
+<button id="btnTote">&#129530;</button>
 
 <!-- framework HUD -->
 <div id="prompt"><span class="pk"></span><span id="promptlabel"></span></div>
@@ -416,6 +498,26 @@
 <button id="btnHelp">?</button>
 <a id="btnKofi" href="https://ko-fi.com/jimbobuildsope" target="_blank" rel="noopener" aria-label="Support development on Ko-fi" title="Support development">&hearts;</a>
 <div id="ctl"><div class="ctlcard"><button id="ctlClose">&times;</button><h1>CONTROLS</h1><div id="ctlBody"></div></div></div>
+
+<!-- economy (task 078): the dibs chip (folding lawn chair + count), the small
+     register pop, and the tote + shop modal cards. All hidden at boot. -->
+<div id="dibs"><span class="dibsinner"><svg class="dibschair" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+  <g stroke="#a7b0b4" stroke-width="1.8" stroke-linecap="round" fill="none"><path d="M6 21 17 11"/><path d="M18 21 7 11"/></g>
+  <g transform="rotate(-23 7 12)"><rect x="4.1" y="2.6" width="5.2" height="10.6" rx="1.5" fill="#e7d9b6"/>
+    <rect x="4.9" y="3.4" width="1.4" height="9" rx=".7" fill="#7a9e4f"/><rect x="7" y="3.4" width="1.4" height="9" rx=".7" fill="#7a9e4f"/></g>
+  <rect x="5.6" y="9.8" width="12.8" height="4.8" rx="1.6" fill="#e7d9b6"/>
+  <rect x="7.1" y="10.5" width="1.5" height="3.4" rx=".7" fill="#7a9e4f"/><rect x="9.9" y="10.5" width="1.5" height="3.4" rx=".7" fill="#7a9e4f"/>
+  <rect x="12.7" y="10.5" width="1.5" height="3.4" rx=".7" fill="#7a9e4f"/><rect x="15.5" y="10.5" width="1.5" height="3.4" rx=".7" fill="#7a9e4f"/>
+</svg><b id="dibsN">0</b></span></div>
+<div id="dibsPop"></div>
+
+<!-- the tote: your stuff (icon grid + caption) -->
+<div id="tote"><div class="jcard"><button id="toteClose">&times;</button><h1 class="jtitle">the tote</h1>
+  <div id="toteGrid" class="tgrid"></div><div id="toteCap" class="tcap"></div></div></div>
+
+<!-- the shop: a keeper, priced item rows, buy = spendDibs + bag.add -->
+<div id="shop"><div class="jcard"><button id="shopClose">&times;</button><h1 class="jtitle" id="shopTitle">the kiosk</h1>
+  <div class="skeeper" id="shopKeeper"></div><div id="shopRows"></div></div></div>
 
 <!-- coach marks (touch only; src/onboard.js shows each one and kills it the
      moment the player performs that gesture) -->

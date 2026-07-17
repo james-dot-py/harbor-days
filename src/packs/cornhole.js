@@ -30,7 +30,7 @@
 //  bag piles(2 colors ×1) + flight bags(2) = 9. Chibis (2) exempt by
 //  design, culled >145 m via registerBumpable's piggyback.
 // =====================================================================
-import { onWorldReady, registerUpdate, createChibi, registerBumpable, toast, getAudioCtx } from '../framework.js';
+import { onWorldReady, registerUpdate, createChibi, registerBumpable, toast, getAudioCtx, wallet } from '../framework.js';
 import * as THREE from 'three';
 import { scene, camera, toon, clamp, lerp, smooth, pip } from '../core.js';
 import { coastQuery, LAND } from '../coast.js';
@@ -255,6 +255,10 @@ onWorldReady((player)=>{
       sBago(to.x,to.y,to.z);sThunk(to.x,to.y,to.z,true);
       const dx=player.x-SITE.x,dz=player.z-SITE.z;
       if(dx*dx+dz*dz<484&&t-lastToast>12){toast('bago!','the south-lawn cornhole match');lastToast=t;}
+      // spectator payout: within 12 m you "called it" — separate channel from the
+      // gold toast (pay() owns the register pop + first-time bonus + throttle).
+      if(dx*dx+dz*dz<144)wallet.pay({key:'cornhole',first:5,repeat:2,
+        reason:'called it — bago!',firstReason:'you called the bago!'});
       mt.phase=4;
     }else{
       // bag rests where it landed, flush with the deck

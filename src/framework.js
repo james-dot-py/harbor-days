@@ -29,6 +29,7 @@ import { mayor, mparts, createChibi, bakeChibiRig } from './character.js';
 import { fw } from './fx.js';
 import { getAudioCtx, setAmbienceGrade } from './audio.js';
 import * as CH from './data/chicago.js';
+import { getSave, markDirty, getFlag, setFlag } from './store.js';   // the guarded save adapter (task 078)
 
 export { createChibi, tintChibiLimb, bakeChibiRig } from './character.js';   // re-export chibi builder + limb recolor + static-rig baker for packs
 // getAudioCtx() -> {actx,sfxBus,musicBus,noiseBuf,mf,noiseHit} (actx null until audio starts)
@@ -46,6 +47,23 @@ export const state={
   speedMult:1,               // movement multiplier (buffs/vehicles) — main.js consults it
   interactionsUsed:0,        // E / ✋ presses that actually fired an onUse (onboarding reads it)
 };
+
+// ---- restore persisted journal state from the save blob (task 078) ----
+// Runs at MODULE SCOPE (framework.js is imported before packs/index.js), so the
+// restored values land BEFORE any pack's import-time `state.x = state.x || dflt`
+// initializer — the pack keeps the restored number, not the default. Only names,
+// ids and numbers cross this boundary; never coords or world-derived state.
+{
+  const _sv=getSave(), _c=_sv.counters||{};
+  if(_sv.zones&&_sv.zones.length)state.zonesVisited=new Set(_sv.zones);
+  for(const k of ['fireworksLaunched','distanceWalked','stonesThrown','fetches','malortShots','fishStreak','golfRounds'])
+    if(typeof _c[k]==='number')state[k]=_c[k];
+  if(_c.bests&&typeof _c.bests==='object')state.bests=Object.assign({},_c.bests);
+  if(_c.fishLog&&typeof _c.fishLog==='object')state.fishLog=Object.assign({},_c.fishLog);
+  if(_c.paidFirsts&&typeof _c.paidFirsts==='object')state.paidFirsts=Object.assign({},_c.paidFirsts);
+  if(Array.isArray(_c.birdsSeen))state.birdsSeen=new Set(_c.birdsSeen);
+  if(Array.isArray(_c.rocksPainted))state.rocksPainted=new Set(_c.rocksPainted);
+}
 
 // --------------------- update registry + world-ready -------------------
 const _updates=[];
@@ -71,6 +89,8 @@ export function worldReady(player){
 // ------------------------------- DOM refs ------------------------------
 let elPrompt,elPromptK,elPromptL,elMeter,elFill,elToast,elToastMain,elToastSub,
     elJournal,elJournalBody,elBtnAct,_fxflash;
+// economy HUD refs (task 078)
+let elDibs,elDibsN,elDibsPop,elTote,elToteGrid,elToteCap,elShop,elShopTitle,elShopKeeper,elShopRows;
 function initDom(){
   elPrompt=$('prompt');elPromptK=elPrompt.querySelector('.pk');elPromptL=$('promptlabel');
   elMeter=$('pwrmeter');elFill=$('pwrfill');
@@ -107,6 +127,44 @@ function initDom(){
   }
   const bJ=$('btnJournal');if(bJ)bJ.addEventListener('click',()=>toggleJournal());
   const jc=$('journalClose');if(jc)jc.addEventListener('click',()=>toggleJournal(false));
+
+  // ---- economy HUD: chip / register pop / tote / shop (task 078) ----
+  elDibs=$('dibs');elDibsN=$('dibsN');elDibsPop=$('dibsPop');
+  elTote=$('tote');elToteGrid=$('toteGrid');elToteCap=$('toteCap');
+  elShop=$('shop');elShopTitle=$('shopTitle');elShopKeeper=$('shopKeeper');elShopRows=$('shopRows');
+  // tote: close button, tap-outside, the touch tote button (desktop uses B)
+  // TAP-OUTSIDE GUARD: a modal opened by a touch INTERACTION (the pill/✋ path)
+  // opens mid-gesture — _touchAct fires onUse in the rAF loop between touchstart
+  // and touchend, so the release's synthesized click lands on the now-covering
+  // BACKDROP and a naive backdrop-click-closes handler shuts the card the same
+  // frame it opened (kiosk shop, task 078). Close only when the gesture STARTED
+  // on the backdrop too (pointerdown target === backdrop).
+  const tcl=$('toteClose');if(tcl)tcl.addEventListener('click',()=>bag.close());
+  let _toteDown=false,_shopDown=false;
+  if(elTote){
+    elTote.addEventListener('pointerdown',e=>{_toteDown=(e.target===elTote);});
+    elTote.addEventListener('click',e=>{if(e.target===elTote&&_toteDown)bag.close();});
+  }
+  const bT=$('btnTote');if(bT)bT.addEventListener('click',()=>{ if(elTote&&elTote.classList.contains('show'))bag.close(); else bag.open(); });
+  // shop: close button, tap-outside (same started-on-backdrop guard)
+  const scl=$('shopClose');if(scl)scl.addEventListener('click',()=>shop.close());
+  if(elShop){
+    elShop.addEventListener('pointerdown',e=>{_shopDown=(e.target===elShop);});
+    elShop.addEventListener('click',e=>{if(e.target===elShop&&_shopDown)shop.close();});
+  }
+  // Escape closes the shop first, then the tote (Escape is not a movement key,
+  // so a bare window listener is safe — DOM-input isolation applies to text fields).
+  addEventListener('keydown',e=>{ if(e.key==='Escape'){
+    if(elShop&&elShop.classList.contains('show'))shop.close();
+    else if(elTote&&elTote.classList.contains('show'))bag.close(); } });
+  // ?dibs=N — tooling affordance: seed a balance so the chip + shop can be shot
+  // without playing to earn it. Seeding a positive balance implies the player is
+  // past their "first dibs", so mark the flag too (keeps the shot's register pop
+  // uncluttered by the one-time gold toast).
+  const _dq=new URLSearchParams(location.search).get('dibs');
+  if(_dq!==null){ const n=parseInt(_dq,10); if(!isNaN(n)){ const sv=getSave(); sv.dibs=n; if(n>0)sv.flags['ope.dibs']='1'; } }
+  refreshChip();
+  if(getSave().dibs>0||getSave().flags['ope.dibs']==='1')revealChip();
 }
 
 // ------------------------------ interactions ---------------------------
@@ -178,10 +236,16 @@ export function camForward(){return{x:Math.sin(cam.yaw),z:Math.cos(cam.yaw)};}
 // ------------------------------- held item -----------------------------
 // holdItem(mesh) : parent a small mesh into the mayor's right hand
 // (mparts.handR); holdItem(null) clears. Only one held item at a time.
-let _held=null;
+// _heldId / _bagHold: the tote (below) tracks which DEFINED item is in hand so
+// its tile can show an "in hand" marker. Any holdItem call from OUTSIDE the
+// tote's own use path (skip stones grabbing the hand, a pack clearing it) must
+// drop that marker — so we clear _heldId unless the tote set _bagHold around
+// its own call.
+let _held=null,_heldId=null,_bagHold=false;
 export function holdItem(mesh){
   if(_held){mparts.handR.remove(_held);_held=null;}
   if(mesh){mparts.handR.add(mesh);_held=mesh;}
+  if(!_bagHold)_heldId=null;
 }
 
 // --------------------------------- NPCs --------------------------------
@@ -482,7 +546,11 @@ function renderJournal(){
 let _prevJ=false;
 function toggleJournal(force){
   const open=force!==undefined?force:!elJournal.classList.contains('show');
-  if(open){renderJournal();elJournal.classList.add('show');}else elJournal.classList.remove('show');
+  if(open){
+    if(elTote)elTote.classList.remove('show');   // one card at a time
+    if(elShop)elShop.classList.remove('show');
+    renderJournal();elJournal.classList.add('show');
+  }else elJournal.classList.remove('show');
 }
 
 // -------------------------------- screen FX ----------------------------
@@ -533,9 +601,10 @@ function updateSitting(dt,player){
 // ------------------------------ per-frame ------------------------------
 // runUpdates(dt,t,player) : called by main.js each frame (after the camera is
 // positioned). Drives tracking, interactions, charge, NPCs and pack updates.
-let _lpx=null,_lpz=null,_prevCool=0,_fcArmed=false,_zoneAcc=0,_npcCullAcc=0;
+let _lpx=null,_lpz=null,_prevCool=0,_fcArmed=false,_zoneAcc=0,_npcCullAcc=0,_prevB=false;
 export function runUpdates(dt,t,player){
   if(dt<0)dt=0;                          // frame-0 rAF can hand us a negative dt
+  econUpdate(dt);                        // one-shot __hd/worn restore + slow save snapshot
   // --- distance walked ---
   if(_lpx!==null&&game.running)state.distanceWalked+=Math.hypot(player.x-_lpx,player.z-_lpz);
   _lpx=player.x;_lpz=player.z;
@@ -552,6 +621,8 @@ export function runUpdates(dt,t,player){
   }
   // --- journal toggle (J) ---
   const jNow=keys.has('j');if(jNow&&!_prevJ)toggleJournal();_prevJ=jNow;
+  // --- tote toggle (B, desktop) — touch uses #btnTote ---
+  const bNow=keys.has('b');if(bNow&&!_prevB){ if(toteIsOpen())bag.close(); else bag.open(); }_prevB=bNow;
 
   // --- action input (E key or mobile button): held + rising edge ---
   const actHeld=keys.has('e')||_touchAct;
@@ -608,6 +679,339 @@ export function runUpdates(dt,t,player){
 
   // --- places (cells): graded room transitions ---
   updatePlaces(dt,player);
+}
+
+// =====================================================================
+//  THE ECONOMY (task 078) — dibs currency · the tote · shops · favors
+//  The frozen framework contract that 079+ build activities/shops/quests on.
+//  Everything is DOM + holdItem meshes only (≈0 draw calls); nothing here
+//  touches the world rng. Persistence rides src/store.js's save blob.
+// =====================================================================
+
+// a compact folding lawn chair, for the shop price glyph (the HUD chip carries
+// its own bigger copy in index.html). avocado webbing on a light tan panel + an
+// aluminum X frame, so it reads at ~15 px against a cream card.
+const CHAIR_SVG_SM='<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" style="vertical-align:-2px">'
+  +'<g stroke="#a7b0b4" stroke-width="1.9" stroke-linecap="round" fill="none"><path d="M6 21 17 11"/><path d="M18 21 7 11"/></g>'
+  +'<g transform="rotate(-23 7 12)"><rect x="4.1" y="2.6" width="5.2" height="10.6" rx="1.5" fill="#e7d9b6"/>'
+  +'<rect x="4.9" y="3.4" width="1.4" height="9" rx=".7" fill="#7a9e4f"/><rect x="7" y="3.4" width="1.4" height="9" rx=".7" fill="#7a9e4f"/></g>'
+  +'<rect x="5.6" y="9.8" width="12.8" height="4.8" rx="1.6" fill="#e7d9b6"/>'
+  +'<rect x="7.1" y="10.5" width="1.5" height="3.4" rx=".7" fill="#7a9e4f"/><rect x="9.9" y="10.5" width="1.5" height="3.4" rx=".7" fill="#7a9e4f"/>'
+  +'<rect x="12.7" y="10.5" width="1.5" height="3.4" rx=".7" fill="#7a9e4f"/><rect x="15.5" y="10.5" width="1.5" height="3.4" rx=".7" fill="#7a9e4f"/></svg>';
+
+// -------- chip / register pop helpers (motion on the CHILD, per PITFALLS) ----
+function revealChip(){ if(elDibs)elDibs.classList.add('on'); }
+function refreshChip(){ if(elDibsN)elDibsN.textContent=String(getSave().dibs); }
+function pulseChip(){ if(!elDibs)return; elDibs.classList.remove('pulse');void elDibs.offsetWidth;elDibs.classList.add('pulse'); }
+function shakeChip(){ if(!elDibs)return; elDibs.classList.remove('short');void elDibs.offsetWidth;elDibs.classList.add('short'); }
+let _popTO=null;
+function showDibsPop(txt){
+  if(!elDibsPop)return;
+  elDibsPop.textContent=txt;
+  elDibsPop.classList.remove('show');void elDibsPop.offsetWidth;elDibsPop.classList.add('show');
+  clearTimeout(_popTO);_popTO=setTimeout(()=>{if(elDibsPop)elDibsPop.classList.remove('show');},1600);
+}
+// a tiny synthesized coin "dink": two quick sine blips, quiet. Guarded — actx is
+// null until the player clicks start (constraint 4).
+function coinDink(){
+  const a=getAudioCtx();if(!a||!a.actx)return;
+  const {actx,sfxBus}=a,dest=sfxBus||actx.destination,now=actx.currentTime;
+  [1300,1750].forEach((f,i)=>{
+    const o=actx.createOscillator(),g=actx.createGain(),t0=now+i*0.055;
+    o.type='sine';o.frequency.value=f;
+    g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.05,t0+0.008);
+    g.gain.exponentialRampToValueAtTime(0.0008,t0+0.1);
+    o.connect(g);g.connect(dest);o.start(t0);o.stop(t0+0.13);
+  });
+}
+
+// -------------------------------- wallet -------------------------------
+// wallet.dibs · earnDibs(n,reason) · spendDibs(n,reason)->bool · pay(opts)->int
+const _payRepeats={};   // per-key paid-repeat counts THIS SESSION (never persisted)
+export const wallet={
+  get dibs(){ return getSave().dibs; },
+  // earn: bump balance, pulse the chip, show the dry register pop. First-EVER
+  // earn also gets the gold toast + reveals the chip + a coin dink.
+  earnDibs(n,reason){
+    if(!(n>0))return;
+    const sv=getSave();
+    sv.dibs+=n;markDirty();
+    refreshChip();revealChip();pulseChip();
+    showDibsPop('+'+n+' dibs'+(reason?' · '+reason:''));
+    if(sv.flags['ope.dibs']!=='1'){
+      sv.flags['ope.dibs']='1';markDirty();
+      toast('your first dibs!','claimed, like a shoveled parking spot');
+    }
+    coinDink();
+  },
+  // spend: refuse (gentle chip shake, no toast) when short; else deduct.
+  spendDibs(n,reason){
+    const sv=getSave();
+    if(sv.dibs<n){ shakeChip(); return false; }
+    sv.dibs-=n;markDirty();refreshChip();
+    return true;
+  },
+  // pay: the shared payout helper. First time for `key` pays `first`; repeats pay
+  // `repeat`, halving (floor, min 1) after 10 paid repeats of that key this
+  // session. paidFirsts persists (via the state snapshot); the repeat count does not.
+  pay({key,first,repeat,reason,firstReason}){
+    state.paidFirsts=state.paidFirsts||{};
+    let amount,r;
+    if(!state.paidFirsts[key]){ amount=first;r=firstReason||reason;state.paidFirsts[key]=1; }
+    else{
+      amount=repeat;r=reason;
+      _payRepeats[key]=(_payRepeats[key]||0)+1;
+      if(_payRepeats[key]>10)amount=Math.max(1,Math.floor(amount/2));
+    }
+    wallet.earnDibs(amount,r);
+    return amount;
+  },
+};
+
+// --------------------------------- bag ---------------------------------
+// bag.define · add · remove · has · count · equip · unequip · worn · defs ·
+// open · close · heldId. Owned counts live in save.bag; the worn cosmetic in
+// save.worn. Item defs are session-scoped (packs re-define them each load).
+function toteIsOpen(){ return !!(elTote&&elTote.classList.contains('show')); }
+function bagRefresh(){ if(toteIsOpen())renderTote(); }
+export const bag={
+  defs:new Map(),
+  // def = {id,name,icon,kind:'holdable'|'gear'|'collectible'|'cosmetic',caption,
+  //        onUse(),onStow(),onEquip(),onUnequip()}. icon is an emoji or inline SVG.
+  define(def){ if(def&&def.id){ bag.defs.set(def.id,def);bagRefresh(); } return def; },
+  add(id,n=1){ const sv=getSave();sv.bag[id]=(sv.bag[id]||0)+n;markDirty();bagRefresh(); },
+  remove(id,n=1){ const sv=getSave();if(sv.bag[id]){ sv.bag[id]-=n;if(sv.bag[id]<=0)delete sv.bag[id];markDirty();bagRefresh(); } },
+  has(id){ return (getSave().bag[id]||0)>0; },
+  count(id){ return getSave().bag[id]||0; },
+  worn(){ return getSave().worn; },
+  heldId(){ return _heldId; },
+  equip(id){
+    const def=bag.defs.get(id);if(!def)return;
+    const sv=getSave();
+    if(sv.worn&&sv.worn!==id){ const cur=bag.defs.get(sv.worn);if(cur&&cur.onUnequip)try{cur.onUnequip();}catch(e){console.warn('[econ] onUnequip',e);} }
+    sv.worn=id;markDirty();
+    if(def.onEquip)try{def.onEquip();}catch(e){console.warn('[econ] onEquip',e);}
+    bagRefresh();
+  },
+  unequip(){
+    const sv=getSave();
+    if(sv.worn){ const cur=bag.defs.get(sv.worn);sv.worn=null;markDirty();
+      if(cur&&cur.onUnequip)try{cur.onUnequip();}catch(e){console.warn('[econ] onUnequip',e);} }
+    bagRefresh();
+  },
+  open(){ openTote(); },
+  close(){ if(elTote)elTote.classList.remove('show'); },
+};
+// bag's own holdable use/stow — flagged so holdItem() keeps the "in hand" marker.
+function bagUse(def){
+  _bagHold=true;
+  try{ if(def.onUse)def.onUse(); }catch(e){console.warn('[econ] onUse',e);}
+  _bagHold=false;
+  _heldId=def.id;
+}
+function bagStow(def){
+  try{ if(def.onStow)def.onStow(); }catch(e){console.warn('[econ] onStow',e);}
+  _bagHold=true;holdItem(null);_bagHold=false;
+  _heldId=null;
+}
+function toteTap(id){
+  const def=bag.defs.get(id);if(!def)return;
+  if(elToteCap)elToteCap.textContent=def.caption||'';
+  if(def.kind==='holdable'){
+    if(_heldId===id)bagStow(def); else bagUse(def);
+    renderTote();
+    bag.close();   // holdable-use closes the card so the player sees their hand
+    return;
+  }
+  if(def.kind==='cosmetic'){
+    if(getSave().worn===id)bag.unequip(); else bag.equip(id);
+    return;        // keep the card open
+  }
+  // gear / collectible: fire onUse, keep the card open
+  try{ if(def.onUse)def.onUse(); }catch(e){console.warn('[econ] onUse',e);}
+  renderTote();
+}
+function renderTote(){
+  if(!elToteGrid)return;
+  const sv=getSave();
+  const ids=Object.keys(sv.bag).filter(id=>sv.bag[id]>0&&bag.defs.has(id));
+  if(!ids.length){
+    elToteGrid.innerHTML='<div class="tempty">just sand in here<span>the kiosk at the dog beach sells treats</span></div>';
+    if(elToteCap)elToteCap.textContent='';
+    return;
+  }
+  elToteGrid.innerHTML=ids.map(id=>{
+    const def=bag.defs.get(id),n=sv.bag[id],held=_heldId===id,worn=sv.worn===id;
+    const mark=held?'<span class="tmark">in hand</span>':worn?'<span class="tmark">wearing</span>':'';
+    const badge=n>1?`<span class="tcount">${n}</span>`:'';
+    return `<div class="ttile${held||worn?' active':''}" data-id="${id}">`
+      +`<div class="ticon">${def.icon||'▫'}</div><span class="tname">${def.name||id}</span>${badge}${mark}</div>`;
+  }).join('');
+  elToteGrid.querySelectorAll('.ttile').forEach(t=>t.addEventListener('click',()=>toteTap(t.getAttribute('data-id'))));
+}
+function openTote(){
+  toggleJournal(false);if(elShop)elShop.classList.remove('show');   // one card at a time
+  renderTote();
+  if(elTote)elTote.classList.add('show');
+}
+
+// -------------------------------- shop ---------------------------------
+// shop.open({title,keeper,items:[{id,price}]}) — buy = spendDibs + bag.add.
+let _shopItems=[];
+export const shop={
+  open({title,keeper,items}){
+    _shopItems=items||[];
+    if(elShopTitle)elShopTitle.textContent=title||'the kiosk';
+    if(elShopKeeper)elShopKeeper.textContent=keeper||'';
+    toggleJournal(false);if(elTote)elTote.classList.remove('show');   // one card at a time
+    renderShop();
+    if(elShop)elShop.classList.add('show');
+  },
+  close(){ if(elShop)elShop.classList.remove('show'); },
+};
+function renderShop(){
+  if(!elShopRows)return;
+  elShopRows.innerHTML=_shopItems.map((it,i)=>{
+    const def=bag.defs.get(it.id)||{},owned=bag.has(it.id);
+    const right=owned
+      ? '<span class="sowned">in your tote ✓</span>'
+      : `<div class="sbuy"><span class="sprice">${CHAIR_SVG_SM}${it.price}</span><button class="sbtn" data-i="${i}">buy</button></div>`;
+    return `<div class="srow" data-i="${i}"><div class="sicon">${def.icon||'▫'}</div>`
+      +`<div class="sinfo"><b>${def.name||it.id}</b><span>${def.caption||''}</span></div>${right}</div>`;
+  }).join('');
+  elShopRows.querySelectorAll('.sbtn').forEach(b=>b.addEventListener('click',()=>shopBuy(+b.getAttribute('data-i'))));
+}
+function shopBuy(i){
+  const it=_shopItems[i];if(!it)return;
+  const def=bag.defs.get(it.id)||{};
+  if(wallet.spendDibs(it.price,def.name||it.id)){
+    bag.add(it.id);
+    toast(def.name||it.id, def.kind==='cosmetic'?'try it on from the tote':"that's yours now");
+    renderShop();
+  }else{
+    // wallet already shook the chip; the row does a tiny refusal shake, no toast
+    const row=elShopRows.querySelector(`.srow[data-i="${i}"]`);
+    if(row){ row.classList.remove('refuse');void row.offsetWidth;row.classList.add('refuse'); }
+  }
+}
+
+// -------------------------------- favors -------------------------------
+// favors.register · offer · advance · complete · at. Never "quests" in copy.
+// State in save.favors[id] = {st:'active'|'done', step}. Done-this-session ids
+// stay in the journal one session (in memory), then retire.
+const _favorDefs=new Map();
+const _doneThisSession=new Set();
+let _todoWired=false;
+// the To-do journal section renders only once ANY favor has ever been offered
+// (save.favors non-empty). Registered lazily so a fresh boot shows no section.
+function ensureTodoSection(){
+  if(_todoWired)return;
+  if(!Object.keys(getSave().favors).length)return;
+  _todoWired=true;
+  journalSection('todo','To-do',()=>{
+    const sv=getSave();let rows=[];
+    for(const [id,def] of _favorDefs){                       // active REGISTERED favors: current step line
+      const f=sv.favors[id];
+      if(f&&f.st==='active'){
+        const line=(def.todo&&def.todo[f.step||0])||def.title||id;
+        rows.push(`<div class="jrow"><span>· ${line}</span></div>`);
+      }
+    }
+    for(const id of _doneThisSession){                       // done THIS session: quiet ✓ line
+      const def=_favorDefs.get(id);
+      rows.push(`<div class="jrow jdone"><span>✓ ${def?def.title:id}</span></div>`);
+    }
+    return rows.join('')||'<i>all caught up</i>';
+  });
+}
+export const favors={
+  // def = {id,title,giver,reward,todo:[step0,step1,…],doneToast:{main,sub}}
+  register(def){ if(def&&def.id){ _favorDefs.set(def.id,def);ensureTodoSection(); } return def; },
+  offer(id){
+    const def=_favorDefs.get(id);if(!def)return;
+    const sv=getSave();
+    if(sv.favors[id]&&sv.favors[id].st)return;               // idempotent
+    sv.favors[id]={st:'active',step:0};markDirty();
+    ensureTodoSection();
+    toast(def.giver+' needs a favor',"it's in your journal");
+  },
+  advance(id){ const f=getSave().favors[id];if(!f)return; f.step=(f.step||0)+1;markDirty(); },
+  complete(id){
+    const def=_favorDefs.get(id),f=getSave().favors[id];if(!f)return;
+    f.st='done';markDirty();
+    _doneThisSession.add(id);
+    if(def){
+      if(def.doneToast)toast(def.doneToast.main,def.doneToast.sub);
+      if(def.reward)wallet.earnDibs(def.reward,def.giver);
+    }
+  },
+  at(id){ const f=getSave().favors[id];return f?{st:f.st||'none',step:f.step||0}:{st:'none',step:0}; },
+};
+
+// ----------------------- fetch-dog registry (dumb) ---------------------
+// registerFetchDog(adapter) -> {remove()}. The framework does NOTHING with these;
+// the tennis-ball pack (079) consumes them to drive a dog to a thrown ball.
+// adapter = {
+//   name,                     // for debugging
+//   pos(out{x,z}),            // write the dog's current position into out
+//   available()->bool,        // is this dog free to fetch right now?
+//   canReach(x,z)->bool,      // can it reach the ball's landing spot?
+//   fetch(x,z, api),          // GO: run to (x,z); drive itself via api:
+//     api.grab(),             //   at the ball — take it into the mouth
+//     api.at(x,y,z),          //   each carried frame — where the ball rides
+//     api.done(x,z),          //   drop it here (back at the thrower)
+//     api.abort(),            //   bail (ball unreachable / interrupted)
+// }
+export const fetchDogs=[];
+export function registerFetchDog(adapter){
+  fetchDogs.push(adapter);
+  return {remove(){const i=fetchDogs.indexOf(adapter);if(i>=0)fetchDogs.splice(i,1);}};
+}
+
+// --------------- persistence snapshot (slow throttle) ------------------
+// Rebuild the whitelisted counter snapshot every ~3 s; write only when it
+// changed (JSON-string compare). Sets are stored as SORTED arrays and
+// distanceWalked as a rounded int, so an idle player never churns the save.
+function buildSnap(){
+  return {
+    zones:[...state.zonesVisited].sort(),
+    counters:{
+      fireworksLaunched:state.fireworksLaunched||0,
+      distanceWalked:Math.round(state.distanceWalked||0),
+      stonesThrown:state.stonesThrown||0,
+      fetches:state.fetches||0,
+      malortShots:state.malortShots||0,
+      fishStreak:state.fishStreak||0,
+      golfRounds:state.golfRounds||0,
+      bests:state.bests||{},
+      fishLog:state.fishLog||{},
+      paidFirsts:state.paidFirsts||{},
+      birdsSeen:state.birdsSeen?[...state.birdsSeen].sort():[],
+      rocksPainted:state.rocksPainted?[...state.rocksPainted].sort():[],
+    },
+  };
+}
+let _snapAcc=0,_snapPrev=null,_econOnce=false;
+function econUpdate(dt){
+  // one-shot, first update frame AFTER worldReady: packs define cosmetics inside
+  // onWorldReady (drained during worldReady), so this is the earliest safe point
+  // to restore the worn look — and the earliest point AFTER main.js assigns
+  // window.__hd wholesale (line ~65), so the __hd.econ hook survives (the same
+  // clobber onboard.js documents; initDom runs at import time, too early).
+  if(!_econOnce){
+    _econOnce=true;
+    const w=getSave().worn;
+    if(w){ const def=bag.defs.get(w);if(def&&def.onEquip)try{def.onEquip();}catch(e){console.warn('[econ] restore onEquip',e);} }
+    try{ window.__hd=window.__hd||{};window.__hd.econ={wallet,bag,favors,shop,save:getSave};
+      window.__hd.flags={get:getFlag,set:setFlag}; }catch(e){}   // debug/tools sibling: store flag round-trip
+  }
+  // slow snapshot
+  _snapAcc-=dt;
+  if(_snapAcc<=0){
+    _snapAcc=3;
+    const snap=buildSnap(),s=JSON.stringify(snap);
+    if(s!==_snapPrev){ _snapPrev=s;const sv=getSave();sv.counters=snap.counters;sv.zones=snap.zones;markDirty(); }
+  }
 }
 
 // ---------------------- built-in world-ready setup ---------------------

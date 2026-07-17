@@ -1,0 +1,18 @@
+[
+  ["goto", 100, -350],
+  ["wait", 1600],
+  ["shot", "078/touch-0-approach"],
+  ["tapSel", "#prompt"],
+  ["wait", 600],
+  ["shot", "078/touch-1-shop"],
+  ["tapSel", "#shopRows .srow[data-i=\"2\"] .sbtn"],
+  ["wait", 600],
+  ["shot", "078/touch-2-bought"],
+  ["tapSel", "#btnTote"],
+  ["wait", 600],
+  ["shot", "078/touch-3-tote"],
+  ["tapSel", "#toteGrid .ttile[data-id=\"bucket-hat\"]"],
+  ["wait", 600],
+  ["shot", "078/touch-4-hat"],
+  ["eval", "({worn: window.__hd.econ.save().worn, bag: window.__hd.econ.save().bag, touch: document.body.classList.contains('touch')})"]
+]
