@@ -48,6 +48,12 @@ const SAX_TEST = /[?&]saxtest=1/.test(location.search);
 // this cast file stays "minimal hooks only".
 export const malortHooks = {};
 
+// task 081 (mayor-for-real): the sax busker + his riff synth, published so the
+// swear-in ceremony can relocate him to the AIDS-Garden forecourt and cue a riff
+// on the spot. Filled inside the SAX BUSKER block in onWorldReady below —
+// {npc, playNow()}; zero behavior change to the busker otherwise.
+export const saxHooks = {};
+
 // beach cove / rock terrace / park height (so figures rest ON the ground)
 function groundY(x,z){
   const b = beachH(x,z); if(b!==null) return b;
@@ -262,6 +268,11 @@ onWorldReady(() => {
         t0 += dur*(0.8 + Math.random()*0.3);                       // slight swing
       }
     }
+    // task 081: publish the busker + an immediate-play hook for the ceremony
+    // (playNow() fires the same riff routine at once; actx-guarded inside playRiff,
+    // so a null audio ctx just no-ops while the visual relocation still happens).
+    saxHooks.npc = sax;
+    saxHooks.playNow = () => playRiff();
     const S = {riffT: SAX_TEST ? 1.5 : 35+Math.random()*20, playT:0};
     rePose.push((dt,t) => {
       S.riffT -= dt;

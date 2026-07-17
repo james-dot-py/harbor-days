@@ -36,6 +36,11 @@ import { OPEN_GRANT, BUTLER_M } from '../data/millennium.js';
 // ---- determinism: LOCAL rng only, consumed only inside onWorldReady ----
 const R = mulberry32(19910808);                  // first Lolla — never the shared world rng
 
+// ---- additive hook (task 081): the drummer rig, so favors-downtown's
+// "lucky stick" favor can raise his arm on a caught throw. Filled in buildBand;
+// zero behavior change here (an exported handle, nothing reads it in this pack).
+export const bandHooks = {};
+
 // ---- shared crowd tech (buckets/geos/re-stamp) lives in ../crowd.js ----
 const STAGE_MOUTH = { x: 224, z: 1006 };         // the crowd faces this
 const DANCE = BUTLER_M.dance;                     // {x:272,z:971.5,r:3}
@@ -210,6 +215,7 @@ function buildBand() {
   const drummer = createChibi({ suit: 0x2b2f6e, pants: 0x24262c, skin: 0x8a5a3c, hair: 0x1a120c, scale: 0.9 });
   drummer.group.position.set(221.7, DECK_Y, 1014.0); drummer.group.rotation.y = NE; millenniumRoot.add(drummer.group);
   band.drummer = drummer;
+  bandHooks.drummer = drummer;                     // task 081 additive hook (the lucky-stick favor)
 
   const guitarist = createChibi({ suit: 0xb03a2e, pants: 0x2b2f36, skin: 0xe8b48c, hair: 0x241610, scale: 0.9 });
   guitarist.group.position.set(226.5, DECK_Y, 1009.0); guitarist.group.rotation.y = NE; guitarist.group.add(makeGuitar());

@@ -169,6 +169,11 @@ function exitBowl(p, ejected) {
 // return → post. Tag radius 1.05. All movement in plain scalars — no
 // per-frame allocations.
 let ref = null, refState = 'post', refT = 0;
+
+// 081 favors ('umpwhistle', favors-wrigley.js) — additive, read-only hook.
+// Filled in onWorldReady below with {npc, refState:()=>state}; changes ZERO
+// existing behavior. The favor pack gates its offer on refState()==='post'.
+export const umpHooks = {};
 // ?slowref=1 (headless-shot knob, like ?gd=): page game-time at screenshot
 // varies wildly under vite/SwiftShader contention (2.6 s .. 15 s+ observed),
 // and the ump TAGS a dev-spawned trespasser before slow shots land — wb-chase
@@ -268,6 +273,7 @@ onWorldReady((player) => {
     lines: ["field's for the players, bud", 'the ivy? 1937. the grass? off limits.',
             'ope — watch the chalk'],
   });
+  umpHooks.npc = ref; umpHooks.refState = () => refState;   // 081: read-only exposure for favors-wrigley
 
   // BOX OFFICE — get a ticket (free, cozy). Priority 8: a real door/ticket
   // outranks the gameday sing-along zone (r 60, priority 6) that overlaps

@@ -817,6 +817,9 @@ function reactToChase(player) {
 //  7. THE VENDOR + near-row real people
 // =====================================================================
 let vendor = null, vendorInter = null, vPhase = 0, vBaseR = 0, heldClearT = 0, vendorT = 18, organT = 25;
+// 081 favors ('poppybuns', favors-wrigley.js) — additive, read-only hook.
+// Filled in buildVendor() with {npc}; changes ZERO existing behavior.
+export const vendorHooks = {};
 function buildVendor() {
   const th0 = BACK_B; vBaseR = rWallB(th0) + WALL_T_B + CONC_W_B / 2;
   const [vx, vz] = at(vBaseR, th0);
@@ -825,6 +828,7 @@ function buildVendor() {
     palette: { suit: 0xb03a2e, pants: 0x2b2f36, skin: 0xcaa07a, hair: 0x2a2018, face: true },
     lines: ['hot dogs! getcha hot dogs!', 'no ketchup. don’t ask.', 'mustard? mustard.', 'ope — comin’ through', 'last row’s on me, kid'],
   });
+  vendorHooks.npc = vendor;   // 081: read-only exposure for favors-wrigley (poppybuns)
   const tray = new THREE.Group();                            // held-prop law: parent to the GROUP, never handR
   tray.add(new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 0.32), toon(0x8a6a3a)));
   for (let i = 0; i < 4; i++) { const d = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.16, 6), toon(0xc06a2a)); d.rotation.z = Math.PI / 2; d.position.set(-0.15 + i * 0.1, 0.05, 0); tray.add(d); }

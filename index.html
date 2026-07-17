@@ -318,6 +318,9 @@
   .jcard{position:relative;background:var(--cream);border-radius:24px;padding:26px 30px 24px;max-width:min(560px,88vw);
     max-height:80vh;overflow-y:auto;box-shadow:0 14px 0 rgba(122,62,44,.28),0 30px 60px rgba(122,62,44,.25);}
   .jtitle{margin:0 4px 12px 0;color:var(--ink);font-size:30px;letter-spacing:.06em;text-shadow:0 2px 0 #f3d9a7}
+  /* 082: the tote/shop cards carry an absolute close button (top:14 right:16, 44px on
+     touch) — reserve its lane so a long title ("the beach kiosk") never crowds the ×. */
+  #tote .jtitle,#shop .jtitle{padding-right:42px}
   #journalClose{position:absolute;top:14px;right:16px;width:34px;height:34px;border:none;border-radius:50%;cursor:pointer;
     background:#e0766a;color:#fff;font-size:20px;line-height:1;box-shadow:0 3px 0 rgba(122,62,44,.3);padding:0}
   .jsec{margin:14px 0 4px}

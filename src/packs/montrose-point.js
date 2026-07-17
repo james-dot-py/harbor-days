@@ -30,6 +30,11 @@ import { scene, toon } from '../core.js';
 import * as CH from '../data/chicago.js';
 import { SPECIES, makeBird, birdCall } from './nature.js';   // reuse the roster + chibi geometry + voices
 
+// task 081 hook: favors-montrose.js reuses the gap-1 birder as "Lois" (so she
+// can .say() her errand lines). Filled below where the birders are built.
+// Additive only — this pack's behaviour is unchanged.
+export const birderHooks = {};
+
 // a small binocular prop: two short barrels + a bridge box, toon dark. Rides
 // the birder's GROUP at face height (never the hand — task-047). r/length are
 // group-local; the 0.74 CITIZEN group scale shrinks them to real-binoc size.
@@ -74,6 +79,7 @@ onWorldReady(() => {
   M.birders.forEach((b, i) => {
     const ry = Math.atan2(b.aim[0] - b.x, b.aim[1] - b.z);   // face the aim target
     const npc = makeNPC({ x: b.x, z: b.z, ry, palette: PAL[i], name: 'birder', lines: LINES[i] });
+    if (i === 0) birderHooks.lois = npc;   // task 081: the gap-1 birder is "Lois" for favors-montrose
     if (b.binocs) { const bn = makeBinocs(); bn.position.set(0, 2.18, 0.44); npc.group.add(bn); }   // face height (see note)
     birders.push({ npc, scope: !!b.scope, binocs: !!b.binocs });
   });

@@ -4,6 +4,7 @@ tools/shots/*.png
 tools/shots/*/*.png
 !tools/shots/baseline.png
 tools/shots/run-*
+tools/tmp/
 autopilot/.env
 autopilot/logs/
 autopilot/session-state.json

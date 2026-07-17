@@ -229,7 +229,11 @@ onWorldReady(player => {
   // interaction at the counter front
   addInteraction({ x: cx, z: FRONT + 1.0, r: 2.6, label: 'browse the kiosk', onUse: () =>
     shop.open({ title: 'the beach kiosk', keeper: 'popcorn’s fresh. the birds know it.',
-      items: [{ id: 'popcorn', price: 5 }, { id: 'tennis-ball', price: 8 }, { id: 'skip-pouch', price: 10 }, { id: 'kite', price: 15 }, { id: 'pirate-hat', price: 12 }, { id: 'bucket-hat', price: 25 }] }) });
+      items: [{ id: 'popcorn', price: 5 }, { id: 'tennis-ball', price: 8 }, { id: 'skip-pouch', price: 10 }, { id: 'kite', price: 15 }, { id: 'pirate-hat', price: 12 }, { id: 'bucket-hat', price: 20 }] }) });
+      // bucket hat: the MILESTONE first hat. 082 balance pass lowered it 25 -> 20 so a
+      // normally-engaged session-1 (a few zones + the pilot favor OR a couple activity
+      // firsts, measured ~40-55 dibs; a light wanderer ~18-24) clears it comfortably —
+      // "err generous: nobody quit Animal Crossing because the bells came too easy."
 
   // =================================================================== //
   //  ITEMS

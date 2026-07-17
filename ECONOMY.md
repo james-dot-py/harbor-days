@@ -111,16 +111,36 @@ Per-session repeat throttle (079 formalized it; verified in-engine —
 `[9,2,2,2,2,2,2,2,2,2,2,1,1]`): an activity's repeat payouts halve after ~10
 paid repeats in a session (min +1). Never zero — a trickle still smiles.
 
-#### For 082's balance pass (honest notes from 079)
+#### FINALIZED against real play (082 balance pass)
 
-- `range.best` pays on the FIRST ball of every session: `isBest` is
-  `carry >= state.rangeBest` and `rangeBest` isn't persisted, so any carry
-  ties 0. The toast already said "new best!" there long before dibs existed —
-  the payout just inherits that looseness.
-- `honorary.sign` / `divvy.dock` re-pay their repeat each session, because
-  `s.collected` / `D.discovered` are session flags and the toast re-fires too.
-  Consistent with "pay the toast that already celebrates it"; worth a look.
-- A casual session measured ~20–40 dibs without trying, as designed.
+Measured a fresh player's session-1 income sources in-engine
+(`tools/tmp/082-balance-sim.mjs`):
+
+- **Zone discovery**: all 11 lakefront zones = **+30** dibs (10 credited ×3; two
+  zones overlap). A realistic session-1 wanderer hits ~6–8 = **+18…+24**.
+- **The pilot favor** (oldstyle, the Malört guy): **+12**, delivered end to end.
+- **Activity firsts**: +5…+10 each; a session-1 player tries ~2–4 = **+10…+30**.
+- So an engaged session-1 lands **~40–55 dibs**; a light "just wandered" session
+  **~18–24** — matching 079's ~20–40 target.
+
+**The one tuning change: bucket hat 25 → 20.** It is the MILESTONE first hat and
+the retention hook; at 25 a light session-1 fell just short of it. At 20 a
+normally-engaged session-1 clears it comfortably while it stays a real
+save-toward goal — "err generous," the first hat should feel earned, not
+withheld. No other price moved; nothing requires grinding ONE activity (repeats
+diminish after ~10/session, so variety always beats farming — by design).
+
+**Two known payout leaks, DELIBERATELY kept (a call, not an oversight):**
+- `range.best` pays the first ball of every session (`rangeBest` unpersisted →
+  any carry ties 0). +5/session of harmless free income; the toast reads "new
+  best!" as it has since before dibs. Kept — it's a tiny returning-player gift,
+  not a grind or a wall.
+- `honorary.sign` / `divvy.dock` re-pay their per-item REPEAT each session (the
+  discovered flags are session-scoped; the completion beats stay `repeat:0` and
+  never re-pay). A returning player earns a little passive income re-spotting the
+  docks/signs — a cozy "oh right, the Divvy network" beat. Kept under the same
+  err-generous rule; the once-ever FIRST bonus still fires exactly once
+  (persisted via `paidFirsts`).
 
 ### The shops (080 — four, each diegetic: a counter, a keeper, the framework card)
 
@@ -130,7 +150,7 @@ because the crank is the souvenir.
 
 | shop | where | stock (dibs) |
 |---|---|---|
-| **the beach kiosk** (078's pilot, expanded) | dog-beach approach (100,−353) | popcorn 5 · tennis ball 8 · skip-stone pouch 10 · kite 15 · paper pirate hat 12 · bucket hat 25 |
+| **the beach kiosk** (078's pilot, expanded) | dog-beach approach (100,−353) | popcorn 5 · tennis ball 8 · skip-stone pouch 10 · kite 15 · paper pirate hat 12 · bucket hat **20** (082: 25→20, the milestone first hat) |
 | **Sluggers to-go** | the Sluggers storefront, Clark St (by the favor door) | Chicago dog 6 · Old Style 6 · ballcap (blue) 25 |
 | **LOLLA MERCH** | Butler Field entry, Grant Park | boombox-to-go 35 (festival price — that's the joke) · flower crown 20 |
 | **the museum cart** | Michigan Ave sidewalk, by the lions | museum coffee 6 · birder's boonie 22 · winter pom hat 25 · **penny machine: 1 dib a crank** |
@@ -195,10 +215,10 @@ for future collectibles, but the pilot never decrements a toy).
 Six, sold across the four shops, each a ONE-DRAW merged mesh parented to the
 mayor's head (022 mayor-only rules — shared createChibi untouched; survives
 sit/squash/skate). The tote equips/unequips; `save.worn` persists the look.
-bucket hat 25 (kiosk) · paper pirate hat 12 (the kids' kiosk) · ballcap,
-Cubs-coded 25 (Sluggers) · flower crown 20 (LOLLA) · birder's boonie 22 +
-winter pom hat 25 (the museum cart — yes, a winter hat in July; the rink
-misses you).
+bucket hat 20 (kiosk; 082 lowered 25→20) · paper pirate hat 12 (the kids'
+kiosk) · ballcap, Cubs-coded 25 (Sluggers) · flower crown 20 (LOLLA) ·
+birder's boonie 22 + winter pom hat 25 (the museum cart — yes, a winter hat
+in July; the rink misses you).
 
 ### Pilot item behaviors
 
@@ -350,3 +370,42 @@ scratch (speedMult, held item), anything a pack derives at runtime.
 
 Determinism: none of this touches the world rng. Draw budget: DOM UI +
 holdItem meshes only (~0). Both inputs, always.
+
+---
+
+## 6. SIGN-OFF — the fun layer ships as a reviewed feature (082)
+
+The economy arc (078 framework/pilot → 079 every-activity-pays → 080 shops/
+catalog/hats → 081 favors+questline → 082 balance/save/polish) is CLOSED and
+ships to the same bar as a neighborhood. 082 verified the whole arc end to end
+this session (081's favors had never been committed — parked after 3 sessions
+fought a set of TEST artifacts, not game bugs; the mechanics were sound):
+
+- **The favors + Mayor-for-Real questline WORK, verified end to end**
+  (`tools/tmp-081-master-verify.mjs`, ALL PASS): date-seeded rotation matches the
+  offline replica across sample days; zone discovery + the "Around the
+  neighborhood" board (Sal/Reggie/Gus + the tomorrow hook); the pilot favor
+  (swig → the L up → Sluggers → the L back → deliver, +12); the Divvy-angel
+  favor (offer → wheel 3 strays → dock 3 → turn-in, +12); the lakefront CITY
+  STAMP (2 favors + the skipped-stone signature → +8) and the Mayor-for-Real row
+  flipping to "✓ stamped". Zero console errors; the gull close-up ≤ 480 draws.
+- **Turn-in celebrations no longer bury**: `toast(main,sub,jump)` — a favor
+  turn-in clears the incidental-toast backlog and lands NOW (`favors.complete`).
+- **Save integrity** (`tools/walkprobe.mjs` save section + `tools/tmp-082-save.mjs`):
+  a schema-migration mechanism (v0→v1 proven; a gap / future version → fresh),
+  corrupt JSON / unknown version → a fresh save + ONE gentle "starting fresh"
+  toast (never a crash, never a nag); economy state + worn hat + favor progress +
+  stamps round-trip through a real reload; private-browsing / artifact contexts
+  degrade silently to in-memory (no console error, no nag).
+- **Balance FINALIZED** (§1): measured session-1 income; the milestone bucket hat
+  lowered 25→20 so a normally-engaged first session earns its first hat; two known
+  payout leaks kept as deliberate err-generous calls.
+- **UI polish**: tote (empty + full), the four shops, and the journal economy/
+  to-do/neighbors sections read clean at 390 px and 1280 px; the coin pop never
+  overlaps the interaction pill (all-pairs rect sweep, both orientations); the
+  shop close-× no longer crowds a long title.
+- **No regression**: walkprobe 737/737, single-file build 1,640 kB, worst
+  standing view 428/480, determinism 0.309 % vs baseline (gate 0.828 %), zero
+  console errors. The world rng is untouched; every change is DOM/save/data only.
+
+The arc is done. Nobody logs off wearing a bucket hat they didn't earn.

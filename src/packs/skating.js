@@ -37,6 +37,12 @@ const SHOE_WHITE = 0xf5f2ec;        // skate-boot white (reads as blades on the 
 const MAYOR_SHOE = 0x241b13;        // the mayor's default shoe color (restore on exit)
 const _r = mulberry32(0x534b4154);  // local 'SKAT' rng — never the shared world rng
 
+// ---- additive hook (task 081): the live skater rig groups, so favors-
+// downtown's "recipe on ice" favor can fumble the card when the player skates
+// too close to one. Filled at the end of onWorldReady; zero behavior change
+// (an exported handle, nothing in this pack reads it).
+export const skaterHooks = {};
+
 // ---- hardcoded downtown-mixed palettes (office wear + tourist colors) ----
 // face:true ONLY on the beginner (last row) so its setFace/wide-eyes read.
 const PAL = [
@@ -166,6 +172,11 @@ onWorldReady(player => {
   registerBumpable(bg.group, bg.parts, BEG_LINES);
   const beg = { group: bg.group, parts: bg.parts, s: 0, hd: _bh, ph: _r() * 6.283,
     stride: 0, nfT: 0, nfCd: 6 + _r() * 4 };
+
+  // task 081 additive hook: expose the five loopers + the beginner as world-
+  // space rig groups (each .position is world coords; millenniumRoot is at the
+  // origin) for the "recipe on ice" favor's fumble proximity test.
+  skaterHooks.rigs = loopers.map(s => s.group); skaterHooks.rigs.push(beg.group);
 
   // ---- the mayor's skates: parented into the leg meshes, hidden until on-ice ----
   const skateL = makeSkate(); skateL.position.set(0, -0.62, 0.06); skateL.visible = false; mparts.legL.add(skateL);

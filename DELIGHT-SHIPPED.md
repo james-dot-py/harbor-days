@@ -535,3 +535,20 @@ cut becomes a revert task.
   stair and rest it on the park-facing rail: "to the lake." The can stays there,
   sweating, for the rest of the session. — the Sheffield rooftop
   (src/packs/sluggers-shop.js) — task 080
+- THE DIVVY ANGEL. Reggie by the Belmont underpass: three bikes wandered off
+  their docks. Wheel each stray home, dock it, come back — "three bikes home
+  safe." (Dock one at a real Divvy dock and you discover it too.) — the lakefront
+  (src/packs/favors-lakefront.js) — task 081 (shipped in the 082 close-out)
+- MAYOR FOR REAL. The mayor earned the charcoal suit; now they earn the retired
+  light-blue sash + red star BACK — a CITY STAMP per neighborhood (two favors +
+  its signature activity), then a swear-in on the AIDS-Garden forecourt: the
+  crowd gathers, the sax plays, confetti + fireworks, and "the sash came back."
+  — the whole city (src/packs/mayor-for-real.js) — task 081 (shipped 082)
+- DIFFERENT NEIGHBORS TOMORROW. The journal's "Around the neighborhood" board
+  lists today's 3–4 folks who could use a hand (in their own Chicago voice, never
+  a map marker) and signs off: "different neighbors tomorrow. that's how blocks
+  work." — the journal (src/packs/favors-core.js) — task 081 (shipped 082)
+- THE PAYOFF LANDS NOW. Finish a favor and the celebration banner jumps the
+  toast queue instead of surfacing 15 seconds later behind a run of incidental
+  dings — the "three bikes home safe" hits the instant you turn it in.
+  — everywhere favors turn in (src/framework.js) — task 082

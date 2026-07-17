@@ -650,3 +650,32 @@ few turns to find; keep each to one line of symptom + fix.
   `position:fixed` (viewport coords = what the handler already means). A HUD
   element positioned from JS with client coords must be `fixed`, or its offset
   parent silently eats the difference — and no desktop test can ever see it.
+- Framework TOASTS QUEUE (~3 s each), so a payoff banner buries behind incidental
+  toasts a favor's own STEPS trigger: the Divvy-angel favor wheels 3 strays to 3
+  real Divvy docks, each firing a 'DIVVY DOCK N/8' discovery toast, so the 'three
+  bikes home safe' turn-in celebration surfaced ~15 s AFTER the moment (082, and it
+  read as a failing test for 3 parked sessions). Fix the CLASS: `toast(main,sub,jump)`
+  — a turn-in/payoff clears the pending queue and shows NOW (`favors.complete` passes
+  jump=true); the incidental toasts already popped the chip, so dropping their banner
+  is free. Any "important beat lands late" is a queue-depth symptom, not a missing beat.
+- An L-arrival RE-SEATS the player at the boarding board and FIGHTS an immediate
+  teleport: an E2E that rides the L then `tele(guy)` + presses E rode the L AGAIN
+  ("RED LINE — 95TH BOUND") because the arrival re-asserted the player at the board
+  for ~1 s (082 — read as "the pilot favor's delivery is broken" for 3 sessions; it
+  works perfectly in isolation, tools/tmp/082-c1-iso.mjs). A real player WALKS from
+  board to giver; a teleport test must settle ~1.5 s then POLL the giver's own prompt
+  (re-teleporting) before pressing. Never trust a teleport landing right after a cell
+  transition — confirm the intended interaction is the ACTIVE prompt first.
+- `wallet.pay` EARLY-RETURNS on a zero amount (`if(!(amount>0))return 0`) BEFORE
+  setting `paidFirsts` — so `pay({key,first:0})` does NOT register the first (082
+  burned a test assert on it). To mark a "signature/first-done" flag you must pay a
+  real (>0) `first`. And seeding a signature by writing `save.counters.paidFirsts`
+  directly gets CLOBBERED within 3 s: `buildSnap` rebuilds `counters.paidFirsts` from
+  `state.paidFirsts` (which the direct write never touched). Set it through the state
+  path (`wallet.pay`), never the save blob — the snapshot is one-directional.
+- store.js flushes the live in-memory save on `pagehide`, so NORMAL navigation can
+  never leave a corrupt save behind — a planted-corruption E2E must neutralize the
+  outgoing page's `localStorage.setItem` after planting, or the pagehide flush
+  overwrites the corrupt value with the still-valid in-memory blob (082 save-integrity
+  test). Reassuring property: the corrupt-recovery path only ever triggers on genuine
+  external tampering / storage faults, exactly what it exists for.

@@ -1352,5 +1352,61 @@ console.log('\n--- Task 071 (k): Point props clear the ribbons (collision-model 
 console.log('\n--- Task 071 (l): meadow interior spot checks walkable ---');
 for(const [x,z] of [[200,-1335],[215,-1345],[225,-1330],[238,-1330]]) expect(`meadow (${x},${z}) walkable`,walkable(x,z),true);
 
+// ===== Task 082: SAVE INTEGRITY — migration + round-trip + corrupt-recovery =====
+// Pure-node exercise of src/store.js (localStorage shim + cache-busted dynamic
+// import per scenario -> fresh module state; store.js caches _save/_probed/
+// _recovered, so a distinct ?sv= query yields a fresh module instance). Mirrors
+// tools/tmp/082-store-sanity.mjs. store.js's module-level addEventListener is
+// try-guarded, so it imports cleanly under node. Reuses the file's expect().
+console.log('\n--- Task 082: save integrity (migration + round-trip + corrupt-recovery) ---');
+function makeLS(seed){
+  const m=new Map(Object.entries(seed||{}));
+  globalThis.localStorage={
+    getItem:k=>(m.has(k)?m.get(k):null),
+    setItem:(k,v)=>m.set(k,String(v)),
+    removeItem:k=>m.delete(k),
+    clear:()=>m.clear(), _m:m,
+  };
+}
+// (a) v0 -> v1 migration keeps every field
+makeLS({'ope.save.v1':JSON.stringify({v:0,dibs:7,bag:{'bucket-hat':1},worn:'bucket-hat',favors:{oldstyle:{st:'done',step:2}},zones:['Belmont Harbor'],counters:{fetches:3},flags:{'ope.stamp.lakefront':'1'}})});
+const sv1=await import('../src/store.js?sv=wp1');
+const wb1=sv1.getSave();
+expect('082 v0->v1 version',wb1.v,1);
+expect('082 v0->v1 dibs',wb1.dibs,7);
+expect('082 v0->v1 worn',wb1.worn,'bucket-hat');
+expect('082 v0->v1 favor',wb1.favors.oldstyle.st,'done');
+expect('082 v0->v1 stamp flag',wb1.flags['ope.stamp.lakefront'],'1');
+expect('082 v0->v1 counter',wb1.counters.fetches,3);
+expect('082 v0->v1 NOT recovered',sv1.wasSaveRecovered(),false);
+// (b) round-trip via public API (mutate -> flushSave -> re-import the written string)
+makeLS();
+const sv2=await import('../src/store.js?sv=wp2');
+const wsv=sv2.getSave(); wsv.dibs=23; wsv.bag['tennis-ball']=1; wsv.worn='ballcap'; wsv.favors.divvyangel={st:'done',step:1}; wsv.flags['ope.stamp.wrigley']='1';
+sv2.flushSave();
+const written=globalThis.localStorage.getItem('ope.save.v1');
+makeLS({'ope.save.v1':written});
+const sv2b=await import('../src/store.js?sv=wp2b');
+const wrt=sv2b.getSave();
+expect('082 round-trip dibs',wrt.dibs,23);
+expect('082 round-trip worn',wrt.worn,'ballcap');
+expect('082 round-trip favor',wrt.favors.divvyangel.st,'done');
+expect('082 round-trip stamp',wrt.flags['ope.stamp.wrigley'],'1');
+// (c) corrupt JSON -> fresh blob + recovered flag set (one gentle toast on boot)
+makeLS({'ope.save.v1':'{not valid json'});
+const sv3=await import('../src/store.js?sv=wp3');
+expect('082 corrupt -> fresh dibs',sv3.getSave().dibs,0);
+expect('082 corrupt -> recovered',sv3.wasSaveRecovered(),true);
+// (d) future version (a stale build can't reach) -> fresh blob + recovered
+makeLS({'ope.save.v1':JSON.stringify({v:99,dibs:5})});
+const sv4=await import('../src/store.js?sv=wp4');
+expect('082 future -> fresh dibs',sv4.getSave().dibs,0);
+expect('082 future -> recovered',sv4.wasSaveRecovered(),true);
+// (e) brand-new player (no save) -> fresh, NOT recovered (never a toast)
+makeLS();
+const sv5=await import('../src/store.js?sv=wp5');
+expect('082 fresh player dibs',sv5.getSave().dibs,0);
+expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
+
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 process.exit(fail?1:0);

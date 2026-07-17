@@ -56,11 +56,44 @@ function rawSet(k, v) { try { const s = probe(); if (s) s.setItem(k, v); }    ca
 function rawRemove(k) { try { const s = probe(); if (s) s.removeItem(k); }     catch (e) { } }
 
 // ------------------------------- the save ------------------------------
-const SAVE_KEY = 'ope.save.v1';
+const SAVE_KEY = 'ope.save.v1';               // storage key (constant; blob.v carries the SCHEMA version)
+const SAVE_V = 1;                             // current schema version — bump + add a MIGRATIONS rung, never mutate live fields
 const LEGACY_FLAG_KEYS = ['ope.onboard.v1', 'ope.a2hs.v1'];   // 077 raw flag keys, absorbed on first load
 
+// schema migrations (task 082): MIGRATIONS[n] upgrades a v-n blob to v-(n+1).
+// The contract for a future schema bump is "add a rung here, never rewrite live
+// fields in place" — so an OLD save opens forward-compatibly instead of being
+// silently discarded (which is what any v!=SAVE_V used to do). A blob whose
+// version can't be walked all the way up to SAVE_V (a gap, or a FUTURE version a
+// stale build can't understand) is treated as unrecoverable -> a fresh start.
+const MIGRATIONS = {
+  // 0 -> 1: the pre-versioned pilot shape. Nothing structural changed between the
+  // unversioned draft and v1, so carry every field forward and stamp the version.
+  // This is the proven STUB (tools/tmp-082-save.mjs exercises a v0 blob end to
+  // end); a real future bump replaces the body with the actual field moves.
+  0: (o) => { o.v = 1; return o; },
+};
+
+let _recovered = false;   // a save EXISTED but was unusable (bad JSON / a version
+                          // we can't reach) and we started fresh — the framework
+                          // shows ONE gentle toast on boot. A brand-new player
+                          // (no save at all) never trips this: no save, no toast.
+
+// walk a parsed blob up to SAVE_V through the MIGRATIONS chain; null if it can't
+// get there (missing rung / future version / runaway).
+function migrate(o) {
+  let guard = 0;
+  while (o && o.v < SAVE_V) {
+    const step = MIGRATIONS[o.v];
+    if (!step) return null;
+    o = step(o);
+    if (++guard > 64) return null;
+  }
+  return (o && o.v === SAVE_V) ? o : null;
+}
+
 function freshBlob() {
-  return { v: 1, dibs: 0, bag: {}, worn: null, favors: {}, zones: [], counters: {}, flags: {} };
+  return { v: SAVE_V, dibs: 0, bag: {}, worn: null, favors: {}, zones: [], counters: {}, flags: {} };
 }
 
 // coerce a parsed object into a well-formed blob (defends against a partial or
@@ -91,16 +124,30 @@ let _save = null;
 function load() {
   const raw = rawGet(SAVE_KEY);
   if (raw) {
-    try {
-      const o = JSON.parse(raw);
-      if (o && typeof o === 'object' && o.v === 1) { _save = normalize(o); return; }
-    } catch (e) { }   // bad JSON -> fall through to a fresh blob, silently
+    let o = null, badJson = false;
+    try { o = JSON.parse(raw); } catch (e) { badJson = true; }   // bad JSON -> unrecoverable
+    if (!badJson && o && typeof o === 'object' && Number.isInteger(o.v)) {
+      if (o.v === SAVE_V) { _save = normalize(o); return; }
+      if (o.v >= 0 && o.v < SAVE_V) {
+        const up = migrate(o);
+        if (up) { _save = normalize(up); writeNow(); return; }   // upgraded -> persist the new shape
+      }
+      // a FUTURE version or a gap in the chain: can't be trusted -> fresh start.
+    }
+    // a save was present but unusable (bad JSON / bad shape / bad version): the
+    // framework will show one gentle toast; NEVER a crash, NEVER a nag beyond it.
+    _recovered = true;
   }
   // missing / corrupt / unknown version: a fresh blob, migrating 077's flags in.
   _save = freshBlob();
   migrateLegacyFlags(_save);
   writeNow();         // persist the fresh (possibly migrated) blob best-effort
 }
+
+// wasSaveRecovered() -> true exactly once per boot when a stored save had to be
+// discarded (bad JSON / unreachable version). The framework reads it after boot
+// to show a single gentle "starting fresh" toast; a fresh player never sees it.
+export function wasSaveRecovered() { return _recovered; }
 
 // getSave() -> the live blob object. Loaded lazily-once, synchronously, on the
 // first access (framework.js reads it at import time, before any pack runs).

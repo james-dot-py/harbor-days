@@ -29,7 +29,7 @@ import { mayor, mparts, createChibi, bakeChibiRig } from './character.js';
 import { fw } from './fx.js';
 import { getAudioCtx, setAmbienceGrade } from './audio.js';
 import * as CH from './data/chicago.js';
-import { getSave, markDirty, getFlag, setFlag } from './store.js';   // the guarded save adapter (task 078)
+import { getSave, markDirty, getFlag, setFlag, wasSaveRecovered } from './store.js';   // the guarded save adapter (task 078; 082 corrupt-recovery)
 
 export { createChibi, tintChibiLimb, bakeChibiRig } from './character.js';   // re-export chibi builder + limb recolor + static-rig baker for packs
 // getAudioCtx() -> {actx,sfxBus,musicBus,noiseBuf,mf,noiseHit} (actx null until audio starts)
@@ -518,9 +518,19 @@ function updatePlaces(dt,player){
 }
 
 // --------------------------------- toast -------------------------------
-// toast(main, sub?) : gold banner, auto-hides after 3s, queues if busy.
-const _toastQ=[];let _toastBusy=false;
-export function toast(main,sub){
+// toast(main, sub?, jump?) : gold banner, auto-hides after 3s, queues if busy.
+// jump=true is for a PAYOFF moment (a favor turn-in): it clears the pending queue
+// and shows immediately, so the celebration never buries behind a run of
+// incidental discovery toasts (082 — the Divvy-angel favor docks strays at real
+// Divvy docks, each firing a 'DIVVY DOCK N/8' toast; without this the 'three
+// bikes home safe' banner surfaced ~15 s late, long after the moment).
+const _toastQ=[];let _toastBusy=false,_toastTO=null;
+export function toast(main,sub,jump){
+  if(jump){
+    _toastQ.length=0;                                    // drop the incidental backlog (already popped on the chip)
+    if(_toastTO){clearTimeout(_toastTO);_toastTO=null;}
+    _toastBusy=false;                                    // let nextToast() take over the banner right now
+  }
   _toastQ.push({main,sub:sub||''});
   if(!_toastBusy)nextToast();
 }
@@ -529,7 +539,7 @@ function nextToast(){
   _toastBusy=true;const{main,sub}=_toastQ.shift();
   elToastMain.textContent=main;elToastSub.textContent=sub;
   elToast.classList.add('show');
-  setTimeout(()=>{elToast.classList.remove('show');setTimeout(nextToast,420);},3000);
+  _toastTO=setTimeout(()=>{_toastTO=null;elToast.classList.remove('show');setTimeout(nextToast,420);},3000);
 }
 
 // -------------------------------- journal ------------------------------
@@ -978,7 +988,7 @@ export const favors={
     f.st='done';markDirty();
     _doneThisSession.add(id);
     if(def){
-      if(def.doneToast)toast(def.doneToast.main,def.doneToast.sub);
+      if(def.doneToast)toast(def.doneToast.main,def.doneToast.sub,true);   // 082: jump the queue — the turn-in payoff lands NOW, not behind incidental toasts
       if(def.reward)wallet.earnDibs(def.reward,def.giver);
     }
   },
@@ -1044,6 +1054,10 @@ function econUpdate(dt){
     if(w){ const def=bag.defs.get(w);if(def&&def.onEquip)try{def.onEquip();}catch(e){console.warn('[econ] restore onEquip',e);} }
     try{ window.__hd=window.__hd||{};window.__hd.econ={wallet,bag,favors,shop,save:getSave};
       window.__hd.flags={get:getFlag,set:setFlag}; }catch(e){}   // debug/tools sibling: store flag round-trip
+    // 082 save integrity: a stored save that couldn't be read (bad JSON / a
+    // version this build can't reach) started us fresh — say so ONCE, gently,
+    // never as a scold. A brand-new player never trips this.
+    if(wasSaveRecovered())toast('starting fresh','couldn’t read your last save — no worries');
   }
   // slow snapshot
   _snapAcc-=dt;
