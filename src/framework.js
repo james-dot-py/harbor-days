@@ -61,6 +61,7 @@ export const state={
   if(_c.bests&&typeof _c.bests==='object')state.bests=Object.assign({},_c.bests);
   if(_c.fishLog&&typeof _c.fishLog==='object')state.fishLog=Object.assign({},_c.fishLog);
   if(_c.paidFirsts&&typeof _c.paidFirsts==='object')state.paidFirsts=Object.assign({},_c.paidFirsts);
+  if(_c.dibsBy&&typeof _c.dibsBy==='object')state.dibsBy=Object.assign({},_c.dibsBy);
   if(Array.isArray(_c.birdsSeen))state.birdsSeen=new Set(_c.birdsSeen);
   if(Array.isArray(_c.rocksPainted))state.rocksPainted=new Set(_c.rocksPainted);
 }
@@ -540,6 +541,10 @@ export function journalSection(id,title,renderFn){
 function renderJournal(){
   elJournalBody.innerHTML=_sections.map(s=>{
     let html='';try{html=s.render();}catch(e){html='<i>…</i>';console.warn('[framework] journalSection render error',e);}
+    if(!html)return '';   // a section with nothing to say hides its HEADER too — this is
+                          // what lets a section register EAGERLY (holding a fixed slot in
+                          // the journal's order) while staying invisible until it has
+                          // something to show. 079's dibs section is the first user.
     return `<section class="jsec"><h2>${s.title}</h2>${html}</section>`;
   }).join('');
 }
@@ -700,21 +705,36 @@ const CHAIR_SVG_SM='<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden=
   +'<rect x="12.7" y="10.5" width="1.5" height="3.4" rx=".7" fill="#7a9e4f"/><rect x="15.5" y="10.5" width="1.5" height="3.4" rx=".7" fill="#7a9e4f"/></svg>';
 
 // -------- chip / register pop helpers (motion on the CHILD, per PITFALLS) ----
-function revealChip(){ if(elDibs)elDibs.classList.add('on'); }
+// revealChip also marks the BODY: the touch hint sits in the same top-left box
+// as the chip and slides below it via body.touch.hasdibs (index.html). A body
+// class rather than a sibling selector — #hint/#dibs DOM order isn't a contract.
+function revealChip(){ if(elDibs){elDibs.classList.add('on');document.body.classList.add('hasdibs');} }
 function refreshChip(){ if(elDibsN)elDibsN.textContent=String(getSave().dibs); }
 function pulseChip(){ if(!elDibs)return; elDibs.classList.remove('pulse');void elDibs.offsetWidth;elDibs.classList.add('pulse'); }
 function shakeChip(){ if(!elDibs)return; elDibs.classList.remove('short');void elDibs.offsetWidth;elDibs.classList.add('short'); }
-let _popTO=null;
-function showDibsPop(txt){
+let _popTO=null,_popN=0,_popT=-1e9;
+// showDibsPop(n,txt) — the dry register line, `+3 dibs · reason`.
+// COALESCE (task 079): a completion beat almost always pays on the SAME FRAME as
+// the increment that completed it (last bird + BINGO, last dock + the whole
+// network, last hole + round done — five such pairs across the activity set).
+// Two raw pops in one frame would show the first for ~0 ms, so sum anything
+// inside a 0.4 s window and keep the LATER reason — completion always pays
+// second, and it's the bigger moment. The window is deliberately far shorter
+// than the 1600 ms display so two genuinely separate beats never merge.
+function showDibsPop(n,txt){
   if(!elDibsPop)return;
-  elDibsPop.textContent=txt;
+  _popN=(game.tNow-_popT<0.4)?_popN+n:n; _popT=game.tNow;
+  elDibsPop.textContent='+'+_popN+' dibs'+(txt?' · '+txt:'');
   elDibsPop.classList.remove('show');void elDibsPop.offsetWidth;elDibsPop.classList.add('show');
   clearTimeout(_popTO);_popTO=setTimeout(()=>{if(elDibsPop)elDibsPop.classList.remove('show');},1600);
 }
 // a tiny synthesized coin "dink": two quick sine blips, quiet. Guarded — actx is
-// null until the player clicks start (constraint 4).
+// null until the player clicks start (constraint 4). Rate-limited to match the
+// pop's coalescing: two dinks at the same instant phase-double into a clack.
+let _dinkT=-1e9;
 function coinDink(){
   const a=getAudioCtx();if(!a||!a.actx)return;
+  if(a.actx.currentTime-_dinkT<0.08)return; _dinkT=a.actx.currentTime;
   const {actx,sfxBus}=a,dest=sfxBus||actx.destination,now=actx.currentTime;
   [1300,1750].forEach((f,i)=>{
     const o=actx.createOscillator(),g=actx.createGain(),t0=now+i*0.055;
@@ -726,18 +746,22 @@ function coinDink(){
 }
 
 // -------------------------------- wallet -------------------------------
-// wallet.dibs · earnDibs(n,reason) · spendDibs(n,reason)->bool · pay(opts)->int
+// wallet.dibs · earnDibs(n,reason,label) · spendDibs(n,reason)->bool · pay(opts)->int
 const _payRepeats={};   // per-key paid-repeat counts THIS SESSION (never persisted)
+const _payAt={};        // per-key last-paid game time — backs pay()'s `cd` throttle
 export const wallet={
   get dibs(){ return getSave().dibs; },
   // earn: bump balance, pulse the chip, show the dry register pop. First-EVER
   // earn also gets the gold toast + reveals the chip + a coin dink.
-  earnDibs(n,reason){
+  // label (079): the ledger bucket for the journal's biggest-earner line.
+  earnDibs(n,reason,label){
     if(!(n>0))return;
     const sv=getSave();
     sv.dibs+=n;markDirty();
+    const b=label||reason||'odds & ends';
+    state.dibsBy=state.dibsBy||{};state.dibsBy[b]=(state.dibsBy[b]||0)+n;
     refreshChip();revealChip();pulseChip();
-    showDibsPop('+'+n+' dibs'+(reason?' · '+reason:''));
+    showDibsPop(n,reason);
     if(sv.flags['ope.dibs']!=='1'){
       sv.flags['ope.dibs']='1';markDirty();
       toast('your first dibs!','claimed, like a shoveled parking spot');
@@ -751,19 +775,30 @@ export const wallet={
     sv.dibs-=n;markDirty();refreshChip();
     return true;
   },
-  // pay: the shared payout helper. First time for `key` pays `first`; repeats pay
-  // `repeat`, halving (floor, min 1) after 10 paid repeats of that key this
-  // session. paidFirsts persists (via the state snapshot); the repeat count does not.
-  pay({key,first,repeat,reason,firstReason}){
+  // pay: the shared payout helper — activities call THIS, never earnDibs.
+  // First time for `key` pays `first`; repeats pay `repeat`, halving (floor,
+  // min 1) after 10 paid repeats of that key this session. paidFirsts persists
+  // (via the state snapshot); the repeat count does not.
+  //   label (079) — ledger bucket for the journal (defaults to key).
+  //   cd    (079) — min seconds between PAID REPEATS of this key; the anti-spam
+  //                 valve for beats that can fire in a fast loop. The first-ever
+  //                 payout is NEVER throttled — that gift always lands.
+  // Returns the amount paid: 0 when throttled, or when a beat defines no repeat
+  // value (a once-ever payout like a zone discovery just goes quiet forever).
+  pay({key,first,repeat,reason,firstReason,label,cd}){
     state.paidFirsts=state.paidFirsts||{};
+    const isFirst=!state.paidFirsts[key];
     let amount,r;
-    if(!state.paidFirsts[key]){ amount=first;r=firstReason||reason;state.paidFirsts[key]=1; }
+    if(isFirst){ amount=first;r=firstReason||reason; }
     else{
+      if(cd&&game.tNow-(_payAt[key]||-1e9)<cd)return 0;
       amount=repeat;r=reason;
-      _payRepeats[key]=(_payRepeats[key]||0)+1;
-      if(_payRepeats[key]>10)amount=Math.max(1,Math.floor(amount/2));
+      if((_payRepeats[key]||0)>=10)amount=Math.max(1,Math.floor(amount/2));
     }
-    wallet.earnDibs(amount,r);
+    if(!(amount>0))return 0;                      // nothing to pay: no pop, no bookkeeping
+    if(isFirst)state.paidFirsts[key]=1; else _payRepeats[key]=(_payRepeats[key]||0)+1;
+    _payAt[key]=game.tNow;
+    wallet.earnDibs(amount,r,label||key);
     return amount;
   },
 };
@@ -986,6 +1021,7 @@ function buildSnap(){
       bests:state.bests||{},
       fishLog:state.fishLog||{},
       paidFirsts:state.paidFirsts||{},
+      dibsBy:state.dibsBy||{},
       birdsSeen:state.birdsSeen?[...state.birdsSeen].sort():[],
       rocksPainted:state.rocksPainted?[...state.rocksPainted].sort():[],
     },
@@ -1021,14 +1057,36 @@ journalSection('harbor-days','Ope!',()=>`
   <div class="jrow"><span>Distance walked</span><b>${state.distanceWalked.toFixed(0)} m</b></div>
   <div class="jrow"><span>Zones visited</span><b>${state.zonesVisited.size} / ${CH.ZONES.length}</b></div>`);
 
+// dibs (task 079) — registered EAGERLY, right under Ope!, so it holds a fixed
+// slot near the top instead of landing wherever the first earn happens to fall
+// (packs register their sections during onWorldReady, so a lazily-added section
+// sorts differently on a fresh boot than on a returning one). It renders '' —
+// and so hides its own header — until the player has ever earned a dib: the same
+// law as the HUD chip, a fresh boot shows a game, not an economy.
+// state.dibsBy is the ledger every earn writes; the biggest earner falls out of
+// it without a single pack having to report anything.
+journalSection('dibs','dibs',()=>{
+  const sv=getSave();
+  if(!(sv.dibs>0||sv.flags['ope.dibs']==='1'))return '';
+  const by=state.dibsBy||{},ks=Object.keys(by).filter(k=>by[k]>0).sort((a,b)=>by[b]-by[a]);
+  const all=ks.reduce((a,k)=>a+by[k],0);
+  return `<div class="jrow"><span>In your pocket</span><b>${sv.dibs}</b></div>`
+    +`<div class="jrow"><span>Earned all told</span><b>${all}</b></div>`
+    +(ks.length?`<div class="jrow"><span>Biggest earner</span><b>${ks[0]} · ${by[ks[0]]}</b></div>`:'');
+});
+
 // Bench sitting — one "sit for a bit" interaction per bench (framework demo).
 onWorldReady(()=>{
   for(const b of CH.BENCHES)addInteraction({x:b.x,z:b.z,r:2.2,label:'sit for a bit',onUse:pl=>sitOnBench(b,pl)});
 });
 // pack-facing sit API: register a sittable spot anywhere (benches use the same
-// mechanism internally). s = {x,z,ry, y? (base height, e.g. a deck), r?, label?}
+// mechanism internally). s = {x,z,ry, y? (base height, e.g. a deck), r?, label?,
+// onSit?} — onSit(player) fires AFTER the sit lands, for packs that hang a beat
+// off it (079's sanctuary dib). Added because the alternative was packs patching
+// the returned handle's undocumented .onUse, which a future refactor would break.
 export function addSitSpot(s){
-  return addInteraction({x:s.x,z:s.z,r:s.r||2.2,label:s.label||'sit for a bit',onUse:pl=>sitOnBench(s,pl)});
+  return addInteraction({x:s.x,z:s.z,r:s.r||2.2,label:s.label||'sit for a bit',
+    onUse:pl=>{sitOnBench(s,pl);if(s.onSit)try{s.onSit(pl);}catch(e){console.warn('[framework] onSit error',e);}}});
 }
 
 // wire the DOM once (index.html is fully parsed before any module runs).

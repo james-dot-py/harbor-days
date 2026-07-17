@@ -40,26 +40,84 @@ walls, no fail states, no nags, no numbers going up for their own sake.
 - **No sinks that reset fun.** Nothing consumable costs enough to regret.
   Cosmetics are the long-saver tier, and even those are 1–3 sessions.
 
-### Pilot rates (078 — the seed table; 079/082 extend + tune)
+### The rate table (079 — every activity pays; 082 finalizes vs real play)
 
-| moment                                       | dibs |
-|----------------------------------------------|------|
-| skip stones: first good skip ever (≥3)       | +5   |
-| skip stones: a good skip (≥3 skips)          | +2   |
-| skip stones: a beauty (≥6 skips)             | +3   |
-| cornhole: first bago you witness up close    | +5   |
-| cornhole: call a bago from the rail          | +2   |
-| favor: an Old Style for the Malört guy       | +12  |
+Every payout goes through `wallet.pay` (§5) and rides the line that ALREADY
+celebrates the moment. `first` is the once-ever gift; `repeat` is the trickle.
+
+| activity | key | first | repeat | reason |
+|---|---|---|---|---|
+| skip stones (≥3 skips) | `stones` | 5 | 2 (3 if ≥6) | a good skip / skipped a beauty |
+| cornhole: call a bago | `cornhole` | 5 | 2 | called it — bago! |
+| driving range: a new best | `range.best` | 5 | 2 | driving range: new best |
+| driving range: bucket done | `range.bucket` | 6 | 3 | driving range: bucket done |
+| mini golf: hole at par or better | `golf.hole` | 5 | 2 | mini golf: par or better |
+| mini golf: course complete | `golf.course` | 8 | 3 | mini golf: course complete |
+| Marovitz: sank it | `marovitz.hole` | 5 | 2 | chip-and-putt: sank it |
+| Marovitz: round done | `marovitz.round` | 8 | 3 | chip-and-putt: round done |
+| badminton: a nice rally | `badminton` | 5 | 2 (cd 6) | badminton: nice rally |
+| birdwatch: a new species | `bingo.species` | 5 | 2 | birdwatch: new friend |
+| birdwatch: BINGO | `bingo.full` | 10 | **0** | birdwatch: BINGO |
+| the plover | `plover` | 8 | 2 | birdwatch: the rarest guy |
+| fishing: reeled one in | `fish` | 5 | 2 | fishing: reeled one in |
+| jetski: a ride | `jetski.ride` | 6 | 2 (cd 20) | jetski: out on the lake |
+| jetski: every 300 m out | `jetski.dist` | 5 | 2 | jetski: went the distance |
+| skating: a hop-spin | `ice.hop` | 5 | 1 (cd 3) | skating: landed a hop-spin |
+| skating: a whole ribbon lap | `ice.loop` | 8 | 3 | skating: the whole ribbon |
+| Divvy: a new dock | `divvy.dock` | 5 | 2 | Divvy: a new dock |
+| Divvy: the whole network | `divvy.all` | 10 | **0** | Divvy: the whole network |
+| an honorary sign | `honorary.sign` | 5 | 2 | found an honorary sign |
+| every honorary sign | `honorary.all` | 10 | **0** | honorary Chicagoan |
+| the L: a new stop | `l.stop.<stop>` | 5 | 2 | the L: \<stop\> |
+| the L: the whole line | `l.all` | 10 | **0** | the L: the whole line |
+| the Handshake, survived | `handshake` | 8 | 2 (cd 8) | the Handshake: survived it |
+| a straight Malört, survived | `malort` | 5 | 2 (cd 8) | Malört: survived it |
+| Wrigley: a ticket | `wrigley.ticket` | 6 | 1 | Wrigley: got a ticket |
+| Wrigley: the whole half-inning | `wrigley.half` | 8 | 3 | Wrigley: the whole half-inning |
+| Wrigley: **ejected** | `wrigley.eject` | 10 | 3 | Wrigley: ejected — worth it |
+| rooftop bleachers: a sit | `rooftop` | 6 | 2 (cd 20) | rooftop: best seat outside |
+| Lolla: the dance circle | `lolla.dance` | 6 | 2 (cd 10) | Lolla: the dance circle |
+| Lolla: a totem | `lolla.totem.<kind>` | 5 | 2 | Lolla: the \<kind\> totem |
+| fetch: a dog brings it back | `fetch` | 5 | 2 (cd 4) | fetch: good dog |
+| sanctuary: a deck sit | `sanctuary.sit` | 5 | 1 (cd 20) | sanctuary: sat a while |
+| the fireworks finale (3 in 4 s) | `fireworks` | 6 | 2 (cd 8) | fireworks: the finale |
+| a zone, first found (×11) | `zone.<name>` | 3 | **0** | found \<name\> |
+| favor: an Old Style for the Malört guy | (favors) | 12 | — | the Malört guy |
+
+**The biggest single payout in the park is getting EJECTED from Wrigley (+10).**
+Comedy pays. That is the whole design bar in one row.
+
+#### Two laws the table encodes
+
+1. **A COLLECTION completes once; a ROUND completes every time.** `repeat: 0`
+   on BINGO / the whole network / every sign / the whole line — a collection
+   can never un-complete, so a repeat there is standing tax-free income (and
+   the per-item session flags reset each load, so it would re-pay the whole
+   card every session). `golf.course` / `marovitz.round` / `range.bucket` keep
+   their repeats: you actually played it again.
+2. **`cd` on anything that can fire in a fast loop.** The first-ever payout is
+   never throttled — that gift always lands.
 
 Cornhole note (078 reality check): today's cornhole is an ambient NPC-vs-NPC
-match — the player doesn't throw. The pilot payout is a SPECTATOR beat: be
+match — the player doesn't throw. The payout is a SPECTATOR beat: be
 within ~12 m when a bago drops and you "called it" (+2, first +5). If a
 later task makes cornhole playable, the rates upgrade to thrown-bag payouts;
 until then, paying the watcher is the cozy read (you cheered, you get a dib).
 
-Per-session repeat throttle (079 formalizes; pilot uses it for stones +
-cornhole): an activity's repeat payouts halve after ~10 paid repeats in a
-session (min +1). Never zero — a trickle still smiles.
+Per-session repeat throttle (079 formalized it; verified in-engine —
+`[9,2,2,2,2,2,2,2,2,2,2,1,1]`): an activity's repeat payouts halve after ~10
+paid repeats in a session (min +1). Never zero — a trickle still smiles.
+
+#### For 082's balance pass (honest notes from 079)
+
+- `range.best` pays on the FIRST ball of every session: `isBest` is
+  `carry >= state.rangeBest` and `rangeBest` isn't persisted, so any carry
+  ties 0. The toast already said "new best!" there long before dibs existed —
+  the payout just inherits that looseness.
+- `honorary.sign` / `divvy.dock` re-pay their repeat each session, because
+  `s.collected` / `D.discovered` are session flags and the toast re-fires too.
+  Consistent with "pay the toast that already celebrates it"; worth a look.
+- A casual session measured ~20–40 dibs without trying, as designed.
 
 ### Pilot prices (beach kiosk)
 
@@ -188,9 +246,11 @@ the blob holds only names, ids and numbers:
 - `zones` — zone NAMES visited (journal progress; names are stable, coords
   are not).
 - `counters` — a WHITELIST of journal numbers (counts + bests, incl. bird
-  bingo's seen-species count/state fields once 079 wires payouts). The
-  framework snapshots whitelisted `state` fields on a slow throttle; packs
-  never touch the save directly.
+  bingo's seen species). The framework snapshots whitelisted `state` fields on
+  a slow throttle; packs never touch the save directly. 079 added `dibsBy` (the
+  label→total ledger) alongside `paidFirsts` (the once-ever payout set). A pack
+  needing a new persisted counter must extend framework `buildSnap()` AND the
+  module-scope restore list — there is no pack-side persistence.
 - `flags` — small seen-it bits (077 coach marks, first-dibs, etc.).
 
 **What never goes in:** positions, world-layout anything, rng state, session
@@ -200,13 +260,35 @@ scratch (speedMult, held item), anything a pack derives at runtime.
 
 ## 5. framework API (078 ships; later tasks consume)
 
-- `wallet.dibs` · `wallet.earnDibs(n, reason)` · `wallet.spendDibs(n, reason) -> bool`
+- `wallet.dibs` · `wallet.earnDibs(n, reason, label)` · `wallet.spendDibs(n, reason) -> bool`
   — earn pulses the chip (`+3 dibs · reason`); first-ever earn gets the big
-  toast; spend refuses (gentle shake, no toast spam) when short.
-- `wallet.pay({key, first, repeat, reason, firstReason}) -> paid` — the shared
-  payout helper 078 shipped: first time for `key` pays `first` (persisted via
+  toast; spend refuses (gentle shake, no toast spam) when short. `label` (079)
+  buckets the earn in the `state.dibsBy` ledger.
+- `wallet.pay({key, first, repeat, reason, firstReason, label, cd}) -> paid` — the
+  shared payout helper. First time for `key` pays `first` (persisted via
   `state.paidFirsts`); repeats pay `repeat`, halving (min 1) after ~10 paid
   repeats of that key per session. Activities call THIS, not earnDibs.
+  - `label` (079) — ledger bucket for the journal's biggest-earner line
+    (defaults to `key`). Short, human, lowercase: `birdwatch`, `mini golf`.
+  - `cd` (079) — min seconds between PAID REPEATS of this key; the anti-spam
+    valve. The first-ever payout is never throttled.
+  - Returns the amount paid, or **0** when throttled or when `repeat` is 0/absent
+    — which is how a once-ever beat (a zone, a collection) goes quiet forever
+    instead of trickling.
+- **The register coalesces** (079): two payouts inside 0.4 s of game time sum
+  into ONE pop and keep the LATER reason. Completion beats almost always pay on
+  the same frame as the increment that completed them (last bird + BINGO, last
+  dock + the network), and two raw pops in a frame would show the first for
+  ~0 ms. Packs need do nothing — just pay both.
+- `addSitSpot({x,z,ry,y?,r?,label?,onSit?})` — `onSit(player)` (079) fires after
+  the sit lands, for packs hanging a beat off it. Use it instead of patching the
+  returned handle's `onUse`.
+- **Journal sections may return `''`** (079) to hide their own header, which lets
+  a section register EAGERLY (holding a fixed slot in the journal's order) while
+  staying invisible until it has something to say. The `dibs` section is the
+  first user: it sits directly under `Ope!` and renders nothing until the first
+  dib is earned. Lazily-registering a section instead sorts it differently on a
+  fresh boot than on a returning one — packs register during `onWorldReady`.
 - `bag.define(item)` · `bag.add(id)` · `bag.has(id)` · `bag.count(id)` ·
   `bag.remove(id)` · `bag.equip(id)/unequip()` — items are defined by packs
   (icon, caption, onUse); the tote renders whatever's defined + owned.

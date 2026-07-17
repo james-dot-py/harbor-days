@@ -44,7 +44,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { onWorldReady, registerUpdate, addInteraction, holdItem, toast,
-         journalSection, state, getAudioCtx } from '../framework.js';
+         journalSection, state, getAudioCtx, wallet } from '../framework.js';
 import { scene, camera, toon, bmat, curveMat, glowTex, clamp, game } from '../core.js';
 import { mayor, mparts } from '../character.js';
 import { collide } from '../props.js';
@@ -147,7 +147,14 @@ function updateSigns(dt,player){
       if(dx*dx+dz*dz<2.2*2.2){
         s.collected=true; signChime();
         toast(`HONORARY ${s.name} WAY`, s.lore);
-        if(SIGNS.every(g=>g.collected)) toast('HONORARY CHICAGOAN','you know every corner now');
+        wallet.pay({key:'honorary.sign',first:5,repeat:2,reason:'found an honorary sign',label:'street signs'});
+        if(SIGNS.every(g=>g.collected)){
+          toast('HONORARY CHICAGOAN','you know every corner now');
+          // repeat:0 — a COLLECTION completes once, ever (the per-sign dib above
+          // still trickles; s.collected is session-scoped, so the set re-forms
+          // each load and a repeat here would re-pay the whole card every time).
+          wallet.pay({key:'honorary.all',first:10,repeat:0,reason:'honorary Chicagoan',label:'street signs'});
+        }
       }
     }
     // docks discovered — cheap n/total check on the same throttle
@@ -158,6 +165,10 @@ function updateSigns(dt,player){
         D.discovered=true;
         const n=DOCKS.filter(d=>d.discovered).length;
         toast('DIVVY DOCK',`${n} / ${DOCKS.length} on the network`);
+        wallet.pay({key:'divvy.dock',first:5,repeat:2,reason:'Divvy: a new dock',label:'Divvy'});
+        // repeat:0 — same law as honorary.all: the network is a collection, and
+        // D.discovered resets each load, so a repeat would re-pay it every session.
+        if(n===DOCKS.length) wallet.pay({key:'divvy.all',first:10,repeat:0,reason:'Divvy: the whole network',label:'Divvy'});
       }
     }
   }

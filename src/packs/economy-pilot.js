@@ -20,7 +20,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { onWorldReady, registerUpdate, addInteraction, makeNPC, chargeThrow,
-         camForward, holdItem, toast, bag, shop, fetchDogs } from '../framework.js';
+         camForward, holdItem, toast, bag, shop, fetchDogs, wallet } from '../framework.js';
 import { scene, toon, bmat, pip, WATER_Y } from '../core.js';
 import { coastQuery, beachH, LAND } from '../coast.js';
 import { pathSamples } from '../paths.js';
@@ -250,6 +250,9 @@ onWorldReady(player => {
         if (closed) return; closed = true; fetchWatchdog = 0;
         if (dropX !== undefined) dropTennisAt(dropX, dropZ); else dropTennisAt(tball.x, tball.z);
         if (good && !goodDogToasted) { goodDogToasted = true; toast('good dog', 'the goodest'); }
+        // pay EVERY completed fetch (the toast is once-only; pay() owns its own
+        // first-time logic + throttle). done() → the ball back at your feet.
+        if (good) wallet.pay({ key: 'fetch', first: 5, repeat: 2, reason: 'fetch: good dog', label: 'fetch', cd: 4 });
         armPickup(); tennisState = 'resting';
       };
       try {

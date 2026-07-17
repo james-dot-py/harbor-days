@@ -496,3 +496,21 @@ cut becomes a revert task.
   equip it from the tote and it sits on the grey afro through walking, jumping,
   bench-sitting and popcorn-holding, and it's still on his head next session.
   — the mayor (src/packs/economy-pilot.js, mparts.head) — task 078
+- GETTING EJECTED FROM WRIGLEY PAYS THE BEST IN THE PARK. +10 dibs — more than
+  the whole half-inning you sat through (+8), more than the ticket (+6), tied
+  with BIRD BINGO. The register reads "Wrigley: EJECTED. worth it." Comedy pays,
+  and it's the only way to need a second ticket. — Wrigley Field
+  (src/packs/wrigley-bowl.js) — task 079
+- THE FINALE IS A THING THE GAME NOTICES. Three fireworks inside four seconds
+  and the register quietly says "+6 dibs · a proper finale!" — nobody told you
+  to do it, there's no prompt, and mashing F was already its own reward. The
+  game just clocked that you were putting on a show. — anywhere
+  (src/packs/economy-payouts.js) — task 079
+- THE WHOLE RIBBON. Skate a full lap of the Maggie Daley ribbon and it pays
+  "skating: the whole ribbon". It's measured as net signed angle around the
+  loop, so carving back and forth cancels out — only actually going all the way
+  around counts. — Maggie Daley Park (src/packs/ribbon-skaters.js) — task 079
+- WANDERING IS AN INCOME. Each of the 11 zones pays +3 the first time you walk
+  into it, so the journal's "Biggest earner" on a fresh save reads "wandering".
+  The game's first economic lesson is that going and looking at things is the
+  point. — the whole map (src/packs/economy-payouts.js) — task 079

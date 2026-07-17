@@ -27,7 +27,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { bmat } from '../core.js';
-import { onWorldReady, registerUpdate, addInteraction, holdItem, toast, favors, bag } from '../framework.js';
+import { onWorldReady, registerUpdate, addInteraction, holdItem, toast, favors, bag, wallet } from '../framework.js';
 import { pourMalort, oldStyleTex } from './malort.js';   // shared swig + Old Style label (task 031)
 import { malortHooks } from './characters.js';            // set in characters.js's onWorldReady (runs earlier in import order)
 
@@ -143,7 +143,11 @@ onWorldReady(() => {
     if (f.st === 'done' && !swig.busy && swig.cool <= 0 && (duetNext || forceDuet())) {
       swig.busy = true; duetArmT = 2.2;
       pourMalort({ npc: guy, react: 'to the lake.', toastMain: 'CHICAGO HANDSHAKE', toastSub: 'split one with the Malört guy',
-        onDone() { swig.busy = false; swig.cool = 28; inter.setLabel('...one more?'); } });
+        // the dib lands on the RECOVERY beat (onDone, ~1.3 s after the toast) —
+        // the punchline of the duet, not the button press
+        onDone() { swig.busy = false; swig.cool = 28; inter.setLabel('...one more?');
+          wallet.pay({ key: 'handshake', first: 8, repeat: 2, reason: 'the Handshake: survived it',
+            firstReason: 'you survived the Handshake', label: 'the Handshake', cd: 8 }); } });
       return true;
     }
     return false;                                       // otherwise the default straight shot runs

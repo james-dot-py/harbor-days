@@ -31,7 +31,7 @@
 //  joined) = ~23.
 // =====================================================================
 import { onWorldReady, registerUpdate, addInteraction, holdItem, toast,
-         journalSection, state, getAudioCtx, registerBumpable, createChibi } from '../framework.js';
+         journalSection, state, getAudioCtx, registerBumpable, createChibi, wallet } from '../framework.js';
 import * as THREE from 'three';
 import { scene, camera, toon, bmat, clamp, lerp, lerpAngle } from '../core.js';
 import { mparts } from '../character.js';
@@ -283,8 +283,10 @@ function attemptHit(court){
     court.jState = 'outgoing'; court.windowOpen = false;
     court.mrally++;
     state.badmintonBest = Math.max(state.badmintonBest||0, court.mrally);
-    if(court.mrally===5 || court.mrally===10 || court.mrally===20 || (court.mrally>20 && court.mrally%20===0))
+    if(court.mrally===5 || court.mrally===10 || court.mrally===20 || (court.mrally>20 && court.mrally%20===0)){
       toast('nice rally!', court.mrally + ' returns in a row 🏸');    // subtle milestones 5 / 10 / 20 …
+      wallet.pay({key:'badminton', first:5, repeat:2, reason:'badminton: nice rally', label:'badminton', cd:6});
+    }
   } else {                                                           // swung too early → whiff
     mayorMiss(court);
   }

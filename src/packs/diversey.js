@@ -32,7 +32,7 @@
 import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { onWorldReady, registerUpdate, addInteraction, chargeThrow, camForward,
-         toast, journalSection, state, getAudioCtx } from '../framework.js';
+         toast, journalSection, state, getAudioCtx, wallet } from '../framework.js';
 import { scene, camera, toon, clamp, lerp, lerpAngle, pip } from '../core.js';
 import { cam } from '../input.js';
 import { mayor } from '../character.js';
@@ -168,9 +168,11 @@ onWorldReady(()=>{
     const yds=Math.round(carry);
     const isBest=carry>=state.rangeBest;
     toast(`${yds} yards`, isBest?'new best!':'nice swing');
+    if(isBest)wallet.pay({key:'range.best',first:5,repeat:2,reason:'driving range: new best',label:'driving range'});
     if(carry>state.rangeBest)state.rangeBest=carry;
     if(state.rangeBucket<=0){
       toast('bucket done!', `best ${Math.round(state.rangeBest)} yds`);
+      wallet.pay({key:'range.bucket',first:6,repeat:3,reason:'driving range: bucket done',label:'driving range'});
       state.rangeBucket=P.bucketN;
     }
     refreshRangeLabels();
@@ -245,6 +247,7 @@ onWorldReady(()=>{
     // its own par branch, so this uses the sensible `strokes<par`).
     const tier=strokes<hole.par?'birdie!':strokes===hole.par?'par':'';
     toast(`hole ${hole.id} — ${strokes} stroke${strokes===1?'':'s'}`, tier);
+    if(strokes<=hole.par)wallet.pay({key:'golf.hole',first:5,repeat:2,reason:'mini golf: par or better',label:'mini golf'});   // same predicate as a non-empty tier
     holed.add(hole.id);
     const idx=holes.indexOf(hole);
     teeInters[idx].enabled=false;                    // lock the finished tee
@@ -252,6 +255,7 @@ onWorldReady(()=>{
     else{
       const total=holes.reduce((s,h)=>s+(state.miniStrokes[h.id]||0),0);
       toast('course complete!', `${total} strokes`);
+      wallet.pay({key:'golf.course',first:8,repeat:3,reason:'mini golf: course complete',label:'mini golf'});
     }
   }
 

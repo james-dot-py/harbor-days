@@ -53,3 +53,4 @@ import './montrose-kite.js';   // FLY A KITE on Cricket Hill — hold-to-launch,
 import './montrose-point.js';   // THE MAGIC HEDGE — Montrose Point sanctuary life: birders + scopes + clustered chibi migrants + graded birdsong (task 071)
 import './favors-pilot.js';   // THE ECONOMY's pilot favor — "an Old Style for the Malört guy" (task 078)
 import './economy-pilot.js';   // THE ECONOMY's beach kiosk + pilot toys — popcorn/tennis ball/bucket hat (task 078)
+import './economy-payouts.js';   // THE ECONOMY's unowned dibs — zone discovery, the fireworks finale, the jetski (task 079)

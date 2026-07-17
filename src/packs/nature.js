@@ -23,7 +23,7 @@
 import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { onWorldReady, registerUpdate, addInteraction, chargeThrow, camForward,
-         holdItem, toast, journalSection, state, makeNPC, getAudioCtx, screenFx } from '../framework.js';
+         holdItem, toast, journalSection, state, makeNPC, getAudioCtx, screenFx, wallet } from '../framework.js';
 import { scene, camera, toon, bmat, curveMat, gmap, clamp, lerp, WATER_Y } from '../core.js';
 import { beachH } from '../coast.js';
 import { cam, keys, joy } from '../input.js';
@@ -694,12 +694,18 @@ onWorldReady(player => {
   }
   function identify(tgt) {
     if (tgt.isPlover) {
-      if (!state.birdsSeen.has('Piping Plover')) { state.birdsSeen.add('Piping Plover'); dingChime(); toast('PIPING PLOVER!', 'the rarest guys'); }
+      if (!state.birdsSeen.has('Piping Plover')) { state.birdsSeen.add('Piping Plover'); dingChime(); toast('PIPING PLOVER!', 'the rarest guys');
+        wallet.pay({ key: 'plover', first: 8, repeat: 2, reason: 'birdwatch: the rarest guy', firstReason: 'birdwatch: a piping plover!', label: 'birdwatch' }); }
       return;
     }
     if (state.birdsSeen.has(tgt.species)) return;
     state.birdsSeen.add(tgt.species); dingChime(); toast(tgt.species, 'checked off the list');
-    if (CORE.every(n => state.birdsSeen.has(n))) toast('BIRD BINGO!', 'Bill Jarvis would be proud');
+    wallet.pay({ key: 'bingo.species', first: 5, repeat: 2, reason: 'birdwatch: new friend', label: 'birdwatch' });
+    if (CORE.every(n => state.birdsSeen.has(n))) { toast('BIRD BINGO!', 'Bill Jarvis would be proud');
+      // repeat:0 — a COLLECTION completes once and can never un-complete, so the
+      // bonus is a once-ever gift. (A later non-core bird re-runs this branch;
+      // without the 0 it would re-pay the card forever.)
+      wallet.pay({ key: 'bingo.full', first: 10, repeat: 0, reason: 'birdwatch: BINGO', label: 'birdwatch' }); }
   }
   function updBinoc(dt, t, pl) {
     // fov ease (24 while raised, back to 50 otherwise)
@@ -850,6 +856,7 @@ onWorldReady(player => {
       if (u >= 1) {
         holdItem(fish.mesh); fish.mesh.position.set(0, 0.12, 0.18); fish.mesh.rotation.set(0, 0, 0.4);
         fish.phase = 'show'; fish.showT = 1.8; toast(fish.catch.label, fish.catch.flavor);
+        wallet.pay({ key: 'fish', first: 5, repeat: 2, reason: 'fishing: reeled one in', label: 'fishing' });
         if (fish.catch.legendary) screenFx.flash('#ffe9a8', 500);
       }
     } else if (P === 'show') {
@@ -909,13 +916,15 @@ onWorldReady(player => {
   function holeDone(h, strokes, holed) {
     const g = state.golf; g.strokes[h.i] = strokes;
     if (g.best[h.i] == null || strokes < g.best[h.i]) g.best[h.i] = strokes;
-    if (holed) { flagPing(); confetti(h.pin[0], h.pin[1]); toast('IN!', `hole ${h.i + 1} in ${strokes} stroke${strokes > 1 ? 's' : ''}`); }
+    if (holed) { flagPing(); confetti(h.pin[0], h.pin[1]); toast('IN!', `hole ${h.i + 1} in ${strokes} stroke${strokes > 1 ? 's' : ''}`);
+      wallet.pay({ key: 'marovitz.hole', first: 5, repeat: 2, reason: 'chip-and-putt: sank it', label: 'golf' }); }
     else toast('gimme', `hole ${h.i + 1} — picked up at ${strokes}`);
     g.roundSet.add(h.i);
     if (g.roundSet.size >= 3) {
       const total = g.strokes.reduce((a, b) => a + (b || 0), 0);
       if (g.bestRound == null || total < g.bestRound) g.bestRound = total;
       state.golfRounds = (state.golfRounds || 0) + 1; g.roundSet.clear();
+      wallet.pay({ key: 'marovitz.round', first: 8, repeat: 3, reason: 'chip-and-putt: round done', label: 'golf' });   // no toast here — the register pop IS the round's beat
     }
   }
   function resolveBall(h) {

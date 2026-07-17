@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { scene, toon, bmat, mulberry32, pointsMat } from '../core.js';
 import { drawQR, KOFI_URL } from '../qr.js';
-import { onWorldReady, registerUpdate, addInteraction, makeNPC, toast, state, getAudioCtx, screenFx } from '../framework.js';
+import { onWorldReady, registerUpdate, addInteraction, makeNPC, toast, state, getAudioCtx, screenFx, wallet } from '../framework.js';
 import { registerCell, setActiveCell, getCell, activeCell } from '../cells.js';
 import { camCtl } from '../main.js';
 import { cam } from '../input.js';
@@ -306,7 +306,7 @@ const DEST = {
     stop: 'Belmont', sub: 'the lakefront', label: 'Belmont / lakefront', name: 'This is Belmont.',
     quips: ['ope — heading back to the lake?', 'belmont harbor next — best breeze in the city',
             'the rocks are the best free seat in town'],
-    arrive: () => toast('BELMONT', 'back at the lakefront'),
+    arrive: () => { toast('BELMONT', 'back at the lakefront'); payStop(DEST.lakefront); },
   },
   wrigleyville: {
     cell: 'wrigleyville', x: SPAWN_W.x + 1.4, z: SPAWN_W.z, y: SPAWN_W.y, yaw: 2.95, lat: 3600,  // east of the canopy post row
@@ -317,6 +317,7 @@ const DEST = {
       organSting();
       if (!state.wrigleyVisited) { state.wrigleyVisited = true; toast('WRIGLEYVILLE', 'the Friendly Confines — game day'); }
       else toast('WRIGLEYVILLE', 'Addison station');
+      payStop(DEST.wrigleyville);
     },
   },
   millennium: {
@@ -328,9 +329,25 @@ const DEST = {
     arrive: () => {
       if (!state.millenniumVisited) { state.millenniumVisited = true; toast('MILLENNIUM PARK', 'downtown — the Bean is that way'); }
       else toast('MILLENNIUM PARK', 'Monroe / the park');
+      payStop(DEST.millennium);
     },
   },
 };
+
+// ---- stop payouts (task 079): the arrival toast IS the beat — the fade lifts
+// on a new neighborhood. Keyed off dest.stop (a stable id, never an index), so
+// the whole-line check below reads exactly the keys the stops paid. paidFirsts
+// persists, so riding the last stop pays the line bonus across sessions too.
+const stopKey = d => 'l.stop.' + d.stop.toLowerCase();
+function payStop(d) {
+  wallet.pay({ key: stopKey(d), first: 5, repeat: 2, reason: 'the L: ' + d.stop, label: 'the L' });
+  const firsts = state.paidFirsts || {};
+  for (const k in DEST) if (!firsts[stopKey(DEST[k])]) return;   // set still short — no line bonus
+  // repeat:0 — riding the whole line is a COLLECTION: it completes once and can
+  // never un-complete. With a repeat value this branch (reached on EVERY arrival
+  // once the set is full) would pay a standing tax-free +3 per ride forever.
+  wallet.pay({ key: 'l.all', first: 10, repeat: 0, reason: 'the L: the whole line', label: 'the L' });
+}
 
 // window-light mood: amber sodium bulbs against the dark State St tube for a
 // Monroe-bound run, warm city lights otherwise. Recolors the static per-vertex

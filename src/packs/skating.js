@@ -25,7 +25,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { onWorldReady, registerUpdate, registerBumpable, journalSection,
-         toast, getAudioCtx, state, createChibi, tintChibiLimb } from '../framework.js';
+         toast, getAudioCtx, state, createChibi, tintChibiLimb, wallet } from '../framework.js';
 import { toon, mulberry32, clamp, lerpAngle } from '../core.js';
 import { activeCell } from '../cells.js';
 import { millenniumRoot } from '../millennium/index.js';
@@ -212,8 +212,13 @@ onWorldReady(player => {
         carve.bp.frequency.setTargetAtTime(900 + speed * 90, A.actx.currentTime, 0.06);
       }
     }
+    // hop-spin: the swish IS the celebration (no toast) — 079 pays on the same
+    // delta, so the dib lands on the landing. Runs pre-cell-gate: rink OR ribbon.
     const hops = state.iceHops || 0;
-    if (hops > prevHops) hopSound();
+    if (hops > prevHops) {
+      hopSound();
+      wallet.pay({ key: 'ice.hop', first: 5, repeat: 1, reason: 'skating: landed a hop-spin', label: 'skating', cd: 3 });
+    }
     prevHops = hops;
 
     // --- longest glide (>5 m/s while on ice) ---

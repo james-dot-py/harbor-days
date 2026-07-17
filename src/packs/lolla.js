@@ -25,7 +25,7 @@
 import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { onWorldReady, registerUpdate, addInteraction, makeNPC, registerBumpable,
-         toast, journalSection, state, screenFx, getAudioCtx, createChibi, bakeChibiRig } from '../framework.js';
+         toast, journalSection, state, screenFx, getAudioCtx, createChibi, bakeChibiRig, wallet } from '../framework.js';
 import { toon, mulberry32, clamp, lerp, lerpAngle } from '../core.js';
 import { CROWD_SHIRT, CROWD_SKIN, crowdGeos, makeCrowd, stampCrowd } from '../crowd.js';
 import { mayor, mparts } from '../character.js';
@@ -320,6 +320,7 @@ function joinDance(pl) {
   pl.x = DANCE.x + Math.cos(ang) * 1.6; pl.z = DANCE.z + Math.sin(ang) * 1.6; pl.vx = 0; pl.vz = 0;
   danceInter.setLabel('bust a move'); danceInter.x = pl.x; danceInter.z = pl.z;
   if (!state.lollaJoinedOnce) { state.lollaJoinedOnce = true; toast('DANCE CIRCLE', 'no wristband needed'); }
+  wallet.pay({ key: 'lolla.dance', first: 6, repeat: 2, reason: 'Lolla: the dance circle', label: 'Lolla', cd: 10 });
 }
 function bustMove() {
   dance.moveIdx = (dance.moveIdx + 1) % 3; dance.moveT = 2.4; dance.cheerT = 2.4;
@@ -343,6 +344,31 @@ function updateDance(dt, pl) {
     if (Math.hypot(pl.x - DANCE.x, pl.z - DANCE.z) > 4.5) { leaveDance(pl); return; }
     if (dance.moveT > 0) { dance.moveT -= dt; driveMayorMove(dance.moveIdx); }
     else driveMayorIdle();
+  }
+}
+
+// =====================================================================
+//  THE TOTEMS — finding one in the sea IS the beat (task 079)
+// =====================================================================
+// No toast: the register pop is the whole celebration (pay() owns it). 5 Hz
+// scan, per-totem armed flag re-armed past 5 m (framework registerBumpable's
+// pattern), scalars only — zero per-frame allocation.
+const TOTEM_R2 = 2.5 * 2.5, TOTEM_REARM2 = 5 * 5;
+const totemArmed = BUTLER_M.totems.map(() => true);
+let totemScan = 0;
+function updateTotems(dt, pl) {
+  totemScan -= dt;
+  if (totemScan > 0) return;
+  totemScan = 0.2;
+  for (let i = 0; i < BUTLER_M.totems.length; i++) {
+    const tm = BUTLER_M.totems[i], dd = d2(pl.x, pl.z, tm[0], tm[1]);
+    if (totemArmed[i]) {
+      if (dd < TOTEM_R2) {
+        totemArmed[i] = false;
+        wallet.pay({ key: 'lolla.totem.' + tm[2], first: 5, repeat: 2,
+          reason: 'Lolla: the ' + tm[2] + ' totem', label: 'Lolla' });
+      }
+    } else if (dd > TOTEM_REARM2) totemArmed[i] = true;
   }
 }
 
@@ -606,6 +632,7 @@ onWorldReady((player) => {
     updateBand(barClock);
     updateDance(dt, pl);
     updateGator(dt, t, pl);
+    updateTotems(dt, pl);
   });
 
   // debug handle for headless verification (main session reads this)

@@ -20,7 +20,7 @@
 import * as THREE from 'three';
 import { toon, bmat, lerpAngle } from '../core.js';
 import { onWorldReady, registerUpdate, addInteraction, makeNPC,
-         toast, journalSection, state, screenFx, holdItem, getAudioCtx } from '../framework.js';
+         toast, journalSection, state, screenFx, holdItem, getAudioCtx, wallet } from '../framework.js';
 import { setActiveCell, activeCell } from '../cells.js';
 import { camCtl } from '../main.js';
 import { cam } from '../input.js';
@@ -150,9 +150,14 @@ function exitBowl(p, ejected) {
     } },
     { at: 1.45, fn: () => {
       transiting = false;
-      if (ejected) toast('EJECTED', (state.ejections || 0) >= 3
-        ? 'banned? never. persistent? yes.'
-        : "no fans on the field — box office is right there");
+      if (ejected) {
+        toast('EJECTED', (state.ejections || 0) >= 3
+          ? 'banned? never. persistent? yes.'
+          : "no fans on the field — box office is right there");
+        // comedy pays — the biggest single payout in the park (task 079)
+        wallet.pay({ key: 'wrigley.eject', first: 10, repeat: 3, reason: 'Wrigley: ejected — worth it',
+          firstReason: 'Wrigley: EJECTED. worth it.', label: 'Wrigley' });
+      }
       else toast('SEE YA AT THE CORNER', 'Clark & Addison');
     } },
   ]);
@@ -274,6 +279,7 @@ onWorldReady((player) => {
       if (state.wrigleyTicket) { toast("you've got yours", 'gates at Clark & Addison'); return; }
       grantTicket();
       toast('ONE TICKET', 'game day — enter at the Marquee Gate');
+      wallet.pay({ key: 'wrigley.ticket', first: 6, repeat: 1, reason: 'Wrigley: got a ticket', label: 'Wrigley' });
     },
   });
 

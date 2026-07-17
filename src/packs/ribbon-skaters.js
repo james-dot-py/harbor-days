@@ -11,7 +11,11 @@
 //      the curves — one hands-clasped-behind speed-skater, one spinner;
 //    * one wobbly BEGINNER hugging a rail (arms out, body wobble, an
 //      ~11 s near-fall) — the archetype the owner loves, ported from the
-//      049 rink onto the ribbon's arclength.
+//      049 rink onto the ribbon's arclength;
+//    * the FULL-LAP beat (task 079): a net-signed-angle detector that pays
+//      dibs when the mayor skates a whole circuit of the ribbon. It is the
+//      ONE state read/write this pack does beyond posture (state.onIce +
+//      wallet.pay); skating.js still owns the skates/audio/journal.
 //
 //  This GENERALIZES packs/skating.js's two state machines (looper +
 //  beginner) from ellipse / rounded-rect paths to ARCLENGTH along the
@@ -28,7 +32,7 @@
 //  every rig sits at y 0 — NOT the rink's −1.6.
 // =====================================================================
 import { onWorldReady, registerUpdate, registerBumpable,
-         createChibi, tintChibiLimb } from '../framework.js';
+         createChibi, tintChibiLimb, state, wallet } from '../framework.js';
 import { mulberry32, clamp, lerp, lerpAngle } from '../core.js';
 import { activeCell } from '../cells.js';
 import { millenniumRoot } from '../millennium/index.js';
@@ -113,9 +117,53 @@ const LOOPERS = [
 const BEG_SPD = 0.55;               // slow wall-hugging crawl (m/s)
 const BEG_LAT = -1.5;               // hugs one rail consistently (< halfW 2.7)
 
+// ---- 079 full-lap beat: the loop's centroid + bbox, filled ONCE at
+// onWorldReady (module-scope scalars — the per-frame test allocates nothing).
+// The vertex-average centroid is INTERIOR: winding about it is exactly −1 and
+// it clears the nearest segment by ~9 m (checked against the data), so one
+// honest circuit accumulates a full 2π and a wander never fakes one.
+let RB_CX = 0, RB_CZ = 0, RB_X0 = 0, RB_X1 = 0, RB_Z0 = 0, RB_Z1 = 0;
+const RB_MARGIN = 4;   // bbox slack (m) — this is what tells ribbon ice from the 049 rink's
+
 // =====================================================================
 onWorldReady(() => {
-  if (!OPEN_GRANT.ribbonIce) return;   // no ice on the ribbon → no skaters
+  if (!OPEN_GRANT.ribbonIce) return;   // no ice on the ribbon → no skaters, no lap
+
+  // ---- centroid + bbox over the 65 UNIQUE verts (U drops loop's repeated
+  // closing vertex, which would otherwise weight one point twice) ----
+  let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity, sx = 0, sz = 0;
+  for (let i = 0; i < NSEG; i++) {
+    const x = U[i][0], z = U[i][1];
+    sx += x; sz += z;
+    if (x < x0) x0 = x; if (x > x1) x1 = x;
+    if (z < z0) z0 = z; if (z > z1) z1 = z;
+  }
+  RB_CX = sx / NSEG; RB_CZ = sz / NSEG;
+  RB_X0 = x0 - RB_MARGIN; RB_X1 = x1 + RB_MARGIN;
+  RB_Z0 = z0 - RB_MARGIN; RB_Z1 = z1 + RB_MARGIN;
+
+  // ---- A FULL LAP OF THE RIBBON ----------------------------------------
+  // state.onIce is GLOBAL (the 049 rink sets it too), so the bbox is what says
+  // "this ice is the ribbon". Accumulate the NET SIGNED angle swept about the
+  // centroid: skating back and forth CANCELS, so only an actual circuit pays.
+  // Own update (not the troupe's below — that one early-outs on the far-cull).
+  let net = 0, prevA = 0, hasPrev = false;
+  registerUpdate((dt, t, pl) => {
+    if (!state.onIce || pl.x < RB_X0 || pl.x > RB_X1 || pl.z < RB_Z0 || pl.z > RB_Z1) {
+      net = 0; hasPrev = false; return;          // off the ice / off the ribbon → forget the lap
+    }
+    const a = Math.atan2(pl.z - RB_CZ, pl.x - RB_CX);
+    if (hasPrev) {
+      let d = a - prevA;                          // unwrap into (−π, π]
+      if (d > Math.PI) d -= 2 * Math.PI; else if (d <= -Math.PI) d += 2 * Math.PI;
+      net += d;
+      if (Math.abs(net) >= 2 * Math.PI) {
+        wallet.pay({ key: 'ice.loop', first: 8, repeat: 3, reason: 'skating: the whole ribbon', label: 'skating' });
+        net = 0;                                  // next lap starts clean
+      }
+    }
+    prevA = a; hasPrev = true;
+  });
 
   // ---- seven loopers (createChibi → millenniumRoot → shoes tinted → bumpable) ----
   const loopers = LOOPERS.map((cfg, i) => {

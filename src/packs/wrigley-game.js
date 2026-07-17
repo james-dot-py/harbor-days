@@ -20,7 +20,7 @@ import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { onWorldReady, registerUpdate, addInteraction, makeNPC, registerBumpable,
          toast, journalSection, state, screenFx, holdItem, getAudioCtx,
-         createChibi, bakeChibiRig } from '../framework.js';
+         createChibi, bakeChibiRig, wallet } from '../framework.js';
 import { toon, bmat, mulberry32, clamp, lerp, camera, game, hexRGB } from '../core.js';
 import { cam, keys, joy } from '../input.js';
 import { mayor, mparts } from '../character.js';
@@ -473,6 +473,7 @@ function recordHalfWatched() {
   if (seated && sittingSince <= halfStartT && game.tNow - halfStartT > 25) {
     state.halfInningsWatched = (state.halfInningsWatched || 0) + 1;
     toast('STAYED FOR THE WHOLE HALF', 'that’s a scorecard kind of day');
+    wallet.pay({ key: 'wrigley.half', first: 8, repeat: 3, reason: 'Wrigley: the whole half-inning', label: 'Wrigley' });
   }
 }
 function halfOver() {

@@ -10,7 +10,7 @@
 //  Data: SANCTUARY in data/chicago.js (place grade, deck.sits, outline).
 //  No shared rng. No per-frame allocation (contains() reuses the poly).
 // =====================================================================
-import { onWorldReady, definePlace, addSitSpot, toast } from '../framework.js';
+import { onWorldReady, definePlace, addSitSpot, toast, wallet } from '../framework.js';
 import { pip } from '../core.js';
 import * as CH from '../data/chicago.js';
 
@@ -26,6 +26,11 @@ onWorldReady(() => {
       if (!visited) { visited = true; toast('shhh — sanctuary', 'the city hushes behind you'); }
     },
   });
-  for (const s of S.deck.sits)
-    addSitSpot({ x: s.x, z: s.z, ry: s.ry, y: S.deck.h, r: 1.8, label: 'sit — watch for birds' });
+  // Deck sits. onSit fires after the framework's sit lands, so 079's dib shares
+  // the beat with its "taking a load off" — the moment you're settled, watching
+  // birds. cd:20 so hopping bench to bench doesn't ring the register.
+  for (const s of S.deck.sits) {
+    addSitSpot({ x: s.x, z: s.z, ry: s.ry, y: S.deck.h, r: 1.8, label: 'sit — watch for birds',
+      onSit: () => wallet.pay({ key: 'sanctuary.sit', first: 5, repeat: 1, reason: 'sanctuary: sat a while', label: 'sanctuary', cd: 20 }) });
+  }
 });

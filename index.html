@@ -161,8 +161,33 @@
      inte…"). It now wraps, drops walk/look to the coach marks (which teach them
      far better than a line of text), and left-aligns under the pill so it stops
      sliding under the minimap at the top-right. */
+  /* box-sizing: max-width is a CONTENT cap by default, so 50vw + the 18px side
+     padding rendered 231px wide and still slid under the minimap (measured 079:
+     right edge 243 vs minimap left 224) — the exact trap PITFALLS records from
+     077's prompt pill and a2hs card. border-box makes the cap mean what it says. */
   body.touch #hint{bottom:auto;top:calc(58px + var(--sat));left:calc(12px + var(--sal));transform:none;
-    white-space:normal;max-width:50vw;text-align:left;line-height:1.7}
+    white-space:normal;max-width:50vw;box-sizing:border-box;text-align:left;line-height:1.7}
+  /* The register pop is nowrap and anchored to the chip, so a long reason ran
+     clean under the minimap (measured 079: "+10 dibs · Wrigley: the whole
+     half-inning" → right edge 269 vs minimap left 224). Cap it to the same pill
+     column as the hint and let it WRAP rather than truncate — the reason is the
+     only text the repeat channel ever gets, so it doesn't get an ellipsis. */
+  body.touch #dibsPop{max-width:50vw;box-sizing:border-box;white-space:normal;line-height:1.35}
+  /* The dibs chip (078) also lives under the pill at top-left, so once it is
+     revealed the hint and the chip occupy the same box. 079 made that collision
+     REACHABLE — zone discovery pays within seconds of boot, while the coach hint
+     is still up for its 9 s (078's first dib came from stones, long after it had
+     gone). The transient element yields to the permanent one: drop the hint below
+     the chip (60→92) and a two-line register pop (103→143). Gated on .hasdibs so
+     a fresh boot — which shows no economy at all — keeps the hint under the pill.
+     PORTRAIT-ONLY, and the media query is load-bearing: landscape already parks
+     the hint BESIDE the pill (top 12 / left 176), clear of the chip — and since a
+     media query adds NO specificity, this .hasdibs rule (2 classes) would beat
+     that landscape rule (1 class) and strand the hint mid-screen at y152 on a
+     390px-tall display. Measured before scoping it. */
+  @media (orientation:portrait){
+    body.touch.hasdibs #hint{top:calc(152px + var(--sat))}
+  }
 
   /* ---------- idle stick ghost: where the thumb goes, at rest ----------
      Only for a player's first session, and retired for good once they have
@@ -360,7 +385,11 @@
     font-size:9px;letter-spacing:.04em;padding:1px 6px;border-radius:8px;box-shadow:0 2px 0 rgba(122,62,44,.2)}
   .tcap{margin-top:12px;padding-top:10px;border-top:1px dashed #e3d3b4;color:rgba(74,59,47,.9);font-size:13px;
     line-height:1.5;min-height:32px}
-  .tempty{color:#9c8168;font-size:14.5px;text-align:center;padding:16px 6px 8px;line-height:1.6}
+  /* grid-column: .tempty is a CHILD of the 64px-column .tgrid, so the empty state
+     was laid out in ONE 64px column and broke one word per line ("just / sand in
+     / here"). It spans the whole row — the first thing a new player sees when
+     they open an empty tote (drive-by fix, 079; 078 only ever shot it with items). */
+  .tempty{grid-column:1/-1;color:#9c8168;font-size:14.5px;text-align:center;padding:16px 6px 8px;line-height:1.6}
   .tempty span{display:block;font-size:12px;color:#b39d85;margin-top:6px}
   .skeeper{margin:-2px 0 8px;color:#9c8168;font-size:13px;font-style:italic;letter-spacing:.02em}
   .srow{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px dashed #e3d3b4}
@@ -447,6 +476,16 @@
     /* landscape has no room under the pill, so the hint sits BESIDE it: right of
        the pill (~135px), left of the minimap, above the utility row */
     body.touch #hint{top:calc(12px + var(--sat));left:calc(176px + var(--sal));max-width:52vw}
+    /* Landscape parks the utility trio in a ROW under the pill (x 14-208, y
+       60-104) — which is exactly where 078 pinned the dibs chip (top 60 / left
+       14), so the chip sat ON the 📖 button and its pop crossed the whole row
+       (all-pairs measured, 079: dibs~btnJournal, dibs~btnHelp, pop~all four).
+       It was invisible until a dib was earned; 079's zone payout earns one in
+       the first seconds, so it surfaces every session. Seat the chip as the
+       row's NEXT slot (208 + 6px gap) — "with the right-side buttons", which is
+       what ECONOMY.md asks for and what this row is in landscape. */
+    body.touch #dibs{left:calc(214px + var(--sal))}
+    body.touch #dibsPop{left:calc(214px + var(--sal))}
     body.touch #btnFire{right:calc(16px + var(--sar));bottom:calc(14px + var(--sab));width:68px;height:68px;font-size:30px}
     body.touch #btnAct{right:calc(94px + var(--sar));bottom:calc(14px + var(--sab));width:64px;height:64px;font-size:28px}
     body.touch #btnJump{right:calc(16px + var(--sar));bottom:calc(90px + var(--sab));width:52px;height:52px;font-size:23px}

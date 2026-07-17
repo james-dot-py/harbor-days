@@ -599,6 +599,28 @@ few turns to find; keep each to one line of symptom + fix.
   gesture's ORIGIN: close only when pointerdown AND click both hit the backdrop
   (framework.js initDom). Modals opened by a BUTTON's click are immune (the
   open happens on the click itself, so no second click follows).
+- A MEDIA QUERY ADDS NO SPECIFICITY, so a two-class rule outside it silently beats
+  the one-class rule inside it: `body.touch.hasdibs #hint{top:152px}` (portrait
+  intent) overrode `@media (orientation:landscape){body.touch #hint{top:12px}}` and
+  stranded the coach hint MID-SCREEN on a 390px-tall landscape phone (079, caught
+  only by measuring). Any new `body.touch.<state>` rule that sets a property an
+  orientation query also sets must live INSIDE its own orientation query — and be
+  measured in BOTH (`--mobile` and `--mobile --landscape`).
+- Two HUD elements can occupy the same box for a whole version and nobody sees it,
+  because one of them is conditionally revealed: 078 pinned the dibs chip at
+  top-left (60/14) exactly where 077 had put the touch coach hint (58/12) and, in
+  landscape, exactly on the 📖 button of the relocated utility row — invisible
+  until you'd EARNED a dib, which 078's stones payout made rare and 079's
+  zone-discovery payout made instant (first seconds of every session). Don't
+  eyeball HUD layout: dump `getBoundingClientRect` for every HUD id and run an
+  ALL-PAIRS overlap check in both orientations (079's `tmp-079-hud.json` is the
+  copyable probe). A rect sweep finds what a screenshot's translucency hides.
+- A `.tempty`-style EMPTY STATE inside a `display:grid` container is a GRID ITEM:
+  the tote's "just sand in here" sat in ONE 64px column and broke one word per
+  line, on every viewport, since 078 — the first thing a new player sees when
+  they open an empty tote. 078 only ever shot the tote WITH items. Any placeholder
+  in a grid needs `grid-column:1/-1`; and screenshot every card in its EMPTY state,
+  not just its populated one.
 - The on-screen joystick VISUAL was never once visible on a real phone until 077.
   `#stick` was `position:absolute` inside `#jzone`, but input.js assigns it raw
   `clientX/clientY` — and #jzone is anchored `bottom:0`, so its top edge sits

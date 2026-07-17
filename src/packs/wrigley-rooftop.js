@@ -14,7 +14,7 @@
 //  them); the fans ride the deck at y 9.6 like the Waveland rooftop watchers.
 // =====================================================================
 import * as THREE from 'three';
-import { onWorldReady, addSitSpot, makeNPC, toast, state } from '../framework.js';
+import { onWorldReady, addSitSpot, makeNPC, toast, state, wallet } from '../framework.js';
 import { toon } from '../core.js';
 import { ROOFTOPS_W } from '../data/wrigleyville.js';
 
@@ -47,6 +47,9 @@ onWorldReady(() => {
       sit(pl);
       state.rooftopSits = (state.rooftopSits || 0) + 1;
       if (!greeted) { greeted = true; toast('rooftop bleachers', 'the best seat that’s not in the stadium'); }
+      // every settle-in pays (pay() owns its own first-time logic); cd 20 so
+      // hopping row to row isn't a faucet
+      wallet.pay({ key: 'rooftop', first: 6, repeat: 2, reason: 'rooftop: best seat outside', label: 'rooftop', cd: 20 });
     };
   }
 

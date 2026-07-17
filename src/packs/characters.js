@@ -35,7 +35,7 @@
 //  all regular meshes, frustum-culled, so zero GLOBAL cost (only in his view).
 // =====================================================================
 import * as THREE from 'three';
-import { onWorldReady, registerUpdate, makeNPC, getAudioCtx, addInteraction } from '../framework.js';
+import { onWorldReady, registerUpdate, makeNPC, getAudioCtx, addInteraction, wallet } from '../framework.js';
 import { scene, toon, bmat, clamp } from '../core.js';
 import { coastQuery, tierAt, beachH } from '../coast.js';
 import { pourMalort, oldStyleTex } from './malort.js';   // shared Malört swig + Old Style label (task 031)
@@ -125,6 +125,8 @@ onWorldReady(() => {
       pourMalort({npc:guy, react:'builds character, told ya',
         toastMain:'BURNT BAND-AID', toastSub:"Jeppson's Malört",
         onDone:()=>{ swig.busy=false; swig.cool=28; guyInter.setLabel('...one more?');
+          // 079: pay on the swig's punchline (the recovery beat), not the press
+          wallet.pay({key:'malort',first:5,repeat:2,reason:'Malört: survived it',label:'Malört',cd:8});
           if(malortHooks.onSwigDone) malortHooks.onSwigDone(); }});   // task 078: the first shared shot earns the errand
     }});
     // task 078: publish the guy / his interaction / swig state for favors-pilot.js
