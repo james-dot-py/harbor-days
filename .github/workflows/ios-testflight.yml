@@ -1,0 +1,91 @@
+# Ope! iOS → TestFlight (task 083).
+#
+# MANUAL dispatch only: the App Store rail is deliberately gated on a human
+# click (and on the owner's Apple Developer enrollment + the ASC_* repo secrets
+# being present). It never runs on push — the web deploy (deploy.yml) is wholly
+# independent and unaffected.
+#
+# Secrets consumed (set by the owner/supervisor 2026-07-16):
+#   ASC_KEY_ID          App Store Connect API key id
+#   ASC_ISSUER_ID       App Store Connect issuer id
+#   ASC_PRIVATE_KEY_B64 the .p8 private key, base64-encoded (decoded below)
+#
+# Prerequisite (owner-only, one time): the App Store Connect app record for
+# bundle id com.playope.ope must exist. Create it in App Store Connect, or run
+# the `create_app` fastlane lane once (see APPSTORE.md).
+name: iOS TestFlight
+
+on:
+  workflow_dispatch:
+    inputs:
+      notes:
+        description: "Build notes (for your own record; shown in the run summary)"
+        required: false
+        default: "Ope! internal TestFlight build"
+
+concurrency:
+  group: ios-testflight
+  cancel-in-progress: false
+
+jobs:
+  testflight:
+    runs-on: macos-14
+    timeout-minutes: 45
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show build notes
+        run: echo "Notes: ${{ github.event.inputs.notes }}" >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Select the latest stable Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Build the single-file game (dist/index.html)
+        run: npm run build
+
+      - name: Sync Capacitor iOS (bundles the build, writes native config, installs pods)
+        run: npx cap sync ios
+
+      - name: Regenerate the app icon + splash from source art
+        run: node tools/cap-assets.mjs
+
+      - name: Install CocoaPods (belt-and-suspenders; cap sync already runs it)
+        working-directory: ios/App
+        run: pod install
+
+      - name: Set up Ruby + fastlane
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+
+      - name: Decode the App Store Connect API key
+        env:
+          ASC_PRIVATE_KEY_B64: ${{ secrets.ASC_PRIVATE_KEY_B64 }}
+        run: |
+          # python3 is preinstalled on macOS runners; b64decode discards any
+          # line-wrap whitespace, so it works whether or not the secret is wrapped
+          # (and avoids BSD-vs-GNU `base64 --decode`/`-D` flag differences).
+          python3 -c "import base64,os; open(os.path.join(os.environ['RUNNER_TEMP'],'AuthKey.p8'),'wb').write(base64.b64decode(os.environ['ASC_PRIVATE_KEY_B64']))"
+          echo "ASC_KEY_PATH=$RUNNER_TEMP/AuthKey.p8" >> "$GITHUB_ENV"
+
+      - name: Build and upload to TestFlight
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: bundle exec fastlane ios beta
+
+      - name: Remove the decoded API key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/AuthKey.p8"

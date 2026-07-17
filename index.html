@@ -7,6 +7,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Ope! — north side, chicago</title>
 
+<!-- ---- native App Store build detection (task 083) -------------------------
+     The Capacitor iOS runtime injects window.Capacitor BEFORE any page script,
+     so this runs pre-paint: the .native class is on <html> before the Ko-fi
+     links in <body> ever render (no flash). Apple 3.1.1 forbids external
+     donation links in a native app; the web/PWA build has no window.Capacitor,
+     this is a no-op there, and the desktop/PWA DOM stays pixel-identical. -->
+<script>
+  try { if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) document.documentElement.classList.add('native'); } catch (e) {}
+</script>
+
 <!-- ---- install to the home screen (task 077) ------------------------------
      The manifest / icons / sw are NOT part of the single-file build: `npm run
      build` still emits exactly one shareable dist/index.html, and the deploy
@@ -79,6 +89,10 @@
     text-decoration:none;border-bottom:1px dotted #d8b48a;padding-bottom:1px;transition:color .15s ease}
   .card .kofilink:hover{color:#e0766a}
   .card .kofilink .kh{color:#e0766a}
+  /* App Store build (task 083): no external-donation surfaces (Apple 3.1.1).
+     Set on <html> pre-paint by the native-detection script above — hides the
+     title-card link AND the ♥ HUD button before either paints. Web/PWA keep them. */
+  html.native .kofilink, html.native #btnKofi{display:none !important}
   /* soft warm vignette over the 3D view (under all HUD) */
   #vig{position:fixed;inset:0;z-index:10;pointer-events:none;
     background:radial-gradient(130% 105% at 50% 42%, rgba(0,0,0,0) 58%, rgba(84,44,58,.16) 82%, rgba(60,28,44,.32) 100%);}

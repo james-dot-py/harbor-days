@@ -1,0 +1,72 @@
+# fastlane — Ope! iOS → TestFlight (task 083)
+#
+# Auth is ENTIRELY via the App Store Connect API key (repo secrets ASC_KEY_ID /
+# ASC_ISSUER_ID / ASC_PRIVATE_KEY_B64, decoded to a .p8 by the workflow). No
+# Apple ID password, no 2FA, and no `match` repo: the key both SIGNS the build
+# (cloud-managed distribution certificate via automatic signing +
+# `-allowProvisioningUpdates`, so Apple manages the cert — nothing to store) and
+# UPLOADS to TestFlight. See APPSTORE.md for the full runbook and the review-risk
+# register.
+
+default_platform(:ios)
+
+# Load the App Store Connect API key. The workflow base64-decodes
+# ASC_PRIVATE_KEY_B64 to a file and passes its path in ASC_KEY_PATH.
+def asc_key
+  app_store_connect_api_key(
+    key_id: ENV.fetch("ASC_KEY_ID"),
+    issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+    key_filepath: ENV.fetch("ASC_KEY_PATH"),
+    duration: 1200,
+    in_house: false
+  )
+end
+
+platform :ios do
+  desc "Build the Capacitor iOS app and upload it to TestFlight"
+  lane :beta do
+    key = asc_key
+
+    # A unique, monotonic build number so App Store Connect always accepts the
+    # upload. Set at archive time via CURRENT_PROJECT_VERSION (Info.plist's
+    # CFBundleVersion resolves to it) — no agvtool, no working-tree churn.
+    build_number = ENV.fetch("BUILD_NUMBER", Time.now.strftime("%Y%m%d%H%M"))
+
+    build_app(
+      workspace: "ios/App/App.xcworkspace",
+      scheme: "App",
+      configuration: "Release",
+      export_method: "app-store",
+      # Gym forwards the ASC key to xcodebuild for -allowProvisioningUpdates, so
+      # Apple creates/uses a cloud distribution certificate and the app-store
+      # provisioning profile with zero local .p12 or match repo.
+      xcargs: "-allowProvisioningUpdates CURRENT_PROJECT_VERSION=#{build_number}",
+      output_directory: "build",
+      output_name: "Ope.ipa",
+      clean: true
+    )
+
+    upload_to_testflight(
+      api_key: key,
+      skip_waiting_for_build_processing: true,
+      distribute_external: false
+    )
+  end
+
+  desc "One-time: create the App Store Connect app record (bundle id com.playope.ope)"
+  lane :create_app do
+    # `produce` creates the app record via the API key if it does not exist yet,
+    # and no-ops if it does. The key must have the App Manager role. This is the
+    # single owner-only prerequisite that this lane can automate — see APPSTORE.md.
+    produce(
+      api_key: asc_key,
+      app_identifier: "com.playope.ope",
+      app_name: "Ope!",
+      language: "English",
+      app_version: "1.0",
+      sku: "ope-north-side-chicago",
+      skip_devcenter: false,
+      skip_itc: false
+    )
+  end
+end

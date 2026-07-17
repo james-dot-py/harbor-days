@@ -1,0 +1,9 @@
+# The App Store Connect app identifier. Keep this in lockstep with
+# capacitor.config.json (appId) and the Xcode project (PRODUCT_BUNDLE_IDENTIFIER);
+# APPSTORE.md tracks all three if the owner corrects the bundle id.
+app_identifier("com.playope.ope")
+
+# No apple_id / team_id / itc_team_id here on purpose: every fastlane action
+# authenticates with the App Store Connect API key (ASC_* secrets, wired in the
+# Fastfile), which carries the team context. That keeps CI free of Apple ID
+# passwords and 2FA.

@@ -552,3 +552,8 @@ cut becomes a revert task.
   toast queue instead of surfacing 15 seconds later behind a run of incidental
   dings — the "three bikes home safe" hits the instant you turn it in.
   — everywhere favors turn in (src/framework.js) — task 082
+- OPE! ON THE HOME SCREEN. The App Store rail lands: the title-card wordmark
+  becomes the app icon and a peach launch splash (with a dusk-lit dark variant),
+  so the game blooms "Ope!" on your home screen and again as it opens — a real,
+  fully-offline game in a native frame. — iOS app icon + splash
+  (assets/, ios/App/App/Assets.xcassets) — task 083

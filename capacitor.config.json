@@ -1,0 +1,11 @@
+{
+  "appId": "com.playope.ope",
+  "appName": "Ope!",
+  "webDir": "dist",
+  "backgroundColor": "#ffb98a",
+  "ios": {
+    "contentInset": "never",
+    "scrollEnabled": false,
+    "backgroundColor": "#ffb98a"
+  }
+}

@@ -5,12 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "cap:sync": "cap sync ios",
+    "cap:assets": "capacitor-assets generate --ios --iconBackgroundColor '#ffb98a' --iconBackgroundColorDark '#ffb98a' --splashBackgroundColor '#ffb98a' --splashBackgroundColorDark '#ffb98a'"
   },
   "dependencies": {
     "three": "0.128.0"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.6.8",
+    "@capacitor/core": "^7.6.8",
+    "@capacitor/ios": "^7.6.8",
     "jsqr": "^1.4.0",
     "pixelmatch": "^7.2.0",
     "puppeteer": "^25.3.0",

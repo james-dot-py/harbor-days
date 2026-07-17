@@ -15,6 +15,7 @@ import { onWorldReady } from '../framework.js';
 import { wrigleyRoot } from '../wrigley/index.js';
 import { ROOFTOPS_W } from '../data/wrigleyville.js';
 import { drawQR, KOFI_URL } from '../qr.js';
+import { isNative } from '../platform.js';
 
 const STEEL = 0x54565e, DARK = 0x2a2622;
 
@@ -54,6 +55,10 @@ function boardTex() {
 }
 
 onWorldReady(() => {
+  // App Store build (guideline 3.1.1): suppress the scannable Ko-fi donation QR.
+  // No rng runs in this pack (fixed placement), so skipping it is determinism-safe
+  // and shifts nothing in the world layout. Web / PWA keep the rooftop board.
+  if (isNative()) return;
   const b = ROOFTOPS_W.waveland[0];                        // west brownstone (no EAMUS sign)
   const cx = (b.x0 + b.x1) / 2;                             // -221.5
   const frontZ = b.z1;                                     // -574 (south/park-facing edge)
@@ -63,6 +68,7 @@ onWorldReady(() => {
   // board group: tilt the whole panel to face down toward the street-level
   // viewer (reduces QR keystone; realistic for an angled ad board)
   const grp = new THREE.Group();
+  grp.name = 'kofiBoard';                                   // tagged so the native-suppression check can assert its absence
   grp.position.set(cx, cy, frontZ + 0.3);
   grp.rotation.x = tilt;
   // physical backing panel (dark steel) — also hides the plane's back face

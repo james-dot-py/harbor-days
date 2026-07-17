@@ -11,3 +11,15 @@ autopilot/session-state.json
 refs/_anchor-cache.json
 autopilot/result.json
 autopilot/usage-governor.json
+
+# iOS native build + signing artifacts (task 083). The ios/ project itself IS
+# committed; these are the per-build / secret outputs that must never be.
+/build/
+*.ipa
+*.p8
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output/
+fastlane/README.md
+.bundle/
+vendor/bundle/
