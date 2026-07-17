@@ -286,6 +286,96 @@ function saveFeedback(text) {
   return { ok: true, msg: 'saved ' + name + ' — the next task start picks it up' };
 }
 
+/* ---- visitors card: GoatCounter (armed but inert until GOATCOUNTER_TOKEN) ---
+   Read the token from .env on every request (cheap, like ntfyTopic) so arming
+   needs NO restart. One in-memory cache (TTL 5 min, last good data kept on
+   failure) so the external API is only hit on the 5-min cache cycle, never on
+   the 2.5s /state poll. All parsing is defensive — a fetch failure must never
+   crash the panel or leak the token. */
+function goatcounterToken() { try { const m = readFileSync(join(HERE, '.env'), 'utf8').match(/^GOATCOUNTER_TOKEN=(.+)$/m); return m ? m[1].trim() : ''; } catch { return ''; } }
+
+function last14Chicago() {
+  // last 14 days inclusive of today, in America/Chicago wall time (digest trick)
+  const pad = n => String(n).padStart(2, '0');
+  const chiNow = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+  const days = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(chiNow);
+    d.setDate(d.getDate() - i);
+    days.push({
+      date: d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()),
+      label: (d.getMonth() + 1) + '/' + d.getDate(),
+      visits: 0, plays: 0,
+    });
+  }
+  return days;
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function fetchVisitors(token, days) {
+  const headers = { Authorization: 'Bearer ' + token };
+  const oldest = days[0].date, today = days[days.length - 1].date;
+  const byDate = {}; for (const d of days) byDate[d.date] = d;
+  let res;
+  try { res = await fetch('https://playope.goatcounter.com/api/v0/stats/hits?start=' + oldest + '&end=' + today + '&limit=100', { headers }); }
+  catch { return { error: 'GoatCounter fetch failed', days }; }
+  if (!res.ok) return { error: 'GoatCounter API ' + res.status, days };       // never leak token/body
+  let data; try { data = await res.json(); } catch { return { error: 'GoatCounter API bad response', days }; }
+  const hits = Array.isArray(data.hits) ? data.hits : [];
+  const isPlay = h => h && h.event && String(h.path || '').replace(/^\//, '') === 'lets-walk';
+  // Primary: each hit carries a per-day stats array. Sum daily (fall back to hourly).
+  if (hits.length && hits.some(h => Array.isArray(h.stats))) {
+    for (const h of hits) {
+      if (!Array.isArray(h.stats)) continue;
+      const play = isPlay(h), visit = !h.event;
+      if (!play && !visit) continue;
+      for (const s of h.stats) {
+        if (!s || !byDate[s.day]) continue;
+        const n = typeof s.daily === 'number' ? s.daily
+          : (Array.isArray(s.hourly) ? s.hourly.reduce((a, b) => a + (typeof b === 'number' ? b : 0), 0) : 0);
+        if (visit) byDate[s.day].visits += n;
+        if (play) byDate[s.day].plays += n;
+      }
+    }
+    return { error: null, days };
+  }
+  if (hits.length) {
+    // Response has hits but no stats arrays (older API shape) — one call per day.
+    for (const d of days) {
+      let r; try { r = await fetch('https://playope.goatcounter.com/api/v0/stats/hits?start=' + d.date + '&end=' + d.date, { headers }); }
+      catch { await sleep(100); continue; }
+      if (!r.ok) { await sleep(100); continue; }
+      let dd; try { dd = await r.json(); } catch { await sleep(100); continue; }
+      const hh = Array.isArray(dd.hits) ? dd.hits : [];
+      const sum = f => hh.filter(f).reduce((s, h) => s + (h.count ?? h.count_unique ?? 0), 0);
+      d.visits = sum(h => h && !h.event);
+      d.plays = sum(isPlay);
+      await sleep(100);
+    }
+    return { error: null, days };
+  }
+  return { error: null, days };   // no hits in range → genuine zeros
+}
+let _visCache = null;   // { at:ms, data }
+async function visitorsData() {
+  const token = goatcounterToken();
+  const days = last14Chicago();
+  if (!token) return { configured: false, error: null, fetchedAt: null, days };
+  const now = Date.now();
+  if (_visCache && _visCache.data && (now - _visCache.at) < 300000) return _visCache.data;
+  let out;
+  try { out = await fetchVisitors(token, days); } catch { out = { error: 'GoatCounter fetch failed', days }; }
+  if (out.error) {
+    // keep last good data on failure — surface the error alongside stale days
+    if (_visCache && _visCache.data && _visCache.data.days) {
+      return { configured: true, error: out.error, fetchedAt: _visCache.data.fetchedAt, days: _visCache.data.days };
+    }
+    return { configured: true, error: out.error, fetchedAt: null, days };
+  }
+  const data = { configured: true, error: null, fetchedAt: new Date().toISOString(), days: out.days };
+  _visCache = { at: now, data };
+  return data;
+}
+
 const FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23fdf6e6'/%3E%3Ccircle cx='16' cy='16' r='7.4' fill='none' stroke='%23e0766a' stroke-width='4'/%3E%3Cpath d='M22 21 l3.2 3.2' stroke='%234fa3c7' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E";
 
 const HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8">
@@ -453,6 +543,11 @@ const HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8">
         <div id="greensChart"></div>
       </div>
       <div class="card">
+        <h2>🚶 Visitors</h2>
+        <p class="cap">visits to playope.com per day · GoatCounter</p>
+        <div id="visitorsBox"></div>
+      </div>
+      <div class="card">
         <h2>⏱ Today’s sessions</h2>
         <p class="cap">each strip = one build session · x = time of day · width = minutes worked</p>
         <div class="legend">
@@ -495,7 +590,7 @@ const HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8">
     </div>
   </div>
 </div>
-<footer>notifications: <a id="ntfy" target="_blank" rel="noopener"></a> · pause is graceful (STOP sentinel, honored between iterations) · feedback lands in autopilot/feedback/ and is committed with the next iteration</footer>
+<footer>notifications: <a id="ntfy" target="_blank" rel="noopener"></a> · visitors: <a href="https://playope.goatcounter.com" target="_blank" rel="noopener">playope.goatcounter.com</a> · pause is graceful (STOP sentinel, honored between iterations) · feedback lands in autopilot/feedback/ and is committed with the next iteration</footer>
 <script>
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>]/g,c=>c==='&'?'&amp;':c==='<'?'&lt;':'&gt;');
@@ -559,6 +654,36 @@ function drawSessions(sess){
     p.push('</g>');
   });
   p.push('</svg>');return p.join('');
+}
+
+function drawVisitorsChart(days){
+  if(!days||!days.length)return '<div class="empty">no visitor data yet</div>';
+  const W=640,H=196,pt=26,pb=24,pl=10,pr=10,plotH=H-pt-pb,base=pt+plotH;
+  const max=Math.max(1,...days.map(d=>Math.max(d.visits||0,d.plays||0)));
+  const step=(W-pl-pr)/days.length,gw=Math.min(46,step*0.62),bw=gw*0.43,gap=gw-bw*2;
+  const p=['<svg viewBox="0 0 '+W+' '+H+'" width="100%" preserveAspectRatio="xMidYMid meet" font-family="inherit">'];
+  p.push('<line x1="'+pl+'" y1="'+base+'" x2="'+(W-pr)+'" y2="'+base+'" stroke="rgba(122,62,44,.20)" stroke-width="1"/>');
+  days.forEach((d,i)=>{
+    const gx=pl+i*step+(step-gw)/2,vx=gx,px=gx+bw+gap,vv=d.visits||0,pv=d.plays||0;
+    const vh=vv/max*plotH,vy=base-vh,ph=pv/max*plotH,py=base-ph,today=i===days.length-1;
+    if(vh>0.6)p.push('<path d="'+topRect(vx,vy,bw,vh,4)+'" fill="#4fa3c7"'+(today?' stroke="#4a3b2f" stroke-width="2"':'')+'><title>'+esc(d.date)+': '+vv+' visitor'+(vv===1?'':'s')+'</title></path>');
+    if(ph>0.6)p.push('<path d="'+topRect(px,py,bw,ph,4)+'" fill="#e0766a"><title>'+esc(d.date)+": "+pv+" pressed let's walk</title></path>');
+    p.push('<text x="'+(vx+bw/2)+'" y="'+(vy-6)+'" text-anchor="middle" font-size="11" font-weight="700" fill="'+(vv?'#4a3b2f':'#c2ad93')+'">'+vv+'</text>');
+    p.push('<text x="'+(gx+gw/2)+'" y="'+(base+15)+'" text-anchor="middle" font-size="10.5" fill="#9c8168"'+(today?' font-weight="700"':'')+'>'+esc(d.label)+'</text>');
+  });
+  p.push('</svg>');return p.join('');
+}
+function renderVisitors(v){
+  if(!v)return '<div class="empty">loading…</div>';
+  if(!v.configured)return '<div class="empty">add <b>GOATCOUNTER_TOKEN</b> to autopilot&#92;.env to light this up — create a read-only token at playope.goatcounter.com → Settings → API tokens (‘Read statistics’ permission). Same token arms the daily 8am visitor digest.</div>';
+  const days=v.days||[],today=days[days.length-1]||{},yest=days[days.length-2]||{};
+  const total=days.reduce((s,d)=>s+(d.visits||0),0),hasData=days.some(d=>(d.visits||0)||(d.plays||0));
+  let h='';
+  if(v.error)h+='<div class="empty">'+esc(v.error)+(hasData?' · showing last good data':'')+'</div>';
+  h+='<div class="govnums" style="margin-bottom:8px"><b>'+(today.visits||0)+'</b> today · '+(yest.visits||0)+' yesterday · <b>'+total+'</b> visits over 14 days · <b>'+(today.plays||0)+"</b> pressed let's walk today</div>";
+  h+='<div class="legend"><span><i style="background:#4fa3c7"></i>visitors</span><span><i style="background:#e0766a"></i>pressed let’s walk</span></div>';
+  h+=drawVisitorsChart(days);
+  return h;
 }
 
 async function refresh(){
@@ -638,6 +763,8 @@ $('start').onclick=async()=>{$('ctlmsg').textContent=(await post('/start')).msg;
 $('pauseBtn').onclick=async()=>{$('ctlmsg').textContent=(await post('/pause')).msg;refresh()};
 $('sendFb').onclick=async()=>{const r=await post('/feedback',{text:$('fb').value});$('fbmsg').textContent=r.msg;if(r.ok)$('fb').value='';refresh()};
 refresh();setInterval(refresh,2500);
+async function refreshVisitors(){let v;try{v=await (await fetch('/visitors')).json()}catch(e){return}paint('visitorsBox',renderVisitors(v))}
+refreshVisitors();setInterval(refreshVisitors,300000);
 </script></body></html>`;
 
 function body(req) { return new Promise(res => { let b = ''; req.on('data', d => b += d).on('end', () => { try { res(JSON.parse(b || '{}')) } catch { res({}) } }); }); }
@@ -646,6 +773,7 @@ const server = http.createServer(async (req, res) => {
   const json = o => { res.writeHead(200, { 'content-type': 'application/json' }); res.end(JSON.stringify(o)); };
   if (req.method === 'GET' && req.url === '/') { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); res.end(HTML); }
   else if (req.method === 'GET' && req.url === '/state') json(state());
+  else if (req.method === 'GET' && req.url === '/visitors') json(await visitorsData());
   else if (req.method === 'POST' && req.url === '/start') json(startLoop((await body(req)).dry));
   else if (req.method === 'POST' && req.url === '/pause') json(pauseLoop());
   else if (req.method === 'POST' && req.url === '/feedback') json(saveFeedback((await body(req)).text));
