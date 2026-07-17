@@ -596,6 +596,38 @@
   html.uiscaled .setlabel{font-size:calc(14px * var(--uiscale,1))}
   html.uiscaled .tcap,html.uiscaled .srow .sinfo b{font-size:calc(14px * var(--uiscale,1))}
 
+  /* ---------- the city map card + compass breadcrumb (task 086) ----------
+     The card: a full-screen stylized city map (canvas, drawn by
+     src/packs/citymap.js from the SAME data the minimaps use). Cozy, not
+     modal — the world keeps running behind it. Opened by tapping the minimap
+     or M on desktop. The chevron (#crumb): pointer-events:none THROUGHOUT —
+     it drifts along the screen edge and must never eat a touch (the 077
+     zone-arbitration law: nothing tappable may sit over the stick). */
+  #citymap{position:fixed;inset:0;z-index:28;display:none;align-items:center;justify-content:center;
+    background:rgba(74,59,47,.42)}
+  #citymap.show{display:flex}
+  .mapcard{position:relative;background:var(--cream);border-radius:24px;padding:12px 16px 16px;box-sizing:border-box;
+    box-shadow:0 12px 0 rgba(122,62,44,.28),0 26px 54px rgba(122,62,44,.25)}
+  .cmtitle{margin:2px 0 0;color:var(--ink);font-size:19px;letter-spacing:.16em;text-align:center;text-shadow:0 2px 0 #f3d9a7}
+  #cmSub{margin:3px 0 8px;color:#9c8168;font-size:11.5px;letter-spacing:.06em;text-align:center;min-height:14px}
+  #cmc{display:block;width:min(88vw,calc((86vh - 118px)*0.72));aspect-ratio:18/25;height:auto;border-radius:14px;cursor:pointer}
+  #cmClose{position:absolute;top:10px;right:12px;width:34px;height:34px;border:none;border-radius:50%;cursor:pointer;z-index:1;
+    background:#e0766a;color:#fff;font-size:19px;line-height:1;box-shadow:0 3px 0 rgba(122,62,44,.3);padding:0}
+  body.touch #cmClose{width:44px;height:44px;font-size:21px}
+  /* the minimap is now a door to the card */
+  #mmc{cursor:pointer}
+  #crumb{position:fixed;left:0;top:0;z-index:19;display:none;pointer-events:none;flex-direction:column;align-items:center;gap:4px;
+    transform:translate(-50%,-50%);opacity:.92;transition:opacity .45s ease}
+  #crumb.on{display:flex}
+  #crumb.faceon{opacity:.34}
+  #crumbBadge{width:44px;height:44px;border-radius:50%;background:rgba(253,246,230,.92);display:flex;align-items:center;justify-content:center;
+    box-shadow:0 3px 0 rgba(122,62,44,.18),0 0 0 5px rgba(255,255,255,.10)}
+  #crumbBadge svg{display:block}
+  #crumbLab{display:flex;flex-direction:column;align-items:center;gap:1px;background:rgba(253,246,230,.92);border-radius:12px;
+    padding:4px 10px;box-shadow:0 3px 0 rgba(122,62,44,.16);text-align:center;max-width:200px}
+  #crumbLab b{color:var(--ink);font-size:12px;letter-spacing:.04em;white-space:nowrap}
+  #crumbSub{color:#c07a4a;font-size:10.5px;letter-spacing:.03em;white-space:nowrap}
+
   /* Landscape gear placement — the top-left utility row's slot after 🧺 (214),
      with the dibs chip at 268. This MUST come AFTER the base `body.touch
      #btnSettings` (portrait: right/434) above: a media query adds NO specificity,
@@ -643,6 +675,20 @@
 <a id="btnKofi" href="https://ko-fi.com/jimbobuildsope" target="_blank" rel="noopener" aria-label="Support development on Ko-fi" title="Support development">&hearts;</a>
 <button id="btnSettings" aria-label="Settings" title="Settings">&#9881;&#65039;</button>
 <div id="ctl"><div class="ctlcard"><button id="ctlClose">&times;</button><h1>CONTROLS</h1><div id="ctlBody"></div></div></div>
+
+<!-- the city map card (task 086): the whole world on one screen — the
+     lakefront strip + the hard cells as connected insets, threaded by the
+     Red Line. Drawn from the same data the minimaps use (src/packs/citymap.js). -->
+<div id="citymap"><div class="mapcard"><button id="cmClose" aria-label="close the map">&times;</button>
+  <h1 class="cmtitle">the city</h1>
+  <div id="cmSub">tap a landmark &mdash; a soft compass walks you there</div>
+  <canvas id="cmc" width="720" height="1000"></canvas>
+</div></div>
+
+<!-- the compass breadcrumb (task 086): a soft chevron at the screen edge +
+     name/distance. Never a tap target (pointer-events:none). -->
+<div id="crumb"><div id="crumbBadge"><svg id="crumbRot" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 2.6 L19.4 17.4 L12 13.6 L4.6 17.4 Z" fill="#e0766a"/></svg></div>
+  <div id="crumbLab"><b id="crumbName"></b><span id="crumbSub"></span></div></div>
 
 <!-- settings card (task 085): audio · camera · accessibility · low-power. Cozy,
      not modal — the world keeps running behind it. All controls wired + persisted

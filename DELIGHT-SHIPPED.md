@@ -563,3 +563,16 @@ cut becomes a revert task.
   mole, the red-capped entrance light on its terraced tip, open lake beyond.
   The compression's thesis as a place to rest. — bay headland (208,-660) —
   task 084
+- THE CITY MAP. Tap the minimap (or M) and the whole world opens on one cream
+  card: the lakefront strip at its true shape, Wrigleyville and Millennium Park
+  as night-lit insets, and the Red Line drawn between them in the transit-map
+  register — white-cased CTA red, stop discs, the dotted State St express, a
+  Sheridan pass-through tick, and a little Chicago-flag flourish in the gutter.
+  One screen that says "look how much city there is now." — the map card (M /
+  minimap tap) — task 086
+- THE COMPASS THAT KNOWS THE L. Tap any landmark on the map and a soft cream
+  chevron rides the screen edge with honest meters ticking down — and if your
+  heart is set on the Bean from the Belmont lawn, it points you to the Red Line
+  board first with a tiny train glyph, rides quiet through the tunnel, and
+  greets you on the far platform already pointing at the kettle. It points; it
+  never drags. — the breadcrumb chevron — task 086

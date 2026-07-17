@@ -81,13 +81,13 @@ function snapshot() {
 // ------------------------------ the card -------------------------------
 function isOpen() { const c = $('settings'); return !!(c && c.classList.contains('show')); }
 function anyCardOpen() {
-  for (const id of ['journal', 'ctl', 'tote', 'shop']) { const e = $(id); if (e && e.classList.contains('show')) return true; }
+  for (const id of ['journal', 'ctl', 'tote', 'shop', 'citymap']) { const e = $(id); if (e && e.classList.contains('show')) return true; }
   return false;
 }
 export function openSettings() {
   const card = $('settings'); if (!card) return;
   // one card at a time — hide the sibling modals (they hide us on their open too)
-  for (const id of ['journal', 'ctl', 'tote', 'shop']) { const e = $(id); if (e) e.classList.remove('show'); }
+  for (const id of ['journal', 'ctl', 'tote', 'shop', 'citymap']) { const e = $(id); if (e) e.classList.remove('show'); }
   syncControls();
   card.classList.add('show');
 }

@@ -9,49 +9,62 @@ export const mm={cv:$('mmc'),ctx:null,base:null,pings:[],cellBase:null,cellB:nul
 // cells.js swaps the base canvas + bounds per active cell (null = lakefront)
 export function mmSetCell(base,bounds){mm.cellBase=base;mm.cellB=bounds}
 export function worldToMap(x,z){const M=mm.cellB||CH.MAP;return[(x-M.x0)/M.w*M.cw,(z-M.z0)/M.h*M.ch]}
-export function mmInit(){
-  mm.ctx=mm.cv.getContext('2d');
-  const b=document.createElement('canvas');b.width=CH.MAP.cw;b.height=CH.MAP.ch;
-  const g=b.getContext('2d');
-  g.fillStyle='#2f9fb1';g.fillRect(0,0,CH.MAP.cw,CH.MAP.ch);
+// drawLakefrontBase(g, M, opts) — the lakefront map painting, parameterized
+// over the world→canvas window M ({x0,z0,w,h,cw,ch}) so BOTH the HUD minimap
+// (M = CH.MAP, byte-identical to the pre-086 inline version) and the city-map
+// card (task 086 — a cropped window at ~2x resolution) render from the SAME
+// data. Stroke/dot sizes scale by px-per-unit relative to the HUD map, so
+// shapes keep their proportions at any scale. opts.dots:false skips the
+// MAP_LANDMARKS dots (the card draws its own labelled CITY_POI layer instead).
+export function drawLakefrontBase(g,M,opts={}){
+  const wm=(x,z)=>[(x-M.x0)/M.w*M.cw,(z-M.z0)/M.h*M.ch];
+  const S=(M.cw/M.w)/(CH.MAP.cw/CH.MAP.w);   // px/unit vs the HUD minimap (1 there)
+  g.fillStyle='#2f9fb1';g.fillRect(0,0,M.cw,M.ch);
   // terrace band along the coasts
-  g.strokeStyle='#e6dabd';g.lineCap='round';g.lineJoin='round';g.lineWidth=8;
+  g.strokeStyle='#e6dabd';g.lineCap='round';g.lineJoin='round';g.lineWidth=8*S;
   // 084: COAST_SEGS[2] is the golf GHOST (rng ballast) — the real vignette
   // golf is MTR_SEGS[7], and the new bay cove (MTR_SEGS[0]) gets a band too.
   [[COAST_MAIN,COAST_SEGS[0]],[COAST_PEN,COAST_SEGS[1]],[COAST_GOLF,MTR_SEGS[7]],[COAST_BAY,MTR_SEGS[0]],[COAST_CORNER,COAST_SEGS[4]],[COAST_TIP,TIP_SEGS]].forEach(([pts,segs])=>{
     g.beginPath();
     for(let i=0;i<pts.length;i++){
       const s=segs[Math.min(i,segs.length-1)],tot=profileTotal(pts[i][1]);
-      const[mx,my]=worldToMap(pts[i][0]+s.nx*tot/2,pts[i][1]+s.nz*tot/2);
+      const[mx,my]=wm(pts[i][0]+s.nx*tot/2,pts[i][1]+s.nz*tot/2);
       i?g.lineTo(mx,my):g.moveTo(mx,my);
     }
     g.stroke();
   });
   // land
   g.fillStyle='#7ecb6f';g.beginPath();
-  LAND.forEach((p,i)=>{const[mx,my]=worldToMap(p[0],p[1]);i?g.lineTo(mx,my):g.moveTo(mx,my)});
+  LAND.forEach((p,i)=>{const[mx,my]=wm(p[0],p[1]);i?g.lineTo(mx,my):g.moveTo(mx,my)});
   g.closePath();g.fill();
   // golf course tint
-  {const G=CH.MAP_GOLF,[ax,ay]=worldToMap(G.x0,G.z0),[bx2,by2]=worldToMap(G.x1,G.z1);
+  {const G=CH.MAP_GOLF,[ax,ay]=wm(G.x0,G.z0),[bx2,by2]=wm(G.x1,G.z1);
    g.fillStyle=G.color;g.fillRect(Math.min(ax,bx2),Math.min(ay,by2),Math.abs(bx2-ax),Math.abs(by2-ay));}
   // dog beach
-  {const[bx,by]=worldToMap(CH.DOG_BEACH.mesh.cx,CH.DOG_BEACH.mesh.cz);g.fillStyle='#f0e2bd';g.beginPath();g.ellipse(bx,by,5,3,0,0,7);g.fill()}
+  {const[bx,by]=wm(CH.DOG_BEACH.mesh.cx,CH.DOG_BEACH.mesh.cz);g.fillStyle='#f0e2bd';g.beginPath();g.ellipse(bx,by,5*S,3*S,0,0,7);g.fill()}
   // trails
-  g.strokeStyle='#b9b2a4';g.lineWidth=3;
+  g.strokeStyle='#b9b2a4';g.lineWidth=3*S;
   [mainCurve,spurCurve].forEach(cv2=>{
     g.beginPath();
-    cv2.getPoints(120).forEach((p,i)=>{const[mx,my]=worldToMap(p.x,p.z);i?g.lineTo(mx,my):g.moveTo(mx,my)});
+    cv2.getPoints(120).forEach((p,i)=>{const[mx,my]=wm(p.x,p.z);i?g.lineTo(mx,my):g.moveTo(mx,my)});
     g.stroke();
   });
-  g.strokeStyle='#e8cfa4';g.lineWidth=2;
+  g.strokeStyle='#e8cfa4';g.lineWidth=2*S;
   [TRAIL_LOOP,TRAIL_ENTRANCE].forEach(pts=>{   // peanut plaza loop + entrance→lake path (task 023)
     g.beginPath();
-    pts.forEach((p,i)=>{const[mx,my]=worldToMap(p[0],p[1]);i?g.lineTo(mx,my):g.moveTo(mx,my)});
+    pts.forEach((p,i)=>{const[mx,my]=wm(p[0],p[1]);i?g.lineTo(mx,my):g.moveTo(mx,my)});
     g.stroke();
   });
   // landmarks
-  const dot=(x,z,c,r=5)=>{const[mx,my]=worldToMap(x,z);g.fillStyle=c;g.beginPath();g.arc(mx,my,r,0,7);g.fill()};
-  CH.MAP_LANDMARKS.forEach(d=>dot(d.x,d.z,d.c,d.r));
+  if(opts.dots!==false){
+    const dot=(x,z,c,r=5)=>{const[mx,my]=wm(x,z);g.fillStyle=c;g.beginPath();g.arc(mx,my,r*S,0,7);g.fill()};
+    CH.MAP_LANDMARKS.forEach(d=>dot(d.x,d.z,d.c,d.r));
+  }
+}
+export function mmInit(){
+  mm.ctx=mm.cv.getContext('2d');
+  const b=document.createElement('canvas');b.width=CH.MAP.cw;b.height=CH.MAP.ch;
+  drawLakefrontBase(b.getContext('2d'),CH.MAP);
   mm.base=b;
 }
 export function mmPing(x,z){mm.pings.push({x,z,t:0})}

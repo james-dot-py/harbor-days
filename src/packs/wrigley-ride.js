@@ -300,7 +300,7 @@ function buildDepartureBoard(root, x, z, faceYaw, dest, bound, baseY) {
 // so they never disagree. sub = the neighborhood line under the stop name on a
 // board. quips = the rider's route flavor (a downtown rider says downtown
 // things) — one is picked per ride.
-const DEST = {
+export const DEST = {
   lakefront: {
     cell: 'lakefront', x: 20, z: 105, y: 0, yaw: 1.35, lat: 3200,
     stop: 'Belmont', sub: 'the lakefront', label: 'Belmont / lakefront', name: 'This is Belmont.',
@@ -333,6 +333,17 @@ const DEST = {
     },
   },
 };
+
+// task 086's city map + breadcrumb read BOARDS/DEST as the single source of stop truth — coordinates live here only.
+const EAST = Math.PI / 2, WEST = -Math.PI / 2;
+export const BOARDS = [
+  ['lakefront',     16,     100,   EAST, 'wrigleyville', 0],    // Belmont → Addison (Howard-bound) — N of the CPD harbor sign (z 101.7–104.3)
+  ['lakefront',     16,     111,   EAST, 'millennium',   0],    // Belmont → Monroe (95th-bound) — S of the pylon
+  ['wrigleyville', -138.5, -447,   0,          'lakefront',  7.6],  // Addison → Belmont (95th-bound) — faces S (down-platform), E of the post row
+  ['wrigleyville', -138.5, -438,   Math.PI,    'millennium', 7.6],  // Addison → Monroe (95th-bound) — faces N (down-platform)
+  ['millennium',    54.5,   796.5, EAST, 'lakefront',    0],    // Monroe → Belmont (Howard-bound)
+  ['millennium',    54.5,   803.5, EAST, 'wrigleyville', 0],    // Monroe → Addison (Howard-bound)
+];
 
 // ---- stop payouts (task 079): the arrival toast IS the beat — the fade lifts
 // on a new neighborhood. Keyed off dest.stop (a stable id, never an index), so
@@ -444,15 +455,6 @@ onWorldReady((player) => {
   // boards sit on the elevated island platform (baseY 7.6), east of the canopy
   // post row (x −140) and clear of the posts in z. The bound (Howard/95th) is
   // origin-aware, computed the same way as the ride toast.
-  const EAST = Math.PI / 2, WEST = -Math.PI / 2;
-  const BOARDS = [
-    ['lakefront',     16,     100,   EAST, 'wrigleyville', 0],    // Belmont → Addison (Howard-bound) — N of the CPD harbor sign (z 101.7–104.3)
-    ['lakefront',     16,     111,   EAST, 'millennium',   0],    // Belmont → Monroe (95th-bound) — S of the pylon
-    ['wrigleyville', -138.5, -447,   0,          'lakefront',  7.6],  // Addison → Belmont (95th-bound) — faces S (down-platform), E of the post row
-    ['wrigleyville', -138.5, -438,   Math.PI,    'millennium', 7.6],  // Addison → Monroe (95th-bound) — faces N (down-platform)
-    ['millennium',    54.5,   796.5, EAST, 'lakefront',    0],    // Monroe → Belmont (Howard-bound)
-    ['millennium',    54.5,   803.5, EAST, 'wrigleyville', 0],    // Monroe → Addison (Howard-bound)
-  ];
   // Interaction zones register now (pure distance checks). The physical boards
   // must parent into their cell root, but the Millennium cell is registered by
   // its OWN pack's onWorldReady, which runs AFTER this one (packs/index.js

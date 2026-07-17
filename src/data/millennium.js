@@ -794,3 +794,23 @@ export const SPAWN_M = { x: 55, z: 800, y: 0 };          // beside the subway ki
 export const MAP_M = (G.maggie || G.artInstitute || G.butler)
   ? MAP_FULL_M
   : { x0: 28, z0: 676, w: 184, h: 240, cw: 188, ch: 246 };
+
+// -------------------------- city-map POI (086) ------------------------
+// The full-city map card's landmark dots for this cell. Same shape as
+// CITY_POI, NO zone field (Millennium is one visited flag). Coordinates
+// derive from the constants above so each dot sits on its feature. The
+// GRANT-expansion landmarks are flag-gated the way MAP_M gates its bounds:
+// with 058-061 all shipped (G.maggie/artInstitute/butler true) every entry
+// is unconditional; were a flag off, its landmarks would fall away (maggie →
+// maggie + ribbon, artInstitute → art, butler → lolla).
+export const CITY_POI_M = [
+  { id: 'bean',     n: 'the bean',        x: 86.8,  z: 797.7, c: '#d8dde4' },   // CLOUD_GATE_M.bean cx/cz
+  { id: 'rink',     n: 'the rink',        x: 67,    z: 799,   c: '#cfe3ee' },   // RINK_M.ice centre
+  { id: 'crown',    n: 'crown fountain',  x: 69.8,  z: 864,   c: '#e8b64c' },   // CROWN_M.pool centre
+  { id: 'pritzker', n: 'the pavilion',    x: 146.5, z: 752,   c: '#d8d2c4' },   // PRITZKER_M.stage centre
+  { id: 'lurie',    n: 'lurie garden',    x: 151.5, z: 867,   c: '#7a9e4f' },   // LURIE_M.bounds centre
+  { id: 'ribbon',   n: 'the skating ribbon', x: 255.2, z: 751, c: '#cfe3ee' },  // RIBBON_M.loop vertex average (65 unique pts, last dup of first)
+  { id: 'maggie',   n: 'maggie daley park', x: 284,  z: 835,  c: '#5da06a' },   // MAGGIE_M.play.zone centre
+  { id: 'art',      n: 'the art institute', x: 76.5, z: 970.5, c: '#b7b0a0' },  // ART_M.westBlock centre
+  { id: 'lolla',    n: 'lolla',           x: 262,   z: 972,   c: '#b06ad0' },   // BUTLER_M.crowd centre
+];

@@ -65,3 +65,4 @@ import './favors-wrigley.js';   // Wrigleyville favors — the gull's whistle, p
 import './favors-downtown.js';   // downtown favors — the chalk bag, the lucky stick, the recipe glide (task 081)
 import './favors-montrose.js';   // Montrose favors — the wind-blown field notes, one for the Park Bait wall (task 081)
 import './mayor-for-real.js';   // MAYOR FOR REAL — city stamps, the AIDS-Garden ceremony, the regalia returns (task 081)
+import './citymap.js';   // THE CITY MAP + compass breadcrumb — full-city card, Red Line thread, landmark headings (task 086)

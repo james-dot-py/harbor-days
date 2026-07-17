@@ -519,10 +519,10 @@ function runStart(){
   function fill(){
     body.innerHTML=(document.body.classList.contains('touch')
       ? ghosts+row('left stick','walk')+row('drag','look around')+row('⬆️','jump')+row('✋','interact')
-        +row('📖','journal')+row('🧺','the tote')+row('✨','pick firework')+row('🎆','launch firework')
+        +row('📖','journal')+row('🗺️','the city map — tap the minimap')+row('🧺','the tote')+row('✨','pick firework')+row('🎆','launch firework')
         +row('🔔','Divvy bell / radio (riding)')
       : row('W A S D','walk')+row('SHIFT','run')+row('SPACE','jump')+row('E','interact')
-        +row('J','journal')+row('B','the tote — your stuff')+row('1–4','pick firework')+row('F','launch firework')
+        +row('J','journal')+row('M','the city map')+row('B','the tote — your stuff')+row('1–4','pick firework')+row('F','launch firework')
         +row('R','Divvy bell / radio station')+row('Z / C · wheel','orbit · zoom'))
       +'<div class="ctlnote">🌊 <b>jetski</b> — wade in past your knees and jump on; ride up to any low step to hop off.'
       +'<br>🚲 <b>Divvy</b> — interact at a dock to borrow a bike; drop it back at any dock.'
@@ -530,7 +530,7 @@ function runStart(){
       +(document.body.classList.contains('touch')?'⬆️':'SPACE')+' hop-spins.</div>';
   }
   const close=()=>card.classList.remove('show');
-  const open=()=>{const s=$('settings');if(s)s.classList.remove('show');fill();card.classList.add('show');};   // one card at a time (task 085)
+  const open=()=>{const s=$('settings');if(s)s.classList.remove('show');const m=$('citymap');if(m)m.classList.remove('show');fill();card.classList.add('show');};   // one card at a time (task 085)
   btn.addEventListener('click',()=>{if(card.classList.contains('show'))close();else open();});
   $('ctlClose').addEventListener('click',close);
   card.addEventListener('click',e=>{if(e.target===card)close()});

@@ -1247,3 +1247,32 @@ export const MAP_LANDMARKS = [
   { x:96,  z:372,  c:'#2f63d0', r:5 },   // Chevron sculpture (south lawn)
   { x:121, z:400,  c:'#8f6234', r:4 },   // corner pier
 ];
+
+/* ----------------------------- CITY POI ------------------------------ */
+// The full-city map card's landmark table for the LAKEFRONT strip (task 086):
+// the dots + labels the city map / compass breadcrumb read. Another city ships
+// a differently-shaped file with this same export and no card changes. Fields:
+// id, n (lowercase display name), x/z (world m), c (css dot color), and an
+// optional zone — the EXACT matching name from the ZONES export above, used to
+// dim a landmark until its zone is discovered (omit where no zone exists, e.g.
+// all of Montrose). North -> south.
+export const CITY_POI = [
+  { id:'montrose-beach', n:'montrose beach',    x:219, z:-994,   c:'#dfc48f' },                       // MONTROSE_BEACH.mesh centre (cx,cz)
+  { id:'magic-hedge',    n:'the magic hedge',   x:213, z:-894.5, c:'#3f8f4f' },                       // MONTROSE_POINT.hedge.pts midpoint
+  { id:'cricket-hill',   n:'cricket hill',      x:112, z:-879,   c:'#77c268' },                       // CRICKET_HILL summit (cx,cz)
+  { id:'the-hook',       n:'the hook',          x:239, z:-700,   c:'#8f6234' },                       // MTR_HOOK_TIP curl — on the mole
+  { id:'park-bait',      n:'park bait',         x:176, z:-740,   c:'#9c5340' },                       // PARK_BAIT (x,z)
+  { id:'montrose-harbor',n:'montrose harbor',   x:212, z:-775,   c:'#4a9fc9' },                       // basin water, between the west seawall (x~185) and the hook mole (x~219)
+  { id:'golf',           n:'the golf course',   x:132, z:-510,   c:'#4f9b46', zone:'Marovitz Golf Course' },
+  { id:'clock-tower',    n:'the clock tower',   x:186, z:-478,   c:'#9a8b78', zone:'Waveland Fieldhouse' },
+  { id:'sanctuary',      n:'the bird sanctuary',x:150, z:-388,   c:'#3f7d3c', zone:'Bird Sanctuary' },
+  { id:'kwanusila',      n:'kwanusila',         x:30,  z:-370,   c:'#e0b13e', zone:'Kwanusila' },
+  { id:'dog-beach',      n:'the dog beach',     x:100, z:-336,   c:'#d9b982', zone:'Dog Beach' },
+  { id:'yacht-club',     n:'the yacht club',    x:70,  z:-180,   c:'#5a86c4', zone:'Yacht Club' },
+  { id:'harbor',         n:'belmont harbor',    x:120, z:-170,   c:'#4a9fc9', zone:'Belmont Harbor' },
+  { id:'harbor-house',   n:'the harbor house',  x:60,  z:-100,   c:'#d0705c', zone:'Belmont Harbor' },
+  { id:'pier',           n:'the harbor pier',   x:205, z:-105,   c:'#8f6234', zone:'Harbor Pier' },
+  { id:'aids-garden',    n:'the aids garden',   x:95,  z:120,    c:'#37a457', zone:'AIDS Garden Chicago' },
+  { id:'rocks',          n:'the belmont rocks', x:150, z:150,    c:'#e0574a', zone:'The Belmont Rocks' },
+  { id:'diversey',       n:'diversey range',    x:58,  z:262.5,  c:'#4f9b46' },  // DIVERSEY.range centre ((28+88)/2,(242+283)/2) — no zone key: the Diversey Point circle (100,378 r34) never covers the range, so gating on it would keep the dot dim while you stand on the tee line
+];
