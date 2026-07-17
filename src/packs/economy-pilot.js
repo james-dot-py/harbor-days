@@ -1,14 +1,20 @@
 // =====================================================================
-//  PACK: economy-pilot — THE BEACH KIOSK + the three pilot toys (task 078).
+//  PACK: economy-pilot — THE BEACH KIOSK (task 078 pilot; EXPANDED task 080).
 //  A tiny wooden concession stand on the grass just NORTH of the dog-beach
-//  fence (the beach approach), selling three things that DO something (the
+//  fence (the beach approach), selling toys that DO something (the
 //  "toy, not trophy" law — none decrement):
 //    * popcorn bag  — hold it; crumbs fall as you walk + the sanctuary flock
 //                     flutters in to peck at your feet (nature.js setCrumbLure).
 //    * tennis ball  — hold + charge-throw; any registered fetch-dog brings it
 //                     back; else it rests and you pick it up again.
-//    * bucket hat   — the mayor actually WEARS it (parents to mparts.head,
-//                     mayor-only per the 022 rules; rides every animation).
+//    * skip pouch   — 080: an infinite pouch of flat stones; hold + charge-throw
+//                     and they skip across open water (shallow skims bounce up to
+//                     ~6 times with a rising plink + splash ring; steep = plonk).
+//                     Shares the 'stones' payout key with activities1's rock pile.
+//    * kite         — 080: hold a wrapped kite bundle + a hint pointing north to
+//                     Cricket Hill, where montrose-kite.js reads bag.has('kite').
+//  Cosmetics (the bucket hat and the new sun hats) now live in the hats pack;
+//  this file keeps the shop ROWS for them but owns no cosmetic defs.
 //
 //  Only-my-file rules honoured: this module + ONE import line in index.js.
 //  All setup inside onWorldReady. FIXED coords, ZERO rng (Math.random only for
@@ -20,7 +26,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { onWorldReady, registerUpdate, addInteraction, makeNPC, chargeThrow,
-         camForward, holdItem, toast, bag, shop, fetchDogs, wallet } from '../framework.js';
+         camForward, holdItem, toast, bag, shop, fetchDogs, wallet, getAudioCtx, state } from '../framework.js';
 import { scene, toon, bmat, pip, WATER_Y } from '../core.js';
 import { coastQuery, beachH, LAND } from '../coast.js';
 import { pathSamples } from '../paths.js';
@@ -94,14 +100,49 @@ function makeTennisBall() {                                // chartreuse sphere 
   const seam = new THREE.Mesh(new THREE.TorusGeometry(0.088, 0.008, 6, 20), toon(0xf6f6f2)); seam.rotation.x = 1.0; g.add(seam);
   return g;
 }
-function makeBucketHat() {                                 // olive-khaki, mayor head-local; 3 meshes (~+3 draws)
+function makePebble() {                                    // 080: a small flat gray skipping stone (1 mesh)
+  const m = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), toon(0x6b6f76));
+  m.scale.set(1, 0.42, 1.3);                              // squashed flat
+  return m;
+}
+function makeKiteBundle() {                                // 080: a rolled-up kite for the hand (~4 tiny meshes)
   const g = new THREE.Group();
-  const khaki = toon(0x8a8a4e), band = toon(0x63632f);
-  const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.26, 16), khaki); crown.position.y = 0.14; g.add(crown);
-  const brim = new THREE.Mesh(new THREE.CylinderGeometry(0.44, 0.66, 0.1, 18, 1, true), khaki); brim.position.y = 0.0; g.add(brim);
-  const bandM = new THREE.Mesh(new THREE.CylinderGeometry(0.428, 0.428, 0.07, 16), band); bandM.position.y = 0.04; g.add(bandM);
-  g.rotation.x = 0.07;                                     // brim tips slightly down toward the front
+  const teal = toon(0x2aa6a0), stick = toon(0x9c6b3f), white = toon(0xf4f4f4);
+  const roll = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.26, 10), teal); roll.rotation.z = Math.PI / 2; g.add(roll);   // rolled sail, lying flat
+  const s1 = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.34, 6), stick); s1.rotation.z = Math.PI / 2 - 0.28; s1.position.set(0.02, 0.02, 0.005); g.add(s1);   // crossed spars poking out one end
+  const s2 = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.3, 6), stick); s2.rotation.z = Math.PI / 2 + 0.32; s2.position.set(0.02, -0.01, -0.01); g.add(s2);
+  const bow = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.012), white); bow.position.set(-0.16, -0.02, 0); bow.rotation.z = 0.6; g.add(bow);   // a little white bow tail
   return g;
+}
+
+// ---- skip-stone SFX + particles (080; self-contained, actx-guarded, quiet) ----
+function stonePlink(n) {                                   // rising sine per skip (getAudioCtx guarded — actx null pre-start)
+  const a = getAudioCtx(); if (!a || !a.actx) return;
+  const { actx, sfxBus } = a, dest = sfxBus || actx.destination, t = actx.currentTime, base = 520 + Math.min(n, 6) * 95;
+  const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine';
+  o.frequency.setValueAtTime(base * 0.9, t); o.frequency.exponentialRampToValueAtTime(base, t + 0.08);
+  g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.07, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+  o.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.18);
+}
+function stonePlonk() {                                    // final sink: low thunk
+  const a = getAudioCtx(); if (!a || !a.actx) return;
+  const { actx, sfxBus } = a, dest = sfxBus || actx.destination, t = actx.currentTime;
+  const o = actx.createOscillator(), g = actx.createGain(); o.type = 'sine';
+  o.frequency.setValueAtTime(150, t); o.frequency.exponentialRampToValueAtTime(52, t + 0.28);
+  g.gain.setValueAtTime(0.16, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.4);
+  o.connect(g); g.connect(dest); o.start(t); o.stop(t + 0.45);
+}
+function splashRing(x, z, big) {                           // droplet sparks + an expanding surface ring (activities1 recipe, smaller)
+  const n = big ? 12 : 8;
+  for (let k = 0; k < n; k++) { const a = Math.random() * Math.PI * 2, sp = (big ? 2.2 : 1.4) * (0.5 + Math.random());
+    FX.spawn(x, WATER_Y + 0.05, z, Math.cos(a) * sp, (big ? 3.6 : 2.4) * (0.55 + 0.5 * Math.random()), Math.sin(a) * sp, 0.72, 0.9, 1.0, big ? 0.55 : 0.4, big ? 3.2 : 2.4, 9, 0.4); }
+  const rn = big ? 18 : 12, rs = big ? 3.4 : 2.2;
+  for (let k = 0; k < rn; k++) { const a = k / rn * Math.PI * 2;
+    FX.spawn(x, WATER_Y + 0.06, z, Math.cos(a) * rs, 0.1, Math.sin(a) * rs, 0.6, 0.86, 1.0, big ? 0.5 : 0.4, big ? 2.6 : 2.0, 0, 3.0); }
+}
+function dustPuff(x, y, z) {                               // dry inland clack: a few tan puffs at the ground
+  for (let k = 0; k < 6; k++) { const a = Math.random() * Math.PI * 2, sp = 0.8 * (0.4 + Math.random());
+    FX.spawn(x, y + 0.1, z, Math.cos(a) * sp, 0.5 + Math.random() * 0.6, Math.sin(a) * sp, 0.78, 0.72, 0.58, 0.5, 1.4, 6, 0.4); }
 }
 
 // ==================================================================== //
@@ -145,7 +186,7 @@ onWorldReady(player => {
   // hand-painted menu board across the counter FRONT (sign law): a FrontSide
   // canvas plane on the apron face — the solid apron behind it IS the backing,
   // and it sits below the counter so the keeper's head reads clear above.
-  const signPlane = new THREE.Mesh(new THREE.PlaneGeometry(2.25, 0.6), bmat(0xffffff, { map: signTex('SNACKS · POP · TENNIS BALLS'), side: THREE.FrontSide }));
+  const signPlane = new THREE.Mesh(new THREE.PlaneGeometry(2.25, 0.6), bmat(0xffffff, { map: signTex('SNACKS · TOYS · KITES'), side: THREE.FrontSide }));
   signPlane.position.set(cx, 0.6, cz + 0.885); add(signPlane);
 
   // popcorn machine on the counter (warm amber glow = self-lit bmat)
@@ -161,11 +202,18 @@ onWorldReady(player => {
     const bx = cx + 0.7, bz = cz + 0.45, top = 1.09, ballMat = toon(0xcadb2f);
     for (const [dx, dy, dz] of [[-0.1, 0.09, 0], [0.1, 0.09, 0], [0.0, 0.24, 0]]) { const b = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 9), ballMat); b.position.set(bx + dx, top + dy, bz + dz); add(b); }
   }
+  // 080 stock: a rolled kite leaning on the right post + two flat skipping stones on the counter (3 meshes, no rng)
+  {
+    const kiteDisp = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6, 10), toon(0x2aa6a0)); kiteDisp.position.set(cx + 1.15, 0.72, cz + 0.6); kiteDisp.rotation.z = 0.3; add(kiteDisp);
+    const stoneMat = toon(0x6b6f76);
+    const s1 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 6), stoneMat); s1.scale.set(1.3, 0.4, 1.5); s1.position.set(cx - 0.05, 1.11, cz + 0.52); add(s1);
+    const s2 = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), stoneMat); s2.scale.set(1.3, 0.4, 1.5); s2.position.set(cx - 0.16, 1.11, cz + 0.44); add(s2);
+  }
 
   // KEEPER — a teen NPC behind the counter, facing the customer (+z); green visor.
   const keeper = makeNPC({ x: cx, z: cz - 0.9, ry: 0, name: 'kioskteen',
     palette: { suit: 0x3ba6d6, pants: 0x33404a, skin: 0xd7a074, hair: 0x2a1d12 },
-    lines: ["popcorn's fresh — the birds know it", "tennis balls are for the dogs. mostly.", "pop's in the cooler", "we take dibs"] });
+    lines: ["popcorn's fresh — the birds know it", "tennis balls are for the dogs. mostly.", "pop's in the cooler", "we take dibs", "flat stones skip best — try the rocks", "that kite wants Cricket Hill"] });
   keeper.group.position.y = 0;
   {                                                         // cheap visor: forward brim + a strap band on the head
     const vis = toon(0x2f9e5b);
@@ -181,7 +229,7 @@ onWorldReady(player => {
   // interaction at the counter front
   addInteraction({ x: cx, z: FRONT + 1.0, r: 2.6, label: 'browse the kiosk', onUse: () =>
     shop.open({ title: 'the beach kiosk', keeper: 'popcorn’s fresh. the birds know it.',
-      items: [{ id: 'popcorn', price: 5 }, { id: 'tennis-ball', price: 8 }, { id: 'bucket-hat', price: 25 }] }) });
+      items: [{ id: 'popcorn', price: 5 }, { id: 'tennis-ball', price: 8 }, { id: 'skip-pouch', price: 10 }, { id: 'kite', price: 15 }, { id: 'pirate-hat', price: 12 }, { id: 'bucket-hat', price: 25 }] }) });
 
   // =================================================================== //
   //  ITEMS
@@ -272,17 +320,78 @@ onWorldReady(player => {
     onUse() { holdTennis(); },
     onStow() { if (tennisState === 'held') tennisState = 'stowed'; throwInter.enabled = false; } });
 
-  // ---- bucket hat: mayor-only worn cosmetic (022) ----
-  let hatMesh = null;
-  bag.define({ id: 'bucket-hat', name: 'bucket hat', icon: '👒', kind: 'cosmetic', caption: 'lake-tested. mayor-approved.',
-    onEquip() { if (!hatMesh) hatMesh = makeBucketHat(); hatMesh.position.set(0, 0.42, 0.02); if (hatMesh.parent !== mparts.head) mparts.head.add(hatMesh); },
-    onUnequip() { if (hatMesh && hatMesh.parent) hatMesh.parent.remove(hatMesh); } });
+  // (bucket hat + the new sun hats now live in the hats pack — the shop lists
+  //  'pirate-hat'/'bucket-hat' rows above by id; those cosmetic DEFS are not here.)
+
+  // ---- skip-stone pouch (080): hold a flat pebble → charge-throw → skip on water ----
+  // 'gear' kind (like the kite): a tote tap fires onUse and leaves the card open;
+  // the hand-swap + our own state track holding (no _heldId marker for gear). The
+  // pouch is INFINITE — every resolved throw refills the hand, nothing decrements.
+  let pebMesh = null, pebbleState = 'stowed', pouchFirst = true;
+  let curPX = 0, curPZ = 0;                                // live player pos (kept by the update; the kite hint reads it)
+  const peb = { x: 0, y: 0, z: 0, x0: 0, z0: 0, vx: 0, vy: 0, vz: 0, skips: 0, t: 0, first: true };   // one live thrown stone (allocated once)
+  const overWaterAt = (x, z) => beachH(x, z) === null && !pip(x, z, LAND);   // brief's water test: no beach + off the LAND polygon
+  const ensurePebble = () => (pebMesh || (pebMesh = makePebble()));
+  // ONE player-following throw interaction (priority −1: every real prompt outranks it)
+  const stoneThrow = addInteraction({ x: 0, z: 0, r: 1.5, priority: -1, label: 'skip a stone (hold)', onUse: () => startStoneThrow() });
+  stoneThrow.enabled = false;
+  function holdPebble() {                                   // (re)fill the hand — used by the tote tap AND the auto-refill
+    const m = ensurePebble();
+    if (m.parent) m.parent.remove(m);
+    m.position.set(0, 0.01, 0.04); m.rotation.set(0, 0, 0); m.scale.set(1, 0.42, 1.3);
+    holdItem(m); pebbleState = 'held';
+  }
+  function startStoneThrow() {
+    if (pebbleState !== 'held') return;
+    chargeThrow({ onRelease(power) {
+      if (pebbleState !== 'held') return;                  // stale (hand stolen / item swapped mid-charge)
+      const m = ensurePebble(); m.getWorldPosition(_wp);
+      holdItem(null); scene.add(m); m.position.copy(_wp); m.scale.set(1.3, 0.5, 1.7);
+      const f = camForward(), speed = 6 + 10 * power;      // camForward on release only (no per-frame alloc)
+      peb.x = _wp.x; peb.y = _wp.y; peb.z = _wp.z;
+      peb.x0 = _wp.x; peb.z0 = _wp.z;                      // launch point — the safety net is RELATIVE to it
+      peb.vx = f.x * speed; peb.vz = f.z * speed; peb.vy = 2 + 2 * power;
+      peb.skips = 0; peb.t = 0; peb.first = true;
+      pebbleState = 'flying'; stoneThrow.enabled = false;
+      state.stonesThrown = (state.stonesThrown || 0) + 1;  // same counter the journal shows
+    } });
+  }
+  function resolveStone(where) {                            // the ONE toast per throw + payout + auto-refill
+    const n = peb.skips;
+    if (n >= 1) toast(`${n} skip${n > 1 ? 's' : ''}!`, n >= 6 ? 'a beauty' : n >= 4 ? 'nice arm' : 'not bad');
+    else if (where === 'land') toast('clack.');
+    else if (where === 'water') toast('plonk!');
+    // 'gone' (flew off the map — safety net) resolves silently.
+    if (n >= 3) wallet.pay({ key: 'stones', first: 5, repeat: n >= 6 ? 3 : 2,   // SAME key as activities1 (shared activity, shared first)
+      reason: n >= 6 ? 'skipped a beauty' : 'a good skip', firstReason: 'first good skip!' });
+    holdPebble();                                          // a fresh flat one back in hand
+  }
+
+  bag.define({ id: 'skip-pouch', name: 'skip-stone pouch', icon: '🪨', kind: 'gear', caption: 'the lake is everywhere. so are stones.',
+    onUse() { holdPebble(); if (pouchFirst) { pouchFirst = false; toast('a pocketful of flat ones', "find the water's edge and let one fly"); } },
+    onStow() { const m = ensurePebble(); if (m.parent) m.parent.remove(m); if (pebbleState === 'held') pebbleState = 'stowed'; stoneThrow.enabled = false; } });
+
+  // ---- kite (080): hold a wrapped bundle + a where-to-fly-it hint (Cricket Hill) ----
+  // Owning it changes the Cricket Hill flight (montrose-kite.js reads bag.has('kite'));
+  // here it is a held prop + a distance-aware hint toward the summit (108,−1316).
+  let kiteMesh = null;
+  bag.define({ id: 'kite', name: 'a kite of your own', icon: '🪁', kind: 'gear', caption: 'wants a hill and wind off the lake — Cricket Hill.',
+    onUse() {
+      const m = kiteMesh || (kiteMesh = makeKiteBundle());
+      if (m.parent) m.parent.remove(m);
+      m.position.set(0, 0.02, 0.05); m.rotation.set(0, 0, 0); holdItem(m);
+      const d = Math.hypot(curPX - 108, curPZ + 1316);      // Cricket Hill summit
+      if (d > 60) toast('the wind wants a hill', 'Cricket Hill — north end, past Montrose Harbor');
+      else toast('this is the spot', 'the summit — fly it');
+    } });
 
   // =================================================================== //
   //  single per-frame update — popcorn crumbs/lure + tennis ball
   // =================================================================== //
   let popHeldPrev = false, crumbT = 0, lureFn = null;
   registerUpdate((dt, t, pl) => {
+    curPX = pl.x; curPZ = pl.z;                            // the kite hint reads the live player pos
+
     // --- POPCORN: crumbs while moving + keep nature's lure alive ---
     const popHeld = bag.heldId() === 'popcorn';
     if (popHeld) {
@@ -323,6 +432,47 @@ onWorldReady(player => {
     } else if (tennisState === 'fetching') {
       fetchWatchdog -= dt;
       if (fetchWatchdog <= 0) { dropTennisAt(tball.x, tball.z); armPickup(); tennisState = 'resting'; }   // 15 s watchdog → treat as abort
+    }
+
+    // --- SKIP-STONE POUCH ---
+    if (pebbleState === 'held') {
+      const m = ensurePebble();
+      if (m.parent !== mparts.handR) { pebbleState = 'stowed'; stoneThrow.enabled = false; }   // hand swapped for another item
+      else { stoneThrow.enabled = true; stoneThrow.x = pl.x; stoneThrow.z = pl.z; }
+    } else if (pebbleState !== 'flying' && stoneThrow.enabled) {
+      stoneThrow.enabled = false;
+    }
+    if (pebbleState === 'flying') {
+      peb.vy -= 9 * dt;
+      peb.x += peb.vx * dt; peb.y += peb.vy * dt; peb.z += peb.vz * dt;
+      const m = ensurePebble(); m.position.set(peb.x, peb.y, peb.z); m.rotation.y += 16 * dt; m.rotation.x += 7 * dt;
+      peb.t += dt;
+      let resolved = false;
+      if (peb.vy < 0) {                                     // only test contact while descending
+        const gy = tennisGroundY(peb.x, peb.z);
+        // WET = the open lake OR any ground sitting below the waterline (the
+        // dog-beach pond's submerged sand is inside DOG_BEACH/LAND, so the
+        // overWaterAt test alone called the pond "land" and stones clacked
+        // invisibly underwater — visible water is water).
+        if (overWaterAt(peb.x, peb.z) || gy <= WATER_Y + 0.05) {
+          if (peb.y <= WATER_Y + 0.05) {
+            // shallow-enough descent SKIMS (angle gate — a flat fast arrival, stricter after the first);
+            // the launch sits ~3.7 m above the lake, so an absolute vy cutoff never skips (see task 080 note).
+            const hs = Math.hypot(peb.vx, peb.vz), factor = peb.first ? 0.78 : 0.55;
+            if (hs > 3 && Math.abs(peb.vy) < factor * hs && peb.skips < 6) {
+              peb.first = false; peb.y = WATER_Y + 0.05;
+              peb.vy = -peb.vy * 0.55; peb.vx *= 0.8; peb.vz *= 0.8;   // small hop + damp (brief)
+              peb.skips++; splashRing(peb.x, peb.z, false); stonePlink(peb.skips);
+            } else { splashRing(peb.x, peb.z, true); stonePlonk(); resolveStone('water'); resolved = true; }   // too steep/spent → PLONK
+          }
+        } else if (peb.y <= gy + 0.05) {                    // over dry LAND/sand: a clack
+          dustPuff(peb.x, gy, peb.z); resolveStone('land'); resolved = true;
+        }
+      }
+      // safety net RELATIVE to the launch (a fixed x 88..262 box silently ate
+      // every throw outside the kiosk neighborhood — the harbor, Montrose, the
+      // cells: 'skip anywhere' is the whole point of the pouch)
+      if (!resolved && (peb.t > 8 || Math.abs(peb.x - peb.x0) > 150 || Math.abs(peb.z - peb.z0) > 150 || peb.y < WATER_Y - 6)) { resolveStone('gone'); resolved = true; }
     }
   });
 

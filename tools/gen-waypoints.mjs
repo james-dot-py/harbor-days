@@ -1131,7 +1131,7 @@ addM('mp-cancer-survivors', [
 // mayor doesn't eclipse it — the 047 occlusion law). Stands hug the spine /
 // forecourt / steps; Michigan road west of x48 is open scenery air.
 addM('mp-lions', [
-  { x: 51.5, z: 981, yaw: 2.75, pitch: 0.02, dist: 7 },     // 3/4 from the S: both lions + steps + facade stack
+  { x: 51.5, z: 981, yaw: 2.55, pitch: 0.02, dist: 10 },    // 3/4 from the S: both lions + steps + facade stack (080 sited the museum cart + docent at ~(50,986) — yaw 2.75 dist 7's camera landed square behind the docent's head; 2.55/10 rays past the cart's west face from the open road, cart mid-ground right)
   { x: 50, z: 971, yaw: 1.5708, pitch: -0.10, dist: 12 },   // head-on portico axis: lions flank, banners + frieze (tilt up — pediment apex honestly crops at this distance)
   { x: 56.2, z: 964.5, yaw: 2.62, pitch: -0.04, dist: 5.5 },// north lion close ("on the prowl", stalk paw)
   { x: 50.6, z: 977, yaw: 0.85, pitch: -0.06, dist: 5 },    // south lion close ("defiance", roaring head up)

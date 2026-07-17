@@ -64,6 +64,8 @@ export const state={
   if(_c.dibsBy&&typeof _c.dibsBy==='object')state.dibsBy=Object.assign({},_c.dibsBy);
   if(Array.isArray(_c.birdsSeen))state.birdsSeen=new Set(_c.birdsSeen);
   if(Array.isArray(_c.rocksPainted))state.rocksPainted=new Set(_c.rocksPainted);
+  if(Array.isArray(_c.seaGlass))state.seaGlass=new Set(_c.seaGlass);       // 080: beachcombed colors
+  if(Array.isArray(_c.pennies))state.pennies=new Set(_c.pennies);          // 080: smashed-penny designs
 }
 
 // --------------------- update registry + world-ready -------------------
@@ -1024,6 +1026,8 @@ function buildSnap(){
       dibsBy:state.dibsBy||{},
       birdsSeen:state.birdsSeen?[...state.birdsSeen].sort():[],
       rocksPainted:state.rocksPainted?[...state.rocksPainted].sort():[],
+      seaGlass:state.seaGlass?[...state.seaGlass].sort():[],
+      pennies:state.pennies?[...state.pennies].sort():[],
     },
   };
 }

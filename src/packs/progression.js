@@ -423,6 +423,11 @@ const STATION_META=[
 ];
 const radio={station:0,carrying:false,timer:null,next:0,step:0,stepDur:0,bus:null,pulse:0,walkBeat:0,speakers:[],box:null};
 let MB_BASE=null;
+// (080) boombox-to-go handoff: _togo holds the to-go box's own speaker cones
+// while the engine is on the to-go box (null = the towel box owns the engine);
+// _borrowI/_putBackI are the towel-box interaction handles (hoisted so
+// radioApi.takeover can re-home the towel box + fix them).
+let _togo=null,_borrowI=null,_putBackI=null;
 
 function buildBoombox(){
   const g=new THREE.Group();
@@ -457,6 +462,7 @@ function newRadioBus(){
   radio.bus=ctx.actx.createGain(); radio.bus.gain.value=0.0001; radio.bus.connect(ctx.actx.destination);
 }
 function radioStart(){
+  _togo=null;                                                          // (080) the towel box claims the engine; the to-go box yields
   const ctx=getAudioCtx();
   if(ctx.actx && MB_BASE==null) MB_BASE=ctx.musicBus.gain.value;
   radio.carrying=true; radio.station=0; newRadioBus();
@@ -472,6 +478,16 @@ function radioReturn(){
   radio.station=0; radio.carrying=false; radio.pulse=0;
 }
 function cycleStation(){ radioSetStation((radio.station+1)%6); }
+// (080) the boombox-to-go (packs/lolla-merch.js) borrows THIS radio engine.
+// takeover: park the towel box if it's in hand (fix its two interactions) and
+// point the engine at the to-go box's cones. release: hand it back to LOFI.
+// cycle: the same station step R uses (touch drives it via the ✋ interaction).
+export const radioApi={
+  takeover(cones){ if(radio.carrying){ radioReturn(); placeBoomboxOnTowel(); if(_putBackI)_putBackI.enabled=false; if(_borrowI)_borrowI.enabled=true; } radioStart(); _togo=cones||[]; return true; },
+  release(){ if(!_togo)return; _togo=null; radioReturn(); },
+  togoActive(){ return !!_togo; },
+  cycle(){ cycleStation(); },
+};
 function radioSetStation(sTo){
   const ctx=getAudioCtx(); radio.station=sTo;
   newRadioBus(); staticBlip();
@@ -504,7 +520,7 @@ function updateRadio(dt){
   radio.pulse*=Math.exp(-6*dt);
   const playing=(radio.station>=1&&radio.station<=4);
   const sc=playing?1+radio.pulse*0.4:1;
-  for(const s of radio.speakers) s.scale.set(sc,sc,1);
+  for(const s of (_togo||radio.speakers)) s.scale.set(sc,sc,1);        // (080) pulse the to-go cones when the engine rides the to-go box
 }
 
 // ---------------- HOUSE (WBMX) — 122 BPM, 2-bar loop ------------------ //
@@ -679,6 +695,7 @@ onWorldReady(player=>{
     putBack.enabled=false; borrow.enabled=true;
     toast('put it back','LOFI’s back on');
   }}); putBack.enabled=false;
+  _borrowI=borrow; _putBackI=putBack;                                  // (080) radioApi.takeover re-homes the towel box + toggles these two
 
   // journal — n/12 + collected list w/ lore + Divvy metres
   journalSection('signs','Honorary Chicago',()=>{

@@ -514,3 +514,24 @@ cut becomes a revert task.
   into it, so the journal's "Biggest earner" on a fresh save reads "wandering".
   The game's first economic lesson is that going and looking at things is the
   point. — the whole map (src/packs/economy-payouts.js) — task 079
+- THE CRANK IS THE SOUVENIR. The penny machine by the AI lions takes exactly
+  1 dib, spins its big cream-spoked wheel with accelerating ratchet clicks, and
+  mints one of four designs (the Bean · a lion · the clock tower · the plover).
+  Once you own all four it KEEPS working — "…another the Bean. the crank's the
+  point." — Michigan Ave, by the south lion (src/packs/museum-cart.js) — task 080
+- NOBODY LOGS OFF WEARING A PAPER PIRATE HAT. Six hats, each exactly one draw
+  call, each parented to the mayor's head so it rides every jump, sit, and
+  skate. The winter pom hat is sold in July ("the rink misses you. july won't
+  mind."). — sold across all four shops (src/packs/hats.js) — task 080
+- SKIP STONES OFF THE BACK OF A JETSKI. The pouch works at ANY water's edge —
+  the harbor, the Montrose surf, the dog-beach doggy pond, and yes, idling on
+  the jetski in open water. Flat fast throws skim up to 6 plinks; steep ones
+  plonk. — every shoreline (src/packs/economy-pilot.js) — task 080
+- YOUR OWN KITE FLIES TEAL. Buy the kiosk's kite bundle and Cricket Hill's
+  summit flight launches YOUR kite — the sail and its middle tail bow turn the
+  bundle's teal, the prompt reads "fly YOUR kite", and launches pay. — Cricket
+  Hill (src/packs/montrose-kite.js + economy-pilot.js) — task 080
+- AN OLD STYLE AT THE DRINK RAIL. Carry a cold one up the Sheffield rooftop
+  stair and rest it on the park-facing rail: "to the lake." The can stays there,
+  sweating, for the rest of the session. — the Sheffield rooftop
+  (src/packs/sluggers-shop.js) — task 080

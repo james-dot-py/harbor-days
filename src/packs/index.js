@@ -54,3 +54,8 @@ import './montrose-point.js';   // THE MAGIC HEDGE — Montrose Point sanctuary 
 import './favors-pilot.js';   // THE ECONOMY's pilot favor — "an Old Style for the Malört guy" (task 078)
 import './economy-pilot.js';   // THE ECONOMY's beach kiosk + pilot toys — popcorn/tennis ball/bucket hat (task 078)
 import './economy-payouts.js';   // THE ECONOMY's unowned dibs — zone discovery, the fireworks finale, the jetski (task 079)
+import './hats.js';   // THE HATS — six mayor-only cosmetics, 1 draw each worn (task 080)
+import './sea-glass.js';   // BEACHCOMBING — sea-glass spots on the two beaches, four colors, a journal page (task 080)
+import './sluggers-shop.js';   // SLUGGERS TO-GO — the Clark St walk-up window: Chicago dog + Old Style + the drink rail (task 080)
+import './museum-cart.js';   // THE MUSEUM CART — Michigan-Ave coffee/souvenir cart by the AI lions + museum coffee + the penny machine (task 080)
+import './lolla-merch.js';   // LOLLA MERCH — Butler Field merch tent + the boombox-to-go (borrows the radio engine); imports LAST so the millennium cell exists (task 080)

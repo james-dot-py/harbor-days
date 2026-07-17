@@ -621,6 +621,26 @@ few turns to find; keep each to one line of symptom + fix.
   they open an empty tote. 078 only ever shot the tote WITH items. Any placeholder
   in a grid needs `grid-column:1/-1`; and screenshot every card in its EMPTY state,
   not just its populated one.
+- Framework TOASTS QUEUE (~3 s each) and wallet's "your first dibs!" gold toast
+  lands IN FRONT of the pack's own line on any fresh save's first earn — an E2E
+  assert that samples the toast right after the press reads the WRONG toast
+  (three separate 080 verify scripts hit this). POLL toast text ≤10 s; and match
+  PROMPTS against #prompt's textContent only — body.innerText false-positives on
+  tote captions (the boombox caption contains "changes the station").
+- An "anywhere" toy with an ABSOLUTE-coordinate safety box is a one-neighborhood
+  toy: the skip-pouch's stray-stone net (x 88..262, z 340..-880 — the kiosk's
+  neighborhood) silently resolved every throw at the harbor, Montrose, and the
+  cells as 'gone' on frame one, with no toast to notice (task 080). Bound flight
+  RELATIVE to the launch point. Corollary: ground BELOW the waterline is
+  visually water — the dog-beach pond's submerged sand is inside LAND/beachH, so
+  an overWaterAt()-only test made stones "clack" invisibly underwater; treat
+  gy <= WATER_Y as wet.
+- Priority −1 player-FOLLOWING prompts (skip a stone, take a bite, change the
+  station) lose the pill to ANY priority ≥0 interaction in range — shop counters
+  (r 2.6 at the anchor you spawn on) and WANDERING dogs ('play fetch' walks into
+  range between your assert and your keypress). E2E: arm presses ATOMICALLY
+  (verify the live pill + dispatch keydown inside one evaluate) and test item
+  use from clear ground, not at the counter you bought it from.
 - The on-screen joystick VISUAL was never once visible on a real phone until 077.
   `#stick` was `position:absolute` inside `#jzone`, but input.js assigns it raw
   `clientX/clientY` — and #jzone is anchored `bottom:0`, so its top edge sits

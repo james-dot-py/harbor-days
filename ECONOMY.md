@@ -81,6 +81,9 @@ celebrates the moment. `first` is the once-ever gift; `repeat` is the trickle.
 | fetch: a dog brings it back | `fetch` | 5 | 2 (cd 4) | fetch: good dog |
 | sanctuary: a deck sit | `sanctuary.sit` | 5 | 1 (cd 20) | sanctuary: sat a while |
 | the fireworks finale (3 in 4 s) | `fireworks` | 6 | 2 (cd 8) | fireworks: the finale |
+| a kite flight (Cricket Hill) | `kite` | 5 | 2 (cd 10) | flew a kite (080) |
+| sea glass, pocketed | `seaglass` | 5 | 2 | lake glass, pocketed (080) |
+| an Old Style at the drink rail | `rooftop.rail` | 5 | 2 (cd 20) | the drink rail (080) |
 | a zone, first found (×11) | `zone.<name>` | 3 | **0** | found \<name\> |
 | favor: an Old Style for the Malört guy | (favors) | 12 | — | the Malört guy |
 
@@ -119,13 +122,22 @@ paid repeats in a session (min +1). Never zero — a trickle still smiles.
   Consistent with "pay the toast that already celebrates it"; worth a look.
 - A casual session measured ~20–40 dibs without trying, as designed.
 
-### Pilot prices (beach kiosk)
+### The shops (080 — four, each diegetic: a counter, a keeper, the framework card)
 
-| item        | dibs | why this price                                    |
-|-------------|------|---------------------------------------------------|
-| popcorn bag | 5    | first purchase — buy it the session you find it   |
-| tennis ball | 8    | a toy you keep forever; still session-one money   |
-| bucket hat  | 25   | the saver item — one good session, per 082's bar  |
+Prices honor the 1–3-casual-sessions bar; cosmetics are the saver tier. The
+penny machine is the game's one deliberate SINK, and it costs exactly 1 dib
+because the crank is the souvenir.
+
+| shop | where | stock (dibs) |
+|---|---|---|
+| **the beach kiosk** (078's pilot, expanded) | dog-beach approach (100,−353) | popcorn 5 · tennis ball 8 · skip-stone pouch 10 · kite 15 · paper pirate hat 12 · bucket hat 25 |
+| **Sluggers to-go** | the Sluggers storefront, Clark St (by the favor door) | Chicago dog 6 · Old Style 6 · ballcap (blue) 25 |
+| **LOLLA MERCH** | Butler Field entry, Grant Park | boombox-to-go 35 (festival price — that's the joke) · flower crown 20 |
+| **the museum cart** | Michigan Ave sidewalk, by the lions | museum coffee 6 · birder's boonie 22 · winter pom hat 25 · **penny machine: 1 dib a crank** |
+
+Sluggers note: buying an Old Style while the Malört-guy favor's first step is
+open counts as step 1 (the counter pack watches the bag) — the favor door's
+free can still works and still wins its own spot.
 
 ---
 
@@ -154,6 +166,39 @@ Rules: every item **does** something ("toy, not trophy" — 080's law).
 Holdables are infinite-use toys, not consumables with counts to babysit —
 the popcorn bag refills itself by the next visit (count exists in the schema
 for future collectibles, but the pilot never decrements a toy).
+
+### The catalog (080 — what each item DOES)
+
+- **hot dog** (Sluggers) — hold a Chicago dog, eat it in three bites: munch,
+  crumbs at your feet, "no ketchup. obviously." A fresh one appears next hold.
+- **Old Style** (Sluggers) — the favor prop, now buyable; carry one up to the
+  Sheffield rooftop and rest it on the DRINK RAIL for the toast beat (pays).
+- **museum coffee** (the cart) — hold it and steam curls off; a 25 s pep in
+  your step (speedMult 1.22, never stomping a Divvy/vehicle multiplier).
+- **kite** (the kiosk) — your OWN kite; Cricket Hill's summit flight flies it
+  (montrose-kite reads the bag), and launches now pay.
+- **boombox-to-go** (LOLLA MERCH) — the beach boombox's radio engine, in your
+  hand, anywhere; R cycles the same six stations (progression `radioApi`).
+- **skip-stone pouch** (the kiosk) — skip stones at ANY water's edge, not just
+  the Rocks piles; same `stones` payout, infinite flat ones.
+- **popcorn / tennis ball** — the 078 pilots, unchanged (bird lure / universal
+  fetch).
+- **sea glass** (found, never sold) — beachcombing spots on the dog beach and
+  Montrose Beach sand; four colors, a journal page, colors persist.
+- **smashed pennies** (MADE at the museum cart) — insert 1 dib, crank the
+  wheel (the crank matters more than the penny), keep the souvenir; four
+  designs (the Bean · a lion · the clock tower · the plover), journal page,
+  designs persist.
+
+### Hats (080 — the cosmetics tier, i.e. the retention system)
+
+Six, sold across the four shops, each a ONE-DRAW merged mesh parented to the
+mayor's head (022 mayor-only rules — shared createChibi untouched; survives
+sit/squash/skate). The tote equips/unequips; `save.worn` persists the look.
+bucket hat 25 (kiosk) · paper pirate hat 12 (the kids' kiosk) · ballcap,
+Cubs-coded 25 (Sluggers) · flower crown 20 (LOLLA) · birder's boonie 22 +
+winter pom hat 25 (the museum cart — yes, a winter hat in July; the rink
+misses you).
 
 ### Pilot item behaviors
 

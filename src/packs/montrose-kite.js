@@ -16,7 +16,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { onWorldReady, registerUpdate, addInteraction, chargeThrow, toast,
-         journalSection, state, getAudioCtx } from '../framework.js';
+         journalSection, state, getAudioCtx, bag, wallet } from '../framework.js';
 import { scene, camera, toon, bmat, clamp, lerp, lerpAngle } from '../core.js';
 import { cam } from '../input.js';
 import { mayor, mparts } from '../character.js';
@@ -73,17 +73,23 @@ onWorldReady((player) => {
   const dg = new THREE.BufferGeometry();
   dg.setAttribute('position', new THREE.Float32BufferAttribute(dpos, 3));
   dg.setIndex([0, 1, 2, 0, 2, 3]); dg.computeVertexNormals();
-  kite.add(new THREE.Mesh(dg, bmat(KITE_COL, { side: THREE.DoubleSide })));
+  const sail = new THREE.Mesh(dg, bmat(KITE_COL, { side: THREE.DoubleSide }));
+  kite.add(sail);
   const spine = new THREE.Mesh(new THREE.BoxGeometry(0.05, 2.2, 0.05), bmat(0x2a2a2a));
   spine.position.y = -0.05; kite.add(spine);
   const spar = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 1.44), bmat(0x2a2a2a));
   kite.add(spar);
   const tailCol = [0xffffff, KITE_COL, 0xffffff];
+  let midBow = null;
   for (let b = 0; b < 3; b++) {
     const bow = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.14, 0.34), bmat(tailCol[b], { side: THREE.DoubleSide }));
     bow.position.set(0.02, -1.35 - b * 0.55, (b % 2 ? 0.22 : -0.22));
     bow.rotation.x = (b % 2 ? -0.5 : 0.5); kite.add(bow);
+    if (b === 1) midBow = bow;
   }
+  // 080: owning the kiosk's kite bundle makes the summit flight YOUR kite — the
+  // sail (and its matching tail bow) turns the bundle's teal on launch.
+  const OWN_COL = 0x2aa6a0;
 
   // ------------------------------ flight session ------------------------------
   // phases: 'ascend' (hand→aloft), 'aloft' (holds + sways), 'reel' (aloft→hand),
@@ -95,6 +101,9 @@ onWorldReady((player) => {
         _dP = new THREE.Vector3(), _dT = new THREE.Vector3();
 
   function launchKite(power){
+    const own = bag.has('kite');                        // 080: the kiosk bundle = your own kite
+    sail.material.color.set(own ? OWN_COL : KITE_COL);
+    if (midBow) midBow.material.color.set(own ? OWN_COL : KITE_COL);
     sess.active = true; sess.phase = 'ascend'; sess.seed = true; sess.t = 0;
     sess.up = 1.2; sess.lean = 0.3;                     // starts near the hand
     sess.upTgt = 8 + power * 5;                         // ~8..13 m — matches the ambient flyers' kites
@@ -103,7 +112,9 @@ onWorldReady((player) => {
     flyInter.enabled = false; reelInter.enabled = true;
     state.kitesFlown++; state.kiteBest = Math.max(state.kiteBest, Math.round(power * 100));
     sGust();
-    toast('UP SHE GOES', "the wind's got it — reel in when you're done");
+    toast('UP SHE GOES', own ? "your kite — the wind's got it. reel in when you're done"
+                             : "the wind's got it — reel in when you're done");
+    wallet.pay({ key: 'kite', first: 5, repeat: 2, reason: 'flew a kite', firstReason: 'first flight!', label: 'kites', cd: 10 });
   }
   function beginReel(){
     if(sess.phase === 'ascend' || sess.phase === 'aloft'){
@@ -119,7 +130,11 @@ onWorldReady((player) => {
   reelInter.enabled = false;
 
   // --------------------------------- per frame --------------------------------
+  let labelAcc = 0;
   registerUpdate((dt, t, pl) => {
+    // 080: the prompt says whose kite flies (throttled — no per-frame bag reads)
+    labelAcc -= dt;
+    if(labelAcc <= 0){ labelAcc = 1.2; if(!sess.active) flyInter.setLabel(bag.has('kite') ? 'fly YOUR kite' : 'fly a kite'); }
     if(!sess.active) return;
     sess.t += dt;
 
