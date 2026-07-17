@@ -38,6 +38,15 @@ const REBUILD_EVERY = 2.0;   // s — rescan the scene graph for candidates
 const CULL_EVERY    = 0.12;  // s — re-test visibility against the live fog.far
 const MARGIN        = 8;     // m — sphere-test safety past fog.far
 
+// Low-power mode (task 085 settings): cull HARDER — pull the cutoff ~48 m INSIDE
+// fog.far. Meshes at that depth are already ~80% fog color, so the tradeoff is a
+// little popping in the far haze for fewer draw calls on old phones. Off = the
+// pixel-neutral MARGIN above; this is the one honest "smoother, slightly less"
+// knob the low-power toggle owns.
+const LOWPWR_MARGIN = -48;
+let _lowPower = false;
+export function setLowPowerCull(on){ _lowPower = !!on; }
+
 let registry   = [];             // [{ o, sphere }]; rebuilt on the REBUILD cadence
 let rebuildAcc = REBUILD_EVERY;  // seed >= period so both fire on the first frame
 let cullAcc    = CULL_EVERY;
@@ -99,7 +108,7 @@ function cull(){
   const e = camera.matrixWorld.elements;
   _camPos.set(e[12], e[13], e[14]);
   _fwd.set(-e[8], -e[9], -e[10]).normalize();   // camera looks down its own -Z
-  const cutoff = far + MARGIN;
+  const cutoff = far + (_lowPower ? LOWPWR_MARGIN : MARGIN);
   for (let i = 0; i < registry.length; i++){
     const entry = registry[i], o = entry.o, s = entry.sphere;
     // A brand-new object may still carry an identity matrixWorld for up to

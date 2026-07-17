@@ -35,6 +35,16 @@ const JOY_DEAD=5;      // px of slop at the origin: kills thumb tremor at rest
 const orb={id:null,lx:0,ly:0,lt:0,touch:false};
 const glide={vy:0,vp:0};
 
+// ---- look feel overrides (task 085 settings) ----
+// _lookScale multiplies BOTH mouse and touch sensitivity (1 = today's exact
+// feel — the TOUCH_/MOUSE_ constants above are untouched). _invertY is a SIGN
+// (+1 normal, -1 inverted) applied to every pitch delta, drag and coast alike,
+// so invert-Y is honored in both paths. The raw cam.lookPx odometer that
+// onboarding reads stays UNSCALED — it counts thumb travel, not look angle.
+let _lookScale=1,_invertY=1;
+export function setLookScale(v){_lookScale=clamp(v,0.2,3);}
+export function setInvertY(on){_invertY=on?-1:1;}
+
 // updateCam(dt) : main.js calls this once per frame, before it places the chase
 // camera. Applies the touch look-inertia; a no-op on desktop and while a finger
 // is still down.
@@ -77,16 +87,17 @@ export function initInput(){
     if(e.pointerId!==orb.id)return;
     const dx=e.clientX-orb.lx,dy=e.clientY-orb.ly;
     orb.lx=e.clientX;orb.ly=e.clientY;
-    const sy=orb.touch?TOUCH_YAW:MOUSE_YAW,sp=orb.touch?TOUCH_PIT:MOUSE_PIT;
+    const sy=(orb.touch?TOUCH_YAW:MOUSE_YAW)*_lookScale,sp=(orb.touch?TOUCH_PIT:MOUSE_PIT)*_lookScale;
+    const dp=dy*sp*_invertY;            // pitch delta, sensitivity + invert applied
     cam.yaw-=dx*sy;
-    cam.pitch=clamp(cam.pitch+dy*sp,PITCH_LO,PITCH_HI);
+    cam.pitch=clamp(cam.pitch+dp,PITCH_LO,PITCH_HI);
     cam.freeT=1.6;
     if(orb.touch){
       cam.lookPx+=Math.abs(dx)+Math.abs(dy);
       // sample the instantaneous angular rate to hand to the coast on release
       const st=Math.max(0.008,(e.timeStamp-orb.lt)/1000);orb.lt=e.timeStamp;
       glide.vy=clamp(-dx*sy/st,-GLIDE_MAX,GLIDE_MAX);
-      glide.vp=clamp(dy*sp/st,-GLIDE_MAX,GLIDE_MAX);
+      glide.vp=clamp(dp/st,-GLIDE_MAX,GLIDE_MAX);
     }
   });
   // release: the glide survives (that IS the inertia). A stale flick from a

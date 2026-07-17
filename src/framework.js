@@ -37,6 +37,12 @@ export { getAudioCtx };
 
 const _v=new THREE.Vector3();            // cached scratch vector (no per-frame alloc)
 
+// prefersCalm() — the ONE reduced-motion flag packs read (task 085 settings).
+// Backed by game.calm (core.js), set live by settings.js from the OS
+// prefers-reduced-motion query or the player's explicit toggle. A pack that
+// animates sway/bob/flash should skip or soften it when this is true.
+export const prefersCalm=()=>game.calm;
+
 // ------------------------------ session state --------------------------
 // state — shared session-only bag (flags/counts/bests). Packs add their own
 // fields freely, e.g. state.stonesSkipped = (state.stonesSkipped||0)+1.
@@ -566,6 +572,7 @@ function toggleJournal(force){
   if(open){
     if(elTote)elTote.classList.remove('show');   // one card at a time
     if(elShop)elShop.classList.remove('show');
+    { const s=$('settings');if(s)s.classList.remove('show'); }   // (settings card too — task 085)
     renderJournal();elJournal.classList.add('show');
   }else elJournal.classList.remove('show');
 }
@@ -577,7 +584,8 @@ function toggleJournal(force){
 let _filterTO=null;
 export const screenFx={
   flash(color,ms=300){
-    _fxflash.style.transition='none';_fxflash.style.background=color;_fxflash.style.opacity='0.85';
+    const peak=game.calm?0.34:0.85;                    // reduced-motion softens the flash (task 085)
+    _fxflash.style.transition='none';_fxflash.style.background=color;_fxflash.style.opacity=String(peak);
     void _fxflash.offsetWidth;                         // force reflow
     _fxflash.style.transition=`opacity ${ms}ms ease-out`;_fxflash.style.opacity='0';
   },
@@ -898,6 +906,7 @@ function renderTote(){
 }
 function openTote(){
   toggleJournal(false);if(elShop)elShop.classList.remove('show');   // one card at a time
+  { const s=$('settings');if(s)s.classList.remove('show'); }        // (settings card too — task 085)
   renderTote();
   if(elTote)elTote.classList.add('show');
 }
@@ -911,6 +920,7 @@ export const shop={
     if(elShopTitle)elShopTitle.textContent=title||'the kiosk';
     if(elShopKeeper)elShopKeeper.textContent=keeper||'';
     toggleJournal(false);if(elTote)elTote.classList.remove('show');   // one card at a time
+    { const s=$('settings');if(s)s.classList.remove('show'); }        // (settings card too — task 085)
     renderShop();
     if(elShop)elShop.classList.add('show');
   },

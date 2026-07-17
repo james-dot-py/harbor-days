@@ -501,8 +501,11 @@
        the first seconds, so it surfaces every session. Seat the chip as the
        row's NEXT slot (208 + 6px gap) — "with the right-side buttons", which is
        what ECONOMY.md asks for and what this row is in landscape. */
-    body.touch #dibs{left:calc(214px + var(--sal))}
-    body.touch #dibsPop{left:calc(214px + var(--sal))}
+    /* the new ⚙ settings gear takes the row's next slot after 🧺 (214); the dibs
+       chip + its register pop slide one slot further right (268) so the earned-dib
+       chip never lands on the gear (the 078/079 same-box HUD-overlap class). */
+    body.touch #dibs{left:calc(268px + var(--sal))}
+    body.touch #dibsPop{left:calc(268px + var(--sal))}
     body.touch #btnFire{right:calc(16px + var(--sar));bottom:calc(14px + var(--sab));width:68px;height:68px;font-size:30px}
     body.touch #btnAct{right:calc(94px + var(--sar));bottom:calc(14px + var(--sab));width:64px;height:64px;font-size:28px}
     body.touch #btnJump{right:calc(16px + var(--sar));bottom:calc(90px + var(--sab));width:52px;height:52px;font-size:23px}
@@ -515,6 +518,91 @@
     /* the tote button joins the top-left utility row (clear of the joystick zone
        at bottom-left) rather than the right action cluster */
     body.touch #btnTote{top:calc(60px + var(--sat));right:auto;left:calc(164px + var(--sal))}
+  }
+
+  /* ---------- settings gear + card (task 085) ---------- */
+  /* the ⚙ gear sits beside "?" (14) and ♥ (54): the third bottom-left pill on
+     desktop; on touch it joins the right utility rail below 🧺 (portrait) or the
+     top-left utility row (landscape, set above). Hidden until "let's walk". */
+  #btnSettings{position:fixed;left:calc(94px + var(--sal));bottom:calc(12px + var(--sab));width:34px;height:34px;border:none;border-radius:50%;cursor:pointer;
+    z-index:21;background:rgba(253,246,230,.92);color:var(--ink);font-size:16px;line-height:1;
+    box-shadow:0 3px 0 rgba(122,62,44,.22);display:none;align-items:center;justify-content:center;padding:0}
+  body.touch #btnSettings{left:auto;right:calc(14px + var(--sar));top:calc(434px + var(--sat));bottom:auto;width:44px;height:44px;font-size:20px}
+
+  #settings{position:fixed;inset:0;z-index:29;display:none;align-items:center;justify-content:center;background:rgba(74,59,47,.38)}
+  #settings.show{display:flex}
+  .setcard{position:relative;background:var(--cream);color:var(--ink);border-radius:22px;
+    padding:22px 26px 18px;width:min(430px,88vw);max-height:82vh;overflow-y:auto;box-sizing:border-box;
+    box-shadow:0 10px 0 rgba(122,62,44,.28),0 24px 50px rgba(122,62,44,.25)}
+  .setcard h1{font-size:16px;letter-spacing:.22em;margin:0 0 6px;text-align:center;color:var(--ink);text-shadow:0 2px 0 #f3d9a7}
+  #setClose{position:absolute;top:12px;right:14px;width:30px;height:30px;border:none;border-radius:50%;cursor:pointer;
+    background:#e0766a;color:#fff;font-size:16px;line-height:1;box-shadow:0 2px 0 rgba(122,62,44,.3);padding:0}
+  body.touch #setClose{width:44px;height:44px;font-size:21px}
+  .setsec{margin:13px 0 2px}
+  .setsec h2{margin:0 0 4px;color:#8a5a3a;font-size:13px;letter-spacing:.12em;text-transform:uppercase}
+  .setrow{display:flex;align-items:center;gap:14px;padding:9px 0;border-bottom:1px dashed #e3d3b4}
+  .setlabel{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:2px;color:var(--ink);font-size:14px}
+  .setlabel .setname{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .setlabel em{font-style:normal;color:#9c8168;font-size:12px;white-space:nowrap}
+  .setsub{color:#9c8168;font-size:11.5px;line-height:1.35}
+  /* slider — cozy cream track, coral-green thumb; touch bumps the target size */
+  .setslider{flex:0 0 148px;width:148px;height:6px;-webkit-appearance:none;appearance:none;border-radius:999px;
+    background:#e6d3b0;outline:none;margin:0}
+  .setslider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;
+    background:#5db06b;box-shadow:0 2px 0 rgba(63,138,77,.7);cursor:pointer}
+  .setslider::-moz-range-thumb{width:20px;height:20px;border:none;border-radius:50%;
+    background:#5db06b;box-shadow:0 2px 0 rgba(63,138,77,.7);cursor:pointer}
+  body.touch .setslider{flex-basis:130px;width:130px;height:10px}
+  body.touch .setslider::-webkit-slider-thumb{width:28px;height:28px}
+  body.touch .setslider::-moz-range-thumb{width:28px;height:28px}
+  /* toggle switch */
+  .setsw{position:relative;display:inline-block;flex:0 0 auto;width:46px;height:26px;cursor:pointer}
+  .setsw input{position:absolute;inset:0;opacity:0;margin:0;width:100%;height:100%;cursor:pointer}
+  .settrack{position:absolute;inset:0;border-radius:999px;background:#d9c6a8;transition:background .18s ease}
+  .setknob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;
+    box-shadow:0 2px 0 rgba(122,62,44,.25);transition:left .18s ease}
+  .setsw input:checked+.settrack{background:#5db06b}
+  .setsw input:checked+.settrack .setknob{left:23px}
+  body.touch .setsw{width:54px;height:32px}
+  body.touch .setknob{width:26px;height:26px}
+  body.touch .setsw input:checked+.settrack .setknob{left:25px}
+  /* segmented S / M / L */
+  .setseg{display:inline-flex;flex:0 0 auto;gap:2px;padding:3px;border-radius:12px;background:rgba(255,236,214,.7)}
+  .setseg button{border:none;background:transparent;color:#8a5a3a;font-family:inherit;font-size:13px;font-weight:700;
+    cursor:pointer;width:34px;height:28px;border-radius:9px;padding:0}
+  .setseg button.on{background:#5db06b;color:#fff;box-shadow:0 2px 0 rgba(63,138,77,.6)}
+  body.touch .setseg button{width:42px;height:38px;font-size:14px}
+
+  /* ---------- UI TEXT SCALE (task 085) ----------
+     --uiscale multiplies HUD font sizes; text size M sets it to 1 AND removes the
+     html.uiscaled class, so M adds no rules and is byte-identical to pre-085 (no
+     baseline shift). The html-prefix lifts specificity over the body.touch
+     orientation rules; the block sits last so ties resolve in its favor. */
+  html.uiscaled #pill{font-size:calc(14px * var(--uiscale,1))}
+  html.uiscaled #hint{font-size:calc(13px * var(--uiscale,1))}
+  html.uiscaled #banner{font-size:calc(clamp(16px,3.4vw,22px) * var(--uiscale,1))}
+  html.uiscaled #toastMain{font-size:calc(16px * var(--uiscale,1))}
+  html.uiscaled #toastSub{font-size:calc(12px * var(--uiscale,1))}
+  html.uiscaled #dibsN{font-size:calc(15px * var(--uiscale,1))}
+  html.uiscaled #dibsPop{font-size:calc(12px * var(--uiscale,1))}
+  html.uiscaled #prompt{font-size:calc(14px * var(--uiscale,1))}
+  html.uiscaled body.touch #prompt{font-size:calc(13px * var(--uiscale,1))}
+  html.uiscaled .jtitle{font-size:calc(30px * var(--uiscale,1))}
+  html.uiscaled .jsec h2{font-size:calc(15px * var(--uiscale,1))}
+  html.uiscaled .jrow{font-size:calc(14px * var(--uiscale,1))}
+  html.uiscaled .ctlcard h1,html.uiscaled .setcard h1{font-size:calc(16px * var(--uiscale,1))}
+  html.uiscaled .ctlrow{font-size:calc(13.5px * var(--uiscale,1))}
+  html.uiscaled .setsec h2{font-size:calc(13px * var(--uiscale,1))}
+  html.uiscaled .setlabel{font-size:calc(14px * var(--uiscale,1))}
+  html.uiscaled .tcap,html.uiscaled .srow .sinfo b{font-size:calc(14px * var(--uiscale,1))}
+
+  /* Landscape gear placement — the top-left utility row's slot after 🧺 (214),
+     with the dibs chip at 268. This MUST come AFTER the base `body.touch
+     #btnSettings` (portrait: right/434) above: a media query adds NO specificity,
+     so equal-specificity rules resolve by SOURCE ORDER (the 079 PITFALLS trap —
+     placed earlier, the portrait rule parked the gear off-screen in landscape). */
+  @media (orientation:landscape){
+    body.touch #btnSettings{top:calc(60px + var(--sat));right:auto;bottom:auto;left:calc(214px + var(--sal))}
   }
 </style>
 </head>
@@ -553,7 +641,40 @@
 <div id="journal"><div class="jcard"><button id="journalClose">&times;</button><h1 class="jtitle">Journal</h1><div id="journalBody"></div></div></div>
 <button id="btnHelp">?</button>
 <a id="btnKofi" href="https://ko-fi.com/jimbobuildsope" target="_blank" rel="noopener" aria-label="Support development on Ko-fi" title="Support development">&hearts;</a>
+<button id="btnSettings" aria-label="Settings" title="Settings">&#9881;&#65039;</button>
 <div id="ctl"><div class="ctlcard"><button id="ctlClose">&times;</button><h1>CONTROLS</h1><div id="ctlBody"></div></div></div>
+
+<!-- settings card (task 085): audio · camera · accessibility · low-power. Cozy,
+     not modal — the world keeps running behind it. All controls wired + persisted
+     in src/settings.js; defaults reproduce today's behavior exactly. -->
+<div id="settings"><div class="setcard"><button id="setClose">&times;</button><h1>SETTINGS</h1>
+  <div id="setBody">
+    <div class="setsec"><h2>Audio</h2>
+      <div class="setrow"><span class="setlabel"><span class="setname">Music<em id="setMusicV">100%</em></span></span>
+        <input type="range" class="setslider" id="setMusic" min="0" max="100" value="100" aria-label="Music volume"></div>
+      <div class="setrow"><span class="setlabel"><span class="setname">Sound effects<em id="setSfxV">100%</em></span></span>
+        <input type="range" class="setslider" id="setSfx" min="0" max="100" value="100" aria-label="Sound-effects volume"></div>
+      <div class="setrow"><span class="setlabel"><span class="setname">Mute everything</span></span>
+        <label class="setsw"><input type="checkbox" id="setMute"><span class="settrack"><span class="setknob"></span></span></label></div>
+    </div>
+    <div class="setsec"><h2>Camera</h2>
+      <div class="setrow"><span class="setlabel"><span class="setname">Look sensitivity<em id="setLookV">100%</em></span></span>
+        <input type="range" class="setslider" id="setLook" min="40" max="200" value="100" aria-label="Look sensitivity"></div>
+      <div class="setrow"><span class="setlabel"><span class="setname">Invert vertical look</span></span>
+        <label class="setsw"><input type="checkbox" id="setInvert"><span class="settrack"><span class="setknob"></span></span></label></div>
+    </div>
+    <div class="setsec"><h2>Accessibility</h2>
+      <div class="setrow"><span class="setlabel"><span class="setname">Reduced motion</span><span class="setsub">calmer camera, softer flashes</span></span>
+        <label class="setsw"><input type="checkbox" id="setCalm"><span class="settrack"><span class="setknob"></span></span></label></div>
+      <div class="setrow"><span class="setlabel"><span class="setname">Text size</span></span>
+        <div class="setseg" id="setText"><button id="setText-s">S</button><button id="setText-m" class="on">M</button><button id="setText-l">L</button></div></div>
+    </div>
+    <div class="setsec"><h2>Performance</h2>
+      <div class="setrow"><span class="setlabel"><span class="setname">Low-power mode</span><span class="setsub">caps resolution &amp; draw distance &mdash; smoother on older phones</span></span>
+        <label class="setsw"><input type="checkbox" id="setLow"><span class="settrack"><span class="setknob"></span></span></label></div>
+    </div>
+  </div>
+</div></div>
 
 <!-- economy (task 078): the dibs chip (folding lawn chair + count), the small
      register pop, and the tote + shop modal cards. All hidden at boot. -->

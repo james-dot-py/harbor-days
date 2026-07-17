@@ -11,6 +11,7 @@ import { FX, DUST, PASTELS, fw, rockets, scheduled, boomLights, setType, updateF
 import { initAudio, audioDbg, audioCtx, installAudioResumeNet, sStep, sChime, sPop, updateAmbience } from './audio.js';
 import { cam, keys, joy, jump, initInput, updateCam } from './input.js';
 import { initOnboarding, updateOnboarding } from './onboard.js';
+import { initSettings } from './settings.js';
 import { mmInit, mmDraw, initMinimapToggle } from './minimap.js';
 import * as CH from './data/chicago.js';
 import { worldReady, runUpdates, state } from './framework.js';
@@ -181,6 +182,7 @@ mmInit();
 initInput();
 installAudioResumeNet();   // mobile audio safety net: resume() on any gesture / refocus (issue 007)
 initMinimapToggle();
+initSettings();   // task 085: load + apply saved settings (DPR/audio/look/calm) before frame 1, wire the card
 
 // ---- framework: run queued pack setup now the world exists ----
 const _tp0=performance.now();
@@ -344,7 +346,8 @@ function frame(now){
   }
   jphys.squash*=Math.exp(-9*dt);
   mayor.position.set(player.x,player.y,player.z);
-  mayor.scale.set(MSCL.x*(1+0.1*jphys.squash),MSCL.y*(1-0.18*jphys.squash),MSCL.z*(1+0.1*jphys.squash));
+  const sq=game.calm?jphys.squash*0.4:jphys.squash;   // reduced-motion tones the jump squash/stretch (task 085)
+  mayor.scale.set(MSCL.x*(1+0.1*sq),MSCL.y*(1-0.18*sq),MSCL.z*(1+0.1*sq));
 
   const sp=Math.hypot(player.vx,player.vz);
   if(sp>0.4)mayor.rotation.y=lerpAngle(mayor.rotation.y,Math.atan2(player.vx,player.vz),1-Math.exp(-10*dt));
@@ -406,7 +409,8 @@ function frame(now){
     pvz-Math.cos(cam.yaw)*horiz);
   if(camCtl.snap){camPos.copy(camTarget);camCtl.snap=false;}
   camPos.lerp(camTarget,1-Math.exp(-8*dt));
-  const shx=(Math.random()-0.5)*fw.shake*0.5,shy=(Math.random()-0.5)*fw.shake*0.5,shz=(Math.random()-0.5)*fw.shake*0.5;
+  const shA=game.calm?0:fw.shake*0.5;   // reduced-motion disables the firework camera sway (task 085)
+  const shx=(Math.random()-0.5)*shA,shy=(Math.random()-0.5)*shA,shz=(Math.random()-0.5)*shA;
   camera.position.set(camPos.x+shx,camPos.y+shy,camPos.z+shz);
   camera.lookAt(pvx,pvy+0.1+Math.tan(upT)*horiz*1.35,pvz);
   const fovT=50+(rideSpd>0?clamp((sp-7)*0.7,0,6):(runF&&sp>6?4:0))+(jphys.air?1.2:0);   // gentle speed/air FOV kick (+ a matching bike tier: eases from ~+2.5 cruising to +6 sprinting)
@@ -496,6 +500,7 @@ function runStart(){
   }
   $('btnHelp').style.display='flex';   // the hint auto-hides; the "?" button is the permanent way back
   $('btnKofi').style.display='flex';   // ♥ Ko-fi support button, beside "?"
+  $('btnSettings').style.display='flex';   // ⚙ settings card (task 085), beside "?" / ♥
   initOnboarding();    // touch only: ghost thumbs teach walk / look / interact (task 077)
 }
 
@@ -525,12 +530,13 @@ function runStart(){
       +(document.body.classList.contains('touch')?'⬆️':'SPACE')+' hop-spins.</div>';
   }
   const close=()=>card.classList.remove('show');
-  btn.addEventListener('click',()=>{if(card.classList.contains('show'))close();else{fill();card.classList.add('show')}});
+  const open=()=>{const s=$('settings');if(s)s.classList.remove('show');fill();card.classList.add('show');};   // one card at a time (task 085)
+  btn.addEventListener('click',()=>{if(card.classList.contains('show'))close();else open();});
   $('ctlClose').addEventListener('click',close);
   card.addEventListener('click',e=>{if(e.target===card)close()});
   addEventListener('keydown',e=>{
     if(e.key==='Escape')close();
-    else if(e.key==='?'){if(card.classList.contains('show'))close();else{fill();card.classList.add('show')}}
+    else if(e.key==='?'){if(card.classList.contains('show'))close();else open();}
   });
 }
 $('start').addEventListener('click',()=>{initAudio();runStart();

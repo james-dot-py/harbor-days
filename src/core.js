@@ -20,8 +20,11 @@ export function pip(px,pz,poly){let ins=false;for(let i=0,j=poly.length-1;i<poly
 export const $ = id=>document.getElementById(id);
 export const WATER_Y = -2.3;
 
-// shared mutable game state (late-bound reads across modules)
-export const game = {running:false, tNow:0};
+// shared mutable game state (late-bound reads across modules). `calm` is the
+// single reduced-motion flag (task 085 settings): fx.js / main.js read it each
+// frame, framework.js re-exports prefersCalm()=>game.calm for packs. Default
+// false = today's full-motion behavior; settings.js flips it live.
+export const game = {running:false, tNow:0, calm:false};
 
 // --------------------------- renderer/scene ---------------------------
 export const renderer = new THREE.WebGLRenderer({antialias:true});
@@ -29,6 +32,15 @@ renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.setSize(innerWidth,innerHeight);
 renderer.setClearColor(0xffb98a);
 document.body.appendChild(renderer.domElement);
+// Low-power mode (task 085 settings): cap devicePixelRatio at 1 on old phones —
+// a retina panel then renders 1/4 the fragments. Off = today's min(dpr,2). The
+// setSize re-applies the new ratio; pixelRatio persists across main.js's resize.
+export function setLowPowerDPR(on){
+  const r=Math.min(devicePixelRatio,on?1:2);
+  if(r===renderer.getPixelRatio())return;   // no-op if unchanged — applySettings() runs on every slider tick; a setSize per tick would churn the drawing buffer
+  renderer.setPixelRatio(r);
+  renderer.setSize(innerWidth,innerHeight);
+}
 
 export const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0xf6ab84,55,210);

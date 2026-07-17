@@ -93,7 +93,12 @@ export function burst(x,y,z,count,speed,rgb,life,size,grav=0,drag=0,flat=1){
 export const PASTELS=[0xff9ec7,0x9ef2c0,0xc3a8ff,0xffd98a,0x9edcff];
 function explode(r){
   const{x,y,z,type}=r;
-  fw.shake=Math.min(fw.shake+0.25,0.6);fw.ambPulse=Math.min(0.45,fw.ambPulse+0.28);
+  // reduced-motion (task 085): soften the burst's camera shake + the global
+  // light-flash pulse. main.js already zeroes the shake APPLICATION when calm;
+  // toning the ambPulse here is what actually calms the sky-flash brightness.
+  const calm=game.calm;
+  fw.shake=Math.min(fw.shake+(calm?0.06:0.25),0.6);
+  fw.ambPulse=Math.min(calm?0.12:0.45,fw.ambPulse+(calm?0.08:0.28));
   addBoom(x,y,z);sBoom();mmPing(x,z);
   if(type===0){
     const rgb=hexRGB(PASTELS[rng()*PASTELS.length|0]);

@@ -1390,17 +1390,18 @@ function makeLS(seed){
     clear:()=>m.clear(), _m:m,
   };
 }
-// (a) v0 -> v1 migration keeps every field
+// (a) v0 -> current (v2, task 085) migration walks the whole chain and keeps every field
 makeLS({'ope.save.v1':JSON.stringify({v:0,dibs:7,bag:{'bucket-hat':1},worn:'bucket-hat',favors:{oldstyle:{st:'done',step:2}},zones:['Belmont Harbor'],counters:{fetches:3},flags:{'ope.stamp.lakefront':'1'}})});
 const sv1=await import('../src/store.js?sv=wp1');
 const wb1=sv1.getSave();
-expect('082 v0->v1 version',wb1.v,1);
-expect('082 v0->v1 dibs',wb1.dibs,7);
-expect('082 v0->v1 worn',wb1.worn,'bucket-hat');
-expect('082 v0->v1 favor',wb1.favors.oldstyle.st,'done');
-expect('082 v0->v1 stamp flag',wb1.flags['ope.stamp.lakefront'],'1');
-expect('082 v0->v1 counter',wb1.counters.fetches,3);
-expect('082 v0->v1 NOT recovered',sv1.wasSaveRecovered(),false);
+expect('082 v0->v2 version',wb1.v,2);
+expect('082 v0->v2 dibs',wb1.dibs,7);
+expect('082 v0->v2 worn',wb1.worn,'bucket-hat');
+expect('082 v0->v2 favor',wb1.favors.oldstyle.st,'done');
+expect('082 v0->v2 stamp flag',wb1.flags['ope.stamp.lakefront'],'1');
+expect('082 v0->v2 counter',wb1.counters.fetches,3);
+expect('085 v0->v2 gains settings bag',typeof wb1.settings,'object');
+expect('082 v0->v2 NOT recovered',sv1.wasSaveRecovered(),false);
 // (b) round-trip via public API (mutate -> flushSave -> re-import the written string)
 makeLS();
 const sv2=await import('../src/store.js?sv=wp2');

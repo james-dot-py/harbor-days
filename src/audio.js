@@ -4,6 +4,27 @@ import { coastQuery, profileTotal } from './coast.js';
 // ------------------------------ audio ----------------------------------
 let actx=null,musicBus,sfxBus,noiseBuf,waveG=null,resumeTries=0;
 const AC_=window.AudioContext||window.webkitAudioContext;
+// ---- volume buses (task 085 settings) -------------------------------------
+// The Music / SFX sliders are 0..1 MULTIPLIERS over today's exact default gains
+// (MUSIC_BASE / SFX_BASE), so a fresh install with both at 1.0 reproduces the
+// shipped mix bit for bit — "defaults = today's behavior exactly". Master mute
+// zeroes both buses without disturbing the slider positions. settings.js calls
+// these at boot (actx still null → they only stash the module vars, the actx-
+// null-until-start contract is preserved) and again live from the card; they
+// apply to the real bus gains the moment initAudio() creates them.
+const MUSIC_BASE=0.16, SFX_BASE=0.85;
+let _musicVol=1,_sfxVol=1,_muted=false;
+function applyLevels(){
+  if(musicBus)musicBus.gain.value=_muted?0:MUSIC_BASE*_musicVol;
+  if(sfxBus)sfxBus.gain.value=_muted?0:SFX_BASE*_sfxVol;
+}
+export function setMusicVol(v){_musicVol=clamp(v,0,1);applyLevels();}
+export function setSfxVol(v){_sfxVol=clamp(v,0,1);applyLevels();}
+export function setMuted(b){_muted=!!b;applyLevels();}
+// audioLevels() — debug/tools + settings snapshot: the stored multipliers AND
+// the LIVE bus gains (null until initAudio). E2E asserts these change on drag.
+export function audioLevels(){return{musicVol:_musicVol,sfxVol:_sfxVol,muted:_muted,
+  musicGain:musicBus?musicBus.gain.value:null,sfxGain:sfxBus?sfxBus.gain.value:null};}
 export function initAudio(){
   if(actx)return;actx=new AC_();resumeAudio();
   musicBus=actx.createGain();musicBus.gain.value=0.16;
@@ -16,6 +37,7 @@ export function initAudio(){
   const wf=actx.createBiquadFilter();wf.type='lowpass';wf.frequency.value=480;
   waveG=actx.createGain();waveG.gain.value=0;
   ws.connect(wf);wf.connect(waveG);waveG.connect(sfxBus);ws.start();
+  applyLevels();   // fold in any settings chosen before start (muted / turned down)
   startMusic();
 }
 // --- persistent audio resume net (mobile) ------------------------------------

@@ -687,3 +687,27 @@ few turns to find; keep each to one line of symptom + fix.
   overwrites the corrupt value with the still-valid in-memory blob (082 save-integrity
   test). Reassuring property: the corrupt-recovery path only ever triggers on genuine
   external tampering / storage faults, exactly what it exists for.
+- SOURCE-ORDER corollary to the 079 "media query adds no specificity" law: a NEW
+  base rule appended AFTER an `@media` block still BEATS an equal-specificity rule
+  INSIDE that earlier media query — a media query adds no specificity, so the tie
+  breaks by document order and the later (base) rule wins even when the query
+  matches. Task 085 appended `body.touch #btnSettings` (portrait: right/top434)
+  in a block placed after the landscape `@media`, whose `body.touch #btnSettings`
+  (left214) sat earlier — so in LANDSCAPE the portrait rule won and parked the gear
+  off-screen at top434 on a 390-tall phone. The E2E's overlap check PASSED (the gear
+  was far-right, clear of the left chip) — only READING the rail PNG revealed the
+  missing gear. Fix: any orientation override must come AFTER its base rule in source
+  order (put a fresh trailing `@media` at the end). And assert HUD elements are
+  WITHIN the viewport, not just non-overlapping — an off-screen element trivially
+  clears every overlap test.
+- A rising-edge keyboard toggle (main.js `keys.has('b')` tote, journal 'j', etc.)
+  MISSES a `page.keyboard.press(k)` in a headless E2E: press = keydown+keyup within
+  one frame gap, so the frame's rising-edge check sees the key already released and
+  the toggle never fires (the keyboard twin of the touch-tap-misses-the-latch
+  pitfall). HOLD it: `keyboard.down(k)` · wait ≥1 frame (~150ms) · `keyboard.up(k)`.
+- A window keydown handler registered in the CAPTURE phase (`addEventListener('keydown',
+  fn, true)`) fires BEFORE all bubble-phase window handlers, so it reads the true
+  pre-state before another handler mutates the DOM. Task 085's settings-card Esc
+  toggle needed this: the framework's bubble-phase Esc closes the tote/shop, so a
+  bubble-phase settings handler would then see "nothing open" and pop settings up in
+  the same keypress. Capture-phase lets it correctly defer to a card that IS open.

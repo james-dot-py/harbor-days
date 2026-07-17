@@ -57,7 +57,8 @@ function rawRemove(k) { try { const s = probe(); if (s) s.removeItem(k); }     c
 
 // ------------------------------- the save ------------------------------
 const SAVE_KEY = 'ope.save.v1';               // storage key (constant; blob.v carries the SCHEMA version)
-const SAVE_V = 1;                             // current schema version — bump + add a MIGRATIONS rung, never mutate live fields
+const SAVE_V = 2;                             // current schema version — bump + add a MIGRATIONS rung, never mutate live fields
+                                              //   v2 (task 085): + settings{} (audio/camera/accessibility/low-power prefs)
 const LEGACY_FLAG_KEYS = ['ope.onboard.v1', 'ope.a2hs.v1'];   // 077 raw flag keys, absorbed on first load
 
 // schema migrations (task 082): MIGRATIONS[n] upgrades a v-n blob to v-(n+1).
@@ -72,6 +73,10 @@ const MIGRATIONS = {
   // This is the proven STUB (tools/tmp-082-save.mjs exercises a v0 blob end to
   // end); a real future bump replaces the body with the actual field moves.
   0: (o) => { o.v = 1; return o; },
+  // 1 -> 2 (task 085): add the settings bag. A v1 save (an existing player) opens
+  // forward with an empty settings{} — so it inherits today's defaults, exactly
+  // as intended; the settings card fills it in on first use.
+  1: (o) => { o.v = 2; if (!o.settings || typeof o.settings !== 'object') o.settings = {}; return o; },
 };
 
 let _recovered = false;   // a save EXISTED but was unusable (bad JSON / a version
@@ -93,7 +98,7 @@ function migrate(o) {
 }
 
 function freshBlob() {
-  return { v: SAVE_V, dibs: 0, bag: {}, worn: null, favors: {}, zones: [], counters: {}, flags: {} };
+  return { v: SAVE_V, dibs: 0, bag: {}, worn: null, favors: {}, zones: [], counters: {}, flags: {}, settings: {} };
 }
 
 // coerce a parsed object into a well-formed blob (defends against a partial or
@@ -107,6 +112,7 @@ function normalize(o) {
   if (Array.isArray(o.zones)) b.zones = o.zones;
   if (o.counters && typeof o.counters === 'object') b.counters = o.counters;
   if (o.flags && typeof o.flags === 'object') b.flags = o.flags;
+  if (o.settings && typeof o.settings === 'object') b.settings = o.settings;   // task 085
   return b;
 }
 
