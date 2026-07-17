@@ -24,10 +24,15 @@ acceptance: >
   deployed at playope.com/privacy (App Store requirement — plain-language:
   anonymous visit counting, no accounts, no personal data, local-only
   saves). (4) CI: a GitHub Actions macOS workflow (manual dispatch) that
-  builds the Capacitor iOS app and — once secrets exist — signs via
-  fastlane with an App Store Connect API key and uploads to TestFlight;
-  until then it runs through the unsigned build step green and documents
-  the 3 secrets the owner will paste (API key id/issuer/key). (5)
+  builds the Capacitor iOS app and signs via fastlane with the App Store
+  Connect API key, uploading to TestFlight. THE SECRETS ALREADY EXIST
+  (owner enrolled + supervisor set them 2026-07-16): repo Actions secrets
+  ASC_KEY_ID, ASC_ISSUER_ID, ASC_PRIVATE_KEY_B64 (the .p8, base64 — decode
+  in the workflow). Build the workflow against exactly those names; the
+  signing + TestFlight upload steps are LIVE, not stubs — the remaining
+  owner-only step is creating the App Store Connect app record (bundle id
+  com.playope.ope), which the runbook covers and fastlane can also do via
+  produce. (5)
   APPSTORE.md: the owner's runbook — enrollment steps ($99/yr individual),
   App Store Connect app creation, the secrets, TestFlight invite flow,
   and the honest REVIEW-RISK register: real-brand likenesses (Sluggers/
