@@ -1,0 +1,45 @@
+{
+ "band": {
+  "x": [
+   14,
+   244
+  ],
+  "z": [
+   -440,
+   -1084
+  ],
+  "step": 2,
+  "points": 37468,
+  "cols": 116,
+  "rows": 323
+ },
+ "totals": {
+  "walkable": 34488,
+  "water": 2566,
+  "blocked": 414
+ },
+ "isolatedIslets": [],
+ "pinholes": [],
+ "trail": {
+  "montrosePts": 17,
+  "mainLast4": [
+   [
+    211,
+    -448
+   ],
+   [
+    211,
+    -540
+   ],
+   [
+    210,
+    -560
+   ],
+   [
+    208,
+    -572
+   ]
+  ],
+  "fails": []
+ }
+}

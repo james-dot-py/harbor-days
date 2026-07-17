@@ -18,9 +18,9 @@ extend this document first.
 
 | Street line | Real | In-game z |
 |---|---|---|
-| Wilson Ave (4600 N) | +1.75 mi | **−1409** (Montrose beach/dunes latitude) |
-| Montrose Ave (4400 N) | +1.5 mi | **−1207** (Montrose underpass gate; osm West Montrose Ave z −1208) |
-| Irving Park Rd (4000 N) | +1 mi | **−800** |
+| Wilson Ave (4600 N) | +1.75 mi | **−973** (Montrose beach/dunes latitude; pre-084 −1409) |
+| Montrose Ave (4400 N) | +1.5 mi | **−771** (Montrose underpass gate; osm West Montrose Ave z −1208 at raw 1:2 — the 084 compression pulls the whole Montrose block +436) |
+| Irving Park Rd (4000 N) | +1 mi | **−600** (pre-084 −800; the golf vignette ends at −580 and Irving rides just north of it) |
 | Waveland Ave (3700 N) | +0.625 mi | **−500** |
 | Addison St (3600 N) | +0.5 mi | **−400** |
 | Roscoe St (3400 N) | +0.25 mi | **−200** |
@@ -29,10 +29,65 @@ extend this document first.
 | Diversey/Fullerton point (~2800 N) | −0.2 mi | **+340…+403** (the corner wrap) |
 | South map edge (~2750 N) | | **+415** |
 
-Map bounds: **x −10…245, z −1520…+415** (≈ 255 × 1,935 m) as of the Montrose
-growth (v0.6). Player clamp a few m inside (WORLD_CLAMP.zMin = −1520, zMax = 408).
-Minimap aspect follows (MAP.z0 = −1560, MAP.h = 1985 — the north growth reshapes
-the HUD minimap; this is the ONE baseline.png regen the growth requires).
+Map bounds: **x −10…245, z −1084…+415** (≈ 255 × 1,499 m) as of the 084
+compression (v0.7). Player clamp a few m inside (WORLD_CLAMP.zMin = −1084,
+zMax = 408). Minimap aspect follows (MAP.z0 = −1124, MAP.h = 1549 — the
+compression reshapes the HUD minimap; a [baseline-regen] task, like the v0.6
+growth was).
+
+## THE 084 COMPRESSION (owner-granted liberty, 2026-07-16 — v0.7)
+
+Owner playtest, verbatim: *"It's way way too far away from the beaches south of
+it, make the golf course that separates them way smaller. … Way too much blank
+space, bring the shoreline in, fine if the whole map curves or whatever."* The
+1:2 rule was always a means to "feels like being there"; north of Addison it
+produced a ~640 m blank walk. This section is the law for the compressed frame
+(the 009 Wrigleyville ×1.6 stretch is the precedent for documented liberties):
+
+1. **Golf vignette.** Marovitz compresses from z −440…−790 to **z −440…−580**
+   (140 m — evocation over acreage). Same fence x 60–205, same starter kiosk,
+   the Waveland fieldhouse unchanged at (186,−478); 6 pins (1–3 playable near
+   the south entrance, 4–6 dressing) + 6 bunkers (count FROZEN — the bunker
+   loop is structures.js's only shared-rng draw) inside the new fence.
+2. **The BAY (shoreline-in), z −580…−655.** The blank golf-to-Montrose lawn is
+   replaced by a curved cove: the shore sweeps WEST from the golf revetment end
+   (~x 232, z −580) to a waist at **~x 198, z −625**, then back out to meet the
+   Montrose harbor-mouth lawn (~x 231, z −655). The Lakefront Trail bends with
+   it (bay routing, then the harbor promenade); revetment terraces wrap the
+   cove (TIER_DEFAULT); bay planting + benches face the water. Data:
+   `COAST_BAY_PTS` (chicago.js). Across the cove the hook mole + entrance
+   light read to the NE — the visual handshake between golf and harbor.
+3. **Montrose block: RIGID +436 z-shift.** Every Montrose feature (harbor,
+   hook, Point/Magic Hedge, beach, dunes, Cricket Hill, underpass, trail
+   alignment from the harbor north) keeps its internal geometry EXACTLY and
+   slides south by **Δz = +436**: old game z − new game z = −436. Anchors:
+   harbor-mouth lawn end −1091→**−655**, basin −1113…−1288→**−677…−852**,
+   Point apex (243,−1330)→**(243,−894)**, beach −1365…−1500→**−929…−1064**,
+   Cricket Hill cz −1315→**−879**, Montrose underpass −1207→**−771**, north
+   edge −1516→**−1080** (clamp −1084). `montroseFx` is PHASE-SHIFTED by the
+   same Δ (`z−436` inside the sines) so the shore meander translates rigidly
+   and every hand-matched junction value survives.
+4. **Determinism containment.** The world-rng stream is preserved bit-for-bit
+   via ghosts: the OLD golf coast (`COAST_GOLF_GHOST_PARAMS`, z −400…−800)
+   stays in `COAST_SEGS[2]` as rng ballast (slab loop consumes, never pushes;
+   foam draws a fixed old-count phase ballast), the OLD `TRAIL_MAIN` polyline
+   ghosts its dual-ribbon samples into `pathSamples`
+   (`TRAIL_MAIN_GHOST084`), and the tuft/grass-patch accept tests sample a
+   frozen `LAND_GHOST084` with a post-filter against the real LAND (zero-scale
+   / skip — draws already consumed). New coast (golf re-cut + bay) renders via
+   the local-xorshift fold like every Montrose piece. Trees are untouched by
+   proof: pip is an x-ray at constant z and no polygon edge at z > −440 moved.
+5. **Frame note for the sections below.** The Montrose sections (069–075
+   close-outs) are kept in their as-built prose: **all game-z coordinates
+   quoted there are in the PRE-084 frame — add +436 for the shipped map.**
+   osm z references remain raw 1:2 truth. New work cites the NEW frame.
+
+The walk is the acceptance (measured): spawn→Montrose-beach trail arc was
+**1,736 m** pre-084 (~6.9 min at the 4.2 m/s walk); compressed it is
+**1,300 m** by arc, **1,405 m / 334 s ≈ 5.6 min actually walked** by the
+input-driving bot (zero stalls) — and the golf/blank separation itself
+(sanctuary fence → harbor mouth) fell from **651 m to 215 m (3×)**. The
+removed distance is almost entirely the blank golf/lawn stretch.
 
 ## The strip, west → east (constant for the whole map)
 
@@ -59,7 +114,7 @@ the HUD minimap; this is the ONE baseline.png regen the growth requires).
 
 ## Sections, north → south
 
-### Montrose, z −800…−1520 (the v0.6 north growth — 068 layout, applied by 069+)
+### Montrose, z −655…−1084 as shipped (v0.7) — prose below in the PRE-084 frame (z −800…−1520; add +436)
 
 The map's first contiguous growth since v0.5. Everything here sits NORTH of the
 Marovitz golf (which ends at z −800 / Irving Park). Coordinates cite
@@ -294,15 +349,16 @@ the Belmont basin stays as a recorded liberty (it reads as a local homage; the
 canonical plovers are the dunes ones). Do not relocate the dunes plovers to the
 dog beach or vice-versa.
 
-### Golf: Sydney R. Marovitz, z −800…−440 (real: 71 ac, 9 holes, 3,265 yd)
-- Fenced course **x 60–205, z −790…−440** (≈ 145 × 350 m): east edge pulled in
-  from x 230 so the DUAL Lakefront Trail runs the lake-side strip EAST of the
-  golf fence (x 205 → revetment x 232), never crossing the fence line. South edge
-  pulled north to z −440 so the Bird Sanctuary sits south of it, with a trail
-  corridor (z −440…−420) between the two fences.
-- **9 holes** (real routing is a N–S out-and-back): tees/greens alternate along the
-  strip; keep the 3 playable holes as holes 1–3 near the south entrance, holes 4–9
-  as visual dressing (greens, flags, bunkers) — all inside the fence.
+### Golf: Sydney R. Marovitz, z −580…−440 (084 COMPACT VIGNETTE; real: 71 ac, 9 holes)
+- Fenced course **x 60–205, z −580…−440** (≈ 145 × 140 m): the 084 compression
+  re-cuts the full-1:2 course (was z −790…−440) to a postcard of itself — the
+  signature reads survive (fence, starter kiosk, tees/pins/flags, bunkers, the
+  lakeside fieldhouse), the acreage does not. East edge x 205 so the DUAL
+  Lakefront Trail runs the lake-side strip EAST of the fence; south edge z −440
+  keeps the Bird Sanctuary corridor (z −440…−420).
+- **6 holes read**: holes 1–3 playable-register near the south entrance
+  (pins ~z −448…−468), 3 dressing pins to ~z −570 — all inside the fence.
+  Bunker COUNT stays 6 (structures.js's only shared-rng draws — frozen).
 - **Waveland fieldhouse + clock tower** lakeside, just inside the golf's SE corner:
   **(x 186, z −478)**, ry +π/2 so the tower corner is presented NE, toward the trail.
 - **Waveland tennis courts** (BUILT): a 2×2 block of 4 courts on the inland lawn

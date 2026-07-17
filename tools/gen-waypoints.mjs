@@ -134,11 +134,17 @@ const ZONE_VIEW = {
   'Yacht Club':          { stand: [79, -180],  pitch: 0.14,  dist: 13 },  // from the basin side
   'Waveland Fieldhouse': { stand: [200, -467], pitch: -0.22, dist: 14 },  // NE trail side, tower in frame
   'Kwanusila':           { stand: [38, -370],  pitch: -0.2,  dist: 12 },  // whole pole incl. wings
+  // 084 COMPRESSION: the golf is now a compact VIGNETTE (bounds z-580..-440,
+  // centre 132,-510). Stand on the lakeside trail EAST of the fence and look
+  // W/SW over it; yaw is OVERRIDDEN off the zone centre so the read is WSW into
+  // the vignette (not WNW at the north edge). The ±0.45 spread catches the
+  // Waveland fieldhouse tower (SW), the pins/flags/bunkers, and the fence.
+  'Marovitz Golf Course':{ stand: [211, -500], yaw: -1.3, pitch: 0.12, dist: 14 },
 };
 for (const zn of CH.ZONES) {
   const v = ZONE_VIEW[zn.n];
   if (v) {
-    const yaw = yawTo(v.stand[0], v.stand[1], zn.x, zn.z);
+    const yaw = v.yaw !== undefined ? R(v.yaw) : yawTo(v.stand[0], v.stand[1], zn.x, zn.z);
     add('zone-' + slug(zn.n), 'lakefront', 'lakefront', v.stand[0], v.stand[1], [
       { yaw, pitch: v.pitch, dist: v.dist },
       { yaw: R(yaw + 0.45), pitch: v.pitch, dist: v.dist + 4 },
@@ -177,21 +183,21 @@ add('redline-belmont', 'lakefront', 'lakefront', 26, 106, [
   { yaw: -1.42, pitch: 0.06, dist: 9 },    // angled toward the MONROE board (south)
 ]);
 
-// MONTROSE north growth (v0.6, task 069): the first mt-* stands proving the map
-// grew. All lakefront lawn (walkable via LAND) — north-looking reveals + the
-// underpass gate. Interim SHELL: barren lawn + the dual trail + the stub
-// revetment; 070-073 fill in the harbor/hedge/beach/hill.
-add('mt-arrival', 'montrose', 'lakefront', 175, -812, [
-  { yaw: 3.14, pitch: 0.15, dist: 13 },    // due NORTH over the old z-812 fence line: the new lawn opens
-  { yaw: 2.84, pitch: 0.12, dist: 13 },    // angled NE toward the continuing trail + open lake
-  { yaw: 3.14, pitch: 0.28, dist: 16 },    // higher/wider reveal of the north growth
+// MONTROSE approach (084 COMPRESSION): mt-arrival + mt-trail now read the new
+// curved BAY cove that replaced the blank golf-to-Montrose lawn (the golf is a
+// compact vignette; the whole Montrose block slid +436 in z). mt-gate is the
+// Montrose underpass, shifted +436 to z-771. All lakefront lawn, walkable via LAND.
+add('mt-arrival', 'montrose', 'lakefront', 150, -604, [
+  { yaw: 2.36, pitch: 0.12, dist: 11 },    // NE across the 084 bay cove -> the hook mole + entrance light across the water
+  { yaw: 2.0,  pitch: 0.10, dist: 14 },    // ENE wider: open cove water + the revetment steps wrapping the curve
+  { yaw: 2.6,  pitch: 0.14, dist: 9 },     // NNE closer: the near shoreline sweep + a bench + prairie planting by the trail
 ]);
-add('mt-trail', 'montrose', 'lakefront', 205, -1000, [
-  { yaw: 3.14, pitch: 0.12, dist: 11 },    // NORTH down the new dual Lakefront Trail stretch
-  { yaw: 0.5,  pitch: 0.06, dist: 10 },    // ENE across the trail to the lake + stub revetment
-  { yaw: 3.0,  pitch: 0.16, dist: 13 },    // north, wider (both ribbons + lawn)
+add('mt-trail', 'montrose', 'lakefront', 150, -632, [
+  { yaw: 0.5, pitch: 0.10, dist: 12 },     // S/SSE along the curving cove shore -> golf revetment; fence + flags right, water left
+  { yaw: 0.2, pitch: 0.10, dist: 12 },     // due-S: the shore curve + the hazy fieldhouse tower down the vignette
+  { yaw: 0.9, pitch: 0.12, dist: 13 },     // SE toward the cove water + the golf revetment end
 ]);
-add('mt-gate', 'montrose', 'lakefront', 34, -1207, [
+add('mt-gate', 'montrose', 'lakefront', 34, -771, [
   { yaw: -1.57, pitch: 0.12, dist: 11 },   // due WEST at the Montrose Ave underpass portal
   { yaw: -1.4,  pitch: 0.1,  dist: 10 },   // angled: portal + flanking hedge + Lakeview backdrop
   { yaw: -1.74, pitch: 0.14, dist: 12 },   // angled the other way
@@ -199,17 +205,17 @@ add('mt-gate', 'montrose', 'lakefront', 34, -1207, [
 
 // MONTROSE HARBOR (task 070): the basin + moored boats, the HOOK breakwater pier,
 // and Park Bait. All on walkable ground (west promenade / the mole top via LAND).
-add('mt-harbor', 'montrose', 'lakefront', 182, -1210, [
+add('mt-harbor', 'montrose', 'lakefront', 182, -774, [
   { yaw: 1.42, pitch: 0.14, dist: 13 },    // east/NE across the basin -> moorings + masts + the hook beyond
   { yaw: 1.15, pitch: 0.13, dist: 14 },    // NE toward the mole/hook + entrance light + star docks
   { yaw: 1.55, pitch: 0.20, dist: 16 },    // wider basin overview (seawall water + docks)
 ]);
-add('mt-hook', 'montrose', 'lakefront', 229, -1212, [
+add('mt-hook', 'montrose', 'lakefront', 229, -776, [
   { yaw: 0.0,  pitch: 0.09, dist: 10 },    // SOUTH straight down the pier -> the curling tip + light + open lake
   { yaw: 0.30, pitch: 0.07, dist: 11 },    // SSE: the hook curl + light with open lake to the left
   { yaw: 0.0,  pitch: 0.14, dist: 13 },    // from further, wider down-pier (rail + riprap read)
 ]);
-add('mt-baitshop', 'montrose', 'lakefront', 183, -1172, [
+add('mt-baitshop', 'montrose', 'lakefront', 183, -736, [
   { yaw: -1.33, pitch: 0.05, dist: 8 },    // WNW at Park Bait's signed front (shop off-centre, sign reads)
   { yaw: -1.75, pitch: 0.06, dist: 8 },    // WSW from the other side (roof + shack form)
   { yaw: -1.55, pitch: 0.13, dist: 11 },   // wider: shop on the mainland + basin/docks context
@@ -219,17 +225,17 @@ add('mt-baitshop', 'montrose', 'lakefront', 183, -1172, [
 // after the harbor's masts and the Point's intimacy. All on walkable SAND (beachH).
 // mt-beach: the long open sand + beach house; mt-dunes: the roped plover natural
 // area (quiet, protective); mt-dock: the seasonal beach bar + beachgoers.
-add('mt-beach', 'montrose', 'lakefront', 215, -1456, [
+add('mt-beach', 'montrose', 'lakefront', 215, -1020, [
   { yaw: -0.7, pitch: 0.06, dist: 12 },    // SW at the beach house's rounded solarium prow — anchors the far end, sand foreground, lake low-left
   { yaw: 0.0,  pitch: 0.05, dist: 14 },    // due SOUTH down the long sand toward the dune, beach house to the right
   { yaw: 0.35, pitch: 0.09, dist: 16 },    // SSE, wide — open sand sweep + low lake horizon (breadth)
 ]);
-add('mt-dunes', 'montrose', 'lakefront', 222, -1421, [
+add('mt-dunes', 'montrose', 'lakefront', 222, -985, [
   { yaw: 0.0,  pitch: 0.05, dist: 10 },    // SOUTH into the roped dune — sign + the plover pair + chick, rope line, grasses + mounds
   { yaw: -0.4, pitch: 0.05, dist: 9 },     // SSW at the 'PIPING PLOVER NESTING AREA' sign + the west plover (sign reads)
   { yaw: 0.28, pitch: 0.09, dist: 12 },    // SSE toward the east plover + dune mounds + the lake edge (breadth)
 ]);
-add('mt-dock', 'montrose', 'lakefront', 216, -1473, [
+add('mt-dock', 'montrose', 'lakefront', 216, -1037, [
   { yaw: 3.14, pitch: 0.08, dist: 10 },    // NORTH at The Dock's south front — canvas 'THE DOCK' sign, awning, umbrellas
   { yaw: 2.85, pitch: 0.06, dist: 9 },     // NNE angle — the L bar counter + beachgoers + umbrella colors
   { yaw: 3.14, pitch: 0.15, dist: 12 },    // wider/higher — the deck + bar on the sand, beach context
@@ -374,6 +380,11 @@ CH.DECKS.forEach((d, i) => {   // skip decks another waypoint already covers
 
 CH.MAP_LANDMARKS.forEach((lm, i) => {   // only landmarks no other waypoint covers
   if (wps.some(w => (w.x - lm.x) ** 2 + (w.z - lm.z) ** 2 < 20 * 20)) return;
+  // ...or if the landmark coincides with a ZONE centre: that zone already has
+  // its own (restaged) waypoint even when the stand sits off-subject — e.g. the
+  // 084 golf vignette stands trail-side, 80 m from the golf landmark (132,-510),
+  // so the stand-proximity test alone would spawn a redundant unjudged dup.
+  if (CH.ZONES.some(zn => (zn.x - lm.x) ** 2 + (zn.z - lm.z) ** 2 < 12 * 12)) return;
   // stand OFF the landmark on the park side (west) and shoot east, far enough
   // for the whole building + water context (mrbjrqz2: walls filled the frame
   // when the player stood at the landmark itself)

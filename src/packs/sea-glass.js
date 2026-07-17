@@ -35,7 +35,7 @@ const COLORS = {
 const ORDER = ['green', 'brown', 'white', 'blue'];   // fixed journal order
 
 // SIX fixed spots — all verified beachH!==null (on sand) and NONE inside the
-// roped plover dune (x 210-233, z -1362..-1414), in node, in
+// roped plover dune (x 210-233, z -926..-978), in node, in
 // tools/tmp-080-seaglass-verify.mjs. Dog-beach cove (near the kiosk 100,-353):
 // green, brown, frosted white. Montrose Beach sand, NORTH of the dune: green,
 // frosted white, and the RARE cobalt BLUE (so all four needs the trip north).
@@ -43,9 +43,9 @@ const SPOTS = [
   { x: 94,  z: -339,  color: 'green' },   // dog beach
   { x: 100, z: -337,  color: 'brown' },   // dog beach
   { x: 107, z: -339,  color: 'white' },   // dog beach
-  { x: 216, z: -1430, color: 'green' },   // Montrose
-  { x: 222, z: -1444, color: 'white' },   // Montrose
-  { x: 212, z: -1468, color: 'blue'  },   // Montrose (rare)
+  { x: 216, z: -994, color: 'green' },   // Montrose
+  { x: 222, z: -1008, color: 'white' },   // Montrose
+  { x: 212, z: -1032, color: 'blue'  },   // Montrose (rare)
 ];
 
 const hex6 = h => '#' + h.toString(16).padStart(6, '0');

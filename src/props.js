@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { scene, rng, rand, toon, bmat, curveMat, gmap, pointsMat, pip, WATER_Y } from './core.js';
-import { COAST_SEGS, tierProfile, profileTotal, beachH, LAND, coastQuery } from './coast.js';
+import { COAST_SEGS, MTR_SEGS, tierProfile, profileTotal, beachH, LAND, LAND_GHOST084, coastQuery } from './coast.js';
 import { pathSamples, pathSamples2, mainCurve } from './paths.js';
 import * as CH from './data/chicago.js';
 
@@ -120,11 +120,11 @@ export function buildProps(){
   const mkrng=seed=>{let s=(seed>>>0)||1;return()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296;};};
   // ---- Montrose Point sanctuary (071): shared LOCAL geometry helpers (pure
   // math, zero rng) + a one-time prefilter of the ribbon samples to the Point's
-  // own ribbons (z < -1280). Reused by every 071 growth block below so the
+  // own ribbons (z < -844). Reused by every 071 growth block below so the
   // pathSamples2 scan runs once, not per candidate. ----
   const mpSeg2=(px,pz,ax,az,bx,bz)=>{const dx=bx-ax,dz=bz-az,L=dx*dx+dz*dz;let t=L?((px-ax)*dx+(pz-az)*dz)/L:0;t=t<0?0:t>1?1:t;const cx=ax+t*dx,cz=az+t*dz;return (px-cx)**2+(pz-cz)**2;};
   const mpPoly2=(px,pz,pts)=>{let m=Infinity;for(let i=0;i<pts.length-1;i++){const d=mpSeg2(px,pz,pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1]);if(d<m)m=d;}return m;};
-  const mpN=[];for(let i=0;i<pathSamples2.length;i++)if(pathSamples2[i][1]<-1280)mpN.push(pathSamples2[i]);
+  const mpN=[];for(let i=0;i<pathSamples2.length;i++)if(pathSamples2[i][1]<-844)mpN.push(pathSamples2[i]);
   // ---- trees ----
   {
     const T=CH.TREES;
@@ -335,9 +335,13 @@ export function buildProps(){
     const EP=CH.ENTRANCE.pad;
     const onPad=(x,z)=>((x-EP.x)/EP.rx)**2+((z-EP.z)/EP.rz)**2<1;
     let placed=0,guard=0;
-    while(placed<n&&guard++<TU.guard){const x=rand(TU.xr[0],TU.xr[1]),z=rand(TU.zr[0],TU.zr[1]);if(!pip(x,z,LAND))continue;
+    // 084: the accept test samples the FROZEN pre-084 land ghost (rand pattern
+    // and count bit-identical), then the zero-scale stamp hides any spot the
+    // compression turned into water / the mole's stone cap — the onPad idiom.
+    while(placed<n&&guard++<TU.guard){const x=rand(TU.xr[0],TU.xr[1]),z=rand(TU.zr[0],TU.zr[1]);if(!pip(x,z,LAND_GHOST084))continue;
       const sy=rand(TU.scaleY[0],TU.scaleY[1]);
-      M.compose(V.set(x,0.14,z),Q.identity(),onPad(x,z)?S.set(0,0,0):S.set(1,sy,1));tuft.setMatrixAt(placed++,M)}
+      const hide=onPad(x,z)||!pip(x,z,LAND)||CH.scatterCarve084(x,z);
+      M.compose(V.set(x,0.14,z),Q.identity(),hide?S.set(0,0,0):S.set(1,sy,1));tuft.setMatrixAt(placed++,M)}
     // ---- Montrose DUNE marram grass: grow the tuft bucket in place with a
     // LOCAL xorshift (zero shared rng — placed already sits at the park-tuft
     // count above). Taller than park tufts so it reads as beach/dune grass; the
@@ -534,7 +538,9 @@ export function buildProps(){
     // the last three centers flank the entrance monument (task 023, per the
     // owner photo: prairie planting at both wall ends + behind it). Instanced
     // counts scale with centers.length — still exactly 3 draw calls.
-    const centers=[[60,150],[120,165],[70,90],[100.9,160.5],[117.5,163.5],[110,164.5]];
+    // 084: three BAY centers earn the compressed shoreline its planting —
+    // west of the cove trail, at the waist, and on the harbor-mouth headland.
+    const centers=[[60,150],[120,165],[70,90],[100.9,160.5],[117.5,163.5],[110,164.5],[150,-600],[140,-632],[200,-664]];
     const grassCols=[0x8a9a5b,0x9fae6b,0x76863f].map(c=>new THREE.Color(c));
     const purples=[0x9a6bd0,0xb58ae0].map(c=>new THREE.Color(c));
     const pr=m32(0x7a1e0055);
@@ -900,15 +906,27 @@ export function buildProps(){
 
   // ---- waterline foam sparkle along the sheet-pile ----
   {
+    // 084: foam POSITIONS come from the REAL runs (the golf ghost excluded;
+    // the vignette golf + bay appended LAST so every pre-084 MAIN/PEN point
+    // keeps its exact phase), while the shared-rng phase draws are a FIXED
+    // BALLAST of exactly the pre-084 count — computed from COAST_SEGS, which
+    // still carries the full-length golf ghost at [2]. Points past the ballast
+    // (there are fewer now, but belt-and-suspenders) get LOCAL phases, so the
+    // shared stream into fireflies/structures is bit-for-bit unchanged.
     const P=[];
-    for(const segs of COAST_SEGS)for(const s of segs){
+    const runs=[COAST_SEGS[0],COAST_SEGS[1],COAST_SEGS[3],COAST_SEGS[4],MTR_SEGS[7],MTR_SEGS[0]];
+    for(const segs of runs)for(const s of segs){
       for(let t=0;t<s.len;t+=1.7){
         const cx=s.ax+s.tx*t,cz=s.az+s.tz*t,tot=profileTotal(cz);
         P.push([cx+s.nx*(tot+0.45),WATER_Y+0.18,cz+s.nz*(tot+0.45)]);
       }
     }
+    let nBallast=0;
+    for(const segs of COAST_SEGS)for(const s of segs)for(let t=0;t<s.len;t+=1.7)nBallast++;
+    const phases=[];for(let i=0;i<nBallast;i++)phases.push(rand(0,9));
+    const foamR=mkrng(0x084f0a1);
     const n=P.length,pos=new Float32Array(n*3),aC=new Float32Array(n*3),aS=new Float32Array(n);
-    for(let i=0;i<n;i++){pos.set(P[i],i*3);aC.set([0.9,1,1],i*3);aS[i]=1.1;foam.ph.push(rand(0,9));foam.base.push(P[i])}
+    for(let i=0;i<n;i++){pos.set(P[i],i*3);aC.set([0.9,1,1],i*3);aS[i]=1.1;foam.ph.push(i<nBallast?phases[i]:foamR()*9);foam.base.push(P[i])}
     const g=new THREE.BufferGeometry();
     g.setAttribute('position',new THREE.BufferAttribute(pos,3));
     g.setAttribute('aColor',new THREE.BufferAttribute(aC,3));

@@ -6,7 +6,12 @@ import * as CH from './data/chicago.js';
 function genCoast(z0,z1,fx){const C=[];for(let z=z0;z>=z1;z-=3)C.push([fx(z),z]);return C}
 export const COAST_MAIN=genCoast(CH.COAST_MAIN_PARAMS.z0,CH.COAST_MAIN_PARAMS.z1,CH.COAST_MAIN_PARAMS.fx);  // Belmont Rocks + south lawn, south->north
 export const COAST_PEN =genCoast(CH.COAST_PEN_PARAMS.z0,CH.COAST_PEN_PARAMS.z1,CH.COAST_PEN_PARAMS.fx);     // east peninsula lake edge
-export const COAST_GOLF=genCoast(CH.COAST_GOLF_PARAMS.z0,CH.COAST_GOLF_PARAMS.z1,CH.COAST_GOLF_PARAMS.fx);  // Marovitz trail-side revetment
+export const COAST_GOLF=genCoast(CH.COAST_GOLF_PARAMS.z0,CH.COAST_GOLF_PARAMS.z1,CH.COAST_GOLF_PARAMS.fx);  // Marovitz trail-side revetment (084 vignette, z-400..-580) — renders via the LOCAL fold, NOT COAST_SEGS
+// 084 GHOST: the pre-084 full-length golf piece (z-400..-800). Lives at
+// COAST_SEGS[2] purely as WORLD-RNG BALLAST — the terrace-slab loop consumes
+// its exact pre-084 rand()/rng() pattern and pushes NO boxes; walkability,
+// wet-band, piles, faces and foam all use the REAL pieces instead.
+const COAST_GOLF_GHOST=genCoast(CH.COAST_GOLF_GHOST_PARAMS.z0,CH.COAST_GOLF_GHOST_PARAMS.z1,CH.COAST_GOLF_GHOST_PARAMS.fx);
 export const COAST_MOUTH=genCoast(CH.COAST_MOUTH_PARAMS.z0,CH.COAST_MOUTH_PARAMS.z1,CH.COAST_MOUTH_PARAMS.fx); // harbor-mouth terraced shore (rocks tip -> basin SW)
 export const COAST_CORNER=genCoast(CH.COAST_CORNER_PARAMS.z0,CH.COAST_CORNER_PARAMS.z1,CH.COAST_CORNER_PARAMS.fx); // south-corner wrap (SW terminus -> rocks SE join), same 7-step profile
 export const M_END=COAST_MAIN[COAST_MAIN.length-1];                          // ~[151,16]
@@ -26,7 +31,7 @@ export const BASIN_W=[];for(let z=CH.BASIN_W_PARAMS.z0;z>=CH.BASIN_W_PARAMS.z1;z
 // QUERY_SEGS (walkability) + folds their terraces/piles/faces into the EXISTING
 // buckets with a LOCAL xorshift (zero new InstancedMesh buckets, zero shared-rng
 // draws — the COAST_TIP precedent). Separate arrays so 070-072 swap one piece.
-export const COAST_MTR_LAWN  =genCoast(CH.COAST_MTR_LAWN_PARAMS.z0,  CH.COAST_MTR_LAWN_PARAMS.z1,  CH.COAST_MTR_LAWN_PARAMS.fx);   // shore south of the harbor
+export const COAST_BAY=CH.COAST_BAY_PTS;                                                                                          // 084: the bay cove replacing the golf-to-Montrose lawn (takes the retired LAWN's slot 0)
 export const COAST_MTR_HARBOR=CH.COAST_MTR_HARBOR_PTS;                                                                            // 070: the hook mole's LAKE(outer) terraced face (polyline)
 export const COAST_MTR_POINT =CH.COAST_MTR_POINT_PTS;                                                                             // 071: the pushed-east Point (polyline, apex 243,-1330 — the map's eastmost land)
 export const COAST_MTR_BEACH =genCoast(CH.COAST_MTR_BEACH_PARAMS.z0, CH.COAST_MTR_BEACH_PARAMS.z1, CH.COAST_MTR_BEACH_PARAMS.fx);  // 072 beach
@@ -36,10 +41,16 @@ export const COAST_MTR_CLOSE =CH.COAST_MTR_CLOSE_PTS;                           
 // Appended AFTER the swap pieces so COAST_MTR[0..4] stay the piece-swap slots.
 export const COAST_MTR_MOUTH  =CH.MTR_HARBOR_MOUTH;
 export const COAST_MTR_HOOKTIP=CH.MTR_HOOK_TIP;
-export const COAST_MTR=[COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE,COAST_MTR_MOUTH,COAST_MTR_HOOKTIP];
+// 084: BAY takes the retired LAWN's slot 0 (same role: the shore south of the
+// harbor mouth); the vignette GOLF piece appends at idx 7. Idx 3 MUST stay the
+// BEACH — the i!==3 filters (sand, no revetment) key on it.
+export const COAST_MTR=[COAST_BAY,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE,COAST_MTR_MOUTH,COAST_MTR_HOOKTIP,COAST_GOLF];
 
 export const LAND=CH.buildLAND({COAST_CORNER,COAST_MAIN,COAST_PEN,COAST_GOLF,COAST_MOUTH,BASIN_W,
-  COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE});
+  COAST_BAY,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE});
+// 084 ghost land (pre-084 polygon truncated at z=-800): the frozen accept-test
+// surface for the shared-rng tuft/grass-patch loops. See chicago.js.
+export const LAND_GHOST084=CH.buildLandGhost084({COAST_CORNER,COAST_MAIN,COAST_PEN,COAST_GOLF_GHOST,COAST_MOUTH,BASIN_W});
 
 // --------------------- terraces (the revetment) ------------------------
 export function tierProfile(zc){
@@ -91,7 +102,11 @@ export function buildSegs(pts){
   }
   return segs;
 }
-export const COAST_SEGS=[buildSegs(COAST_MAIN),buildSegs(COAST_PEN),buildSegs(COAST_GOLF),buildSegs(COAST_MOUTH),buildSegs(COAST_CORNER)];  // corner appended (index 4) so COAST_SEGS[0..3] stay put for props/beach-life
+// 084: COAST_SEGS[2] is the GOLF GHOST — rng ballast only (slab loop consumes,
+// never pushes; excluded from openRuns/QUERY/foam positions). The REAL golf +
+// bay live in MTR_SEGS (idx 7 / idx 0) and render via the local fold.
+export const GHOST_CI=2;
+export const COAST_SEGS=[buildSegs(COAST_MAIN),buildSegs(COAST_PEN),buildSegs(COAST_GOLF_GHOST),buildSegs(COAST_MOUTH),buildSegs(COAST_CORNER)];  // corner appended (index 4) so COAST_SEGS[0..3] stay put for props/beach-life
 // The tip is kept OUT of COAST_SEGS on purpose: props.js beach-life/foam iterate
 // COAST_SEGS (with the shared rng), so appending here would shift the world's rng order
 // (moved towels/flowers — hard constraint #1). Instead coastQuery/tierAt (walkability
@@ -103,7 +118,9 @@ export const TIP_SEGS=buildSegs(COAST_TIP);
 // never to COAST_SEGS. Their terraces/piles/faces render inside buildCoast via a
 // local xorshift folded into the existing buckets.
 export const MTR_SEGS=COAST_MTR.map(buildSegs);
-const QUERY_SEGS=[...COAST_SEGS,TIP_SEGS,...MTR_SEGS.filter((_,i)=>i!==3)];  // task 072: BEACH (idx 3) is SAND (beachH), not a revetment
+// 084: the ghost (COAST_SEGS[2]) is NOT walkable/queryable — the real golf
+// piece is MTR_SEGS[7], the bay MTR_SEGS[0].
+const QUERY_SEGS=[...COAST_SEGS.filter((_,i)=>i!==GHOST_CI),TIP_SEGS,...MTR_SEGS.filter((_,i)=>i!==3)];  // task 072: BEACH (idx 3) is SAND (beachH), not a revetment
 export function coastQuery(x,z){
   let best=null,bd2=1e9;
   for(const C of QUERY_SEGS)for(const s of C){
@@ -247,7 +264,7 @@ export function buildCoast(){
   // so the wet-stain band / sheet-piles / wall-faces (all rng-free, iterating
   // openRuns) include them — those InstancedMeshes just grow (zero new buckets).
   const VT_MTR=MTR_SEGS.map(vertexTangents);
-  const openRuns=[...COAST_SEGS.map((s,i)=>[s,VTS[i]]),[TIP_SEGS,VT_TIP],...MTR_SEGS.map((s,i)=>[s,VT_MTR[i]]).filter((_,i)=>i!==3)];  // task 072: beach (idx 3) = sand, no revetment features
+  const openRuns=[...COAST_SEGS.map((s,i)=>[s,VTS[i]]).filter((_,i)=>i!==GHOST_CI),[TIP_SEGS,VT_TIP],...MTR_SEGS.map((s,i)=>[s,VT_MTR[i]]).filter((_,i)=>i!==3)];  // task 072: beach (idx 3) = sand, no revetment features; 084: the golf GHOST is rng ballast, not a rendered run
 
   // terrace blocks — instanced, jittered for the uneven limestone look.
   // Warm-GRAY concrete family (the real Belmont revetment is a warm gray, not the
@@ -290,7 +307,10 @@ export function buildCoast(){
               rot:srot+rand(-0.035,0.035),
               c:cols[i<2?(rng()*3|0):(2+(rng()*3|0))]
             };
-            if(!inPierChannel(bx,bz))boxes.push(box);            // carve the pier slip (rng already consumed)
+            // pier slip carve + the 084 golf GHOST (ci===GHOST_CI): in both
+            // cases every rand()/rng() above is already consumed — the skip
+            // keeps the world rng order bit-for-bit while nothing renders.
+            if(!inPierChannel(bx,bz)&&ci!==GHOST_CI)boxes.push(box);
             acc+=p.w[i];
           }
         }
@@ -662,9 +682,14 @@ export function buildCoast(){
     let placed=0;
     for(let i=0;i<G.count;i++){
       let x,z,ok=false,tries=0;
-      while(tries++<G.tries){x=rand(G.xr[0],G.xr[1]);z=rand(G.zr[0],G.zr[1]);if(pip(x,z,LAND)){ok=true;break}}
+      // 084: accept against the FROZEN pre-084 land ghost so the rand() try
+      // pattern (and everything downstream in the shared stream) never moves;
+      // the real-LAND post-filter below drops patches the compression put in
+      // the water / on the mole (draws already consumed).
+      while(tries++<G.tries){x=rand(G.xr[0],G.xr[1]);z=rand(G.zr[0],G.zr[1]);if(pip(x,z,LAND_GHOST084)){ok=true;break}}
       if(!ok)continue;                       // no land found -> never place on water
       const r=rand(G.radius[0],G.radius[1]),sx=rand(G.scaleX[0],G.scaleX[1]);
+      if(!pip(x,z,LAND)||CH.scatterCarve084(x,z))continue;   // 084 post-filter (rng consumed above)
       let k=1;
       while(k>=0.4&&!rimFits(x,z,r*sx*k,r*k))k-=0.15;
       if(k<0.4)continue;                     // hugs the coast too tight at any size -> skip

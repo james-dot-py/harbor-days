@@ -673,6 +673,14 @@ few turns to find; keep each to one line of symptom + fix.
   directly gets CLOBBERED within 3 s: `buildSnap` rebuilds `counters.paidFirsts` from
   `state.paidFirsts` (which the direct write never touched). Set it through the state
   path (`wallet.pay`), never the save blob — the snapshot is one-directional.
+- pathSamples2 is NOT a free parking lot for reshaped ribbons: props' tree
+  POST-filter (near2) scans ALL of pathSamples2 during buildProps, so pushing a
+  reshaped MAIN trail there re-filtered trees its ghost had already cleared —
+  removals shifted every later tree's per-tree m32 INDEX and canopies
+  reshuffled map-wide (084's spawn diff showed a pink/green canopy swap at a
+  tree that "didn't move"). A reshaped ribbon whose GHOST already feeds the
+  frozen scans must merge its real samples via a THIRD array
+  (paths.js pathSamplesMain) that main.js appends AFTER buildProps.
 - store.js flushes the live in-memory save on `pagehide`, so NORMAL navigation can
   never leave a corrupt save behind — a planted-corruption E2E must neutralize the
   outgoing page's `localStorage.setItem` after planting, or the pagehide flush

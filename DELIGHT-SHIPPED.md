@@ -557,3 +557,9 @@ cut becomes a revert task.
   so the game blooms "Ope!" on your home screen and again as it opens — a real,
   fully-offline game in a native frame. — iOS app icon + splash
   (assets/, ios/App/App/Assets.xcassets) — task 083
+- THE HEADLAND BENCH. Where the new bay cove meets the Montrose harbor mouth, a
+  lone bench on the grassy headland faces NE across the water — sit and the
+  whole harbor handshake composes itself: the mooring field, the stone hook
+  mole, the red-capped entrance light on its terraced tip, open lake beyond.
+  The compression's thesis as a place to rest. — bay headland (208,-660) —
+  task 084

@@ -1240,18 +1240,18 @@ function buildMontrosePoint(POSTS,RAILS){
     fenceRun(line,{spacing:2.6,postH:0.5,color:0xd8d0bd,collide:false},POSTS,RAILS);
 
   // (b) SPLIT-RAIL FLANKS running N/S from each gateway post along x=191
-  // (posts sit at z -1316.1 / -1319.9 = gate.z ± span/2). Weathered timber,
+  // (posts sit at z -880.1 / -883.9 = gate.z ± span/2). Weathered timber,
   // solid colliders (collideR 0.9) so the player is channelled through the gap.
-  fenceRun([[191,-1316.1],[191,-1311.9]],{spacing:2.1,postH:G.rail.postH,color:G.wood,collideR:0.5},POSTS,RAILS);
-  fenceRun([[191,-1319.9],[191,-1322.6]],{spacing:2.1,postH:G.rail.postH,color:G.wood,collideR:0.5},POSTS,RAILS);
-  // south flank SHORTENED (-1324.1 -> -1322.6) + both collideR 0.5: the Montrose
-  // walk ribbon bows to x~189.8 by z-1324, and a 0.9 collider there reached onto
+  fenceRun([[191,-880.1],[191,-875.9]],{spacing:2.1,postH:G.rail.postH,color:G.wood,collideR:0.5},POSTS,RAILS);
+  fenceRun([[191,-883.9],[191,-886.6]],{spacing:2.1,postH:G.rail.postH,color:G.wood,collideR:0.5},POSTS,RAILS);
+  // south flank SHORTENED (-888.1 -> -886.6) + both collideR 0.5: the Montrose
+  // walk ribbon bows to x~189.8 by z-888, and a 0.9 collider there reached onto
   // the ribbon (soft-push on the approach path — the issue-025 ring law).
 
-  // (c) THE TIMBER GATEWAY at MP.gate (191,-1318). Opening faces WEST; the beam
+  // (c) THE TIMBER GATEWAY at MP.gate (191,-882). Opening faces WEST; the beam
   // runs N-S over two posts. Individual toon meshes, world coords direct.
   const woodM=toon(G.wood);
-  const zN=MP.gate.z+G.span/2,zS=MP.gate.z-G.span/2;   // -1316.1 (north) / -1319.9 (south)
+  const zN=MP.gate.z+G.span/2,zS=MP.gate.z-G.span/2;   // -880.1 (north) / -883.9 (south)
   for(const pz of[zN,zS]){
     const post=new THREE.Mesh(new THREE.BoxGeometry(G.postW,G.postH,G.postW),woodM);
     post.position.set(MP.gate.x,G.postH/2,pz);scene.add(post);
@@ -1300,9 +1300,9 @@ function buildMontrosePoint(POSTS,RAILS){
     const rtex=new THREE.CanvasTexture(cv);rtex.anisotropy=4;
     const rp=new THREE.Mesh(new THREE.PlaneGeometry(rw,rh),
       curveMat(new THREE.MeshBasicMaterial({map:rtex,side:THREE.FrontSide})));
-    rp.position.set(190.9,1.05,-1321.6);rp.rotation.y=-Math.PI/2;scene.add(rp);
+    rp.position.set(190.9,1.05,-885.6);rp.rotation.y=-Math.PI/2;scene.add(rp);
     const rear=new THREE.Mesh(new THREE.PlaneGeometry(rw,rh),toon(G.rules.bg,{mat:{side:THREE.BackSide}}));
-    rear.position.set(190.9,1.05,-1321.6);rear.rotation.y=-Math.PI/2;scene.add(rear);   // solid rear
+    rear.position.set(190.9,1.05,-885.6);rear.rotation.y=-Math.PI/2;scene.add(rear);   // solid rear
   }
 
   // (d) THE INTERPRETIVE PANEL at MP.panel (front faces WNW per MP.panel.ry).

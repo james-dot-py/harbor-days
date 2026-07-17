@@ -26,16 +26,16 @@ import * as CH from '../data/chicago.js';
 // ---------------------------------------------------------------------
 //  TUNABLE PLACEMENT CONSTANTS (orchestrator nudges these from screenshots)
 // ---------------------------------------------------------------------
-// Fisherman: on the mole deck (z=-1240 spans x 219..238), 2.5 m inboard of the
+// Fisherman: on the mole deck (z=-804 spans x 219..238), 2.5 m inboard of the
 // lake face (x=238) so the line drops CLEANLY off the edge into open water and
 // never punches the paved deck. Moved lakeward from the suggested x=230 for that
 // reason — see the report. ry ~1.48 faces the open lake (east, a touch south).
-const FISH_X = 235.5, FISH_Z = -1240, FISH_RY = 1.48;
+const FISH_X = 235.5, FISH_Z = -804, FISH_RY = 1.48;
 
 // Park Bait cooler: on the mainland, just east of the shop's east wall
 // (PARK_BAIT.x=176,w=6.4 -> east face x≈179.2), z a touch south of shop centre.
 const COOLER_X = CH.PARK_BAIT.x + 4;      // 180
-const COOLER_Z = CH.PARK_BAIT.z + 2;      // -1174
+const COOLER_Z = CH.PARK_BAIT.z + 2;      // -738
 const CHIRP_R  = 15;                       // crickets audible within 15 m
 
 // ---------------------------------------------------------------------
@@ -178,7 +178,7 @@ onWorldReady((player) => {
     scene.add(cool);
   }
 
-  addInteraction({ x: 180, z: -1172, r: 2.5, label: 'peek in the cooler',
+  addInteraction({ x: 180, z: -736, r: 2.5, label: 'peek in the cooler',
     onUse: () => toast('PARK BAIT',
       'Crickets, a dozen for a buck. (Cricket Hill up the shore is named for the swarms.)') });
 

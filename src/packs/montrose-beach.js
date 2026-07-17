@@ -17,7 +17,7 @@
 //      the Monty & Rose / Imani story warmly + honestly, plus a journal note.
 //
 //  Only-my-file rules: one import line in packs/index.js, no shared edits.
-//  All setup in onWorldReady. Spawns are FAR NORTH (z≈-1450, ~1.4 km from
+//  All setup in onWorldReady. Spawns are FAR NORTH (z≈-1014, ~1.4 km from
 //  the Belmont spawn plaza — culled at spawn) so baseline scenes are
 //  untouched. NO shared rng (rng/rand) — all jitter is Math.random / fixed
 //  data / index-seeded sin phase — so world determinism is safe.
@@ -47,15 +47,15 @@ const BEACH_PAL = [
 ];
 
 // dry, walkable sand spots — around The Dock + the open sand, all h≈0 and
-// well NORTH of the roped dune (z≤-1444, dune interior starts at z=-1414).
+// well NORTH of the roped dune (z≤-1008, dune interior starts at z=-978).
 // Validated at spawn: montroseBeachH!==null, !beachCarved, dryish (h>-0.5),
 // so the y=0 rig sits flat on the sand.
 const SPOTS = [
-  { x:214, z:-1476 },   // just south of The Dock deck
-  { x:221, z:-1479 },   // east side of The Dock
-  { x:224, z:-1452 },   // open sand
-  { x:218, z:-1458 },   // open sand
-  { x:226, z:-1444 },   // open sand, toward the dune's north edge
+  { x:214, z:-1040 },   // just south of The Dock deck
+  { x:221, z:-1043 },   // east side of The Dock
+  { x:224, z:-1016 },   // open sand
+  { x:218, z:-1022 },   // open sand
+  { x:226, z:-1008 },   // open sand, toward the dune's north edge
 ];
 
 onWorldReady((player) => {
@@ -75,7 +75,7 @@ onWorldReady((player) => {
   // (realistic tiny birds vanish at this scale). Body + head only, no neckband;
   // a tiny beak + eyes give it a bird read, a stub leg pair grounds it. A few
   // individual frustum-culled meshes → +0 InstancedMesh buckets. It sits at the
-  // nest spot right by the small dune mound (220,-1407) so the family reads.
+  // nest spot right by the small dune mound (220,-971) so the family reads.
   const chick = new THREE.Group();
   {
     const bodyC = 0xf2e8d2, headC = 0xf7efdc;   // pale sand; head a touch paler

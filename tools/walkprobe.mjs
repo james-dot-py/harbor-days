@@ -17,18 +17,18 @@ const COAST_GOLF=genCoast(CH.COAST_GOLF_PARAMS.z0,CH.COAST_GOLF_PARAMS.z1,CH.COA
 const COAST_MOUTH=genCoast(CH.COAST_MOUTH_PARAMS.z0,CH.COAST_MOUTH_PARAMS.z1,CH.COAST_MOUTH_PARAMS.fx);
 const COAST_CORNER=genCoast(CH.COAST_CORNER_PARAMS.z0,CH.COAST_CORNER_PARAMS.z1,CH.COAST_CORNER_PARAMS.fx);
 const BASIN_W=[];for(let z=CH.BASIN_W_PARAMS.z0;z>=CH.BASIN_W_PARAMS.z1;z-=CH.BASIN_W_PARAMS.step)BASIN_W.push([CH.BASIN_W_PARAMS.fx(z),z]);
-// MONTROSE north stub pieces (task 069) — mirror coast.js exactly (genCoast per piece,
-// polyline for the NE-corner closure) so LAND + QUERY_SEGS stay lockstep with the engine.
-const COAST_MTR_LAWN  =genCoast(CH.COAST_MTR_LAWN_PARAMS.z0,  CH.COAST_MTR_LAWN_PARAMS.z1,  CH.COAST_MTR_LAWN_PARAMS.fx);
+// MONTROSE north stub pieces (task 069; 084 reshape) — mirror coast.js exactly
+// (genCoast/polyline per piece) so LAND + QUERY_SEGS stay lockstep with the engine.
+const COAST_BAY=CH.COAST_BAY_PTS;                                                                  // 084: the bay cove replacing the retired COAST_MTR_LAWN (MTR slot 0)
 const COAST_MTR_HARBOR=CH.COAST_MTR_HARBOR_PTS;                                                    // 070: hook mole lake face (polyline)
-const COAST_MTR_POINT =CH.COAST_MTR_POINT_PTS;                                                                             // 071: the pushed-east Point (polyline, apex 243,-1330 — the map's eastmost land)
+const COAST_MTR_POINT =CH.COAST_MTR_POINT_PTS;                                                                             // 071: the pushed-east Point (polyline, apex 243,-894 — the map's eastmost land)
 const COAST_MTR_BEACH =genCoast(CH.COAST_MTR_BEACH_PARAMS.z0, CH.COAST_MTR_BEACH_PARAMS.z1, CH.COAST_MTR_BEACH_PARAMS.fx);
 const COAST_MTR_CLOSE =CH.COAST_MTR_CLOSE_PTS;
 const COAST_MTR_MOUTH =CH.MTR_HARBOR_MOUTH;    // 070: mouth entrance shore (terraced)
 const COAST_MTR_HOOKTIP=CH.MTR_HOOK_TIP;       // 070: hook tip curl (terraced)
-const COAST_MTR=[COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE,COAST_MTR_MOUTH,COAST_MTR_HOOKTIP];
+const COAST_MTR=[COAST_BAY,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE,COAST_MTR_MOUTH,COAST_MTR_HOOKTIP,COAST_GOLF];  // 084: BAY at slot 0, the vignette GOLF appended at idx 7 (matches coast.js). idx 3 MUST stay BEACH.
 const LAND=CH.buildLAND({COAST_CORNER,COAST_MAIN,COAST_PEN,COAST_GOLF,COAST_MOUTH,BASIN_W,
-  COAST_MTR_LAWN,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE});
+  COAST_BAY,COAST_MTR_HARBOR,COAST_MTR_POINT,COAST_MTR_BEACH,COAST_MTR_CLOSE});
 const P_START=COAST_PEN[0];
 const COAST_TIP=CH.peninsulaTipLine(P_START);   // peninsula south-tip terraced arc (matches coast.js)
 
@@ -36,7 +36,7 @@ function buildSegs(pts){const segs=[];for(let i=0;i<pts.length-1;i++){const ax=p
 const COAST_SEGS=[buildSegs(COAST_MAIN),buildSegs(COAST_PEN),buildSegs(COAST_GOLF),buildSegs(COAST_MOUTH),buildSegs(COAST_CORNER)];
 const TIP_SEGS=buildSegs(COAST_TIP);
 const MTR_SEGS=COAST_MTR.map(buildSegs);        // Montrose stub revetment tops (task 069) — mirror coast.js
-const QUERY_SEGS=[...COAST_SEGS,TIP_SEGS,...MTR_SEGS.filter((_,i)=>i!==3)];  // coastQuery scans the tip + Montrose (COAST_SEGS stays 5); task 072: BEACH (idx 3) is SAND (beachH), NOT a revetment — excluded so no walkable tier lingers off the sand
+const QUERY_SEGS=[...COAST_SEGS.filter((_,i)=>i!==2),TIP_SEGS,...MTR_SEGS.filter((_,i)=>i!==3)];  // 084: golf lives at COAST_SEGS[2] AND MTR idx7 — drop the COAST_SEGS copy so it isn't duplicated; the real-piece SET then matches coast.js's QUERY_SEGS exactly. BEACH (MTR idx3) is SAND (beachH), NOT a revetment — excluded so no walkable tier lingers off the sand
 function tierProfile(zc){const R=CH.TIER_ROCKS;if(zc>R.zMin&&zc<R.zMax){if(zc>R.cornerZ0){const f=clamp((zc-R.cornerZ0)/(R.cornerZ1-R.cornerZ0),0,1);const w=R.w.slice();w[w.length-1]=R.w[w.length-1]+(R.cornerPromW-R.w[w.length-1])*f;return{w,step:R.step}}return{w:R.w,step:R.step}}return{w:CH.TIER_DEFAULT.w,step:CH.TIER_DEFAULT.step}}
 function profileTotal(zc){const p=tierProfile(zc);let s=0;for(const w of p.w)s+=w;return s}
 function inPierChannel(x,z){const P=CH.PIER_CHANNEL;if(!P)return false;if(x<P.x0||x>P.x1||z>P.zMax)return false;const topZ=P.topZ0+(P.topZ1-P.topZ0)*(x-P.x0)/(P.x1-P.x0);return z>=topZ}
@@ -1078,57 +1078,79 @@ console.log('\n--- Wrigley bowl: field / track / wall / gates / concourse / wedg
 
 // ===== Task 069: MONTROSE north growth — new lawn/trail/revetment walkable, edges sealed =====
 console.log('\n--- Task 069: Montrose new lawn is walkable (north extension via LAND pip) ---');
-for(const [x,z] of [[100,-1000],[60,-1300],[180,-900],[150,-1450]]) expect(`Montrose lawn (${x},${z})`,walkable(x,z),true);
+for(const [x,z] of [[100,-1000],[60,-864],[180,-900],[150,-1014]]) expect(`Montrose lawn (${x},${z})`,walkable(x,z),true);
 
-console.log('\n--- Task 069: the Montrose trail runs on the new lawn ---');
-for(const [x,z] of [CH.TRAIL_MONTROSE[1],CH.TRAIL_MONTROSE[3],CH.TRAIL_MONTROSE[6],CH.TRAIL_MONTROSE[9],CH.TRAIL_MONTROSE[11]])
+console.log('\n--- Task 069/084: the whole Montrose trail runs on walkable land, end to end ---');
+for(const [x,z] of CH.TRAIL_MONTROSE)
   expect(`Montrose trail (${x},${z})`,walkable(x,z),true);
 
-console.log('\n--- Task 069: Montrose LAWN revetment top walkable, open water beyond NOT ---');
-for(const z of [-900,-1000]){   // LAWN band only (z-800..-1088); -1100..-1250 = 070 harbor basin, -1300..-1362 = 071 Point bulge (probed in the 071 block — its apron reaches past this z), -1360.. = 072 beach. Was -1340, but the 071 flip pushes that z's shore east onto the bulge apron.
-  const tx=CH.montroseFx(z);
-  expect(`revetment top inboard (${(tx-0.6).toFixed(1)},${z})`,walkable(tx-0.6,z),true);
-  expect(`open water beyond top (${(tx+14).toFixed(1)},${z}) NOT walkable`,walkable(tx+14,z),false);
+// 084: the retired blank-lawn revetment (old montroseFx shore z-800..-1088) is
+// replaced by the BAY cove (z-580..-655). The old montroseFx-top test no longer
+// describes real geography there (Point/beach now occupy those z), so it is
+// re-authored as the bay cove: inland lawn walkable, the concave cove water NOT,
+// and TIER_DEFAULT revetment steps stepping DOWN seaward of the shore top edge.
+console.log('\n--- Task 084: the BAY cove — inland lawn walkable, cove water NOT, revetment steps down seaward ---');
+// cove WATER (>12.2 m seaward of the shore line, past the TIER_DEFAULT apron) — NOT
+// walkable. NB: the walkable revetment apron reaches ~12.2 m seaward, so genuine open
+// water needs a bigger stand-off than the task's staged (170,-628)/(220,-600)/(190,-645),
+// which land ON the apron (lat 6-11 m) — re-authored to the cove interior (lat 18-21 m).
+for(const [x,z] of [[200,-632],[210,-620],[220,-632],[215,-635]]) expect(`bay cove water (${x},${z}) NOT walkable`,walkable(x,z),false);
+// cove LAND (west of the waist / golf interior / headland) — walkable
+for(const [x,z] of [[150,-628],[200,-660],[150,-575],[208,-660]]) expect(`bay land (${x},${z}) walkable`,walkable(x,z),true);
+// TIER_DEFAULT revetment steps just seaward of the shore top edge step DOWN and stay walkable
+{
+  const BAY_SEGS=buildSegs(COAST_BAY);
+  let s=BAY_SEGS[0],bd=1e9; for(const seg of BAY_SEGS){const d=Math.hypot(seg.ax-155,seg.az+628);if(d<bd){bd=d;s=seg}}  // segment nearest the waist (~155,-628)
+  const ys=[];let mono=true,allWalk=true,maxI=-1;
+  for(const lat of [0.4,2,4,6]){                     // step seaward along the coast normal
+    const px=s.ax+s.nx*lat,pz=s.az+s.nz*lat;
+    ys.push(+surfaceY(px,pz).toFixed(2));
+    const q=coastQuery(px,pz);if(q){const t=tierAt(q.lat,q.z);if(t)maxI=Math.max(maxI,t.i);}
+    if(!walkable(px,pz))allWalk=false;
+  }
+  for(let i=1;i<ys.length;i++)if(ys[i]>ys[i-1]+1e-6)mono=false;
+  console.log(`  bay waist steps @(${s.ax.toFixed(0)},${s.az.toFixed(0)}) ys=${JSON.stringify(ys)} mono=${mono} walk=${allWalk} maxTier=${maxI}`);
+  expect('bay revetment steps down seaward + walkable (TIER_DEFAULT)',mono&&allWalk&&maxI>=1,true);
 }
 
 console.log('\n--- Task 070: Montrose Harbor basin water NOT walkable (concave LAND carve) ---');
-for(const [x,z] of [[200,-1160],[200,-1200],[205,-1250],[195,-1280],[210,-1145]]) expect(`basin (${x},${z})`,walkable(x,z),false);
+for(const [x,z] of [[200,-724],[200,-764],[205,-814],[195,-844],[210,-709]]) expect(`basin (${x},${z})`,walkable(x,z),false);
 
 console.log('\n--- Task 070: the HOOK mole (breakwater) walkable end to end ---');
-for(const [x,z] of [[228,-1290],[228,-1240],[230,-1190],[231,-1160],[230,-1133]]) expect(`hook mole (${x},${z})`,walkable(x,z),true);
-expect('mole north root (solid land) (210,-1295)',walkable(210,-1295),true);
-expect('open lake east of the mole (252,-1200) NOT walkable',walkable(252,-1200),false);
+for(const [x,z] of [[228,-854],[228,-804],[230,-754],[231,-724],[230,-697]]) expect(`hook mole (${x},${z})`,walkable(x,z),true);
+expect('mole north root (solid land) (210,-859)',walkable(210,-859),true);
+expect('open lake east of the mole (252,-764) NOT walkable',walkable(252,-764),false);
 
 console.log('\n--- Task 070: harbor west shore (mainland) walkable ---');
-for(const [x,z] of [[176,-1176],[172,-1230],[168,-1205]]) expect(`west shore (${x},${z})`,walkable(x,z),true);
+for(const [x,z] of [[176,-740],[172,-794],[168,-769]]) expect(`west shore (${x},${z})`,walkable(x,z),true);
 
 console.log('\n--- Task 069: Montrose underpass berm (x<14, outside LAND) NOT walkable ---');
-for(const [x,z] of [[7,-1207],[10,-1207]]) expect(`berm behind the fence (${x},${z}) NOT walkable`,walkable(x,z),false);
+for(const [x,z] of [[7,-771],[10,-771]]) expect(`berm behind the fence (${x},${z}) NOT walkable`,walkable(x,z),false);
 
 console.log('\n--- Task 069: north map edge is sealed ---');
 expect('inside the north lawn (150,-1000) walkable',walkable(150,-1000),true);
 expect('past the north map edge (150,-1600) NOT walkable',walkable(150,-1600),false);
 
 console.log('\n--- Task 072: Montrose Beach sand walkable (beachH), roped dune interior NOT ---');
-for(const [x,z] of [[214,-1470],[224,-1450],[230,-1432],[212,-1490],[236,-1400]]) expect(`beach sand (${x},${z}) walkable`,walkable(x,z),true);
-for(const [x,z] of [[218,-1392],[224,-1385],[220,-1405],[228,-1395]]) expect(`dune interior (${x},${z}) BLOCKED`,walkable(x,z),false);
-expect('beach just NORTH of the dune (222,-1420) walkable',walkable(222,-1420),true);
-expect('beach WEST of the dune (208,-1390) walkable',walkable(208,-1390),true);
-expect('beach EAST of the dune (236,-1390) walkable',walkable(236,-1390),true);   // the sand WRAPS the dune (no walk-island)
-expect('wet sand at the waterline (239,-1455) walkable (wade)',walkable(239,-1455),true);
-expect('open lake east of the beach (243,-1455) NOT walkable',walkable(243,-1455),false);
+for(const [x,z] of [[214,-1034],[224,-1014],[230,-996],[212,-1054],[236,-964]]) expect(`beach sand (${x},${z}) walkable`,walkable(x,z),true);
+for(const [x,z] of [[218,-956],[224,-949],[220,-969],[228,-959]]) expect(`dune interior (${x},${z}) BLOCKED`,walkable(x,z),false);
+expect('beach just NORTH of the dune (222,-984) walkable',walkable(222,-984),true);
+expect('beach WEST of the dune (208,-954) walkable',walkable(208,-954),true);
+expect('beach EAST of the dune (236,-954) walkable',walkable(236,-954),true);   // the sand WRAPS the dune (no walk-island)
+expect('wet sand at the waterline (239,-1019) walkable (wade)',walkable(239,-1019),true);
+expect('open lake east of the beach (243,-1019) NOT walkable',walkable(243,-1019),false);
 
 console.log('\n--- Task 072: beach sand slopes DOWN to the lake (dry inland, wet at the waterline) ---');
-console.log(`  montroseBeachH x=214:${CH.montroseBeachH(214,-1450).toFixed(2)}  x=232:${CH.montroseBeachH(232,-1450).toFixed(2)}  x=240:${CH.montroseBeachH(240,-1450).toFixed(2)}  (should trend 0 -> negative)`);
-expect('dry sand inland is ~grade (>-0.2)',CH.montroseBeachH(214,-1450)>-0.2,true);
-expect('sand is underwater at x240 (<-2.0)',CH.montroseBeachH(240,-1450)<-2.0,true);
-expect('montroseBeachH null outside the sand (250,-1450)',CH.montroseBeachH(250,-1450),null);
+console.log(`  montroseBeachH x=214:${CH.montroseBeachH(214,-1014).toFixed(2)}  x=232:${CH.montroseBeachH(232,-1014).toFixed(2)}  x=240:${CH.montroseBeachH(240,-1014).toFixed(2)}  (should trend 0 -> negative)`);
+expect('dry sand inland is ~grade (>-0.2)',CH.montroseBeachH(214,-1014)>-0.2,true);
+expect('sand is underwater at x240 (<-2.0)',CH.montroseBeachH(240,-1014)<-2.0,true);
+expect('montroseBeachH null outside the sand (250,-1014)',CH.montroseBeachH(250,-1014),null);
 
 console.log('\n--- Task 072: beach house hall BLOCKED (solid), The Dock deck WALKABLE ---');
-for(const [x,z] of [[199,-1440],[196,-1445],[202,-1432]]) expect(`beach house hall (${x},${z}) BLOCKED`,walkable(x,z),false);
-for(const [x,z] of [[206,-1440],[192,-1440]]) expect(`sand/lawn just outside the beach house (${x},${z}) walkable`,walkable(x,z),true);
-for(const [x,z] of [[216,-1484],[212,-1482],[220,-1486]]) expect(`The Dock deck (${x},${z}) walkable`,walkable(x,z),true);
-expect('The Dock deck surface at deckY',surfaceY(216,-1484),CH.THE_DOCK.deckY);
+for(const [x,z] of [[199,-1004],[196,-1009],[202,-996]]) expect(`beach house hall (${x},${z}) BLOCKED`,walkable(x,z),false);
+for(const [x,z] of [[206,-1004],[192,-1004]]) expect(`sand/lawn just outside the beach house (${x},${z}) walkable`,walkable(x,z),true);
+for(const [x,z] of [[216,-1048],[212,-1046],[220,-1050]]) expect(`The Dock deck (${x},${z}) walkable`,walkable(x,z),true);
+expect('The Dock deck surface at deckY',surfaceY(216,-1048),CH.THE_DOCK.deckY);
 
 // ===== Task 073: CRICKET HILL — the walkable analytic mound (engine <-> probe lockstep) =====
 console.log('\n--- Task 073: Cricket Hill is walkable everywhere (no cliff/hole; whole mound on LAND) ---');
@@ -1187,7 +1209,7 @@ console.log('\n--- Task 073: the base is clear of TRAIL_MONTROSE (no trail on th
 
 // ===== Task 071: Montrose Point FLIPPED — real Point walkability =====
 // COAST_MTR_POINT is now CH.COAST_MTR_POINT_PTS (the pushed-east polyline, apex
-// 243,-1330 — the map's eastmost land). LAND / QUERY_SEGS / MTR_SEGS[2] all
+// 243,-894 — the map's eastmost land). LAND / QUERY_SEGS / MTR_SEGS[2] all
 // consume it automatically (coast.js + this probe flipped in lockstep). These
 // expects prove the LIVE Point: the bulge is real, the piece joins its
 // neighbors, both sanctuary ribbons + every new-land spot are walkable, the
@@ -1204,15 +1226,15 @@ console.log('\n--- Task 071 (a): the pushed-east bulge is LIVE ---');
 console.log('\n--- Task 071 (b): the piece joins its neighbors, monotone north, finite ---');
 {
   const P=CH.COAST_MTR_POINT_PTS, first=P[0], last=P[P.length-1];
-  expect('Point piece starts at the mole lake-face end (236,-1300)',Math.hypot(first[0]-236,first[1]+1300)<0.01,true);
-  const bx=CH.montroseFx(-1362);
-  expect(`Point piece ends on the stub meander (~${bx.toFixed(1)},-1362) for the beach join`,Math.hypot(last[0]-bx,last[1]+1362)<0.6,true);
+  expect('Point piece starts at the mole lake-face end (236,-864)',Math.hypot(first[0]-236,first[1]+864)<0.01,true);
+  const bx=CH.montroseFx(-926);
+  expect(`Point piece ends on the stub meander (~${bx.toFixed(1)},-926) for the beach join`,Math.hypot(last[0]-bx,last[1]+926)<0.6,true);
   expect('Point piece runs north monotonically (CR overshoot tol 0.3)',P.every((p,i)=>!i||p[1]<P[i-1][1]+0.3),true);
   expect('Point data is finite',P.every(p=>Number.isFinite(p[0])&&Number.isFinite(p[1])),true);
 }
 
 console.log('\n--- Task 071 (c): the three waypoint stands are walkable ---');
-for(const [x,z] of [[203,-1319],[229,-1341],[186,-1316]]) expect(`stand (${x},${z}) walkable`,walkable(x,z),true);
+for(const [x,z] of [[203,-883],[229,-905],[186,-880]]) expect(`stand (${x},${z}) walkable`,walkable(x,z),true);
 
 console.log('\n--- Task 071 (d): both sanctuary ribbons fully walkable, none inside the dune ---');
 {
@@ -1228,12 +1250,12 @@ console.log('\n--- Task 071 (d): both sanctuary ribbons fully walkable, none ins
 }
 
 console.log('\n--- Task 071 (e): the new-land spots on the bulge are walkable ---');
-for(const [x,z] of [[MPT.scope.x,MPT.scope.z],[242,-1330],[240,-1318],[240,-1345]]) expect(`new-land (${x},${z}) walkable`,walkable(x,z),true);
+for(const [x,z] of [[MPT.scope.x,MPT.scope.z],[242,-894],[240,-882],[240,-909]]) expect(`new-land (${x},${z}) walkable`,walkable(x,z),true);
 
 console.log('\n--- Task 071 (f): the bulge terraces step DOWN seaward to open water (mirrors the Tip idiom) ---');
 {
   const segs=MTR_SEGS[2];   // buildSegs of the flipped Point piece (walkprobe builds MTR_SEGS from COAST_MTR)
-  for(const zc of [-1315,-1330,-1348]){
+  for(const zc of [-879,-894,-912]){
     let s=segs[0],bd=1e9; for(const seg of segs){const d=Math.abs(seg.az-zc);if(d<bd){bd=d;s=seg}}
     const ys=[];let mono=true,maxI=-1,allWalk=true;
     for(const lat of [0.4,3,6,9]){
@@ -1258,7 +1280,7 @@ console.log('\n--- Task 071 (g): open water beyond the bulge apron is NOT walkab
 // apron, not water — see report.)
 {
   const P=CH.COAST_MTR_POINT_PTS;
-  for(const zc of [-1305,-1320,-1340]){
+  for(const zc of [-869,-884,-904]){
     let cx=-1e9; for(const p of P) if(Math.abs(p[1]-zc)<6) cx=Math.max(cx,p[0]);
     const x=+(cx+14).toFixed(1);
     expect(`open water (${x},${zc}) beyond the apron NOT walkable`,walkable(x,zc),false);
@@ -1266,17 +1288,17 @@ console.log('\n--- Task 071 (g): open water beyond the bulge apron is NOT walkab
 }
 
 console.log('\n--- Task 071 (h): the join seams have no walkability holes ---');
-expect('mole join (236,-1299) walkable',walkable(236,-1299),true);
-expect('mole join (236.2,-1302) walkable',walkable(236.2,-1302),true);
-expect('beach join (235,-1360) walkable',walkable(235,-1360),true);
-// beach-sand side of the z-1362 join. NB: the task's (232,-1366) lands INSIDE the
-// roped 072 MONTROSE_DUNE (x<=233, z in [-1414,-1362]) -> non-walkable by the dune
+expect('mole join (236,-863) walkable',walkable(236,-863),true);
+expect('mole join (236.2,-866) walkable',walkable(236.2,-866),true);
+expect('beach join (235,-924) walkable',walkable(235,-924),true);
+// beach-sand side of the z-926 join. NB: the task's (232,-930) lands INSIDE the
+// roped 072 MONTROSE_DUNE (x<=233, z in [-978,-926]) -> non-walkable by the dune
 // carve (beachCarved). Sample sand EAST of the dune instead (x>233) — see report.
-expect('beach-sand side of the z-1362 join (235,-1364) walkable',walkable(235,-1364),true);
+expect('beach-sand side of the z-926 join (235,-928) walkable',walkable(235,-928),true);
 
 console.log('\n--- Task 071 (i): hedge control pts + gaps + loop-end walkable (hook-mole connectivity) ---');
 for(const [x,z] of [...MPT.hedge.pts,...MPT.hedge.gaps]) expect(`hedge (${x},${z}) walkable`,walkable(x,z),true);
-expect('loop end (206,-1299.5) walkable',walkable(206,-1299.5),true);
+expect('loop end (206,-863.5) walkable',walkable(206,-863.5),true);
 
 console.log('\n--- Task 071 (j): all 4 birder spots walkable + not inside the dune ---');
 for(const b of MPT.birders){
@@ -1291,9 +1313,9 @@ console.log('\n--- Task 071 (k): Point props clear the ribbons (collision-model 
 //   * gateway posts FRAME the entrance path (opening 3.8 m > path 2.4 m; a gate
 //     crossing, exempt like the sanctuary fence gate) -> clear the trail + loop.
 //   * split-rail flanks LINE the trail (x=191, just E of the walk ribbon) ->
-//     clear the sanctuary paths (south flank shortened to -1322.6 off the bow).
+//     clear the sanctuary paths (south flank shortened to -886.6 off the bow).
 //   * the tip scope sits EAST of the loop's tip arc -> clears ALL walkways
-//     (moved from the staged 235.5,-1335, which overlapped the sampled loop).
+//     (moved from the staged 235.5,-899, which overlapped the sampled loop).
 //   * birders are NON-colliding makeNPC figures (framework: soft bump only, no
 //     blocker) that line the paths -> walkability checked in (j), not clearance.
 // The furniture that must stay OFF every walkway — the panel post + every rope
@@ -1324,7 +1346,7 @@ console.log('\n--- Task 071 (k): Point props clear the ribbons (collision-model 
   };
   // 1) furniture that must stay off EVERY walkway: panel post + rope posts.
   const ALL=['mtBike','mtWalk','ent','loop'];
-  const furn=[{p:[200,-1320.5],r:0.15,n:'panel post'}];
+  const furn=[{p:[200,-884.5],r:0.15,n:'panel post'}];
   for(const rope of MPT.ropes) for(const pt of posts(rope,2.6)) furn.push({p:pt,r:0.1,n:'rope post'});
   let fOff=0,fmin=1e9,fw=null;
   for(const pr of furn){const c=clr(pr.p[0],pr.p[1],pr.r,ALL);
@@ -1333,14 +1355,14 @@ console.log('\n--- Task 071 (k): Point props clear the ribbons (collision-model 
   expect(`panel + ${furn.length-1} rope posts clear ALL 4 ribbons by >=0.6 m (min ${fmin.toFixed(2)} at ${fw}; ${fOff} off)`,fOff,0);
   // 2) the gateway FRAMES the entrance path: opening exceeds the path width, and
   //    the posts clear the through-trail + the loop.
-  const gspan=Math.abs(-1316.1-(-1319.9));
+  const gspan=Math.abs(-880.1-(-883.9));
   expect(`gateway opening ${gspan.toFixed(1)} m exceeds the path width ${MPT.paths.width} m (path threads the gate)`,gspan>MPT.paths.width+0.6,true);
-  for(const gp of [[191,-1316.1],[191,-1319.9]]){
+  for(const gp of [[191,-880.1],[191,-883.9]]){
     const c=clr(gp[0],gp[1],0.2,['mtBike','mtWalk','loop']);
     expect(`gateway post (${gp[0]},${gp[1]}) clears trail+loop by >=0.6 m (min ${c.min.toFixed(2)} at ${c.worst})`,c.min>=0.6-1e-6,true);
   }
   // 3) split-rail flanks line the trail -> clear the SANCTUARY paths.
-  for(const se of [[191,-1311.9],[191,-1322.6]]){
+  for(const se of [[191,-875.9],[191,-886.6]]){
     const c=clr(se[0],se[1],0.15,['ent','loop']);
     expect(`split-rail end (${se[0]},${se[1]}) clears the sanctuary paths by >=0.6 m (min ${c.min.toFixed(2)} at ${c.worst})`,c.min>=0.6-1e-6,true);
   }
@@ -1350,7 +1372,7 @@ console.log('\n--- Task 071 (k): Point props clear the ribbons (collision-model 
 }
 
 console.log('\n--- Task 071 (l): meadow interior spot checks walkable ---');
-for(const [x,z] of [[200,-1335],[215,-1345],[225,-1330],[238,-1330]]) expect(`meadow (${x},${z}) walkable`,walkable(x,z),true);
+for(const [x,z] of [[200,-899],[215,-909],[225,-894],[238,-894]]) expect(`meadow (${x},${z}) walkable`,walkable(x,z),true);
 
 // ===== Task 082: SAVE INTEGRITY — migration + round-trip + corrupt-recovery =====
 // Pure-node exercise of src/store.js (localStorage shim + cache-busted dynamic

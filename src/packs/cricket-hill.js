@@ -19,7 +19,7 @@
 //    * ABOUT toast   — a passive E / hand fact at the summit (no kite gameplay).
 //
 //  Only-my-file rules: one import line in packs/index.js, no shared edits. All
-//  setup in onWorldReady. The mound is FAR NORTH (z≈-1315, ~1.47 km from the
+//  setup in onWorldReady. The mound is FAR NORTH (z≈-879, ~1.47 km from the
 //  Belmont spawn) so baseline scenes are untouched; the NPCs cull at range and
 //  every static is frustum-culled. NO shared rng (rng/rand) — all jitter is a
 //  LOCAL xorshift / index-seeded phase — so world determinism is safe.
@@ -52,14 +52,14 @@ const KITE_LINES = [
 // flyers: on the summit + the windward (lake-facing, EAST) upper slope, all
 // clear of the desire path; each faces roughly EAST into the lake breeze.
 const FLYERS = [
-  { x:106, z:-1317, ry:1.42, kite:0xff5a4d, up:12.5, lean:2.6, ph:0.0 },
-  { x:117, z:-1311, ry:1.72, kite:0xffd23f, up:13.5, lean:3.2, ph:1.9 },
-  { x:120, z:-1320, ry:1.55, kite:0x39a0ed, up:11.5, lean:2.2, ph:3.6 },
+  { x:106, z:-881, ry:1.42, kite:0xff5a4d, up:12.5, lean:2.6, ph:0.0 },
+  { x:117, z:-875, ry:1.72, kite:0xffd23f, up:13.5, lean:3.2, ph:1.9 },
+  { x:120, z:-884, ry:1.55, kite:0x39a0ed, up:11.5, lean:2.2, ph:3.6 },
 ];
 
 // worn desire path — up the harbor-side (SE) slope to the summit. Centerline
 // world nodes (all inside the footprint, so cricketHillH is defined on them).
-const PATH_NODES = [[139,-1305],[132,-1308],[125,-1311],[119,-1313],[114,-1315]];
+const PATH_NODES = [[139,-869],[132,-872],[125,-875],[119,-877],[114,-879]];
 const PATH_HALF = 1.25, PATH_COLOR = 0xb59a6f;
 
 onWorldReady(() => {

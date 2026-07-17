@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-17T07:00:04.284Z",
+ "generated": "2026-07-17T21:07:54.368Z",
  "count": 128,
  "waypoints": [
   {
@@ -277,26 +277,26 @@
    "id": "zone-marovitz-golf-course",
    "area": "lakefront",
    "cell": "lakefront",
-   "x": 150,
-   "z": -610,
+   "x": 211,
+   "z": -500,
    "framings": [
     {
-     "yaw": 0.8,
-     "pitch": 0.2,
-     "dist": 15
-    },
-    {
-     "yaw": 2.9,
-     "pitch": 0.2,
-     "dist": 15
-    },
-    {
      "yaw": -1.3,
-     "pitch": 0.28,
-     "dist": 17
+     "pitch": 0.12,
+     "dist": 14
+    },
+    {
+     "yaw": -0.85,
+     "pitch": 0.12,
+     "dist": 18
+    },
+    {
+     "yaw": -1.75,
+     "pitch": 0.22,
+     "dist": 11
     }
    ],
-   "expectation": "Sydney R. Marovitz golf course: fenced rolling fairways with greens, flags and bunkers stretching north; tee/green dressing, no buildings dominating."
+   "expectation": "Sydney R. Marovitz golf course — the 084 COMPACT VIGNETTE: from the lakeside trail looking W/SW over the perimeter fence, a compact-but-unmistakable golf read — mown fairway + greens with red flag pins, sand bunkers, the pale perimeter fence, and the Waveland fieldhouse clock tower anchoring the SW. Evocation over acreage: it reads clearly as a golf course (fence, flags, bunkers, fieldhouse) in a small footprint, NOT rolling endless fairways, NOT an empty lawn."
   },
   {
    "id": "sanctuary-deck",
@@ -352,58 +352,58 @@
    "id": "mt-arrival",
    "area": "montrose",
    "cell": "lakefront",
-   "x": 175,
-   "z": -812,
+   "x": 150,
+   "z": -604,
    "framings": [
     {
-     "yaw": 3.14,
-     "pitch": 0.15,
-     "dist": 13
-    },
-    {
-     "yaw": 2.84,
+     "yaw": 2.36,
      "pitch": 0.12,
-     "dist": 13
+     "dist": 11
     },
     {
-     "yaw": 3.14,
-     "pitch": 0.28,
-     "dist": 16
+     "yaw": 2,
+     "pitch": 0.1,
+     "dist": 14
+    },
+    {
+     "yaw": 2.6,
+     "pitch": 0.14,
+     "dist": 9
     }
    ],
-   "expectation": "THE MAP GREW NORTH (task 069 shell): standing at the old z-812 fence line looking north, the new Montrose lawn opens ahead — a continuous, walkable, honest SHELL (barren by design; 070-073 add the harbor/Magic Hedge/beach/Cricket Hill). The dual Lakefront Trail continues up the lake (east/right) side, open blue lake to the east, the LSD berm + Lakeview brick backdrop to the west. NO hole, NO seam or wall at the old fence line — the ground reads unbroken from the golf into Montrose. Emptiness is expected; a HOLE, a floating edge, or a hard wall across the lawn is NOT."
+   "expectation": "THE 084 BAY COVE REVEAL: standing on the golf-side lawn, the new shoreline sweeps WEST into a curved cove just below the stand, with open cove water in the middle distance and TIER_DEFAULT revetment steps wrapping the curve; across the bay to the NE the Montrose hook mole reads with its red-capped white entrance light (a small marker at distance, ~120 m, hazy over the water), and prairie planting + a bench sit by the trail. The read: the golf course and Montrose harbor are NEIGHBORS across a curved bay — NO blank lawn, NO hole, NO floating edge or hard wall."
   },
   {
    "id": "mt-trail",
    "area": "montrose",
    "cell": "lakefront",
-   "x": 205,
-   "z": -1000,
+   "x": 150,
+   "z": -632,
    "framings": [
     {
-     "yaw": 3.14,
-     "pitch": 0.12,
-     "dist": 11
-    },
-    {
      "yaw": 0.5,
-     "pitch": 0.06,
-     "dist": 10
+     "pitch": 0.1,
+     "dist": 12
     },
     {
-     "yaw": 3,
-     "pitch": 0.16,
+     "yaw": 0.2,
+     "pitch": 0.1,
+     "dist": 12
+    },
+    {
+     "yaw": 0.9,
+     "pitch": 0.12,
      "dist": 13
     }
    ],
-   "expectation": "The dual Lakefront Trail CONTINUES north on the new Montrose stretch: the asphalt bike ribbon with yellow center dashes plus the crushed-limestone walking ribbon beside it, both running to the horizon; lawn on both sides, open lake to the east. It must read continuous with TRAIL_MAIN (no gap/jog at the golf-end join) and both ribbons present — not a single path, not a dead end."
+   "expectation": "THE COVE WAIST (084 compression): standing on the lawn just west of the cove's waist, looking SOUTH along the curving shore — the cove shoreline sweeps away south toward the golf revetment, the Marovitz golf fence + flags read on the RIGHT (west) and open cove water lies to the LEFT (east). The curve of the coast is the subject: a continuous shaped shoreline, NOT a straight wall and NOT a blank lawn. The Waveland fieldhouse tower may read only as a hazy silhouette far down the vignette (~150 m); do not expect more than that at range."
   },
   {
    "id": "mt-gate",
    "area": "montrose",
    "cell": "lakefront",
    "x": 34,
-   "z": -1207,
+   "z": -771,
    "framings": [
     {
      "yaw": -1.57,
@@ -421,14 +421,14 @@
      "dist": 12
     }
    ],
-   "expectation": "The Montrose Avenue underpass (z-1207, x0-14): a fenced dead-end portal through the LSD berm matching the Belmont/Addison/Irving register — a voussoir stone arch over a dark recessed door, limestone posts/lintel, warm lanterns, flanked by the perimeter hedge with the gap aligned to the mouth, and the low-rise Lakeview brick backdrop rising behind the berm. NO gag sign. Reads as a real neighborhood gate, sealed for now."
+   "expectation": "The Montrose Avenue underpass (z-771, x0-14): a fenced dead-end portal through the LSD berm matching the Belmont/Addison/Irving register — a voussoir stone arch over a dark recessed door, limestone posts/lintel, warm lanterns, flanked by the perimeter hedge with the gap aligned to the mouth, and the low-rise Lakeview brick backdrop rising behind the berm. NO gag sign. Reads as a real neighborhood gate, sealed for now."
   },
   {
    "id": "mt-harbor",
    "area": "montrose",
    "cell": "lakefront",
    "x": 182,
-   "z": -1210,
+   "z": -774,
    "framings": [
     {
      "yaw": 1.42,
@@ -453,7 +453,7 @@
    "area": "montrose",
    "cell": "lakefront",
    "x": 229,
-   "z": -1212,
+   "z": -776,
    "framings": [
     {
      "yaw": 0,
@@ -478,7 +478,7 @@
    "area": "montrose",
    "cell": "lakefront",
    "x": 183,
-   "z": -1172,
+   "z": -736,
    "framings": [
     {
      "yaw": -1.33,
@@ -503,7 +503,7 @@
    "area": "montrose",
    "cell": "lakefront",
    "x": 215,
-   "z": -1456,
+   "z": -1020,
    "framings": [
     {
      "yaw": -0.7,
@@ -528,7 +528,7 @@
    "area": "montrose",
    "cell": "lakefront",
    "x": 222,
-   "z": -1421,
+   "z": -985,
    "framings": [
     {
      "yaw": 0,
@@ -553,7 +553,7 @@
    "area": "montrose",
    "cell": "lakefront",
    "x": 216,
-   "z": -1473,
+   "z": -1037,
    "framings": [
     {
      "yaw": 3.14,
@@ -578,7 +578,7 @@
    "area": "montrose",
    "cell": "lakefront",
    "x": 112,
-   "z": -1315,
+   "z": -879,
    "framings": [
     {
      "yaw": 0.72,
@@ -603,7 +603,7 @@
    "area": "montrose",
    "cell": "lakefront",
    "x": 112,
-   "z": -1272,
+   "z": -836,
    "framings": [
     {
      "yaw": 3.14,
@@ -628,7 +628,7 @@
    "area": "montrose",
    "cell": "lakefront",
    "x": 203,
-   "z": -1319,
+   "z": -883,
    "framings": [
     {
      "yaw": 2.36,
@@ -653,7 +653,7 @@
    "area": "montrose",
    "cell": "lakefront",
    "x": 229,
-   "z": -1341,
+   "z": -905,
    "framings": [
     {
      "yaw": 0.79,
@@ -678,7 +678,7 @@
    "area": "montrose",
    "cell": "lakefront",
    "x": 186,
-   "z": -1316,
+   "z": -880,
    "framings": [
     {
      "yaw": 1.62,

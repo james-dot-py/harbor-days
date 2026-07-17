@@ -182,17 +182,17 @@ onWorldReady(() => {
   //  Laid here (after Belmont populates boats[]/spokes[], before N is taken)
   //  so it rides the SAME instanced meshes below → ZERO new draw calls. Its
   //  own local rng (seed 7071) keeps it independent of Belmont's draw order.
-  //  Basin water x192..216, z-1145..-1282; finger docks root x186 reaching
-  //  east to ~x201 at deck rows z-1150/-1190/-1228/-1262; hook mole at x>=219.
+  //  Basin water x192..216, z-709..-846; finger docks root x186 reaching
+  //  east to ~x201 at deck rows z-714/-754/-792/-826; hook mole at x>=219.
   //  We moor in the slips beside the fingers and across the open east half.
   // =====================================================================
   const belmontBoatCount = boats.length;   // Belmont's rnd draws end here; Montrose is rnd2 only
   const rnd2 = m32(7071);
 
   const M_ROWS = [199, 208, 214];                       // 2 open-water rows (208/214) + 1 slip row (199)
-  const M_Z0 = -1152, M_Z1 = -1276, M_ZSTEP = 13.8, M_STAGGER = 2.5;
-  const MONTROSE_CLUSTERS = [{ x: 203, z: -1180, n: 8 }, { x: 207, z: -1240, n: 7 }];
-  const M_DOCK_Z = [-1150, -1190, -1228, -1262];        // finger-dock deck rows (planks x186..201)
+  const M_Z0 = -716, M_Z1 = -840, M_ZSTEP = 13.8, M_STAGGER = 2.5;
+  const MONTROSE_CLUSTERS = [{ x: 203, z: -744, n: 8 }, { x: 207, z: -804, n: 7 }];
+  const M_DOCK_Z = [-714, -754, -792, -826];        // finger-dock deck rows (planks x186..201)
   const M_DOCK_XMAX = 202, M_DOCK_SKIP_Z = 4.5;         // keep a slip-row boat off the planks
 
   const nearMontroseCluster = (x, z) => {
@@ -243,7 +243,7 @@ onWorldReady(() => {
   // Belmont + Montrose star-dock floats share one InstancedMesh
   const ALL_CLUSTERS = [...CLUSTERS, ...MONTROSE_CLUSTERS];
   // a few loose Montrose cans out in the open east water
-  const montroseLooseCans = [[212, -1160], [211, -1212], [213, -1268]];
+  const montroseLooseCans = [[212, -724], [211, -776], [213, -832]];
 
   const N = boats.length;
 

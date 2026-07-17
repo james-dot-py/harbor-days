@@ -37,7 +37,15 @@
 // (+/- ~3-6 m), the way a real Belmont Harbor shoreline reads from the air.
 export const COAST_MAIN_PARAMS = { z0:340, z1:16,   fx:z=>150+Math.sin(z*0.020)*3.4+Math.sin(z*0.052+1.3)*1.9+Math.sin(z*0.091+0.6)*1.0 };  // Belmont Rocks (east-facing) — now reaches z340 where the corner wrap begins
 export const COAST_PEN_PARAMS  = { z0:-25, z1:-330, fx:z=>196+4*Math.sin(Math.PI*(z+330)/305)+Math.sin(z*0.058+0.8)*1.2+Math.sin(z*0.101+2.1)*0.7 };  // east peninsula lake edge — TEARDROP (addison harbor.png): narrow at the root/tip (~196), swelling +4 mid-length (peak ~x200 @ z-177), small octaves for the organic read
-export const COAST_GOLF_PARAMS = { z0:-400,z1:-800, fx:z=>232+Math.sin(z*0.017)*1.9+Math.sin(z*0.045+1.1)*1.1+Math.sin(z*0.082+0.4)*0.7 };  // Marovitz trail-side revetment
+// 084 COMPRESSION: the golf revetment is re-cut to the compact vignette
+// (z -400..-580); the OLD full-length piece stays as GHOST rng ballast — the
+// coast.js terrace-slab loop iterates COAST_SEGS[2] with the SHARED world rng,
+// so the ghost consumes the exact pre-084 draw pattern (boxes never pushed)
+// and every towel/tuft/tree downstream stays bit-identical. The NEW golf +
+// bay pieces render via the LOCAL xorshift fold (the Montrose precedent).
+const golfFx = z=>232+Math.sin(z*0.017)*1.9+Math.sin(z*0.045+1.1)*1.1+Math.sin(z*0.082+0.4)*0.7;
+export const COAST_GOLF_PARAMS       = { z0:-400,z1:-580, fx:golfFx };  // Marovitz trail-side revetment (084 vignette cut)
+export const COAST_GOLF_GHOST_PARAMS = { z0:-400,z1:-800, fx:golfFx };  // pre-084 piece — WORLD-RNG BALLAST ONLY, never rendered/walked
 // THE CORNER WRAP (Diversey/Fullerton point): the SAME 7-step terraced revetment
 // as the Rocks, swept from east-facing around to south-facing. Fitted-quadratic fx
 // (like COAST_MOUTH): genCoast walks z 403 -> 340, so the array runs SW terminus
@@ -66,19 +74,25 @@ export const BASIN_W_PARAMS    = { z0:-20, z1:-328, step:3, fx:z=>85+Math.sin(z*
 // sand) without touching the others' arrays. One shared gentle meander (x ~231-
 // 237, well under xMax 244) keeps the whole shore continuous; TIER_DEFAULT
 // (4 steps) applies since every z here is outside the Rocks band (zMin 20).
-export const montroseFx = z => 234 + Math.sin(z*0.016)*2.2 + Math.sin(z*0.041+0.7)*1.3;
-export const COAST_MTR_LAWN_PARAMS   = { z0:-800,  z1:-1088, fx:montroseFx };  // honest shore south of the harbor mouth (ships as-is)
+// 084 COMPRESSION: the whole Montrose block slides SOUTH by MTR_DZ. montroseFx
+// is PHASE-SHIFTED by the same delta so the shore meander translates RIGIDLY —
+// every hand-matched junction value (mouth start, beach stub, closure) survives
+// exactly: montroseFx(oldZ + MTR_DZ) === pre-084 montroseFx(oldZ).
+export const MTR_DZ = 436;
+export const montroseFx = z => 234 + Math.sin((z-MTR_DZ)*0.016)*2.2 + Math.sin((z-MTR_DZ)*0.041+0.7)*1.3;
+// (COAST_MTR_LAWN is RETIRED by 084 — the blank golf-to-Montrose lawn is
+// replaced by the curved BAY cove, COAST_BAY_PTS below, defined after crChain.)
 // COAST_MTR_HARBOR is no longer a straight stub — task 070 carves the Montrose
 // Harbor basin + hook mole here. Its pieces (MTR_HARBOR_MOUTH / mtBasin*Line /
 // mtMoleWestSeawall / MTR_HOOK_TIP / COAST_MTR_HARBOR_PTS) are defined below,
 // after crChain (the Montrose-harbor block near the Belmont basin functions).
-export const COAST_MTR_POINT_PARAMS  = { z0:-1303, z1:-1362, fx:montroseFx };  // 071 pushes Montrose Point + the Magic Hedge east
-export const COAST_MTR_BEACH_PARAMS  = { z0:-1365, z1:-1500, fx:montroseFx };  // 072 lays Montrose Beach sand + the dunes here
+export const COAST_MTR_POINT_PARAMS  = { z0:-867, z1:-926, fx:montroseFx };  // 071 pushes Montrose Point + the Magic Hedge east
+export const COAST_MTR_BEACH_PARAMS  = { z0:-929, z1:-1064, fx:montroseFx };  // 072 lays Montrose Beach sand + the dunes here
 // NE-corner map-edge closure: the revetment wraps from the beach's north end
 // (matches COAST_MTR_BEACH's last point) west into the north-cap hedge line. A
 // polyline (not fx(z)); coast.js densifies it. Ordered shore->west so the terrace
 // normal points N/NE into the edge water.
-export const COAST_MTR_CLOSE_PTS = [[montroseFx(-1500),-1500],[233,-1506],[228,-1510],[217,-1513],[201,-1514.5]];
+export const COAST_MTR_CLOSE_PTS = [[montroseFx(-1064),-1064],[233,-1070],[228,-1074],[217,-1077],[201,-1078.5]];
 
 /* -------------------------------- LAND ------------------------------- */
 // Catmull-Rom densifier: a smooth polyline through `ctrl` at ~`step` m
@@ -121,28 +135,42 @@ export function peninsulaTipLine(P_START){ return crChain([[166,-24],[176,-17],[
 // A bigger sibling of Belmont Harbor, laid with the SAME basin + peninsula +
 // terraced-tip + south-mouth topology (BASIN_W / peninsulaWestLine / COAST_TIP /
 // COAST_MOUTH), Montrose coords, and a STONE breakwater where Belmont has a
-// grassy spit. Replaces the 069 COAST_MTR_HARBOR stub (z -1091..-1300). All
+// grassy spit. Replaces the 069 COAST_MTR_HARBOR stub (z -655..-864). All
 // densified via crChain (no rng). East-west COMPRESSED to fit xMax 244 (the
 // standing liberty — order is the law, not raw osm x). Determinism-safe: every
 // scatter loop caps at z>=-800, so this LAND carve is scatter-free (069 proved
 // it, 0.34% spawn). Water is WATER_N (y -2.32) showing through the concave LAND.
 //
+// ---- THE BAY (084 COMPRESSION, z -580..-655) -------------------------------
+// The curved cove replacing the blank golf-to-Montrose lawn: the shore sweeps
+// WEST from the golf revetment end (golfFx(-580)=232.97) to a waist at ~x155,
+// z-628, then back out to meet the harbor-mouth lawn end (montroseFx(-652) at
+// z-655 — the same junction geometry the old LAWN piece arrived with, gentle
+// N-NE final tangent into the mouth's NW sweep). Ordered south->north so the
+// seaward normal points into the cove water; TIER_DEFAULT terraces via the
+// LOCAL fold (zero shared rng). Across the cove the hook mole + entrance light
+// read to the NE — the golf-to-harbor visual handshake.
+export const COAST_BAY_PTS = crChain([
+  [232.972,-580],[220,-592],[200,-602],[178,-612],[162,-620],[155,-628],
+  [156,-636],[164,-644],[181,-650],[207,-652.5],[224,-653.5],[236.278,-655],
+],2.5);   // return leg strictly monotonic in z — a north-south wiggle here cuts a water sliver into the headland (x-ray pip)
+
 // TERRACED pieces (walkable steps via QUERY_SEGS + folded terraces/piles/faces,
 // the COAST_TIP precedent). Ordered so each seaward normal points to the water:
-export const MTR_HARBOR_MOUTH = crChain([[montroseFx(-1088),-1091],[231,-1097],[216,-1104],[201,-1110],[191,-1114],[186,-1117]],2.5);  // mouth SW entrance shore (LAWN end -> basin SW jamb)
-export const MTR_HOOK_TIP     = crChain([[228,-1129],[232,-1121],[238,-1120],[242,-1127],[242,-1138],[239,-1148],[237,-1154]],1.7);  // hook curl at the south tip (terraces face the LAKE only; light on top)
-export const COAST_MTR_HARBOR_PTS = crChain([[237,-1154],[238,-1200],[238,-1262],[236,-1300]],2.5);  // mole LAKE(outer) terraced face -> continues to the Point (the swapped 070 piece)
+export const MTR_HARBOR_MOUTH = crChain([[montroseFx(-652),-655],[231,-661],[216,-668],[201,-674],[191,-678],[186,-681]],2.5);  // mouth SW entrance shore (LAWN end -> basin SW jamb)
+export const MTR_HOOK_TIP     = crChain([[228,-693],[232,-685],[238,-684],[242,-691],[242,-702],[239,-712],[237,-718]],1.7);  // hook curl at the south tip (terraces face the LAKE only; light on top)
+export const COAST_MTR_HARBOR_PTS = crChain([[237,-718],[238,-764],[238,-826],[236,-864]],2.5);  // mole LAKE(outer) terraced face -> continues to the Point (the swapped 070 piece)
 // SEAWALLS (flush sheet-pile bulkheads; the basin's west + north walls and the
 // mole's inner/basin face — which WRAPS down to the apex so the terraced tip only
 // faces open water, no walkable shelf pokes into the mouth). Added to seawallLines().
-export function mtBasinWestLine(){  return crChain([[186,-1117],[185,-1160],[185,-1224],[186,-1286]],2.5); }  // mainland promenade edge (docks + launch root here)
-export function mtBasinNorthLine(){ return crChain([[186,-1288],[197,-1289],[208,-1289],[217,-1287]],2.5); }  // basin north wall -> mole root
-export function mtMoleWestSeawall(){return crChain([[217,-1287],[219,-1240],[219,-1180],[220,-1150],[224,-1137],[228,-1129]],2.5); }  // mole inner(basin) face: north root -> down and around to the SW apex
+export function mtBasinWestLine(){  return crChain([[186,-681],[185,-724],[185,-788],[186,-850]],2.5); }  // mainland promenade edge (docks + launch root here)
+export function mtBasinNorthLine(){ return crChain([[186,-852],[197,-853],[208,-853],[217,-851]],2.5); }  // basin north wall -> mole root
+export function mtMoleWestSeawall(){return crChain([[217,-851],[219,-804],[219,-744],[220,-714],[224,-701],[228,-693]],2.5); }  // mole inner(basin) face: north root -> down and around to the SW apex
 // harbor entrance light on the hook-tip apex (Belmont HARBOR_LIGHT register)
-export const MT_HARBOR_LIGHT = { pos:[239,-1130], towerH:2.6, r:0.44, white:0xf2ece0, red:0xd23b34, glow:0xffd98a };
+export const MT_HARBOR_LIGHT = { pos:[239,-694], towerH:2.6, r:0.44, white:0xf2ece0, red:0xd23b34, glow:0xffd98a };
 // mole STONE-paved walk cap (the breakwater top reads as concrete, not the LAND
 // lawn). A flat filled polygon over the mole footprint (frustum-culled, +0 far views).
-export const MT_MOLE_PAVE = [[220,-1150],[224,-1137],[228,-1129],[233,-1123],[240,-1127],[241,-1140],[238,-1150],[238,-1300],[219,-1300],[219,-1150]];  // footprint (inner seawall x219 -> apex curl -> lake face x238 -> north)
+export const MT_MOLE_PAVE = [[220,-714],[224,-701],[228,-693],[233,-687],[240,-691],[241,-704],[238,-714],[238,-864],[219,-864],[219,-714]];  // footprint (inner seawall x219 -> apex curl -> lake face x238 -> north)
 
 // The park outline as one polygon: SW corner, up the rocks (COAST_MAIN),
 // around the harbor mouth along its terraced revetment (COAST_MOUTH) to the
@@ -154,7 +182,7 @@ export const MT_MOLE_PAVE = [[220,-1150],[224,-1137],[228,-1129],[233,-1123],[24
 // the mouth), not a hole. Corners are 6-10-point arc sweeps so the aerial reads
 // as smooth, curvy shoreline.
 export function buildLAND({ COAST_CORNER, COAST_MAIN, COAST_PEN, COAST_GOLF, COAST_MOUTH, BASIN_W,
-                            COAST_MTR_LAWN, COAST_MTR_HARBOR, COAST_MTR_POINT, COAST_MTR_BEACH, COAST_MTR_CLOSE }){
+                            COAST_BAY, COAST_MTR_HARBOR, COAST_MTR_POINT, COAST_MTR_BEACH, COAST_MTR_CLOSE }){
   const P_START=COAST_PEN[0], P_END=COAST_PEN[COAST_PEN.length-1];
   const P=[[14,415]];                                      // new SW corner (map extended south; the SW terminus of the corner revetment is ~[55,403], so [14,415]->[55,403] is the SW grass edge toward Diversey)
   P.push(...COAST_CORNER);                                 // curved south-facing revetment (SW terminus -> SE join with the rocks)
@@ -166,11 +194,11 @@ export function buildLAND({ COAST_CORNER, COAST_MAIN, COAST_PEN, COAST_GOLF, COA
   P.push(...peninsulaWestLine(P_START));                   // peninsula west edge + rounded south tip
   P.push(...COAST_PEN);                                    // peninsula lake edge (curvy)
   P.push(...crChain([P_END,[210,-356],[222,-380],COAST_GOLF[0]],2.5)); // Addison reach (smooth)
-  P.push(...COAST_GOLF);                                   // golf revetment (curvy)
-  // MONTROSE north growth (v0.6): the stub revetment continues the shore north
-  // from the golf's end (~232,-800) to the map edge. Each piece is separate so
-  // 070-072 replace one (harbor basin / Point / beach) without touching the rest.
-  P.push(...COAST_MTR_LAWN);                                // shore south of the harbor mouth
+  P.push(...COAST_GOLF);                                   // golf revetment (084 vignette, ends z-580)
+  // 084 COMPRESSION: the BAY cove replaces the blank golf-to-Montrose lawn —
+  // the shore sweeps west to the waist (~155,-628) and back to the harbor-mouth
+  // lawn end (montroseFx(-652),-655), where the (shifted) Montrose block begins.
+  P.push(...COAST_BAY);                                     // the 084 bay cove (curvy, west-sweeping)
   // 070: Montrose Harbor — a concave south-opening basin with an east breakwater
   // MOLE (the hook). Traced like Belmont's basin+peninsula: mouth SW entrance
   // shore -> basin west seawall -> basin north -> DOWN the mole's inner face ->
@@ -183,9 +211,34 @@ export function buildLAND({ COAST_CORNER, COAST_MAIN, COAST_PEN, COAST_GOLF, COA
   P.push(...COAST_MTR_HARBOR);                             // mole lake(outer) terraced face (N)
   P.push(...COAST_MTR_POINT);                               // 071: Montrose Point + Magic Hedge
   P.push(...COAST_MTR_BEACH);                               // 072: Montrose Beach + dunes
-  P.push(...COAST_MTR_CLOSE);                               // NE-corner closure (~201,-1514.5)
-  P.push([14,-1516]);                                       // north edge (west end; north-cap hedge)
+  P.push(...COAST_MTR_CLOSE);                               // NE-corner closure (~201,-1078.5)
+  P.push([14,-1080]);                                       // north edge (west end; north-cap hedge)
   P.push([14,-812],[14,-400],[14,0]);                      // west park edge (closes to [14,415])
+  return P;
+}
+
+// 084 DETERMINISM BALLAST — the PRE-084 land polygon, truncated at z=-800.
+// The shared-rng tuft/grass-patch accept loops (props.js TUFTS, coast.js
+// GRASS_PATCHES) sample z >= -800 only, and pip is an x-ray at constant z, so
+// this truncated polygon reproduces the pre-084 accept/reject decisions
+// BIT-FOR-BIT (edges south of -800 identical to the old map; the horizontal
+// z=-800 closure edge never crosses an x-ray). Consumers accept against THIS
+// ghost (rng stream frozen) and then post-filter against the real LAND
+// (zero-scale / skip — draws already consumed). Never reshape it.
+export function buildLandGhost084({ COAST_CORNER, COAST_MAIN, COAST_PEN, COAST_GOLF_GHOST, COAST_MOUTH, BASIN_W }){
+  const P_START=COAST_PEN[0], P_END=COAST_PEN[COAST_PEN.length-1];
+  const P=[[14,415]];
+  P.push(...COAST_CORNER);
+  P.push(...COAST_MAIN);
+  P.push(...COAST_MOUTH);
+  P.push(...BASIN_W);
+  P.push([85,-327],[88,-333],[90,-339],[95,-341],[105,-341],[110,-339],[112,-333],[113,-330]);
+  P.push(...basinNorthLine());
+  P.push(...peninsulaWestLine(P_START));
+  P.push(...COAST_PEN);
+  P.push(...crChain([P_END,[210,-356],[222,-380],COAST_GOLF_GHOST[0]],2.5));
+  P.push(...COAST_GOLF_GHOST);                             // the OLD full golf revetment (to z-800)
+  P.push([14,-800],[14,-400],[14,0]);                      // z=-800 closure + west edge home
   return P;
 }
 
@@ -240,13 +293,13 @@ export function seawallLines({ P_START, BASIN_W }){
 // near the map's middle so the golf's lake never runs out of water)
 export const WATER = { size:1650, seg:180, cx:110, cz:-260 };
 // MONTROSE north growth: a SECOND water plane covering the new north stretch
-// (the main WATER plane's north edge is only z -1085). Kept SEPARATE (not a
+// (the main WATER plane's north edge is only z -649). Kept SEPARATE (not a
 // resized WATER) so the existing lake surface — including the spawn view — stays
 // BIT-IDENTICAL for the determinism gate. Built with the same living-water mat +
-// aShore in coast.js; overlaps the main plane in z -1000..-1085 and sits 0.02 m
+// aShore in coast.js; overlaps the main plane in z -1000..-649 and sits 0.02 m
 // LOWER so the existing plane wins there (no z-fight, no seam). Frustum-culled
 // (a lone Mesh) so it costs 0 draws in any view not looking at the far north.
-export const WATER_N = { size:1000, seg:84, cx:190, cz:-1500, yOff:-0.02 };
+export const WATER_N = { size:1000, seg:84, cx:190, cz:-1064, yOff:-0.02 };
 
 // dog beach — sloped sand cove at the basin's NORTH tip. beachH (coast.js)
 // reads t = (z - ref)/span so it is 0 (dry) at the north edge and dips to
@@ -261,7 +314,7 @@ export const DOG_BEACH = {
 
 // ---- MONTROSE BEACH + DUNES (v0.6, task 072) ------------------------------
 // The city's big wild beach, NORTH of the Point. Replaces the 069
-// COAST_MTR_BEACH revetment stub (z -1365..-1500) with SAND: a beachH-style
+// COAST_MTR_BEACH revetment stub (z -929..-1064) with SAND: a beachH-style
 // sloped cove (the DOG_BEACH machinery at scale), shared by engine + walkprobe.
 // The sand is dry (h~0) inland (x <= slope.ref) and slopes DOWN in +x (east)
 // tucking UNDER the lake by x~x1 — the waterline. Walkable everywhere in bounds
@@ -272,9 +325,9 @@ export const DOG_BEACH = {
 // boundary but its terraces are EXCLUDED from the coast fold (coast.js) so no
 // concrete renders on the sand.
 export const MONTROSE_BEACH = {
-  bounds:{ x0:200, x1:240, z0:-1500, z1:-1360 },   // sand footprint (walkable except the roped dune)
+  bounds:{ x0:200, x1:240, z0:-1064, z1:-924 },   // sand footprint (walkable except the roped dune)
   slope:{ ref:227, span:14, depth:-2.7 },          // dry (h~0) at x<=227, dips under the lake by x~241
-  mesh:{ cx:219, cz:-1430, w:46, d:146, segW:36, segD:58 },   // sand render plane (frustum-culled) x196..242
+  mesh:{ cx:219, cz:-994, w:46, d:146, segW:36, segD:58 },   // sand render plane (frustum-culled) x196..242
   sand:0xd9c087,   // task 075: warmed from near-white 0xe8d9b5 — the flat beach read as snow/concrete under the toon sun; a golden tan reads as warm Chicago sand (matches the dune mounds; lone frustum-culled Mesh, +0 draws, no rng)
 };
 // dune natural area — the roped, protected SE corner abutting the Point. Its
@@ -284,15 +337,15 @@ export const MONTROSE_BEACH = {
 // collide:false) + the piping-plover story (2 adults + 1 chick + ONE honest
 // sign). Quiet + protective, not a zoo exhibit.
 export const MONTROSE_DUNE = {
-  bounds:{ x0:210, x1:233, z0:-1414, z1:-1362 },   // BLOCKED interior (no collider)
-  // rope line: E edge (x233) -> N edge (z-1414, faces the beach) -> W edge (x210).
-  // South (z-1362) is the natural Point-side edge, left open. collide:false.
-  fence:[ [233,-1362],[233,-1414],[210,-1414],[210,-1362] ],
-  mounds:[ {x:217,z:-1394,rx:5.5,rz:6.0,h:1.05}, {x:226,z:-1380,rx:4.6,rz:5.2,h:0.8}, {x:220,z:-1407,rx:4.2,rz:4.6,h:0.62} ],
+  bounds:{ x0:210, x1:233, z0:-978, z1:-926 },   // BLOCKED interior (no collider)
+  // rope line: E edge (x233) -> N edge (z-978, faces the beach) -> W edge (x210).
+  // South (z-926) is the natural Point-side edge, left open. collide:false.
+  fence:[ [233,-926],[233,-978],[210,-978],[210,-926] ],
+  mounds:[ {x:217,z:-958,rx:5.5,rz:6.0,h:1.05}, {x:226,z:-944,rx:4.6,rz:5.2,h:0.8}, {x:220,z:-971,rx:4.2,rz:4.6,h:0.62} ],
   grass:{ count:130, seed:0x0d0e17, scaleY:[1.5,2.8], color:0x9fb56b, fringe:5 },  // taller/paler than park tufts; in bounds + a small fringe
-  plovers:[ {x:214,z:-1407,ry:0.6}, {x:225,z:-1405,ry:2.3} ],   // near the NORTH rope so they READ from the mt-dunes stand
-  chick:{ x:219, z:-1408 },
-  sign:{ x:218, z:-1415.5, ry:Math.PI, lines:['PIPING PLOVER','NESTING AREA','— please keep out —'] },  // central on the N rope; faces N (the beach); FrontSide + backing
+  plovers:[ {x:214,z:-971,ry:0.6}, {x:225,z:-969,ry:2.3} ],   // near the NORTH rope so they READ from the mt-dunes stand
+  chick:{ x:219, z:-972 },
+  sign:{ x:218, z:-979.5, ry:Math.PI, lines:['PIPING PLOVER','NESTING AREA','— please keep out —'] },  // central on the N rope; faces N (the beach); FrontSide + backing
 };
 // Montrose beach LIFE — towels/umbrellas/coolers scattered on the DRY sand north
 // of the dune, GROWN into the existing rocks beach-life buckets with a LOCAL seed
@@ -300,7 +353,7 @@ export const MONTROSE_DUNE = {
 // on beachWalkable + clearance from the buildings.
 export const MONTROSE_BEACH_LIFE = {
   seed:0x7205a1,
-  region:{ xr:[209,231], zr:[-1498,-1420] },       // dry-to-mid sand, north of the dune
+  region:{ xr:[209,231], zr:[-1062,-984] },       // dry-to-mid sand, north of the dune
   towels:22, umbrellas:8, coolers:5,
 };
 // Montrose Beach House — the historic ship-like bathing pavilion (1920s). Honest
@@ -310,12 +363,12 @@ export const MONTROSE_BEACH_LIFE = {
 // structures.js builds it (merged statics + frustum-culled). Set back inland
 // (west) of the sand; anchors the beach's south-central end.
 export const BEACH_HOUSE = {
-  x:199, z:-1440, ry:0,          // long axis N-S; solarium/prow + windows face EAST (+x, the sand/lake)
+  x:199, z:-1004, ry:0,          // long axis N-S; solarium/prow + windows face EAST (+x, the sand/lake)
   hallW:9, hallD:22, hallH:6.2,  // hallW = E-W depth, hallD = N-S length, hallH = two storeys
   prowR:5.2,                     // rounded solarium radius (east end, lake-facing)
   wall:0xe7dcc2, roof:0xb15f3e, trim:0x9a8a6a, glow:0xffe1a0, deckRail:0xb7a888,
   sign:'MONTROSE BEACH HOUSE',
-  footRect:{ x0:194, x1:204, z0:-1452, z1:-1428 },   // closed hall — carved from walk (052 law; prow gets a collider)
+  footRect:{ x0:194, x1:204, z0:-1016, z1:-992 },   // closed hall — carved from walk (052 law; prow gets a collider)
 };
 // The Dock at Montrose Beach — the seasonal open-air beach BAR (bar-likeness
 // register: canvas signage, umbrellas, NO interior). A raised weathered-wood
@@ -324,12 +377,12 @@ export const BEACH_HOUSE = {
 // north end. structures.js builds it (frustum-culled + shared POSTS via fenceRun
 // if needed). Beach NPCs (makeNPC) cluster here (packs/montrose-beach.js).
 export const THE_DOCK = {
-  x:216, z:-1484, ry:Math.PI,    // faces SOUTH down the beach (toward arriving players)
+  x:216, z:-1048, ry:Math.PI,    // faces SOUTH down the beach (toward arriving players)
   deckW:12, deckD:8.5, deckY:0.36,
   wood:0x9c7a4e, bar:0x6b4e32, awning:0x2fb6a8, trim:0xece3cf, glow:0xffdf9a,
   umbCols:[0xff6b6b,0xffd93d,0x54a0ff,0x2fb6a8],
   sign:'THE DOCK',
-  deckRect:{ x0:210, x1:222, z0:-1488, z1:-1480 },   // raised wood deck — WALKABLE (structures.js walkRect + walkprobe mirror)
+  deckRect:{ x0:210, x1:222, z0:-1052, z1:-1044 },   // raised wood deck — WALKABLE (structures.js walkRect + walkprobe mirror)
 };
 // beach walkability helpers — SHARED by engine (main.js/coast.js) and
 // tools/walkprobe.mjs so the two never fork (PITFALLS: walkprobe + engine must
@@ -355,6 +408,18 @@ export function inBeachBuilding(x,z){              // beach house closed hall (T
 // (065 law). The dune fence rope + the beach-house prow carry their own visual
 // colliders/rope only where they can't strand the player.
 export function beachCarved(x,z){ return inMontroseDune(x,z)||inBeachBuilding(x,z); }
+// 084: ghost-accepted scatter (tufts/grass patches sampled against the pre-084
+// LAND ghost) that lands on the mole's STONE walk cap must be hidden — the
+// mole top IS pip(LAND) but reads as concrete. Local pip (chicago.js keeps no
+// engine imports); callers also test the real LAND for water.
+export function scatterCarve084(x,z){
+  const poly=MT_MOLE_PAVE;let ins=false;
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const xi=poly[i][0],zi=poly[i][1],xj=poly[j][0],zj=poly[j][1];
+    if(((zi>z)!==(zj>z))&&(x<(xj-xi)*(z-zi)/(zj-zi)+xi))ins=!ins;
+  }
+  return ins;
+}
 export function beachWalkable(x,z){                // the beachH!==null path (dog + Montrose sand)
   const dg=DOG_BEACH.bounds;
   if(x>=dg.x0&&x<=dg.x1&&z>=dg.z0&&z<=dg.z1)return z>DOG_BEACH.walkZMin;  // dog beach: whole cove walkable
@@ -363,7 +428,7 @@ export function beachWalkable(x,z){                // the beachH!==null path (do
 
 // ---- CRICKET HILL (v0.6, task 073) — the map's first walkable HILL ---------
 // Chicago's kite mound, inland-WEST of Montrose Harbor (comfort station osm
-// z-1319; here at game z-1315, clear WEST of the re-routed trail x160-180 and
+// z-1319 raw 1:2; here at game z-879 in the 084 compressed frame, clear WEST of the re-routed trail x160-180 and
 // EAST of the LSD berm). An ANALYTIC grassy dome in the beachH/tierAt lineage:
 // a SINGLE shared surface function so the engine (main.js/coast.js surfaceY) and
 // tools/walkprobe.mjs never fork. The profile is a radial smoothstep — FLAT top
@@ -376,8 +441,8 @@ export function beachWalkable(x,z){                // the beachH!==null path (do
 // packs/cricket-hill.js; this module owns only the surface math (+ the footprint
 // the pack and gen-waypoints cite). Height ~7 m (the "~7 m class" from the brief).
 export const CRICKET_HILL = {
-  cx:112, cz:-1315,          // summit centre (inland-west of the harbor basin at x186)
-  rx:31, rz:27,              // elliptical base radii — footprint x81..143, z-1288..-1342
+  cx:112, cz:-879,          // summit centre (inland-west of the harbor basin at x186)
+  rx:31, rz:27,              // elliptical base radii — footprint x81..143, z-852..-906
   height:7.0,                // summit height (m)
   grass:0x77c268,            // a touch deeper/cooler than lawn 0x7ecb6f so the mass reads, but blends at the rim
 };
@@ -397,57 +462,57 @@ export function cricketHillH(x,z){                  // height (m) on the mound, 
 // never fork) and builds the sanctuary from MONTROSE_POINT. Pure data — crChain
 // is deterministic, no rng at import time.
 //
-// The pushed-east Point shore (piece-swap slot idx 2, z -1300..-1362): starts
-// at COAST_MTR_HARBOR_PTS' end (236,-1300), bulges to the tip apex (243,-1330)
+// The pushed-east Point shore (piece-swap slot idx 2, z -864..-926): starts
+// at COAST_MTR_HARBOR_PTS' end (236,-864), bulges to the tip apex (243,-894)
 // — the map's eastmost land, 1 m inside WORLD_CLAMP.xMax — and returns to
-// (234.9,-1362) to meet the beach stub start (montroseFx(-1365)=234.92).
+// (234.9,-926) to meet the beach stub start (montroseFx(-929)=234.92).
 // TIER_DEFAULT terraces face the open lake; own piece OUT of COAST_SEGS
 // (COAST_TIP precedent), folded via the LOCAL xorshift like its neighbors.
-export const COAST_MTR_POINT_PTS = crChain([[236,-1300],[239,-1308],[242,-1318],[243,-1330],[241.5,-1342],[238.5,-1352],[236,-1358],[234.9,-1362]],2.5);
+export const COAST_MTR_POINT_PTS = crChain([[236,-864],[239,-872],[242,-882],[243,-894],[241.5,-906],[238.5,-916],[236,-922],[234.9,-926]],2.5);
 // The sanctuary itself. Compass care: -z is NORTH; the band's south edge
-// (z -1296) meets the mole-root neck, its north edge (z -1362) the roped dune.
+// (z -860) meets the mole-root neck, its north edge (z -926) the roped dune.
 // Everything at x <= ~231 sits on TODAY's lawn (walkable now — staged walkprobe
 // expects lock it); 'scope'/the tip-loop east arc sit on the FUTURE bulge.
 export const MONTROSE_POINT = {
-  meadow:{ x0:188, x1:241, z0:-1358, z1:-1296 },   // prairie carpet + wildflower drifts (LOCAL seed; clip to LAND, >=2 m clear of every ribbon — the trail cuts the NW corner)
-  gate:{ x:191, z:-1318 },                         // timber gateway just E of the trail's walk ribbon (~x187): posts + header beam, chunky YELLOW routed letters, split-rail flanks, rules board; opening faces WEST (arrivals from the trail), beam runs N-S
-  panel:{ x:200, z:-1320.5, ry:-0.55 },            // the SEPARATE cream 'The Magic Hedge — A migrant magnet' interpretive panel, south side of the entrance path; front faces WNW so both the gate approach and the mt-hedge f0 camera catch the cream face
-  hedge:{ pts:[[194,-1326],[206,-1329],[220,-1332],[231,-1336]], h:2.6, w:2.2,   // the green wall (~38 m), WSW->ENE
-          gaps:[[207,-1329],[222,-1332.5]] },      // birder clearings ON the line; scopes/birders cluster on the gaps' SOUTH (path) side
+  meadow:{ x0:188, x1:241, z0:-922, z1:-860 },   // prairie carpet + wildflower drifts (LOCAL seed; clip to LAND, >=2 m clear of every ribbon — the trail cuts the NW corner)
+  gate:{ x:191, z:-882 },                         // timber gateway just E of the trail's walk ribbon (~x187): posts + header beam, chunky YELLOW routed letters, split-rail flanks, rules board; opening faces WEST (arrivals from the trail), beam runs N-S
+  panel:{ x:200, z:-884.5, ry:-0.55 },            // the SEPARATE cream 'The Magic Hedge — A migrant magnet' interpretive panel, south side of the entrance path; front faces WNW so both the gate approach and the mt-hedge f0 camera catch the cream face
+  hedge:{ pts:[[194,-890],[206,-893],[220,-896],[231,-900]], h:2.6, w:2.2,   // the green wall (~38 m), WSW->ENE
+          gaps:[[207,-893],[222,-896.5]] },      // birder clearings ON the line; scopes/birders cluster on the gaps' SOUTH (path) side
   paths:{                                          // both NEW crushed-limestone ribbons via pathSamples2 (never touch TRAIL_MONTROSE's points)
-    entrance:[[191,-1318],[198,-1322],[207,-1325.5],[217,-1328.5],[227,-1331],[232,-1338]],   // gate -> hedge's S flank -> around its east end
-    loop:[[232,-1338],[237,-1333],[239,-1327],[236,-1319],[230,-1312],[222,-1306],[214,-1302],[206,-1299.5]],   // tip clearing -> S shore edge -> the mole-root walk (trail-gate-hedge-tip-hook connectivity, no dead ends)
+    entrance:[[191,-882],[198,-886],[207,-889.5],[217,-892.5],[227,-895],[232,-902]],   // gate -> hedge's S flank -> around its east end
+    loop:[[232,-902],[237,-897],[239,-891],[236,-883],[230,-876],[222,-870],[214,-866],[206,-863.5]],   // tip clearing -> S shore edge -> the mole-root walk (trail-gate-hedge-tip-hook connectivity, no dead ends)
     width:2.4,                                     // crushed limestone, TRAIL_STYLE.walk color/y
   },
-  scope:{ x:238.1, z:-1336.4 },                    // tip-clearing tripod-scope spot on the 071 bulge, EAST of the loop's tip arc (the CR-sampled loop passes ~0.8 m from the staged 235.5,-1335 — tripod legs overlapped the hero path; here it clears the centerline by >=2.8 m)
-  trees:[[210,-1344],[211,-1352],[236,-1326]],     // low tree-cluster anchors (refs: scattered clusters in open meadow; keep the hedge sightlines clear). Anchor 1 moved W of the staged (223,-1349): mt-point's pull-back cameras land at (221.9,-1348)/(224.7,-1350) and a canopy there is the 034/047 camera-trap
-  stands:{ hedge:[203,-1319], point:[229,-1341], gate:[186,-1316] },   // the mt-* waypoint stands — all lawn TODAY (GEOGRAPHY §Point waypoints; final strings in refs/montrose/BRIEF.md)
+  scope:{ x:238.1, z:-900.4 },                    // tip-clearing tripod-scope spot on the 071 bulge, EAST of the loop's tip arc (the CR-sampled loop passes ~0.8 m from the staged 235.5,-899 — tripod legs overlapped the hero path; here it clears the centerline by >=2.8 m)
+  trees:[[210,-908],[211,-916],[236,-890]],     // low tree-cluster anchors (refs: scattered clusters in open meadow; keep the hedge sightlines clear). Anchor 1 moved W of the staged (223,-913): mt-point's pull-back cameras land at (221.9,-912)/(224.7,-914) and a canopy there is the 034/047 camera-trap
+  stands:{ hedge:[203,-883], point:[229,-905], gate:[186,-880] },   // the mt-* waypoint stands — all lawn TODAY (GEOGRAPHY §Point waypoints; final strings in refs/montrose/BRIEF.md)
   // ---- 071 build params (ALL local seeds — zero shared rng; consumed by
   // props.js / structures.js / paths.js / packs/montrose-point.js) ----
   prairie:{ seed:0x51ab17, tufts:420, tuftScaleY:[1.5,2.8],       // tuft-bucket growth: taller straw-length meadow grass (green; height carries the read, the dune-grass precedent)
             straw:760, strawH:[0.45,0.95], strawColor:0xcfba7e,   // ONE merged frustum-culled Mesh of thin straw cones — the straw half of the prairie palette
             clearD:2.0 },                                         // min distance to every ribbon centerline (trail + sanctuary paths)
   flowers:{ seed:0x601d70,                                        // grows the AIDS-garden stems+heads buckets in place (setColorAt heads)
-            drifts:[[234,-1344,4],[228,-1336,3.5],[210,-1340,4],[199,-1330,3],[216,-1352,4]], perDrift:18, goldenrod:0xf2c14e,
-            asters:[[224,-1342,3],[204,-1334,2.5]], perAster:14, aster:0xb48ae0 },
+            drifts:[[234,-908,4],[228,-900,3.5],[210,-904,4],[199,-894,3],[216,-916,4]], perDrift:18, goldenrod:0xf2c14e,
+            asters:[[224,-906,3],[204,-898,2.5]], perAster:14, aster:0xb48ae0 },
   hedgeFill:{ seed:0x8ed6e1, step:1.1, jitter:0.35,               // grows the HEDGES InstancedMesh: overlapping blobs along hedge.pts
               sx:[1.5,2.1], sy:[1.05,1.35], sz:1.15, y:1.3,       // per-instance yaw follows the segment tangent; top ~2.4-2.7 m (h 2.6)
               gapR:1.7,                                           // skip blobs within gapR of each gaps[] point — the birder windows
               ragged:{ off:[0.8,1.6], step:2.7, sy:[0.5,0.75] } },// sparse low second row on the S (path) side — the refs' ragged front
   treeFill:{ seed:0x7ee3a1, per:[3,2,1], spread:[4.5,3.5,0.1], scale:[1.7,2.2] },   // clusters per anchor (kept clear of ribbons/hedge/dune by rejection)
   ropes:[                                                         // white rope-and-post lines (fenceRun collide:false; the refs' path fencing)
-    [[196,-1324],[203,-1326.2]],                                  // entrance path, hedge side (stops W of gap 1 — birders stand in the window)
-    [[231,-1348],[236,-1343],[239,-1337]],                        // tip meadow shore-edge run (mt-point f0 foreground)
+    [[196,-888],[203,-890.2]],                                  // entrance path, hedge side (stops W of gap 1 — birders stand in the window)
+    [[231,-912],[236,-907],[239,-901]],                        // tip meadow shore-edge run (mt-point f0 foreground)
   ],
-  gateway:{ span:3.8, postW:0.26, postH:2.9, beamY:2.45, beamH:0.5, beamLen:5.2,   // posts at z -1316.1/-1319.9; beam spans them N-S
+  gateway:{ span:3.8, postW:0.26, postH:2.9, beamY:2.45, beamH:0.5, beamLen:5.2,   // posts at z -880.1/-883.9; beam spans them N-S
             wood:0x9a8d78, letters:0xe8c11c,                      // weathered gray timber, chunky routed-yellow letters (FrontSide canvas on the beam's W face; the beam box is the solid rear)
             rail:{ len:4.2, postH:1.0 },                          // split-rail flanks running N/S from each post along x=191
             rules:{ w:1.5, h:1.0, bg:0x2b2723 } },                // dark rules board ('Open from dawn to dusk'), W-facing at the S jamb
   birders:[                                                       // the devotees (pack: makeNPC wander:0, aim = look target; probe: footprint clearance)
-    { x:206.0, z:-1327.4, aim:[207,-1329] },                      // gap-1 pair, peering into the window
-    { x:208.6, z:-1326.7, aim:[207.5,-1329.5], scope:true },      // ...one on a tripod scope
-    { x:221.6, z:-1330.6, aim:[222,-1332.5], binocs:true },       // gap-2, binoculars raised
-    { x:237.8, z:-1336.8, aim:[245,-1327], scope:true },          // tip clearing (east of the loop arc, just inside the shore rope), scope aimed SE over the open lake
+    { x:206.0, z:-891.4, aim:[207,-893] },                      // gap-1 pair, peering into the window
+    { x:208.6, z:-890.7, aim:[207.5,-893.5], scope:true },      // ...one on a tripod scope
+    { x:221.6, z:-894.6, aim:[222,-896.5], binocs:true },       // gap-2, binoculars raised
+    { x:237.8, z:-900.8, aim:[245,-891], scope:true },          // tip clearing (east of the loop arc, just inside the shore rope), scope aimed SE over the open lake
   ],
 };
 
@@ -490,6 +555,26 @@ export const TRAIL_MAIN=[
   [91,-427],                                        // NW-corner sweep (bowed clear of the sanctuary NW corner)
   [106,-433],[145,-433],[182,-432],[205,-431],      // corridor east run (south of golf z-440, north of sanctuary z-420)
   [211,-448],                                       // reach the golf lake side
+  [211,-540],[210,-560],[208,-572],                 // 084: the vignette golf ends at z-580; MAIN hands off to TRAIL_MONTROSE's bay routing here (41 control points, same count as pre-084 — lamps' getPoint(t) fractions stay put)
+];
+// 084 DETERMINISM BALLAST — the pre-084 TRAIL_MAIN (full golf run to z-782).
+// Its dual-ribbon samples (walk-offset pass + bike pass) are pushed into
+// pathSamples at MAIN's ORIGINAL build slot, byte-identical, so the shared-rng
+// tree-rejection scan (props.js nearPath, stride 3) never moves a tree. The
+// REAL (compressed) TRAIL_MAIN above draws into pathSamples2. The
+// TRAIL_LOOP_GHOST law applies: NEVER delete or reshape this table.
+export const TRAIL_MAIN_GHOST084=[
+  [30,406],[25,390],[22,366],[20.5,338],[19.5,306],[19.5,272],[19.5,238],[20,210],[27,190],
+  [36,178],[50,172],[66,168],[82,162],[96,152],[106,138],[112,120],[111,106],
+  [104,55],[90,15],[75,-5],
+  [58,-45],[48,-95],[44,-150],
+  [45,-205],[48,-258],[54,-300],
+  [62,-325],[74,-340],
+  [86,-352],[90,-366],
+  [90,-388],[90,-410],
+  [91,-427],
+  [106,-433],[145,-433],[182,-432],[205,-431],
+  [211,-448],
   [211,-540],[211,-660],[211,-782],
 ];
 export const TRAIL_SPUR=[
@@ -549,14 +634,19 @@ export const TRAIL_CONNECTOR=[[16,105],[34,108],[54,112],[70,116],[79,120]];
 // the Point. A NEW ribbon (never reshape TRAIL_MAIN — pathSamples is phase-
 // sensitive); paths.js draws it LAST and registers its samples in pathSamples2
 // only. Starts ~z-770 (overlapping TRAIL_MAIN's end so the ribbons join with no
-// gap) and runs to z-1460, holding x~200-211 (clear of the revetment x~234 and the
+// gap) and runs to z-1024, holding x~200-211 (clear of the revetment x~234 and the
 // west hedge x14). 070-073 re-route locally as the harbor/Point/beach carve in.
 // 070 re-routes the harbor stretch WEST of the basin (the basin water sits x186-218,
-// z-1113..-1288) so the promenade hugs the mainland harbor edge and never crosses
+// z-677..-852) so the promenade hugs the mainland harbor edge and never crosses
 // water; determinism-safe (pathSamples2, merged after buildProps; scatter caps z>=-800).
+// 084: re-authored — the bay routing (sweeping west with the cove, shore
+// >=7m east of the bike centerline so the walk ribbon clears the revetment
+// top) then the SHIFTED harbor-north alignment (pre-084 points +436 from
+// [172,-699] on — the promenade/Point/beach run translates rigidly).
 export const TRAIL_MONTROSE=[
-  [211,-770],[211,-812],[205,-890],[198,-985],[188,-1072],[172,-1135],
-  [158,-1200],[160,-1265],[180,-1312],[199,-1360],[206,-1414],[210,-1460],
+  [209,-562],[206,-580],[196,-598],[178,-608],[160,-616],[148,-626],
+  [146,-638],[154,-648],[168,-658],[176,-672],
+  [172,-699],[158,-764],[160,-829],[180,-876],[199,-924],[206,-978],[210,-1024],
 ];
 // Dual-path styling. walkOff (paths.js) = bike/2 + gap + walk/2 = 4.0 m, so
 // the two ribbons run parallel with a ~1.2 m grass strip between them.
@@ -581,7 +671,7 @@ export const ZONES=[
   {n:'Kwanusila',            x:30,  z:-370, r:12},
   {n:'Bird Sanctuary',       x:150, z:-388, r:52},
   {n:'Waveland Fieldhouse',  x:186, z:-478, r:22},
-  {n:'Marovitz Golf Course', x:150, z:-610, r:90},
+  {n:'Marovitz Golf Course', x:132, z:-510, r:72},   // 084: the compact vignette (bounds z-580..-440)
 ];
 
 // player + camera start — THE FRONT DOOR (task 023): the player spawns on the
@@ -594,7 +684,7 @@ export const ZONES=[
 // Rocks steps and the lake. Monument wall front-right of the view, suggestion
 // box ahead-right, Divvy dock behind-left across the trail. Camera due west.
 export const SPAWN = { player:{ x:109.5, z:156.6 }, yaw:1.57, camera:{ x:87.5, y:4.5, z:156.6 } };
-export const WORLD_CLAMP = { xMin:14, xMax:244, zMin:-1520, zMax:408 };   // zMin -1520 (was -822): the MONTROSE north growth (v0.6). zMax 408: the south lawn + pier tip (z406), short of the skyline billboard (z504+)
+export const WORLD_CLAMP = { xMin:14, xMax:244, zMin:-1084, zMax:408 };   // zMin -1084 (was -822): the MONTROSE north growth (v0.6). zMax 408: the south lawn + pier tip (z406), short of the skyline billboard (z504+)
 
 /* ------------------------------- PROPS ------------------------------- */
 
@@ -626,8 +716,8 @@ export const HEDGES = {
   // west-fence gaps line up with the three underpasses (Belmont MOVED to z105,
   // so its gap moved to [95,115] — this also clears the paved CONNECTOR that
   // leaves the underpass mouth at (16,105); Addison z-400, Irving Park z-800).
-  west:{ x:14, z0:-1516, z1:412, step:5.5, gaps:[[95,115],[-410,-390],[-810,-790],[-1217,-1197]] },   // z0 -1516: MONTROSE growth; 4th gap = the Montrose underpass (z-1207)
-  north:{ z:-1515, x0:14, x1:200, step:5.5 },   // north cap MOVED to the new map edge (was z-812); caps the lawn x14-200, the closure revetment is the shore east of it
+  west:{ x:14, z0:-1080, z1:412, step:5.5, gaps:[[95,115],[-410,-390],[-610,-590],[-781,-761]] },   // z0 -1080 (084 frame); 3rd gap = Irving Park at the vignette golf's north (z-600), 4th = the Montrose underpass (z-771)
+  north:{ z:-1079, x0:14, x1:200, step:5.5 },   // north cap MOVED to the new map edge (was z-812); caps the lawn x14-200, the closure revetment is the shore east of it
   cap:{ z:406, x0:14, x1:23, step:5.5 },   // SW corner cap only (x14-23): the aerial-canonical trail now exits the map at (30,406) — the cap stops short of the gate so the ribbon passes clear
   scale:[3,2.2,2.8], y:1.1, color:0x4c9a55,
 };
@@ -721,24 +811,24 @@ export const FINGER_DOCKS = {
 // (which draws world rng). Each deck is a walkRect (walkable boardwalk).
 export const MT_FINGER_DOCKS = {
   x0:186, len:15, halfW:0.95,
-  rows:[-1150,-1190,-1228,-1262],        // 4 finger groups down the west shore
+  rows:[-714,-754,-792,-826],        // 4 finger groups down the west shore
   seawallX:-186,                          // |x| of the basin west seawall (deck sits on grade west of it, on posts east of it)
 };
 // public boat LAUNCH ramp — a wide pale slab sloping from the shore into the basin.
-export const MT_LAUNCH = { x0:186, x1:204, z0:-1300, z1:-1286, topY:0.05, botY:-2.05, color:0xb9b3a2 };
+export const MT_LAUNCH = { x0:186, x1:204, z0:-864, z1:-850, topY:0.05, botY:-2.05, color:0xb9b3a2 };
 // Park Bait Shop — the real bait/tackle shop (small, signed). On the mainland
 // WEST of the basin, facing the water (east). structures.js builds it (frustum-
 // culled shack + a two-sided canvas sign). The map's north-harbor "you are here".
-export const PARK_BAIT = { x:176, z:-1176, w:6.4, d:4.6, h:2.7, ry:0, wall:0xcfc7b4, roof:0x9c5340, trim:0x7d6b52, sign:'PARK BAIT' };
+export const PARK_BAIT = { x:176, z:-740, w:6.4, d:4.6, h:2.7, ry:0, wall:0xcfc7b4, roof:0x9c5340, trim:0x7d6b52, sign:'PARK BAIT' };
 // the HOOK fishing-pier RAILING — the mole's inner(basin) walk edge + around the
 // terraced tip, so the player leans on it and never falls into the basin. Posts
 // sit INBOARD on the walkable mole top; structures.js fenceRun feeds the SHARED
 // POSTS/RAILS buckets (+0 buckets). Small collider (keeps the player on-deck, no trap).
 export const MT_HOOK_RAIL = { spacing:3.0, postH:0.95, color:0x7d8790, collideR:0.5,
-  line:[[219.7,-1284],[220.1,-1240],[220.1,-1182],[220.9,-1152],[224.6,-1139],[228.8,-1131],[233.4,-1125],[239,-1129]] };
+  line:[[219.7,-848],[220.1,-804],[220.1,-746],[220.9,-716],[224.6,-703],[228.8,-695],[233.4,-689],[239,-693]] };
 // Montrose harbor wooden signs (register: SIGNS above). Faces its approach.
 export const MT_SIGNS = [
-  { text:'MONTROSE HARBOR', x:184, z:-1120, ry:Math.PI },   // at the mouth/promenade south, facing the arriving trail
+  { text:'MONTROSE HARBOR', x:184, z:-684, ry:Math.PI },   // at the mouth/promenade south, facing the arriving trail
 ];
 
 // wooden signs (text + placement).
@@ -794,6 +884,10 @@ export const BENCHES = [
   { x:73.5, z:383.2, ry:0.3 },
   { x:89,   z:373.8, ry:0.5 },
   { x:105,  z:369,   ry:0.95 },
+  // 084 BAY benches: west of the cove trail facing east over the water, and on
+  // the headland facing NE across the harbor mouth to the hook + entrance light
+  { x:154, z:-612, ry:1.37 },
+  { x:208, z:-660, ry:2.4 },
 ];
 
 // pier plank decks (peninsula lake side + the new corner pier) with walkable rects.
@@ -815,7 +909,7 @@ export const BENCHES = [
 export const LAKEVIEW_BAND = {
   front:-16,                 // band front line (the L track is the backdrop at x~-8)
   zr:[-812,408],             // the ORIGINAL span — marched FIRST with the original seed so every existing block stays byte-identical
-  zrN:[-1516,-812],          // MONTROSE growth: the north extension, marched SECOND with its OWN seed (existing band unperturbed; same 3 InstancedMeshes -> 0 new buckets)
+  zrN:[-1080,-812],          // MONTROSE growth: the north extension, marched SECOND with its OWN seed (existing band unperturbed; same 3 InstancedMeshes -> 0 new buckets)
   spacing:[15,30],           // street-ish gaps between buildings
   depth:[8,14],              // how far the blocks extend west
   w:[10,22],                 // frontage widths
@@ -872,10 +966,10 @@ export const DOG_PROPS = {
 // Toon cars slide N/S in
 // the `lsd.js` content pack; the static berm/road/portals build here.
 export const LSD = {
-  berm:{ x0:0, x1:14, z0:-1530, z1:418, h:1.0, color:0x6f9e5c },   // z0 -1530 (was -846): MONTROSE growth — berm/road run the full new length; z1 418 past the south lawn
+  berm:{ x0:0, x1:14, z0:-1094, z1:418, h:1.0, color:0x6f9e5c },   // z0 -1094 (was -846): MONTROSE growth — berm/road run the full new length; z1 418 past the south lawn
   road:{ x0:2.5, x1:11.5, y:1.02, color:0x8f9298 },
   lane:{ color:0xf2ede0, w:0.16, len:2.4, gap:3.2, count:7 },   // dashed center lines
-  underpasses:[105, -400, -800, -1207],                        // Belmont z105, Addison -400, Irving -800, Montrose -1207 (v0.6 growth)
+  underpasses:[105, -400, -600, -771],                        // Belmont z105, Addison -400, Irving -600 (084: at the vignette golf's north), Montrose -771 (084 frame)
   portal:{ w:7, h:4.2, recess:0x211f22, arch:0xd8cbb0 },
 };
 
@@ -967,16 +1061,15 @@ export const CORNER_PARK = {
 // pulled north to z-440 so the Bird Sanctuary (z-420..-357) sits south of it,
 // with a trail corridor (z-440..-420) between the two fences.
 export const GOLF = {
-  bounds:{ x0:60, x1:205, z0:-790, z1:-440 },   // east edge x205 (lake-side trail runs east of it); south edge z-440 (corridor to the sanctuary)
+  bounds:{ x0:60, x1:205, z0:-580, z1:-440 },   // 084 COMPACT VIGNETTE: z-580..-440 (was -790) — evocation over acreage; east edge x205 (lake-side trail east of it); south edge z-440 (corridor to the sanctuary)
   fairway:0x83c86a, green:0x5fa851, sand:0xe9d9a6,
   pins:[
-    [95,-452],[110,-468],[125,-448],                  // holes 1-3 (south, playable — all inside the fence)
-    [140,-500],[165,-540],[150,-590],
-    [180,-640],[120,-690],[160,-740],                 // 4-9 (dressing)
+    [95,-452],[110,-468],[125,-448],                  // holes 1-3 (south, playable — unchanged)
+    [148,-498],[170,-540],[122,-565],                 // 4-6 (dressing, inside the vignette fence)
   ],
   bunkers:[
-    [105,-470,3.2],[130,-520,2.8],[155,-575,2.6],
-    [170,-630,3.0],[110,-670,2.4],[145,-720,2.8],
+    [105,-470,3.2],[130,-505,2.8],[158,-522,2.6],     // COUNT FROZEN at 6 — the bunker loop is
+    [178,-556,3.0],[102,-540,2.4],[140,-548,2.8],     // structures.js's only shared-rng draw (084)
   ],
   flag:0xff5a5a, greenR:2.6,
   fence:{ color:0xe6ebe4, postH:1.0, spacing:2.6 },
@@ -1141,8 +1234,8 @@ export const SKYLINE_TOWERS = {
 // minimap world->canvas mapping and landmark dots. The world is very tall
 // now (z -850..320); px/unit is kept near-uniform (mild ~1.5x horizontal
 // spread for legibility) so shapes read true and the open lake letterboxes.
-export const MAP = { x0:-170, z0:-1560, w:576, h:1985, cw:304, ch:412 };   // MONTROSE growth (v0.6): z0 -850->-1560, h 1275->1985 so the north stretch (to z~-1516) fits; bottom stays z+425; ch/cw unchanged -> the taller map packs tighter vertically (the HUD minimap aspect flip -> baseline.png regen)
-export const MAP_GOLF = { x0:60, x1:205, z0:-790, z1:-440, color:'#8fce74' };
+export const MAP = { x0:-170, z0:-1124, w:576, h:1549, cw:304, ch:412 };   // 084 COMPRESSION: z0 -1560->-1124, h 1985->1549 (north edge now z-1084 + 40 pad; bottom stays z+425); ch/cw unchanged -> the shorter map breathes vertically (HUD minimap aspect change -> the 084 baseline.png regen)
+export const MAP_GOLF = { x0:60, x1:205, z0:-580, z1:-440, color:'#8fce74' };   // 084 vignette
 export const MAP_LANDMARKS = [
   { x:60,  z:-100, c:'#d0705c', r:6 },   // harbor house
   { x:30,  z:-370, c:'#e0b13e', r:5 },   // Kwanusila
@@ -1150,7 +1243,7 @@ export const MAP_LANDMARKS = [
   { x:205, z:-105, c:'#8f6234', r:5 },   // pier
   { x:70,  z:-180, c:'#5a86c4', r:5 },   // yacht club
   { x:186, z:-478, c:'#9a8b78', r:6 },   // Waveland fieldhouse (lakeside, golf SE)
-  { x:150, z:-610, c:'#4f9b46', r:6 },   // golf
+  { x:132, z:-510, c:'#4f9b46', r:6 },   // golf (084 vignette)
   { x:96,  z:372,  c:'#2f63d0', r:5 },   // Chevron sculpture (south lawn)
   { x:121, z:400,  c:'#8f6234', r:4 },   // corner pier
 ];

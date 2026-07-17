@@ -15,11 +15,11 @@ import { scene, toon } from '../core.js';
 // local deterministic rng — never the shared core rng()/rand()
 function m32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 
-// road extents (match CH.LSD in data/chicago.js: berm z0 -1530, road y 1.02)
-// Z0 -1530 (was -846): MONTROSE growth — cars run the full new berm length. N is
+// road extents (match CH.LSD in data/chicago.js: berm z0 -1094, road y 1.02)
+// Z0 -1094 (was -846): MONTROSE growth — cars run the full new berm length. N is
 // a FIXED count (2 InstancedMeshes), so the longer range adds no draw calls and
 // touches no shared rng (placement uses the local m32(90210) only).
-const Z0 = -1530, Z1 = 316, LEN = Z1 - Z0;
+const Z0 = -1094, Z1 = 316, LEN = Z1 - Z0;
 const CAR_Y = 1.02 + 0.65;
 const LANES = [                         // x lane, travel direction (+z south / -z north)
   { x: 3.6, dir: 1 }, { x: 5.6, dir: 1 },

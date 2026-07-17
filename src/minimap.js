@@ -1,5 +1,5 @@
 import { $ } from './core.js';
-import { COAST_MAIN, COAST_PEN, COAST_GOLF, COAST_CORNER, COAST_TIP, COAST_SEGS, TIP_SEGS, profileTotal, LAND } from './coast.js';
+import { COAST_MAIN, COAST_PEN, COAST_GOLF, COAST_BAY, COAST_CORNER, COAST_TIP, COAST_SEGS, MTR_SEGS, TIP_SEGS, profileTotal, LAND } from './coast.js';
 import { mainCurve, spurCurve, TRAIL_LOOP, TRAIL_ENTRANCE } from './paths.js';
 import { mayor } from './character.js';
 import * as CH from './data/chicago.js';
@@ -16,7 +16,9 @@ export function mmInit(){
   g.fillStyle='#2f9fb1';g.fillRect(0,0,CH.MAP.cw,CH.MAP.ch);
   // terrace band along the coasts
   g.strokeStyle='#e6dabd';g.lineCap='round';g.lineJoin='round';g.lineWidth=8;
-  [[COAST_MAIN,COAST_SEGS[0]],[COAST_PEN,COAST_SEGS[1]],[COAST_GOLF,COAST_SEGS[2]],[COAST_CORNER,COAST_SEGS[4]],[COAST_TIP,TIP_SEGS]].forEach(([pts,segs])=>{
+  // 084: COAST_SEGS[2] is the golf GHOST (rng ballast) — the real vignette
+  // golf is MTR_SEGS[7], and the new bay cove (MTR_SEGS[0]) gets a band too.
+  [[COAST_MAIN,COAST_SEGS[0]],[COAST_PEN,COAST_SEGS[1]],[COAST_GOLF,MTR_SEGS[7]],[COAST_BAY,MTR_SEGS[0]],[COAST_CORNER,COAST_SEGS[4]],[COAST_TIP,TIP_SEGS]].forEach(([pts,segs])=>{
     g.beginPath();
     for(let i=0;i<pts.length;i++){
       const s=segs[Math.min(i,segs.length-1)],tot=profileTotal(pts[i][1]);

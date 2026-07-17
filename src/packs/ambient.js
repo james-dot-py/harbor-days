@@ -25,7 +25,7 @@ const TRACK_X = -8;           // centre of the elevated structure, just W of the
 const DECK_TOP = 7.6;         // top of the track deck
 const CAR_Y = DECK_TOP + 1.6; // car centre height
 const PLATFORM_Z = 105;       // Belmont platform stub, aligned with the Belmont underpass (moved to z 105)
-const Z_N = -1530, Z_S = 316;  // north / south ends — the full map z range (Z_N -1530: MONTROSE growth, matches the LSD berm z0). deck=1 Mesh, rails=1 InstancedMesh(2), bents=1 InstancedMesh(dynamic count) => extending north is +0 draws
+const Z_N = -1094, Z_S = 316;  // north / south ends — the full map z range (Z_N -1094: MONTROSE growth, matches the LSD berm z0). deck=1 Mesh, rails=1 InstancedMesh(2), bents=1 InstancedMesh(dynamic count) => extending north is +0 draws
 
 // ---- module runtime handles (built in onWorldReady) ----
 let TRAIN = null, JETS = null, WRIG = null, WRIG_GRP = null;

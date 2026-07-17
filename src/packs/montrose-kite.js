@@ -12,7 +12,7 @@
 //  All setup inside onWorldReady. The kite rig is a handful of self-lit
 //  (bmat) INDIVIDUAL meshes built ONCE and hidden until launch (+0
 //  InstancedMesh buckets; frustum-culled, drawn only when the summit is in
-//  view). NO shared rng — the mound is far north (z≈-1315), determinism-safe.
+//  view). NO shared rng — the mound is far north (z≈-879), determinism-safe.
 // =====================================================================
 import * as THREE from 'three';
 import { onWorldReady, registerUpdate, addInteraction, chargeThrow, toast,
@@ -23,7 +23,7 @@ import { mayor, mparts } from '../character.js';
 import { CRICKET_HILL } from '../data/chicago.js';
 
 // summit stand — on the flat top, clear of the 073 kite-flyer NPCs (106/117/120)
-const ANCHOR = { x: 108, z: -1316 };
+const ANCHOR = { x: 108, z: -880 };
 const hillH = (x, z) => { const H = CRICKET_HILL;
   const dx = (x - H.cx) / H.rx, dz = (z - H.cz) / H.rz, u = Math.hypot(dx, dz);
   if (u >= 1) return 0; const s = 1 - u; return H.height * s * s * (3 - 2 * s); };

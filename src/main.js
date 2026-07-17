@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { renderer, scene, camera, amb, clamp, lerp, lerpAngle, hexRGB, pip, rng, rand, $, game, toon } from './core.js';
 import { skyGroup, clouds, buildSky } from './sky.js';
 import { buildCoast, water, waterN, coastQuery, profileTotal, tierAt, beachH, LAND } from './coast.js';
-import { buildPaths, pathSamples, pathSamples2 } from './paths.js';
+import { buildPaths, pathSamples, pathSamples2, pathSamplesMain } from './paths.js';
 import { buildProps, colliders, walkRects, bobbers, drifter, dogTail, foam, fireflies } from './props.js';
 import { buildStructures } from './structures.js';
 import { mayor, mparts, buildMayor, updateCharacter, updateChibiShadows } from './character.js';
@@ -82,7 +82,7 @@ buildProps();
 // rng consumers in buildProps saw the byte-identical legacy array (world
 // scatter frozen), while every pack (worldReady) still keeps off the new
 // peanut loop + entrance path like any other ribbon.
-pathSamples.push(...pathSamples2);
+pathSamples.push(...pathSamples2,...pathSamplesMain);   // 084: the compressed main trail's samples merge here too (post-buildProps; the ghost fed the frozen scans)
 buildStructures();
 endCellCapture();
 const _tm0=performance.now();

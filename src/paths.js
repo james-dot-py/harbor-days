@@ -18,6 +18,14 @@ export const pathSamples=[];
 // (garden boulders, prairie) probe BOTH arrays, and main.js merges these into
 // pathSamples AFTER buildProps so every pack still keeps off the new ribbons.
 export const pathSamples2=[];
+// 084: the COMPRESSED main trail's own dual-ribbon samples. Kept out of BOTH
+// pathSamples (the ghost covers the frozen tree-placement scan) AND
+// pathSamples2 (props' tree POST-filter near2 scans that during buildProps —
+// feeding it the new main line re-filtered trees the ghost had already
+// cleared, shifting every later tree's per-tree m32 index: canopy reshuffle).
+// main.js merges this into pathSamples AFTER buildProps so packs still keep
+// off the real trail.
+export const pathSamplesMain=[];
 export let mainCurve=null, walkCurve=null, spurCurve=null;
 
 function curveOf(ctrl){ return new THREE.CatmullRomCurve3(ctrl.map(p=>new THREE.Vector3(p[0],0,p[1]))); }
@@ -49,10 +57,29 @@ function ribbonOn(curve,width,color,y,shift,samples=pathSamples){
 export function buildPaths(){
   const st=CH.TRAIL_STYLE;
   const walkOff=st.bike.width/2+st.gap+st.walk.width/2;   // 4.0 m centerline separation
-  // MAIN dual path: walking ribbon (offset) then bike ribbon (centerline).
+  // 084 GHOST of the pre-084 TRAIL_MAIN: push its dual-ribbon samples (walk-
+  // offset pass then bike pass, replicating ribbonOn's sample math exactly)
+  // into pathSamples AT MAIN'S ORIGINAL BUILD SLOT — same content, count and
+  // stride-3 phase, so the shared-rng tree-rejection scan (props.js nearPath)
+  // is bit-for-bit unchanged. The REAL (compressed) MAIN draws just below
+  // into pathSamples2, like every post-freeze ribbon. Never remove.
+  {
+    const gm=curveOf(CH.TRAIL_MAIN_GHOST084);
+    const n=Math.max(60,Math.round(gm.getLength()/2));
+    const p=new THREE.Vector3(),t=new THREE.Vector3();
+    for(const shift of[walkOff,0]){
+      for(let i=0;i<=n;i++){
+        const u=i/n; gm.getPoint(u,p); gm.getTangent(u,t);
+        pathSamples.push([p.x+(-t.z)*shift,p.z+t.x*shift]);
+      }
+    }
+  }
+  // MAIN dual path (084 compressed): walking ribbon (offset) then bike ribbon
+  // (centerline) — drawn for real, samples into pathSamplesMain ONLY (see note
+  // at its declaration: pathSamples2 is scanned by props' tree post-filter).
   mainCurve=curveOf(CH.TRAIL_MAIN);
-  const walkCl=ribbonOn(mainCurve,st.walk.width,st.walk.color,st.walk.y,walkOff);
-  ribbonOn(mainCurve,st.bike.width,st.bike.color,st.bike.y,0);
+  const walkCl=ribbonOn(mainCurve,st.walk.width,st.walk.color,st.walk.y,walkOff,pathSamplesMain);
+  ribbonOn(mainCurve,st.bike.width,st.bike.color,st.bike.y,0,pathSamplesMain);
   walkCurve=curveOf(walkCl.filter((_,i)=>i%8===0||i===walkCl.length-1));
   // SPUR: single ribbon.
   spurCurve=curveOf(CH.TRAIL_SPUR);

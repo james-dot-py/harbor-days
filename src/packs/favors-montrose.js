@@ -34,19 +34,19 @@ import { birderHooks } from './montrose-point.js';   // the gap-1 birder "Lois" 
 
 // ---- placements — ALL derived from data consts (084 will reshape Montrose) --
 const MP = CH.MONTROSE_POINT, DUNE = CH.MONTROSE_DUNE, PB = CH.PARK_BAIT;
-const B0 = MP.birders[0];                                   // gap-1 birder (206.0,-1327.4) = Lois
+const B0 = MP.birders[0];                                   // gap-1 birder (206.0,-891.4) = Lois
 const LOIS = { x: B0.x, z: B0.z };
 // the three pages (fixed a->b->c order). a: on the arrival lawn just SOUTH of
 // the gateway, clear of the entrance path; b: on walkable meadow just outside
 // (south of) the dune rope, NEVER inside the dune carve; c: in the tip clearing,
 // clear of the CR-sampled loop ribbon, the shore rope, the scope + tip birder.
-const PAGE_A = { x: MP.gate.x + 3, z: MP.gate.z + 4 };          // (194, -1314)
-const PAGE_B = { x: (DUNE.bounds.x0 + DUNE.bounds.x1) / 2, z: DUNE.bounds.z1 + 3 };   // (221.5, -1359)
-const PAGE_C = { x: MP.scope.x - 3.6, z: MP.scope.z - 3.6 };    // (234.5, -1340)
+const PAGE_A = { x: MP.gate.x + 3, z: MP.gate.z + 4 };          // (194, -878)
+const PAGE_B = { x: (DUNE.bounds.x0 + DUNE.bounds.x1) / 2, z: DUNE.bounds.z1 + 3 };   // (221.5, -923)
+const PAGE_C = { x: MP.scope.x - 3.6, z: MP.scope.z - 3.6 };    // (234.5, -904)
 const PAGES = [PAGE_A, PAGE_B, PAGE_C];
 // Gus at the Park Bait door — east/harbor side, clear of the r3.6 shop collider
-// and >=3.7 m from the cricket-cooler peek at (180,-1172).
-const GUS = { x: PB.x + 4, z: PB.z - 3 };                       // (180, -1179)
+// and >=3.7 m from the cricket-cooler peek at (180,-736).
+const GUS = { x: PB.x + 4, z: PB.z - 3 };                       // (180, -743)
 const GUS_RY = Math.atan2(8, -3);                              // face ENE, out over the basin
 
 // scribbled-page toast lines (a page of Lois's notes; spaced by travel, never a loop)

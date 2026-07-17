@@ -46,7 +46,7 @@ const FD = CH.FINGER_DOCKS, MD = CH.MT_FINGER_DOCKS, DECK_Y = CH.SEAWALL_Y.top +
 // the only walkable Belmont slip deck, and noted.
 const SAL  = { x: FD.x0 + 7, z: FD.rows[FD.rows.length - 1], y: DECK_Y };   // (85, -275)
 // RITA — on the NORTHERNMOST Montrose finger dock (same walkRect family).
-const RITA = { x: MD.x0 + 7, z: MD.rows[0], y: DECK_Y };                    // (193, -1150)
+const RITA = { x: MD.x0 + 7, z: MD.rows[0], y: DECK_Y };                    // (193, -714)
 // REGGIE — clear of the tight Belmont-underpass Divvy cluster: departure
 // boards (16,100)/(16,111) r3, Divvy grab (24,110) r2.6, sax busker (18,108),
 // pylon (15.4,107) — (30,116) sits >=8 m from all of them (verify ≥3.7 m).
