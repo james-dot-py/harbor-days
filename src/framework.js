@@ -42,6 +42,9 @@ const _v=new THREE.Vector3();            // cached scratch vector (no per-frame 
 // prefers-reduced-motion query or the player's explicit toggle. A pack that
 // animates sway/bob/flash should skip or soften it when this is true.
 export const prefersCalm=()=>game.calm;
+// prefersLowPower() — the 085 low-power toggle, mirrored like calm. A pack
+// with an optional particle field should thin its instance count when true.
+export const prefersLowPower=()=>!!game.lowPower;
 
 // ---------------------- the mayor's NAME (task 087) --------------------
 // Stored through the ONE guarded door (store.js flags view). '' = unset; the
@@ -339,6 +342,11 @@ const MOVER_NEAR2=87*87, MOVER_FAR2=93*93;
 //     it works for movers; a pack that hides its own rig sets npc._lodActive=false
 //     (not group.visible) to stay out of the framework's visibility ownership.
 const CITIZEN=0.74;   // canonical citizen scale — matches the mayor (scale:1 here = mayor-sized)
+// npcList() — read-only view of the live framework NPC registry (task 090: the
+// lake-moods pack stamps ONE shared umbrella InstancedMesh over rigs it doesn't
+// own — updateChibiShadows precedent). Treat as read-only; a consumer's private
+// per-NPC fields go on the npc object itself (the _lodActive convention).
+export function npcList(){return _npcs;}
 export function makeNPC({x,z,ry=0,palette,name='',lines,wander=0,scale=1,staticLod=false,moverLod=false}){
   scale*=CITIZEN;
   const {group,parts}=createChibi(Object.assign({scale},palette));

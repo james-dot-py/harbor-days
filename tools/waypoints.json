@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-18T21:53:05.462Z",
- "count": 135,
+ "generated": "2026-07-18T22:43:47.692Z",
+ "count": 139,
  "waypoints": [
   {
    "id": "spawn",
@@ -401,6 +401,87 @@
     }
    ],
    "expectation": "088 TRAIL SEAM (issue 028): the dual Lakefront Trail — grey asphalt bike ribbon with yellow center dashes, a green grass strip, and the parallel pale limestone WALKING ribbon. BOTH pavements solid at every angle (no dropout, no shimmer), the dashes sit ON the asphalt only (never floating over grass or the walking path), trailside furniture (bench/lamp/sign) stands BESIDE the ribbons, and no tree trunk stands in either ribbon."
+  },
+  {
+   "id": "mood-fog",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 111,
+   "z": 156,
+   "framings": [
+    {
+     "yaw": 0.24,
+     "pitch": 0.06,
+     "dist": 10
+    },
+    {
+     "x": 146,
+     "z": 120,
+     "yaw": 1.35,
+     "pitch": 0.02,
+     "dist": 9
+    },
+    {
+     "x": 120,
+     "z": 330,
+     "yaw": 0.12,
+     "pitch": 0.03,
+     "dist": 11
+    }
+   ],
+   "expectation": "090 LAKE MOODS — FOG OFF THE LAKE: the golden dusk stays canon but a soft peach mist deepens the air — middle distance ghosted well before the old 210 m horizon, globe lamps wearing warm additive halos, drifting fog banks low over the water to the east (f1), and in f2 the skyline reading as a faint silhouette veiled behind the haze scrim. MILD BY DESIGN: never gray, never stormy — near-field grass/props/mayor stay crisp and colorful; it must still read instantly as Ope!'s dusk, only mistier. World content identical to a clear day.",
+   "q": "mood=fog"
+  },
+  {
+   "id": "mood-rain",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 40.5,
+   "z": -236.5,
+   "framings": [
+    {
+     "yaw": -2,
+     "pitch": 0.06,
+     "dist": 7
+    },
+    {
+     "x": 48,
+     "z": -240,
+     "yaw": 0.1,
+     "pitch": 0.12,
+     "dist": 10
+    },
+    {
+     "x": 44,
+     "z": -230,
+     "yaw": -2.6,
+     "pitch": 0.14,
+     "dist": 12
+    }
+   ],
+   "expectation": "090 LAKE MOODS — WARM DRIZZLE: soft warm rain streaks over the dusk (gentle, sparse — a summer sprinkle, NOT a storm; the sky stays golden peach, never darkened), the frisbee-pair NPCs holding little pastel toy umbrellas overhead at chibi scale (canopy clearly above the head, not clipping it), and wet puddle glints ON the trail pavements only (f1 — ellipses on the ribbon, never floating on grass). Streaks visible but subtle in every framing; world content and NPCs otherwise unchanged.",
+   "q": "mood=rain&rainon=1"
+  },
+  {
+   "id": "mood-firefly",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 171,
+   "z": -396.25,
+   "framings": [
+    {
+     "yaw": -1.46,
+     "pitch": 0.3,
+     "dist": 10
+    },
+    {
+     "yaw": -1.77,
+     "pitch": 0.26,
+     "dist": 11
+    }
+   ],
+   "expectation": "090 LAKE MOODS — FIREFLY NIGHT'S-EDGE (SANCTUARY): the Bird Sanctuary interior glowing with a SURGE of warm firefly motes — clearly denser than the everyday handful of 70 map-wide, drifting/blinking among the clearings and understory — under an extra-golden cast (warmer horizon, honeyed light). Cozy and magical, NOT particle spam; the sanctuary room (loop path, grove, deck rail) reads exactly as usual beneath the motes.",
+   "q": "mood=firefly"
   },
   {
    "id": "mt-arrival",
@@ -3538,6 +3619,29 @@
     }
    ],
    "expectation": "088 SIGN TRUTH (issue 027): the Lollapalooza MERCH tent on Butler Field — the plum 'MERCH' banner hangs clear of the canopy front facing east, LEGIBLE and stable, with NO dark backing box poking through or past the banner face (the shipped bug: transposed backing dimensions left a 2.5 m blade through the sign). Hanging tees + wood counter under the tent, festival-staff keeper behind, crowd/festival context around."
+  },
+  {
+   "id": "mood-firefly-lurie",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 160,
+   "z": 861,
+   "framings": [
+    {
+     "yaw": -2.2,
+     "pitch": 0.1,
+     "dist": 7
+    },
+    {
+     "x": 152,
+     "z": 881,
+     "yaw": 2.8,
+     "pitch": 0.12,
+     "dist": 9
+    }
+   ],
+   "expectation": "090 LAKE MOODS — FIREFLY NIGHT'S-EDGE (LURIE): firefly motes drifting and blinking low over the Lurie Garden planting plates + Seam boardwalk at golden dusk, the hedge walls and garden reading exactly as usual beneath them; extra-golden cast. Subtle density (fewer than the sanctuary surge), no motes inside solid geometry, Millennium cell otherwise unchanged.",
+   "q": "mood=firefly"
   }
  ]
 }

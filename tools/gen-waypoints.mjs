@@ -210,6 +210,40 @@ add('trail-seam', 'lakefront', 'lakefront', 90, -400, [
   { yaw: -2.55, pitch: 0.1, dist: 8 },     // across: both ribbons + the strip
 ]);
 
+/* ---- 090 LAKE MOODS: the three date-seeded weather layers, each shot with
+   its explicit ?mood= opt-in (the 087 tooling law — under play=1 the mood is
+   OFF unless requested, so every OTHER waypoint stays byte-stable). rainon=1
+   pins the drizzle phase ON (headless page time is unpredictable; the phase
+   cycle would make shots timing-coupled without it). ---- */
+// FOG: f0 south past the monument globe lamp (114.8,162.2 — ~25° off-axis, 047
+// law) into the misted lawn; f1 east over the Belmont Rocks at the fog-bank
+// wall on the water; f2 the south lawn looking at the GHOSTED skyline scrim.
+add('mood-fog', 'lakefront', 'lakefront', 111, 156, [
+  { yaw: 0.24, pitch: 0.06, dist: 10 },
+  { x: 146, z: 120, yaw: 1.35, pitch: 0.02, dist: 9 },
+  { x: 120, z: 330, yaw: 0.12, pitch: 0.03, dist: 11 },
+], { q: 'mood=fog' });
+// RAIN: the frisbee pair (34,-242)/(48,-232) under their umbrellas + the
+// trail's puddles. f0 aims PAST the SW partner (the coord-hash CARRIER —
+// the NE one rolls without, that's the stagger; 047 law keeps the carrier
+// off-axis, and their bump bubble no longer camouflages the mint canopy).
+add('mood-rain', 'lakefront', 'lakefront', 40.5, -236.5, [
+  { yaw: -2.0, pitch: 0.06, dist: 7 },
+  { x: 48, z: -240, yaw: 0.1, pitch: 0.12, dist: 10 },
+  { x: 44, z: -230, yaw: -2.6, pitch: 0.14, dist: 12 },
+], { q: 'mood=rain&rainon=1' });
+// FIREFLY: the sanctuary deck perch (the 025 hero stands), now judging the
+// SURGE — clearly denser motes than the everyday handful, extra-golden cast.
+// NO third (NW-canopy) framing: that frustum is 499/480 with the mood OFF —
+// an inherited sanctuary-deck-f2 overrun (queue task 095), not a mood cost.
+{
+  const D = CH.SANCTUARY.deck, cz = (D.z0 + D.z1) / 2, sx = D.x0 + 1.5;
+  add('mood-firefly', 'lakefront', 'lakefront', R(sx), R(cz), [
+    { yaw: yawTo(sx, cz, 132, -392), pitch: 0.3, dist: 10 },
+    { yaw: yawTo(sx, cz, 122, -406), pitch: 0.26, dist: 11 },
+  ], { q: 'mood=firefly' });
+}
+
 // MONTROSE approach (084 COMPRESSION): mt-arrival + mt-trail now read the new
 // curved BAY cove that replaced the blank golf-to-Montrose lawn (the golf is a
 // compact vignette; the whole Montrose block slid +436 in z). mt-gate is the
@@ -1267,6 +1301,15 @@ addM('mp-lolla-merch', [
   { x: 219, z: 921.5, yaw: -1.6, pitch: 0.02, dist: 5 },     // from the S, aimed W: banner right-of-frame
   { x: 224, z: 926, yaw: -0.9, pitch: 0.05, dist: 8 },       // wider: tent left, festival context right
 ]);
+
+// 090 LAKE MOODS — the Lurie firefly surge (millennium cell). Stands on the
+// Seam boardwalk / south rim; aims PAST the planting plates (047 law) so the
+// motes read over the tapestry beside the mayor. add() direct (addM has no
+// extras slot; this one needs its ?mood= opt-in).
+add('mood-firefly-lurie', 'millennium', 'millennium', 160, 861, [
+  { yaw: -2.2, pitch: 0.1, dist: 7 },
+  { x: 152, z: 881, yaw: 2.8, pitch: 0.12, dist: 9 },
+], { q: 'mood=firefly' });
 
 /* --------------------------- expectations ---------------------------- */
 let expect = {};

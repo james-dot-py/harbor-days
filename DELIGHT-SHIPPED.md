@@ -603,3 +603,13 @@ cut becomes a revert task.
   on every head in the cast; take it off and every curl springs back. The
   cab driver even doffs his flat cap when you hand him a different hat.
   — hats-wear-right pass — task 089
+- LAKE MOODS. The golden dusk is still canon, but a given real-world day now
+  has a mood, date-seeded like the favors: ~2 days in 7 FOG rolls off the lake
+  (peach mist banks drifting onto the rocks, halos on the globe lamps, the
+  skyline ghosted, a distant foghorn every few minutes), ~1 in 7 it's WARM
+  DRIZZLE that comes and goes in few-minute showers (soft streaks, puddle
+  shimmer on the trail, neighbors popping little pastel umbrellas — some
+  never bother, that's the stagger), and ~1 in 7 an extra-golden FIREFLY
+  night's-edge surges the sanctuary + Lurie Garden with amber motes over a
+  cricket layer. Visit three days running and you'll catch one worth texting
+  someone about. — everywhere on the lakefront + Lurie — task 090

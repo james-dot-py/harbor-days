@@ -23,8 +23,10 @@ export const WATER_Y = -2.3;
 // shared mutable game state (late-bound reads across modules). `calm` is the
 // single reduced-motion flag (task 085 settings): fx.js / main.js read it each
 // frame, framework.js re-exports prefersCalm()=>game.calm for packs. Default
-// false = today's full-motion behavior; settings.js flips it live.
-export const game = {running:false, tNow:0, calm:false};
+// false = today's full-motion behavior; settings.js flips it live. `lowPower`
+// mirrors the 085 low-power toggle the same way (framework prefersLowPower())
+// so packs can thin optional particle counts without reaching into settings.
+export const game = {running:false, tNow:0, calm:false, lowPower:false};
 
 // --------------------------- renderer/scene ---------------------------
 export const renderer = new THREE.WebGLRenderer({antialias:true});

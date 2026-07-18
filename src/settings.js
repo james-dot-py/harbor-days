@@ -64,6 +64,7 @@ export function applySettings() {
   setMusicVol(S.music); setSfxVol(S.sfx); setMuted(S.muted);
   setLookScale(S.look); setInvertY(S.invertY);
   game.calm = calmEffective();
+  game.lowPower = S.lowPower;   // packs read this via framework prefersLowPower()
   setLowPowerDPR(S.lowPower); setLowPowerCull(S.lowPower);
   const m = TEXT_SCALE[S.text] || 1;
   document.documentElement.style.setProperty('--uiscale', String(m));

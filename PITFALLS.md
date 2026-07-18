@@ -742,6 +742,15 @@ few turns to find; keep each to one line of symptom + fix.
   it because every mt-beach framing faced AWAY from the lake — judge waterlines by
   a framing that looks INTO them (088's mt-shore-waterline), and keep beach slope
   refs east of the land edge (walkprobe asserts it).
+- r128 setColorAt sizes the LAZILY-created instanceColor from the CURRENT
+  count: a pool-style InstancedMesh parked at count=0 before its first
+  setColorAt gets a ZERO-LENGTH color buffer and renders BLACK forever — which
+  reads exactly like "toon ignores instanceColor" (090 umbrellas, a diagnose
+  cycle). Allocate colors while count == capacity (the constructor default),
+  THEN park count at 0. Related overlay law from the same task: a translucent
+  effect COLORED LIKE ITS BACKGROUND is invisible — fog-bank puffs tinted the
+  fog color vanished in front of the fog wall; contrast an overlay against the
+  NEAR field (cream over blue water), not the far haze it imitates.
 - A canvas SIGN plane EXACTLY coplanar with its backing face z-fights and "flashes
   in and out" while playing (088/issue 027: the kiosk board at apron-face depth,
   0 mm proud). The 032 sign law gains a depth clause: a sign plane sits 0.012-0.03 m
