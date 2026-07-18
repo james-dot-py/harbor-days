@@ -29,7 +29,7 @@ concurrency:
 
 jobs:
   testflight:
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 45
     env:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
@@ -49,7 +49,9 @@ jobs:
       - name: Select the latest stable Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: latest-stable
+          # Apple requires the iOS 26 SDK for App Store Connect uploads (annual
+          # SDK gate). macos-15 ships Xcode 26.x but DEFAULTS to 16.4 — pin it.
+          xcode-version: "^26.0"
 
       - name: Install JS dependencies
         run: npm ci
