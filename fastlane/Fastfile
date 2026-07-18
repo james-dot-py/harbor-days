@@ -40,7 +40,11 @@ platform :ios do
       # Gym forwards the ASC key to xcodebuild for -allowProvisioningUpdates, so
       # Apple creates/uses a cloud distribution certificate and the app-store
       # provisioning profile with zero local .p12 or match repo.
-      xcargs: "-allowProvisioningUpdates CURRENT_PROJECT_VERSION=#{build_number}",
+      # DEVELOPMENT_TEAM comes from the APPLE_TEAM_ID repo secret — automatic
+      # signing on a headless runner cannot infer the team (the pbxproj
+      # deliberately carries none; the repo is public).
+      xcargs: "-allowProvisioningUpdates DEVELOPMENT_TEAM=#{ENV.fetch("APPLE_TEAM_ID")} CURRENT_PROJECT_VERSION=#{build_number}",
+      export_team_id: ENV.fetch("APPLE_TEAM_ID"),
       output_directory: "build",
       output_name: "Ope.ipa",
       clean: true

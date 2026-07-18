@@ -52,6 +52,7 @@ Users and Access → Integrations → App Store Connect API → Team Keys) with 
 | `ASC_KEY_ID` | the key's Key ID (e.g. `2X9ABC1234`) |
 | `ASC_ISSUER_ID` | the team's Issuer ID (a UUID) |
 | `ASC_PRIVATE_KEY_B64` | the downloaded `AuthKey_XXXX.p8`, base64-encoded |
+| `APPLE_TEAM_ID` | your 10-char Team ID (developer.apple.com → Membership) — added 2026-07-17 after the first CI run showed automatic signing needs it explicitly |
 
 To (re)create `ASC_PRIVATE_KEY_B64` from a fresh `.p8`:
 
