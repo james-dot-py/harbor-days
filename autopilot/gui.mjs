@@ -667,7 +667,7 @@ function drawVisitorsChart(days){
     const gx=pl+i*step+(step-gw)/2,vx=gx,px=gx+bw+gap,vv=d.visits||0,pv=d.plays||0;
     const vh=vv/max*plotH,vy=base-vh,ph=pv/max*plotH,py=base-ph,today=i===days.length-1;
     if(vh>0.6)p.push('<path d="'+topRect(vx,vy,bw,vh,4)+'" fill="#4fa3c7"'+(today?' stroke="#4a3b2f" stroke-width="2"':'')+'><title>'+esc(d.date)+': '+vv+' visitor'+(vv===1?'':'s')+'</title></path>');
-    if(ph>0.6)p.push('<path d="'+topRect(px,py,bw,ph,4)+'" fill="#e0766a"><title>'+esc(d.date)+": "+pv+" pressed let's walk</title></path>');
+    if(ph>0.6)p.push('<path d="'+topRect(px,py,bw,ph,4)+'" fill="#e0766a"><title>'+esc(d.date)+": "+pv+" pressed let's walk</title></path>");
     p.push('<text x="'+(vx+bw/2)+'" y="'+(vy-6)+'" text-anchor="middle" font-size="11" font-weight="700" fill="'+(vv?'#4a3b2f':'#c2ad93')+'">'+vv+'</text>');
     p.push('<text x="'+(gx+gw/2)+'" y="'+(base+15)+'" text-anchor="middle" font-size="10.5" fill="#9c8168"'+(today?' font-weight="700"':'')+'>'+esc(d.label)+'</text>');
   });
