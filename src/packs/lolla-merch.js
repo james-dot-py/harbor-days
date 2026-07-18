@@ -142,8 +142,10 @@ function buildTent(root) {
   }
   // MERCH sign — a hanging banner CLEAR of the canopy front (x216.19) so it reads
   // from any approach; solid dark backing box merges in, the canvas face stays its
-  // own mesh (never atlased with letters — 050). backing WEST of the +x face.
-  parts.push(paint(new THREE.BoxGeometry(2.5, 0.66, 0.08).translate(216.5, 2.12, CZ), 0x2a2230));
+  // own mesh (never atlased with letters — 050). backing is thin in X (0.08) and
+  // long in Z (2.5) so it PARALLELS the y=PI/2 face: front face x216.54, sign face
+  // x216.57 → 30 mm gap (a transposed 2.5×…×0.08 box speared a blade through it).
+  parts.push(paint(new THREE.BoxGeometry(0.08, 0.66, 2.5).translate(216.5, 2.12, CZ), 0x2a2230));
   // ---- ONE merged vertexColors mesh (1 draw) ----
   const merged = new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(parts, false), vc());
   merged.name = 'lolla-merch-tent'; root.add(merged);

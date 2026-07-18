@@ -26,6 +26,12 @@ export const pathSamples2=[];
 // main.js merges this into pathSamples AFTER buildProps so packs still keep
 // off the real trail.
 export const pathSamplesMain=[];
+// 088: every REAL drawn ribbon registers its shifted centerline polyline here
+// (via ribbonOn). {pts:[[x,z],...], w:width}. Ghost sample blocks
+// (TRAIL_MAIN_GHOST084, TRAIL_LOOP_GHOST) are inline loops that never call
+// ribbonOn, so they DO NOT register — ribbonLanes === the real walkable ribbons.
+// Consumed by the prop-clearance audit + the props.js tree clearance nudge.
+export const ribbonLanes=[];
 export let mainCurve=null, walkCurve=null, spurCurve=null;
 
 function curveOf(ctrl){ return new THREE.CatmullRomCurve3(ctrl.map(p=>new THREE.Vector3(p[0],0,p[1]))); }
@@ -51,6 +57,7 @@ function ribbonOn(curve,width,color,y,shift,samples=pathSamples){
   g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
   g.setIndex(idx);g.computeVertexNormals();
   scene.add(new THREE.Mesh(g,toon(color)));
+  ribbonLanes.push({pts:cl,w:width});   // 088: register the real drawn ribbon
   return cl;
 }
 
@@ -121,11 +128,26 @@ export function buildPaths(){
   ribbonOn(curveOf(CH.TRAIL_ENTRANCE),st.loop.width,st.loop.color,st.loop.y,0,pathSamples2);
   // MONTROSE north growth (v0.6, task 069): the dual Lakefront Trail CONTINUES
   // north as a NEW ribbon — walk ribbon then bike centerline, same styling as
-  // MAIN — registered in pathSamples2 ONLY so pathSamples stays byte-identical
-  // (the phase-sensitive tree scan never sees it; determinism holds). Drawn LAST.
+  // MAIN. 088 REROUTE (issue 030): the OLD line's dual samples are pushed into
+  // pathSamples2 as a byte-identical GHOST at this original build slot
+  // (replicating ribbonOn's sample math exactly — walk-offset pass then bike
+  // pass, same n, same order) so the tree post-filter (props.js near2) and every
+  // local clearD consumer see an UNCHANGED array; the REAL (rerouted) ribbons
+  // draw below into pathSamplesMain, like MAIN itself (the 084 law). Never remove.
+  {
+    const gm=curveOf(CH.TRAIL_MONTROSE_GHOST088);
+    const n=Math.max(60,Math.round(gm.getLength()/2));
+    const p=new THREE.Vector3(),t=new THREE.Vector3();
+    for(const shift of[walkOff,0]){
+      for(let i=0;i<=n;i++){
+        const u=i/n; gm.getPoint(u,p); gm.getTangent(u,t);
+        pathSamples2.push([p.x+(-t.z)*shift,p.z+t.x*shift]);
+      }
+    }
+  }
   const montroseCurve=curveOf(CH.TRAIL_MONTROSE);
-  ribbonOn(montroseCurve,st.walk.width,st.walk.color,st.walk.y,walkOff,pathSamples2);
-  ribbonOn(montroseCurve,st.bike.width,st.bike.color,st.bike.y,0,pathSamples2);
+  ribbonOn(montroseCurve,st.walk.width,st.walk.color,st.walk.y,walkOff,pathSamplesMain);
+  ribbonOn(montroseCurve,st.bike.width,st.bike.color,st.bike.y,0,pathSamplesMain);
   // yellow center dashes on the paved BIKE path + the SPUR + Montrose (not the walkway)
   {
     const dashes=[];

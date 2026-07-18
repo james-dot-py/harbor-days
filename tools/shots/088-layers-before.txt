@@ -1,0 +1,56 @@
+PATH-LAYERS  (current tree)
+
+Y-LADDER (ascending):
+  0.050  corner-desire    pavement  w2
+  0.050  main-bike        pavement  w3.2
+  0.050  montrose-bike    pavement  w3.2
+  0.050  spur             pavement  w2.6
+  0.055  sanctuary-loop   pavement  w1.9
+  0.060  connector        pavement  w2.2
+  0.060  garden-entrance  pavement  w2.2
+  0.060  garden-loop      pavement  w2.2
+  0.062  main-walk        pavement  w2.4
+  0.062  montrose-walk    pavement  w2.4
+  0.062  point-entrance   pavement  w2.4
+  0.062  point-loop       pavement  w2.4
+  0.065  corner-path      pavement  w1.8
+  0.075  dash-main        marking   w0.6  owner=main-bike
+  0.075  dash-montrose    marking   w0.6  owner=montrose-bike
+  0.075  dash-spur        marking   w0.6  owner=spur
+  ---- wrigleyville street decals (static, streets.js not imported) ----
+  0.000  wv-asphalt(grade)    base
+  0.035  wv-yellow-paint      paint
+  0.036  wv-crosswalk-paint   paint
+  0.055  wv-sidewalk          slab
+
+DIAGNOSTICS:
+  spur <-> main-bike min centerline dist = 0.000 m near (74.0,-340.0) (junction [74,-340] ~ 0)
+  dash-main <-> main-walk min dist = 3.980 m near (209.2,-433.2)
+  dash-spur <-> main-walk min dist = 0.222 m near (83.9,-343.5)
+
+OVERLAPPING PAIRS (18):
+  main-bike <-> spur  d=0.00  Δy=0.000  near (74.0,-340.0)
+  main-bike <-> garden-loop  d=0.63  Δy=0.010  near (111.0,124.6)
+  main-bike <-> montrose-bike  d=0.16  Δy=0.000  near (208.0,-572.0)
+  main-bike <-> dash-main  d=0.00  Δy=0.025  near (30.0,406.0)
+  main-bike <-> dash-spur  d=0.00  Δy=0.025  near (74.0,-340.0)
+  main-bike <-> dash-montrose  d=0.16  Δy=0.025  near (208.0,-572.0)
+  main-walk <-> spur  d=0.06  Δy=0.012  near (83.5,-343.4)
+  main-walk <-> montrose-walk  d=0.16  Δy=0.000  near (211.9,-572.7)
+  main-walk <-> dash-spur  d=0.06  Δy=0.013  near (83.5,-343.4)
+  spur <-> dash-main  d=0.00  Δy=0.025  near (74.0,-340.0)
+  spur <-> dash-spur  d=0.00  Δy=0.025  near (74.0,-340.0)
+  connector <-> garden-loop  d=0.16  Δy=0.000  near (79.0,120.0)
+  garden-loop <-> dash-main  d=0.62  Δy=0.015  near (110.6,123.8)
+  montrose-bike <-> dash-main  d=0.20  Δy=0.025  near (208.0,-571.0)
+  montrose-bike <-> dash-montrose  d=0.00  Δy=0.025  near (209.0,-562.0)
+  point-entrance <-> point-loop  d=0.00  Δy=0.000  near (232.0,-902.0)
+  dash-main <-> dash-spur  d=0.00  Δy=0.000  near (74.0,-340.0)
+  dash-main <-> dash-montrose  d=0.16  Δy=0.000  near (208.0,-572.0)
+
+VIOLATIONS (3):
+   1. COPLANAR/TOO-CLOSE: main-bike (y 0.050) vs spur (y 0.050) overlap near (74.0,-340.0) — need |Δy|>=0.006 (Δ0.000)
+   2. MARKING ABOVE CROSSING PAVEMENT: dash-spur (y 0.075) must sit >=0.004 BELOW crossing main-walk (y 0.062) near (83.5,-343.4) (Δ-0.013)
+   3. MARKING ABOVE CROSSING PAVEMENT: dash-main (y 0.075) must sit >=0.004 BELOW crossing garden-loop (y 0.060) near (110.6,123.8) (Δ-0.015)
+
+PATH-LAYERS: 3 violations

@@ -89,6 +89,30 @@ input-driving bot (zero stalls) — and the golf/blank separation itself
 (sanctuary fence → harbor mouth) fell from **651 m to 215 m (3×)**. The
 removed distance is almost entirely the blank golf/lawn stretch.
 
+### 088 shoreline-truth amendments (owner playtest 2026-07-17, issue 030)
+
+1. **The beach WATERLINE law.** `MONTROSE_BEACH.slope.ref` must sit EAST of the
+   LAND edge (`montroseFx` peaks at x 237.5): with ref 227 the sand dipped
+   below y0 from x≈227.5 while the y0 LAND lawn ran to the coast line, so a
+   lawn-green strip capped the beach at the exact waterline (the 041
+   grade-carpet class). Shipped: ref 237.6, span 5, bounds x1 242.5 — dry sand
+   to the land edge, a short wet band, underwater by x≈242. Any future coast
+   move re-checks `sand ~grade at the LAND edge` (walkprobe 072 block).
+2. **Trail INLAND of the beach house.** `TRAIL_MONTROSE`'s tail no longer
+   crosses the sand: bike stays x ≤ 188 (walk ribbon +4 east clears
+   `BEACH_HOUSE.footRect` x0 194 by ~0.8 m) and the trail runs to the north
+   cap (~z −1058) instead of dead-ending mid-beach — matching the real
+   alignment (trail landward of the beach house; sand touches only beach
+   things). Determinism: the pre-088 line ghosts its dual samples into
+   `pathSamples2` (`TRAIL_MONTROSE_GHOST088`, the 084 TRAIL_MAIN law); the
+   real ribbons sample into `pathSamplesMain`.
+3. **Beach life keeps off pavements.** Montrose towels reject any spot within
+   w/2+1.3 m of a REAL ribbon centerline (`ribbonLanes`); city-wide,
+   `tools/prop-clearance.mjs` (run by walkprobe) asserts no tree/blocking prop
+   base on any ribbon, and `tools/path-layers.mjs` asserts the path/decal
+   y-ladder (`TRAIL_STYLE`: bike .050 < spur .056 < dash .062 < loop .068 <
+   walk .074) — both permanent gates.
+
 ## The strip, west → east (constant for the whole map)
 
 1. **x 0–14 — Lake Shore Drive embankment** (NOT walkable): low berm, stylized

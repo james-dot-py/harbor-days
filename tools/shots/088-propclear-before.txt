@@ -1,0 +1,11 @@
+$ node tools/prop-clearance.mjs 5241   (PRE-FIX, exit 1)
+TREE (52.9,-63.5) 0.41m from lane centerline (w 3.2, need >=2.10) near (53.3,-63.6)
+TREE (49.9,-134.0) 1.29m from lane centerline (w 2.4, need >=1.70) near (48.6,-134.0)
+TREE (182.0,-160.0) 0.59m from lane centerline (w 2.6, need >=1.80) near (182.6,-160.0)
+TREE (178.6,-404.2) 1.32m from lane centerline (w 1.9, need >=1.45) near (177.5,-403.4)
+TREE (154.9,-410.6) 1.38m from lane centerline (w 1.9, need >=1.45) near (154.8,-412.0)
+TREE (140.9,-410.3) 1.11m from lane centerline (w 1.9, need >=1.45) near (141.2,-409.2)
+TREE (138.6,-369.7) 0.79m from lane centerline (w 1.9, need >=1.45) near (138.6,-368.9)
+TREE (118.7,-375.4) 0.48m from lane centerline (w 1.9, need >=1.45) near (119.0,-375.8)
+PROP (85.0,-352.0) r 0.35 h inf center 0.84m onto lane (w 3.2, need >=1.55) near (85.7,-351.5)
+PROP-CLEARANCE: 9 violations (8 trees, 1 colliders) across 13 lanes / 364 trees

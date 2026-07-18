@@ -171,7 +171,7 @@ onWorldReady((player) => {
       const tex = new THREE.CanvasTexture(cv);
       const placard = new THREE.Mesh(new THREE.PlaneGeometry(0.62, 0.27),
         curveMat(new THREE.MeshBasicMaterial({ map: tex, side: THREE.FrontSide })));
-      placard.position.set(0, 0.34, 0.262); cool.add(placard);
+      placard.position.set(0, 0.34, 0.275); cool.add(placard);     // 15 mm proud of the 0.260 backing face (anti z-fight)
       const backing = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.29, 0.03), toon(0xcbb892));
       backing.position.set(0, 0.34, 0.245); cool.add(backing);     // solid back -> no mirrored text
     }

@@ -735,3 +735,19 @@ few turns to find; keep each to one line of symptom + fix.
   toggle needed this: the framework's bubble-phase Esc closes the tote/shop, so a
   bubble-phase settings handler would then see "nothing open" and pop settings up in
   the same keypress. Capture-phase lets it correctly defer to a card that IS open.
+- The 041 grade-carpet law has a COASTAL edition: any surface that dips below y0
+  INSIDE the LAND polygon gets capped by the y0 lawn fill — MONTROSE beach's
+  slope.ref sat west of the coast line, so a lawn-green strip ran between the sand
+  and the water at the EXACT waterline for five shipped tasks (072-087). Nobody saw
+  it because every mt-beach framing faced AWAY from the lake — judge waterlines by
+  a framing that looks INTO them (088's mt-shore-waterline), and keep beach slope
+  refs east of the land edge (walkprobe asserts it).
+- A canvas SIGN plane EXACTLY coplanar with its backing face z-fights and "flashes
+  in and out" while playing (088/issue 027: the kiosk board at apron-face depth,
+  0 mm proud). The 032 sign law gains a depth clause: a sign plane sits 0.012-0.03 m
+  PROUD of its backing along the normal — and a backing box's dims must PARALLEL
+  the sign face (lolla MERCH transposed 2.5 m of backing THROUGH the banner).
+  Whole-map layer ordering is now mechanical: tools/path-layers.mjs (y-ladder:
+  overlapping pavements >=0.006 apart; markings above their own asphalt, BELOW
+  crossing pavements) + tools/prop-clearance.mjs (no tree/prop base on any ribbon)
+  both run inside walkprobe — fix data, never silence the tools.

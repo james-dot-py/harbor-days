@@ -68,10 +68,12 @@ function buildBox() {
   const slotLip = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.06, 0.03), toon(BRASS));
   slotLip.position.set(0, 1.61, 0.23); g.add(slotLip);
   // painted front label (curved with the world; FrontSide so no mirrored text
-  // shows from behind — the opaque body sits right behind it)
+  // shows from behind — the opaque body sits right behind it). z 0.234 is 14 mm
+  // local (~22 mm world at scale 1.55) proud of the 0.220 body face so the two
+  // don't z-fight.
   const label = new THREE.Mesh(new THREE.PlaneGeometry(0.52, 0.44),
     curveMat(new THREE.MeshBasicMaterial({ map: labelTex() })));
-  label.position.set(0, 1.34, 0.222); g.add(label);
+  label.position.set(0, 1.34, 0.234); g.add(label);
   return g;
 }
 

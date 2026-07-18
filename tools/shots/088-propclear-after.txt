@@ -1,0 +1,15 @@
+$ node tools/prop-clearance.mjs 5241   (POST-FIX, exit 1)
+TREE (182.0,-160.0) 0.59m from lane centerline (w 2.6, need >=1.80) near (182.6,-160.0)
+PROP (85.0,-352.0) r 0.35 h inf center 0.84m onto lane (w 3.2, need >=1.55) near (85.7,-351.5)
+PROP-CLEARANCE: 2 violations (1 trees, 1 colliders) across 13 lanes / 364 trees
+
+# Both remaining are OUT OF SCOPE for the rng-tree clearance nudge:
+#  - TREE (182,-160): a hand-placed CH.TREES.fixed entry ([182,-160,1.05,false],
+#    the SPIT strip). The nudge deliberately SKIPS TREES.fixed so the main
+#    session can reposition it thoughtfully in src/data/chicago.js (task 088).
+#  - PROP (85,-352): a hand-placed infinite-height collider (r 0.35) whose base
+#    sits ON the w=3.2 trail (0.84m < 1.55). Not a tree — needs a data/structures
+#    hand fix, not the geometry nudge.
+#
+# The 7 rng-placed tree offenders from 088-propclear-before.txt (x~50 south main
+# trail x2, Bird Sanctuary north grove x5) were all cleared by the nudge.

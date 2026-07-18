@@ -36,7 +36,7 @@ import { FX } from '../fx.js';
 // ------------------------------ fixed coords -------------------------------
 const CART = { x: 51, z: 986 };        // cart centre (pre-probed walkable-clean)
 const PENNY = { x: 52, z: 990.5 };     // penny machine (pre-probed clean)
-const KEEPER = { x: 49.6, z: 986 };    // docent, west of the cart, facing east
+const KEEPER = { x: 50, z: 984.5 };    // docent, NW of the cart facing it — 088: was (49.6,986), 0.6 m DEAD IN FRONT of the west-facing 'COFFEE · SOUVENIRS' sign; every read of the sign was keeper-blocked (the 061/080 NPC-blocks-the-frame law)
 const BROWSE = { x: 53, z: 986 };      // shop interaction anchor (east of cart)
 const DESIGNS = ['the Bean', 'a lion', 'the clock tower', 'the plover'];
 const CRANK_DUR = 1.8;                  // seconds of ratchet + wiggle before the ding
@@ -218,7 +218,7 @@ onWorldReady(() => {
     // Ave; the cream backing panel behind it hides the mirrored back.
     const sign = new THREE.Mesh(new THREE.PlaneGeometry(0.86, 0.44),
       bmat(0xffffff, { map: signTex('COFFEE · SOUVENIRS'), side: THREE.FrontSide }));
-    sign.position.set(-0.77, 0.62, 0); sign.rotation.y = -Math.PI / 2;   // face −x (west)
+    sign.position.set(-0.775, 0.62, 0); sign.rotation.y = -Math.PI / 2;   // face −x (west); 15 mm proud of the −0.76 backing face (anti z-fight)
     cartGroup.add(sign);
     cartGroup.position.set(CART.x, 0, CART.z);
     root.add(cartGroup);

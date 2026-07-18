@@ -87,7 +87,7 @@ const SIGNS = [
   { name:'DEL CLOSE',                   lore:"the improv guru — 'yes, and'",      x:35,  z:-362, ry:1.4  },
   { name:'ANN SATHER',                  lore:'cinnamon rolls the size of a plate',x:207.5, z:-472, ry:1.6  },
   { name:'HARRY CARAY',                 lore:'Holy Cow!',                         x:26,  z:99,   ry:1.6  },
-  { name:'VIVIAN MAIER',                lore:'the nanny with a Rolleiflex',       x:85,  z:-352, ry:0.6  },
+  { name:'VIVIAN MAIER',                lore:'the nanny with a Rolleiflex',       x:79.5, z:-351, ry:0.6  },  // 088: was (85,-352) — the post stood IN the w3.2 bike lane at the spur junction (prop-clearance.mjs); 4 m west, same corner
   { name:'WAX TRAX! RECORDS',           lore:"Chicago's industrial-dance temple", x:209, z:-104, ry:-1.6, y0:0.42 },
   { name:'IRV KUPCINET',                lore:"'Kup's Column' ran 60 years",       x:95,  z:-418, ry:-1.6 },
 ];

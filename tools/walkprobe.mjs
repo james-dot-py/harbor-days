@@ -1141,9 +1141,12 @@ expect('wet sand at the waterline (239,-1019) walkable (wade)',walkable(239,-101
 expect('open lake east of the beach (243,-1019) NOT walkable',walkable(243,-1019),false);
 
 console.log('\n--- Task 072: beach sand slopes DOWN to the lake (dry inland, wet at the waterline) ---');
-console.log(`  montroseBeachH x=214:${CH.montroseBeachH(214,-1014).toFixed(2)}  x=232:${CH.montroseBeachH(232,-1014).toFixed(2)}  x=240:${CH.montroseBeachH(240,-1014).toFixed(2)}  (should trend 0 -> negative)`);
+console.log(`  montroseBeachH x=214:${CH.montroseBeachH(214,-1014).toFixed(2)}  x=237:${CH.montroseBeachH(237,-1014).toFixed(2)}  x=242:${CH.montroseBeachH(242,-1014).toFixed(2)}  (should trend 0 -> negative)`);
 expect('dry sand inland is ~grade (>-0.2)',CH.montroseBeachH(214,-1014)>-0.2,true);
-expect('sand is underwater at x240 (<-2.0)',CH.montroseBeachH(240,-1014)<-2.0,true);
+// 088 (issue 030): the dry sand must reach EAST of the LAND edge (montroseFx <= 237.5)
+// so the y0 lawn never caps the waterline — then dip under the lake inside the bounds.
+expect('sand still ~grade at the LAND edge x237.5 (>-0.2)',CH.montroseBeachH(237.5,-1014)>-0.2,true);
+expect('sand is underwater at x242 (<-2.0)',CH.montroseBeachH(242,-1014)<-2.0,true);
 expect('montroseBeachH null outside the sand (250,-1014)',CH.montroseBeachH(250,-1014),null);
 
 console.log('\n--- Task 072: beach house hall BLOCKED (solid), The Dock deck WALKABLE ---');
@@ -1430,6 +1433,26 @@ makeLS();
 const sv5=await import('../src/store.js?sv=wp5');
 expect('082 fresh player dibs',sv5.getSave().dibs,0);
 expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
+
+// ===== 088 PERMANENT GUARDS — spawned as gate categories so the standard
+// verify (step 1 = this file) mechanically runs them every time:
+//   path-layers.mjs    — path/decal y-ladder assertion (issue 028; pure Node)
+//   prop-clearance.mjs — tree/prop-vs-ribbon sweep (issue 029; spawns its OWN
+//                        vite + headless page, ~25 s — the cost of "tree-on-path
+//                        can never ship again")
+// Skip with WALKPROBE_FAST=1 only for tight inner-loop iteration; the final
+// gate run must include them.
+if(process.env.WALKPROBE_FAST!=='1'){
+  const {spawnSync}=await import('child_process');
+  for(const tool of['path-layers.mjs','prop-clearance.mjs']){
+    console.log(`\n--- 088 guard: ${tool} ---`);
+    const r=spawnSync(process.execPath,[new URL(tool,import.meta.url).pathname.replace(/^\/([A-Za-z]:)/,'$1')],{encoding:'utf8',timeout:180000});
+    const out=(r.stdout||'')+(r.stderr||'');
+    const tail=out.trim().split('\n').slice(-6).join('\n');
+    console.log(tail);
+    expect(`088 guard ${tool} exit 0`,r.status,0);
+  }
+}
 
 console.log(`\n==== ${pass} passed, ${fail} failed ====`);
 process.exit(fail?1:0);

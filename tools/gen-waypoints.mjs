@@ -183,6 +183,33 @@ add('redline-belmont', 'lakefront', 'lakefront', 26, 106, [
   { yaw: -1.42, pitch: 0.06, dist: 9 },    // angled toward the MONROE board (south)
 ]);
 
+/* ---- 088 VISUAL-TRUTH waypoints (issues 027-030): the loop never framed the
+   SHOP SIGNS close enough to read, never judged the bike/walk trail SEAM, and
+   never once looked EAST at the Montrose waterline (the 072-075 framings all
+   faced away — the lawn-strip-at-the-waterline bug shipped unseen). Framing
+   rule per the 080 mp-lions-f0 fix: subject visible and unoccluded or the
+   shot is invalid. ---- */
+// beach kiosk (economy-pilot.js KX/KZ = 100,-353; sign on the +z south apron):
+// f0 head-on close enough to READ the board; f1 oblique + f2 far pull-back are
+// the FLICKER checks (issue 027 was a sign/apron coplanar z-fight — the board
+// must be rock-solid from every angle and distance).
+// f0/f2 stand WEST of the sign axis with yaw aimed at a background point past
+// the kiosk — a dead-on yaw centers the mayor exactly on the board (047 law;
+// the first cut of f0/f2 eclipsed the text behind the player).
+add('shop-kiosk', 'lakefront', 'lakefront', 100, -347.5, [
+  { x: 97, z: -347.5, yaw: 2.98, pitch: 0.04, dist: 5 },   // near: board beside the mayor, legible
+  { yaw: 2.75, pitch: 0.05, dist: 7 },                     // oblique: stability off-axis
+  { x: 97, z: -345, yaw: 3.08, pitch: 0.05, dist: 12 },    // far: stability at distance, board clear of the player
+]);
+// the dual-trail SEAM (issue 028): bike asphalt + dashes | grass strip | lime-
+// stone walk, judged down-trail both ways + across. Stand mid-west-run (bike
+// x90; the exact stretch the owner walks arriving at the sanctuary).
+add('trail-seam', 'lakefront', 'lakefront', 90, -400, [
+  { yaw: 3.14, pitch: 0.03, dist: 12 },    // north down the seam
+  { yaw: 0,    pitch: 0.03, dist: 12 },    // south down the seam
+  { yaw: -2.55, pitch: 0.1, dist: 8 },     // across: both ribbons + the strip
+]);
+
 // MONTROSE approach (084 COMPRESSION): mt-arrival + mt-trail now read the new
 // curved BAY cove that replaced the blank golf-to-Montrose lawn (the golf is a
 // compact vignette; the whole Montrose block slid +436 in z). mt-gate is the
@@ -240,6 +267,28 @@ add('mt-dock', 'montrose', 'lakefront', 216, -1037, [
   { yaw: 2.85, pitch: 0.06, dist: 9 },     // NNE angle — the L bar counter + beachgoers + umbrella colors
   { yaw: 3.14, pitch: 0.15, dist: 12 },    // wider/higher — the deck + bar on the sand, beach context
 ]);
+
+// 088 MONTROSE SHORELINE ARC (issue 030): the waterline read the 072-075
+// framings never took (all faced away from the lake), + the harbor-mouth arc.
+// mt-shore-waterline: sand must run east through a short wet band INTO the
+// water — the shipped bug was a lawn-green strip capping the beach at the
+// exact waterline (MONTROSE_BEACH.slope.ref sat WEST of the LAND edge).
+add('mt-shore-waterline', 'montrose', 'lakefront', 228, -1000, [
+  { yaw: 1.35, pitch: 0.12, dist: 9 },     // EAST: sand -> wet band -> water, no green strip
+  { yaw: 0.35, pitch: 0.08, dist: 12 },    // SSE along the waterline curve
+  { yaw: -2.2, pitch: 0.1, dist: 12 },     // NW back over the dry sand: towels + The Dock/beach house landward
+]);
+// mt-shore-mouth: stand ON the rerouted trail bend at the mouth lawn; the
+// hook's stone arm + entrance light (MT_HARBOR_LIGHT) read across the water.
+{
+  const L = CH.MT_HARBOR_LIGHT.pos, sx = 176, sz = -672;
+  const yaw = yawTo(sx, sz, L[0], L[1]);
+  add('mt-shore-mouth', 'montrose', 'lakefront', sx, sz, [
+    { yaw, pitch: 0.08, dist: 11 },                          // NE at the hook arm + light across the mouth
+    { yaw: R(yaw - 0.31), pitch: 0.08, dist: 13 },           // wider east: mouth water + mole lake face
+    { yaw: R(yaw + 0.29), pitch: 0.12, dist: 9 },            // NNE closer: the basin entrance jamb
+  ]);
+}
 
 // CRICKET HILL (task 073): the map's FIRST walkable HILL, inland-west of the
 // harbor. Two hand-authored stands (elevated summit + lawn base). The summit
@@ -610,6 +659,22 @@ featW('wv-caray-statue', V.carayStatue.x, V.carayStatue.z, { stand: [-196, -550]
     { yaw: -1.57, pitch: 0.06, dist: 12 },
     { yaw: -1.2,  pitch: 0.1,  dist: 12 },
     { yaw: -1.95, pitch: 0.14, dist: 13 },
+  ]);
+}
+{ // 088 (issue 027): the SLUGGERS shop MENU BOARD close-read — sluggers-shop.js
+  // hangs it at building-local (FACE+0.11, 1.72, ZW-1.4) on the street face.
+  // Stand out on Clark along the sign's local +x normal; yaw skewed ~0.25 off
+  // dead-on so the mayor doesn't eclipse it (047 law; board top y2.13 clears
+  // the head anyway). f2 far oblique = the flicker check.
+  const SL = W.SLUGGERS_W, c = Math.cos(SL.th), s = Math.sin(SL.th);
+  const lx = 6.11, lz = 5.3 - 1.4;
+  const sxw = SL.cx + lx * c + lz * s, szw = SL.cz - lx * s + lz * c;        // sign world pos
+  const px = SL.cx + (lx + 4.6) * c + lz * s, pz = SL.cz - (lx + 4.6) * s + lz * c;
+  const yaw = yawTo(px, pz, sxw, szw);
+  add('shop-sluggers', 'wrigleyville', 'wrigleyville', R(px), R(pz), [
+    { yaw: R(yaw + 0.25), pitch: 0.0, dist: 4.5 },   // near head-on: menu lines legible
+    { yaw: R(yaw - 0.3), pitch: 0.02, dist: 6 },     // oblique from the south
+    { yaw: R(yaw + 0.2), pitch: 0.04, dist: 9 },     // far: stability at distance
   ]);
 }
 { // one representative CPD barricade line (Addison east, by the station)
@@ -1177,6 +1242,30 @@ addM('mp-lolla-crowd', [
   { x: 271, z: 960, yaw: -0.70, pitch: 0.10, dist: 7 },     // the swaying instanced field + totems + FOH booth + dance circle (SW)
   { x: 228, z: 905, yaw: 1.3, pitch: 0.04, dist: 5.2 },     // ON closed Monroe at the entry arch looking E down the festival street (camera clear of the z-901 garland string + truck awnings — both ate earlier framings)
   { x: 209.5, z: 905, yaw: -0.25, pitch: 0.04, dist: 5 },   // the LINEUP poster at the Monroe/Columbus corner (~25° right of axis — 047 law)
+]);
+
+// 088 (issue 027): the two MILLENNIUM shop signs, framed close enough to READ.
+// mp-museum-cart: cart (51,986), 'COFFEE · SOUVENIRS' plane faces WEST (−x) at
+// x≈50.23, sign is LOW (y 0.4-0.84) — stands sit BESIDE the axis so the mayor
+// never eclipses it (047 law); cameras land in the open Michigan road air.
+// 047 law, hard-learned here: the chase camera pins the MAYOR at frame centre
+// on the yaw axis — aiming yaw AT the sign hides it behind the player. Each
+// framing aims PAST the cart so the sign sits ~20-30° off-axis beside the
+// mayor. (The docent was also moved off the sign's west normal — 080 NPC law.)
+addM('mp-museum-cart', [
+  { x: 47.5, z: 984.2, yaw: 1.75, pitch: 0.06, dist: 4.5 },  // SW oblique: sign left of the mayor
+  { x: 47.5, z: 988.2, yaw: 1.15, pitch: 0.06, dist: 4.5 },  // NW oblique: sign right of the mayor
+  { x: 46, z: 983.5, yaw: 1.85, pitch: 0.06, dist: 7.5 },    // wider: cart + docent + penny machine + lion steps, sign off-axis
+]);
+// mp-lolla-merch: tent (214,926), plum MERCH banner faces EAST (+x) at x≈216.57
+// y2.12 (above the mayor's head — head-on is safe). The 088 sweep fixed its
+// backing box (dimensions were transposed: a 2.5 m blade poked through the face).
+// Same 047 law: yaws aim past the tent so the banner reads BESIDE the mayor
+// (the first cut aimed straight at it and the player's head covered the word).
+addM('mp-lolla-merch', [
+  { x: 221, z: 924.4, yaw: -0.55, pitch: 0.02, dist: 5 },    // from the SE, aimed NNW: MERCH left of the mayor
+  { x: 219, z: 921.5, yaw: -1.6, pitch: 0.02, dist: 5 },     // from the S, aimed W: banner right-of-frame
+  { x: 224, z: 926, yaw: -0.9, pitch: 0.05, dist: 8 },       // wider: tent left, festival context right
 ]);
 
 /* --------------------------- expectations ---------------------------- */

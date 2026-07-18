@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { renderer, scene, camera, amb, clamp, lerp, lerpAngle, hexRGB, pip, rng, rand, $, game, toon } from './core.js';
 import { skyGroup, clouds, buildSky } from './sky.js';
 import { buildCoast, water, waterN, coastQuery, profileTotal, tierAt, beachH, LAND } from './coast.js';
-import { buildPaths, pathSamples, pathSamples2, pathSamplesMain } from './paths.js';
-import { buildProps, colliders, walkRects, bobbers, drifter, dogTail, foam, fireflies } from './props.js';
+import { buildPaths, pathSamples, pathSamples2, pathSamplesMain, ribbonLanes } from './paths.js';
+import { buildProps, colliders, walkRects, bobbers, drifter, dogTail, foam, fireflies, TREE_SPOTS } from './props.js';
 import { buildStructures } from './structures.js';
 import { mayor, mparts, buildMayor, updateCharacter, updateChibiShadows } from './character.js';
 import { updateFogCull, fogCullStats } from './fogcull.js';
@@ -70,7 +70,10 @@ window.__hd={errs:errRing,perf:()=>({drawCalls:renderer.info.render.calls,fps:Ma
   fogcull:fogCullStats,   // {managed,hidden} — fog-distance culling introspection
   // debug-only scene access for tools/ (raycast attribution — census() names merged
   // meshes but can't localize a face; a ray can)
-  scene,camera,THREE};
+  scene,camera,THREE,
+  // 088: prop-vs-path clearance audit snapshot (tools/prop-clearance.mjs). JSON-safe:
+  // Infinity collider heights encode as h:-1. Trees are the FINAL nudged placements.
+  propAudit:()=>({trees:TREE_SPOTS.map(t=>[t[0],t[1],t[2]||1]),colliders:colliders.map(c=>({x:c.x,z:c.z,r:c.r,h:c.h===Infinity?-1:c.h})),lanes:ribbonLanes})};
 
 // ---- build the world (order matters: single shared rng, top-to-bottom) ----
 // timed (task 007): __hd.buildMs reports where world-build start-up cost goes.

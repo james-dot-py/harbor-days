@@ -325,9 +325,14 @@ export const DOG_BEACH = {
 // boundary but its terraces are EXCLUDED from the coast fold (coast.js) so no
 // concrete renders on the sand.
 export const MONTROSE_BEACH = {
-  bounds:{ x0:200, x1:240, z0:-1064, z1:-924 },   // sand footprint (walkable except the roped dune)
-  slope:{ ref:227, span:14, depth:-2.7 },          // dry (h~0) at x<=227, dips under the lake by x~241
-  mesh:{ cx:219, cz:-994, w:46, d:146, segW:36, segD:58 },   // sand render plane (frustum-culled) x196..242
+  bounds:{ x0:200, x1:242.5, z0:-1064, z1:-924 }, // sand footprint (walkable except the roped dune)
+  // 088 (issue 030): slope ref MUST sit EAST of the LAND edge (montroseFx <= 237.5)
+  // — with ref 227 the sand dipped below y0 from x~227.5 while the y0 LAND lawn
+  // ran to the coast line, so a lawn-green strip capped the beach at the exact
+  // waterline (the 041 grade-carpet-over-sunken-feature class, beach edition).
+  // Dry flat sand to x237.6, then a short wet slope under the lake by x~242.
+  slope:{ ref:237.6, span:5, depth:-2.7 },         // dry (h~0) at x<=237.6, dips under the lake by x~242
+  mesh:{ cx:220.5, cz:-994, w:49, d:146, segW:36, segD:58 },   // sand render plane (frustum-culled) x196..245
   sand:0xd9c087,   // task 075: warmed from near-white 0xe8d9b5 — the flat beach read as snow/concrete under the toon sun; a golden tan reads as warm Chicago sand (matches the dune mounds; lone frustum-culled Mesh, +0 draws, no rng)
 };
 // dune natural area — the roped, protected SE corner abutting the Point. Its
@@ -646,17 +651,42 @@ export const TRAIL_CONNECTOR=[[16,105],[34,108],[54,112],[70,116],[79,120]];
 export const TRAIL_MONTROSE=[
   [209,-562],[206,-580],[196,-598],[178,-608],[160,-616],[148,-626],
   [146,-638],[154,-648],[168,-658],[176,-672],
+  // 088 REROUTE (issue 030, owner "shoreline placement"): the shipped tail
+  // ([199,-924],[206,-978],[210,-1024]) ran the asphalt + dashes ACROSS the
+  // beach SAND east of the beach house. Real place: the Lakefront Trail passes
+  // INLAND (west) of the beach house. Bike stays x<=188 so the walk ribbon
+  // (+4 east, w 2.4) clears BEACH_HOUSE.footRect x0 194 by ~0.8 m, and the
+  // trail now reaches the map's north cap instead of dead-ending mid-sand.
+  [172,-699],[158,-764],[160,-829],[180,-876],[186,-914],[188,-960],[188,-1012],[186,-1058],
+];
+// 088 DETERMINISM BALLAST — the pre-088 TRAIL_MONTROSE. Its dual-ribbon samples
+// stay in pathSamples2 at the ORIGINAL build slot, byte-identical, so the tree
+// post-filter (props.js near2) + every local clearD consumer sees an unchanged
+// array; the REAL (rerouted) line above samples into pathSamplesMain (merged
+// after buildProps). The TRAIL_MAIN_GHOST084 law applies: NEVER delete/reshape.
+export const TRAIL_MONTROSE_GHOST088=[
+  [209,-562],[206,-580],[196,-598],[178,-608],[160,-616],[148,-626],
+  [146,-638],[154,-648],[168,-658],[176,-672],
   [172,-699],[158,-764],[160,-829],[180,-876],[199,-924],[206,-978],[210,-1024],
 ];
 // Dual-path styling. walkOff (paths.js) = bike/2 + gap + walk/2 = 4.0 m, so
 // the two ribbons run parallel with a ~1.2 m grass strip between them.
+// 088 STRICT Y-LADDER (issue 028, owner "dashed line floats / pavement drops
+// out"): every overlapping pair keeps >=0.006 separation (safe against 24-bit
+// depth quantization inside the ~100 m detail range), and MARKINGS sit above
+// their own asphalt but BELOW any crossing pedestrian pavement — so at a
+// crossing the limestone covers the dashes (paint yields to the crossing
+// surface, the real-world read) instead of the dashes floating on top of it.
+// Ladder: bike 0.050 < spur 0.056 < dash 0.062 < loop 0.068 < walk 0.074.
+// tools/path-layers.mjs asserts this mechanically in the verify gate — run it
+// after ANY change here or to the trail polylines.
 export const TRAIL_STYLE = {
-  bike:{ width:3.2, color:0x83878d, y:0.05 },     // asphalt bike path (mainCurve centerline)
-  walk:{ width:2.4, color:0xd9c9ac, y:0.062 },    // crushed-limestone walking path (walkCurve) — ABOVE bike/spur y so crossings (e.g. the spur branch at [74,-340]) layer cleanly instead of z-fighting
-  gap:1.2,                                         // grass strip between bike & walk
-  spur:{ width:2.6, color:0x83878d, y:0.05 },      // single asphalt connector (fits the cove gates)
-  loop:{ width:2.2, color:0xd9c9ac, y:0.06 },      // little garden loop (crushed limestone)
-  dash:{ spacing:2.8, w:0.14, len:1.1, color:0xe6c458, y:0.075 },  // yellow center dashes (bike + spur only)
+  bike:{ width:3.2, color:0x83878d, y:0.05 },      // asphalt bike path (mainCurve centerline)
+  walk:{ width:2.4, color:0xd9c9ac, y:0.074 },     // crushed-limestone walking path (walkCurve) — top of the ladder: covers dashes + asphalt at crossings
+  gap:1.2,                                          // grass strip between bike & walk
+  spur:{ width:2.6, color:0x83878d, y:0.056 },      // single asphalt connector — ABOVE main bike (they overlap at the [74,-340] branch; 0.05/0.05 was a coplanar z-fight)
+  loop:{ width:2.2, color:0xd9c9ac, y:0.068 },      // little garden loop (crushed limestone) — above the dashes it crosses at the TRAIL_MAIN tangent (111,120)
+  dash:{ spacing:2.8, w:0.14, len:1.1, color:0xe6c458, y:0.062 },  // yellow center dashes (bike + spur only) — above both asphalts, below both limestones
 };
 
 /* ------------------------------- ZONES ------------------------------- */
@@ -700,9 +730,12 @@ export const TREES = {
   minGapD2:60,
   scale:[1.0,1.8], pinkProb:0.16,
   fixed:[   // the SPIT's treed strip — flanking the spine trail (x~178-186) on BOTH sides, per the aerial
-    [172,-60,1.1,false],[178,-110,1.0,true],[182,-160,1.05,false],
+    [172,-60,1.1,false],[178,-110,1.0,true],[176,-160,1.05,false],
     [176,-210,1.0,false],[185,-260,0.95,true],[170,-300,1.1,false],
     [190,-90,0.9,false],[168,-140,1.0,true],
+    // ^ [182,-160] moved to [176,-160] below (088 issue 029: the spur spine runs
+    //   x~182.7 at z-160 — the tree stood 0.6 m off the path centerline, IN the
+    //   path; prop-clearance.mjs is the permanent guard)
     [174,-240,1.1,false],[189,-235,1.0,false],[175,-180,1.0,true],[191,-172,1.05,false],
     [177,-122,1.1,false],[193,-128,0.95,false],[179,-82,1.0,true],[195,-88,1.05,false],
     [172,-42,1.0,false],[181,-52,0.95,false],[170,-268,1.0,false],[188,-292,1.05,true],
@@ -1257,7 +1290,7 @@ export const MAP_LANDMARKS = [
 // dim a landmark until its zone is discovered (omit where no zone exists, e.g.
 // all of Montrose). North -> south.
 export const CITY_POI = [
-  { id:'montrose-beach', n:'montrose beach',    x:219, z:-994,   c:'#dfc48f' },                       // MONTROSE_BEACH.mesh centre (cx,cz)
+  { id:'montrose-beach', n:'montrose beach',    x:220.5, z:-994, c:'#dfc48f' },                       // MONTROSE_BEACH.mesh centre (cx,cz)
   { id:'magic-hedge',    n:'the magic hedge',   x:213, z:-894.5, c:'#3f8f4f' },                       // MONTROSE_POINT.hedge.pts midpoint
   { id:'cricket-hill',   n:'cricket hill',      x:112, z:-879,   c:'#77c268' },                       // CRICKET_HILL summit (cx,cz)
   { id:'the-hook',       n:'the hook',          x:239, z:-700,   c:'#8f6234' },                       // MTR_HOOK_TIP curl — on the mole

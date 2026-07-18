@@ -184,10 +184,12 @@ onWorldReady(player => {
   const fascia = new THREE.Mesh(new THREE.BoxGeometry(awW, 0.16, 0.05), cream); fascia.position.set(cx, feY, feZ + 0.02); add(fascia);
 
   // hand-painted menu board across the counter FRONT (sign law): a FrontSide
-  // canvas plane on the apron face — the solid apron behind it IS the backing,
-  // and it sits below the counter so the keeper's head reads clear above.
+  // canvas plane on the apron face — the solid apron behind it IS the backing
+  // (its front face is cz+0.885; the plane sits 15 mm proud at cz+0.9 so the two
+  // coplanar faces don't z-fight), and it sits below the counter so the keeper's
+  // head reads clear above.
   const signPlane = new THREE.Mesh(new THREE.PlaneGeometry(2.25, 0.6), bmat(0xffffff, { map: signTex('SNACKS · TOYS · KITES'), side: THREE.FrontSide }));
-  signPlane.position.set(cx, 0.6, cz + 0.885); add(signPlane);
+  signPlane.position.set(cx, 0.6, cz + 0.9); add(signPlane);
 
   // popcorn machine on the counter (warm amber glow = self-lit bmat)
   {

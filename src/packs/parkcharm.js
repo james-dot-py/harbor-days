@@ -58,7 +58,7 @@ const OCCUPIED=[
   [45,-150],  // hot-dog cart
   [50,-120],  // goose patrol lawn
   [100,112],[92,-333],[140,100],[38,-235],[125,-8],[60,-170],
-  [35,-362],[207.5,-472],[26,99],[85,-352],[95,-418],        // honorary + entrance signs (Ann Sather now trail-side by the fieldhouse)
+  [35,-362],[207.5,-472],[26,99],[79.5,-351],[95,-418],      // honorary + entrance signs (Ann Sather now trail-side by the fieldhouse; Vivian Maier moved off the bike lane, 088)
   [205,-105], // peninsula pier sign (DECKS x200-216, z-120..-90)
   [193,-470],[196,-476],                                      // chess tables (below)
 ];

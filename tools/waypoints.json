@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-17T21:07:54.368Z",
- "count": 128,
+ "generated": "2026-07-18T04:24:45.577Z",
+ "count": 135,
  "waypoints": [
   {
    "id": "spawn",
@@ -349,6 +349,60 @@
    "expectation": "The Belmont Red Line stop cluster and its DESTINATION PICKER (task 051): a red-header 'RED LINE · BELMONT · lakefront stop' identity pylon (white transit disc) flanked by two lollipop DEPARTURE BOARDS, each its own boarding point you walk up to — '→ ADDISON / Wrigley Field / Howard-bound' and '→ MONROE / Millennium Park / 95th / Dan Ryan-bound'. Text crisp and UPRIGHT (never mirrored), posts end below the panels (no bisected text), and the read stays uncluttered beside the existing blue Belmont Harbor park sign."
   },
   {
+   "id": "shop-kiosk",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 100,
+   "z": -347.5,
+   "framings": [
+    {
+     "x": 97,
+     "z": -347.5,
+     "yaw": 2.98,
+     "pitch": 0.04,
+     "dist": 5
+    },
+    {
+     "yaw": 2.75,
+     "pitch": 0.05,
+     "dist": 7
+    },
+    {
+     "x": 97,
+     "z": -345,
+     "yaw": 3.08,
+     "pitch": 0.05,
+     "dist": 12
+    }
+   ],
+   "expectation": "088 SIGN TRUTH (issue 027): the beach kiosk head-on — striped peach/cream scalloped awning, wooden counter with the popcorn machine + tennis-ball pyramid, keeper NPC behind, and the cream 'SNACKS · TOYS · KITES' menu board on the counter apron. The board must be LEGIBLE in f0 and ROCK-SOLID in every framing — no shimmer, no patchy/missing text, no flicker artifacts at the oblique (f1) or far (f2) reads (the shipped bug was the sign plane exactly coplanar with its apron backing)."
+  },
+  {
+   "id": "trail-seam",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 90,
+   "z": -400,
+   "framings": [
+    {
+     "yaw": 3.14,
+     "pitch": 0.03,
+     "dist": 12
+    },
+    {
+     "yaw": 0,
+     "pitch": 0.03,
+     "dist": 12
+    },
+    {
+     "yaw": -2.55,
+     "pitch": 0.1,
+     "dist": 8
+    }
+   ],
+   "expectation": "088 TRAIL SEAM (issue 028): the dual Lakefront Trail — grey asphalt bike ribbon with yellow center dashes, a green grass strip, and the parallel pale limestone WALKING ribbon. BOTH pavements solid at every angle (no dropout, no shimmer), the dashes sit ON the asphalt only (never floating over grass or the walking path), trailside furniture (bench/lamp/sign) stands BESIDE the ribbons, and no tree trunk stands in either ribbon."
+  },
+  {
    "id": "mt-arrival",
    "area": "montrose",
    "cell": "lakefront",
@@ -572,6 +626,56 @@
     }
    ],
    "expectation": "THE DOCK AT MONTROSE BEACH (task 072): the seasonal open-air beach BAR at the beach's north end — a raised weathered-wood deck with an L-shaped bar counter under a teal canvas awning, colorful beach umbrellas, warm string-light glow, and a legible 'THE DOCK' canvas sign facing the sand. A few beachgoer NPCs mill around it. The bar-likeness register (canvas signage + umbrellas, no interior needed); reads endearing and unmistakably a beach bar on the sand, the sign readable and not mirrored, NOT a generic box, NOT floating."
+  },
+  {
+   "id": "mt-shore-waterline",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 228,
+   "z": -1000,
+   "framings": [
+    {
+     "yaw": 1.35,
+     "pitch": 0.12,
+     "dist": 9
+    },
+    {
+     "yaw": 0.35,
+     "pitch": 0.08,
+     "dist": 12
+    },
+    {
+     "yaw": -2.2,
+     "pitch": 0.1,
+     "dist": 12
+    }
+   ],
+   "expectation": "088 SHORELINE TRUTH (issue 030): Montrose Beach meets the LAKE — dry golden sand runs east, dips through a short wet-sand band, and goes straight INTO the water. NO lawn-green strip between the sand and the waterline (the shipped bug), no hard wall, no gap. f1 reads the waterline curving away south; f2 looks back landward across dry sand dotted with towels/umbrellas (none on any pavement) toward The Dock / beach house."
+  },
+  {
+   "id": "mt-shore-mouth",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 176,
+   "z": -672,
+   "framings": [
+    {
+     "yaw": 1.91,
+     "pitch": 0.08,
+     "dist": 11
+    },
+    {
+     "yaw": 1.6,
+     "pitch": 0.08,
+     "dist": 13
+    },
+    {
+     "yaw": 2.2,
+     "pitch": 0.12,
+     "dist": 9
+    }
+   ],
+   "expectation": "088 SHORELINE TRUTH (issue 030): from the trail bend on the harbor-mouth lawn, the arc across the mouth water — the hook mole's low stone arm closes the view NE with the red-capped white entrance light on its tip, basin masts read beyond/behind the mole, bay-cove lawn + revetment in the foreground. The shoreline pieces JOIN (no gaps, no floating slabs, no doubled walls); reads as one continuous coast: bay -> mouth -> hook."
   },
   {
    "id": "mt-crickethill-summit",
@@ -1878,6 +1982,31 @@
     }
    ],
    "expectation": "The street approach to Sluggers on Clark: the low 2-storey bar with a visible exterior stair climbing its street face to the rooftop batting cage above, and a 'BATTING CAGES UPSTAIRS ↑' sign at the base. The cage is a destination you walk up to, not furniture on the sidewalk."
+  },
+  {
+   "id": "shop-sluggers",
+   "area": "wrigleyville",
+   "cell": "wrigleyville",
+   "x": -323.04,
+   "z": -479.13,
+   "framings": [
+    {
+     "yaw": -1.05,
+     "pitch": 0,
+     "dist": 4.5
+    },
+    {
+     "yaw": -1.6,
+     "pitch": 0.02,
+     "dist": 6
+    },
+    {
+     "yaw": -1.1,
+     "pitch": 0.04,
+     "dist": 9
+    }
+   ],
+   "expectation": "088 SIGN TRUTH (issue 027): the SLUGGERS storefront menu board beside the serving window on the Clark face — a cream board with readable menu lines, STABLE (no flicker/shimmer) head-on, oblique, and far; the serving window with keeper, counter ledge with the deco Chicago dog + Old Style can stack, and the striped awning above all read; sign not mirrored, not bisected by any post."
   },
   {
    "id": "wv-barricade-addison-e",
@@ -3347,6 +3476,68 @@
     }
    ],
    "expectation": "A field of chibi festivalgoers in mixed colors swaying and bouncing in waves toward the stage — distinct heads over chunky bodies (people, not jellybeans), totems poking above the crowd (a hand-made yellow star, a foam EL car, a disco ball — and an inflatable alligator drifting over hands), the FOH sound booth and dance circle nearby; f1 stands under the branded entry arch on closed Monroe with the food-truck row beyond; f2 reads the all-Chicago pun LINEUP poster (MALÖRT FACE, DEEP DISH MODE, THE LAKE EFFECTS) at the Monroe/Columbus corner."
+  },
+  {
+   "id": "mp-museum-cart",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 47.5,
+   "z": 984.2,
+   "framings": [
+    {
+     "x": 47.5,
+     "z": 984.2,
+     "yaw": 1.75,
+     "pitch": 0.06,
+     "dist": 4.5
+    },
+    {
+     "x": 47.5,
+     "z": 988.2,
+     "yaw": 1.15,
+     "pitch": 0.06,
+     "dist": 4.5
+    },
+    {
+     "x": 46,
+     "z": 983.5,
+     "yaw": 1.85,
+     "pitch": 0.06,
+     "dist": 7.5
+    }
+   ],
+   "expectation": "088 SIGN TRUTH (issue 027): the museum coffee/souvenir CART on the Michigan spine by the lion steps — the cream 'COFFEE · SOUVENIRS' sign plane faces west, LEGIBLE and stable (no flicker, no dark blade through it), the docent NPC beside the cart, penny machine nearby, Art Institute steps/lions context behind. The sign must be visible beside (not eclipsed by) the mayor in f0/f1."
+  },
+  {
+   "id": "mp-lolla-merch",
+   "area": "millennium",
+   "cell": "millennium",
+   "x": 221,
+   "z": 924.4,
+   "framings": [
+    {
+     "x": 221,
+     "z": 924.4,
+     "yaw": -0.55,
+     "pitch": 0.02,
+     "dist": 5
+    },
+    {
+     "x": 219,
+     "z": 921.5,
+     "yaw": -1.6,
+     "pitch": 0.02,
+     "dist": 5
+    },
+    {
+     "x": 224,
+     "z": 926,
+     "yaw": -0.9,
+     "pitch": 0.05,
+     "dist": 8
+    }
+   ],
+   "expectation": "088 SIGN TRUTH (issue 027): the Lollapalooza MERCH tent on Butler Field — the plum 'MERCH' banner hangs clear of the canopy front facing east, LEGIBLE and stable, with NO dark backing box poking through or past the banner face (the shipped bug: transposed backing dimensions left a 2.5 m blade through the sign). Hanging tees + wood counter under the tent, festival-staff keeper behind, crowd/festival context around."
   }
  ]
 }

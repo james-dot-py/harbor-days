@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { scene, rng, rand, toon, bmat, curveMat, gmap, pointsMat, pip, WATER_Y } from './core.js';
 import { COAST_SEGS, MTR_SEGS, tierProfile, profileTotal, beachH, LAND, LAND_GHOST084, coastQuery } from './coast.js';
-import { pathSamples, pathSamples2, mainCurve } from './paths.js';
+import { pathSamples, pathSamples2, mainCurve, ribbonLanes } from './paths.js';
 import * as CH from './data/chicago.js';
 
 // --------------------------- world props ------------------------------
@@ -16,6 +16,10 @@ export let dogTail=null;
 export const foam={pts:null,ph:[],base:[]};
 export const fireflies={n:70,base:[],ph:[]};
 const treeSpots=[];
+// 088: SNAPSHOT of the FINAL tree placements (post-nudge), for the prop-vs-path
+// clearance audit exposed via window.__hd.propAudit(). Filled once, after the
+// clearance nudge, immediately before the tree-consumption loop.
+export const TREE_SPOTS=[];
 
 // LOCAL deterministic rng (mulberry32) for per-tree cosmetic randomness ONLY.
 // Never touches the shared world rng() — seed it per tree so tree placement
@@ -179,6 +183,43 @@ export function buildProps(){
         }
       }
     }
+
+    // 088 CLEARANCE NUDGE — "trees in the middle of pathways" (owner). Pure
+    // geometry, ZERO rng: runs AFTER all rng consumption so world scatter stays
+    // byte-identical (per-tree color/scale are index-coupled — we MOVE x,z only,
+    // never add/remove/reorder). For each rng-placed spot, up to 4 refinement
+    // passes push it clear of the nearest REAL ribbon (ribbonLanes) by w/2+0.75 m
+    // (nudge target 0.6+0.15, comfortably past the audit's w/2+0.5). The SPIT's
+    // hand-placed CH.TREES.fixed trees are the MAIN SESSION's to reposition in
+    // data — skipped here so the audit still surfaces them.
+    {
+      const fixedSet=new Set(T.fixed);
+      const seg=(px,pz,ax,az,bx,bz)=>{const dx=bx-ax,dz=bz-az,L=dx*dx+dz*dz;let u=L?((px-ax)*dx+(pz-az)*dz)/L:0;u=u<0?0:u>1?1:u;const cx=ax+u*dx,cz=az+u*dz;return{d:Math.hypot(px-cx,pz-cz),cx,cz,dx,dz};};
+      // nearest ribbon by smallest clearance MARGIN (d − required); required uses
+      // the deliberately-larger 0.6 so nudged trees pass the 0.5 audit with room.
+      const nearest=(px,pz)=>{let b=null;for(const lane of ribbonLanes){const req=lane.w/2+0.6,pts=lane.pts;for(let i=0;i<pts.length-1;i++){const r=seg(px,pz,pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1]);if(!b||r.d-req<b.d-b.req){b=r;b.req=req;b.w=lane.w;}}}return b;};
+      for(const spot of treeSpots){
+        if(fixedSet.has(spot))continue;                 // hand-placed data tree — main session moves it
+        for(let it=0;it<4;it++){
+          const b=nearest(spot[0],spot[1]);
+          if(!b||b.d>=b.req)break;                       // already clear of every ribbon
+          const target=b.req+0.15;
+          let nx=spot[0]-b.cx,nz=spot[1]-b.cz,L=Math.hypot(nx,nz),moved=false;
+          if(L<0.02){                                    // sitting on the centerline — use the segment perpendicular
+            const sl=Math.hypot(b.dx,b.dz)||1,px=-b.dz/sl,pz=b.dx/sl;
+            for(const s of[1,-1]){const x=b.cx+px*s*target,z=b.cz+pz*s*target;if(pip(x,z,LAND)){spot[0]=x;spot[1]=z;moved=true;break;}}
+          }else{                                         // push straight away from the nearest ribbon point
+            nx/=L;nz/=L;
+            const x1=b.cx+nx*target,z1=b.cz+nz*target;
+            if(pip(x1,z1,LAND)){spot[0]=x1;spot[1]=z1;moved=true;}
+            else{const x2=b.cx-nx*target,z2=b.cz-nz*target;if(pip(x2,z2,LAND)){spot[0]=x2;spot[1]=z2;moved=true;}}
+          }
+          if(!moved)break;                               // both sides leave land — leave it (audit flags for a hand fix)
+        }
+      }
+    }
+    // 088: snapshot the FINAL (nudged) tree placements for the clearance audit.
+    TREE_SPOTS.length=0;for(const t of treeSpots)TREE_SPOTS.push(t.slice());
 
     const n=treeSpots.length,M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3(),Eu=new THREE.Euler();
 
@@ -602,12 +643,21 @@ export function buildProps(){
     {
       const rg=MBL.region,dk=CH.THE_DOCK.deckRect;
       const onDeck=(x,z)=>x>=dk.x0-1&&x<=dk.x1+1&&z>=dk.z0-1&&z<=dk.z1+1;
+      // 088 (issue 030): towels kept OFF the trail ribbons — the dual Lakefront
+      // Trail crosses the towel region (bike x~206-210, walk +4 east), and towels
+      // landed ON the limestone walking path (088-mt-beach shot). Prefilter the
+      // REAL ribbon centerlines (ribbonLanes) to the region bbox once; reject any
+      // towel within w/2+1.3 m. Pure geometry on the LOCAL mr stream — the shared
+      // world rng never sees this block.
+      const laneNear=[];
+      for(const L of ribbonLanes){const need=(L.w/2+1.3)**2;for(const p of L.pts)if(p[0]>rg.xr[0]-4&&p[0]<rg.xr[1]+4&&p[1]>rg.zr[0]-4&&p[1]<rg.zr[1]+4)laneNear.push([p[0],p[1],need]);}
+      const onLane=(x,z)=>{for(const p of laneNear){const dx=x-p[0],dz=z-p[1];if(dx*dx+dz*dz<p[2])return true}return false};
       let tries=0;
       while(mspots.length<MBL.towels&&tries++<600){
         const x=rg.xr[0]+mr()*(rg.xr[1]-rg.xr[0]),z=rg.zr[0]+mr()*(rg.zr[1]-rg.zr[0]);
         const h=CH.montroseBeachH(x,z);
         if(h===null||h<=-0.5)continue;                   // wet/underwater sand — skip
-        if(CH.beachCarved(x,z)||onDeck(x,z))continue;
+        if(CH.beachCarved(x,z)||onDeck(x,z)||onLane(x,z))continue;
         mspots.push({x,z,y:h+0.05,rot:mr()*6.283});
       }
     }
