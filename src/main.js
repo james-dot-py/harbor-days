@@ -11,10 +11,11 @@ import { FX, DUST, PASTELS, fw, rockets, scheduled, boomLights, setType, updateF
 import { initAudio, audioDbg, audioCtx, installAudioResumeNet, sStep, sChime, sPop, updateAmbience } from './audio.js';
 import { cam, keys, joy, jump, initInput, updateCam } from './input.js';
 import { initOnboarding, updateOnboarding } from './onboard.js';
+import { initNaming, updateNaming } from './naming.js';
 import { initSettings } from './settings.js';
 import { mmInit, mmDraw, initMinimapToggle } from './minimap.js';
 import * as CH from './data/chicago.js';
-import { worldReady, runUpdates, state } from './framework.js';
+import { worldReady, runUpdates, state, setIdleGroundProbe } from './framework.js';
 import { beginCellCapture, endCellCapture, mergeCellStatic, getCell, cellWalk, cellSurf, cellClamp, cellKind } from './cells.js';
 import './packs/index.js';   // content packs (side-effect); loaded before world build
 
@@ -190,6 +191,7 @@ worldReady(player);
 window.__hd.player=player;   // debug/tools only: live player handle (act.mjs E2E reads coords / teleports within a cell)
 window.__hd.input={joy,cam}; // debug/tools only: steering-bot access (062 hold-forward crossing assertions)
 window.__hd.setTrap=r=>{TRAP_TEST=r||null;}; // debug/tools only: inject a synthetic non-walk block to verify the anti-trap escape (issue 025)
+setIdleGroundProbe((x,z)=>({walk:walkable(x,z),y:surfaceY(x,z)}));   // task 087: let the idle-charm sit only land on safe flat ground (shared engine walk data)
 window.__hd.buildMs={build:Math.round(_tm0-_tb0),merge:Math.round(_tm1-_tm0),packs:Math.round(performance.now()-_tp0)};
 console.log('[perf] world build '+window.__hd.buildMs.build+'ms · mergeCellStatic '+window.__hd.buildMs.merge+'ms · packs '+window.__hd.buildMs.packs+'ms');
 
@@ -470,6 +472,7 @@ function frame(now){
   updateChibiShadows();   // after runUpdates: rigs have moved; one InstancedMesh re-stamp
   updateFogCull(dt);      // hide fully-fogged meshes (pixel-neutral draw-call cut)
   updateOnboarding(dt);   // touch coach marks — after runUpdates so state.distanceWalked/interactionsUsed are current
+  updateNaming(dt);       // task 087: name-your-mayor card, once, after the coach marks
 
   if(DBG.get('dbg')==='1'&&performance.now()>dbgHud.holdT){const h=$('hint');h.style.display='block';h.classList.remove('hide');
     const s=`x=${player.x.toFixed(1)} z=${player.z.toFixed(1)} y=${player.y.toFixed(2)} mag=${mag.toFixed(2)} mvx=${mvx.toFixed(2)} wadeT=${jsk.wadeT.toFixed(2)} on=${jsk.on?1:0} walk=${walkable(player.x,player.z)?1:0} iw07=${isWater(player.x+mvx*0.7,player.z+mvz*0.7)?1:0} walk07=${walkable(player.x+mvx*0.7,player.z+mvz*0.7)?1:0}`;
@@ -502,6 +505,7 @@ function runStart(){
   $('btnKofi').style.display='flex';   // ♥ Ko-fi support button, beside "?"
   $('btnSettings').style.display='flex';   // ⚙ settings card (task 085), beside "?" / ♥
   initOnboarding();    // touch only: ghost thumbs teach walk / look / interact (task 077)
+  initNaming();        // task 087: arm the name-your-mayor card (shows after the coach marks)
 }
 
 // ---- "?" controls card: always-discoverable version of the hint bar ----

@@ -105,6 +105,10 @@ function retireAll() {
   setFlag(SEEN_KEY, '1');
 }
 
+// onboardingActive() — true while the touch coach marks are still teaching. The
+// naming card (task 087) waits this out so the two never stack on screen.
+export function onboardingActive() { return on; }
+
 // updateOnboarding(dt) : called every frame from main.js's loop (after the
 // input is sampled, so a gesture is dismissed on the same frame it happens).
 export function updateOnboarding(dt) {

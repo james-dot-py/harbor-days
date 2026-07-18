@@ -132,6 +132,7 @@ onWorldReady((player) => {
   // --------------------------------- per frame --------------------------------
   let labelAcc = 0;
   registerUpdate((dt, t, pl) => {
+    state.idleBusy = sess.active;   // 087: no idle stretch/sit while a flight owns the mayor + session cam
     // 080: the prompt says whose kite flies (throttled — no per-frame bag reads)
     labelAcc -= dt;
     if(labelAcc <= 0){ labelAcc = 1.2; if(!sess.active) flyInter.setLabel(bag.has('kite') ? 'fly YOUR kite' : 'fly a kite'); }

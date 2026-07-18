@@ -576,3 +576,17 @@ cut becomes a revert task.
   board first with a tiny train glyph, rides quiet through the tunnel, and
   greets you on the far platform already pointing at the kettle. It points; it
   never drags. — the breadcrumb chevron — task 086
+
+- THE NEIGHBORS LEARN YOUR NAME. Once, right after you start, a little cream
+  card asks "what should the neighbors call ya?" — and then it holds it close.
+  Every fourth "ope" or so, someone greets you by it. The journal signs its
+  title page "kept by the honorable {you}". A favor-giver thanks you by name.
+  And when the ump tosses you at Wrigley, the whole park hears "{YOU}, OUT!"
+  Said once at the right moment, never overused. — name your mayor — task 087
+
+- THE MAYOR BREATHES WHEN YOU WALK AWAY. Set the phone down and after twenty
+  seconds the mayor stretches, yawns, and squints up at the sky; after a minute,
+  on a nice flat patch, plops right down to take a load off — and a butterfly or
+  a sparrow drifts over to keep company. Touch anything and they pop back up,
+  instantly, no fight for control. The world reads alive even when you left to
+  make coffee. — idle charm — task 087

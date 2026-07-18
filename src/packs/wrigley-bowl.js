@@ -20,7 +20,7 @@
 import * as THREE from 'three';
 import { toon, bmat, lerpAngle } from '../core.js';
 import { onWorldReady, registerUpdate, addInteraction, makeNPC,
-         toast, journalSection, state, screenFx, holdItem, getAudioCtx, wallet } from '../framework.js';
+         toast, journalSection, state, screenFx, holdItem, getAudioCtx, wallet, mayorLabel } from '../framework.js';
 import { setActiveCell, activeCell } from '../cells.js';
 import { camCtl } from '../main.js';
 import { cam } from '../input.js';
@@ -151,7 +151,8 @@ function exitBowl(p, ejected) {
     { at: 1.45, fn: () => {
       transiting = false;
       if (ejected) {
-        toast('EJECTED', (state.ejections || 0) >= 3
+        // the ump's call, by name — comedy (task 087): "{NAME}, OUT!"
+        toast(mayorLabel().toUpperCase() + ', OUT!', (state.ejections || 0) >= 3
           ? 'banned? never. persistent? yes.'
           : "no fans on the field — box office is right there");
         // comedy pays — the biggest single payout in the park (task 079)

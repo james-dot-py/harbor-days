@@ -24,7 +24,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { renderer, scene, camera, amb, sun, toon, curveMat, clamp, lerp, lerpAngle, $, game } from './core.js';
-import { cam, keys, joy } from './input.js';
+import { cam, keys, joy, jump } from './input.js';
 import { mayor, mparts, createChibi, bakeChibiRig } from './character.js';
 import { fw } from './fx.js';
 import { getAudioCtx, setAmbienceGrade } from './audio.js';
@@ -42,6 +42,24 @@ const _v=new THREE.Vector3();            // cached scratch vector (no per-frame 
 // prefers-reduced-motion query or the player's explicit toggle. A pack that
 // animates sway/bob/flash should skip or soften it when this is true.
 export const prefersCalm=()=>game.calm;
+
+// ---------------------- the mayor's NAME (task 087) --------------------
+// Stored through the ONE guarded door (store.js flags view). '' = unset; the
+// naming card (src/naming.js) writes it once at first start. mayorName() is the
+// RAW chosen name (empty until they pick one) — the incidental spots (bump
+// lines, favor thanks) only personalize when it's non-empty, so an
+// enter-through player never hears a robotic "ope, Mayor". mayorLabel() falls
+// back to 'Mayor' for the DELIBERATE signage (journal signature, the Wrigley
+// ejection) where a name always reads right.
+const NAME_KEY='ope.name.v1';
+export function mayorName(){ return getFlag(NAME_KEY)||''; }
+export function mayorLabel(){ return mayorName()||'Mayor'; }
+// sanitizeName — letters/spaces/apostrophes only, collapsed whitespace, ≤12.
+export function sanitizeName(raw){
+  return String(raw||'').replace(/[^A-Za-z '’]/g,'').replace(/\s+/g,' ').trim().slice(0,12);
+}
+// setMayorName(raw) — sanitize + persist; '' clears it (enter-through default).
+export function setMayorName(raw){ const c=sanitizeName(raw); setFlag(NAME_KEY,c); return c; }
 
 // ------------------------------ session state --------------------------
 // state — shared session-only bag (flags/counts/bests). Packs add their own
@@ -269,6 +287,28 @@ const BUMP_LINES=[
   "say hi to your mother for me","pop's in the cooler, help yourself",
   "jeez, it's gorgeous out","this? this is nothin'. you shoulda seen '11",
 ];
+// Name-flavored bump lines (task 087): a ROTATING MINORITY of collide "ope"s
+// greet the mayor by name — ~1 in 4, and ONLY once they've chosen one — so
+// being known lands as a warm surprise, never a robotic tic. {name} is filled
+// at pick time. Math.random throughout (NEVER the world rng).
+const NAME_BUMP_LINES=[
+  "ope — my fault, {name}",
+  "oh hey {name}, didn't see ya",
+  "lookin' sharp today, {name}",
+  "how ya been, {name}?",
+  "{name}! say hi to your mother for me",
+  "watch the elbows there, {name}",
+  "hot enough for ya, {name}?",
+  "there's our {name}",
+];
+// pickBumpLine — the shared line chooser both makeNPC and registerBumpable use.
+// ~1 in 4 (and only with a chosen name) it swaps in a name greeting.
+function pickBumpLine(lines){
+  const nm=mayorName();
+  if(nm&&Math.random()<0.25)
+    return NAME_BUMP_LINES[(Math.random()*NAME_BUMP_LINES.length)|0].replace('{name}',nm);
+  return lines[(Math.random()*lines.length)|0];
+}
 // Distance culling for framework NPCs. Fog hides everything past ~210m but the
 // meshes are still DRAWN — each chibi is ~20 meshes (+ held props), so far NPCs
 // on long sightlines blow the draw-call budget invisibly. Hide the whole group
@@ -354,7 +394,7 @@ function updateNPC(npc,dt,t,player){
   else g.rotation.z=0;
   // bump line
   const bx=player.x-g.position.x,bz=player.z-g.position.z,bd2=bx*bx+bz*bz;
-  if(npc._armed&&bd2<1.21){npc.say(npc.lines[(Math.random()*npc.lines.length)|0]);npc._armed=false;}
+  if(npc._armed&&bd2<1.21){npc.say(pickBumpLine(npc.lines));npc._armed=false;}
   else if(!npc._armed&&bd2>6.25)npc._armed=true;
   // speech bubble projection (head world pos -> screen)
   if(npc._bubbleT>0){
@@ -446,7 +486,7 @@ function updateBumpables(dt,player){
       else if(d2<NPC_CULL_SHOW2)b.group.visible=true;
     }
     if(near){ near.armed=false;_bumpSpeaker=near;_bumpT=3;
-      bub.textContent=near.lines[(Math.random()*near.lines.length)|0]; }
+      bub.textContent=pickBumpLine(near.lines); }
   }
   // project the live bubble to the speaker's head anchor every frame
   if(_bumpT>0&&_bumpSpeaker){
@@ -557,7 +597,10 @@ export function journalSection(id,title,renderFn){
   if(ex){ex.title=title;ex.render=renderFn;}else _sections.push({id,title,render:renderFn});
 }
 function renderJournal(){
-  elJournalBody.innerHTML=_sections.map(s=>{
+  // the title page signs itself with the mayor's name (task 087) — the name is
+  // sanitized to letters/spaces/apostrophes at entry, so it is HTML-safe here.
+  const sign=`<div class="jsign">kept by the honorable ${mayorLabel()}</div>`;
+  elJournalBody.innerHTML=sign+_sections.map(s=>{
     let html='';try{html=s.render();}catch(e){html='<i>…</i>';console.warn('[framework] journalSection render error',e);}
     if(!html)return '';   // a section with nothing to say hides its HEADER too — this is
                           // what lets a section register EAGERLY (holding a fixed slot in
@@ -602,11 +645,11 @@ export const screenFx={
 // (built-in demo/cozy feature — exercises interactions + registry + camera)
 const SIT_LIFT=0.34;
 let _sit=null;
-function sitOnBench(b,player){
+function sitOnBench(b,player,quiet){
   _sit={x:b.x,z:b.z,y:SIT_LIFT+(b.y||0),ry:b.ry};   // b.y: base height for elevated seats (decks)
   player.vx=player.vz=0;player.x=b.x;player.z=b.z;
   hidePrompt();
-  toast('taking a load off','settle in — move to stand');
+  if(!quiet)toast('taking a load off','settle in — move to stand');   // idle auto-sit is quiet (task 087)
 }
 function movementPressed(){
   return keys.has('w')||keys.has('a')||keys.has('s')||keys.has('d')||
@@ -621,6 +664,156 @@ function updateSitting(dt,player){
   mparts.armL.rotation.x=-0.18;mparts.armR.rotation.x=-0.18;
   mparts.body.rotation.x=-0.05;
   cam.yaw+=0.12*dt;cam.freeT=1;
+}
+
+// ------------------------------ idle charm -----------------------------
+// (task 087) When the player steps away, the world stays alive: after ~20 s of
+// NO input the mayor stretches / yawns / checks the sky (a tiny state machine on
+// the EXISTING rig — arm/leg/body rotation.x + head rotation, everything else
+// restored by updateCharacter and the head reset here; NEVER manual shoe/hand
+// animation, Bug 2 rules), and a bit of ambient life (a butterfly or a sparrow)
+// drifts closer. After ~60 s, on safe FLAT ground, the mayor sits right down
+// (reusing the sit warp). ANY input stands up instantly and never fights
+// control. No idle during rides / activities / chases (gated on the ride flags
+// + a shared state.idleBusy latch a session activity may set). Uses LOCAL time
+// (game.tNow) + Math.random only — never the world rng (determinism untouched).
+// Idle is DISABLED under ?play=1 (all tooling / baseline / walkthrough shots —
+// headless pages run far more game time than waitMs, so an un-gated idle would
+// pose or seat the mayor in EVERY waypoint shot). Real players (who click start,
+// no ?play) always get it. Debug overrides for capturing the sequence:
+//   ?idle=stretch — force on, stretch fast, never sit (the natural cycle)
+//   ?idle=yawn    — force on, HOLD the peak yawn pose (a deterministic capture)
+//   ?idle=sit     — force on, sit fast (~4 s)
+//   ?idle=fast    — force on, fast timers (stretch ~2 s, sit ~8 s)
+//   ?idle=1       — force on with the real 20 s / 60 s timers (parity)
+//   ?idle=0       — force off
+const _IDBG=new URLSearchParams(location.search);
+const _idleParam=_IDBG.get('idle');
+const IDLE_ENABLED=_idleParam==='0'?false:(_IDBG.get('play')==='1'?!!_idleParam:true);
+const IDLE_HOLD_YAWN=_idleParam==='yawn';
+const _idleFast=_idleParam==='fast'||_idleParam==='stretch'||_idleParam==='yawn'||_idleParam==='sit';
+const IDLE_STRETCH_AT=_idleFast?2:20;
+const IDLE_SIT_AT=_idleParam==='sit'?4:((_idleParam==='stretch'||_idleParam==='yawn')?1e9:(_idleFast?8:60));
+const ESC4=[[0.7,0],[-0.7,0],[0,0.7],[0,-0.7]];
+let _idleT=0,_idlePhase=0,_idleSit=false,_idleLookPx=0,_critter=null,_critterKind=0;
+// main.js hands us a ground probe (walk + surface height) so we can tell whether
+// the spot underfoot is safe FLAT ground to sit on — the walk data lives in the
+// engine, so we borrow it rather than fork it (the shared-definition rule).
+let _idleGround=null;
+export function setIdleGroundProbe(fn){_idleGround=fn;}
+function idleInputNow(){
+  const look=cam.lookPx,moved=look!==_idleLookPx;_idleLookPx=look;
+  const real=keys.size>0||_touchAct||joy.len>0.2||joy.id!==null||jump.buf>0||moved;
+  const orbit=!_idleSit&&cam.freeT>0;   // desktop/touch look-drag (sit sets freeT itself — ignore it while seated)
+  return real||orbit;
+}
+function idleBlocked(){
+  return !game.running||_charge||state.onWater||state.onIce||(state.rideSpeed>0)||state.idleBusy;
+}
+function idleFlatSafe(player){
+  if(!_idleGround)return false;
+  if(Math.hypot(player.vx||0,player.vz||0)>0.12)return false;
+  const c=_idleGround(player.x,player.z);
+  if(!c||!c.walk)return false;
+  if(Math.abs((player.y||0)-c.y)>0.35)return false;   // airborne / on the jetski
+  let lo=c.y,hi=c.y;
+  for(const[ox,oz]of ESC4){
+    const s=_idleGround(player.x+ox,player.z+oz);
+    if(!s||!s.walk)return false;
+    if(s.y<lo)lo=s.y;if(s.y>hi)hi=s.y;
+  }
+  return (hi-lo)<0.22;                                 // level enough to plop down
+}
+function resetIdlePose(){ mparts.head.rotation.x=0;mparts.head.rotation.z=0; }   // arms/legs/body are re-stamped by updateCharacter; only the head is ours to clear
+function poseIdleStretch(a){
+  const p=mparts;
+  if(IDLE_HOLD_YAWN){                                   // debug: freeze the peak yawn for a clean capture
+    p.armL.rotation.x=-2.3;p.armR.rotation.x=-2.3;
+    p.body.rotation.x=-0.14;p.body.scale.y=1.12*1.06;
+    p.head.rotation.x=-0.4;p.head.rotation.z=0;
+    p.legL.rotation.x=0.05;p.legR.rotation.x=-0.05;
+    return;
+  }
+  const cyc=a%10;
+  if(cyc<3.2){                                          // the big stretch + yawn
+    const k=Math.sin((cyc/3.2)*Math.PI);                // 0 → 1 → 0
+    p.armL.rotation.x=-2.3*k;p.armR.rotation.x=-2.3*k;  // arms rise overhead
+    p.body.rotation.x=-0.14*k;p.body.scale.y=1.12*(1+0.06*k);
+    p.head.rotation.x=-0.4*k;p.head.rotation.z=0;       // chin up
+    p.legL.rotation.x=0.05*k;p.legR.rotation.x=-0.05*k;
+  }else if(cyc<6){                                      // check the sky, glance around
+    const k=Math.sin(((cyc-3.2)/2.8)*Math.PI);
+    p.head.rotation.x=-0.3*k;p.head.rotation.z=0.22*Math.sin((cyc-3.2)*1.6);
+    p.body.rotation.x=-0.04*k;p.armL.rotation.x=0;p.armR.rotation.x=0;
+  }else{                                                // settle — a slow breathing sway
+    const s=Math.sin(a*1.1);
+    p.head.rotation.x=0.02*s;p.head.rotation.z=0.05*s;p.body.rotation.x=0;
+    p.armL.rotation.x=0.04*s;p.armR.rotation.x=-0.04*s;
+  }
+}
+// ambient life: one reusable rig (a butterfly OR a sparrow), built lazily on the
+// first idle, hidden otherwise (drawn only while it's actually visiting; ≤4
+// draws, near the player). Self-lit-ish toon, no world rng.
+function buildCritter(){
+  const g=new THREE.Group();g.visible=false;g.name='idle-critter';scene.add(g);
+  const bf=new THREE.Group();                            // butterfly
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(0.02,0.02,0.34,5),toon(0x3a2a22));body.rotation.x=Math.PI/2;bf.add(body);
+  const wm=toon(0xf2a6c8,{mat:{side:THREE.DoubleSide}}),wg=new THREE.CircleGeometry(0.16,10);
+  const wL=new THREE.Mesh(wg,wm),wR=new THREE.Mesh(wg,wm);
+  wL.rotation.y=0.5;wR.rotation.y=-0.5;bf.add(wL,wR);bf._wings=[wL,wR];g.add(bf);
+  const sp=new THREE.Group();                            // sparrow
+  const sBody=new THREE.Mesh(new THREE.SphereGeometry(0.13,9,8),toon(0x8a6b4a));sBody.scale.set(1,0.9,1.25);
+  const sHead=new THREE.Mesh(new THREE.SphereGeometry(0.09,8,7),toon(0x6f523a));sHead.position.set(0,0.11,0.14);
+  const sBeak=new THREE.Mesh(new THREE.ConeGeometry(0.03,0.09,5),toon(0xdca23a));sBeak.rotation.x=Math.PI/2;sBeak.position.set(0,0.1,0.24);
+  const sTail=new THREE.Mesh(new THREE.BoxGeometry(0.05,0.02,0.16),toon(0x6f523a));sTail.position.set(0,0.02,-0.16);
+  sp.add(sBody,sHead,sBeak,sTail);g.add(sp);
+  g._bf=bf;g._sp=sp;g._t=0;
+  return g;
+}
+function spawnCritter(player){
+  if(!_critter)_critter=buildCritter();
+  _critterKind=Math.random()<0.5?0:1;
+  _critter._bf.visible=_critterKind===0;_critter._sp.visible=_critterKind===1;
+  const ang=Math.random()*Math.PI*2,r=7+Math.random()*3;
+  _critter.position.set(player.x+Math.cos(ang)*r,2.4+Math.random()*0.8,player.z+Math.sin(ang)*r);
+  _critter._t=0;_critter.visible=true;
+}
+function tickCritter(dt,player){
+  if(!_critter||!_critter.visible)return;
+  const tt=(_critter._t+=dt);
+  const hx=player.x+Math.cos(tt*0.5)*2.2,hz=player.z+Math.sin(tt*0.5)*2.2;   // slow circle near the mayor
+  const hy=(_critterKind===0?2.0:1.3)+Math.sin(tt*2.2)*0.18;
+  const k=1-Math.exp(-1.4*dt);
+  _critter.position.x=lerp(_critter.position.x,hx,k);
+  _critter.position.y=lerp(_critter.position.y,hy,k);
+  _critter.position.z=lerp(_critter.position.z,hz,k);
+  const fx=hx-_critter.position.x,fz=hz-_critter.position.z;
+  if(Math.abs(fx)+Math.abs(fz)>1e-3)_critter.rotation.y=Math.atan2(fx,fz);
+  if(_critterKind===0){                                                       // butterfly flap + flutter tilt
+    const f=Math.sin(tt*16)*0.7;
+    _critter._bf._wings[0].rotation.y=0.5+f;_critter._bf._wings[1].rotation.y=-0.5-f;
+    _critter.rotation.z=Math.sin(tt*2)*0.1;
+  }else{ _critter._sp.rotation.x=Math.sin(tt*3)*0.06;_critter.rotation.z=0; }  // sparrow bob
+}
+function retireCritter(){ if(_critter)_critter.visible=false; }
+function updateIdle(dt,player){
+  if(!IDLE_ENABLED)return;
+  if(idleInputNow()||idleBlocked()){
+    if(_idleSit){_sit=null;_idleSit=false;}
+    if(_idlePhase)resetIdlePose();
+    _idleT=0;_idlePhase=0;retireCritter();
+    return;
+  }
+  if(_sit){ if(_idleSit)tickCritter(dt,player); return; }   // a sit (bench or ours) owns the pose; keep the visitor company
+  _idleT+=dt;
+  if(_idleT<IDLE_STRETCH_AT){ if(_idlePhase){resetIdlePose();_idlePhase=0;} return; }
+  if(!_idlePhase){ _idlePhase=1;spawnCritter(player); }
+  poseIdleStretch(_idleT-IDLE_STRETCH_AT);
+  tickCritter(dt,player);
+  if(_idleT>=IDLE_SIT_AT&&idleFlatSafe(player)){
+    resetIdlePose();_idleSit=true;
+    sitOnBench({x:player.x,z:player.z,ry:mayor.rotation.y},player,true);
+  }
 }
 
 // ------------------------------ per-frame ------------------------------
@@ -662,6 +855,10 @@ export function runUpdates(dt,t,player){
   }else{
     scanInteractions(player,actPressed);
   }
+  // --- idle charm (task 087): after the sit/charge/scan block so packs that
+  // pose the mayor (kite, swings) still win; before pack updates so an idle sit
+  // it starts is respected. Reads only local time + Math.random. ---
+  updateIdle(dt,player);
 
   // --- NPC distance culling (bucketed, hysteresis) ---
   // Recompute group.visible every ~0.3s (not per-frame). Interaction prompts are
@@ -998,7 +1195,13 @@ export const favors={
     f.st='done';markDirty();
     _doneThisSession.add(id);
     if(def){
-      if(def.doneToast)toast(def.doneToast.main,def.doneToast.sub,true);   // 082: jump the queue — the turn-in payoff lands NOW, not behind incidental toasts
+      if(def.doneToast){
+        // 082: jump the queue — the turn-in payoff lands NOW, not behind incidental
+        // toasts. 087: the giver thanks the mayor BY NAME when they've chosen one.
+        const nm=mayorName();
+        const sub=nm?(def.doneToast.sub?`${def.doneToast.sub} — thanks, ${nm}`:`thanks a million, ${nm}`):def.doneToast.sub;
+        toast(def.doneToast.main,sub,true);
+      }
       if(def.reward)wallet.earnDibs(def.reward,def.giver);
     }
   },

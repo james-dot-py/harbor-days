@@ -573,6 +573,27 @@
   .setseg button.on{background:#5db06b;color:#fff;box-shadow:0 2px 0 rgba(63,138,77,.6)}
   body.touch .setseg button{width:42px;height:38px;font-size:14px}
 
+  /* ---------- name your mayor (task 087) ---------- */
+  /* a small cream card, shown once at first start. z above the other cards so it
+     is never stacked behind one; it only ever appears when nothing else is up. */
+  #naming{position:fixed;inset:0;z-index:34;display:none;align-items:center;justify-content:center;background:rgba(74,59,47,.42)}
+  #naming.show{display:flex}
+  .namecard{position:relative;background:var(--cream);color:var(--ink);border-radius:22px;
+    padding:24px 26px 20px;width:min(360px,86vw);box-sizing:border-box;text-align:center;
+    box-shadow:0 10px 0 rgba(122,62,44,.28),0 24px 50px rgba(122,62,44,.25)}
+  .namecard.nope{animation:nameShake .4s ease}
+  @keyframes nameShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+  .nameq{font-size:18px;line-height:1.32;margin:2px 4px 16px;color:var(--ink)}
+  #nameInput{width:100%;box-sizing:border-box;border:2px solid #e3d3b4;border-radius:14px;background:#fffaf0;
+    color:var(--ink);font-family:inherit;font-size:20px;text-align:center;padding:12px 14px;outline:none;letter-spacing:.02em}
+  #nameInput:focus{border-color:#5db06b}
+  .namebtn{margin-top:16px;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-weight:700;
+    font-size:16px;color:#fff;background:#5db06b;box-shadow:0 3px 0 rgba(63,138,77,.7);padding:11px 26px}
+  .namebtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(63,138,77,.7)}
+  .namehint{margin-top:12px;color:#9c8168;font-size:12px}
+  /* the journal title-page signature (task 087) */
+  .jsign{margin:-2px 4px 14px 0;color:#9c8168;font-size:13px;font-style:italic;letter-spacing:.02em}
+
   /* ---------- UI TEXT SCALE (task 085) ----------
      --uiscale multiplies HUD font sizes; text size M sets it to 1 AND removes the
      html.uiscaled class, so M adds no rules and is byte-identical to pre-085 (no
@@ -720,6 +741,17 @@
         <label class="setsw"><input type="checkbox" id="setLow"><span class="settrack"><span class="setknob"></span></span></label></div>
     </div>
   </div>
+</div></div>
+
+<!-- name your mayor (task 087): once, after first start (and after 077's coach
+     marks on touch). A real <input> so the mobile OS keyboard appears on focus;
+     src/naming.js suspends the game key handlers while it's up. -->
+<div id="naming"><div class="namecard">
+  <div class="nameq">what should the neighbors call ya?</div>
+  <input id="nameInput" type="text" maxlength="12" placeholder="Mayor" autocomplete="off"
+    autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="what should we call you">
+  <button id="nameOk" class="namebtn">that&rsquo;s me</button>
+  <div class="namehint">the whole neighborhood&rsquo;s gonna know it</div>
 </div></div>
 
 <!-- economy (task 078): the dibs chip (folding lawn chair + count), the small
