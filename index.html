@@ -379,6 +379,18 @@
   body.touch #btnTote{display:flex;position:fixed;right:calc(14px + var(--sar));top:calc(384px + var(--sat));
     width:44px;height:44px;border-radius:50%;align-items:center;justify-content:center;font-size:22px;z-index:21;
     background:rgba(253,246,230,.92);box-shadow:0 4px 0 rgba(122,62,44,.22);border:none}
+  /* 091 tote affordance: item-count badge (persistent while the tote holds
+     anything) + a one-time first-pickup glow nudge. The looping pulse lives on
+     the BUTTON's box-shadow and the pop on the CHILD badge — nothing fights an
+     opacity fade (the 077 animation-beats-opacity law). */
+  #toteN{display:none;position:absolute;top:-5px;right:-5px;min-width:19px;height:19px;box-sizing:border-box;
+    padding:0 4px;border-radius:10px;background:#d9a441;color:#fff;font:800 11px/1 "Trebuchet MS",system-ui,sans-serif;
+    align-items:center;justify-content:center;box-shadow:0 2px 0 rgba(122,62,44,.28);pointer-events:none}
+  #toteN.pop{animation:toteNPop .5s ease}
+  @keyframes toteNPop{0%{transform:scale(1)}35%{transform:scale(1.45)}100%{transform:scale(1)}}
+  body.touch #btnTote.nudge{animation:toteNudge 1.1s ease-in-out 6}
+  @keyframes toteNudge{0%,100%{box-shadow:0 4px 0 rgba(122,62,44,.22),0 0 0 0 rgba(217,164,65,.55)}
+    50%{box-shadow:0 4px 0 rgba(122,62,44,.22),0 0 0 9px rgba(217,164,65,0)}}
   /* tote (z 28) + shop (z 27): journal-family modal cards */
   #tote,#shop{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(74,59,47,.42)}
   #tote{z-index:28}#shop{z-index:27}
@@ -751,7 +763,7 @@
 <button id="btnJump">&#11014;&#65039;</button>
 <button id="btnAct">&#9995;</button>
 <button id="btnJournal">&#128214;</button>
-<button id="btnTote">&#129530;</button>
+<button id="btnTote">&#129530;<span id="toteN"></span></button>
 
 <!-- framework HUD -->
 <div id="prompt"><span class="pk"></span><span id="promptlabel"></span></div>

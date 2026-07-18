@@ -23,7 +23,7 @@
 //  for a one-line usage note.
 // =====================================================================
 import * as THREE from 'three';
-import { renderer, scene, camera, amb, sun, toon, curveMat, clamp, lerp, lerpAngle, $, game } from './core.js';
+import { renderer, scene, camera, amb, sun, toon, curveMat, pointsMat, clamp, lerp, lerpAngle, $, game } from './core.js';
 import { cam, keys, joy, jump } from './input.js';
 import { mayor, mparts, createChibi, bakeChibiRig } from './character.js';
 import { fw } from './fx.js';
@@ -120,7 +120,7 @@ export function worldReady(player){
 let elPrompt,elPromptK,elPromptL,elMeter,elFill,elToast,elToastMain,elToastSub,
     elJournal,elJournalBody,elBtnAct,_fxflash;
 // economy HUD refs (task 078)
-let elDibs,elDibsN,elDibsPop,elTote,elToteGrid,elToteCap,elShop,elShopTitle,elShopKeeper,elShopRows;
+let elDibs,elDibsN,elDibsPop,elTote,elToteGrid,elToteCap,elShop,elShopTitle,elShopKeeper,elShopRows,elBtnTote,elToteN;
 function initDom(){
   elPrompt=$('prompt');elPromptK=elPrompt.querySelector('.pk');elPromptL=$('promptlabel');
   elMeter=$('pwrmeter');elFill=$('pwrfill');
@@ -175,7 +175,8 @@ function initDom(){
     elTote.addEventListener('pointerdown',e=>{_toteDown=(e.target===elTote);});
     elTote.addEventListener('click',e=>{if(e.target===elTote&&_toteDown)bag.close();});
   }
-  const bT=$('btnTote');if(bT)bT.addEventListener('click',()=>{ if(elTote&&elTote.classList.contains('show'))bag.close(); else bag.open(); });
+  elBtnTote=$('btnTote');elToteN=$('toteN');
+  if(elBtnTote)elBtnTote.addEventListener('click',()=>{ if(elTote&&elTote.classList.contains('show'))bag.close(); else bag.open(); });
   // shop: close button, tap-outside (same started-on-backdrop guard)
   const scl=$('shopClose');if(scl)scl.addEventListener('click',()=>shop.close());
   if(elShop){
@@ -824,6 +825,141 @@ function updateIdle(dt,player){
   }
 }
 
+// ------------------------ interact affordance (task 091) ----------------
+// (owner 2026-07-18: "it should be more clear you can engage with people you
+// can engage with. Objects you can interact with should appear interactable
+// but not unnaturally so.") ONE shared quiet mechanism — packs inherit it,
+// nothing opts in, nothing is hand-rolled per pack:
+//   * PEOPLE — a framework NPC standing AT an enabled interaction (the Malört
+//     guy, the counter regulars) GLANCES at a near player: the head eases
+//     toward you inside ~6 m, clamped to a natural neck arc, and eases back
+//     when you leave or walk behind them. Decorative NPCs never do — that is
+//     the read-at-a-glance difference in one frame.
+//   * OBJECTS — an enabled interaction anchor with NO person on it gets a
+//     faint warm glint: a single soft additive point twinkling ~0.95 m over
+//     the spot, fading in from ~6.5 m, bobbing a few cm. A catch-light, not a
+//     quest marker (no outline, no arrow, never full-bright).
+// Gated by the 087 idle-gate law: OFF under ?play=1 (baseline/walkthrough
+// shots) unless ?affordance=1; ?affordance=0 forces off for a real player.
+// Local time only, Math-free of the world rng — determinism untouched.
+const _affParam=_IDBG.get('affordance');
+const AFF_ENABLED=_affParam==='0'?false:(_IDBG.get('play')==='1'?_affParam==='1':true);
+const AFF_NEAR=4.5,AFF_FAR=6.5,AFF_FAR2=AFF_FAR*AFF_FAR;  // glint fade band (m)
+const AFF_MAX=6;                                          // glint pool size
+const AFF_NPC2=2.2*2.2,AFF_BUMP2=1.6*1.6;                 // "a person is on this anchor" radii²
+let _affPts=null,_affPos=null,_affCol=null,_affSize=null;
+const _affGlints=[];                                      // live interaction handles (refs only)
+let _affScanT=0,_affNpcT=0;
+function affBuild(){
+  const g=new THREE.BufferGeometry();
+  // 2 points per glint: a soft warm HALO + a small near-white CORE — additive
+  // cream alone washes out over bright toon lawns/sand (the 090 overlay law:
+  // contrast against the NEAR field), the hot core survives any background.
+  _affPos=new Float32Array(AFF_MAX*6);_affCol=new Float32Array(AFF_MAX*6);_affSize=new Float32Array(AFF_MAX*2);
+  g.setAttribute('position',new THREE.BufferAttribute(_affPos,3));
+  g.setAttribute('aColor',new THREE.BufferAttribute(_affCol,3));
+  g.setAttribute('aSize',new THREE.BufferAttribute(_affSize,1));
+  _affPts=new THREE.Points(g,pointsMat());
+  _affPts.frustumCulled=false;_affPts.visible=false;_affPts.name='affordance-glints';
+  scene.add(_affPts);
+}
+// throttled: which NPCs stand at an enabled interaction (they GLANCE, and they
+// suppress the glint — a sparkle on a person reads wrong).
+function affScanNpcs(){
+  for(const npc of _npcs){
+    let hit=null;
+    const gx=npc.group.position.x,gz=npc.group.position.z;
+    for(const it of _interactions){
+      if(!it.enabled)continue;
+      const dx=it.x-gx,dz=it.z-gz;
+      if(dx*dx+dz*dz<AFF_NPC2){hit=it;break;}
+    }
+    npc._affInter=hit;
+  }
+}
+// throttled: the nearby object anchors that get a glint this beat. Excludes
+// priority<0 (player-following prompts anchor ON the player) and any anchor
+// with a person (NPC or bumpable figure) standing on it.
+function affScanGlints(player){
+  _affGlints.length=0;
+  for(const it of _interactions){
+    if(_affGlints.length>=AFF_MAX)break;
+    if(!it.enabled||it.priority<0)continue;
+    const dx=player.x-it.x,dz=player.z-it.z;
+    if(dx*dx+dz*dz>AFF_FAR2)continue;
+    let person=false;
+    for(const n of _npcs){const ax=n.group.position.x-it.x,az=n.group.position.z-it.z;if(ax*ax+az*az<AFF_NPC2){person=true;break;}}
+    if(!person)for(const b of _bumpables){const ax=b.group.position.x-it.x,az=b.group.position.z-it.z;if(ax*ax+az*az<AFF_BUMP2){person=true;break;}}
+    if(person)continue;
+    if(it._affY===undefined){const c=_idleGround?_idleGround(it.x,it.z):null;it._affY=c?c.y:(player.y||0);}
+    _affGlints.push(it);
+  }
+}
+// debug/tools probe (091): live affordance state — enabled flag, glint count,
+// points visibility, and per-NPC glance angles. Installed on the FIRST update
+// frame (main.js assigns window.__hd wholesale at load — the econ-hook clobber).
+let _affDbg=false;
+function affInstallDbg(){
+  _affDbg=true;
+  try{window.__hd=window.__hd||{};window.__hd.aff=()=>({enabled:AFF_ENABLED,glints:_affGlints.length,
+    ptsVisible:!!(_affPts&&_affPts.visible),
+    glances:_npcs.filter(n=>Math.abs(n._glance||0)>0.05).map(n=>({name:n.name,g:+(n._glance||0).toFixed(2)}))});}catch(e){}
+}
+function updateAffordance(dt,t,player){
+  if(!_affDbg)affInstallDbg();
+  if(!AFF_ENABLED)return;
+  _affNpcT-=dt;if(_affNpcT<=0){_affNpcT=1.2;affScanNpcs();}
+  _affScanT-=dt;if(_affScanT<=0){_affScanT=0.45;affScanGlints(player);}
+  // --- object glints (one Points draw, visible only when something is near) ---
+  if(_affGlints.length&&!_affPts)affBuild();
+  if(_affPts){
+    let n=0;
+    for(let i=0;i<_affGlints.length;i++){
+      const it=_affGlints[i];
+      const dx=player.x-it.x,dz=player.z-it.z,d=Math.sqrt(dx*dx+dz*dz);
+      const fade=clamp((AFF_FAR-d)/(AFF_FAR-AFF_NEAR),0,1);
+      if(fade<=0)continue;
+      const ph=(it.x*7.13+it.z*3.71)%6.283;          // per-anchor phase, no rng
+      const tw=0.7+0.3*Math.sin(t*2.1+ph*2.3);       // never fully dark — a shot always catches it
+      const gy=it._affY+0.8+0.09*Math.sin(t*1.4+ph);
+      const j=n*6;                                   // halo then core
+      _affPos[j]=it.x;_affPos[j+1]=gy;_affPos[j+2]=it.z;
+      _affPos[j+3]=it.x;_affPos[j+4]=gy;_affPos[j+5]=it.z;
+      const ah=0.42*fade*tw,ac=0.95*fade*tw;
+      _affCol[j]=ah;_affCol[j+1]=0.72*ah;_affCol[j+2]=0.38*ah;      // amber halo
+      _affCol[j+3]=ac;_affCol[j+4]=0.93*ac;_affCol[j+5]=0.78*ac;    // warm-white core
+      _affSize[n*2]=0.85+0.16*tw;
+      _affSize[n*2+1]=0.3+0.07*tw;
+      n++;
+    }
+    if(n||_affPts.visible){
+      _affPts.geometry.attributes.position.needsUpdate=true;
+      _affPts.geometry.attributes.aColor.needsUpdate=true;
+      _affPts.geometry.attributes.aSize.needsUpdate=true;
+      _affPts.geometry.setDrawRange(0,n*2);
+      _affPts.visible=n>0;
+    }
+  }
+  // --- interactive-NPC glance (heads ease toward a near player) ---
+  for(const npc of _npcs){
+    if(!npc.group.visible)continue;
+    const g=npc.group,p=npc.parts;
+    let tgt=0;
+    if(npc._affInter&&npc._affInter.enabled){
+      const dx=player.x-g.position.x,dz=player.z-g.position.z;
+      if(dx*dx+dz*dz<36){
+        let rel=Math.atan2(dx,dz)-g.rotation.y;
+        rel=((rel%6.2832)+9.4248)%6.2832-3.1416;     // normalize to (-π,π]
+        if(Math.abs(rel)<1.35)tgt=clamp(rel,-0.55,0.55);   // never owl-neck
+      }
+    }
+    const cur=npc._glance||0;
+    const nx=lerp(cur,tgt,1-Math.exp(-4*dt));
+    npc._glance=nx;
+    if(Math.abs(nx)>0.002||Math.abs(cur)>0.002)p.head.rotation.y=nx;
+  }
+}
+
 // ------------------------------ per-frame ------------------------------
 // runUpdates(dt,t,player) : called by main.js each frame (after the camera is
 // positioned). Drives tracking, interactions, charge, NPCs and pack updates.
@@ -900,6 +1036,10 @@ export function runUpdates(dt,t,player){
   }
   // --- NPCs ---
   for(const npc of _npcs){ if(!npc.group.visible)continue; updateNPC(npc,dt,t,player); }
+
+  // --- interact affordance (091): glance + glints. BEFORE pack updates, so a
+  // pack that re-poses its NPC's head in registerUpdate still wins the frame ---
+  updateAffordance(dt,t,player);
 
   // --- pack updates ---
   for(let i=0;i<_updates.length;i++){try{_updates[i](dt,t,player);}catch(e){console.warn('[framework] update error',e);}}
@@ -1034,13 +1174,41 @@ export const wallet={
 // save.worn. Item defs are session-scoped (packs re-define them each load).
 function toteIsOpen(){ return !!(elTote&&elTote.classList.contains('show')); }
 function bagRefresh(){ if(toteIsOpen())renderTote(); }
+// ---- tote affordance (task 091 — owner: "accessing your tote should be more
+// obvious"). Two layers, both DOM-only (no gating needed: nothing fires without
+// a real pickup, so play=1 baseline/walkthrough shots never see them):
+//   * a persistent COUNT BADGE on the touch 🧺 button (items in the tote) that
+//     pops on every add — the tote visibly HAS your stuff;
+//   * a one-time first-pickup hint: a toast naming the input (B / the 🧺) plus,
+//     on touch, a short glow pulse on the button itself (animation lives on the
+//     button's box-shadow, badge pop on the CHILD — the 077 opacity law).
+const TOTE_SEEN='ope.tote.v1';
+let _toteNudgeTO=null;
+function refreshToteBadge(){
+  if(!elToteN)return;
+  const b=getSave().bag;let n=0;for(const k in b)if(b[k]>0)n+=b[k];
+  elToteN.textContent=n>9?'9+':String(n);
+  elToteN.style.display=n>0?'flex':'none';
+}
+function toteNudge(){
+  refreshToteBadge();
+  if(elToteN){ elToteN.classList.remove('pop');void elToteN.offsetWidth;elToteN.classList.add('pop'); }
+  if(!getFlag(TOTE_SEEN)){
+    setFlag(TOTE_SEEN,'1');
+    toast('into the tote it goes',IS_TOUCH()?'tap the 🧺 to rummage':'press B to rummage');
+    if(IS_TOUCH()&&elBtnTote){
+      elBtnTote.classList.add('nudge');
+      clearTimeout(_toteNudgeTO);_toteNudgeTO=setTimeout(()=>{if(elBtnTote)elBtnTote.classList.remove('nudge');},8000);
+    }
+  }
+}
 export const bag={
   defs:new Map(),
   // def = {id,name,icon,kind:'holdable'|'gear'|'collectible'|'cosmetic',caption,
   //        onUse(),onStow(),onEquip(),onUnequip()}. icon is an emoji or inline SVG.
   define(def){ if(def&&def.id){ bag.defs.set(def.id,def);bagRefresh(); } return def; },
-  add(id,n=1){ const sv=getSave();sv.bag[id]=(sv.bag[id]||0)+n;markDirty();bagRefresh(); },
-  remove(id,n=1){ const sv=getSave();if(sv.bag[id]){ sv.bag[id]-=n;if(sv.bag[id]<=0)delete sv.bag[id];markDirty();bagRefresh(); } },
+  add(id,n=1){ const sv=getSave();sv.bag[id]=(sv.bag[id]||0)+n;markDirty();bagRefresh();toteNudge(); },
+  remove(id,n=1){ const sv=getSave();if(sv.bag[id]){ sv.bag[id]-=n;if(sv.bag[id]<=0)delete sv.bag[id];markDirty();bagRefresh();refreshToteBadge(); } },
   has(id){ return (getSave().bag[id]||0)>0; },
   count(id){ return getSave().bag[id]||0; },
   worn(){ return getSave().worn; },
@@ -1112,6 +1280,7 @@ function renderTote(){
 function openTote(){
   toggleJournal(false);if(elShop)elShop.classList.remove('show');   // one card at a time
   { const s=$('settings');if(s)s.classList.remove('show'); }        // (settings card too — task 085)
+  if(elBtnTote)elBtnTote.classList.remove('nudge');                 // found it — stop nudging (091)
   renderTote();
   if(elTote)elTote.classList.add('show');
 }
@@ -1273,6 +1442,7 @@ function econUpdate(dt){
     _econOnce=true;
     const w=getSave().worn;
     if(w){ const def=bag.defs.get(w);if(def&&def.onEquip)try{def.onEquip();}catch(e){console.warn('[econ] restore onEquip',e);} }
+    refreshToteBadge();   // a returning save shows its tote badge from boot (091)
     try{ window.__hd=window.__hd||{};window.__hd.econ={wallet,bag,favors,shop,save:getSave};
       window.__hd.flags={get:getFlag,set:setFlag}; }catch(e){}   // debug/tools sibling: store flag round-trip
     // 082 save integrity: a stored save that couldn't be read (bad JSON / a

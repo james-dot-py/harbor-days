@@ -760,3 +760,16 @@ few turns to find; keep each to one line of symptom + fix.
   overlapping pavements >=0.006 apart; markings above their own asphalt, BELOW
   crossing pavements) + tools/prop-clearance.mjs (no tree/prop base on any ribbon)
   both run inside walkprobe — fix data, never silence the tools.
+- The 091 interact affordance (framework.js: NPC glance + object glints) has a
+  probe — `window.__hd.aff()` -> {enabled, glints, ptsVisible, glances[]} — USE
+  IT before tuning visuals: both halves were "invisible" on first shots while
+  provably running (the glance was a correct-but-subtle 0.55 rad the full-frame
+  eye missed — crop-diff the head to see it; the glint was rendering at ~10 px).
+  Glint lessons: one additive cream point washes out over bright toon lawns (the
+  090 overlay law) — it took a 2-point HALO+CORE (amber halo ~0.85 aSize + warm
+  white core ~0.3) to read; and the glint hovers at anchor+0.8 m with depthTest
+  ON, so an anchor INSIDE tall geometry (a Divvy dock pylon) buries its sparkle
+  — diegetically fine (docks are sign-posted), but don't pick such a spot as the
+  demo shot. Glance ownership: applied in updateNPC order BEFORE pack updates,
+  so a pack that re-poses heads still wins its frame. Gating is the 087 idle law
+  (OFF under ?play=1 unless ?affordance=1) — a waypoint shot can never catch it.

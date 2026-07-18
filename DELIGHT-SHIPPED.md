@@ -613,3 +613,13 @@ cut becomes a revert task.
   night's-edge surges the sanctuary + Lurie Garden with amber motes over a
   cricket layer. Visit three days running and you'll catch one worth texting
   someone about. — everywhere on the lakefront + Lurie — task 090
+- THE WORLD NOTICES YOU BACK. Walk near anyone you can actually talk to and
+  they turn their head to meet you — the Malört guy (now visibly cradling his
+  Jeppson's, amber glass, cream label), the kiosk teen over her counter, the
+  handshake regular on the rocks. Objects you can use carry a faint warm
+  catch-light that twinkles and drifts within ~6 m — a bench, the boombox
+  towel, the live mini-golf tee — while everything decorative stays quiet.
+  One glance now sorts the world into "alive" and "scenery," and nothing
+  floats, points, or glows unnaturally. Plus your tote finally announces
+  itself: a gold count badge on the 🧺, a first-pickup nudge, and B on the
+  hint bar. — every interaction everywhere — task 091

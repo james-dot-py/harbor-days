@@ -28,7 +28,8 @@
 //  DEV: ?saxtest=1 forces the first riff ~1.5 s after load (then every ~3 s)
 //  so the busker audio path can be exercised in a short screenshot.
 //
-//  Draw calls added: bottle(1) binoculars(1) veil(1) camera(1) sax(8: body×2,
+//  Draw calls added: held bottle(4: body/label/neck/cap — 091 chibi-chunky
+//  Jeppson's) binoculars(1) veil(1) camera(1) sax(8: body×2,
 //  U-bow, bell, neck, mouthpiece, 3 keys) sax-case(1) chair-legs(1)
 //  chair-seat(1) chair-back(1) megaphone(1). Malört-guy stash (task 031):
 //  case(1) 2 cans(2) bottle body/neck/cap/label(4) + the guy's live-eyes(1) —
@@ -116,8 +117,24 @@ onWorldReady(() => {
     const guy = makeNPC({x:X, z:Z, ry:-1.9, palette:{suit:0x8a4a3a,pants:0x2f3540,skin:0xe0a878,hair:0x2a1c12,face:true},
       name:'malort', lines:["you ever had Malört?","it's a Chicago thing, ya know","builds character","tastes like a burnt band-aid — want some?"]});
     guy.group.position.y = y;
-    const bottle = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.058,0.28,9), toon(0x9a7b2e));
-    bottle.position.set(0, 0.06, 0.04); guy.parts.handR.add(bottle);
+    // 091 (owner: "mallort guy should have a bottle of mallort he's holding"):
+    // the old single olive cylinder read as a speck lost against his rust suit
+    // (audit shot). Chibi-chunky Jeppson's instead — amber body, a CREAM LABEL
+    // band (the read), gold cap — same recipe/colors as the stash bottle, so
+    // toon()'s cache shares materials. Small handR-local offset only (PITFALLS
+    // 047: the hand is re-posed every frame, so the prop rides it).
+    const bottle = new THREE.Group();
+    const bBody = new THREE.Mesh(new THREE.CylinderGeometry(0.062,0.085,0.30,10), toon(0x8a5a16));
+    const bLabel = new THREE.Mesh(new THREE.CylinderGeometry(0.089,0.089,0.13,10), toon(0xe9d79a));
+    bLabel.position.y = 0.055;   // upper-middle of the body — above the gripping hand, so the band reads
+    const bNeck = new THREE.Mesh(new THREE.CylinderGeometry(0.026,0.052,0.14,8), toon(0x8a5a16));
+    bNeck.position.y = 0.21;
+    const bCap = new THREE.Mesh(new THREE.CylinderGeometry(0.031,0.031,0.05,8), toon(0xd8b13a));
+    bCap.position.y = 0.295;
+    bottle.add(bBody,bLabel,bNeck,bCap);
+    bottle.position.set(0, 0.10, 0.07);
+    bottle.rotation.x = 0.95;   // counter the raised arm's -1.05 pitch so the bottle stands near-upright in world (the label band reads)
+    guy.parts.handR.add(bottle);
     buildMalortStash(X, Z, groundY);                 // his bottle + Old Style case on the step
 
     // He's been OFFERING since Round 5 with no way to say yes (issue 013). Now
@@ -139,7 +156,7 @@ onWorldReady(() => {
     malortHooks.guy = guy; malortHooks.inter = guyInter; malortHooks.swig = swig;
 
     rePose.push((dt, t) => {
-      guy.parts.armR.rotation.x = -1.05; guy.parts.armR.rotation.z = -0.12;
+      guy.parts.armR.rotation.x = -1.05; guy.parts.armR.rotation.z = -0.34;   // outboard so the bottle silhouettes clear of the belly (091)
       guy.parts.armL.rotation.x = -0.25;
       if(swig.cool>0){ swig.cool-=dt; if(swig.cool<=0) guyInter.setLabel('burnt band-aid?'); }
       if(malortHooks.rePose) malortHooks.rePose(dt, t);   // task 078: favor pack's per-frame hook (duet arm + label)

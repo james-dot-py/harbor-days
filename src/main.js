@@ -504,7 +504,7 @@ function runStart(){
     // all. What is left is the stuff no ghost thumb can mime.
     h.textContent=document.body.classList.contains('touch')
       ?'⬆️ jump · ✋ interact · 📖 journal · ✨ type · 🎆 launch'
-      :'WASD move · SPACE jump · Z/C orbit · SHIFT run · E interact · J journal · 1–4 firework · F launch';
+      :'WASD move · SPACE jump · Z/C orbit · SHIFT run · E interact · B tote · J journal · 1–4 firework · F launch';
     setTimeout(()=>h.classList.add('hide'),9000);
   }
   $('btnHelp').style.display='flex';   // the hint auto-hides; the "?" button is the permanent way back
