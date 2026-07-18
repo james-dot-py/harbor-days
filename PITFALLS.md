@@ -687,6 +687,12 @@ few turns to find; keep each to one line of symptom + fix.
   overwrites the corrupt value with the still-valid in-memory blob (082 save-integrity
   test). Reassuring property: the corrupt-recovery path only ever triggers on genuine
   external tampering / storage faults, exactly what it exists for.
+  FRESH-SAVE corollary (081 re-verify): `localStorage.clear()` on a live page is
+  ALSO undone by that page's pagehide flush — the next load quietly inherits the
+  "cleared" save (the 081b ceremony ran with a mid-favor to-do it never asked for).
+  An E2E that needs a genuinely fresh save must use a fresh browser context
+  (puppeteer ≥22: `browser.createBrowserContext()` — `createIncognitoBrowserContext`
+  is gone), not clear-and-reload.
 - SOURCE-ORDER corollary to the 079 "media query adds no specificity" law: a NEW
   base rule appended AFTER an `@media` block still BEATS an equal-specificity rule
   INSIDE that earlier media query — a media query adds no specificity, so the tie
