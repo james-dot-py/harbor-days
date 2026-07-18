@@ -43,7 +43,16 @@ platform :ios do
       # DEVELOPMENT_TEAM comes from the APPLE_TEAM_ID repo secret — automatic
       # signing on a headless runner cannot infer the team (the pbxproj
       # deliberately carries none; the repo is public).
-      xcargs: "-allowProvisioningUpdates DEVELOPMENT_TEAM=#{ENV.fetch("APPLE_TEAM_ID")} CURRENT_PROJECT_VERSION=#{build_number}",
+      # -allowProvisioningUpdates alone is not enough on a headless runner:
+      # xcodebuild needs the ASC API key itself (-authenticationKey*) to be able
+      # to CREATE the cloud-managed cert + provisioning profile. Gym forwards
+      # the key to the upload step, not to xcodebuild — pass it explicitly.
+      xcargs: "-allowProvisioningUpdates" \
+        " -authenticationKeyPath #{ENV.fetch("ASC_KEY_PATH")}" \
+        " -authenticationKeyID #{ENV.fetch("ASC_KEY_ID")}" \
+        " -authenticationKeyIssuerID #{ENV.fetch("ASC_ISSUER_ID")}" \
+        " DEVELOPMENT_TEAM=#{ENV.fetch("APPLE_TEAM_ID")}" \
+        " CURRENT_PROJECT_VERSION=#{build_number}",
       export_team_id: ENV.fetch("APPLE_TEAM_ID"),
       output_directory: "build",
       output_name: "Ope.ipa",
