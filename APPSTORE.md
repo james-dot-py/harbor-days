@@ -84,7 +84,7 @@ TestFlight needs an app record for bundle id **`com.playope.ope`**. Two ways:
 
 ## 4. Run the TestFlight build
 
-`.github/workflows/ios-testflight.yml` is **manual dispatch only** (never on
+`.github/workflows/testflight.yml` is **manual dispatch only** (never on
 push). It, on a `macos-14` runner:
 
 1. `npm ci` + `npm run build` → the single-file `dist/index.html`.
