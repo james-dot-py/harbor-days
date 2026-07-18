@@ -34,6 +34,10 @@ function vcGeo(geo,hex){
 }
 const mergeVC=arr=>BufferGeometryUtils.mergeBufferGeometries(arr,false);                         // vcGeo inputs (already non-indexed)
 const mergeGeo=arr=>BufferGeometryUtils.mergeBufferGeometries(arr.map(g=>g.index?g.toNonIndexed():g),false); // single-material (no colors)
+// chibiKit — the vertex-color merge helpers, exported for avatars.js accessory
+// builders (task 089): paint parts with vcGeo, mergeVC them, draw under the ONE
+// shared vcMat — every accessory stays a single draw call.
+export const chibiKit={vcGeo,mergeVC,vcMat};
 
 // stampRanges(geo,ranges,pal): rewrite the 'color' attribute of a cloned template
 // geometry with this chibi's palette. ranges = [[start,count,paletteKey],…]; the
@@ -144,8 +148,10 @@ function chibiTemplate(hairStyle,bigEyes,face,detail){
   t={};
   // detail (mayor only, task 022): extra fidelity sub-geos folded into the SAME
   // merges — brows, shirt cuffs, thumbs, shoe soles — so the draw-call count is
-  // unchanged. Fixed-color pieces (cuff/sole/brow) are NOT palette ranges;
-  // stampRanges leaves them untouched, exactly like the baked eyes.
+  // unchanged. Fixed-color pieces (sole/brow) are NOT palette ranges;
+  // stampRanges leaves them untouched, exactly like the baked eyes. The cuff IS
+  // a palette range since 089 (avatar jackets need non-white cuffs) — its
+  // default 0xf2efe8 keeps the mayor byte-identical.
   // leg cylinder + shoe sphere -> one merged mesh (identical L/R geometry)
   {
     const legGeo=vcGeo(new THREE.CylinderGeometry(0.15,0.13,0.55,7).translate(0,-0.275,0),0xffffff);
@@ -163,7 +169,9 @@ function chibiTemplate(hairStyle,bigEyes,face,detail){
     const thumbs=detail?[vcGeo(new THREE.SphereGeometry(0.048,6,5).translate(hl.x-s*0.075,hl.y+0.03,hl.z+0.07),0xffffff)]:[];
     const ac=armGeo.attributes.position.count,cc=cuffs.length?cuffs[0].attributes.position.count:0,
           hc=handGeo.attributes.position.count+(thumbs.length?thumbs[0].attributes.position.count:0);
-    t['arm'+(s<0?'L':'R')]={geo:mergeVC([armGeo,...cuffs,handGeo,...thumbs]),vc:{arm:[0,ac],hand:[ac+cc,hc]},ranges:[[0,ac,'suit'],[ac+cc,hc,'skin']],hl};
+    const ranges=[[0,ac,'suit'],[ac+cc,hc,'skin']];
+    if(cc)ranges.push([ac,cc,'cuff']);
+    t['arm'+(s<0?'L':'R')]={geo:mergeVC([armGeo,...cuffs,handGeo,...thumbs]),vc:{arm:[0,ac],hand:[ac+cc,hc]},ranges,hl};
   }
   // head + cheeks + BAKED HAIR -> one vertex-colored mesh (hair rides the head).
   // By DEFAULT the two eye spheres also fold in (colored 0x1d1712 via vertex
@@ -191,7 +199,8 @@ function chibiTemplate(hairStyle,bigEyes,face,detail){
       return vcGeo(b,0x2b211a);
     }):[];
     t.head={geo:mergeVC([headGeo,...cheekGeos,...hairGeos,...eyeGeos,...browGeos]),
-      ranges:[[0,headN,'skin'],[headN,cheekN,'cheek'],[headN+cheekN,hairN,'hair']]};
+      ranges:[[0,headN,'skin'],[headN,cheekN,'cheek'],[headN+cheekN,hairN,'hair']],
+      hair:[headN+cheekN,hairN]};   // vertex window of the baked hair (089: hat-wear compression)
   }
   // eyes: BOTH pupils in one geometry (single shared toon(0x1d1712) mesh) — only
   // built for face:true rigs (the default folds them into the head above).
@@ -226,9 +235,9 @@ function chibiTemplate(hairStyle,bigEyes,face,detail){
 //   (arm+hand), handL/handR (live empty nodes for held items), head (head+
 //   cheeks+hair[+eyes]), hair (=head), eyeL/eyeR (dummy, or shared eyes mesh if
 //   face:true), shadow (stub))
-export function createChibi({suit,pants,skin,hair,shoe=0x57351f,hairStyle,scale=1,bigEyes=false,cheek=0xffa1a1,face=false,detail=false}){
+export function createChibi({suit,pants,skin,hair,shoe=0x57351f,hairStyle,scale=1,bigEyes=false,cheek=0xffa1a1,face=false,detail=false,cuff=0xf2efe8}){
   const group=new THREE.Group(),parts={};group.name='chibi';   // named so the static cell-merge pass can exempt live rigs
-  const suitM=toon(suit),tpl=chibiTemplate(hairStyle,bigEyes,face,detail),pal={suit,pants,skin,hair,shoe,cheek};
+  const suitM=toon(suit),tpl=chibiTemplate(hairStyle,bigEyes,face,detail),pal={suit,pants,skin,hair,shoe,cheek,cuff};
   // shadow: an empty stub at y=0.02 tracked by the global instanced-shadow manager
   // (packs still remove it / toggle .visible; no per-rig ground disc is drawn).
   const shadow=new THREE.Object3D();shadow.position.y=0.02;group.add(shadow);parts.shadow=shadow;_shadowStubs.push(shadow);
@@ -251,6 +260,7 @@ export function createChibi({suit,pants,skin,hair,shoe=0x57351f,hairStyle,scale=
   // head + cheeks + hair merged into ONE vcMat mesh; hair bobs with the head.
   const headGeo=tpl.head.geo.clone();stampRanges(headGeo,tpl.head.ranges,pal);
   const head=new THREE.Mesh(headGeo,vcMat());head.position.y=2.22;group.add(head);parts.head=head;
+  head.userData.hair=tpl.head.hair;   // baked-hair vertex window (089: setHairCompressed)
   parts.hair=head;   // hair is baked into the head geometry — alias so pack reads still resolve
   // eyes: DEFAULT folds both pupils into the head merge (parts.eyeL/eyeR point at
   // a shared detached dummy, so stray setFace/scale writes are harmless no-ops —
@@ -264,6 +274,50 @@ export function createChibi({suit,pants,skin,hair,shoe=0x57351f,hairStyle,scale=
   if(bigEyes){const gl=new THREE.Mesh(tpl.glints,glintMat());gl.position.set(0,2.32,0.55);group.add(gl);}
   if(scale!==1)group.scale.setScalar(scale);
   return {group,parts};
+}
+
+// =====================================================================
+//  HAT-WEAR HAIR COMPRESSION (task 089 — "hats don't replace the afro")
+//  A worn hat must READ as replacing the hair volume, not intersecting it.
+//  The hair is baked into the head merge, so we rewrite the hair range's
+//  POSITIONS in place: every vertex outside the skull (r>0.56 head-local)
+//  is pulled radially toward the head centre. The keep-fraction blends by
+//  height — near the nape/ears the fringe keeps some body (hair still shows
+//  under a brim), while the top squashes to a skull-hugging cap (max reach
+//  ~0.59), so any hat whose shell clears r≈0.60 above its hatline contains
+//  it. Originals are snapshotted once per rig for exact restore on unequip.
+//  Runtime cost: a few hundred verts on equip/unequip only — no per-frame
+//  work, no rng, NPC rigs untouched (only the worn rig is ever compressed).
+// =====================================================================
+export function setHairCompressed(parts,on){
+  const head=parts&&parts.head;if(!head||!head.isMesh)return;
+  const hr=head.userData.hair;if(!hr)return;
+  on=!!on;
+  if(on===!!head.userData.hairSquashed)return;
+  const pos=head.geometry.attributes.position;
+  const [start,count]=hr;
+  if(!head.userData.hairBase){          // snapshot originals once (per-rig clone)
+    const a=new Float32Array(count*3);
+    for(let i=0;i<count;i++){a[i*3]=pos.getX(start+i);a[i*3+1]=pos.getY(start+i);a[i*3+2]=pos.getZ(start+i);}
+    head.userData.hairBase=a;
+  }
+  const base=head.userData.hairBase;
+  if(!on){
+    for(let i=0;i<count;i++)pos.setXYZ(start+i,base[i*3],base[i*3+1],base[i*3+2]);
+  }else{
+    for(let i=0;i<count;i++){
+      const x=base[i*3],y=base[i*3+1],z=base[i*3+2];
+      const r=Math.sqrt(x*x+y*y+z*z);
+      if(r>0.56){
+        const u=clamp((y+0.10)/0.45,0,1),sm=u*u*(3-2*u);   // 0 at the nape → 1 by y0.35
+        const k=0.45+(0.06-0.45)*sm;                        // keep 45% of the overhang low, 6% up top
+        const s=(0.56+(r-0.56)*k)/r;
+        pos.setXYZ(start+i,x*s,y*s,z*s);
+      }
+    }
+  }
+  head.userData.hairSquashed=on;
+  pos.needsUpdate=true;
 }
 
 // tintChibiLimb(mesh,part,hex): recolor one baked sub-range of a merged limb
@@ -334,45 +388,88 @@ export function bakeChibiRig(group,parts,{keepEyes=false}={}){
   // stray setFace/scale write is a harmless no-op; nothing reads them on a baked rig.
 }
 
-export function buildMayor(){
-  // build the shared chibi with the mayor's EXACT palette, then reparent its
-  // parts directly onto `mayor` (keeps the historical flat hierarchy + no rng).
-  // the mayor (owner portrait, task 022): warm dark brown skin, short textured
-  // grey afro, big beady eyes, thin composed brows, charcoal suit over a white
-  // collared shirt. detail:true = mayor-only template extras folded into the
-  // shared merges (zero extra draw calls; NPC output untouched).
-  const {group,parts}=createChibi({suit:0x484850,pants:0x3a3a41,skin:0x6e4632,hair:0xb5aea6,shoe:0x241b13,hairStyle:'afroTex',bigEyes:true,cheek:0xa1614c,face:true,detail:true});   // face:true keeps the separate eyes mesh aligned with the (non-bobbing) glints
-  while(group.children.length)mayor.add(group.children[0]);
-  Object.assign(mparts,parts);
-  // suit front (owner portrait — REPLACES the old sash/star/tie regalia): charcoal
-  // notched lapels over a white shirt V + collar, jacket buttons, small round gold
-  // pin on the wearer's-left lapel. ONE merged vertex-colored mesh under vcMat =
-  // 1 draw call (the regalia was 3). Flat-parented like the old regalia so the
-  // body sphere's breathing scale never distorts it. Pinstripes skipped: they
-  // don't read at chibi scale without texture maps (plain charcoal is right).
-  {
-    const SHIRT=0xf2efe8,LAPEL=0x37373e,BTN=0x1b1916,GOLD=0xd9a83c;
-    const g=[];
-    const shirt=new THREE.BoxGeometry(0.17,0.34,0.05);shirt.rotateX(-0.38);shirt.translate(0,1.57,0.43);
-    g.push(vcGeo(shirt,SHIRT));
-    for(const s of[-1,1]){
-      const lap=new THREE.BoxGeometry(0.13,0.38,0.05);            // lapel: top leans outward, bottom meets the button line
-      lap.rotateZ(-s*0.30);lap.rotateY(s*0.35);lap.rotateX(-0.30);lap.translate(s*0.185,1.50,0.44);
-      g.push(vcGeo(lap,LAPEL));
-      const notch=new THREE.BoxGeometry(0.115,0.075,0.05);        // notch flap, near-horizontal at the lapel top
-      notch.rotateZ(-s*1.15);notch.rotateY(s*0.35);notch.translate(s*0.26,1.70,0.38);
-      g.push(vcGeo(notch,LAPEL));
-      const col=new THREE.BoxGeometry(0.085,0.11,0.045);          // white collar point above the lapel
-      col.rotateZ(-s*0.55);col.rotateX(-0.25);col.translate(s*0.095,1.74,0.37);
-      g.push(vcGeo(col,SHIRT));
-    }
-    g.push(vcGeo(new THREE.SphereGeometry(0.032,7,6).translate(0,1.35,0.50),BTN));
-    g.push(vcGeo(new THREE.SphereGeometry(0.032,7,6).translate(0,1.22,0.515),BTN));
-    const pin=new THREE.CylinderGeometry(0.036,0.036,0.03,10);
-    pin.rotateX(Math.PI/2);pin.rotateY(0.35);pin.translate(0.245,1.60,0.43);
-    g.push(vcGeo(pin,GOLD));
-    const suitFront=new THREE.Mesh(mergeVC(g),vcMat());mayor.add(suitFront);
+// mayorSuitFront(group) — the mayor's suit front (owner portrait — REPLACES the
+// old sash/star/tie regalia): charcoal notched lapels over a white shirt V +
+// collar, jacket buttons, small round gold pin on the wearer's-left lapel. ONE
+// merged vertex-colored mesh under vcMat = 1 draw call (the regalia was 3).
+// Flat-parented like the old regalia so the body sphere's breathing scale never
+// distorts it. Pinstripes skipped: they don't read at chibi scale without
+// texture maps (plain charcoal is right).
+function mayorSuitFront(group){
+  const SHIRT=0xf2efe8,LAPEL=0x37373e,BTN=0x1b1916,GOLD=0xd9a83c;
+  const g=[];
+  const shirt=new THREE.BoxGeometry(0.17,0.34,0.05);shirt.rotateX(-0.38);shirt.translate(0,1.57,0.43);
+  g.push(vcGeo(shirt,SHIRT));
+  for(const s of[-1,1]){
+    const lap=new THREE.BoxGeometry(0.13,0.38,0.05);            // lapel: top leans outward, bottom meets the button line
+    lap.rotateZ(-s*0.30);lap.rotateY(s*0.35);lap.rotateX(-0.30);lap.translate(s*0.185,1.50,0.44);
+    g.push(vcGeo(lap,LAPEL));
+    const notch=new THREE.BoxGeometry(0.115,0.075,0.05);        // notch flap, near-horizontal at the lapel top
+    notch.rotateZ(-s*1.15);notch.rotateY(s*0.35);notch.translate(s*0.26,1.70,0.38);
+    g.push(vcGeo(notch,LAPEL));
+    const col=new THREE.BoxGeometry(0.085,0.11,0.045);          // white collar point above the lapel
+    col.rotateZ(-s*0.55);col.rotateX(-0.25);col.translate(s*0.095,1.74,0.37);
+    g.push(vcGeo(col,SHIRT));
   }
+  g.push(vcGeo(new THREE.SphereGeometry(0.032,7,6).translate(0,1.35,0.50),BTN));
+  g.push(vcGeo(new THREE.SphereGeometry(0.032,7,6).translate(0,1.22,0.515),BTN));
+  const pin=new THREE.CylinderGeometry(0.036,0.036,0.03,10);
+  pin.rotateX(Math.PI/2);pin.rotateY(0.35);pin.translate(0.245,1.60,0.43);
+  g.push(vcGeo(pin,GOLD));
+  const suitFront=new THREE.Mesh(mergeVC(g),vcMat());suitFront.userData.avatarExtra=1;group.add(suitFront);
+}
+
+// THE MAYOR (owner portrait, task 022): warm dark brown skin, short textured
+// grey afro, big beady eyes, thin composed brows, charcoal suit over a white
+// collared shirt. detail:true = template extras folded into the shared merges
+// (zero extra draw calls; NPC output untouched). face:true keeps the separate
+// eyes mesh aligned with the (non-bobbing) glints. Kept in this module (not
+// avatars.js) so buildMayor has no import cycle; avatars.js re-exposes it as
+// the default cast member.
+export const MAYOR_DEF={
+  chibi:{suit:0x484850,pants:0x3a3a41,skin:0x6e4632,hair:0xb5aea6,shoe:0x241b13,hairStyle:'afroTex',bigEyes:true,cheek:0xa1614c,face:true,detail:true},
+  extras:(group,parts)=>mayorSuitFront(group),
+};
+
+// =====================================================================
+//  applyAvatarRig(def) — rebuild the PLAYER rig in place on the `mayor`
+//  group (task 089 avatar cast). def = {chibi:<createChibi opts>, extras?}.
+//  The group keeps its identity (position/rotation/scale/scene parent and
+//  every module holding `mayor`), and `mparts` is re-assigned in place so
+//  live pack reads (badminton swings, kite arm, idle charm) stay valid.
+//  Pack-attached children SURVIVE the swap: skates on the legs, held props
+//  in the hands, a worn hat on the head are carried onto the new parts.
+//  Anything an avatar builder itself added is tagged userData.avatarExtra
+//  and is rebuilt by the new def instead of carried. Consumes NO rng.
+// =====================================================================
+const RIG_PART_KEYS=['legL','legR','armL','armR','head','body'];
+export function applyAvatarRig(def){
+  const carry={};let wasSquashed=false;
+  if(mparts.head){                       // not the first build — rescue pack children
+    wasSquashed=!!mparts.head.userData.hairSquashed;
+    for(const k of RIG_PART_KEYS){
+      const p=mparts[k];
+      carry[k]=p?p.children.filter(c=>!c.userData.avatarExtra&&c!==mparts.handL&&c!==mparts.handR):[];
+    }
+    carry.handL=mparts.handL?[...mparts.handL.children]:[];
+    carry.handR=mparts.handR?[...mparts.handR.children]:[];
+  }
+  const oldStub=mparts.shadow;
+  if(oldStub){const i=_shadowStubs.indexOf(oldStub);if(i>=0)_shadowStubs.splice(i,1);}
+  while(mayor.children.length)mayor.remove(mayor.children[0]);
+  const {group,parts}=createChibi(def.chibi);
+  while(group.children.length)mayor.add(group.children[0]);
+  for(const k of Object.keys(mparts))delete mparts[k];
+  Object.assign(mparts,parts);
+  if(def.extras)def.extras(mayor,mparts);
+  if(wasSquashed)setHairCompressed(mparts,true);   // a worn hat rides the swap — keep the hair replaced
+  for(const k of RIG_PART_KEYS)if(carry[k])for(const c of carry[k])mparts[k].add(c);
+  if(carry.handL)for(const c of carry.handL)mparts.handL.add(c);
+  if(carry.handR)for(const c of carry.handR)mparts.handR.add(c);
+}
+
+export function buildMayor(){
+  applyAvatarRig(MAYOR_DEF);
   mayor.scale.setScalar(0.74);
   // pre-start pose = the data spawn (main.js re-stamps from `player` every
   // frame; this literal only covers frame 0 / the title backdrop). Facing

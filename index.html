@@ -572,6 +572,11 @@
     cursor:pointer;width:34px;height:28px;border-radius:9px;padding:0}
   .setseg button.on{background:#5db06b;color:#fff;box-shadow:0 2px 0 rgba(63,138,77,.6)}
   body.touch .setseg button{width:42px;height:38px;font-size:14px}
+  /* a compact cozy action button for a settings row (task 089: "change your look") */
+  .setbtn{flex:0 0 auto;border:none;border-radius:999px;cursor:pointer;background:#5db06b;color:#fff;font-family:inherit;
+    font-size:13px;letter-spacing:.04em;padding:8px 18px;box-shadow:0 3px 0 #3f8a4d;transition:transform .1s ease,box-shadow .1s ease}
+  .setbtn:active{transform:translateY(2px);box-shadow:0 1px 0 #3f8a4d}
+  body.touch .setbtn{min-height:44px;padding:0 20px}
 
   /* ---------- name your mayor (task 087) ---------- */
   /* a small cream card, shown once at first start. z above the other cards so it
@@ -593,6 +598,50 @@
   .namehint{margin-top:12px;color:#9c8168;font-size:12px}
   /* the journal title-page signature (task 087) */
   .jsign{margin:-2px 4px 14px 0;color:#9c8168;font-size:13px;font-style:italic;letter-spacing:.02em}
+
+  /* ---------- avatar picker (task 089): "who are ya, anyway?" ----------
+     The first-play cast card, docked BOTTOM-CENTER so the live player rig at
+     screen-center stays visible above it — the rig IS the preview and it
+     turntables while the card is up. The backdrop is mostly transparent (only a
+     soft floor gradient grounds the card) so the world reads through, and
+     tap-outside CONFIRMS (avatarselect.js), so a stray walk-tap self-heals on
+     touch. Sits above the HUD; naming (z34) waits this out so they never stack. */
+  #avpick{position:fixed;inset:0;z-index:33;display:none;align-items:flex-end;justify-content:center;
+    background:linear-gradient(180deg,rgba(74,59,47,0) 46%,rgba(74,59,47,.32) 100%)}
+  #avpick.show{display:flex}
+  .avcard{position:relative;box-sizing:border-box;background:var(--cream);color:var(--ink);
+    width:min(560px,94vw);max-height:38vh;margin:0 0 16px;padding:16px 22px 16px;border-radius:22px;
+    display:flex;flex-direction:column;text-align:center;
+    box-shadow:0 10px 0 rgba(122,62,44,.28),0 24px 50px rgba(122,62,44,.25);
+    animation:avIn .5s cubic-bezier(.22,1.2,.36,1) both}
+  @keyframes avIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  .avtitle{margin:0;color:var(--ink);font-size:clamp(20px,4.4vw,26px);letter-spacing:.04em;text-shadow:0 2px 0 #f3d9a7}
+  .avsub{margin:4px 0 10px;color:#9c8168;font-size:12px;letter-spacing:.04em;line-height:1.3}
+  /* the rail: horizontal, scrolls on overflow with a thin cozy scrollbar */
+  .avrail{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 8px;
+    scrollbar-width:thin;scrollbar-color:#d8b48a transparent;-webkit-overflow-scrolling:touch}
+  .avrail::-webkit-scrollbar{height:6px}
+  .avrail::-webkit-scrollbar-thumb{background:#d8b48a;border-radius:999px}
+  .avrail::-webkit-scrollbar-track{background:transparent}
+  .avtile{flex:0 0 auto;box-sizing:border-box;width:70px;min-height:74px;cursor:pointer;border:none;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    border-radius:16px;padding:8px 4px 6px;background:rgba(255,236,214,.55);color:var(--ink);
+    font-family:inherit;box-shadow:0 2px 0 rgba(122,62,44,.12);
+    transition:transform .1s ease,box-shadow .12s ease,background .12s ease}
+  .avtile:hover{transform:translateY(-2px)}
+  .avico{font-size:34px;line-height:1}
+  .avname{font-size:10.5px;letter-spacing:.02em;line-height:1.15;max-width:64px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* selected: a warm coral highlight ring + a small lift */
+  .avtile.on{background:rgba(255,220,188,.92);box-shadow:0 0 0 3px #e0766a,0 2px 0 rgba(122,62,44,.16);transform:translateY(-2px)}
+  .avblurb{margin:2px 0 10px;color:#8a7561;font-size:13px;letter-spacing:.03em;line-height:1.35;min-height:18px}
+  .avok{align-self:center;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-weight:700;
+    font-size:16px;color:#fff;background:#5db06b;box-shadow:0 3px 0 rgba(63,138,77,.7);padding:11px 30px}
+  .avok:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(63,138,77,.7)}
+  /* touch: a full-width bottom sheet, flush to the bottom edge (rounded top only) */
+  body.touch .avcard{width:100%;max-width:none;margin:0;max-height:52vh;border-radius:22px 22px 0 0;
+    padding:14px 18px calc(14px + var(--sab))}
+  body.touch .avtile{min-height:44px}
+  body.touch .avok{min-height:44px;padding:12px 30px}
 
   /* ---------- UI TEXT SCALE (task 085) ----------
      --uiscale multiplies HUD font sizes; text size M sets it to 1 AND removes the
@@ -657,6 +706,23 @@
   @media (orientation:landscape){
     body.touch #btnSettings{top:calc(60px + var(--sat));right:auto;bottom:auto;left:calc(214px + var(--sal))}
   }
+
+  /* Avatar picker — landscape (task 089). MUST come AFTER the base + portrait
+     `.avcard` rules above: a media query adds NO specificity (the 079/085
+     source-order law), so an earlier equal-specificity rule would win. On a
+     390-tall landscape phone the whole stack shrinks so the card fits fully
+     inside the viewport with #avOk reachable, and the rig stays visible above. */
+  @media (orientation:landscape){
+    body.touch .avcard{max-height:82vh;margin:0;border-radius:22px 22px 0 0;padding:10px 20px calc(10px + var(--sab))}
+    body.touch .avtitle{font-size:19px}
+    body.touch .avsub{margin:2px 0 6px;font-size:11px}
+    body.touch .avrail{gap:8px;padding:2px 2px 6px}
+    body.touch .avtile{width:62px;min-height:46px;padding:5px 4px 4px;gap:2px}
+    body.touch .avico{font-size:26px}
+    body.touch .avname{font-size:10px;max-width:56px}
+    body.touch .avblurb{margin:1px 0 6px;font-size:11.5px;min-height:14px}
+    body.touch .avok{font-size:14px;padding:9px 26px;min-height:44px}
+  }
 </style>
 </head>
 <body>
@@ -716,6 +782,10 @@
      in src/settings.js; defaults reproduce today's behavior exactly. -->
 <div id="settings"><div class="setcard"><button id="setClose">&times;</button><h1>SETTINGS</h1>
   <div id="setBody">
+    <div class="setsec"><h2>Appearance</h2>
+      <div class="setrow"><span class="setlabel"><span class="setname">Your look</span><span class="setsub">pick a different chicagoan for the mayor</span></span>
+        <button id="setAvatar" class="setbtn">change it</button></div>
+    </div>
     <div class="setsec"><h2>Audio</h2>
       <div class="setrow"><span class="setlabel"><span class="setname">Music<em id="setMusicV">100%</em></span></span>
         <input type="range" class="setslider" id="setMusic" min="0" max="100" value="100" aria-label="Music volume"></div>
@@ -752,6 +822,18 @@
     autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="what should we call you">
   <button id="nameOk" class="namebtn">that&rsquo;s me</button>
   <div class="namehint">the whole neighborhood&rsquo;s gonna know it</div>
+</div></div>
+
+<!-- avatar picker (task 089): the first-play "who are ya, anyway?" cast card.
+     Docks bottom-center so the live player rig (screen center) stays the preview
+     above it; the rig turntables while the card is up. All wired in
+     src/avatarselect.js — #avRail is filled with .avtile buttons at runtime. -->
+<div id="avpick"><div class="avcard">
+  <h1 class="avtitle">who are ya, anyway?</h1>
+  <div class="avsub">pick your chicagoan &mdash; you can change it later in &#9881;&#65039;</div>
+  <div id="avRail" class="avrail"></div>
+  <div id="avBlurb" class="avblurb"></div>
+  <button id="avOk" class="avok">that&rsquo;s me!</button>
 </div></div>
 
 <!-- economy (task 078): the dibs chip (folding lawn chair + count), the small

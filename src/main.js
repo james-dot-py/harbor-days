@@ -13,6 +13,7 @@ import { cam, keys, joy, jump, initInput, updateCam } from './input.js';
 import { initOnboarding, updateOnboarding } from './onboard.js';
 import { initNaming, updateNaming } from './naming.js';
 import { initSettings } from './settings.js';
+import { initAvatarSelect, updateAvatarSelect } from './avatarselect.js';
 import { mmInit, mmDraw, initMinimapToggle } from './minimap.js';
 import * as CH from './data/chicago.js';
 import { worldReady, runUpdates, state, setIdleGroundProbe } from './framework.js';
@@ -187,6 +188,7 @@ initInput();
 installAudioResumeNet();   // mobile audio safety net: resume() on any gesture / refocus (issue 007)
 initMinimapToggle();
 initSettings();   // task 085: load + apply saved settings (DPR/audio/look/calm) before frame 1, wire the card
+initAvatarSelect();   // task 089: apply the saved/?avatar= rig before frame 1 (and before the worn-restore), arm the first-play picker
 
 // ---- framework: run queued pack setup now the world exists ----
 const _tp0=performance.now();
@@ -476,6 +478,7 @@ function frame(now){
   updateFogCull(dt);      // hide fully-fogged meshes (pixel-neutral draw-call cut)
   updateOnboarding(dt);   // touch coach marks — after runUpdates so state.distanceWalked/interactionsUsed are current
   updateNaming(dt);       // task 087: name-your-mayor card, once, after the coach marks
+  updateAvatarSelect(dt); // task 089: first-play avatar picker (before naming) + its turntable
 
   if(DBG.get('dbg')==='1'&&performance.now()>dbgHud.holdT){const h=$('hint');h.style.display='block';h.classList.remove('hide');
     const s=`x=${player.x.toFixed(1)} z=${player.z.toFixed(1)} y=${player.y.toFixed(2)} mag=${mag.toFixed(2)} mvx=${mvx.toFixed(2)} wadeT=${jsk.wadeT.toFixed(2)} on=${jsk.on?1:0} walk=${walkable(player.x,player.z)?1:0} iw07=${isWater(player.x+mvx*0.7,player.z+mvz*0.7)?1:0} walk07=${walkable(player.x+mvx*0.7,player.z+mvz*0.7)?1:0}`;

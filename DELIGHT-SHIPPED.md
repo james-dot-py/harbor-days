@@ -590,3 +590,16 @@ cut becomes a revert task.
   a sparrow drifts over to keep company. Touch anything and they pop back up,
   instantly, no fight for control. The world reads alive even when you left to
   make coffee. — idle charm — task 087
+- WHO ARE YA, ANYWAY? First play asks, and the answer is an eleven-strong
+  Chicago cast standing right there in the world as you flip through them: the
+  mayor, a leather-and-all biker, a big joyful hockey diehard, a River-North
+  quarter-zip consultant, a pilates girl with the mat on her back, the tattooed
+  chef in the blue apron, an old cab driver in a tweed flat cap, ¡viva México!
+  under a tricolor cape, an L conductor in hi-vis, da mustache-and-aviators
+  superfan, and a dibs defender carrying the folded lawn chair — change your
+  mind any time in ⚙. — first-play avatar picker — task 089
+- HATS FINALLY REPLACE THE HAIR. Pull on the bucket hat and the afro tucks in
+  under it like it would in real life — a fringe still peeking out at the nape —
+  on every head in the cast; take it off and every curl springs back. The
+  cab driver even doffs his flat cap when you hand him a different hat.
+  — hats-wear-right pass — task 089

@@ -28,6 +28,7 @@ import { keys } from './input.js';
 import { getFlag, setFlag } from './store.js';
 import { setMayorName, sanitizeName } from './framework.js';
 import { onboardingActive } from './onboard.js';
+import { avatarPickActive } from './avatarselect.js';
 
 const SEEN_KEY = 'ope.named.v1';
 const DBG = new URLSearchParams(location.search);
@@ -105,6 +106,7 @@ export function updateNaming(dt) {
   if (done || shown || !el) return;
   if (!game.running) return;
   if (onboardingActive()) return;             // wait out the touch coach marks
+  if (avatarPickActive()) { t = 0; return; }  // wait out the avatar picker (task 089) — with a fresh breath after
   t += Math.max(0, dt);
   if (t < minDelay) return;
   open();

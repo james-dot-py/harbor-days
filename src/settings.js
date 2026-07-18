@@ -19,6 +19,7 @@ import { getSave, markDirty } from './store.js';
 import { setMusicVol, setSfxVol, setMuted, audioLevels } from './audio.js';
 import { setLookScale, setInvertY } from './input.js';
 import { setLowPowerCull } from './fogcull.js';
+import { openAvatarPicker } from './avatarselect.js';
 
 // text-size multipliers (S / M / L). M = 1 → the --uiscale override rules all
 // compute calc(base * 1) = base, i.e. a byte-identical no-op (index.html gates
@@ -81,13 +82,13 @@ function snapshot() {
 // ------------------------------ the card -------------------------------
 function isOpen() { const c = $('settings'); return !!(c && c.classList.contains('show')); }
 function anyCardOpen() {
-  for (const id of ['journal', 'ctl', 'tote', 'shop', 'citymap']) { const e = $(id); if (e && e.classList.contains('show')) return true; }
+  for (const id of ['journal', 'ctl', 'tote', 'shop', 'citymap', 'avpick']) { const e = $(id); if (e && e.classList.contains('show')) return true; }
   return false;
 }
 export function openSettings() {
   const card = $('settings'); if (!card) return;
   // one card at a time — hide the sibling modals (they hide us on their open too)
-  for (const id of ['journal', 'ctl', 'tote', 'shop', 'citymap']) { const e = $(id); if (e) e.classList.remove('show'); }
+  for (const id of ['journal', 'ctl', 'tote', 'shop', 'citymap', 'avpick']) { const e = $(id); if (e) e.classList.remove('show'); }
   syncControls();
   card.classList.add('show');
 }
@@ -128,6 +129,8 @@ function wire() {
   on('setLow', 'change', e => { S.lowPower = !!e.target.checked; commit(); });
   // text-size segmented buttons
   for (const k of ['s', 'm', 'l']) on('setText-' + k, 'click', () => { S.text = k; commit(); });
+  // change-your-look row → the avatar cast picker (task 089)
+  on('setAvatar', 'click', () => { closeSettings(); openAvatarPicker(); });
 
   // open / close
   on('btnSettings', 'click', () => { if (isOpen()) closeSettings(); else openSettings(); });
