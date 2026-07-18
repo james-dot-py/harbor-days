@@ -11,5 +11,8 @@ const args = [
   '--splashBackgroundColor', '#ffb98a',
   '--splashBackgroundColorDark', '#5a3238',
 ];
-console.log('[cap-assets] capacitor-assets ' + args.join(' '));
-execSync(`npx --no-install capacitor-assets ${args.join(' ')}`, { stdio: 'inherit', shell: true });
+// Quote the color values: unquoted, bash on the macOS CI runner reads '#...'
+// as a comment and the flag loses its argument (cmd on Windows does not).
+const quoted = args.map(a => a.startsWith('#') ? '"' + a + '"' : a);
+console.log('[cap-assets] capacitor-assets ' + quoted.join(' '));
+execSync(`npx --no-install capacitor-assets ${quoted.join(' ')}`, { stdio: 'inherit', shell: true });
