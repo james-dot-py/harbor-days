@@ -705,6 +705,24 @@ few turns to find; keep each to one line of symptom + fix.
   one frame gap, so the frame's rising-edge check sees the key already released and
   the toggle never fires (the keyboard twin of the touch-tap-misses-the-latch
   pitfall). HOLD it: `keyboard.down(k)` · wait ≥1 frame (~150ms) · `keyboard.up(k)`.
+- Any feature that animates the mayor or spawns content on a TIMER (idle charm's
+  stretch/yawn/sit + ambient critter, task 087) MUST be gated OFF under `?play=1`
+  — walkthrough.mjs AND the baseline both load every shot with `play=1`, and
+  headless pages run FAR more game time than waitMs (2.6–15 s+, PITFALLS above),
+  so an un-gated 20 s idle would pose or SEAT the mayor in waypoint shots at the
+  long end and read as world drift everywhere. 087 gates it
+  `_idleParam==='0'?false:(play?!!_idleParam:true)` — real players (who click
+  start, no ?play) always get it; tooling opts in with `?idle=stretch|yawn|sit|
+  fast|1`. Same law as the 087 naming card (hidden under play unless `?name=1`).
+  Corollary: to CAPTURE a timed pose deterministically, add a debug HOLD mode
+  (`?idle=yawn` freezes the peak) — a cycling animation + unpredictable headless
+  game-time means a single shot lands on a random beat (087's first stretch shot
+  caught the settle beat, arms down, and read as "no stretch").
+- A live-sanitize `input` handler that `.trim()`s each keystroke makes INTERNAL
+  spaces impossible: "Sam " → trim → "Sam", so the next letter appends with no
+  space and you can never type "Sam O'Brien" (task 087 name field). Keep a single
+  TRAILING space while typing (strip invalid chars, collapse doubles, drop
+  leading, cap length — but no trim); do the final trim only at SUBMIT.
 - A window keydown handler registered in the CAPTURE phase (`addEventListener('keydown',
   fn, true)`) fires BEFORE all bubble-phase window handlers, so it reads the true
   pre-state before another handler mutates the DOM. Task 085's settings-card Esc
