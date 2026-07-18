@@ -43,17 +43,21 @@ platform :ios do
       # DEVELOPMENT_TEAM comes from the APPLE_TEAM_ID repo secret — automatic
       # signing on a headless runner cannot infer the team (the pbxproj
       # deliberately carries none; the repo is public).
-      # -allowProvisioningUpdates alone is not enough on a headless runner:
-      # xcodebuild needs the ASC API key itself (-authenticationKey*) to be able
-      # to CREATE the cloud-managed cert + provisioning profile. Gym forwards
-      # the key to the upload step, not to xcodebuild — pass it explicitly.
-      xcargs: "-allowProvisioningUpdates" \
-        " -authenticationKeyPath #{ENV.fetch("ASC_KEY_PATH")}" \
-        " -authenticationKeyID #{ENV.fetch("ASC_KEY_ID")}" \
-        " -authenticationKeyIssuerID #{ENV.fetch("ASC_ISSUER_ID")}" \
+      # Headless signing, the recipe that actually works on a bare runner:
+      # ARCHIVE UNSIGNED (automatic signing would demand a development profile
+      # the runner can never have), then sign once at EXPORT, where
+      # -allowProvisioningUpdates + the ASC API key mint Apple's cloud-managed
+      # distribution cert + app-store profile (Apple holds the private key —
+      # no keychain, no cert-limit churn, no match repo).
+      xcargs: "CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO" \
         " DEVELOPMENT_TEAM=#{ENV.fetch("APPLE_TEAM_ID")}" \
         " CURRENT_PROJECT_VERSION=#{build_number}",
       export_team_id: ENV.fetch("APPLE_TEAM_ID"),
+      export_options: { signingStyle: "automatic" },
+      export_xcargs: "-allowProvisioningUpdates" \
+        " -authenticationKeyPath #{ENV.fetch("ASC_KEY_PATH")}" \
+        " -authenticationKeyID #{ENV.fetch("ASC_KEY_ID")}" \
+        " -authenticationKeyIssuerID #{ENV.fetch("ASC_ISSUER_ID")}",
       output_directory: "build",
       output_name: "Ope.ipa",
       clean: true
