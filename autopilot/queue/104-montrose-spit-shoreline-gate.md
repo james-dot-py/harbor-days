@@ -19,11 +19,11 @@ acceptance: >
   shoreline; screenshot from the spit shows it extending into open water
   with the lighthouse at the end. NOTE: this moves coastline — expect the
   determinism gate to flag relocated scatter; regen baseline.png and update
-  affected waypoints in the same commit. Do not change anything not listed
-  here. Standard gates (the new check becomes one of them).
+  affected waypoints in the same commit. The listed fixes are the must-haves; beyond them the owner grants judgment (2026-07-19: 'you can change things not listed if you see fit') — adjacent improvements are allowed where clearly right, with determinism + all gates green. Standard gates (the new check becomes one of them).
 refs:
-  - bug-reports/montrose-spit.png (owner screenshot, repo root — if absent,
-    proceed from the description + OSM)
+  - owner description only (2026-07-19: no screenshot exists — verify the
+    self-intersection + spit orientation with tools/shot.mjs and the shoreline
+    data BEFORE fixing)
   - refs/montrose/osm.json (if present)
   - GEOGRAPHY.md, src/data/chicago.js, src/coast.js
   - autopilot/queue/done/ (084 Montrose compression context)

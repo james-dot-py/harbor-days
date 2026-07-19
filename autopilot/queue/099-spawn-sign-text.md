@@ -14,7 +14,7 @@ acceptance: >
   sign's mesh, dimensions, materials, colors, or placement. De-brand law
   applies to the new copy (RENAMES.md; geographic names stay real). Accept:
   geometry/material diff is empty except the text content; close-up shot
-  shows the new copy legibly. Do not change anything not listed here.
+  shows the new copy legibly. The listed fixes are the must-haves; beyond them the owner grants judgment (2026-07-19: 'you can change things not listed if you see fit') — adjacent improvements are allowed where clearly right, with determinism + all gates green.
   Standard gates.
 refs:
   - src/packs/suggestions.js (the kiosk)

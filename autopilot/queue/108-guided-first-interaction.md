@@ -23,3 +23,7 @@ refs:
   - src/packs/suggestions.js (kiosk on the walk line)
   - src/onboard.js (077 coach-mark pattern), src/store.js
 ---
+
+Owner license (2026-07-19): 'you can change things not listed if you see
+fit' — adjacent improvements beyond this spec are allowed where clearly
+right, with determinism + all gates green.

@@ -14,8 +14,7 @@ acceptance: >
   junctions. Accept: add a walkprobe-style test that samples NPC positions
   over N seconds and asserts 0 walker positions on the bike-path polyline
   and 0 cyclist positions on the walk-path polyline (within path-width
-  tolerance); the test joins the standard gate permanently. Do not change
-  anything not listed here. Standard gates.
+  tolerance); the test joins the standard gate permanently. The listed fixes are the must-haves; beyond them the owner grants judgment (2026-07-19: 'you can change things not listed if you see fit') — adjacent improvements are allowed where clearly right, with determinism + all gates green. Standard gates.
 refs:
   - src/packs/traillife.js
   - src/paths.js (dual trail data)

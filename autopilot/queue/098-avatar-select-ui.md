@@ -16,8 +16,7 @@ acceptance: >
   screenshot shows "the consult…" and "the ca…" today). Accept: tools/shot.mjs
   capture of the selection screen (desktop AND --mobile) shows the full
   avatar model and the complete name text for the longest avatar name in the
-  roster. Do not change anything not listed here — the pick flow, timing,
-  ope.avatar key, and roster contents all stay. Standard gates (walkprobe,
+  roster. The pick flow, timing, ope.avatar key, and roster contents stay; beyond that, the owner grants judgment (2026-07-19: 'you can change things not listed if you see fit') — adjacent improvements are allowed where clearly right, with determinism + all gates green. Standard gates (walkprobe,
   screenshot regression, zero console errors).
 refs:
   - src/avatarselect.js

@@ -15,11 +15,12 @@ acceptance: >
   path-continuity check to the standard gate PERMANENTLY (adjacent segment
   edges align within tolerance, no degenerate/overlapping quads) and it
   passes map-wide; (3) any other seams the new check surfaces are fixed at
-  the cause, not hidden. Do not change anything not listed here. Standard
+  the cause, not hidden. The listed fixes are the must-haves; beyond them the owner grants judgment (2026-07-19: 'you can change things not listed if you see fit') — adjacent improvements are allowed where clearly right, with determinism + all gates green. Standard
   gates (the new check becomes one of them).
 refs:
-  - bug-reports/montrose-fence.png (owner screenshot, repo root — if absent,
-    proceed from the description; the owner has been asked to drop it in)
+  - owner description only (2026-07-19: no screenshot exists — REPRODUCE the
+    jank with tools/shot.mjs around the white-fence end at Montrose Harbor and
+    find the bug from the description BEFORE fixing)
   - src/paths.js
   - tools/walkprobe.mjs, tools/mp-gridsweep.mjs
   - PITFALLS.md

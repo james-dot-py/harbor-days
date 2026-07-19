@@ -14,7 +14,7 @@ acceptance: >
   does not intersect the arm mesh. Keep the 031 drink-interaction behavior —
   this is a parenting/visibility fix only. Accept: player avatar has no
   bottle attached; screenshot of the Malört NPC shows the bottle
-  unobstructed. Do not change anything not listed here. Standard gates.
+  unobstructed. The listed fixes are the must-haves; beyond them the owner grants judgment (2026-07-19: 'you can change things not listed if you see fit') — adjacent improvements are allowed where clearly right, with determinism + all gates green. Standard gates.
 refs:
   - src/packs/characters.js (the Malört guy)
   - src/framework.js (holdItem)

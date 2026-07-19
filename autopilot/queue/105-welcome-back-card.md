@@ -28,3 +28,7 @@ refs:
   - src/packs/lake-moods.js (date-seeded mood)
   - src/store.js, src/data/chicago.js (ZONES)
 ---
+
+Owner license (2026-07-19): 'you can change things not listed if you see
+fit' — adjacent improvements beyond this spec are allowed where clearly
+right, with determinism + all gates green.
