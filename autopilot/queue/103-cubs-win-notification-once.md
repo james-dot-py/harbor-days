@@ -3,7 +3,7 @@ id: 103
 area: wrigleyville
 type: fix
 model: kimi
-turns: 40
+turns: 60
 title: Chubs-win notification fires at most once per session
 acceptance: >
   Owner (2026-07-19): "Cubs win notification can fire multiple times." Gate

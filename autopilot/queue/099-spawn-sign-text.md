@@ -3,7 +3,7 @@ id: 099
 area: lakefront
 type: fix
 model: kimi
-turns: 40
+turns: 60
 title: Spawn sign — swap real-world text for Ope! welcome copy
 acceptance: >
   Owner (2026-07-19): "The sign at the spawn point (AIDS Garden) still shows

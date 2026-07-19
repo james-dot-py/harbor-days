@@ -3,7 +3,7 @@ id: 108
 area: onboarding
 type: delight
 model: kimi
-turns: 50
+turns: 70
 title: Guided first interaction — one pulsing hand-pill, one time, ever (B4)
 acceptance: >
   From the 2026-07-19 design audit: a first-time player can walk 13 seconds

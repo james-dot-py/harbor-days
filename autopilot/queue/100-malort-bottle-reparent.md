@@ -3,7 +3,7 @@ id: 100
 area: lakefront
 type: fix
 model: kimi
-turns: 50
+turns: 70
 title: Malört bottle lives on the NPC's hand, not the player's
 acceptance: >
   Owner (2026-07-19): "The bottle is attached to the player avatar instead of

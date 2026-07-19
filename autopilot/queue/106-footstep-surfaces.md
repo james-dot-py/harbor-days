@@ -3,7 +3,7 @@ id: 106
 area: feel
 type: delight
 model: kimi
-turns: 60
+turns: 80
 title: Footsteps — real surface coverage + de-repetition (design audit B2)
 acceptance: >
   From the 2026-07-19 design audit: sStep knows only wood/stone/grass

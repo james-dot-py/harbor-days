@@ -324,14 +324,31 @@ function runClaude({ prompt, maxTurns, resume, model }) {
 // turn budget mid-task gets ONE resume with a top-up — turn exhaustion with
 // full context is resumable work, not a failure (learned on task 002: the
 // read-every-PNG doctrine eats turns fast).
+// kimi resume fragility (2026-07-19, task 098): kimi-k3's endpoint REJECTS some
+// resumed contexts — API 400 "the message at position N with role 'assistant'
+// must not be empty" — so the turns-topup / limit-sleep resume paths die code=1
+// within minutes. Detect that signature and continue as a FRESH session with an
+// interruption note (the tree keeps any uncommitted work) instead of eating a
+// strike. Resume remains the default: full-context continuation is better work.
+const RESUME_REJECT_RE = /must not be empty|API Error: 4\d\d|api_error_status":\s*4/i;
+async function resumeOrFresh(attempt, prompt, maxTurns, model) {
+  const resumed = await runClaude({ prompt: 'continue the task', maxTurns, resume: attempt.sessionId, model });
+  if (classifyLimit(resumed) === 'spend') { resumed.spendLimit = true; return resumed; }
+  if (RESUME_REJECT_RE.test(resumed.resultText || '')) {
+    log({ event: 'resume-rejected', msg: 'endpoint refused the resumed context; continuing as a FRESH session (tree may hold uncommitted work)' });
+    await notify('Harbor Days autopilot: resume refused', 'Resume of ' + attempt.sessionId + ' hit an API 4xx; continuing the task as a fresh session.', { priority: 'default' });
+    return runClaude({ prompt: prompt + '\n\nNOTE: a previous session was interrupted mid-task and may have left UNCOMMITTED changes in the tree — review the current file state before editing; keep whatever already holds.', maxTurns, model });
+  }
+  return resumed;
+}
 async function runWithLimitResilience({ prompt, maxTurns, model }) {
   let attempt = await runClaude({ prompt, maxTurns, model });
   if (classifyLimit(attempt) === 'spend') { attempt.spendLimit = true; return attempt; }
   if (attempt.maxTurnsHit && attempt.sessionId) {
     log({ event: 'turns-topup', msg: 'resuming ' + attempt.sessionId + ' with +' + maxTurns + ' turns' });
     await notify('Harbor Days autopilot: turn top-up', 'Session ' + attempt.sessionId + ' ran out of turns mid-task; resuming once with +' + maxTurns + '.', { priority: 'default' });
-    attempt = await runClaude({ prompt: 'continue the task', maxTurns, resume: attempt.sessionId, model });
-    if (classifyLimit(attempt) === 'spend') { attempt.spendLimit = true; return attempt; }
+    attempt = await resumeOrFresh(attempt, prompt, maxTurns, model);
+    if (attempt.spendLimit) return attempt;
   }
   let backoff = START_BACKOFF_MS;
   while (classifyLimit(attempt) === 'limit') {
@@ -346,8 +363,8 @@ async function runWithLimitResilience({ prompt, maxTurns, model }) {
     log({ event: 'limit-sleep-end', msg: 'resuming ' + (attempt.sessionId || '?') });
     await notify('Harbor Days autopilot resuming', 'Resuming session ' + (attempt.sessionId || '?'), { priority: 'default' });
     if (!attempt.sessionId) { log({ event: 'resume-failed', msg: 'no session_id captured; cannot resume' }); break; }
-    attempt = await runClaude({ prompt: 'continue the task', maxTurns, resume: attempt.sessionId, model });
-    if (classifyLimit(attempt) === 'spend') { attempt.spendLimit = true; return attempt; }
+    attempt = await resumeOrFresh(attempt, prompt, maxTurns, model);
+    if (attempt.spendLimit) return attempt;
   }
   return attempt;
 }
