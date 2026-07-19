@@ -168,7 +168,7 @@ onWorldReady(() => {
   // ================================================================= //
   {
     const X=92, Z=-349, base=-2.1;
-    const birder = makeNPC({x:X, z:Z, ry:base, palette:{suit:0x4f6b4a,pants:0x3a4030,skin:0xcaa080,hair:0x4a3a24,hairStyle:'bun'},
+    const birder = makeNPC({x:X, z:Z, ry:base, staticLod:true, palette:{suit:0x4f6b4a,pants:0x3a4030,skin:0xcaa080,hair:0x4a3a24,hairStyle:'bun'},   // 095: 1-draw twin at distance
       name:'birder', lines:["shhh — scarlet tanager","that's a warbler, not a sparrow","the plovers are BACK","ope — don't spook 'em"]});
     // binoculars: two short barrels (one InstancedMesh), glued to the face
     const binoc = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.06,0.06,0.2,8), toon(0x1a1a20), 2);

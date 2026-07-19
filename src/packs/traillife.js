@@ -291,7 +291,7 @@ onWorldReady((player) => {
   const span = 0.96, base = 0.02;
   for (let i = 0; i < 6; i++){
     const pal = JOG_PAL[i];
-    const npc = makeNPC({ x: XS[0], z: ZS[0], palette: pal, name: '', lines: JOG_LINES, wander: 0 });
+    const npc = makeNPC({ x: XS[0], z: ZS[0], palette: pal, name: '', lines: JOG_LINES, wander: 0, moverLod: true });   // 095: 1-draw twin at distance
     const d0 = (base + span * (i / 6)) * TOT, d1 = (base + span * ((i + 1) / 6)) * TOT;
     joggers.push({ npc, d0, d1, d: d0 + Math.random() * (d1 - d0), dir: Math.random() < 0.5 ? 1 : -1,
       sp: 2.6 + Math.random() * 0.8, walkT: Math.random() * 6.28 });
@@ -315,7 +315,7 @@ onWorldReady((player) => {
   const anchors = [{ c: dGarden, half: 42, side: 1 }, { c: dHarbor, half: 46, side: -1 }];
   for (let i = 0; i < 2; i++){
     const a = anchors[i];
-    const npc = makeNPC({ x: XS[0], z: ZS[0], palette: WALK_PAL[i], name: '', lines: WALK_LINES, wander: 0 });
+    const npc = makeNPC({ x: XS[0], z: ZS[0], palette: WALK_PAL[i], name: '', lines: WALK_LINES, wander: 0, moverLod: true });   // 095: 1-draw twin at distance
     walkers.push({ npc, d0: Math.max(4, a.c - a.half), d1: Math.min(TOT - 4, a.c + a.half),
       d: a.c, dir: Math.random() < 0.5 ? 1 : -1, sp: 1.5, spCur: 1.5, walkT: Math.random() * 6.28,
       dogTrot: Math.random() * 6.28, sniff: 0, sniffing: false, timer: 4 + Math.random() * 4,

@@ -768,6 +768,15 @@ few turns to find; keep each to one line of symptom + fix.
   the band comes within 1 m of any walkable grade, approach along the grade
   quad's edge (not across its corner), and keep data ramps <=0.55 y per meter
   (the 093 rink ramp at 1.6/2.7 = 0.59 failed; 1.6/3.0 passes).
+- fogcull's restore path re-shows ANY mesh carrying a stale `_fogHidden` tag —
+  including one a pack ALSO hid in between (task 095: the bird live/baked LOD
+  hid a far rig fogcull had tagged during the early camera-settle frames; when
+  the graded sanctuary fog eased, fogcull "restored what it hid" and the live
+  rig rendered NEXT TO its baked twin, +4 draws/bird, while the pack's state
+  said hidden). Any pack that toggles child-mesh `.visible` itself must be
+  EXEMPTED in fogcull's selfManaged (name the group — 'chibi', 'bird') — the
+  userData.noFogCull flag exists but a name rule covers every child at once.
+  Symptom signature: probe shows lodLive=false + BOTH twin and rig visible.
 - The 091 interact affordance (framework.js: NPC glance + object glints) has a
   probe — `window.__hd.aff()` -> {enabled, glints, ptsVisible, glances[]} — USE
   IT before tuning visuals: both halves were "invisible" on first shots while

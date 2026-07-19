@@ -25,9 +25,10 @@
 //  plane over a solid backing). Colliders sit INBOARD on walkable grass (052/065).
 // =====================================================================
 import * as THREE from 'three';
+import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { onWorldReady, registerUpdate, addInteraction, makeNPC, chargeThrow,
          camForward, holdItem, toast, bag, shop, fetchDogs, wallet, getAudioCtx, state } from '../framework.js';
-import { scene, toon, bmat, pip, WATER_Y } from '../core.js';
+import { scene, toon, bmat, pip, WATER_Y, curveMat, gmap } from '../core.js';
 import { coastQuery, beachH, LAND } from '../coast.js';
 import { pathSamples } from '../paths.js';
 import { collide } from '../props.js';
@@ -153,67 +154,85 @@ onWorldReady(player => {
   const cx = SITE.x, cz = SITE.z, FRONT = cz + 0.5;        // counter/sign live on the +z (south) face
 
   // ------------------------------ build ------------------------------
-  const wood = toon(0x9c6b3f), woodDk = toon(0x7d5330);
+  // 095 draw-call diet: every one-off STATIC part below is BAKED (transform +
+  // per-vertex colour) into `foldParts` and merged into ONE vertex-colored,
+  // world-curved toon mesh at the end of the build — ~36 meshes collapse to 1
+  // draw. curveMat injects the world-curve vertex shader (required for a world
+  // mesh); white MeshToonMaterial × per-vertex colour == a per-part toon tint
+  // under r128's LinearEncoding (the hats/character/museum-cart recipe). Only the
+  // textured menu board, the transparent popcorn glass and the keeper rig stay
+  // live separate meshes. Consumes NO rng (fixed coords, no Math.random here).
+  const wood = 0x9c6b3f, woodDk = 0x7d5330;
   const add = (m) => { scene.add(m); return m; };
+  const foldParts = [];
+  const _fc = new THREE.Color();
+  const fold = (geo, hex) => {                             // bake one part: non-index, stamp its solid colour, queue it for the merge
+    geo = geo.index ? geo.toNonIndexed() : geo;
+    _fc.set(hex);
+    const n = geo.attributes.position.count, a = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) { a[i * 3] = _fc.r; a[i * 3 + 1] = _fc.g; a[i * 3 + 2] = _fc.b; }
+    geo.setAttribute('color', new THREE.BufferAttribute(a, 3));
+    foldParts.push(geo);
+  };
 
   // 4 posts
-  for (const px of [cx - 1.2, cx + 1.2]) for (const pz of [cz + 0.75, cz - 0.75]) {
-    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.09, 2.2, 8), wood);
-    post.position.set(px, 1.1, pz); add(post);
-  }
+  for (const px of [cx - 1.2, cx + 1.2]) for (const pz of [cz + 0.75, cz - 0.75])
+    fold(new THREE.CylinderGeometry(0.08, 0.09, 2.2, 8).translate(px, 1.1, pz), wood);
   // counter slab + front apron + side panels + a low back shelf
-  const counter = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.14, 0.72), woodDk); counter.position.set(cx, 1.0, cz + 0.5); add(counter);
-  const apron = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.9, 0.07), wood); apron.position.set(cx, 0.55, cz + 0.85); add(apron);
-  for (const sx of [cx - 1.2, cx + 1.2]) { const side = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.95, 1.4), wood); side.position.set(sx, 0.55, cz); add(side); }
-  const shelf = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.1, 0.4), woodDk); shelf.position.set(cx, 0.92, cz - 0.6); add(shelf);
+  fold(new THREE.BoxGeometry(2.5, 0.14, 0.72).translate(cx, 1.0, cz + 0.5), woodDk);
+  fold(new THREE.BoxGeometry(2.5, 0.9, 0.07).translate(cx, 0.55, cz + 0.85), wood);
+  for (const sx of [cx - 1.2, cx + 1.2]) fold(new THREE.BoxGeometry(0.07, 0.95, 1.4).translate(sx, 0.55, cz), wood);
+  fold(new THREE.BoxGeometry(2.5, 0.1, 0.4).translate(cx, 0.92, cz - 0.6), woodDk);
 
   // scalloped peach/cream striped awning — alternating thin toon boxes read
   // cleaner than a texture at this size; a scallop valance hangs off the front.
-  const peach = toon(0xf2a86a), cream = toon(0xf3e6cf);
-  const peachDS = toon(0xf2a86a, { mat: { side: THREE.DoubleSide } }), creamDS = toon(0xf3e6cf, { mat: { side: THREE.DoubleSide } });
+  const peach = 0xf2a86a, cream = 0xf3e6cf;
   const NST = 7, awW = 2.9, stW = awW / NST, awZ = cz + 0.35, awY = 2.35, tilt = 0.2;
-  const scGeo = new THREE.CircleGeometry(0.2, 8, Math.PI, Math.PI);   // downward semicircle (theta π..2π), facing +z
   const feY = awY - Math.sin(tilt) * 0.52, feZ = awZ + Math.cos(tilt) * 0.52;   // front edge after the tilt
   for (let i = 0; i < NST; i++) {
     const px = cx - awW / 2 + stW * (i + 0.5);
-    const stripe = new THREE.Mesh(new THREE.BoxGeometry(stW + 0.004, 0.06, 1.05), i % 2 ? cream : peach);
-    stripe.position.set(px, awY, awZ); stripe.rotation.x = tilt; add(stripe);
-    const sc = new THREE.Mesh(scGeo, i % 2 ? creamDS : peachDS);           // scallop bump under the front edge
-    sc.position.set(px, feY - 0.02, feZ + 0.03); add(sc);
+    fold(new THREE.BoxGeometry(stW + 0.004, 0.06, 1.05).rotateX(tilt).translate(px, awY, awZ), i % 2 ? cream : peach);
+    // scallop bump under the front edge — its OWN CircleGeometry (theta π..2π, faces +z;
+    // the old code reused a single instance, so build a fresh one per scallop)
+    fold(new THREE.CircleGeometry(0.2, 8, Math.PI, Math.PI).translate(px, feY - 0.02, feZ + 0.03), i % 2 ? cream : peach);
   }
-  const fascia = new THREE.Mesh(new THREE.BoxGeometry(awW, 0.16, 0.05), cream); fascia.position.set(cx, feY, feZ + 0.02); add(fascia);
+  fold(new THREE.BoxGeometry(awW, 0.16, 0.05).translate(cx, feY, feZ + 0.02), cream);
 
   // hand-painted menu board across the counter FRONT (sign law): a FrontSide
   // canvas plane on the apron face — the solid apron behind it IS the backing
   // (its front face is cz+0.885; the plane sits 15 mm proud at cz+0.9 so the two
   // coplanar faces don't z-fight), and it sits below the counter so the keeper's
-  // head reads clear above.
+  // head reads clear above. STAYS a live textured mesh (not folded).
   const signPlane = new THREE.Mesh(new THREE.PlaneGeometry(2.25, 0.6), bmat(0xffffff, { map: signTex('SNACKS · TOYS · KITES'), side: THREE.FrontSide }));
   signPlane.position.set(cx, 0.6, cz + 0.9); add(signPlane);
 
-  // popcorn machine on the counter (warm amber glow = self-lit bmat)
+  // popcorn machine on the counter (warm amber glow = self-lit bmat GLASS stays live)
   {
     const mx = cx - 0.55, mz = cz + 0.45, top = 1.07;
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.34), toon(0xd23b34)); body.position.set(mx, top + 0.2, mz); add(body);
+    fold(new THREE.BoxGeometry(0.4, 0.4, 0.34).translate(mx, top + 0.2, mz), 0xd23b34);   // body
     const glass = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.26, 0.28), bmat(0xffbf57, { transparent: true, opacity: 0.85 })); glass.position.set(mx, top + 0.22, mz); add(glass);
-    for (const [dx, dy, dz] of [[-0.07, 0.3, 0.02], [0.05, 0.33, -0.03], [0.0, 0.36, 0.04], [0.09, 0.31, 0.03]]) { const k = new THREE.Mesh(new THREE.SphereGeometry(0.045, 7, 6), toon(0xfff2cc)); k.position.set(mx + dx, top + dy, mz + dz); add(k); }
-    const lid = new THREE.Mesh(new THREE.BoxGeometry(0.44, 0.06, 0.38), toon(0xb52c25)); lid.position.set(mx, top + 0.44, mz); add(lid);
+    for (const [dx, dy, dz] of [[-0.07, 0.3, 0.02], [0.05, 0.33, -0.03], [0.0, 0.36, 0.04], [0.09, 0.31, 0.03]]) fold(new THREE.SphereGeometry(0.045, 7, 6).translate(mx + dx, top + dy, mz + dz), 0xfff2cc);   // kernels
+    fold(new THREE.BoxGeometry(0.44, 0.06, 0.38).translate(mx, top + 0.44, mz), 0xb52c25);   // lid
   }
   // a small pyramid of 3 tennis balls on the counter
   {
-    const bx = cx + 0.7, bz = cz + 0.45, top = 1.09, ballMat = toon(0xcadb2f);
-    for (const [dx, dy, dz] of [[-0.1, 0.09, 0], [0.1, 0.09, 0], [0.0, 0.24, 0]]) { const b = new THREE.Mesh(new THREE.SphereGeometry(0.09, 10, 9), ballMat); b.position.set(bx + dx, top + dy, bz + dz); add(b); }
+    const bx = cx + 0.7, bz = cz + 0.45, top = 1.09;
+    for (const [dx, dy, dz] of [[-0.1, 0.09, 0], [0.1, 0.09, 0], [0.0, 0.24, 0]]) fold(new THREE.SphereGeometry(0.09, 10, 9).translate(bx + dx, top + dy, bz + dz), 0xcadb2f);
   }
-  // 080 stock: a rolled kite leaning on the right post + two flat skipping stones on the counter (3 meshes, no rng)
+  // 080 stock: a rolled kite leaning on the right post + two flat skipping stones on the counter (no rng)
   {
-    const kiteDisp = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6, 10), toon(0x2aa6a0)); kiteDisp.position.set(cx + 1.15, 0.72, cz + 0.6); kiteDisp.rotation.z = 0.3; add(kiteDisp);
-    const stoneMat = toon(0x6b6f76);
-    const s1 = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 6), stoneMat); s1.scale.set(1.3, 0.4, 1.5); s1.position.set(cx - 0.05, 1.11, cz + 0.52); add(s1);
-    const s2 = new THREE.Mesh(new THREE.SphereGeometry(0.07, 8, 6), stoneMat); s2.scale.set(1.3, 0.4, 1.5); s2.position.set(cx - 0.16, 1.11, cz + 0.44); add(s2);
+    fold(new THREE.CylinderGeometry(0.05, 0.05, 0.6, 10).rotateZ(0.3).translate(cx + 1.15, 0.72, cz + 0.6), 0x2aa6a0);   // kite display, tilted
+    // two squashed skipping stones — bake the (1.3,0.4,1.5) scale into the geometry, then translate
+    fold(new THREE.SphereGeometry(0.08, 8, 6).scale(1.3, 0.4, 1.5).translate(cx - 0.05, 1.11, cz + 0.52), 0x6b6f76);
+    fold(new THREE.SphereGeometry(0.07, 8, 6).scale(1.3, 0.4, 1.5).translate(cx - 0.16, 1.11, cz + 0.44), 0x6b6f76);
   }
 
+  // ---- 095: emit the whole stand as ONE vertex-colored, world-curved toon mesh ----
+  scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(foldParts, false),
+    curveMat(new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: gmap, side: THREE.DoubleSide }))));
+
   // KEEPER — a teen NPC behind the counter, facing the customer (+z); green visor.
-  const keeper = makeNPC({ x: cx, z: cz - 0.9, ry: 0, name: 'kioskteen',
+  const keeper = makeNPC({ x: cx, z: cz - 0.9, ry: 0, name: 'kioskteen', staticLod: true,   // 095: 1-draw baked twin past 60 m (he never wanders)
     palette: { suit: 0x3ba6d6, pants: 0x33404a, skin: 0xd7a074, hair: 0x2a1d12 },
     lines: ["popcorn's fresh — the birds know it", "tennis balls are for the dogs. mostly.", "pop's in the cooler", "we take dibs", "flat stones skip best — try the rocks", "that kite wants Cricket Hill"] });
   keeper.group.position.y = 0;

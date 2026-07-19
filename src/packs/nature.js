@@ -254,6 +254,40 @@ function paintGeo(g, hex) {
 }
 const mergeGeos = arr => BufferGeometryUtils.mergeBufferGeometries(arr);
 
+// ---- baked LOD twin (task 095 draw diet) ----------------------------------
+// A perched songbird is 4 draws (body / head / 2 wings) purely so the head can
+// tilt and the wings can flap — detail that is subpixel past ~30 m. Each pool
+// bird carries a 1-draw BAKED twin (the live parts' geometries merged in the
+// exact perched pose, shared per species), and updBirdLod keeps only the
+// nearest few birds live (lawnlife/048 law: live rigs near, baked twins far).
+// The twin is a child of the same group, so every behavior (perch bob, fly
+// arcs, relocate, lure, binocular ID — which projects the GROUP) is unchanged.
+// Build-time only; consumes no rng.
+const _bakedGeoCache = new Map();
+function addBakedTwin(spec, g) {
+  let geo = _bakedGeoCache.get(spec.name);
+  if (!geo) {
+    const gs = [];
+    for (const child of g.children) {              // body / head / wings — all direct mesh children
+      child.updateMatrix();
+      gs.push(child.geometry.clone().applyMatrix4(child.matrix));
+    }
+    geo = mergeGeos(gs);
+    _bakedGeoCache.set(spec.name, geo);
+  }
+  const baked = new THREE.Mesh(geo, BIRD_MAT);
+  baked.name = 'bird-baked'; baked.visible = false; g.add(baked);
+  const u = g.userData;
+  u.baked = baked; u.liveM = g.children.filter(c => c !== baked); u.lodLive = true;
+}
+function setBirdLod(b, live) {
+  const u = b.userData;
+  if (!u.baked || u.lodLive === live) return;
+  u.lodLive = live;
+  for (const m of u.liveM) m.visible = live;
+  u.baked.visible = !live;
+}
+
 function makeBird(spec) {
   const g = new THREE.Group();
   const hun = spec.hunched;
@@ -285,6 +319,8 @@ function makeBird(spec) {
   g.scale.setScalar(spec.size * BIRD_SCALE);
   if (hun) g.rotation.x = 0.25;
   g.userData = birdData(spec, headMesh, wings);
+  g.name = 'bird';
+  addBakedTwin(spec, g);
   g.visible = false;
   return g;
 }
@@ -309,6 +345,7 @@ function makeHeron(spec) {
   const headMesh = new THREE.Mesh(mergeGeos(hParts), BIRD_MAT); neck.add(headMesh);
   g.scale.setScalar(spec.size);
   g.userData = birdData(spec, headMesh, []); g.userData.neck = neck; g.userData.neckRest = 0;
+  g.name = 'bird';                                 // herons stay live always (3 draws, the slow strike is the charm)
   g.visible = false;
   return g;
 }
@@ -400,8 +437,11 @@ onWorldReady(player => {
   // a weathered dead SNAG — a real bird-sanctuary feature (cavity nesters) and
   // the woodpecker's home; stands in the interior, deck-facing (east) side.
   const SNAG = { x: 150, z: -402 };
-  { const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.24, 3.0, 7), toon(0x9a938a)); trunk.position.set(SNAG.x, 1.5, SNAG.z); scene.add(trunk);
-    const stub = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.09, 0.7, 5), toon(0x8a837a)); stub.position.set(SNAG.x + 0.24, 2.35, SNAG.z); stub.rotation.z = -0.9; scene.add(stub); }
+  { // trunk + stub vertex-color-merged into one mesh (095: 2 draws → 1, same colors/transforms)
+    const trunk = new THREE.CylinderGeometry(0.15, 0.24, 3.0, 7); trunk.translate(0, 1.5, 0);
+    const stub = new THREE.CylinderGeometry(0.05, 0.09, 0.7, 5); stub.rotateZ(-0.9); stub.translate(0.24, 2.35, 0);
+    const snagMesh = new THREE.Mesh(mergeGeos([paintGeo(trunk, 0x9a938a), paintGeo(stub, 0x8a837a)]), BIRD_MAT);
+    snagMesh.position.set(SNAG.x, 0, SNAG.z); scene.add(snagMesh); }
   woodpecker.userData.snag = SNAG;
 
   // eye-level perches right on the deck RAIL — the "a bird lands beside you"
@@ -411,6 +451,26 @@ onWorldReady(player => {
 
   // busy/calm wave + cull state
   let busy = true, waveT = 12, birdRelocT = 1.2, birdsShown = false, flockPassT = 0;
+  // ---- bird LOD state (095): nearest ≤6 birds within 30 m stay live 4-draw
+  // rigs; every other visible bird shows its 1-draw baked twin. Re-ranked every
+  // ~0.35 s AND immediately after any relocate (so a rail bird never renders a
+  // baked tick beside the player). Hoisted array — no per-frame alloc.
+  const LOD_LIVE_MAX = 6, LOD_LIVE_R2 = 30 * 30;
+  const _lodArr = [];
+  let birdLodT = 0, lodDirty = true;
+  function updBirdLod(pl) {
+    _lodArr.length = 0;
+    for (const b of pool) if (b.visible) _lodArr.push(b);
+    if (woodpecker.visible) _lodArr.push(woodpecker);
+    if (hummer.visible) _lodArr.push(hummer);
+    for (const b of _lodArr) {
+      const dx = b.position.x - pl.x, dz = b.position.z - pl.z;
+      b.userData._d2 = dx * dx + dz * dz;
+    }
+    _lodArr.sort((a, b) => a.userData._d2 - b.userData._d2);
+    for (let i = 0; i < _lodArr.length; i++)
+      setBirdLod(_lodArr[i], i < LOD_LIVE_MAX && _lodArr[i].userData._d2 < LOD_LIVE_R2);
+  }
   function queueFlockPass() { flockPassT = 0.15; }
   // crumb-lure state (task 078): last recruit point + throttles (hoisted — no
   // per-frame alloc; fn() is only called on lureScan ticks, never every frame).
@@ -446,6 +506,7 @@ onWorldReady(player => {
       b.rotation.y = k % 2 ? 0.7 : -0.7; b.userData.perchT = rr(9, 15);
     }
     birdRelocT = 9 + Math.random() * 7;
+    lodDirty = true;                                // re-rank live/baked on the fresh layout
   }
   // launch a perched bird — hop (short/low), circling flight, or a raptor glide
   function startFlight(b) {
@@ -628,6 +689,8 @@ onWorldReady(player => {
     updFlockPass(dt);
     updHeron(nightHeron, dt, t); updHeron(greatBlue, dt, t);
     updWoodpecker(dt); updHummer(dt, t);
+    birdLodT -= dt;
+    if (birdLodT <= 0 || lodDirty) { birdLodT = 0.35; lodDirty = false; updBirdLod(pl); }
   }
 
   // --------------------------- 2. PLOVER PEN -------------------------- //
@@ -673,7 +736,7 @@ onWorldReady(player => {
     if (dx * dx + dz * dz < 2.1 * 2.1 && scoldT <= 0) { steward.say('ope — not too close!'); scoldT = 4.5; }
   }
   const steward = makeNPC({
-    x: 108, z: -343, ry: -0.27,
+    x: 108, z: -343, ry: -0.27, staticLod: true,   // 095: 1-draw baked twin past 60 m (the sanctuary-deck frustum)
     palette: { suit: 0xff7a1a, pants: 0x35414c, skin: 0xe4b489, hair: 0x241812, shoe: 0x222 },
     lines: ["that's Monty and Rose's cousin", "give 'em space now, wouldya", "they flew in from Montrose"],
   });

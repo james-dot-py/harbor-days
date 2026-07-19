@@ -516,10 +516,10 @@ onWorldReady(player=>{
   dogIMs.forEach(m=>{ m.frustumCulled=false; m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); scene.add(m); });
 
   // ---- owners (framework NPCs, scale 1) ----
-  const ownerA=makeNPC({x:91,z:-340,ry:0.4,name:'walkerA',
+  const ownerA=makeNPC({x:91,z:-340,ry:0.4,name:'walkerA', staticLod:true,   // 095: 1-draw twin at distance
     palette:{suit:0x4f6f9a,pants:0x2c3542,skin:0xdca878,hair:0x2b2118},
     lines:["go get it!","good boy!","atta girl","drop it","who's a good dog"]});
-  const ownerB=makeNPC({x:99.5,z:-340,ry:-0.3,name:'walkerB',
+  const ownerB=makeNPC({x:99.5,z:-340,ry:-0.3,name:'walkerB', staticLod:true,   // 095: 1-draw twin at distance
     palette:{suit:0xb0553f,pants:0x33404a,skin:0xe6b088,hair:0x3a2a1c},
     lines:["here!","go go go!","bring it back","nice catch","fetch!"]});
 

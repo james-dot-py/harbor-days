@@ -61,7 +61,10 @@ function fogged(m){
 }
 
 // o sits under a subtree that manages its own visibility — character rigs
-// (framework.js NPC/bumpable culling) — or opts out via userData.noFogCull?
+// (framework.js NPC/bumpable culling), sanctuary birds (nature.js live/baked
+// LOD flips child-mesh .visible; a stale _fogHidden restore here re-showed a
+// hidden live rig NEXT TO its baked twin, task 095) — or opts out via
+// userData.noFogCull?
 // NOTE: userData.live (cells.js) is NOT an exemption here — it means "animates
 // its TRANSFORMS, don't bake it into a merge" (boats, bobbers, trains, the
 // dog). Nothing manages those objects' .visible, and a bobbing boat past
@@ -70,7 +73,7 @@ function fogged(m){
 // composes independently with any group-level toggling.
 function selfManaged(o){
   if (o.userData && o.userData.noFogCull) return true;
-  for (let p = o; p; p = p.parent) if (p.name === 'chibi') return true;
+  for (let p = o; p; p = p.parent) if (p.name === 'chibi' || p.name === 'bird') return true;
   return false;
 }
 

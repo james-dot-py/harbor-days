@@ -176,18 +176,18 @@ onWorldReady(() => {
   // =================================================================== //
   //  the neighbors (makeNPC, wander:0, distinct palettes, house-voice bumps)
   // =================================================================== //
-  const sal = makeNPC({ x: SAL.x, z: SAL.z, ry: -Math.PI / 2, wander: 0, name: 'sal',
+  const sal = makeNPC({ x: SAL.x, z: SAL.z, ry: -Math.PI / 2, wander: 0, staticLod: true, name: 'sal',   // 095: 1-draw twin at distance
     palette: { suit: 0x2f5d8a, pants: 0xcdbf99, skin: 0xc9976a, hair: 0xb4b0a8, face: true },
     lines: ["twenty years I've had this slip.", "the lake's flat as glass today.", "Rita moors up at Montrose now.", "she laminates everything. everything."] });
   sal.group.position.y = SAL.y;
   addCap(sal, 0x223b52, 0x1a2c3d);
 
-  const rita = makeNPC({ x: RITA.x, z: RITA.z, ry: -Math.PI / 2, wander: 0, name: 'rita',
+  const rita = makeNPC({ x: RITA.x, z: RITA.z, ry: -Math.PI / 2, wander: 0, staticLod: true, name: 'rita',   // 095: 1-draw twin at distance
     palette: { suit: 0xb5473f, pants: 0x37414c, skin: 0xd8a878, hair: 0x3a2a1a, hairStyle: 'bun', face: true },
     lines: ["Montrose has the room. Belmont's a shoebox.", "he spelled 'buoy' wrong, you know.", "tell Sal the varnish held up fine."] });
   rita.group.position.y = RITA.y;
 
-  const reggie = makeNPC({ x: REGGIE.x, z: REGGIE.z, ry: REGGIE.ry, wander: 0, name: 'reggie',
+  const reggie = makeNPC({ x: REGGIE.x, z: REGGIE.z, ry: REGGIE.ry, wander: 0, staticLod: true, name: 'reggie',   // 095: 1-draw twin at distance
     palette: { suit: 0x1f7fb8, pants: 0x2b3138, skin: 0x6b4a2f, hair: 0x1a130c, face: true },
     lines: ["I rebalance the whole north side.", "these bikes got a mind of their own.", "one rolls off, three roll off — go figure.", "you'd be amazed where they end up."] });
   // hi-vis stripe across the vest (reads as a rebalancer)
@@ -195,7 +195,7 @@ onWorldReady(() => {
   addCap(reggie, 0x1f7fb8, 0x18628f);
 
   const sheY = (beachH(SHELLEY.x, SHELLEY.z) ?? 0);
-  const shelley = makeNPC({ x: SHELLEY.x, z: SHELLEY.z, ry: SHELLEY.ry, wander: 0, name: 'shelley',
+  const shelley = makeNPC({ x: SHELLEY.x, z: SHELLEY.z, ry: SHELLEY.ry, wander: 0, staticLod: true, name: 'shelley',   // 095: 1-draw twin at distance
     palette: { suit: 0x6a9b8a, pants: 0x7a6a58, skin: 0xe0b088, hair: 0x8a5a34, hairStyle: 'bun', face: true },
     lines: ["blue's the rare one, you know.", "the lake gives it back, polished.", "cobalt only comes up at the big beach.", "frosted white's pretty, but blue pays the rent."] });
   shelley.group.position.y = sheY;
