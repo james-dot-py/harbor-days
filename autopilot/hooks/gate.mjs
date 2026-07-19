@@ -10,6 +10,7 @@
 //
 // Checks (all mechanical):
 //   1. node tools/walkprobe.mjs exits 0.
+//   1b. node tools/npc-paths.mjs exits 0 (live trail path-discipline probe).
 //   2. npm run build succeeds; dist/ contains EXACTLY index.html; log its size.
 //   3. Every tools/shots/run-*/report.json with mtime >= lastCodeEdit:
 //      summary.errorShots===0, summary.noCanary===0, summary.maxDrawCalls<=budget.
@@ -111,6 +112,13 @@ async function main() {
     const wp = spawnSync(process.execPath, [path.join(TOOLS, 'walkprobe.mjs')], { cwd: ROOT, encoding: 'utf8' });
     if (wp.status !== 0) failures.push('walkprobe failed (exit ' + wp.status + '):\n' + ((wp.stdout || '') + (wp.stderr || '')).trim().split('\n').slice(-12).join('\n'));
   } catch (e) { failures.push('walkprobe could not run: ' + e.message); }
+
+  // ---- 1b. NPC path discipline (task 101: live probe, own vite+browser) ----
+  try {
+    const np = spawnSync(process.execPath, [path.join(TOOLS, 'npc-paths.mjs')], { cwd: ROOT, encoding: 'utf8', timeout: 300000 });
+    if (np.status !== 0) failures.push('npc-paths failed (exit ' + np.status + '):\n' + ((np.stdout || '') + (np.stderr || '')).trim().split('\n').slice(-12).join('\n'));
+    else console.log('[gate] npc-paths ok');
+  } catch (e) { failures.push('npc-paths could not run: ' + e.message); }
 
   // ---- 2. build ------------------------------------------------------------
   try {

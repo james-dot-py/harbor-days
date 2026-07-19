@@ -179,6 +179,20 @@ for(const p of walkC) if(!walkable(p[0],p[1])) walkBad++;
 expect(`bike centerline all on land (${bikeBad} off)`,bikeBad,0);
 expect(`walk centerline all on land (${walkBad} off)`,walkBad,0);
 
+// ===== 101: dual-trail separation envelope =====
+// NPC path discipline (traillife: pedestrians on the walk ribbon, cyclists on
+// the bike ribbon) is only POSSIBLE while the two centerlines keep their
+// separation; a future reroute that pinches them would let a glued mover read
+// as "on the other path". Assert the envelope here (pure JS, always on) — the
+// live mover positions themselves are gate-checked by tools/npc-paths.mjs.
+console.log('\n--- dual-trail separation envelope (101) ---');
+function minPolySep(a,b){let m=1e9;for(const p of a){let best=1e9;for(let i=0;i<b.length-1;i++){const r=ptSeg(p[0],p[1],b[i][0],b[i][1],b[i+1][0],b[i+1][1]);if(r.d<best)best=r.d;}if(best<m)m=best;}return m;}
+{ const sep=minPolySep(walkC,bikeC);
+  expect(`MAIN walk/bike centerline separation ${sep.toFixed(2)} >= 3.9`,sep>=3.9,true); }
+{ const mtB=crSample(CH.TRAIL_MONTROSE,1.2), mtW=offsetLine(mtB,walkOff);
+  const sep=minPolySep(mtW,mtB);
+  expect(`MONTROSE walk/bike centerline separation ${sep.toFixed(2)} >= 3.9`,sep>=3.9,true); }
+
 console.log('\n--- spur is the peninsula route: NO paved ribbon on the dog-beach sand ---');
 { const b=CH.DOG_BEACH.bounds;
   let onSand=0;

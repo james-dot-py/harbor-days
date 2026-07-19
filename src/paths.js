@@ -32,9 +32,21 @@ export const pathSamplesMain=[];
 // ribbonOn, so they DO NOT register — ribbonLanes === the real walkable ribbons.
 // Consumed by the prop-clearance audit + the props.js tree clearance nudge.
 export const ribbonLanes=[];
+// 101: the DRAWN dual-trail centerlines by name (ribbonOn returns), exposed on
+// __hd.trailLanes by main.js so the npc-paths gate probe measures movers
+// against the real ribbons — never a node-side curve mirror.
+export const trailLanes={walk:null,bike:null,mtrWalk:null,mtrBike:null};
 export let mainCurve=null, walkCurve=null, spurCurve=null;
 
 function curveOf(ctrl){ return new THREE.CatmullRomCurve3(ctrl.map(p=>new THREE.Vector3(p[0],0,p[1]))); }
+
+const _frT=new THREE.Vector3();
+// THE trail frame convention — point + LEFT normal (-t.z, t.x) of `curve` at
+// parameter u. ribbonOn offsets ribbons along this normal and traillife's
+// mover tables sample the same frame, so movers stay glued to the DRAWN
+// ribbon. (r128 getTangent is the numeric delta tangent; both consumers read
+// identical values.)
+export function trailFrame(curve,u,p,n){ curve.getPoint(u,p); curve.getTangent(u,_frT); n.set(-_frT.z,0,_frT.x); }
 
 // Draw a paved ribbon of `width` following `curve`, with its centerline
 // shifted laterally by `shift` (along the left normal). Collects the shifted
@@ -44,8 +56,8 @@ function ribbonOn(curve,width,color,y,shift,samples=pathSamples){
   const pos=[],idx=[],cl=[];
   const p=new THREE.Vector3(),t=new THREE.Vector3();
   for(let i=0;i<=n;i++){
-    const u=i/n; curve.getPoint(u,p); curve.getTangent(u,t);
-    const nx=-t.z,nz=t.x,w=width/2;
+    const u=i/n; trailFrame(curve,u,p,t);
+    const nx=t.x,nz=t.z,w=width/2;
     const cx=p.x+nx*shift,cz=p.z+nz*shift;
     cl.push([cx,cz]); samples.push([cx,cz]);
     pos.push(cx+nx*w,y,cz+nz*w, cx-nx*w,y,cz-nz*w);
@@ -86,7 +98,8 @@ export function buildPaths(){
   // at its declaration: pathSamples2 is scanned by props' tree post-filter).
   mainCurve=curveOf(CH.TRAIL_MAIN);
   const walkCl=ribbonOn(mainCurve,st.walk.width,st.walk.color,st.walk.y,walkOff,pathSamplesMain);
-  ribbonOn(mainCurve,st.bike.width,st.bike.color,st.bike.y,0,pathSamplesMain);
+  trailLanes.bike=ribbonOn(mainCurve,st.bike.width,st.bike.color,st.bike.y,0,pathSamplesMain);
+  trailLanes.walk=walkCl;
   walkCurve=curveOf(walkCl.filter((_,i)=>i%8===0||i===walkCl.length-1));
   // SPUR: single ribbon.
   spurCurve=curveOf(CH.TRAIL_SPUR);
@@ -146,8 +159,8 @@ export function buildPaths(){
     }
   }
   const montroseCurve=curveOf(CH.TRAIL_MONTROSE);
-  ribbonOn(montroseCurve,st.walk.width,st.walk.color,st.walk.y,walkOff,pathSamplesMain);
-  ribbonOn(montroseCurve,st.bike.width,st.bike.color,st.bike.y,0,pathSamplesMain);
+  trailLanes.mtrWalk=ribbonOn(montroseCurve,st.walk.width,st.walk.color,st.walk.y,walkOff,pathSamplesMain);
+  trailLanes.mtrBike=ribbonOn(montroseCurve,st.bike.width,st.bike.color,st.bike.y,0,pathSamplesMain);
   // yellow center dashes on the paved BIKE path + the SPUR + Montrose (not the walkway)
   {
     const dashes=[];

@@ -5,19 +5,27 @@
 //  with movers so every stretch feels alive.
 //
 //    * 6 JOGGERS  — makeNPC chibis in bright running kit, each patrolling one
-//      sixth of the main trail (back-and-forth), 2.6–3.4 m/s, manual run gait.
+//      sixth of the WALKING path (back-and-forth), 2.6–3.4 m/s, manual run gait.
 //      Bump lines: "on your left!", "ope", "nice night for it", "six more miles".
 //    * 2 CYCLISTS — instanced tube bikes (spinning wheels) with a chibi rider
-//      posed pedalling + leaning, 5.5–7 m/s on long segments, weaving gently
+//      posed pedalling + leaning, 5.5–7 m/s on long BIKE-path segments, weaving gently
 //      around the centerline. Bell "ding-ding" + "on your left!" within 2.5 m.
 //    * 2 DOG-WALKERS — chibi + a small instanced-parts dog on a thin leash
-//      cylinder (re-posed each frame). 1.5 m/s on the south-garden and harbor
-//      stretches; the dog stops to sniff now and then (walker waits, tugs).
+//      cylinder (re-posed each frame). 1.5 m/s on the WALKING path's south-garden
+//      + harbor stretches; the dog stops to sniff now and then (walker waits, tugs).
 //
-//  Every mover rides the MAIN trail curve: at setup we bake an arc-length
-//  sample table of mainCurve; movers advance by metres along it and read back
-//  position + tangent, so they stay glued to the ribbon and keep constant
-//  ground speed. Zero per-frame allocation — all matrices/vectors are hoisted
+//  PATH DISCIPLINE (task 101, owner: "NPCs mix up the walking path and biking
+//  path"): the main trail is a DUAL ribbon — asphalt bike centerline +
+//  crushed-limestone walk ribbon one grass-strip over (paths.js). Pedestrians
+//  (joggers, dog-walkers) ride ONLY the walking path; cyclists ride ONLY the
+//  bike path — at spawn and every frame, junctions included (each mover is
+//  glued to its own table, so a ribbon switch is impossible). Two arc-length
+//  sample tables are baked at setup from the SAME trailFrame the ribbons are
+//  drawn with: T_BIKE (shift 0) and T_WALK (shift = ribbonOn's walk offset);
+//  movers advance by metres along their table and read back position +
+//  tangent, keeping constant ground speed. tools/npc-paths.mjs live-samples
+//  __hd.trail in the acceptance gate and asserts the classes never cross.
+//  Zero per-frame allocation — all matrices/vectors are hoisted
 //  scratch and recomposed each frame (the moorings.js pattern). No core rng is
 //  ever touched (Math.random / a local m32 only), so world determinism is safe.
 //
@@ -29,46 +37,53 @@
 import * as THREE from 'three';
 import { onWorldReady, registerUpdate, makeNPC, getAudioCtx, registerFetchDog } from '../framework.js';
 import { scene, toon, lerpAngle } from '../core.js';
-import { mainCurve } from '../paths.js';
+import { mainCurve, trailFrame } from '../paths.js';
+import { TRAIL_STYLE } from '../data/chicago.js';
 
 // ---- local deterministic rng (unused for layout, kept for parity) ----
 function m32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 
 // =====================================================================
-//  arc-length sample table of the MAIN trail curve
+//  arc-length sample tables of the DUAL trail (bike centerline + walk offset)
 // =====================================================================
-let XS, ZS, CUM, SEGN = 0, TOT = 0;
-function buildTable(){
+// ribbonOn draws the walking ribbon this many metres along the trailFrame
+// LEFT normal; T_WALK shifts by the same amount so pedestrians ride the
+// DRAWN limestone, not a re-derived curve.
+const WALK_OFF = TRAIL_STYLE.bike.width / 2 + TRAIL_STYLE.gap + TRAIL_STYLE.walk.width / 2;   // 4.0 m
+let T_BIKE = null, T_WALK = null;
+function makeTable(curve, shift){
   const N = 700;
-  XS = new Float32Array(N + 1); ZS = new Float32Array(N + 1); CUM = new Float32Array(N + 1);
-  const p = new THREE.Vector3();
-  mainCurve.getPoint(0, p); XS[0] = p.x; ZS[0] = p.z; CUM[0] = 0;
-  let px = p.x, pz = p.z, cum = 0;
+  const XS = new Float32Array(N + 1), ZS = new Float32Array(N + 1), CUM = new Float32Array(N + 1);
+  const p = new THREE.Vector3(), n = new THREE.Vector3();
+  trailFrame(curve, 0, p, n);
+  XS[0] = p.x + n.x * shift; ZS[0] = p.z + n.z * shift; CUM[0] = 0;
+  let px = XS[0], pz = ZS[0], cum = 0;
   for (let i = 1; i <= N; i++){
-    mainCurve.getPoint(i / N, p);
-    cum += Math.hypot(p.x - px, p.z - pz);
-    XS[i] = p.x; ZS[i] = p.z; CUM[i] = cum; px = p.x; pz = p.z;
+    trailFrame(curve, i / N, p, n);
+    const x = p.x + n.x * shift, z = p.z + n.z * shift;
+    cum += Math.hypot(x - px, z - pz);
+    XS[i] = x; ZS[i] = z; CUM[i] = cum; px = x; pz = z;
   }
-  SEGN = N; TOT = cum;
+  return { XS, ZS, CUM, SEGN: N, TOT: cum };
 }
 // write curve position (out) + unit tangent (tan) at arc-length d (metres)
-function sampleAt(d, out, tan){
-  if (d < 0) d = 0; else if (d > TOT) d = TOT;
-  let lo = 0, hi = SEGN;
-  while (lo < hi){ const mid = (lo + hi + 1) >> 1; if (CUM[mid] <= d) lo = mid; else hi = mid - 1; }
-  let i = lo; if (i >= SEGN) i = SEGN - 1;
-  const seg = (CUM[i + 1] - CUM[i]) || 1e-6, f = (d - CUM[i]) / seg;
-  const x0 = XS[i], z0 = ZS[i], x1 = XS[i + 1], z1 = ZS[i + 1];
+function sampleAt(T, d, out, tan){
+  if (d < 0) d = 0; else if (d > T.TOT) d = T.TOT;
+  let lo = 0, hi = T.SEGN;
+  while (lo < hi){ const mid = (lo + hi + 1) >> 1; if (T.CUM[mid] <= d) lo = mid; else hi = mid - 1; }
+  let i = lo; if (i >= T.SEGN) i = T.SEGN - 1;
+  const seg = (T.CUM[i + 1] - T.CUM[i]) || 1e-6, f = (d - T.CUM[i]) / seg;
+  const x0 = T.XS[i], z0 = T.ZS[i], x1 = T.XS[i + 1], z1 = T.ZS[i + 1];
   out.set(x0 + (x1 - x0) * f, 0, z0 + (z1 - z0) * f);
   let tx = x1 - x0, tz = z1 - z0; const tl = Math.hypot(tx, tz) || 1e-6;
   tan.set(tx / tl, 0, tz / tl);
 }
 // nearest arc-length d to a target world point (setup-time anchor helper)
-function findD(tx, tz){
+function findD(T, tx, tz){
   let best = 0, bd = Infinity;
-  for (let i = 0; i <= SEGN; i++){
-    const dx = XS[i] - tx, dz = ZS[i] - tz, d2 = dx * dx + dz * dz;
-    if (d2 < bd){ bd = d2; best = CUM[i]; }
+  for (let i = 0; i <= T.SEGN; i++){
+    const dx = T.XS[i] - tx, dz = T.ZS[i] - tz, d2 = dx * dx + dz * dz;
+    if (d2 < bd){ bd = d2; best = T.CUM[i]; }
   }
   return best;
 }
@@ -285,38 +300,39 @@ const cyclists = [];  // {rider, d, dir, d0, d1, sp, wheelA, pedal, wf, wph, bel
 const walkers = [];   // {npc, d, dir, d0, d1, sp, spCur, walkT, dogTrot, sniff, sniffing, timer, side, lead}
 
 onWorldReady((player) => {
-  buildTable();
+  T_BIKE = makeTable(mainCurve, 0);
+  T_WALK = makeTable(mainCurve, WALK_OFF);
 
-  // ---- 6 joggers: one sixth of the trail each (whole-map coverage) ----
+  // ---- 6 joggers: one sixth of the WALKING path each (whole-map coverage) ----
   const span = 0.96, base = 0.02;
   for (let i = 0; i < 6; i++){
     const pal = JOG_PAL[i];
-    const npc = makeNPC({ x: XS[0], z: ZS[0], palette: pal, name: '', lines: JOG_LINES, wander: 0, moverLod: true });   // 095: 1-draw twin at distance
-    const d0 = (base + span * (i / 6)) * TOT, d1 = (base + span * ((i + 1) / 6)) * TOT;
+    const npc = makeNPC({ x: T_WALK.XS[0], z: T_WALK.ZS[0], palette: pal, name: '', lines: JOG_LINES, wander: 0, moverLod: true });   // 095: 1-draw twin at distance
+    const d0 = (base + span * (i / 6)) * T_WALK.TOT, d1 = (base + span * ((i + 1) / 6)) * T_WALK.TOT;
     joggers.push({ npc, d0, d1, d: d0 + Math.random() * (d1 - d0), dir: Math.random() < 0.5 ? 1 : -1,
       sp: 2.6 + Math.random() * 0.8, walkT: Math.random() * 6.28 });
   }
 
-  // ---- 2 cyclists on long segments ----
+  // ---- 2 cyclists on long segments of the BIKE path ----
   buildBikes(BIKE_COL);
   const cSeg = [[0.05, 0.6], [0.4, 0.95]];
   for (let i = 0; i < 2; i++){
-    const rider = makeNPC({ x: XS[0], z: ZS[0], palette: CYC_PAL[i], name: '', lines: CYC_LINES, wander: 0 });
-    cyclists.push({ rider, d0: cSeg[i][0] * TOT, d1: cSeg[i][1] * TOT,
-      d: (cSeg[i][0] + Math.random() * (cSeg[i][1] - cSeg[i][0])) * TOT, dir: i === 0 ? 1 : -1,
+    const rider = makeNPC({ x: T_BIKE.XS[0], z: T_BIKE.ZS[0], palette: CYC_PAL[i], name: '', lines: CYC_LINES, wander: 0 });
+    cyclists.push({ rider, d0: cSeg[i][0] * T_BIKE.TOT, d1: cSeg[i][1] * T_BIKE.TOT,
+      d: (cSeg[i][0] + Math.random() * (cSeg[i][1] - cSeg[i][0])) * T_BIKE.TOT, dir: i === 0 ? 1 : -1,
       sp: 5.5 + Math.random() * 1.5, wheelA: 0, pedal: 0, wf: 0.6 + Math.random() * 0.3,
       wph: Math.random() * 6.28, bellArmed: true });
   }
 
   // ---- 2 dog-walkers: anchored to the south garden + the harbor stretch ----
   buildDogs(DOG_COL);
-  const dGarden = findD(112, 120);   // AIDS Garden stretch (south)
-  const dHarbor = findD(48, -150);   // harbor-west stretch
+  const dGarden = findD(T_WALK, 112, 120);   // AIDS Garden stretch (south)
+  const dHarbor = findD(T_WALK, 48, -150);   // harbor-west stretch
   const anchors = [{ c: dGarden, half: 42, side: 1 }, { c: dHarbor, half: 46, side: -1 }];
   for (let i = 0; i < 2; i++){
     const a = anchors[i];
-    const npc = makeNPC({ x: XS[0], z: ZS[0], palette: WALK_PAL[i], name: '', lines: WALK_LINES, wander: 0, moverLod: true });   // 095: 1-draw twin at distance
-    walkers.push({ npc, d0: Math.max(4, a.c - a.half), d1: Math.min(TOT - 4, a.c + a.half),
+    const npc = makeNPC({ x: T_WALK.XS[0], z: T_WALK.ZS[0], palette: WALK_PAL[i], name: '', lines: WALK_LINES, wander: 0, moverLod: true });   // 095: 1-draw twin at distance
+    walkers.push({ npc, d0: Math.max(4, a.c - a.half), d1: Math.min(T_WALK.TOT - 4, a.c + a.half),
       d: a.c, dir: Math.random() < 0.5 ? 1 : -1, sp: 1.5, spCur: 1.5, walkT: Math.random() * 6.28,
       dogTrot: Math.random() * 6.28, sniff: 0, sniffing: false, timer: 4 + Math.random() * 4,
       side: a.side, lead: 1.4,
@@ -339,13 +355,23 @@ onWorldReady((player) => {
     });
   }
 
+  // ---- 101: live path-discipline probe (tools/npc-paths.mjs, acceptance gate)
+  // Pedestrians (joggers + dog-walkers) vs cyclists, live world positions,
+  // JSON-safe. The lane polylines the probe measures against come from
+  // __hd.trailLanes (main.js) — the DRAWN ribbons, so no mirror can drift.
+  window.__hd = window.__hd || {};
+  window.__hd.trail = () => ({
+    walkers: joggers.concat(walkers).map(m => { const p = m.npc.group.position; return [+p.x.toFixed(3), +p.z.toFixed(3)]; }),
+    cyclists: cyclists.map(c => { const p = c.rider.group.position; return [+p.x.toFixed(3), +p.z.toFixed(3)]; }),
+  });
+
   // =============================== per-frame ============================
   registerUpdate((dt, t, pl) => {
     // ---- joggers ----
     for (const j of joggers){
       j.d += j.dir * j.sp * dt;
       if (j.d >= j.d1){ j.d = j.d1; j.dir = -1; } else if (j.d <= j.d0){ j.d = j.d0; j.dir = 1; }
-      sampleAt(j.d, _pos, _tan);
+      sampleAt(T_WALK, j.d, _pos, _tan);
       const g = j.npc.group;
       g.position.set(_pos.x, 0, _pos.z);
       g.rotation.y = Math.atan2(_tan.x * j.dir, _tan.z * j.dir);
@@ -360,7 +386,7 @@ onWorldReady((player) => {
       const c = cyclists[i];
       c.d += c.dir * c.sp * dt;
       if (c.d >= c.d1){ c.d = c.d1; c.dir = -1; } else if (c.d <= c.d0){ c.d = c.d0; c.dir = 1; }
-      sampleAt(c.d, _pos, _tan);
+      sampleAt(T_BIKE, c.d, _pos, _tan);
       const nx = -_tan.z, nz = _tan.x;                    // left normal
       const ph = t * c.wf + c.wph;
       const off = Math.sin(ph) * 0.75;                    // gentle weave
@@ -401,7 +427,7 @@ onWorldReady((player) => {
       w.sniff += ((w.sniffing ? 1 : 0) - w.sniff) * Math.min(1, dt * 4);
       w.d += w.dir * w.spCur * dt;
       if (w.d >= w.d1){ w.d = w.d1; w.dir = -1; } else if (w.d <= w.d0){ w.d = w.d0; w.dir = 1; }
-      sampleAt(w.d, _pos, _tan);
+      sampleAt(T_WALK, w.d, _pos, _tan);
       const nx = -_tan.z, nz = _tan.x;
       const yaw = Math.atan2(_tan.x * w.dir, _tan.z * w.dir);
       // walker walks a touch to one side of the centerline
@@ -414,7 +440,7 @@ onWorldReady((player) => {
       runGait(w.npc.parts, w.walkT, wamt, 0.05 - 0.06 * w.sniff);   // slight lean-back tug when sniffing
       // dog: ahead along travel, other side of the walker
       const dogD = w.d + w.dir * w.lead;
-      sampleAt(dogD, _pos2, _tan2);
+      sampleAt(T_WALK, dogD, _pos2, _tan2);
       const dnx = -_tan2.z, dnz = _tan2.x;
       const dx0 = _pos2.x - dnx * 0.5 * w.side, dz0 = _pos2.z - dnz * 0.5 * w.side;
       let dyaw = Math.atan2(_tan2.x * w.dir, _tan2.z * w.dir) + (w.sniff > 0.5 ? 0.5 : 0); // sniff turns aside

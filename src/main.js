@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { renderer, scene, camera, amb, clamp, lerp, lerpAngle, hexRGB, pip, rng, rand, $, game, toon, chaseDistK, baseFov } from './core.js';
 import { skyGroup, clouds, buildSky } from './sky.js';
 import { buildCoast, water, waterN, coastQuery, profileTotal, tierAt, beachH, LAND } from './coast.js';
-import { buildPaths, pathSamples, pathSamples2, pathSamplesMain, ribbonLanes } from './paths.js';
+import { buildPaths, pathSamples, pathSamples2, pathSamplesMain, ribbonLanes, trailLanes } from './paths.js';
 import { buildProps, colliders, walkRects, bobbers, drifter, dogTail, foam, fireflies, TREE_SPOTS } from './props.js';
 import { buildStructures } from './structures.js';
 import { mayor, mparts, buildMayor, updateCharacter, updateChibiShadows } from './character.js';
@@ -209,6 +209,7 @@ window.__hd.player=player;   // debug/tools only: live player handle (act.mjs E2
 window.__hd.input={joy,cam}; // debug/tools only: steering-bot access (062 hold-forward crossing assertions)
 window.__hd.setTrap=r=>{TRAP_TEST=r||null;}; // debug/tools only: inject a synthetic non-walk block to verify the anti-trap escape (issue 025)
 window.__hd.gstate=state;    // debug/tools only: live gameplay state handle (093 rink E2E reads onIce/iceHops)
+window.__hd.trailLanes=()=>({walk:trailLanes.walk,bike:trailLanes.bike,mtrWalk:trailLanes.mtrWalk,mtrBike:trailLanes.mtrBike});   // debug/tools only: the DRAWN dual-trail centerlines (101 npc-paths gate probe — never a node-side curve mirror)
 setIdleGroundProbe((x,z)=>({walk:walkable(x,z),y:surfaceY(x,z)}));   // task 087: let the idle-charm sit only land on safe flat ground (shared engine walk data)
 window.__hd.buildMs={build:Math.round(_tm0-_tb0),merge:Math.round(_tm1-_tm0),packs:Math.round(performance.now()-_tp0)};
 console.log('[perf] world build '+window.__hd.buildMs.build+'ms · mergeCellStatic '+window.__hd.buildMs.merge+'ms · packs '+window.__hd.buildMs.packs+'ms');
@@ -217,6 +218,7 @@ console.log('[perf] world build '+window.__hd.buildMs.build+'ms · mergeCellStat
 const camPos=new THREE.Vector3(CH.SPAWN.camera.x,CH.SPAWN.camera.y,CH.SPAWN.camera.z);
 const camTarget=new THREE.Vector3();
 export const camCtl={snap:false};   // packs set snap=true after a teleport (cells.js rides)
+window.__hd.camCtl=camCtl;   // debug/tools only: tools set snap=true after a __hd.player teleport so the chase cam doesn't swoosh
 let assistAmt=0,introT=0;   // introT 1→0: start-of-game camera swoop (skipped in ?play=1)
 let stepT=0,sparkT=0;
 let last=performance.now();

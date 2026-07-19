@@ -846,4 +846,18 @@ few turns to find; keep each to one line of symptom + fix.
   the toast glass in the mayor's afro; the comment's claimed fist coords
   actually matched +0.5). Verify a raised-arm pose by Euler math from the
   template's hl AND a front screenshot — never trust the pose comment.
+- `window.__hd.player` is a PLAIN {x,z,y,vx,vz} state object, not an Object3D:
+  a tools/ teleport is `__hd.player.x=..; __hd.player.z=..` (+ `__hd.camCtl.snap=true`
+  so the chase cam doesn't swoosh — camCtl is on __hd since 101). `.position.set`
+  throws undefined. Live camera aim = `__hd.input.cam.{yaw,pitch,dist}`.
+- The Edit tool can fail to match a LONG old_string (30+ lines) that is byte-
+  identical to the file (verified via od -c) — split replacements into ≤~15-line
+  chunks and they match instantly (101, cost ~6 turns on one function swap).
+- Movers on a DUAL trail ride offset arc-length tables built from the SAME frame
+  helper the ribbons are drawn with (paths.js trailFrame; traillife makeTable
+  shift 0 = bike, shift walkOff = walk) — never a re-derived curve (walkCurve's
+  stride-8 CR can sag off the drawn centerline on bends). Discipline is gate-
+  probed LIVE: __hd.trail positions + __hd.trailLanes drawn-ribbon polylines,
+  sampled over N seconds by tools/npc-paths.mjs (gate check 1b) — no node-side
+  curve mirror to drift.
 
