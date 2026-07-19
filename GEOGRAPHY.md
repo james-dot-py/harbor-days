@@ -58,11 +58,16 @@ produced a ~640 m blank walk. This section is the law for the compressed frame
 2. **The BAY (shoreline-in), z −580…−655.** The blank golf-to-Montrose lawn is
    replaced by a curved cove: the shore sweeps WEST from the golf revetment end
    (~x 232, z −580) to a waist at **~x 198, z −625**, then back out to meet the
-   Montrose harbor-mouth lawn (~x 231, z −655). The Lakefront Trail bends with
-   it (bay routing, then the harbor promenade); revetment terraces wrap the
-   cove (TIER_DEFAULT); bay planting + benches face the water. Data:
+   Montrose harbor-mouth lawn at **(213,−655.5)** — task 104 RECEDED this
+   corner from the original x 236: the mainland must stay well WEST of the
+   hook mole so the spit projects into open water (owner 2026-07-19; the old
+   corner sat at the mole's own x and the two terraced aprons met across the
+   mouth — the shoreline read as touching itself). The Lakefront Trail bends
+   with it (bay routing, then the harbor promenade); revetment terraces wrap
+   the cove (TIER_DEFAULT); bay planting + benches face the water. Data:
    `COAST_BAY_PTS` (chicago.js). Across the cove the hook mole + entrance
-   light read to the NE — the visual handshake between golf and harbor.
+   light read to the NE across real open water — the visual handshake
+   between golf and harbor.
 3. **Montrose block: RIGID +436 z-shift.** Every Montrose feature (harbor,
    hook, Point/Magic Hedge, beach, dunes, Cricket Hill, underpass, trail
    alignment from the harbor north) keeps its internal geometry EXACTLY and
@@ -184,25 +189,47 @@ osm x (osm harbor water spans x −230…75, breakwater to osm x 243 — squeeze
   - **West seawall / promenade** (`MT_BASIN_W`, bulkhead) x ≈ 186, z −1113…−1286 —
     the mainland harbor edge; finger docks + the launch root here.
   - **North seawall** (`MT_BASIN_N`) z ≈ −1288, x 186→216.
-  - **Mouth**: the SOUTH opening (z ≈ −1120), between the basin SW jamb (186,−1113)
-    and the hook tip (~231,−1118); the mouth-entrance shore (`MTR_HARBOR_MOUTH`,
-    terraced) sweeps NW from the LAWN end (~234,−1091) to the SW jamb.
-  - Basin water region ≈ x 186…218, z −1120…−1288 (mooring field + slips).
+  - **Mouth**: the SOUTH opening (z ≈ −1120), between the basin SW jamb (186,−1117)
+    and the hook tip apex (~243,−1130); the mouth-entrance shore
+    (`MTR_HARBOR_MOUTH`, terraced) sweeps NW from the RECEDED lawn corner
+    (213,−1091.5 — task 104; see the SPIT-LAKEWARD law below) to the SW jamb.
+  - Basin water region ≈ x 186…218 (widening to ~235 at the raked mouth),
+    z −1120…−1288 (mooring field + slips).
 - **THE HOOK** (the signature silhouette — a long stone breakwater/fishing pier,
   the east barrier of the basin, WALKABLE end to end): a peninsula-pattern **mole**
   (part of LAND, flat stone-paved top) rooted at the NORTH (basin-N z −1287 and the
-  Point-bound shore z −1300), reaching SOUTH with a hooked, curling TIP:
-  - Mole basin (inner/west) face `MT_MOLE_W` seawall x ≈ 219, z −1287→−1142.
-  - **Hook TIP** `MTR_HOOK_TIP` — a terraced horseshoe curl at the south tip
-    (COAST_TIP precedent), x 220→237 around z −1118, the tip apex carrying the
-    **harbor entrance light** (`MT_HARBOR_LIGHT` ≈ 236,−1128, white tower / red cap /
-    warm bulb, the Belmont-mouth-light register).
+  Point-bound shore z −1300), reaching SOUTH and **RAKING EAST into the lake** so
+  the tip is the local EASTMOST land (task 104 — the SPIT-LAKEWARD law):
+  - Mole basin (inner/west) face `MT_MOLE_W` seawall rakes x 217→236
+    (z −1287→−1134), then WRAPS the curl's W/SW to the south rim
+    (240.2,−1122.3) — the deck tapers from ~20 m at the root to ~7 m at the
+    tip, and no terrace apron ever pokes into the mouth channel (a west-facing
+    apron there reads as a broken shelf floating on the widened water).
+  - **Hook TIP** `MTR_HOOK_TIP` — a terraced teardrop curl at the south tip
+    (COAST_TIP precedent), terraces facing S/E open water ONLY, apex
+    **(243.4,−1133)** — matching the Point apex's x 243, terraces stepping
+    past the clamp into the water (the recorded 071 liberty class) — carrying
+    the **harbor entrance light** (`MT_HARBOR_LIGHT` ≈ 240.3,−1130, white
+    tower / red cap / warm bulb, the Belmont-mouth-light register). Southmost
+    reach z −1121.6; open water S, E and W of the curl.
   - Mole lake (outer/east) terraced face `COAST_MTR_HARBOR` (the swapped 070 piece)
-    x ≈ 237, z −1150→−1300, stepping down to the open lake (riprap toe = the folded
-    pile/face/wet-band + revetment steps). Rail run along the inner walk edge
-    (structures.js `fenceRun`, through the shared POSTS/RAILS buckets).
+    x 236(root)→241(mid-arm), z −1146→−1300, stepping down to the open lake
+    (riprap toe = the folded pile/face/wet-band + revetment steps). Rail run
+    along the inner walk edge (structures.js `fenceRun`, shared POSTS/RAILS).
   - mt-hook stands **mid-mole** (~z −1215) looking SOUTH down the pier toward the
     curling tip + light + open lake past the mouth (down-the-length axis camera).
+- **SPIT-LAKEWARD law (task 104, owner 2026-07-19).** The spit must EXTEND INTO
+  THE LAKE — the owner's report: the shoreline touched/overlapped itself and the
+  hook curled back toward shore. Root cause: the mainland mouth corner sat at
+  x 236 (the mole's own x) so the mole never projected past the shoreline, and
+  the two TIER_DEFAULT aprons (12.2 m each) met across the ~25 m mouth gap. The
+  law: (a) the mainland shore at the mouth stays ≤ x 213 (the receded bay
+  corner); (b) the mole rakes EAST so its tip curl (~243) is the local eastmost
+  land, in open water on three sides — per the real OSM breakwater (osm.json
+  479527712: roots at the shore, reaches ~800 m lakeward at 1:2 — the game keeps
+  the direction, compressed); (c) the full shoreline polyline must stay SIMPLE —
+  enforced permanently by `tools/shoreline-simple.mjs` (gate: no LAND polygon
+  self-intersection, no facing-apron water pinch below the visible-water floor).
 - **WEST SHORE**: finger docks (`MT_FINGER_DOCKS`, x0 186, reaching east into the
   basin — REUSE the Belmont dock deck/post + boat vocabulary, zero new InstancedMesh
   buckets), the public boat **LAUNCH** ramp (a wide slab sloping into the water,
@@ -332,6 +359,10 @@ kite-flyer NPCs: packs/cricket-hill.js (073/074). Waypoints:
 - **The hook curl relocated**: the real breakwater's terminal hook curls at the
   beach's NORTH end (~z −1577, past the map cap −1516); the game curls it at the
   harbor MOUTH (070) so the signature silhouette survives inside the bounds.
+  AMENDED by task 104 (owner 2026-07-19): the relocation stands, but the arm
+  must RAKE EAST with its tip the local eastmost land — the spit extends INTO
+  the lake, never back toward a shore that sits at its own x (the
+  SPIT-LAKEWARD law, §Montrose Harbor).
 - **The sanctuary band slides north** (beside-the-basin → beyond-the-mole,
   z −1296…−1362) — see the Point subsection (071).
 - **Plovers in two places**: the canonical Monty & Rose / Imani story lives at

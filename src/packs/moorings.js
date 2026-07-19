@@ -182,8 +182,10 @@ onWorldReady(() => {
   //  Laid here (after Belmont populates boats[]/spokes[], before N is taken)
   //  so it rides the SAME instanced meshes below → ZERO new draw calls. Its
   //  own local rng (seed 7071) keeps it independent of Belmont's draw order.
-  //  Basin water x192..216, z-709..-846; finger docks root x186 reaching
-  //  east to ~x201 at deck rows z-714/-754/-792/-826; hook mole at x>=219.
+  //  Basin water x192..216, z-709..-846 (104: the mole inner face rakes
+  //  217->236 southward, so the basin only WIDENS east of these rows);
+  //  finger docks root x186 reaching east to ~x201 at deck rows
+  //  z-714/-754/-792/-826.
   //  We moor in the slips beside the fingers and across the open east half.
   // =====================================================================
   const belmontBoatCount = boats.length;   // Belmont's rnd draws end here; Montrose is rnd2 only

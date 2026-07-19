@@ -1134,7 +1134,9 @@ console.log('\n--- Task 084: the BAY cove — inland lawn walkable, cove water N
 // which land ON the apron (lat 6-11 m) — re-authored to the cove interior (lat 18-21 m).
 for(const [x,z] of [[200,-632],[210,-620],[220,-632],[215,-635]]) expect(`bay cove water (${x},${z}) NOT walkable`,walkable(x,z),false);
 // cove LAND (west of the waist / golf interior / headland) — walkable
-for(const [x,z] of [[150,-628],[200,-660],[150,-575],[208,-660]]) expect(`bay land (${x},${z}) walkable`,walkable(x,z),true);
+// (104: the headland corner receded to (213,-655.5); the old (208,-660) probe
+// now sits ON the mouth shoreline edge — moved inland to (204,-659))
+for(const [x,z] of [[150,-628],[200,-660],[150,-575],[204,-659]]) expect(`bay land (${x},${z}) walkable`,walkable(x,z),true);
 // TIER_DEFAULT revetment steps just seaward of the shore top edge step DOWN and stay walkable
 {
   const BAY_SEGS=buildSegs(COAST_BAY);
@@ -1153,11 +1155,35 @@ for(const [x,z] of [[150,-628],[200,-660],[150,-575],[208,-660]]) expect(`bay la
 
 console.log('\n--- Task 070: Montrose Harbor basin water NOT walkable (concave LAND carve) ---');
 for(const [x,z] of [[200,-724],[200,-764],[205,-814],[195,-844],[210,-709]]) expect(`basin (${x},${z})`,walkable(x,z),false);
+// 104: the raked inner face (217->236 southward) WIDENS the basin mouth — the
+// old inner-wall band is water now, and the mouth channel south of the tip is
+// genuinely open (the pre-104 layout had the two aprons meeting there).
+for(const [x,z] of [[225,-700],[230,-690],[222,-668],[232,-662]]) expect(`104 widened mouth water (${x},${z}) NOT walkable`,walkable(x,z),false);
 
 console.log('\n--- Task 070: the HOOK mole (breakwater) walkable end to end ---');
-for(const [x,z] of [[228,-854],[228,-804],[230,-754],[231,-724],[230,-697]]) expect(`hook mole (${x},${z})`,walkable(x,z),true);
+// (104 raked arm: deck spans inner 217->236 rake to lake face 236->241; the
+// old (230,-697) probe is basin water now — tip probes moved onto the plateau)
+for(const [x,z] of [[228,-854],[228,-804],[230,-754],[233,-724],[236,-708]]) expect(`hook mole (${x},${z})`,walkable(x,z),true);
 expect('mole north root (solid land) (210,-859)',walkable(210,-859),true);
-expect('open lake east of the mole (252,-764) NOT walkable',walkable(252,-764),false);
+expect('open lake east of the mole (256,-764) NOT walkable',walkable(256,-764),false);
+console.log('\n--- Task 104: the hook TIP plateau + light spot walkable, curl in open water ---');
+{
+  const L=CH.MT_HARBOR_LIGHT.pos;
+  expect(`light spot (${L[0]},${L[1]}) walkable`,walkable(L[0],L[1]),true);
+  for(const [x,z] of [[240,-694],[242,-697],[240,-702]]) expect(`tip plateau (${x},${z}) walkable`,walkable(x,z),true);
+  // the spit is the LOCAL EASTMOST land: its curl apex reaches x>=243 (the
+  // Point-apex class) while the mainland mouth corner stays <= x 213
+  const tipMaxX=Math.max(...CH.MTR_HOOK_TIP.map(p=>p[0]));
+  expect(`tip curl apex x ${tipMaxX.toFixed(1)} >= 243 (extends lakeward)`,tipMaxX>=243,true);
+  const mouthMaxX=Math.max(...CH.MTR_HARBOR_MOUTH.map(p=>p[0]));
+  expect(`mainland mouth corner x ${mouthMaxX.toFixed(1)} <= 213 (receded)`,mouthMaxX<=213.01,true);
+  // curl terraces step down into OPEN water around the tip (walkable steps,
+  // then genuine lake beyond the apron). NB: probe OFF a segment interior —
+  // the convex corner fan wedge (e.g. 242,-684) fails coastQuery's axial-
+  // excess check by design (rendered slabs fatten to cover it visually).
+  expect('curl first step east of the apex (243.9,-693) walkable',walkable(243.9,-693),true);
+  expect('open lake south of the curl apron (241,-668) NOT walkable',walkable(241,-668),false);
+}
 
 console.log('\n--- Task 070: harbor west shore (mainland) walkable ---');
 for(const [x,z] of [[176,-740],[172,-794],[168,-769]]) expect(`west shore (${x},${z})`,walkable(x,z),true);
@@ -1483,11 +1509,16 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
 //                          src/pathgeom.js with the engine so it measures the
 //                          SHIPPED geometry — malformed path seams can never
 //                          ship again)
+//   shoreline-simple.mjs — shoreline self-intersection + facing-apron pinch
+//                          sweep (task 104, the owner's "shoreline touches
+//                          itself / spit curls back toward shore" report;
+//                          pure Node, rebuilds LAND from chicago.js — an
+//                          overlapping shoreline can never ship again)
 // Skip with WALKPROBE_FAST=1 only for tight inner-loop iteration; the final
 // gate run must include them.
 if(process.env.WALKPROBE_FAST!=='1'){
   const {spawnSync}=await import('child_process');
-  for(const tool of['path-layers.mjs','prop-clearance.mjs','path-continuity.mjs']){
+  for(const tool of['path-layers.mjs','prop-clearance.mjs','path-continuity.mjs','shoreline-simple.mjs']){
     console.log(`\n--- 088 guard: ${tool} ---`);
     const r=spawnSync(process.execPath,[new URL(tool,import.meta.url).pathname.replace(/^\/([A-Za-z]:)/,'$1')],{encoding:'utf8',timeout:180000});
     const out=(r.stdout||'')+(r.stderr||'');

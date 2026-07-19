@@ -895,4 +895,18 @@ few turns to find; keep each to one line of symptom + fix.
   'CHUBS WIN'); the reload re-fire needs a long-enough wait because the negative
   frame-1 dt (PITFALLS) pushes WRIG.winT positive and delays the first ambient win
   ~4 s (tools/tmp-103-winonce.mjs).
+- Two shoreline stretches at the SAME x with terraced aprons (12.2 m each) MERGE
+  visually across any <25 m water gap — the owner reads it as "the shoreline
+  touches itself / the spit curls back toward shore" (task 104, the Montrose
+  mouth: the bay corner sat at the mole's own x 236). Keep facing shores' clear
+  water ≥ 4 m past both aprons; tools/shoreline-simple.mjs now gates this
+  mechanically (LAND simplicity + facing-apron pinch, far-pairs only — cove
+  ends are exempt by along-shore distance). Corollaries from the same fix: a
+  terraced piece whose first segments' seaward normals point INTO a basin/mouth
+  builds a floating step-shelf on the channel (wrap the flush seawall around
+  the curl to where normals face open water); a ShapeGeometry walk-cap outline
+  that self-intersects (raw concatenated crChain ends) triangulates into folded
+  wings over water (gate checks pave simplicity); and a tight terraced curl
+  (r≈4-5 m) gaps its outer tiers at the shared 2.2 fold stride — densify the
+  stride for that piece only (local xorshift, +0 draws).
 

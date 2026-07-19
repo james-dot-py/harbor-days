@@ -26,11 +26,12 @@ import * as CH from '../data/chicago.js';
 // ---------------------------------------------------------------------
 //  TUNABLE PLACEMENT CONSTANTS (orchestrator nudges these from screenshots)
 // ---------------------------------------------------------------------
-// Fisherman: on the mole deck (z=-804 spans x 219..238), 2.5 m inboard of the
-// lake face (x=238) so the line drops CLEANLY off the edge into open water and
-// never punches the paved deck. Moved lakeward from the suggested x=230 for that
-// reason — see the report. ry ~1.48 faces the open lake (east, a touch south).
-const FISH_X = 235.5, FISH_Z = -804, FISH_RY = 1.48;
+// Fisherman: on the mole deck (104 raked arm: z=-804 spans x ~220.3..239.9),
+// 2.5 m inboard of the lake face (x≈239.9) so the line drops CLEANLY off the
+// edge into open water and never punches the paved deck. Moved lakeward from
+// the suggested x=230 for that reason — see the report. ry ~1.48 faces the
+// open lake (east, a touch south).
+const FISH_X = 237.4, FISH_Z = -804, FISH_RY = 1.48;
 
 // Park Bait cooler: on the mainland, just east of the shop's east wall
 // (PARK_BAIT.x=176,w=6.4 -> east face x≈179.2), z a touch south of shop centre.

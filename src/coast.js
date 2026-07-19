@@ -328,10 +328,16 @@ export function buildCoast(){
       for(let ci=0;ci<MTR_SEGS.length;ci++){
         if(ci===3)continue;   // task 072: BEACH is sand — no terraces
         const segs=MTR_SEGS[ci],VT=VT_MTR[ci];
+        // 104: the raked hook-tip curl (ci 6) is the map's tightest terraced
+        // arc (r ~4-5 m) — at the shared 2.2 stride its OUTER tiers gap into
+        // floating slabs. Densified stride for that piece only (same bucket,
+        // +0 draws; the local hm stream downstream — golf jitter — shifts, a
+        // cosmetic non-event).
+        const stride=ci===6?1.1:2.2;
         for(let j=0;j<segs.length;j++){
           const s=segs[j],a=VT[j],b=VT[j+1];
           const turn=Math.acos(clamp(a[0]*b[0]+a[1]*b[1],-1,1)),xtra=Math.min(1.3,turn*3.0);
-          for(let t=0;t<s.len;t+=2.2){
+          for(let t=0;t<s.len;t+=stride){
             const u=t/s.len;let tgx=a[0]+(b[0]-a[0])*u,tgz=a[1]+(b[1]-a[1])*u;const tl=Math.hypot(tgx,tgz)||1;tgx/=tl;tgz/=tl;
             const nsx=-tgz,nsz=tgx,srot=Math.atan2(tgx,tgz);
             const cx=s.ax+s.tx*t,cz=s.az+s.tz*t;
