@@ -1160,15 +1160,18 @@ export function sanctuaryLoop(){ const P=crChain([...SANCTUARY.loopCtrl,SANCTUAR
 
 // low fence ringing the dog-beach cove's landward sides (N/E/W), gates on
 // BOTH the west and east sides so the trail spur passes through; the south
-// side is open to the water.
+// side is open to the water. The gates run all the way to the waterline:
+// fenceRun posts stand base-y0, and the cove sand dips to ~-2 m by z-328, so
+// any post seaward of z~-339 hangs mid-air over the slope (092 floating-prop
+// sweep — the old narrow gates left a 3-post stub floating on each side).
 export const DOG_FENCE = {
   lines:[
     [[88,-328],[88,-341]],     // west (gate)
     [[88,-341],[112,-341]],    // north (landward, z-341)
     [[112,-341],[112,-328]],   // east (gate)
   ],
-  gates:[ { x0:87,  x1:89,  z0:-338, z1:-332 },
-          { x0:111, x1:113, z0:-336, z1:-330 } ],
+  gates:[ { x0:87,  x1:89,  z0:-338.5, z1:-327.5 },
+          { x0:111, x1:113, z0:-338.5, z1:-327.5 } ],
   color:0xc9a97a, postH:0.9, spacing:2.0,
 };
 

@@ -934,11 +934,13 @@ export function buildProps(){
   // ---- dog beach props + one very good dog ----
   {
     const DP=CH.DOG_PROPS;
-    const bh=z=>{const h=beachH(24,z);return h===null?0:h};
+    // rest height from the sloped cove sand AT the prop's own spot — a stale
+    // x sample here (pre-084 cove) left the ball/pail hovering mid-air (092).
+    const bh=(x,z)=>{const h=beachH(x,z);return h===null?0:h};
     const ball=new THREE.Mesh(new THREE.SphereGeometry(0.42,12,10),toon(0xff7b6b));
-    ball.position.set(DP.ball.x,bh(DP.ball.z)+DP.ball.yOff,DP.ball.z);scene.add(ball);collide(DP.ball.x,DP.ball.z,DP.ball.collide);
+    ball.position.set(DP.ball.x,bh(DP.ball.x,DP.ball.z)+DP.ball.yOff,DP.ball.z);scene.add(ball);collide(DP.ball.x,DP.ball.z,DP.ball.collide);
     const pail=new THREE.Mesh(new THREE.CylinderGeometry(0.26,0.2,0.42,10),toon(0x7fc8f0));
-    pail.position.set(DP.pail.x,bh(DP.pail.z)+DP.pail.yOff,DP.pail.z);scene.add(pail);
+    pail.position.set(DP.pail.x,bh(DP.pail.x,DP.pail.z)+DP.pail.yOff,DP.pail.z);scene.add(pail);
     const dog=new THREE.Group(),dm=toon(0xf5efe2);
     const body=new THREE.Mesh(new THREE.SphereGeometry(0.42,10,9),dm);body.scale.set(0.85,0.8,1.25);body.position.y=0.48;dog.add(body);
     const hd=new THREE.Mesh(new THREE.SphereGeometry(0.3,9,8),dm);hd.position.set(0,0.92,0.5);dog.add(hd);
@@ -948,7 +950,7 @@ export function buildProps(){
     dogTail.position.set(0,0.62,-0.5);dogTail.rotation.x=-0.9;dog.add(dogTail);
     for(const s of[-1,1])for(const f of[0.3,-0.28]){const leg=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,0.4,6),dm);leg.position.set(s*0.2,0.2,f);dog.add(leg)}
     dog.userData.live=true;   // the tail (dogTail) wags in the main loop — keep the whole rig live, exempt from the cell merge
-    const dz=DP.dog.z;dog.position.set(DP.dog.x,bh(dz),dz);dog.rotation.y=DP.dog.ry;scene.add(dog);collide(DP.dog.x,dz,DP.dog.collide);
+    const dz=DP.dog.z;dog.position.set(DP.dog.x,bh(DP.dog.x,dz),dz);dog.rotation.y=DP.dog.ry;scene.add(dog);collide(DP.dog.x,dz,DP.dog.collide);
   }
 
   for(const s of CH.SIGNS)makeSign(s.text,s.x,s.z,s.ry);
