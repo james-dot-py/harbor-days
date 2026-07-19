@@ -2,7 +2,7 @@
 id: 102
 area: montrose
 type: fix
-model: kimi
+model: fable
 turns: 100
 title: Path-continuity root cause at the white fence + permanent gate check
 acceptance: >
@@ -25,3 +25,14 @@ refs:
   - tools/walkprobe.mjs, tools/mp-gridsweep.mjs
   - PITFALLS.md
 ---
+
+Supervisor note (2026-07-19): this task was previously attempted on kimi-k3.
+Attempt 1 did ~68 min of real work, then died on a resume rejection; retries
+2-3 failed instantly because the kimi provider account is suspended (billing)
+— the park was NOT a merit failure. Attempt 1's work is UNCOMMITTED in the
+tree: modified GEOGRAPHY.md, src/data/chicago.js, src/paths.js; new
+tools/path-continuity.mjs (a draft of the permanent gate check) and
+tools/tmp-102-*.mjs debug scripts. Evaluate that work first — keep what
+holds, revert what doesn't, and delete the tmp-102-* scratch scripts before
+finishing. tools/path-continuity.mjs may be a usable head start on
+acceptance item (2).

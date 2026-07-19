@@ -2,7 +2,7 @@
 id: 109
 area: feel
 type: delight
-model: kimi
+model: opus
 turns: 60
 title: Landing thump + brush rustle — the ground answers back (B5)
 acceptance: >

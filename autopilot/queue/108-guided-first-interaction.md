@@ -2,7 +2,7 @@
 id: 108
 area: onboarding
 type: delight
-model: kimi
+model: opus
 turns: 70
 title: Guided first interaction — one pulsing hand-pill, one time, ever (B4)
 acceptance: >

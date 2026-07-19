@@ -2,7 +2,7 @@
 id: 106
 area: feel
 type: delight
-model: kimi
+model: opus
 turns: 80
 title: Footsteps — real surface coverage + de-repetition (design audit B2)
 acceptance: >

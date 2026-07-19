@@ -2,7 +2,7 @@
 id: 104
 area: montrose
 type: fix
-model: kimi
+model: fable
 turns: 110
 title: Montrose spit extends INTO the lake + shoreline self-intersection gate
 acceptance: >

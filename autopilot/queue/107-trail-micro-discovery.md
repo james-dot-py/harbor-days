@@ -2,7 +2,7 @@
 id: 107
 area: lakefront
 type: delight
-model: kimi
+model: opus
 turns: 100
 title: Trail micro-discovery pass — something worth noticing every ~50 m (B3)
 acceptance: >

@@ -2,7 +2,7 @@
 id: 105
 area: meta
 type: delight
-model: kimi
+model: opus
 turns: 70
 title: "Back already?" — the welcome-back card (design audit B1)
 acceptance: >

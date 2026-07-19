@@ -2,7 +2,7 @@
 id: 103
 area: wrigleyville
 type: fix
-model: kimi
+model: opus
 turns: 60
 title: Chubs-win notification fires at most once per session
 acceptance: >
