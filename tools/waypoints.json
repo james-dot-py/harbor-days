@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-19T02:07:22.370Z",
+ "generated": "2026-07-19T07:20:08.558Z",
  "count": 139,
  "waypoints": [
   {
@@ -21,7 +21,7 @@
      "dist": 14
     }
    ],
-   "expectation": "The FRONT-DOOR spawn (task 023, owner-sited): the chibi mayor on the decomposed-granite forecourt FACING THE WATER — open lawn running east to the Belmont Rocks steps and the blue lake with sailboats; the grey monument wall (gold letters, bronze ginkgo scatter) along the frame's right with white sitting blocks and the leaning boulder, the upsized WHERE NEXT suggestion box ahead-right, the crushed-limestone entrance path heading toward the lake, Divvy dock + Lakefront Trail behind-left. Must match baseline.png composition."
+   "expectation": "The FRONT-DOOR spawn (task 023, owner-sited): the chibi mayor on the decomposed-granite forecourt FACING THE WATER — open lawn running east to the Belmont Rocks steps and the blue lake with sailboats; the grey monument wall (gold letters, bronze ginkgo scatter) along the frame's right with white sitting blocks and the leaning boulder, the upsized WHERE NEXT suggestion box ahead-right, the crushed-limestone entrance path heading toward the lake, Dibsy dock (094 pun sign) + Lakefront Trail behind-left. Must match baseline.png composition."
   },
   {
    "id": "zone-aids-garden-chicago",
@@ -346,7 +346,7 @@
      "dist": 9
     }
    ],
-   "expectation": "The Belmont Red Line stop cluster and its DESTINATION PICKER (task 051): a red-header 'RED LINE · BELMONT · lakefront stop' identity pylon (white transit disc) flanked by two lollipop DEPARTURE BOARDS, each its own boarding point you walk up to — '→ ADDISON / Wrigley Field / Howard-bound' and '→ MONROE / Millennium Park / 95th / Dan Ryan-bound'. Text crisp and UPRIGHT (never mirrored), posts end below the panels (no bisected text), and the read stays uncluttered beside the existing blue Belmont Harbor park sign."
+   "expectation": "The Belmont Red Line stop cluster and its DESTINATION PICKER (task 051): a red-header 'RED LINE · BELMONT · lakefront stop' identity pylon (white transit disc) flanked by two lollipop DEPARTURE BOARDS, each its own boarding point you walk up to — '→ ADDISON / Wiggly Field / Howard-bound' and '→ MONROE / Millennium Park / 95th / Dan Ryan-bound'. Text crisp and UPRIGHT (never mirrored), posts end below the panels (no bisected text), and the read stays uncluttered beside the existing blue Belmont Harbor park sign."
   },
   {
    "id": "shop-kiosk",
@@ -631,7 +631,7 @@
      "dist": 11
     }
    ],
-   "expectation": "PARK BAIT (task 070): the little Montrose Harbor bait & tackle shop on the west shore — a small one-storey shack with a pitched roof and a legible 'PARK BAIT' sign facing the harbor, sitting on the mainland just back from the promenade with the basin water and docks beyond. The map's north-harbor landmark shop; reads small, signed, and endearing (the bar-likeness register), NOT a generic box, the sign readable and not mirrored."
+   "expectation": "PERCH BAIT (task 070; 094 pun of Park Bait): the little Montrose Harbor bait & tackle shop on the west shore — a small one-storey shack with a pitched roof and a legible 'PERCH BAIT' sign facing the harbor, sitting on the mainland just back from the promenade with the basin water and docks beyond. The map's north-harbor landmark shop; reads small, signed, and endearing (the bar-likeness register), NOT a generic box, the sign readable and not mirrored."
   },
   {
    "id": "mt-beach",
@@ -906,7 +906,7 @@
      "dist": 5
     }
    ],
-   "expectation": "Standing in a Diversey hitting bay on the ground deck, the view DOWN the range (north): the open bay front framed by divider walls, the green fenced field receding under the tall perimeter net, distance boards; reads as a real enterable Topgolf-style bay you hit from — not scenery."
+   "expectation": "Standing in a Diversey hitting bay on the ground deck, the view DOWN the range (north): the open bay front framed by divider walls, the green fenced field receding under the tall perimeter net, distance boards; reads as a real enterable driving-range bay you hit from — not scenery."
   },
   {
    "id": "dv-minigolf",
@@ -1156,7 +1156,7 @@
      "dist": 8
     }
    ],
-   "expectation": "The AIDS Garden entrance monument per entrance-monument-sign.jpg (owner-sited near the garden Divvy dock): a low wide grey concrete/granite wall, gold 'AIDS Garden Chicago' letters FULLY legible on its north face — the leaning granite boulder sits mid-span WEST of the letters and never covers the 'A' (owner correction) — a quiet scatter of small bronze ginkgo-leaf plaques (names NOT legible — right at toon scale), two white limestone sitting blocks on a speckled grey-tan decomposed-granite forecourt, prairie grass flanking, a white globe lamp behind. The ONE and ONLY AIDS Garden sign in the game."
+   "expectation": "The AIDS Garden entrance monument per entrance-monument-sign.jpg (owner-sited near the garden Dibsy dock): a low wide grey concrete/granite wall, gold 'AIDS Garden Chicago' letters FULLY legible on its north face — the leaning granite boulder sits mid-span WEST of the letters and never covers the 'A' (owner correction) — a quiet scatter of small bronze ginkgo-leaf plaques (names NOT legible — right at toon scale), two white limestone sitting blocks on a speckled grey-tan decomposed-granite forecourt, prairie grass flanking, a white globe lamp behind. The ONE and ONLY AIDS Garden sign in the game."
   },
   {
    "id": "ag-statue-loop",
@@ -1431,7 +1431,7 @@
      "dist": 15
     }
    ],
-   "expectation": "THE shot: the red Wrigley Field marquee on the ROUNDED Clark & Addison corner, reading like the real sign per the owner ref: arched crown with 'WRIGLEY FIELD' set along the arc, small 'HOME OF' over large 'CHICAGO CUBS', art-deco scroll shoulders, white pinstripe trim, and a black rounded message board with DOT-MATRIX lettering (live message line). Behind it the facade reads as a looming GRANDSTAND, not a storefront (012/IMG_2333): green steel column rhythm rising to the rim, red-brick band + red-tile pent over the ground floor, arched-window band at the crown, and a flag ring (Chicago city flag among them) above the marquee. A Chicagoan should recognize THIS sign instantly."
+   "expectation": "THE shot: the red marquee on the ROUNDED Clark & Addison corner, reading like the real sign per the owner ref (094 pun text): arched crown with 'WIGGLY FIELD' set along the arc, small 'HOME OF' over large 'CHICAGO CHUBS', art-deco scroll shoulders, white pinstripe trim, and a black rounded message board with DOT-MATRIX lettering (live message line). Behind it the facade reads as a looming GRANDSTAND, not a storefront (012/IMG_2333): green steel column rhythm rising to the rim, red-brick band + red-tile pent over the ground floor, arched-window band at the crown, and a flag ring (Chicago city flag among them) above the marquee. A Chicagoan should recognize THIS sign instantly."
   },
   {
    "id": "wv-scoreboard",
@@ -1556,7 +1556,7 @@
      "dist": 14
     }
    ],
-   "expectation": "GATE D on the SE-corner diagonal (task 020): maroon gate doors with a green GATE D sign set in the ANGLED bowl wall, a green WRIGLEY FIELD board above, red-brick corner court in front, the grandstand crown wrapping the corner overhead — the gate faces the Sheffield & Addison intersection; the flat east (Sheffield) face beyond stays gateless red brick."
+   "expectation": "GATE D on the SE-corner diagonal (task 020): maroon gate doors with a green GATE D sign set in the ANGLED bowl wall, a green WIGGLY FIELD board above, red-brick corner court in front, the grandstand crown wrapping the corner overhead — the gate faces the Sheffield & Addison intersection; the flat east (Sheffield) face beyond stays gateless red brick."
   },
   {
    "id": "wv-gate-bleacher",
@@ -1581,7 +1581,7 @@
      "dist": 14
     }
    ],
-   "expectation": "The Bleacher Gate on the CHAMFERED Sheffield & Waveland corner (009 rework): the gate faces the intersection at 45 degrees with its green BLEACHERS sign, fronted by a generous RED-BRICK plaza apron carrying the Harry Caray statue centered and OFF the sidewalk through-line, gate behind the statue per the owner reference; the green scoreboard rides above/behind the corner; Murphy's across the street."
+   "expectation": "The Bleacher Gate on the CHAMFERED Sheffield & Waveland corner (009 rework): the gate faces the intersection at 45 degrees with its green BLEACHERS sign, fronted by a generous RED-BRICK plaza apron carrying the Harry Caray statue centered and OFF the sidewalk through-line, gate behind the statue per the owner reference; the green scoreboard rides above/behind the corner; Furphy's across the street."
   },
   {
    "id": "wv-knothole",
@@ -1631,32 +1631,32 @@
      "dist": 9
     }
    ],
-   "expectation": "The Addison stair doorway under the girder bridge now reads as the station head-house (refs/addison-station/): limestone portal frame proud of the abutment around the door, crowned by the real dark CTA sign band 'Addison 3600 N / 940 W' with the red Elevator tab and white Cubs-logo square; street passes beneath the bridge."
+   "expectation": "The Addison stair doorway under the girder bridge now reads as the station head-house (refs/addison-station/): limestone portal frame proud of the abutment around the door, crowned by the real dark CTA sign band 'Addison 3600 N / 940 W' with the red Elevator tab and white C-roundel square; street passes beneath the bridge."
   },
   {
    "id": "wv-murphys",
    "area": "wrigleyville",
    "cell": "wrigleyville",
-   "x": -170,
-   "z": -533,
+   "x": -195,
+   "z": -555,
    "framings": [
     {
-     "yaw": 3.14,
-     "pitch": 0.2,
-     "dist": 12
+     "yaw": 1.06,
+     "pitch": 0.12,
+     "dist": 11
     },
     {
-     "yaw": 3.74,
-     "pitch": 0.2,
-     "dist": 9
+     "yaw": 1.46,
+     "pitch": 0.12,
+     "dist": 11
     },
     {
-     "yaw": 2.54,
-     "pitch": 0.28,
-     "dist": 14
+     "yaw": 0.66,
+     "pitch": 0.12,
+     "dist": 11
     }
    ],
-   "expectation": "Murphy's Bleachers at the SE corner of Sheffield & Waveland reads as THE real bar (refs/murphys-bleachers/): a 2-storey blonde-brick mass with a cream fascia carrying big red MURPHY'S BLEACHERS letters and a rooftop deck, a 1-storey red-brick corner annex with the verdigris bronze sign band (baseball disc + MURPHY'S) and sage-green awning, a changeable-letter marquee board on a pole, and a fenced sidewalk beer garden with tables/umbrellas along Sheffield."
+   "expectation": "Furphy's Bleachers (094 pun of Murphy's) at the SE corner of Sheffield & Waveland reads as the real bar's likeness (refs/murphys-bleachers/): a 2-storey blonde-brick mass with a cream fascia carrying big red FURPHY'S BLEACHERS letters and a rooftop deck, a 1-storey red-brick corner annex with the verdigris bronze sign band (baseball disc + FURPHY'S) and sage-green awning, a changeable-letter marquee board on a pole, and a fenced sidewalk beer garden with tables/umbrellas along Sheffield."
   },
   {
    "id": "wv-engine78",
@@ -1706,7 +1706,7 @@
      "dist": 14
     }
    ],
-   "expectation": "The Cubby Bear opposite the marquee corner reads as THE real bar (refs/cubby-bear/): blonde/tan-brick 2-storey corner block, black storefront fascia with window neon (no sign clipping past any face edge — issue 001), maroon corner door toward Clark & Addison, diamond THE CUBBY BEAR logo on both street faces, dark-green cornice, rooftop billboard on a steel truss above."
+   "expectation": "The Chubby Bear (094 pun of the Cubby Bear) opposite the marquee corner reads as the real bar's likeness (refs/cubby-bear/): blonde/tan-brick 2-storey corner block, black storefront fascia with window neon (no sign clipping past any face edge — issue 001), maroon corner door toward Clark & Addison, diamond THE CHUBBY BEAR logo on both street faces, dark-green cornice, rooftop billboard on a steel truss above."
   },
   {
    "id": "wv-bar-sluggers",
@@ -1731,7 +1731,7 @@
      "dist": 14
     }
    ],
-   "expectation": "SLUGGERS on the west side of Clark: cream party-wall storefront with the yellow/red SLUGGERS sign band (+ WORLD CLASS SPORTS BAR script) and a FAST PITCH BATTING CAGES banner; the task-009 exterior stair and rooftop cage still read above the storefront; part of the glowing bar row."
+   "expectation": "SLUGGARDS (094 pun of Sluggers) on the west side of Clark: cream party-wall storefront with the yellow/red SLUGGARDS sign band (+ WORLD CLASS SPORTS BAR script) and a FAST PITCH BATTING CAGES banner; the task-009 exterior stair and rooftop cage still read above the storefront; part of the glowing bar row."
   },
   {
    "id": "wv-bar-sports-corner",
@@ -1756,7 +1756,7 @@
      "dist": 14
     }
    ],
-   "expectation": "SPORTS CORNER in the Clark bar row reads to type (refs/sports-corner/): cream/buff 3-storey front, vertical blue SPORTS CORNER blade sign readable from the street, navy awnings over a glassy ground floor, big glassy 2nd-floor windows, roof-deck railing on top."
+   "expectation": "SPORTS CORNET (094 pun of Sports Corner) in the Clark bar row reads to type (refs/sports-corner/): cream/buff 3-storey front, vertical blue SPORTS CORNET blade sign readable from the street, navy awnings over a glassy ground floor, big glassy 2nd-floor windows, roof-deck railing on top."
   },
   {
    "id": "wv-bar-casey-s",
@@ -1781,7 +1781,7 @@
      "dist": 14
     }
    ],
-   "expectation": "CASEY MORAN'S in the Clark bar row: white/cream classical facade with arched 2nd-floor windows, dark-green sign band with gold CASEY MORAN'S lettering (shamrock neon kept), rooftop pergola/deck hint above."
+   "expectation": "CASEY AT THE BAR (094 pun of Casey Moran's) in the Clark bar row: white/cream classical facade with arched 2nd-floor windows, dark-green sign band with gold CASEY AT THE BAR lettering (shamrock neon kept), rooftop pergola/deck hint above."
   },
   {
    "id": "wv-bar-the-dugout",
@@ -1831,7 +1831,7 @@
      "dist": 10
     }
    ],
-   "expectation": "A souvenir/cap stand on Addison by the station: caps, W flags, Cubs-blue merchandise on display."
+   "expectation": "A souvenir/cap stand on Addison by the station: caps, W flags, Chubs-blue merchandise on display."
   },
   {
    "id": "wv-stall-1",
@@ -2037,7 +2037,7 @@
      "dist": 11
     }
    ],
-   "expectation": "THE Sluggers rooftop batting cage (task 009): atop the lowered SLUGGERS bar, reachable by the exterior stair, a netted fast-pitch tunnel with the pitching machine and home plate sits on a rooftop deck the mayor can stand on. Reads as a real upstairs destination — not a street hut. The batter faces the park (east)."
+   "expectation": "THE Sluggards rooftop batting cage (task 009): atop the lowered SLUGGARDS bar, reachable by the exterior stair, a netted fast-pitch tunnel with the pitching machine and home plate sits on a rooftop deck the mayor can stand on. Reads as a real upstairs destination — not a street hut. The batter faces the park (east)."
   },
   {
    "id": "wv-sluggers-stair",
@@ -2062,7 +2062,7 @@
      "dist": 13
     }
    ],
-   "expectation": "The street approach to Sluggers on Clark: the low 2-storey bar with a visible exterior stair climbing its street face to the rooftop batting cage above, and a 'BATTING CAGES UPSTAIRS ↑' sign at the base. The cage is a destination you walk up to, not furniture on the sidewalk."
+   "expectation": "The street approach to Sluggards on Clark: the low 2-storey bar with a visible exterior stair climbing its street face to the rooftop batting cage above, and a 'BATTING CAGES UPSTAIRS ↑' sign at the base. The cage is a destination you walk up to, not furniture on the sidewalk."
   },
   {
    "id": "shop-sluggers",
@@ -2087,7 +2087,7 @@
      "dist": 9
     }
    ],
-   "expectation": "088 SIGN TRUTH (issue 027): the SLUGGERS storefront menu board beside the serving window on the Clark face — a cream board with readable menu lines, STABLE (no flicker/shimmer) head-on, oblique, and far; the serving window with keeper, counter ledge with the deco Chicago dog + Old Style can stack, and the striped awning above all read; sign not mirrored, not bisected by any post."
+   "expectation": "088 SIGN TRUTH (issue 027): the SLUGGARDS storefront menu board beside the serving window on the Clark face — a cream board with readable menu lines (Olde Stylo · 6 among them), STABLE (no flicker/shimmer) head-on, oblique, and far; the serving window with keeper, counter ledge with the deco Chicago dog + Olde Stylo can stack, and the striped awning above all read; sign not mirrored, not bisected by any post."
   },
   {
    "id": "wv-barricade-addison-e",
@@ -2137,7 +2137,7 @@
      "dist": 13
     }
    ],
-   "expectation": "The Clark right-of-way south of Addison (task 033, owner directive): blue CPD 'POLICE LINE' A-frames close the mouth at z -385.5 with an officer nearby, but Clark VISIBLY CONTINUES beyond the line — asphalt with yellow centerline dashes, curbs, sidewalk slabs and cobra lamps receding SSE on the diagonal, FLANKED by storefront buildings that line the alignment (Cubby Bear then the clark-sw lots west, the addison-s corner lot then clark-se lots east); NO building mass stands IN the right-of-way anywhere down the vista; a green 'N CLARK ST' blade reads near the east curb and a small green pinstriped COMING-SOON placard (017 teaser register) reads on the closure line; the street fades into the low-rise Lakeview backdrop and open distance — a street the city plans to use, not a dead end and not a wall."
+   "expectation": "The Clark right-of-way south of Addison (task 033, owner directive): blue CPD 'POLICE LINE' A-frames close the mouth at z -385.5 with an officer nearby, but Clark VISIBLY CONTINUES beyond the line — asphalt with yellow centerline dashes, curbs, sidewalk slabs and cobra lamps receding SSE on the diagonal, FLANKED by storefront buildings that line the alignment (Chubby Bear then the clark-sw lots west, the addison-s corner lot then clark-se lots east); NO building mass stands IN the right-of-way anywhere down the vista; a green 'N CLARK ST' blade reads near the east curb and a small green pinstriped COMING-SOON placard (017 teaser register) reads on the closure line; the street fades into the low-rise Lakeview backdrop and open distance — a street the city plans to use, not a dead end and not a wall."
   },
   {
    "id": "wv-street-addison",
@@ -2267,7 +2267,7 @@
      "dist": 13
     }
    ],
-   "expectation": "Clark & Addison, all four corners occupied and right: the marquee on its rounded corner (NE of the intersection — the stadium block is north of Addison, east of Clark), the Cubby Bear across Addison (SW), bar-row masses up Clark (NW), storefront fabric SE — and between the SW and SE corners the Clark right-of-way OPENS south past the CPD line (task 033): visible street continuing, no building across the alignment. No bare corner, no backdrop-grade box facing the intersection."
+   "expectation": "Clark & Addison, all four corners occupied and right: the marquee on its rounded corner (NE of the intersection — the stadium block is north of Addison, east of Clark), the Chubby Bear across Addison (SW), bar-row masses up Clark (NW), storefront fabric SE — and between the SW and SE corners the Clark right-of-way OPENS south past the CPD line (task 033): visible street continuing, no building across the alignment. No bare corner, no backdrop-grade box facing the intersection."
   },
   {
    "id": "wv-x-sheffield-addison",
@@ -2297,7 +2297,7 @@
      "dist": 13
     }
    ],
-   "expectation": "Sheffield & Addison, the FIELD corner done right: the stadium SE/right-field corner reads as its real angled/rounded mass with signage presence but NO gate/door visuals on the east face (owner placement correction, 012); a souvenir-store corner across Addison (Sports World-style); the station entrance relationship east; every corner holds something with intent."
+   "expectation": "Sheffield & Addison, the FIELD corner done right: the stadium SE/right-field corner reads as its real angled/rounded mass with signage presence but NO gate/door visuals on the east face (owner placement correction, 012); a souvenir-store corner across Addison (Sports Whirled-style); the station entrance relationship east; every corner holds something with intent."
   },
   {
    "id": "wv-x-sheffield-waveland",
@@ -2327,7 +2327,7 @@
      "dist": 13
     }
    ],
-   "expectation": "Sheffield & Waveland: the chamfered Bleacher Gate + Caray plaza on the stadium corner, Murphy s Bleachers across, rooftop brownstones up Sheffield — the classic bleacher-corner tableau, no voids."
+   "expectation": "Sheffield & Waveland: the chamfered Bleacher Gate + Caray plaza on the stadium corner, Furphy's Bleachers across, rooftop brownstones up Sheffield — the classic bleacher-corner tableau, no voids."
   },
   {
    "id": "wv-x-clark-waveland",
@@ -2382,7 +2382,7 @@
      "dist": 11
     }
    ],
-   "expectation": "Owner photo clark-addison-se-corner (2026-07-10): from the NW corner of Clark & Addison looking SE across the intersection — the real corner is low brick retail crowned by a big rooftop AD BILLBOARD angled at the intersection. Game must show: the grey-stone corner lot with a rooftop billboard on a dark truss angled NW at the intersection (NO CURVEBALLS baseball ad, posts below the panel), so the two boards (this + Cubby Bear's) bracket the intersection like the real corner; the CPD line + officer + green COMING-SOON placard with Clark visibly continuing south (033 — already TRUE, keep); low-rise storefront strips receding both ways. Ignore-construction rule applies to the photo, not the game."
+   "expectation": "Owner photo clark-addison-se-corner (2026-07-10): from the NW corner of Clark & Addison looking SE across the intersection — the real corner is low brick retail crowned by a big rooftop AD BILLBOARD angled at the intersection. Game must show: the grey-stone corner lot with a rooftop billboard on a dark truss angled NW at the intersection (NO CURVEBALLS baseball ad, posts below the panel), so the two boards (this + Chubby Bear's) bracket the intersection like the real corner; the CPD line + officer + green COMING-SOON placard with Clark visibly continuing south (033 — already TRUE, keep); low-rise storefront strips receding both ways. Ignore-construction rule applies to the photo, not the game."
   },
   {
    "id": "wv-photo-cubby-bear",
@@ -2407,7 +2407,7 @@
      "dist": 12
     }
    ],
-   "expectation": "Owner photo cubby-bear-detail: blonde brick, dark-green cornice, THE CUBBY BEAR diamond crest high on the wall, black storefront fascia with lit windows and neon, corner door, rooftop billboard on a steel truss. This pair read TRUE against the owner ground truth as-is (010 likeness) — judge that it STAYS true: blonde mass + diamond crest + CUBBY BEAR band + black fascia + GO CUBS truss board all visible from the marquee corner. No churn."
+   "expectation": "Owner photo cubby-bear-detail: blonde brick, dark-green cornice, THE CUBBY BEAR diamond crest high on the wall, black storefront fascia with lit windows and neon, corner door, rooftop billboard on a steel truss. Game carries the 094 pun text (THE CHUBBY BEAR / GO CHUBS) on the same true massing (010 likeness) — judge that the composition STAYS true: blonde mass + diamond crest + CHUBBY BEAR band + black fascia + GO CHUBS truss board all visible from the marquee corner. No other churn."
   },
   {
    "id": "wv-photo-swift-and-sons",
@@ -2432,7 +2432,7 @@
      "dist": 13
     }
    ],
-   "expectation": "Owner photo swift-and-sons-tavern: the real NW corner is Hotel Zachary's rounded brick corner with the blue SWIFT TAVERN blade and flower-boxed bay windows. STANDING LIBERTY: the game's Clark bar row (006 sign-off) holds this frontage instead — the real Sports Corner/Dugout actually live at Sheffield & Addison. Judge the corner-ANCHOR read, not the tenant: the Dugout's dark band + oriel bay nearest the corner, the lit bar row receding north with Sports Corner's navy blade, a dense anchored streetwall like the photo's — no bare or backdrop-grade corner."
+   "expectation": "Owner photo swift-and-sons-tavern: the real NW corner is Hotel Zachary's rounded brick corner with the blue SWIFT TAVERN blade and flower-boxed bay windows. STANDING LIBERTY: the game's Clark bar row (006 sign-off) holds this frontage instead — the real Sports Corner/Dugout actually live at Sheffield & Addison. Judge the corner-ANCHOR read, not the tenant: the Dugout's dark band + oriel bay nearest the corner, the lit bar row receding north with Sports Cornet's navy blade, a dense anchored streetwall like the photo's — no bare or backdrop-grade corner."
   },
   {
    "id": "wv-photo-gallagher-north",
@@ -2457,7 +2457,7 @@
      "dist": 12
     }
    ],
-   "expectation": "Owner photo gallagher-way-facing-north: plaza pavers + lawn + cafe furniture, bronze statues on plinths, the Gallagher building behind carrying a GALLAGHER WAY band and a huge Cubs video screen. Game read TRUE (019/020 — keep): banded pavers, wedge lawn, splash pad, statue row on pedestals, CUBS 3–2 video board, GALLAGHER WAY band on the office block, tree planters along Clark. Recorded liberty: cream masonry office vs the real glass box — the band + board carry the ID. No churn."
+   "expectation": "Owner photo gallagher-way-facing-north: plaza pavers + lawn + cafe furniture, bronze statues on plinths, the Gallagher building behind carrying a GALLAGHER WAY band and a huge Cubs video screen. Game read TRUE (019/020 — keep): banded pavers, wedge lawn, splash pad, statue row on pedestals, CHUBS 3–2 video board, GALLAGHER WAY band on the office block, tree planters along Clark. Recorded liberty: cream masonry office vs the real glass box — the band + board carry the ID. No churn."
   },
   {
    "id": "wv-photo-west-flank",
@@ -2482,7 +2482,7 @@
      "dist": 12
     }
    ],
-   "expectation": "Owner photo wrigley-west-side-from-addison: the stadium's street wall — low cream/brick base band, green structural steel with arched grilles, upper-deck fascia, game-day flags, a gated canopy. Game read TRUE at the base (012 skin — keep): red-brick band, ADDISON GATE + WELCOME TO THE FRIENDLY CONFINES, green column rhythm with arched windows, bunting, terracotta rim trim. NEW (034): white LATTICE LIGHT BANKS must rise above the crown — wide steel lattice heads on the roof masts, the photos' skyline signature (the old bare masts never read from the street)."
+   "expectation": "Owner photo wrigley-west-side-from-addison: the stadium's street wall — low cream/brick base band, green structural steel with arched grilles, upper-deck fascia, game-day flags, a gated canopy. Game read TRUE at the base (012 skin — keep): red-brick band, ADDISON GATE + WELCOME TO THE WIGGLY CONFINES (094 pun), green column rhythm with arched windows, bunting, terracotta rim trim. NEW (034): white LATTICE LIGHT BANKS must rise above the crown — wide steel lattice heads on the roof masts, the photos' skyline signature (the old bare masts never read from the street)."
   },
   {
    "id": "wv-photo-addison-west",
@@ -2507,7 +2507,7 @@
      "dist": 12
     }
    ],
-   "expectation": "Owner photo addison-south-side-facing-west: looking west along Addison — the real south side is anchored by a giant round LUCKY STRIKE bowling sign projecting over the sidewalk; the stadium face runs north with the white light lattice above. Game must show: the round maroon-ring LUCKY STRIKE disc blade projecting from the whitegrill fabric lot over the south sidewalk (legible, not mirrored, bracket clear of the text); the fabric row + Cubby Bear GO CUBS board terminating the view west (already TRUE); the stadium south face right (bunting, TICKETS, red base band — under-the-wall vantage: the lattice banks read from wv-photo-west-flank's tilted framings, not from directly below the wall, same as the real sidewalk)."
+   "expectation": "Owner photo addison-south-side-facing-west: looking west along Addison — the real south side is anchored by a giant round LUCKY STRIKE bowling sign projecting over the sidewalk; the stadium face runs north with the white light lattice above. Game must show: the round maroon-ring PLUCKY STRIKE disc blade (094 pun) projecting from the whitegrill fabric lot over the south sidewalk (legible, not mirrored, bracket clear of the text); the fabric row + Chubby Bear GO CHUBS board terminating the view west (already TRUE); the stadium south face right (bunting, TICKETS, red base band — under-the-wall vantage: the lattice banks read from wv-photo-west-flank's tilted framings, not from directly below the wall, same as the real sidewalk)."
   },
   {
    "id": "wv-photo-se-corner",
@@ -2557,7 +2557,7 @@
      "dist": 15
     }
    ],
-   "expectation": "Owner photo addison-walking-west-from-redline: the arrival read walking west from the Red Line — a corner retail anchor at Addison & Sheffield (real: Sports Corner's cream mass + blade; game: the owner-directed SPORTS WORLD corner store, a deliberate likeness rhyme), street bustle (stall, cars, fans), and Wrigley looming beyond with its white light lattice. Camera exits from under the viaduct like the real walk. Recorded liberty: the real Sports Corner/Dugout tenants live on the game's Clark row. Judge: corner-anchor presence + the stadium/light-bank loom entering frame-right + bustle."
+   "expectation": "Owner photo addison-walking-west-from-redline: the arrival read walking west from the Red Line — a corner retail anchor at Addison & Sheffield (real: Sports Corner's cream mass + blade; game: the SPORTS WHIRLED corner store (094 pun of the owner-directed SPORTS WORLD), a deliberate likeness rhyme), street bustle (stall, cars, fans), and Wrigley looming beyond with its white light lattice. Camera exits from under the viaduct like the real walk. Recorded liberty: the real Sports Corner/Dugout tenants live on the game's Clark row. Judge: corner-anchor presence + the stadium/light-bank loom entering frame-right + bustle."
   },
   {
    "id": "wv-photo-viaduct",
@@ -2647,7 +2647,7 @@
      "dist": 2.05
     }
    ],
-   "expectation": "Inside the Red Line car, the 'SUPPORT DEVELOPMENT ♥' ad placard on the north end wall (the transit-car ad precedent, like the Wrigley's Spearmint card): a cream poster with red frame, the header over a large crisp black-on-white QR and the ko-fi.com/jimbobuildsope caption, read head-on down the car's length and clear of the grab poles. The QR must be sharp enough to scan (mechanically decoded to the Ko-fi URL by tools/decode-qr.mjs)."
+   "expectation": "Inside the Red Line car, the 'SUPPORT DEVELOPMENT ♥' ad placard on the north end wall (the transit-car ad precedent, like the Wiggly's Spearmint card): a cream poster with red frame, the header over a large crisp black-on-white QR and the ko-fi.com/jimbobuildsope caption, read head-on down the car's length and clear of the grab poles. The QR must be sharp enough to scan (mechanically decoded to the Ko-fi URL by tools/decode-qr.mjs)."
   },
   {
    "id": "wb-arrival",
@@ -2817,7 +2817,7 @@
      "dist": 10
     }
    ],
-   "expectation": "THE SCOREBOARD READ from the center-field warning track, looking up: the green hand-turned board fills the upper frame with a LEGIBLE line score — inning digits in the VISITORS and CUBS box rows, run totals under R, the amber at-bat indicator, outs lamps by the clock, and a game-day message line. Clock + pennant masts + the W flag (furled or flying) up top. Digits crisp enough to read numbers."
+   "expectation": "THE SCOREBOARD READ from the center-field warning track, looking up: the green hand-turned board fills the upper frame with a LEGIBLE line score — inning digits in the VISITORS and CHUBS box rows, run totals under R, the amber at-bat indicator, outs lamps by the clock, and a game-day message line. Clock + pennant masts + the W flag (furled or flying) up top. Digits crisp enough to read numbers."
   },
   {
    "id": "wb-stretch",
@@ -2902,7 +2902,7 @@
      "dist": 6
     }
    ],
-   "expectation": "At the Millennium subway kiosk the RED LINE stair-head pylon is flanked by two departure boards reading like a station portal over the descending stair — '→ BELMONT / the lakefront / Howard-bound' and '→ ADDISON / Wrigley Field / Howard-bound' (both NORTHBOUND from downtown Monroe). Text upright and legible, lollipop posts, the Bean and ice rink opening east beyond."
+   "expectation": "At the Millennium subway kiosk the RED LINE stair-head pylon is flanked by two departure boards reading like a station portal over the descending stair — '→ BELMONT / the lakefront / Howard-bound' and '→ ADDISON / Wiggly Field / Howard-bound' (both NORTHBOUND from downtown Monroe). Text upright and legible, lollipop posts, the Bean and ice rink opening east beyond."
   },
   {
    "id": "mp-streetwall",
@@ -2964,7 +2964,7 @@
      "dist": 6.2
     }
    ],
-   "expectation": "A semicircular peristyle of paired Doric columns on a raised curved base sweeps around a single-jet fountain basin at the lawn's north-west corner — the columns washed purple by uplights over a warm gold-lit base — framed against glass office giants; the interior framing stands inside the exedra with the purple colonnade wrapping around; a low curved limestone wall nearby reads WRIGLEY SQUARE."
+   "expectation": "A semicircular peristyle of paired Doric columns on a raised curved base sweeps around a single-jet fountain basin at the lawn's north-west corner — the columns washed purple by uplights over a warm gold-lit base — framed against glass office giants; the interior framing stands inside the exedra with the purple colonnade wrapping around; a low curved limestone wall nearby reads WIGGLY SQUARE (094 pun)."
   },
   {
    "id": "mp-wrigley-square",
@@ -2995,7 +2995,7 @@
      "dist": 4.6
     }
    ],
-   "expectation": "The owner night-photo read from the Wrigley Square lawn: across the open lawn apron the Millennium Monument's semicircular Doric colonnade glows PURPLE from uplights above a WARM GOLD-washed curved base carrying a dark dedication band (TO THE FOUNDERS OF MILLENNIUM PARK), a single lit fountain jet rises at its foot between flanking planter urns and twin-globe period lamps, and the lit Michigan Avenue towers stack tall behind the crown — purple-on-gold reading civic-elegant, not neon."
+   "expectation": "The owner night-photo read from the Wiggly Square lawn: across the open lawn apron the Millennium Monument's semicircular Doric colonnade glows PURPLE from uplights above a WARM GOLD-washed curved base carrying a dark dedication band (TO THE FOUNDERS OF MILLENNIUM PARK), a single lit fountain jet rises at its foot between flanking planter urns and twin-globe period lamps, and the lit Michigan Avenue towers stack tall behind the crown — purple-on-gold reading civic-elegant, not neon."
   },
   {
    "id": "mp-rink-overlook",
@@ -3026,7 +3026,7 @@
      "dist": 9
     }
    ],
-   "expectation": "A sunken white ice sheet streaked with faint blue skate lines sits a level below the plaza — noticeably BIG, with open ice between the loopers (the 093 grown sheet) — ringed by chunky white boards with cream caps and corner floodlight masts; several chibi skaters glide in loops while a wobbly beginner hugs the boards, the balustrade framing pitches DOWN into the carved pit (no lawn capping it), and eastward views show the PARK GRILL sign band on the cream grill front beneath the white balustrade, the Bean and the streetwall rising above."
+   "expectation": "A sunken white ice sheet streaked with faint blue skate lines sits a level below the plaza — noticeably BIG, with open ice between the loopers (the 093 grown sheet) — ringed by chunky white boards with cream caps and corner floodlight masts; several chibi skaters glide in loops while a wobbly beginner hugs the boards, the balustrade framing pitches DOWN into the carved pit (no lawn capping it), and eastward views show the LARK GRILL sign band (094 pun) on the cream grill front beneath the white balustrade, the Bean and the streetwall rising above."
   },
   {
    "id": "mp-rink-entry",
@@ -3157,7 +3157,7 @@
      "dist": 7
     }
    ],
-   "expectation": "A broad paved allee runs north between double rows of trees with globe lamps and colorful pennant banners, past a curved inscribed limestone plinth, and dead-ends visually at the white PRUDENTIAL slab and its diamond-topped twin."
+   "expectation": "A broad paved allee runs north between double rows of trees with globe lamps and colorful pennant banners, past a curved inscribed limestone plinth, and dead-ends visually at the white PRUDENT OWL slab (094 pun of the Prudential sign) and its diamond-topped twin."
   },
   {
    "id": "mp-pritzker-stage",
@@ -3219,7 +3219,7 @@
      "dist": 6
     }
    ],
-   "expectation": "Steel pipe arcs criss-cross overhead in a dome-like lattice hung with paired speaker pods, converging toward a lit silver stage at the lawn's far end, with the north skyline wall — Prudential sign, diamond spire, white monolith — standing beyond."
+   "expectation": "Steel pipe arcs criss-cross overhead in a dome-like lattice hung with paired speaker pods, converging toward a lit silver stage at the lawn's far end, with the north skyline wall — PRUDENT OWL sign, diamond spire, white monolith — standing beyond."
   },
   {
    "id": "mp-lurie",
@@ -3422,7 +3422,7 @@
      "dist": 5
     }
    ],
-   "expectation": "Two verdigris green-bronze LIONS on granite plinths flank a broad limestone grand staircase — subtly different beasts: the north one head-level 'on the prowl' with a forepaw advanced, the south one chest-up with its mouth open 'in defiance', both gazing west over Michigan Ave; behind them the beaux-arts front stacks rusticated base, arched entries, hanging exhibition banners (invented shows), the THE ART INSTITVTE OF CHICAGO frieze and a pediment. A local should stop at the steps and grin."
+   "expectation": "Two verdigris green-bronze LIONS on granite plinths flank a broad limestone grand staircase — subtly different beasts: the north one head-level 'on the prowl' with a forepaw advanced, the south one chest-up with its mouth open 'in defiance', both gazing west over Michigan Ave; behind them the beaux-arts front stacks rusticated base, arched entries, hanging exhibition banners (invented shows), the THE ARF INSTITVTE OF CHICAGO frieze (094 pun) and a pediment. A local should stop at the steps and grin."
   },
   {
    "id": "mp-south-garden",
@@ -3470,7 +3470,7 @@
      "dist": 5
     }
    ],
-   "expectation": "Closed E Monroe with the festival LIVE: pipe crowd-fence sections, orange traffic cones and a stacked pallet still on the walkable asphalt (load-in gear at the quiet west end), the scaffold arch at the park crossing now wearing a LOLLAPALOOZA banner — and south across the street the Art Institute's pedimented facade with its two bronze lions rising over the forecourt."
+   "expectation": "Closed E Monroe with the festival LIVE: pipe crowd-fence sections, orange traffic cones and a stacked pallet still on the walkable asphalt (load-in gear at the quiet west end), the scaffold arch at the park crossing now wearing a LALLAPAWLOOZA banner (094 pun) — and south across the street the Art Institute's pedimented facade with its two bronze lions rising over the forecourt."
   },
   {
    "id": "mp-nichols",
@@ -3556,7 +3556,7 @@
      "dist": 5
     }
    ],
-   "expectation": "A field of chibi festivalgoers in mixed colors swaying and bouncing in waves toward the stage — distinct heads over chunky bodies (people, not jellybeans), totems poking above the crowd (a hand-made yellow star, a foam EL car, a disco ball — and an inflatable alligator drifting over hands), the FOH sound booth and dance circle nearby; f1 stands under the branded entry arch on closed Monroe with the food-truck row beyond; f2 reads the all-Chicago pun LINEUP poster (MALÖRT FACE, DEEP DISH MODE, THE LAKE EFFECTS) at the Monroe/Columbus corner."
+   "expectation": "A field of chibi festivalgoers in mixed colors swaying and bouncing in waves toward the stage — distinct heads over chunky bodies (people, not jellybeans), totems poking above the crowd (a hand-made yellow star, a foam EL car, a disco ball — and an inflatable alligator drifting over hands), the FOH sound booth and dance circle nearby; f1 stands under the branded entry arch on closed Monroe with the food-truck row beyond; f2 reads the all-Chicago pun LINEUP poster (MALÖRP FACE, DEEP DISH MODE, THE LAKE EFFECTS) at the Monroe/Columbus corner."
   },
   {
    "id": "mp-museum-cart",
@@ -3618,7 +3618,7 @@
      "dist": 8
     }
    ],
-   "expectation": "088 SIGN TRUTH (issue 027): the Lollapalooza MERCH tent on Butler Field — the plum 'MERCH' banner hangs clear of the canopy front facing east, LEGIBLE and stable, with NO dark backing box poking through or past the banner face (the shipped bug: transposed backing dimensions left a 2.5 m blade through the sign). Hanging tees + wood counter under the tent, festival-staff keeper behind, crowd/festival context around."
+   "expectation": "088 SIGN TRUTH (issue 027): the Lallapawlooza MERCH tent on Butler Field — the plum 'MERCH' banner hangs clear of the canopy front facing east, LEGIBLE and stable, with NO dark backing box poking through or past the banner face (the shipped bug: transposed backing dimensions left a 2.5 m blade through the sign). Hanging tees + wood counter under the tent, festival-staff keeper behind, crowd/festival context around."
   },
   {
    "id": "mood-firefly-lurie",

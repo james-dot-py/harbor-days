@@ -70,8 +70,9 @@ function sportsWorldTex() {
   g.fillStyle = '#bf2f27'; g.fillRect(0, 0, 512, 96);
   g.strokeStyle = 'rgba(255,255,255,.35)'; g.lineWidth = 4; g.strokeRect(5, 5, 502, 86);
   g.fillStyle = '#f7f5ef'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = '900 60px "Arial Black",Arial,sans-serif';
-  g.fillText('SPORTS WORLD', 256, 52);
+  let fs = 60; g.font = `900 ${fs}px "Arial Black",Arial,sans-serif`;
+  while (g.measureText('SPORTS WHIRLED').width > 486 && fs > 30) { fs -= 2; g.font = `900 ${fs}px "Arial Black",Arial,sans-serif`; }
+  g.fillText('SPORTS WHIRLED', 256, 52);
   return tx(cv);
 }
 // wall-mounted canvas merch banner (opaque) — bg colour + one or two lines
@@ -149,7 +150,9 @@ function ctaBladeTex(dir) {
   g.strokeStyle = '#f2f2ef'; g.lineWidth = 5; g.strokeRect(6, 6, 436, 128);
   g.fillStyle = '#c0271f'; g.fillRect(18, 18, 96, 104);               // red CTA tab
   g.fillStyle = '#ffffff'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = '900 40px "Arial Black",Arial,sans-serif'; g.fillText('CTA', 66, 70);
+  let tf = 40; g.font = `900 ${tf}px "Arial Black",Arial,sans-serif`;
+  while (g.measureText('THE L').width > 86 && tf > 16) { tf -= 2; g.font = `900 ${tf}px "Arial Black",Arial,sans-serif`; }
+  g.fillText('THE L', 66, 70);
   g.textAlign = 'left'; g.font = '800 44px "Trebuchet MS",Arial,sans-serif';
   g.fillText('ADDISON', 132, 70);
   // arrow head + shaft toward the station end
@@ -225,7 +228,7 @@ function buildSportsWorld() {
   }
 
   // --- canvas souvenir banners under the 2nd-floor sills ---
-  plane(bannerTex('CUBS SOUVENIRS', null, '#0e4c92', '#f7f5ef'), -214, 4.9, -384.20, Math.PI, 6.0, 0.72, false);
+  plane(bannerTex('CHUBS SOUVENIRS', null, '#0e4c92', '#f7f5ef'), -214, 4.9, -384.20, Math.PI, 6.0, 0.72, false);
   plane(bannerTex('T-SHIRTS · CAPS', 'PENNANTS', '#bf2f27', '#f7f5ef'), -203.94, 4.9, -376.5, Math.PI / 2, 5.4, 0.9, false);
   plane(wFlagBannerTex(), -208.4, 4.9, -384.20, Math.PI, 1.1, 0.72, true);
 
@@ -236,7 +239,7 @@ function buildSportsWorld() {
   // --- sidewalk merch racks ON the Addison S sidewalk, just outside the door ---
   // (IN the walk corridor -> colliders; near the NE/chamfer door)
   box(1.3, 0.85, 0.8, BASE, -211.5, 0.45, -386.6, 0);                                    // cap bin
-  plane2(merchSignTex('CUBS', 'HATS $10', '#0e4c92', '#c0271f'), -211.5, 1.15, -386.18, Math.PI, 1.1, 0.55, false);
+  plane2(merchSignTex('CHUBS', 'HATS $10', '#0e4c92', '#c0271f'), -211.5, 1.15, -386.18, Math.PI, 1.1, 0.55, false);
   collide(-211.5, -386.6, 0.75);
   box(1.0, 1.4, 0.6, DARK, -207.8, 0.7, -386.9, 0);                                       // t-shirt rack post box
   plane2(merchSignTex('TEES', '$20', '#c0271f', '#0e4c92'), -207.8, 1.65, -386.58, Math.PI, 0.9, 0.5, false);

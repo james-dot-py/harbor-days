@@ -99,7 +99,7 @@ function murphyTex() {                               // red letters on cream, gr
   g.fillStyle = '#1f5136'; g.fillRect(0, 0, 512, 12); g.fillRect(0, 116, 512, 12);
   g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillStyle = '#b6392c'; g.font = '800 46px "Arial Black",Arial,sans-serif';
-  g.fillText("MURPHY'S", 256, 46); g.font = '800 40px "Arial Black",Arial,sans-serif';
+  g.fillText("FURPHY'S", 256, 46); g.font = '800 40px "Arial Black",Arial,sans-serif';
   g.fillText('BLEACHERS', 256, 90);
   return tx(cv);
 }
@@ -109,7 +109,7 @@ function bladeTex() {                                // vertical MURPHY'S blade
   g.strokeStyle = '#f3ead2'; g.lineWidth = 6; g.strokeRect(6, 6, 84, 372);
   g.save(); g.translate(48, 192); g.rotate(-Math.PI / 2);
   g.fillStyle = '#f6c14a'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = '800 52px "Arial Black",Arial,sans-serif'; g.fillText("MURPHY'S", 0, 0); g.restore();
+  g.font = '800 52px "Arial Black",Arial,sans-serif'; g.fillText("FURPHY'S", 0, 0); g.restore();
   return tx(cv);
 }
 function murphyBandTex() {                           // verdigris bronze annex sign band
@@ -132,7 +132,7 @@ function murphyBandTex() {                           // verdigris bronze annex s
   g.fillStyle = '#3a6b8c'; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.font = 'italic 14px "Comic Sans MS",cursive'; g.fillText('believe', 256, 64);
   g.fillStyle = '#caa24a'; g.strokeStyle = '#5a4420'; g.lineWidth = 2;
-  g.font = '800 40px Georgia,serif'; g.strokeText("MURPHY'S", 256, 44); g.fillText("MURPHY'S", 256, 44);
+  g.font = '800 40px Georgia,serif'; g.strokeText("FURPHY'S", 256, 44); g.fillText("FURPHY'S", 256, 44);
   g.fillStyle = '#e6ddc8'; g.fillRect(196, 96, 120, 22);
   g.fillStyle = '#3d3020'; g.font = '700 20px Georgia,serif'; g.fillText('BLEACHERS', 256, 107);
   return tx(cv);
@@ -146,8 +146,8 @@ function murphyMarqueeTex() {                        // changeable-letter marque
   g.fillText('NEXT', 128, 58); g.fillText('YEAR', 128, 104); g.fillText('IS NOW', 128, 154);
   g.fillStyle = '#ffd24a'; g.font = '700 22px "Trebuchet MS",Arial,sans-serif'; g.fillText('BAR TRIVIA @8', 128, 206);
   g.fillStyle = '#b6392c'; g.fillRect(20, 248, 216, 52);
-  g.fillStyle = '#f6f3ea'; g.font = '800 22px "Trebuchet MS",Arial,sans-serif'; g.fillText('BUDWEISER', 128, 264);
-  g.fillStyle = '#8fb7e2'; g.font = '700 17px "Trebuchet MS",Arial,sans-serif'; g.fillText('· BUD LIGHT ·', 128, 288);
+  g.fillStyle = '#f6f3ea'; g.font = '800 22px "Trebuchet MS",Arial,sans-serif'; g.fillText('SUDWEISER', 128, 264);
+  g.fillStyle = '#8fb7e2'; g.font = '700 17px "Trebuchet MS",Arial,sans-serif'; g.fillText('· SUD LIGHT ·', 128, 288);
   return tx(cv);
 }
 function cubbyTex() {                                // single-line white-on-black storefront plate
@@ -155,7 +155,7 @@ function cubbyTex() {                                // single-line white-on-bla
   g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, 512, 96);
   g.strokeStyle = '#f4f4f2'; g.lineWidth = 6; g.strokeRect(8, 8, 496, 80);
   g.fillStyle = '#f7f7f4'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = '800 54px "Arial Black",Arial,sans-serif'; g.fillText('CUBBY BEAR', 256, 52);
+  g.font = '800 54px "Arial Black",Arial,sans-serif'; g.fillText('CHUBBY BEAR', 256, 52);
   return tx(cv);
 }
 function cubbyDiamondTex() {                         // navy diamond crest (alpha)
@@ -168,7 +168,7 @@ function cubbyDiamondTex() {                         // navy diamond crest (alph
   g.fillStyle = '#f6f6f2'; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.font = '700 24px "Trebuchet MS",Arial,sans-serif'; g.fillText('THE', 128, 82);
   g.font = '800 42px "Arial Black",Arial,sans-serif';
-  g.fillText('CUBBY', 128, 120); g.fillText('BEAR', 128, 160);
+  g.fillText('CHUBBY', 128, 120); g.fillText('BEAR', 128, 160);
   g.font = '700 22px "Trebuchet MS",Arial,sans-serif'; g.fillText('CHICAGO', 128, 194);
   return tx(cv);
 }
@@ -178,8 +178,8 @@ function cubbyBillboardTex() {                       // rooftop truss ad
   g.fillStyle = '#c0392b'; g.beginPath(); g.arc(74, 72, 48, 0, 7); g.fill();       // Old Style-ish roundel
   g.strokeStyle = '#f6efdc'; g.lineWidth = 4; g.beginPath(); g.arc(74, 72, 48, 0, 7); g.stroke();
   g.fillStyle = '#f6efdc'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = '700 17px "Trebuchet MS",Arial,sans-serif'; g.fillText('OLD', 74, 60); g.fillText('STYLE', 74, 84);
-  g.fillStyle = '#ffffff'; g.font = '800 78px "Arial Black",Arial,sans-serif'; g.fillText('GO CUBS', 306, 76);
+  g.font = '700 17px "Trebuchet MS",Arial,sans-serif'; g.fillText('OLDE', 74, 60); g.fillText('STYLO', 74, 84);
+  g.fillStyle = '#ffffff'; g.font = '800 70px "Arial Black",Arial,sans-serif'; g.fillText('GO CHUBS', 306, 76);
   return tx(cv);
 }
 function cornerBillboardTex() {                      // SE-corner rooftop ad (fiber-internet gag)
@@ -208,7 +208,7 @@ function luckyStrikeTex() {                          // round two-sided bowling 
   g.fillStyle = '#f2ede2'; g.beginPath(); g.arc(128, 128, 88, 0, 7); g.fill();    // cream disc
   g.fillStyle = '#1a2a52'; g.textAlign = 'center'; g.textBaseline = 'middle';     // stacked navy name
   g.font = '800 40px "Arial Black",Arial,sans-serif';
-  g.fillText('LUCKY', 128, 108); g.fillText('STRIKE', 128, 150);
+  g.fillText('PLUCKY', 128, 108); g.fillText('STRIKE', 128, 150);
   g.fillStyle = '#c0392b'; for (const [dx, dy] of [[0, 182], [-11, 196], [11, 196]]) { g.beginPath(); g.arc(128 + dx, dy, 5, 0, 7); g.fill(); }   // bowling-pin dot trio
   return tx(cv);
 }
@@ -231,7 +231,9 @@ function beerTex(word, hex) {                        // tiny window neon
   const col = '#' + hex.toString(16).padStart(6, '0');
   g.textAlign = 'center'; g.textBaseline = 'middle';
   g.shadowColor = col; g.shadowBlur = 16; g.fillStyle = col;
-  g.font = '700 30px "Trebuchet MS",Arial,sans-serif'; g.fillText(word, 64, 34); g.fillText(word, 64, 34);
+  let fs = 30; g.font = `700 ${fs}px "Trebuchet MS",Arial,sans-serif`;
+  while (g.measureText(word).width > 118 && fs > 12) { fs -= 1; g.font = `700 ${fs}px "Trebuchet MS",Arial,sans-serif`; }
+  g.fillText(word, 64, 34); g.fillText(word, 64, 34);
   return tx(cv);
 }
 function lintelTex() {                               // carved-limestone frieze over the bay
@@ -270,7 +272,7 @@ function capSignTex() {                              // hand-lettered CUBS HATS 
   g.strokeStyle = '#c9c0aa'; g.lineWidth = 5; g.strokeRect(6, 6, 244, 116);
   g.textAlign = 'center'; g.textBaseline = 'middle';
   g.fillStyle = '#0e4c92'; g.font = '800 40px "Comic Sans MS","Marker Felt",cursive';
-  g.fillText('CUBS HATS', 128, 46);
+  g.fillText('CHUBS HATS', 128, 46);
   g.fillStyle = '#c0392b'; g.font = '800 46px "Comic Sans MS","Marker Felt",cursive';
   g.fillText('$10', 128, 92);
   return tx(cv);
@@ -299,7 +301,7 @@ function boardTex() {                                // Gallagher Way video boar
   g.fillStyle = '#c9a35a'; g.beginPath(); g.moveTo(256, 176); g.lineTo(300, 216); g.lineTo(256, 256); g.lineTo(212, 216); g.closePath(); g.fill();  // infield
   g.fillStyle = '#f7f7f2'; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.font = '800 76px "Arial Black",Arial,sans-serif';
-  g.shadowColor = '#ffd24a'; g.shadowBlur = 18; g.fillText('CUBS 3–2', 256, 58); g.shadowBlur = 0;
+  g.shadowColor = '#ffd24a'; g.shadowBlur = 18; g.fillText('CHUBS 3–2', 256, 58); g.shadowBlur = 0;
   g.font = '700 34px "Trebuchet MS",Arial,sans-serif'; g.fillStyle = '#ffe08a';
   g.fillText('GAME IN PROGRESS', 256, 108);
   return tx(cv);
@@ -365,7 +367,7 @@ function sluggersBandTex() {                         // yellow/red primary sign
   g.fillStyle = '#f4c81e'; g.fillRect(0, 0, 512, 112);
   g.strokeStyle = '#c0392b'; g.lineWidth = 6; g.strokeRect(6, 6, 500, 100);
   g.fillStyle = '#c0392b'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = '800 56px "Arial Black",Arial,sans-serif'; g.fillText('SLUGGERS', 256, 42);
+  g.font = '800 56px "Arial Black",Arial,sans-serif'; g.fillText('SLUGGARDS', 256, 42);
   g.fillStyle = '#1c4e8a'; g.font = 'italic 700 26px Georgia,serif'; g.fillText('World Class Sports Bar', 256, 86);
   return tx(cv);
 }
@@ -375,7 +377,7 @@ function sportsBladeTex() {                          // vertical navy blade, gol
   g.strokeStyle = '#d9a441'; g.lineWidth = 6; g.strokeRect(6, 6, 84, 436);
   g.fillStyle = '#f4c81e'; g.textAlign = 'center'; g.textBaseline = 'middle';
   g.font = '800 30px "Arial Black",Arial,sans-serif';
-  const s = 'SPORTS CORNER', top = 26, step = (422 - top) / (s.length - 1);
+  const s = 'SPORTS CORNET', top = 26, step = (422 - top) / (s.length - 1);
   for (let i = 0; i < s.length; i++) if (s[i] !== ' ') g.fillText(s[i], 48, top + i * step);
   return tx(cv);
 }
@@ -384,7 +386,9 @@ function caseysBandTex() {                           // dark-green gold-serif ba
   g.fillStyle = '#123f2a'; g.fillRect(0, 0, 512, 112);
   g.strokeStyle = '#d9a441'; g.lineWidth = 5; g.strokeRect(8, 8, 496, 96);
   g.fillStyle = '#e9c766'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.font = '800 52px Georgia,serif'; g.fillText("CASEY MORAN'S", 256, 60);
+  let fs = 52; g.font = `800 ${fs}px Georgia,serif`;   // headless serif fallback runs ~15% wide (050 law) — fit, never clip
+  while (g.measureText('CASEY AT THE BAR').width > 480 && fs > 24) { fs -= 2; g.font = `800 ${fs}px Georgia,serif`; }
+  g.fillText('CASEY AT THE BAR', 256, 60);
   return tx(cv);
 }
 function archWinTex() {                              // arched warm window + limestone surround
@@ -413,7 +417,7 @@ function shared() {
   if (SH) return SH;
   SH = {
     winMat: bmat(0xffffff, { map: winTex() }),
-    beerMats: [bmat(0xffffff, { map: beerTex('OLD STYLE', 0xff5a3c) }), bmat(0xffffff, { map: beerTex('BUDWEISER', 0xff4a4a) }), bmat(0xffffff, { map: beerTex('ON TAP', 0x5ad0ff) })],
+    beerMats: [bmat(0xffffff, { map: beerTex('OLDE STYLO', 0xff5a3c) }), bmat(0xffffff, { map: beerTex('SUDWEISER', 0xff4a4a) }), bmat(0xffffff, { map: beerTex('ON TAP', 0x5ad0ff) })],
     flagMat: bmat(0xffffff, { map: wFlagTex(), side: THREE.DoubleSide }),
     capSignMat: bmat(0xffffff, { map: capSignTex() }),   // shared across the 3 stands
     aBoardMat: bmat(0xffffff, { map: aBoardTex() }),

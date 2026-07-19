@@ -135,7 +135,7 @@ onWorldReady((player) => {
   // interaction anchor ~1.5 m inboard (west) of him so the player stands on deck
   addInteraction({ x: FISH_X - 1.5, z: FISH_Z, r: 2.5, label: 'ask about the fishing',
     onUse: () => toast('OFF THE HOOK',
-      'Perch off the breakwater — get your minnows at Park Bait up the shore.') });
+      'Perch off the breakwater — get your minnows at Perch Bait up the shore.') });
 
   // ---- the catch cycle + always-flopping bucket fish (no per-frame alloc) ----
   let lastDrop = -1, popT = 0;
@@ -179,7 +179,7 @@ onWorldReady((player) => {
   }
 
   addInteraction({ x: 180, z: -736, r: 2.5, label: 'peek in the cooler',
-    onUse: () => toast('PARK BAIT',
+    onUse: () => toast('PERCH BAIT',
       'Crickets, a dozen for a buck. (Cricket Hill up the shore is named for the swarms.)') });
 
   // cricket chirp scheduler state
@@ -260,7 +260,7 @@ onWorldReady((player) => {
   // ---- journal ----
   journalSection('montrose-harbor-life', 'Montrose Harbor', () => `
     <div class="jrow"><span>Perch off the hook</span><b>${state.mtPerch}</b></div>
-    <div class="jrow"><span>Park Bait</span><b>live crickets, by the dozen</b></div>`);
+    <div class="jrow"><span>Perch Bait</span><b>live crickets, by the dozen</b></div>`);
 });
 
 // a single cricket chirp: 2–4 quick high-sine pulses (~0.02 s on / 0.03 s off),

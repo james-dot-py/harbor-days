@@ -76,6 +76,12 @@ unprompted"); until then everything stays in this repo. Photo mode: explicitly r
    buttons. R is claimed by the progression pack (Divvy bell / radio station cycle).
    SPACE = jump (main.js jphys), F = firework launch.
    Test both on every change.
+8. **De-brand law (owner 2026-07-18, task 094):** no real commercial mark as
+   player-visible text — display strings use the pun ledger in **RENAMES.md**
+   (Wiggly Field, Chubs, Dibsy, Olde Stylo, Malörp, Lallapawlooza…). Geographic/
+   street/park names, honorary ways, person names, and the Ko-fi rail stay real.
+   Ids/save keys never change for a rename. Extend RENAMES.md when new brands
+   would otherwise appear.
 
 ## Dev workflow
 

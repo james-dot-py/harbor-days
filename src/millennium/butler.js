@@ -152,7 +152,7 @@ export function buildButler() {
     dk(1.2, 13.4, 1.2, -7, 6.7, -6.4);               // left post
     dk(1.2, 13.4, 1.2, 7, 6.7, -6.4);                // right post (pokes E — collide below)
     dk(15, 0.9, 0.9, 0, 2.2, -6.4);                  // bottom truss chord across the mouth
-    // LOLLAPALOOZA banner strip on the top beam + two vertical side banners
+    // LALLAPAWLOOZA banner strip on the top beam + two vertical side banners
     { const b = new THREE.Mesh(new THREE.PlaneGeometry(14.4, 1.5), bnrMat());
       b.position.set(0, 13.0, -7.02); b.rotation.y = Math.PI; SG.add(b); }
     for (const sx2 of [-7, 7]) { const sb = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 7.5), bnrMat());
@@ -334,7 +334,7 @@ export function buildButler() {
   }
 
   // =====================================================================
-  // 11. ENTRY ARCHES — festival pylons + LOLLAPALOOZA banners over the two
+  // 11. ENTRY ARCHES — festival pylons + LALLAPAWLOOZA banners over the two
   //     closed streets; the third arch (52,901) already exists (060) —
   //     hang a banner on its bare top beam only.
   // =====================================================================
@@ -477,12 +477,12 @@ function tileTex() {   // cream graph-paper tile grid (pale tiles + darker grout
   for (let i = 0; i <= 128.1; i += 128 / 6) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 128); g.stroke(); g.beginPath(); g.moveTo(0, i); g.lineTo(128, i); g.stroke(); }
   return cvTex(cv);
 }
-function bannerTex() {   // deep-plum LOLLAPALOOZA festival banner
+function bannerTex() {   // deep-plum LALLAPAWLOOZA festival banner
   const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 140; const g = cv.getContext('2d');
   g.fillStyle = '#6e1b39'; g.fillRect(0, 0, 1024, 140);
   g.strokeStyle = 'rgba(244,220,160,0.55)'; g.lineWidth = 8; g.strokeRect(10, 10, 1004, 120);
   g.fillStyle = '#f4e6cf'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  fitFont(g, 'LOLLAPALOOZA', 940, 108, 'Arial,sans-serif', '900'); g.fillText('LOLLAPALOOZA', 512, 74);
+  fitFont(g, 'LALLAPAWLOOZA', 940, 108, 'Arial,sans-serif', '900'); g.fillText('LALLAPAWLOOZA', 512, 74);
   return cvTex(cv);
 }
 function stripeTex() {   // red/white circus stripes (tent roofs)
@@ -514,13 +514,13 @@ function lineupTex() {   // THE LINEUP POSTER — all-Chicago pun bill (no real 
   g.fillStyle = '#efe4cf'; g.fillRect(0, 0, 1024, 768);
   g.strokeStyle = '#6e1b39'; g.lineWidth = 14; g.strokeRect(16, 16, 992, 736);
   g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillStyle = '#6e1b39'; fitFont(g, 'LOLLAPALOOZA', 940, 120, 'Arial,sans-serif', '900'); g.fillText('LOLLAPALOOZA', 512, 88);
+  g.fillStyle = '#6e1b39'; fitFont(g, 'LALLAPAWLOOZA', 940, 120, 'Arial,sans-serif', '900'); g.fillText('LALLAPAWLOOZA', 512, 88);
   g.fillStyle = '#2f6f6a'; fitFont(g, 'BUTLER FIELD · GRANT PARK · ALL WEEKEND', 900, 42, 'Arial,sans-serif', '700'); g.fillText('BUTLER FIELD · GRANT PARK · ALL WEEKEND', 512, 156);
   g.fillStyle = '#3a2c22';
-  ['MALÖRT FACE', 'DEEP DISH MODE', 'THE LAKE EFFECTS'].forEach((t, i) => { fitFont(g, t, 900, 74, 'Arial,sans-serif', '900'); g.fillText(t, 512, 232 + i * 78); });
+  ['MALÖRP FACE', 'DEEP DISH MODE', 'THE LAKE EFFECTS'].forEach((t, i) => { fitFont(g, t, 900, 74, 'Arial,sans-serif', '900'); g.fillText(t, 512, 232 + i * 78); });
   g.fillStyle = '#8a5a1c';
   ['WINDY CITY HEAT · LOWER WACKER · THE JIBARITOS', 'BEAR DOWN BRASS · SIXTEEN-INCH SOFTBALL · GIARDINIERA'].forEach((t, i) => { fitFont(g, t, 946, 40, 'Arial,sans-serif', '700'); g.fillText(t, 512, 486 + i * 50); });
   g.fillStyle = '#4a4030';
-  ['OPE! & THE SORRYS · DIBS · THE VIADUCTS · CTA GHOST TRAIN', 'POLISH & ONIONS · THE MONTROSE DOGS · LAKE EFFECT SNOW DAY · THE 606'].forEach((t, i) => { fitFont(g, t, 954, 30, 'Arial,sans-serif', '700'); g.fillText(t, 512, 602 + i * 44); });
+  ['OPE! & THE SORRYS · DIBS · THE VIADUCTS · L GHOST TRAIN', 'POLISH & ONIONS · THE MONTROSE DOGS · LAKE EFFECT SNOW DAY · THE 606'].forEach((t, i) => { fitFont(g, t, 954, 30, 'Arial,sans-serif', '700'); g.fillText(t, 512, 602 + i * 44); });
   return cvTex(cv);
 }

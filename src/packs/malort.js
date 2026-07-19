@@ -50,7 +50,7 @@ export function makeShotGlass(){
 // is NOT here — the Handshake regular keeps that; the Malört guy skips straight
 // to this. npc is a makeNPC-built chibi with face:true (so setFace reads).
 export function pourMalort({npc, react='it grows on ya',
-    toastMain='IT GROWS ON YOU', toastSub="Jeppson's Malört", onDone}={}){
+    toastMain='IT GROWS ON YOU', toastSub="Jebson's Malörp", onDone}={}){
   const shot=makeShotGlass();
   shot.position.set(0,0.13,0); holdItem(shot);
   screenFx.filter('saturate(0.2) contrast(1.35) hue-rotate(-20deg)',2600);
@@ -70,6 +70,6 @@ export function oldStyleTex(){
   g.fillStyle='#b8252b';g.beginPath();g.ellipse(64,64,44,34,0,0,7);g.fill();
   g.fillStyle='#f3ede0';g.beginPath();g.ellipse(64,64,38,28,0,0,7);g.fill();
   g.fillStyle='#1c4fa0';g.textAlign='center';g.textBaseline='middle';
-  g.font='800 20px "Trebuchet MS",sans-serif';g.fillText('OLD',64,56);g.fillText('STYLE',64,76);
+  g.font='800 20px "Trebuchet MS",sans-serif';g.fillText('OLDE',64,56);g.fillText('STYLO',64,76);
   const tx=new THREE.CanvasTexture(cv);tx.anisotropy=4;return tx;
 }

@@ -88,7 +88,12 @@ export const state={
   if(_c.bests&&typeof _c.bests==='object')state.bests=Object.assign({},_c.bests);
   if(_c.fishLog&&typeof _c.fishLog==='object')state.fishLog=Object.assign({},_c.fishLog);
   if(_c.paidFirsts&&typeof _c.paidFirsts==='object')state.paidFirsts=Object.assign({},_c.paidFirsts);
-  if(_c.dibsBy&&typeof _c.dibsBy==='object')state.dibsBy=Object.assign({},_c.dibsBy);
+  if(_c.dibsBy&&typeof _c.dibsBy==='object'){
+    state.dibsBy=Object.assign({},_c.dibsBy);
+    // 094 de-brand: merge any legacy wallet-ledger buckets into their new display names
+    const _dibsRn={Divvy:'Dibsy',Wrigley:'Wiggly',Lolla:'Lalla','Malört':'Malörp'};
+    for(const o in _dibsRn){ if(o in state.dibsBy){ const n=_dibsRn[o]; state.dibsBy[n]=(state.dibsBy[n]||0)+state.dibsBy[o]; delete state.dibsBy[o]; } }
+  }
   if(Array.isArray(_c.birdsSeen))state.birdsSeen=new Set(_c.birdsSeen);
   if(Array.isArray(_c.rocksPainted))state.rocksPainted=new Set(_c.rocksPainted);
   if(Array.isArray(_c.seaGlass))state.seaGlass=new Set(_c.seaGlass);       // 080: beachcombed colors
@@ -286,8 +291,8 @@ const BUMP_LINES=[
   "watch out for deer on your way home!",
   "oh jeez, didn't see ya there","you betcha",
   "hot enough for ya?","it's not the heat, it's the humidity",
-  "welp. better get going","go bears.","how 'bout them cubs",
-  "we're stopping at culver's after this",
+  "welp. better get going","go bears.","how 'bout them chubs",
+  "we're stopping at culvert's after this",
   "say hi to your mother for me","pop's in the cooler, help yourself",
   "jeez, it's gorgeous out","this? this is nothin'. you shoulda seen '11",
 ];

@@ -163,7 +163,7 @@ onWorldReady(player=>{
     <div class="jrow"><span>Goose encounters</span><b>${state.gooseEncounters||0}</b></div>
     <div class="jrow"><span>Longest frisbee rally</span><b>${(state.bests&&state.bests.discRally)||0}</b></div>
     <div class="jrow"><span>Chicago handshakes</span><b>${state.handshakes||0}</b></div>
-    <div class="jrow"><span>Malört shots</span><b>${state.malortShots||0}</b></div>`);
+    <div class="jrow"><span>Malörp shots</span><b>${state.malortShots||0}</b></div>`);
 
   // ================================================================== //
   //  1) HOT DOG CART  (on the harbor-west lawn, beside the trail)
@@ -438,7 +438,7 @@ onWorldReady(player=>{
   // ================================================================== //
   const HX=150,HZ=195;                                // Belmont Rocks (top terrace, h~0; nudged from 152 so NPC+cooler sit on ground)
   const hsNPC=makeNPC({x:HX,z:HZ,ry:0,palette:{suit:0x18b8a0,pants:0xf2c94c,skin:0xd8a070,hair:0x241a12,face:true},   // setFace at runtime → keep live eyes
-    name:'regular',lines:["pull up a rock","beautiful day for it, eh","you ever had Malört?","welcome to the rocks"]});
+    name:'regular',lines:["pull up a rock","beautiful day for it, eh","you ever had Malörp?","welcome to the rocks"]});
   const cooler=new THREE.Mesh(new THREE.BoxGeometry(0.72,0.46,0.52),toon(0xd0392f));cooler.position.set(HX+1.3,0.23,HZ+0.4);scene.add(cooler);
   const coolerLid=new THREE.Mesh(new THREE.BoxGeometry(0.76,0.1,0.56),toon(0xeceae2));coolerLid.position.set(HX+1.3,0.51,HZ+0.4);scene.add(coolerLid);
   const can=new THREE.Mesh(new THREE.CylinderGeometry(0.11,0.11,0.32,12),bmat(0xffffff,{map:oldStyleTex()}));
@@ -449,7 +449,7 @@ onWorldReady(player=>{
     can.position.set(0,0.15,0); can.rotation.set(0,0,0); holdItem(can); sCrack();   // the ceremony: an Old Style FIRST...
     setTimeout(()=>{                                  // ...then the shared swig (the Malört).
       state.handshakes=(state.handshakes||0)+1;
-      pourMalort({npc:hsNPC, react:'it grows on ya', toastMain:'IT GROWS ON YOU', toastSub:"Jeppson's Malört",
+      pourMalort({npc:hsNPC, react:'it grows on ya', toastMain:'IT GROWS ON YOU', toastSub:"Jebson's Malörp",
         onDone:()=>{ HS.busy=false; HS.cool=60; hsInter.setLabel('walk it off...'); }});
     },1500);
   }});

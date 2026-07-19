@@ -244,7 +244,7 @@ function buildGround() {
     cap.position.set(rx, 1.16, (MC.z0 + MC.z1) / 2); millenniumRoot.add(cap); }
 
   // 12. Wrigley Square inscribed WALL (the park's signature signage form) —
-  // a low curved limestone wall reading WRIGLEY SQUARE at the lawn corner.
+  // a low curved limestone wall reading WIGGLY SQUARE at the lawn corner.
   { const w = WQ.wall, tex = wrigleyWallTex(w.text);
     const body = new THREE.Mesh(new THREE.BoxGeometry(7.5, 1.2, 0.7), toon(0xd8cfb8));
     body.position.set(w.x, 0.6, w.z); millenniumRoot.add(body);

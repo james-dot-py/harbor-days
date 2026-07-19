@@ -157,11 +157,11 @@ function buildTent(root) {
   // framework-culled past 145 m (invisible on the lakefront). festival-staff look.
   makeNPC({ x: 213.0, z: CZ, ry: Math.PI / 2, wander: 0, name: '',
     palette: { suit: 0x1c1c22, pants: 0x2b2f36, skin: 0xcaa06e, hair: 0x241610, hairStyle: 'bun' },
-    lines: ["festival pricing. I don't make the rules.", 'the flower crowns are real. the pit isn’t.', "it's got Lolla FM. obviously."] });
+    lines: ["festival pricing. I don't make the rules.", 'the flower crowns are real. the pit isn’t.', "it's got Lalla FM. obviously."] });
 
   // the shop (framework card) — flower-crown is defined by packs/hats.js
   addInteraction({ x: 215.6, z: CZ, r: 2.4, label: 'browse the merch', onUse: () => {
-    shop.open({ title: 'LOLLA MERCH', keeper: "festival pricing. I don't make the rules.",
+    shop.open({ title: 'LALLA MERCH', keeper: "festival pricing. I don't make the rules.",
       items: [{ id: 'boombox', price: 35 }, { id: 'flower-crown', price: 20 }] });
   } });
 }

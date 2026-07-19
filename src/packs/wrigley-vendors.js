@@ -275,7 +275,7 @@ onWorldReady(player => {
     const startD = [0, 2.6, 5.2];
     const npcs = palettes.map((pal, i) => {
       const n = makeNPC({ x: pts[0].x, z: pts[0].z, ry: 0, wander: 0, moverLod: true, name: 'fan', palette: pal,
-        lines: ['go cubs go!', 'ope — this way to the gate', "hurry, it's almost first pitch"] });
+        lines: ['go chubs go!', 'ope — this way to the gate', "hurry, it's almost first pitch"] });
       n.group.position.x = pts[0].x; n.group.position.z = pts[0].z;
       return n;
     });

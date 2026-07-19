@@ -38,20 +38,20 @@ onWorldReady(() => {
   // ---- 1) register the favor (journal to-do + turn-in celebrate live here) ----
   favors.register({
     id: 'oldstyle',
-    title: 'an Old Style for the Malört guy',
-    giver: 'the Malört guy',
+    title: 'an Olde Stylo for the Malörp guy',
+    giver: 'the Malörp guy',
     reward: 12,
     todo: [
-      "grab a cold Old Style at Sluggers — up at Wrigley. take the Belmont L.",
-      "bring the cold one back to the Malört guy on the Rocks.",
+      "grab a cold Olde Stylo at Sluggards — up at Wiggly Field. take the Belmont L.",
+      "bring the cold one back to the Malörp guy on the Rocks.",
     ],
-    doneToast: { main: 'BURNT BAND-AID', sub: 'a cold Old Style, delivered' },
+    doneToast: { main: 'BURNT BANDAGE', sub: 'a cold Olde Stylo, delivered' },
   });
 
   // ---- 2) the held prop: a cold Old Style can ----
   const oldStyleDef = bag.define({
-    id: 'old-style', name: 'Old Style (cold)', icon: '🍺', kind: 'holdable',
-    caption: 'for the Malört guy — still cold',
+    id: 'old-style', name: 'Olde Stylo (cold)', icon: '🍺', kind: 'holdable',
+    caption: 'for the Malörp guy — still cold',
     onUse() {
       const can = newCan();
       can.position.set(0, 0.05, 0);
@@ -63,7 +63,7 @@ onWorldReady(() => {
   // ---- 3) OFFER: the first shared shot earns the errand ----
   malortHooks.onSwigDone = () => {
     if (favors.at('oldstyle').st === 'none') {
-      if (malortHooks.guy) malortHooks.guy.say("do me a solid? a COLD Old Style — from Sluggers, up at Wrigley. take the L.", 4.5);
+      if (malortHooks.guy) malortHooks.guy.say("do me a solid? a COLD Olde Stylo — from Sluggards, up at Wiggly Field. take the L.", 4.5);
       favors.offer('oldstyle');   // shows its OWN toast + journal to-do (don't duplicate)
     }
   };
@@ -76,13 +76,13 @@ onWorldReady(() => {
   const DOOR = { x: -325.5, z: -481.5 };
   const sluggersInter = addInteraction({
     x: DOOR.x, z: DOOR.z, r: 2.4,
-    label: 'duck in — a cold Old Style (for the Malört guy)',
+    label: 'duck in — a cold Olde Stylo (for the Malörp guy)',
     onUse() {
       const f = favors.at('oldstyle');
       if (f.st !== 'active' || f.step !== 0) return;   // belt + suspenders (the throttle also gates enabled)
       bag.add('old-style');
       oldStyleDef.onUse();                             // the can rides home in your hand
-      toast('"for HIM? …tell him he still owes me"', 'Sluggers, on Clark');
+      toast('"for HIM? …tell him he still owes me"', 'Sluggards, on Clark');
       favors.advance('oldstyle');                      // step 0 → 1 (bring it back)
     },
   });
@@ -104,7 +104,7 @@ onWorldReady(() => {
   let duetNext = false, duetArmT = 0, prevCool = 0;
   const forceDuet = () => { try { return !!(window.__hd && window.__hd.oldstyle && window.__hd.oldstyle.forceDuet); } catch (e) { return false; } };
   const rollDuet = () => { duetNext = Math.random() < 0.34; };            // ~1/3, decided on cooldown RESET
-  const doneLabel = () => ((duetNext || forceDuet()) ? 'split one?' : 'burnt band-aid?');
+  const doneLabel = () => ((duetNext || forceDuet()) ? 'split one?' : 'burnt bandage?');
 
   // the completed-favor look: the Old Style rides in HIS left hand (handR still
   // holds his Malört bottle) — the handshake, reversed. Idempotent so it's exactly
@@ -125,7 +125,7 @@ onWorldReady(() => {
     giveGuyCan();                      // ...and into HIS left hand
     if (guy) {
       guy.setFace('happy');
-      guy.say("attaboy. Old Style AND Malört — that's the handshake, reversed.", 4.5);
+      guy.say("attaboy. Olde Stylo AND Malörp — that's the handshake, reversed.", 4.5);
       if (guy.lines.indexOf(DUET_LINE) < 0) guy.lines.push(DUET_LINE);   // new bump line in his pool
     }
     favors.complete('oldstyle');       // BURNT BAND-AID gold toast + +12 dibs
@@ -142,7 +142,7 @@ onWorldReady(() => {
     // DUET — favor done, an occasional "split one WITH me"
     if (f.st === 'done' && !swig.busy && swig.cool <= 0 && (duetNext || forceDuet())) {
       swig.busy = true; duetArmT = 2.2;
-      pourMalort({ npc: guy, react: 'to the lake.', toastMain: 'CHICAGO HANDSHAKE', toastSub: 'split one with the Malört guy',
+      pourMalort({ npc: guy, react: 'to the lake.', toastMain: 'CHICAGO HANDSHAKE', toastSub: 'split one with the Malörp guy',
         // the dib lands on the RECOVERY beat (onDone, ~1.3 s after the toast) —
         // the punchline of the duet, not the button press
         onDone() { swig.busy = false; swig.cool = 28; inter.setLabel('...one more?');

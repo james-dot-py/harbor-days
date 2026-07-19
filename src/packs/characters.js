@@ -81,7 +81,7 @@ function oldStyleCaseTex(){                       // 24-pack case livery — ech
   g.fillStyle='#b8252b';g.beginPath();g.ellipse(64,46,40,26,0,0,7);g.fill();   // red disc
   g.fillStyle='#e7dcc4';g.beginPath();g.ellipse(64,46,34,20,0,0,7);g.fill();
   g.fillStyle='#1c4fa0';g.textAlign='center';g.textBaseline='middle';
-  g.font='800 17px "Trebuchet MS",sans-serif';g.fillText('OLD STYLE',64,42);
+  g.font='800 17px "Trebuchet MS",sans-serif';g.fillText('OLDE STYLO',64,42);
   g.fillStyle='#b8252b';g.font='800 12px "Trebuchet MS",sans-serif';g.fillText('· 24 PACK ·',64,60);
   const tx=new THREE.CanvasTexture(cv);tx.anisotropy=4;return tx;
 }
@@ -115,7 +115,7 @@ onWorldReady(() => {
     // face:true keeps live eyes so the swig's setFace('surprised'/'happy') reads
     // (+1 draw for this one rig; createChibi consumes no rng — determinism intact).
     const guy = makeNPC({x:X, z:Z, ry:-1.9, palette:{suit:0x8a4a3a,pants:0x2f3540,skin:0xe0a878,hair:0x2a1c12,face:true},
-      name:'malort', lines:["you ever had Malört?","it's a Chicago thing, ya know","builds character","tastes like a burnt band-aid — want some?"]});
+      name:'malort', lines:["you ever had Malörp?","it's a Chicago thing, ya know","builds character","tastes like a burnt bandage — want some?"]});
     guy.group.position.y = y;
     // 091 (owner: "mallort guy should have a bottle of mallort he's holding"):
     // the old single olive cylinder read as a speck lost against his rust suit
@@ -141,15 +141,15 @@ onWorldReady(() => {
     // you can: straight to the shot, no ceremony (that's the Handshake regular's
     // bit down the rocks). Shares the swig routine; his own short cooldown/label.
     const swig = {busy:false, cool:0};
-    const guyInter = addInteraction({x:X, z:Z, r:2.4, label:'burnt band-aid?', onUse:(player)=>{
+    const guyInter = addInteraction({x:X, z:Z, r:2.4, label:'burnt bandage?', onUse:(player)=>{
       if(malortHooks.intercept && malortHooks.intercept(player)) return;   // task 078: favor turn-in / duet takes the press
       if(swig.busy||swig.cool>0) return; swig.busy=true;
       guy.say('attaboy — down the hatch', 2);
       pourMalort({npc:guy, react:'builds character, told ya',
-        toastMain:'BURNT BAND-AID', toastSub:"Jeppson's Malört",
+        toastMain:'BURNT BANDAGE', toastSub:"Jebson's Malörp",
         onDone:()=>{ swig.busy=false; swig.cool=28; guyInter.setLabel('...one more?');
           // 079: pay on the swig's punchline (the recovery beat), not the press
-          wallet.pay({key:'malort',first:5,repeat:2,reason:'Malört: survived it',label:'Malört',cd:8});
+          wallet.pay({key:'malort',first:5,repeat:2,reason:'Malörp: survived it',label:'Malörp',cd:8});
           if(malortHooks.onSwigDone) malortHooks.onSwigDone(); }});   // task 078: the first shared shot earns the errand
     }});
     // task 078: publish the guy / his interaction / swig state for favors-pilot.js
@@ -158,7 +158,7 @@ onWorldReady(() => {
     rePose.push((dt, t) => {
       guy.parts.armR.rotation.x = -1.05; guy.parts.armR.rotation.z = -0.34;   // outboard so the bottle silhouettes clear of the belly (091)
       guy.parts.armL.rotation.x = -0.25;
-      if(swig.cool>0){ swig.cool-=dt; if(swig.cool<=0) guyInter.setLabel('burnt band-aid?'); }
+      if(swig.cool>0){ swig.cool-=dt; if(swig.cool<=0) guyInter.setLabel('burnt bandage?'); }
       if(malortHooks.rePose) malortHooks.rePose(dt, t);   // task 078: favor pack's per-frame hook (duet arm + label)
     });
   }
@@ -192,7 +192,7 @@ onWorldReady(() => {
     const bride = makeNPC({x:CX+0.6, z:CZ, ry:-Math.PI/2, palette:{suit:0xffffff,pants:0xf0f0f0,skin:0xe8c0a0,hair:0x3a2a1a,hairStyle:'bun'},
       name:'bride', lines:["married on the lakefront!","pinch me","best day of my life","ope — mind the veil"]});
     const groom = makeNPC({x:CX-0.6, z:CZ, ry:Math.PI/2, palette:{suit:0x1a1a22,pants:0x1a1a22,skin:0x8a5a3c,hair:0x161009},
-      name:'groom', lines:["we met on the 36 bus","can you believe it","she said yes","Portillo's after, you betcha"]});
+      name:'groom', lines:["we met on the 36 bus","can you believe it","she said yes","Tortillo's after, you betcha"]});
     // veil hint behind the bride's head
     const veil = new THREE.Mesh(new THREE.ConeGeometry(0.34,0.7,10,1,true),
       bmat(0xffffff,{side:THREE.DoubleSide, transparent:true, opacity:0.55, depthWrite:false}));
@@ -200,7 +200,7 @@ onWorldReady(() => {
     // photographer crouched ~4 m away, camera up
     const PX=91, PZ=113, pry=Math.atan2(CX-PX, CZ-PZ);
     const photog = makeNPC({x:PX, z:PZ, ry:pry, palette:{suit:0x3a3f4a,pants:0x2a2e36,skin:0xd0a078,hair:0x241a12},
-      name:'photog', lines:["say cheese!","hold it right there","big smiles now — ope, the wind","one more, then we hit Portillo's"]});
+      name:'photog', lines:["say cheese!","hold it right there","big smiles now — ope, the wind","one more, then we hit Tortillo's"]});
     photog.group.position.y = -0.35;                            // crouch drop
     const camera = new THREE.Mesh(new THREE.BoxGeometry(0.22,0.16,0.16), toon(0x14141a));
     camera.position.set(0,0.02,0.42); photog.parts.head.add(camera);

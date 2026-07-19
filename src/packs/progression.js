@@ -81,13 +81,13 @@ const SIGNS = [
   { name:'KEITH HARING',                lore:'the garden he would have loved',    x:100, z:112,  ry:-1.9 },
   { name:'MONTY & ROSE',                lore:'the plovers that stopped a fest',   x:82,  z:-333, ry:1.4  },
   { name:'FRANKIE KNUCKLES',            lore:'the Godfather of House',            x:140, z:100,  ry:-1.6 },
-  { name:'STEVE GOODMAN',               lore:"he wrote 'Go, Cubs, Go'",           x:38,  z:-235, ry:0.9  },
+  { name:'STEVE GOODMAN',               lore:'he wrote the one the whole ballpark sings', x:38,  z:-235, ry:0.9  },
   { name:'JEAN BAPTISTE POINT DU SABLE',lore:'the founder of Chicago',            x:104, z:-6,   ry:-1.4 },
   { name:'STUDS TERKEL',                lore:'he listened to the whole city',     x:60,  z:-170, ry:-1.6 },
   { name:'DEL CLOSE',                   lore:"the improv guru — 'yes, and'",      x:35,  z:-362, ry:1.4  },
   { name:'ANN SATHER',                  lore:'cinnamon rolls the size of a plate',x:207.5, z:-472, ry:1.6  },
   { name:'HARRY CARAY',                 lore:'Holy Cow!',                         x:26,  z:99,   ry:1.6  },
-  { name:'VIVIAN MAIER',                lore:'the nanny with a Rolleiflex',       x:79.5, z:-351, ry:0.6  },  // 088: was (85,-352) — the post stood IN the w3.2 bike lane at the spur junction (prop-clearance.mjs); 4 m west, same corner
+  { name:'VIVIAN MAIER',                lore:'the nanny with the twin-lens camera', x:79.5, z:-351, ry:0.6  },  // 088: was (85,-352) — the post stood IN the w3.2 bike lane at the spur junction (prop-clearance.mjs); 4 m west, same corner
   { name:'WAX TRAX! RECORDS',           lore:"Chicago's industrial-dance temple", x:209, z:-104, ry:-1.6, y0:0.42 },
   { name:'IRV KUPCINET',                lore:"'Kup's Column' ran 60 years",       x:95,  z:-418, ry:-1.6 },
 ];
@@ -164,11 +164,11 @@ function updateSigns(dt,player){
       if(dx*dx+dz*dz<6*6){
         D.discovered=true;
         const n=DOCKS.filter(d=>d.discovered).length;
-        toast('DIVVY DOCK',`${n} / ${DOCKS.length} on the network`);
-        wallet.pay({key:'divvy.dock',first:5,repeat:2,reason:'Divvy: a new dock',label:'Divvy'});
+        toast('DIBSY DOCK',`${n} / ${DOCKS.length} on the network`);
+        wallet.pay({key:'divvy.dock',first:5,repeat:2,reason:'Dibsy: a new dock',label:'Dibsy'});
         // repeat:0 — same law as honorary.all: the network is a collection, and
         // D.discovered resets each load, so a repeat would re-pay it every session.
-        if(n===DOCKS.length) wallet.pay({key:'divvy.all',first:10,repeat:0,reason:'Divvy: the whole network',label:'Divvy'});
+        if(n===DOCKS.length) wallet.pay({key:'divvy.all',first:10,repeat:0,reason:'Dibsy: the whole network',label:'Dibsy'});
       }
     }
   }
@@ -296,7 +296,7 @@ function divvyTex(){
   const cv=document.createElement('canvas'); cv.width=256; cv.height=180; const g=cv.getContext('2d');
   g.fillStyle='#0f4d78'; g.fillRect(0,0,256,180);
   g.fillStyle='#ffffff'; g.textAlign='center'; g.textBaseline='middle';
-  g.font='900 66px "Trebuchet MS",sans-serif'; g.fillText('DIVVY',128,66);
+  g.font='900 66px "Trebuchet MS",sans-serif'; g.fillText('DIBSY',128,66);
   g.fillStyle='#8fd6f2'; g.font='700 22px "Trebuchet MS",sans-serif'; g.fillText('grab a bike',128,120);
   const t=new THREE.CanvasTexture(cv); t.anisotropy=4; return t;
 }
@@ -349,7 +349,7 @@ function mount(player){
   state.rideSpeed=BIKE_ONTRAIL;   // seed a >0 ride speed at once so main.js switches to the bike model this frame
   for(const g of bike.grabs) g.enabled=false; bike.off.enabled=true;
   bike.off.x=player.x; bike.off.z=player.z;
-  toast("DIVVY'D","SHIFT to sprint · R = bell · E = hop off");
+  toast("DIBSY'D","SHIFT to sprint · R = bell · E = hop off");
 }
 function dismount(dockCell){
   if(!bike.mounted)return;
@@ -415,10 +415,10 @@ function ringBell(){ if(bike.bellCd>0)return; bike.bellCd=0.4; bell(); toast('�
 const TOWEL={x:145,z:162};
 const STATION_META=[
   {name:'📻 LOFI',            flavor:'the harbor score'},
-  {name:"WBMX · HOUSE",       flavor:'warehouse, 122 BPM'},
-  {name:'CHECKERBOARD · BLUES',flavor:'a slow shuffle in E'},
-  {name:'WGN · GO CUBS GO',   flavor:'Steve Goodman, on a loop since 1984'},
-  {name:'LOLLA FM',           flavor:'live from Butler Field'},
+  {name:"WBOX · HOUSE",       flavor:'warehouse, 122 BPM'},
+  {name:'CHECKERBIRD · BLUES',flavor:'a slow shuffle in E'},
+  {name:'WOPE · GO CHUBS GO',  flavor:'on a loop since 1984'},
+  {name:'LALLA FM',           flavor:'live from Butler Field'},
   {name:'RADIO OFF',          flavor:'just the lake now'},
 ];
 const radio={station:0,carrying:false,timer:null,next:0,step:0,stepDur:0,bus:null,pulse:0,walkBeat:0,speakers:[],box:null};
@@ -681,7 +681,7 @@ onWorldReady(player=>{
   buildBoombox();
 
   // Divvy interactions — a grab at every dock (same label), one shared dismount
-  bike.grabs=DOCKS.map(D=>addInteraction({x:D.x,z:D.z,r:2.6,label:'grab a Divvy',onUse:pl=>{ bike.returning=false; mount(pl); }}));
+  bike.grabs=DOCKS.map(D=>addInteraction({x:D.x,z:D.z,r:2.6,label:'grab a Dibsy',onUse:pl=>{ bike.returning=false; mount(pl); }}));
   bike.off =addInteraction({x:0,z:0,r:3,priority:50,label:'hop off',onUse:()=>dismount()}); bike.off.enabled=false;
 
   // Boombox interactions
@@ -702,7 +702,7 @@ onWorldReady(player=>{
     const got=SIGNS.filter(s=>s.collected);
     let rows=`<div class="jrow"><span>Honorary signs</span><b>${got.length} / 12</b></div>`;
     for(const s of got) rows+=`<div class="jrow"><span>✓ ${s.name} WAY</span><b>${s.lore}</b></div>`;
-    rows+=`<div class="jrow"><span>Divvy metres ridden</span><b>${(state.divvyMeters||0).toFixed(0)} m</b></div>`;
+    rows+=`<div class="jrow"><span>Dibsy metres ridden</span><b>${(state.divvyMeters||0).toFixed(0)} m</b></div>`;
     const docksFound=DOCKS.filter(D=>D.discovered).length;
     rows+=`<div class="jrow"><span>Docks discovered</span><b>${docksFound} / ${DOCKS.length}</b></div>`;
     return rows;

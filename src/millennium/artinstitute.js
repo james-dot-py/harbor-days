@@ -221,7 +221,7 @@ export function buildArtInstitute() {
     // --- entablature + frieze lettering + heavy cornice --------------------
     box(0.35, 0.4, d, 58.75, 14.4, cz, C.trim);                      // architrave (full width)
     box(0.6, 0.95, d + 0.6, 58.6, 15.9, cz, C.trim);                 // heavy cornice
-    plate(58.93, 15.0, 970.75, 11, 0.85, -Math.PI / 2, friezeTex('THE ART INSTITVTE OF CHICAGO'), 0, 0, 1024, 96);
+    plate(58.93, 15.0, 970.75, 11, 0.85, -Math.PI / 2, friezeTex('THE ARF INSTITVTE OF CHICAGO'), 0, 0, 1024, 96);
     plate(58.93, 15.0, 954.75, 9, 0.6, -Math.PI / 2, nameTex('RAPHAEL · LEONARDO · TITIAN'), 0, 96, 768, 72);
     plate(58.93, 15.0, 986.5, 9, 0.6, -Math.PI / 2, nameTex('REMBRANDT · HOLBEIN · VERONESE'), 0, 168, 768, 72);
     // --- PEDIMENT over the portico bay (base y16.4, apex y19) --------------

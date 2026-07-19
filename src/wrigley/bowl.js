@@ -138,7 +138,7 @@ function paintScoreboard(data = {}) {
   g.fillStyle = '#f2ece0'; g.textAlign = 'left'; g.textBaseline = 'alphabetic';
   g.font = '700 34px "Courier New",monospace';
   g.fillText('VISITORS', 60, 248);
-  g.fillText('CUBS', 60, 308);
+  g.fillText('CHUBS', 60, 308);
   { const ty = half === 'bot' ? 298 : 238;
     g.fillStyle = '#e8b64c'; g.beginPath();
     g.moveTo(40, ty - 8); g.lineTo(40, ty + 8); g.lineTo(54, ty); g.closePath(); g.fill(); }
@@ -523,7 +523,7 @@ function buildOutfield() {
   grp.rotation.y = BACK_B;                                       // face looks back at home
   add(grp);
   // default GAME-DAY face (the pack paints the real line score at world-ready)
-  bowlScoreboard({ msg1: 'GAME DAY AT THE CONFINES', msg2: 'CUBS vs SOX · TODAY 7:05' });
+  bowlScoreboard({ msg1: 'GAME DAY AT THE CONFINES', msg2: 'CHUBS vs SOCKS · TODAY 7:05' });
 }
 
 // light towers on the roof rim + outfield wings (exterior placements, so the
@@ -657,7 +657,7 @@ function buildMinimapBase() {
   { const [x, z] = at(rWallB(BACK_B) + CONC_W_B + 3.4, BACK_B); dot(x, z, '#e0574a', 5); } // the gate out
   g.fillStyle = '#f4efe6'; g.textAlign = 'center';
   g.font = '700 18px "Trebuchet MS",sans-serif';
-  g.fillText('WRIGLEY FIELD', M.cw / 2, 30);
+  g.fillText('WIGGLY FIELD', M.cw / 2, 30);
   g.font = 'italic 600 14px Georgia,serif';
   g.fillText('game day — stay off the grass', M.cw / 2, 52);
   return cv;

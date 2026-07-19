@@ -1,5 +1,5 @@
 // =====================================================================
-//  PACK: sluggers-shop — "SLUGGERS TO-GO" walk-up window (task 080).
+//  PACK: sluggers-shop — "SLUGGARDS TO-GO" walk-up window (task 080).
 //  A diegetic to-go counter built into the SLUGGERS storefront on Clark St
 //  (VILLAGE_W.clarkBars[0]), ~5 m north of the favor door so the two prompts
 //  never fight. Sells a Chicago dog, an Old Style, and the Cubs-coded ballcap
@@ -70,11 +70,11 @@ function menuTex() {
   g.textAlign = 'center'; g.textBaseline = 'middle';
   const line = (txt, y, size, col) => { g.fillStyle = col; let fs = size; g.font = `800 ${fs}px "Trebuchet MS",sans-serif`;
     while (g.measureText(txt).width > 210 && fs > 10) { fs -= 2; g.font = `800 ${fs}px "Trebuchet MS",sans-serif`; } g.fillText(txt, 128, y); };
-  line('SLUGGERS', 54, 42, '#ffd24a');
+  line('SLUGGARDS', 54, 42, '#ffd24a');
   line('TO-GO', 94, 34, '#ffd24a');
   g.strokeStyle = '#d8b24a'; g.lineWidth = 3; g.beginPath(); g.moveTo(38, 122); g.lineTo(218, 122); g.stroke();
   line('Chicago dog · 6', 162, 26, '#f4efe2');
-  line('Old Style · 6', 206, 26, '#f4efe2');
+  line('Olde Stylo · 6', 206, 26, '#f4efe2');
   line('ballcap · 25', 250, 26, '#f4efe2');
   line('no ketchup.', 302, 24, '#8fd0a0');
   const tx = new THREE.CanvasTexture(cv); tx.anisotropy = 4; return tx;
@@ -187,7 +187,7 @@ onWorldReady(() => {
 
   // ---- the shop interaction at the window ----
   addInteraction({ x: AWX, z: AWZ, r: 2.2, label: 'grab a dog & a cold one', onUse: () =>
-    shop.open({ title: 'Sluggers to-go', keeper: "no ketchup. don't ask.",
+    shop.open({ title: 'Sluggards to-go', keeper: "no ketchup. don't ask.",
       items: [{ id: 'hot-dog', price: 6 }, { id: 'old-style', price: 6 }, { id: 'cubs-cap', price: 25 }] }) });
 
   // =================================================================== //
@@ -224,7 +224,7 @@ onWorldReady(() => {
 
   // ---- Old Style: RE-DEFINE the id (our def wins; favors-pilot keeps its own) ----
   let osMesh = null;
-  bag.define({ id: 'old-style', name: 'Old Style (cold)', icon: '🍺', kind: 'holdable',
+  bag.define({ id: 'old-style', name: 'Olde Stylo (cold)', icon: '🍺', kind: 'holdable',
     caption: 'rest it on the Sheffield rooftop drink rail',
     onUse() { const can = osMesh || (osMesh = newCan()); if (can.parent) can.parent.remove(can); can.position.set(0, 0.05, 0); holdItem(can); },
     onStow() {} });
@@ -236,12 +236,12 @@ onWorldReady(() => {
   const railX = SH.x0 + 0.34, railTopY = roofY + 1.02;              // buildSheffieldExtras drink-rail geometry
   const RAIL_CAN = { x: railX + 0.12, y: railTopY + 0.1, z: -526 }; // sits ON the rail top (matches the cup boxes)
   let railCan = null;
-  const railInter = addInteraction({ x: SH.x0 + 0.6, z: -526, r: 2.0, priority: 3, label: 'rest the Old Style on the rail',
+  const railInter = addInteraction({ x: SH.x0 + 0.6, z: -526, r: 2.0, priority: 3, label: 'rest the Olde Stylo on the rail',
     onUse(pl) {
       if (pl.y < 8) return;                          // must be up on the deck
       if (!railCan) { railCan = newCan(); railCan.position.set(RAIL_CAN.x, RAIL_CAN.y, RAIL_CAN.z); wrigleyRoot.add(railCan); }
       holdItem(null);                                // the can leaves your hand (no-op if stowed)
-      toast('to the lake', 'an Old Style at the drink rail');
+      toast('to the lake', 'an Olde Stylo at the drink rail');
       wallet.pay({ key: 'rooftop.rail', first: 5, repeat: 2, reason: 'the drink rail', label: 'rooftop', cd: 20 });
     } });
   railInter.enabled = false;

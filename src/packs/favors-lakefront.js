@@ -155,15 +155,15 @@ onWorldReady(() => {
     doneToast: { main: 'SEALED WITH SPRAY', sub: 'a letter across the water, both ways' } });
   rotation.join({ id: 'loveletter', giver: 'Sal', where: 'down on the Belmont slips', hood: HOOD });
 
-  favors.register({ id: 'divvyangel', title: 'be a Divvy angel', giver: 'Reggie', reward: 12,
+  favors.register({ id: 'divvyangel', title: 'be a Dibsy angel', giver: 'Reggie', reward: 12,
     todo: [
-      "three Divvy strays wandered off — wheel each one home to ANY lakefront dock.",
+      "three Dibsy strays wandered off — wheel each one home to ANY lakefront dock.",
       "one home, two still out there. wheel the next stray to a dock.",
       "two home, one stray left. wheel it home.",
       "all three docked — go tell Reggie by the Belmont underpass.",
     ],
-    doneToast: { main: 'DIVVY ANGEL', sub: 'three bikes home safe' } });
-  rotation.join({ id: 'divvyangel', giver: 'Reggie', where: 'by the Belmont-underpass Divvy dock', hood: HOOD });
+    doneToast: { main: 'DIBSY ANGEL', sub: 'three bikes home safe' } });
+  rotation.join({ id: 'divvyangel', giver: 'Reggie', where: 'by the Belmont-underpass Dibsy dock', hood: HOOD });
 
   favors.register({ id: 'lakeglass', title: 'blue for the window lady', giver: 'Shelley', reward: 10,
     todo: [
@@ -260,7 +260,7 @@ onWorldReady(() => {
       const f = favors.at('divvyangel');
       if (!(f.st === 'active' && f.step < 3) || wheeling || bk.state !== 'parked') return;
       wheeling = bk; bk.state = 'wheeling'; bk.pick.enabled = false; bk.group.rotation.z = 0;
-      if (!wheelHinted) { wheelHinted = true; toast('rolling it home', 'walk it to any Divvy dock — E to dock it'); }
+      if (!wheelHinted) { wheelHinted = true; toast('rolling it home', 'walk it to any Dibsy dock — E to dock it'); }
     } });
     bk.pick.enabled = false;
     return bk;
@@ -295,10 +295,10 @@ onWorldReady(() => {
       reggie.say("three bikes wandered off my docks — one's " + STRAYS[0].where + ", one's " + STRAYS[1].where + ", one rolled " + STRAYS[2].where + ". happens every summer. walk 'em home, angel?", 6);
       favors.offer('divvyangel');
     } else if (f.st === 'active' && f.step < 3) {
-      reggie.say("still got strays out there. any Divvy dock'll do.", 4);
+      reggie.say("still got strays out there. any Dibsy dock'll do.", 4);
     } else if (f.st === 'active' && f.step === 3) {
       reggie.setFace('happy');
-      reggie.say("attaboy. three bikes, home safe — you're a Divvy angel.", 5);
+      reggie.say("attaboy. three bikes, home safe — you're a Dibsy angel.", 5);
       favors.complete('divvyangel');   // DIVVY ANGEL + 12 dibs
     }
   } });

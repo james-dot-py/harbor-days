@@ -623,3 +623,11 @@ cut becomes a revert task.
   floats, points, or glows unnaturally. Plus your tote finally announces
   itself: a gold count badge on the 🧺, a first-pickup nudge, and B on the
   hint bar. — every interaction everywhere — task 091
+- THE WHOLE CITY WINKS NOW. Every brand in town turned into a pun with a
+  straight face: the marquee crowns WIGGLY FIELD (home of the CHICAGO CHUBS),
+  Sluggards pours an Olde Stylo, the Malörp guy still makes his malörp face,
+  Furphy's and the Chubby Bear anchor their corners, Dibsy bikes chime past
+  the Perch Bait shack, the radio spins WOPE · GO CHUBS GO, and downtown the
+  Chassé Promenade leads to the Arf Institvte under the Prudent Owl sign.
+  Same city, one long affectionate nudge in the ribs — and the lawyers sleep
+  fine. — everywhere a sign glows — task 094

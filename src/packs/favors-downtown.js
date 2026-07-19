@@ -108,7 +108,7 @@ onWorldReady(player => {
     todo: ["find the drummer's lucky stick — the crowd kept it, out in the field",
            "throw the stick back up onto the stage"],
     doneToast: { main: 'LUCKY STICK', sub: 'back mid-set, no dropped beat' } });
-  rotation.join({ id: 'drumstick', giver: 'the drummer', where: 'stage-front at Lolla, Butler Field', hood: 'downtown' });
+  rotation.join({ id: 'drumstick', giver: 'the drummer', where: 'stage-front at Lalla, Butler Field', hood: 'downtown' });
 
   favors.register({ id: 'recipeglide', title: 'the family recipe, on ice', giver: 'Bev', reward: 12,
     todo: ["skate Gram's recipe across to Dot at the far end of the rink",
@@ -130,7 +130,7 @@ onWorldReady(player => {
 
   const dot = makeNPC({ x: DOT.x, z: DOT.z, ry: Math.PI, name: 'Dot',
     palette: { suit: 0x9a4b6e, pants: 0x33272b, skin: 0xdca07a, hair: 0x241610, hairStyle: 'bun', face: true },
-    lines: ["did Bev send you? of course she did", 'three parts Malört, one part regret', 'careful on the ice, hon'] });
+    lines: ["did Bev send you? of course she did", 'three parts Malörp, one part regret', 'careful on the ice, hon'] });
   dot.group.position.y = ICE_Y;
 
   const THEO_BUMP = "I mostly eat the chalk. don't tell the wall guys.";
@@ -253,14 +253,14 @@ onWorldReady(player => {
   // =====================================================================
   function holdCard() { const m = makeCard(); m.position.set(0, 0.03, 0.05); m.rotation.set(-0.35, 0, 0); holdItem(m); cardState = 'inhand'; cardWorld.visible = false; }
   bag.define({ id: 'family-recipe', name: "Gram's recipe", icon: '📜', kind: 'holdable',
-    caption: 'laminated. three parts Malört, one part apology.',
+    caption: 'laminated. three parts Malörp, one part apology.',
     onUse() { holdCard(); }, onStow() { cardState = 'none'; } });
 
   function deliverToDot() {
     const f = favors.at('recipeglide');
     if (f.st !== 'active' || f.step !== 0 || !bag.has('family-recipe')) return;
     bag.remove('family-recipe'); holdItem(null); cardState = 'none';
-    dot.setFace('happy'); dot.say('three parts Malört, one part apology. checks out.', 4.5);
+    dot.setFace('happy'); dot.say('three parts Malörp, one part apology. checks out.', 4.5);
     favors.advance('recipeglide');                   // step 0 -> 1 (glide back to Bev)
   }
   function fumbleCard(pl) {

@@ -531,12 +531,12 @@ function runStart(){
     body.innerHTML=(document.body.classList.contains('touch')
       ? ghosts+row('left stick','walk')+row('drag','look around')+row('⬆️','jump')+row('✋','interact')
         +row('📖','journal')+row('🗺️','the city map — tap the minimap')+row('🧺','the tote')+row('✨','pick firework')+row('🎆','launch firework')
-        +row('🔔','Divvy bell / radio (riding)')
+        +row('🔔','Dibsy bell / radio (riding)')
       : row('W A S D','walk')+row('SHIFT','run')+row('SPACE','jump')+row('E','interact')
         +row('J','journal')+row('M','the city map')+row('B','the tote — your stuff')+row('1–4','pick firework')+row('F','launch firework')
-        +row('R','Divvy bell / radio station')+row('Z / C · wheel','orbit · zoom'))
+        +row('R','Dibsy bell / radio station')+row('Z / C · wheel','orbit · zoom'))
       +'<div class="ctlnote">🌊 <b>jetski</b> — wade in past your knees and jump on; ride up to any low step to hop off.'
-      +'<br>🚲 <b>Divvy</b> — interact at a dock to borrow a bike; drop it back at any dock.'
+      +'<br>🚲 <b>Dibsy</b> — interact at a dock to borrow a bike; drop it back at any dock.'
       +'<br>⛸ <b>skating</b> — step onto the McCormick rink downtown; '
       +(document.body.classList.contains('touch')?'⬆️':'SPACE')+' hop-spins.</div>';
   }

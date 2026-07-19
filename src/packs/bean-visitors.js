@@ -66,6 +66,6 @@ onWorldReady(() => {
   // the journal owns the honest naming (the plate in the world says only
   // THE BEAN — keep in-world signage minimal, like the real thing)
   journalSection('millennium', 'Millennium Park', () => `
-    <p><b>Cloud Gate</b> — everyone calls it the Bean. The shiniest thing
+    <p><b>the Bean</b> — officially it&#39;s something fancier. everyone calls it the Bean. The shiniest thing
     in the whole city, holding a painted little Chicago on its belly.</p>`);
 });

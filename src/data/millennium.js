@@ -73,7 +73,7 @@ export const WRIGLEY_SQ_M = {
   urns: [[73.9, 718.6], [62.1, 730.4]],          // planter urns on the chord-end piers
   lamps: [[77.1, 721.8], [65.3, 733.6]],         // quad-globe period lamps at the lawn approach
   lawn: { x0: 58, x1: 90, z0: 730, z1: 750 },    // visual (inside the plaza quad)
-  wall: { x: 78, z: 749, text: 'WRIGLEY SQUARE' },
+  wall: { x: 78, z: 749, text: 'WIGGLY SQUARE' },
   grate: { x: 72, z: 709 },                      // Millennium Station rumble flavor (delight seed)
 };
 
@@ -246,7 +246,7 @@ export const STREETWALL_M = {
 // the skyline-billboard register (~0.55-0.6x), NOT 1:1 — recorded liberty.
 export const BACKDROP_M = {
   giants: { z0: 680, z1: 692, list: [
-    { name: 'ONE PRU',    x: 79,  w: 42, h: 130, style: 'sign-slab' },      // white PRUDENTIAL sign
+    { name: 'ONE PRU',    x: 79,  w: 42, h: 130, style: 'sign-slab' },      // white PRUDENT OWL sign
     { name: 'TWO PRU',    x: 102, w: 22, h: 165, style: 'diamond-spire' },
     { name: 'AON',        x: 172, w: 30, h: 200, style: 'white-fins' },
     { name: 'BLUE CROSS', x: 206, w: 26, h: 95,  style: 'glass' },          // osm x 245, pulled in-frame
@@ -426,7 +426,7 @@ export const ART_M = {
   cliffS: [                                                         // Michigan cliff band extension z 935→1080
     { name: 'BORG-WARNER',      z: 984,  w: 16, h: 60, style: 'glass' },
     { name: 'SYMPHONY CENTER',  z: 1002, w: 26, h: 40, style: 'colonnade' },  // ORCHESTRA HALL
-    { name: 'RAILWAY EXCHANGE', z: 1023, w: 26, h: 65, style: 'santafe' },    // white terra-cotta + rooftop SANTA FE sign
+    { name: 'RAILWAY EXCHANGE', z: 1023, w: 26, h: 65, style: 'santafe' },    // white terra-cotta + rooftop SANTA FLEA sign
     { name: 'McCORMICK BLDG',   z: 1072, w: 28, h: 60, style: 'tower' },
   ],
 };
@@ -821,6 +821,6 @@ export const CITY_POI_M = [
   { id: 'lurie',    n: 'lurie garden',    x: 151.5, z: 867,   c: '#7a9e4f' },   // LURIE_M.bounds centre
   { id: 'ribbon',   n: 'the skating ribbon', x: 255.2, z: 751, c: '#cfe3ee' },  // RIBBON_M.loop vertex average (65 unique pts, last dup of first)
   { id: 'maggie',   n: 'maggie daley park', x: 284,  z: 835,  c: '#5da06a' },   // MAGGIE_M.play.zone centre
-  { id: 'art',      n: 'the art institute', x: 76.5, z: 970.5, c: '#b7b0a0' },  // ART_M.westBlock centre
-  { id: 'lolla',    n: 'lolla',           x: 262,   z: 972,   c: '#b06ad0' },   // BUTLER_M.crowd centre
+  { id: 'art',      n: 'the arf institute', x: 76.5, z: 970.5, c: '#b7b0a0' },  // ART_M.westBlock centre
+  { id: 'lolla',    n: 'lalla',           x: 262,   z: 972,   c: '#b06ad0' },   // BUTLER_M.crowd centre
 ];

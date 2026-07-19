@@ -77,7 +77,7 @@ function ratTex(){
   return new THREE.CanvasTexture(cv);
 }
 // atlas of boat names — one cell per boat, merged into a single draw call
-const BOAT_NAMES=['Second City','Nauti by Nature','Dibs','The Lake Effect','Malört Face','Deep Dish','Windy Citizen','Grabowski','Sweet Home','Lincoln Parked','Ope-n Water','Wrigley Wave'];
+const BOAT_NAMES=['Second City','Nauti by Nature','Dibs','The Lake Effect','Malörp Face','Deep Dish','Windy Citizen','Grabowski','Sweet Home','Lincoln Parked','Ope-n Water','Wiggly Wave'];
 const ATLAS_COLS=4, ATLAS_ROWS=4, CELL_W=256, CELL_H=72;
 function namesAtlasTex(names){
   const cv=document.createElement('canvas');cv.width=CELL_W*ATLAS_COLS;cv.height=CELL_H*ATLAS_ROWS;const g=cv.getContext('2d');
@@ -235,7 +235,7 @@ function buildWrigley(){
 function cubsWin(player){
   roar(5.0,0.18);organRiff();
   state.cubsWins=(state.cubsWins||0)+1;
-  toast('CUBS WIN','somewhere west, 40,000 people hug');
+  toast('CHUBS WIN','somewhere west, 40,000 people hug');
   // 3-4 distant bursts over the west treeline, staggered via the fx scheduler
   const cols=[0x0e3386,0xffffff,0xcc3433,0xffe08a];
   const n=3+(rng()*2|0);
@@ -443,7 +443,7 @@ onWorldReady(player=>{
   state.jetsSeen=state.jetsSeen||0;state.trainsWatched=state.trainsWatched||0;
   journalSection('chicago','Chicago Things',()=>`
     <div class="jrow"><span>Rat Hole respects</span><b>${state.ratRespects||0}</b></div>
-    <div class="jrow"><span>Cubs wins witnessed</span><b>${state.cubsWins||0}</b></div>
+    <div class="jrow"><span>Chubs wins witnessed</span><b>${state.cubsWins||0}</b></div>
     <div class="jrow"><span>Jets seen</span><b>${state.jetsSeen||0}</b></div>
     <div class="jrow"><span>Trains watched</span><b>${state.trainsWatched||0}</b></div>`);
 

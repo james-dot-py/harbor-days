@@ -609,7 +609,12 @@ featW('wv-knothole', (ST.knothole.x0 + ST.knothole.x1) / 2, ST.knothole.z,
 featW('wv-station-door', -140, W.STATION_W.landing.z1 - 0.5, { stand: [-140, -398], pitch: 0.06, dist: 9 });
 
 const rectC = r => [(r.x0 + r.x1) / 2, (r.z0 + r.z1) / 2];
-feat('wv-murphys', ...rectC(V.murphys), 0.2, 12);
+// murphys: the default snap stood ON the bar block and its spread cameras
+// parked inside the stadium bleacher-corner mass (white frames, run mrr7fzoh
+// — the engine78 feat() class). Stand in the Sheffield/Waveland intersection
+// SW of the bar; the pull-back lands in the open street (094 street-shot
+// proven: fascia + blade + annex band all read).
+featW('wv-murphys', ...rectC(V.murphys), { stand: [-195, -555], pitch: 0.12, dist: 11 });
 // engine78: the default snap's f0 spread put the camera inside the firehouse
 // mass (blank frame, runs mrcn4gsg + mrcoeciv) — feat() does not clearance-
 // filter. Stand on Waveland SE of the house, clearance-picked framings.

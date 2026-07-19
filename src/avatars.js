@@ -205,7 +205,7 @@ export const AVATARS = [
   { id: 'mayor', name: 'the mayor', icon: '🏛️', blurb: 'the honorable incumbent. beloved.', def: MAYOR_DEF },
   { id: 'biker', name: 'the biker', icon: '🏍️', blurb: 'milwaukee ave, leather and all. waves at every dog.',
     def: { chibi: { suit: 0x23232a, pants: 0x33415a, skin: 0xc98e66, hair: 0x3a2e26, shoe: 0x14141a, cuff: 0x1b1b20, hairStyle: 'default', bigEyes: true, face: true, detail: true }, extras: biker } },
-  { id: 'sportsfan', name: 'the diehard', icon: '🏒', blurb: 'united center regular. would take a puck for you.',
+  { id: 'sportsfan', name: 'the diehard', icon: '🏒', blurb: 'untied center regular. would take a puck for you.',
     def: { chibi: { suit: 0xb02a28, pants: 0x26262b, skin: 0xe8b48d, hair: 0x4a3324, shoe: 0x1c1c20, cuff: 0x1f1f24, cheek: 0xd4766a, hairStyle: 'default', bigEyes: true, face: true, detail: true }, extras: sportsfan } },
   { id: 'yuppie', name: 'the consultant', icon: '💼', blurb: 'two monitors, one cold brew. let\'s circle back.',
     def: { chibi: { suit: 0xa8c4dd, pants: 0xc2ad7c, skin: 0xe0ac84, hair: 0x4a3626, shoe: 0x5a3d22, cuff: 0xa8c4dd, hairStyle: 'tall', bigEyes: true, face: true, detail: true }, extras: yuppie } },

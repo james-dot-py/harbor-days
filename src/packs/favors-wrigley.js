@@ -210,8 +210,8 @@ onWorldReady(() => {
     doneToast: { main: 'SAVED THE SEVENTH', sub: 'poppy buns, delivered' },
   });
   // rotation pool (offers gate on rotation.offerable; started/done stay live) ----
-  rotation.join({ id: 'umpwhistle', giver: 'the ump', where: 'at his post inside Wrigley — you’ll need a ticket', hood: 'wrigley' });
-  rotation.join({ id: 'poppybuns', giver: 'the hot dog guy', where: 'working the concourse inside Wrigley', hood: 'wrigley' });
+  rotation.join({ id: 'umpwhistle', giver: 'the ump', where: 'at his post inside Wiggly Field — you’ll need a ticket', hood: 'wrigley' });
+  rotation.join({ id: 'poppybuns', giver: 'the hot dog guy', where: 'working the concourse inside Wiggly Field', hood: 'wrigley' });
 
   // ---- held props ----
   whistleDef = bag.define({

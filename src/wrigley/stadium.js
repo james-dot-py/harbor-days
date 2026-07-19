@@ -180,12 +180,12 @@ function drawMarquee(msg) {
   mqPath(g, MQ_IN); g.strokeStyle = '#f4efe2'; g.lineJoin = 'round'; g.lineWidth = 5; g.stroke();  // pinstripe frame
   g.beginPath(); g.moveTo(72, 470); g.lineTo(952, 470); g.lineWidth = 4; g.stroke();               // doubled bottom line
   mqScroll(g, 126, 206, 1); mqScroll(g, 898, 206, -1);                  // art-deco shoulder volutes
-  mqArchText(g, 'WRIGLEY FIELD');                                       // text on the arc
+  mqArchText(g, 'WIGGLY FIELD');                                       // text on the arc
   g.fillStyle = '#f6f1e6'; g.textAlign = 'center'; g.textBaseline = 'alphabetic';
   g.font = '800 30px Georgia,serif'; g.fillText('HOME OF', 512, 206);
   let fs = 78; g.font = `800 ${fs}px Georgia,serif`;
-  while (g.measureText('CHICAGO CUBS').width > 812 && fs > 44) { fs -= 2; g.font = `800 ${fs}px Georgia,serif`; }
-  g.fillText('CHICAGO CUBS', 512, 292);
+  while (g.measureText('CHICAGO CHUBS').width > 812 && fs > 44) { fs -= 2; g.font = `800 ${fs}px Georgia,serif`; }
+  g.fillText('CHICAGO CHUBS', 512, 292);
   mqDots(g, msg, 80, 314, 864, 140);
   marqueeTex.needsUpdate = true;
 }
@@ -251,7 +251,7 @@ function scoreboardTex() {
   // inning grid
   g.font = '700 17px "Courier New",monospace'; g.textAlign = 'left';
   g.fillText('VISITORS  0 1 0 0 1 0 0', 30, 124);
-  g.fillText('CUBS      1 0 0 2 0 0', 30, 154);
+  g.fillText('CHUBS     1 0 0 2 0 0', 30, 154);
   g.strokeStyle = '#f2ece0'; g.lineWidth = 1;
   for (let i = 0; i < 10; i++) { g.strokeRect(196 + i * 22, 106, 20, 22); g.strokeRect(196 + i * 22, 136, 20, 22); }
   g.textAlign = 'center';
@@ -284,7 +284,7 @@ function backClockTex() {
   g.lineWidth = 9; g.beginPath(); g.moveTo(cxx, cyy); g.lineTo(cxx + Math.sin(3.85) * 44, cyy - Math.cos(3.85) * 44); g.stroke();  // hour
   g.lineWidth = 6; g.beginPath(); g.moveTo(cxx, cyy); g.lineTo(cxx + Math.sin(1.15) * 70, cyy - Math.cos(1.15) * 70); g.stroke();  // minute
   g.fillStyle = '#efe8d6'; g.textAlign = 'center'; g.font = '700 22px Georgia,serif';
-  g.fillText('WRIGLEY FIELD', 128, 238);
+  g.fillText('WIGGLY FIELD', 128, 238);
   return new THREE.CanvasTexture(cv);
 }
 function backScoreTex() {
@@ -294,7 +294,7 @@ function backScoreTex() {
   g.strokeStyle = '#0f2b20'; g.lineWidth = 5; g.strokeRect(3, 3, 506, 138);
   g.fillStyle = '#efe8d6'; g.textAlign = 'left'; g.font = '700 22px "Courier New",monospace';
   g.fillText('VISITORS 0 1 0 0 1 0 0  2', 22, 44);
-  g.fillText('CUBS     1 0 0 2 0 0  3', 22, 80);
+  g.fillText('CHUBS    1 0 0 2 0 0  3', 22, 80);
   g.textAlign = 'center'; g.font = '700 18px "Courier New",monospace';
   g.fillText('GAME IN PROGRESS · INNING 7', 256, 120);
   return new THREE.CanvasTexture(cv);
@@ -527,7 +527,7 @@ function boxSignTex(w, h, big, sub) {
 function boxOfficeSigns() {
   // a) plaza (notchS) face — outer wall face sits at z≈−446.05; 0.09 proud, faces north
   const a = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 1.8),
-    bmat(0xffffff, { map: boxSignTex(768, 192, 'WRIGLEY FIELD', 'TICKET OFFICE') }));
+    bmat(0xffffff, { map: boxSignTex(768, 192, 'WIGGLY FIELD', 'TICKET OFFICE') }));
   a.position.set(-283.9, 7.0, -446.14); a.rotation.y = Math.PI;
   atlasPlane(a, false);
   // b) Clark (clark) face — mid-edge, 0.75 m proud along the outward (west) normal
@@ -543,7 +543,7 @@ function boxOfficeSigns() {
 function seCornerSigns() {
   const gd = S.gates.gateD, ox = Math.sin(gd.yaw), oz = Math.cos(gd.yaw);   // gate outward dir
   const board = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 1.8),
-    bmat(0xffffff, { map: boxSignTex(768, 192, 'WRIGLEY FIELD', 'GATE D') }));
+    bmat(0xffffff, { map: boxSignTex(768, 192, 'WIGGLY FIELD', 'GATE D') }));
   // 0.5 proud: the green steel columns sit ~0.12 proud with 0.55 depth — the
   // board mounts on standoffs IN FRONT of them, else a column bisects the letters
   board.position.set(gd.x + ox * 0.5, 6.9, gd.z + oz * 0.5); board.rotation.y = gd.yaw;
@@ -1030,7 +1030,7 @@ function friendlyConfinesBanner() {
   g.fillStyle = '#1e4d38'; g.fillRect(0, 0, 768, 64);          // Cubs green field
   g.strokeStyle = '#e9e2d0'; g.lineWidth = 3; g.strokeRect(5, 5, 758, 54);   // thin cream border
   g.fillStyle = '#efe8d6'; g.textBaseline = 'middle'; g.font = '700 30px Georgia,serif';
-  const txt = 'WELCOME TO THE FRIENDLY CONFINES', extra = 4;   // letter tracking like the ref
+  const txt = 'WELCOME TO THE WIGGLY CONFINES', extra = 4;   // letter tracking like the ref
   const ws = [...txt].map(c => g.measureText(c).width + extra), total = ws.reduce((s, w) => s + w, 0) - extra;
   let x = 384 - total / 2; g.textAlign = 'left';
   for (let i = 0; i < txt.length; i++) { g.fillText(txt[i], x, 34); x += ws[i]; }

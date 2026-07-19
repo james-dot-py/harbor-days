@@ -852,7 +852,7 @@ export const MT_LAUNCH = { x0:186, x1:204, z0:-864, z1:-850, topY:0.05, botY:-2.
 // Park Bait Shop — the real bait/tackle shop (small, signed). On the mainland
 // WEST of the basin, facing the water (east). structures.js builds it (frustum-
 // culled shack + a two-sided canvas sign). The map's north-harbor "you are here".
-export const PARK_BAIT = { x:176, z:-740, w:6.4, d:4.6, h:2.7, ry:0, wall:0xcfc7b4, roof:0x9c5340, trim:0x7d6b52, sign:'PARK BAIT' };
+export const PARK_BAIT = { x:176, z:-740, w:6.4, d:4.6, h:2.7, ry:0, wall:0xcfc7b4, roof:0x9c5340, trim:0x7d6b52, sign:'PERCH BAIT' };
 // the HOOK fishing-pier RAILING — the mole's inner(basin) walk edge + around the
 // terraced tip, so the player leans on it and never falls into the basin. Posts
 // sit INBOARD on the walkable mole top; structures.js fenceRun feeds the SHARED
@@ -1297,7 +1297,7 @@ export const CITY_POI = [
   { id:'magic-hedge',    n:'the magic hedge',   x:213, z:-894.5, c:'#3f8f4f' },                       // MONTROSE_POINT.hedge.pts midpoint
   { id:'cricket-hill',   n:'cricket hill',      x:112, z:-879,   c:'#77c268' },                       // CRICKET_HILL summit (cx,cz)
   { id:'the-hook',       n:'the hook',          x:239, z:-700,   c:'#8f6234' },                       // MTR_HOOK_TIP curl — on the mole
-  { id:'park-bait',      n:'park bait',         x:176, z:-740,   c:'#9c5340' },                       // PARK_BAIT (x,z)
+  { id:'park-bait',      n:'perch bait',        x:176, z:-740,   c:'#9c5340' },                       // PARK_BAIT (x,z)
   { id:'montrose-harbor',n:'montrose harbor',   x:212, z:-775,   c:'#4a9fc9' },                       // basin water, between the west seawall (x~185) and the hook mole (x~219)
   { id:'golf',           n:'the golf course',   x:132, z:-510,   c:'#4f9b46', zone:'Marovitz Golf Course' },
   { id:'clock-tower',    n:'the clock tower',   x:186, z:-478,   c:'#9a8b78', zone:'Waveland Fieldhouse' },

@@ -65,7 +65,7 @@ function peer(player) {
   cam.dist = 2.2;                                     // tight over-shoulder
   camCtl.snap = true;
   binoc.active = true; binoc.t = 0;
-  toast('through the lenses', 'CUBS 3–2 · runner on first · 7th');
+  toast('through the lenses', 'CHUBS 3–2 · runner on first · 7th');
   screenFx.filter('contrast(1.05) saturate(1.1)', 5300);   // subtle "through glass" tint
 }
 function unpeer() {

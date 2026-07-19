@@ -58,7 +58,7 @@ const PAL_FEST = [
   { suit: 0x5a7de8, pants: 0x2b3340, skin: 0x955f3d, hair: 0x161009, hairStyle: 'afro' },
 ];
 const RAIL_LINES = [
-  'ope! sorry — front rail is LIFE', 'been here since NOON', 'malört face is my malört face',
+  'ope! sorry — front rail is LIFE', 'been here since NOON', 'malörp face is my malörp face',
   'they only play bangers', 'the drummer WINKED at me', 'sorry ope — this is my spot',
   'deep dish mode goes SO hard live', 'I lost my group at the tamale truck',
   'hydrate or diedrate, ope', 'the alligator is my king',
@@ -326,7 +326,7 @@ function joinDance(pl) {
   pl.x = DANCE.x + Math.cos(ang) * 1.6; pl.z = DANCE.z + Math.sin(ang) * 1.6; pl.vx = 0; pl.vz = 0;
   danceInter.setLabel('bust a move'); danceInter.x = pl.x; danceInter.z = pl.z;
   if (!state.lollaJoinedOnce) { state.lollaJoinedOnce = true; toast('DANCE CIRCLE', 'no wristband needed'); }
-  wallet.pay({ key: 'lolla.dance', first: 6, repeat: 2, reason: 'Lolla: the dance circle', label: 'Lolla', cd: 10 });
+  wallet.pay({ key: 'lolla.dance', first: 6, repeat: 2, reason: 'Lalla: the dance circle', label: 'Lalla', cd: 10 });
 }
 function bustMove() {
   dance.moveIdx = (dance.moveIdx + 1) % 3; dance.moveT = 2.4; dance.cheerT = 2.4;
@@ -372,7 +372,7 @@ function updateTotems(dt, pl) {
       if (dd < TOTEM_R2) {
         totemArmed[i] = false;
         wallet.pay({ key: 'lolla.totem.' + tm[2], first: 5, repeat: 2,
-          reason: 'Lolla: the ' + tm[2] + ' totem', label: 'Lolla' });
+          reason: 'Lalla: the ' + tm[2] + ' totem', label: 'Lalla' });
       }
     } else if (dd > TOTEM_REARM2) totemArmed[i] = true;
   }
@@ -612,7 +612,7 @@ onWorldReady((player) => {
     onUse: (pl) => { if (!dance.joined) joinDance(pl); bustMove(); },
   });
 
-  journalSection('lolla', 'Lollapalooza', () => `
+  journalSection('lolla', 'Lallapawlooza', () => `
     <div class="jrow"><span>Moves busted</span><b>${state.lollaMoves || 0}</b></div>
     <div class="jrow"><span>Sets heard</span><b>${state.lollaSets || 0}</b></div>
     <div class="jrow"><span>Gator sightings</span><b>${state.lollaGator || 0}</b></div>`);
@@ -631,7 +631,7 @@ onWorldReady((player) => {
     musicBeats += dt * (music.bpm / 60);
     const rate = music.song === 'B' ? 1 : 0.5;               // ω LOCKED to the music: bounce on four-on-floor, half-sway on rock
     const barClock = musicBeats / 4;
-    if (prox > 0.5 && prevProx <= 0.5) toast('LOLLAPALOOZA', 'butler field · grounds open — wander in');
+    if (prox > 0.5 && prevProx <= 0.5) toast('LALLAPAWLOOZA', 'butler field · grounds open — wander in');
     prevProx = prox;
 
     if (d < 280) updateCrowd(rate);                          // the swaying instanced sea

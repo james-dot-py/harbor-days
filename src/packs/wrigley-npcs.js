@@ -235,8 +235,8 @@ onWorldReady(player => {
   sign.position.set(CX, 1.72, CZ + 0.58); wrigleyRoot.add(sign);
   const hdVendor = makeNPC({ x: CX, z: CZ - 1.5, ry: 0, wander: 0, staticLod: true, name: 'hotdog',
     palette: { suit: 0xe8e2d0, pants: 0x333a44, skin: 0xe0a878, hair: 0x2a2018, face: true },   // setFace at runtime → keep live eyes
-    lines: ["encased meats, Wrigley-side", "ope — no ketchup, house rules travel",
-      "steamed, never boiled", "how 'bout them Cubs — get a dog"] });
+    lines: ["encased meats, Wiggly-side", "ope — no ketchup, house rules travel",
+      "steamed, never boiled", "how 'bout them Chubs — get a dog"] });
   // steam: 3 slow-rising billboarded glow points off the pot → wrigleyRoot
   const steam = [];
   for (let i = 0; i < 3; i++) {
@@ -266,7 +266,7 @@ onWorldReady(player => {
   // ================================================================== //
   const bum1 = makeNPC({ x: -196, z: -564, ry: 0, wander: 0, staticLod: true, name: 'bum',
     palette: { suit: 0x2a52a8, pants: 0x2a2e36, skin: 0xd8a878, hair: 0x3a2a1c },
-    lines: ["threw it back — wasn't ours, ope", "the bleachers are the only true seats", "fly the W, baby"] });
+    lines: ["threw it back — wasn't ours, ope", "the bleachers are the only true seats", "fly the dub, baby"] });
   { const flag = new THREE.Group();
     const fpole = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.3, 6), toon(0x6a4a2a)); fpole.position.set(0, 0.65, 0); flag.add(fpole);
     const cloth = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.38), bmat(0xffffff, { map: wFlagTex(), side: THREE.DoubleSide }));
@@ -280,7 +280,7 @@ onWorldReady(player => {
   rePose.push(() => { bum2.parts.armL.rotation.x = -2.3; bum2.parts.armR.rotation.x = -2.3; bum2.parts.armL.rotation.z = 0.15; bum2.parts.armR.rotation.z = -0.15; });
   makeNPC({ x: -205, z: -565, ry: 0, wander: 0, staticLod: true, name: 'bum',
     palette: { suit: 0xe8e6df, pants: 0x394b57, skin: 0x8a5a3c, hair: 0x241a12 },
-    lines: ["Waveland's where the legends land, ope", "been in these bleachers since the Bartman days", "sweet home, Wrigley Field"] });
+    lines: ["Waveland's where the legends land, ope", "been in these bleachers since the Bartman days", "sweet home, Wiggly Field"] });
 
   // ================================================================== //
   //  6) ROOFTOP WATCHERS x2 — on the climbable roof (y 9.6)
@@ -292,7 +292,7 @@ onWorldReady(player => {
   rePose.push(() => { w1.parts.armL.rotation.x = -2.3; w1.parts.armR.rotation.x = -2.3; w1.parts.armL.rotation.z = 0.15; w1.parts.armR.rotation.z = -0.15; });
   const w2 = makeNPC({ x: -211, z: -581, ry: 0, wander: 0, staticLod: true, name: 'rooftop',
     palette: { suit: 0xc06a3a, pants: 0x2a3340, skin: 0xc98a5a, hair: 0x241a12 },
-    lines: ["you can smell the hot dogs from up here, ope", "we can see the whole infield — go Cubs"] });
+    lines: ["you can smell the hot dogs from up here, ope", "we can see the whole infield — go Chubs"] });
   w2.group.position.y = 9.6;
 
   // ================================================================== //
@@ -310,17 +310,17 @@ onWorldReady(player => {
   rePose.push(() => { t1.parts.armR.rotation.x = -2.0; t1.parts.armR.rotation.z = -0.1; t1.parts.armL.rotation.x = -1.2; });
   makeNPC({ x: -292, z: -397, ry: faceTo(-292, -397, MARQUEE.x, MARQUEE.z), wander: 0, staticLod: true, name: 'tourist',
     palette: { suit: 0x3aa0c0, pants: 0x2a2e36, skin: 0x8a5a3c, hair: 0x1a140e },
-    lines: ["one more with the sign, ope", "we saw the Cubs win here once", "smile — friendly confines!"] });
+    lines: ["one more with the sign, ope", "we saw the Chubs win here once", "smile — wiggly confines!"] });
 
   // ================================================================== //
   //  8) GALLAGHER WAY — a kid pair chasing (wander) + a parent watching
   // ================================================================== //
   makeNPC({ x: -296, z: -490, ry: 0, wander: 2.5, scale: 0.55, name: 'kid',
     palette: { suit: 0xf0a02a, pants: 0x394b57, skin: 0xe0a878, hair: 0x241a12 },
-    lines: ["tag, you're it! ope", "I'm gonna play for the Cubs someday", "race ya to the splash pad!"] });
+    lines: ["tag, you're it! ope", "I'm gonna play for the Chubs someday", "race ya to the splash pad!"] });
   const kid2 = makeNPC({ x: -298, z: -492, ry: 0, wander: 2.5, scale: 0.55, name: 'kid',
     palette: { suit: 0x3ac06a, pants: 0x2a3340, skin: 0xc98a5a, hair: 0x3a2a1c },
-    lines: ["ope, sorry! didn't see ya", "my glove's bigger than yours", "go Cubbies!"] });
+    lines: ["ope, sorry! didn't see ya", "my glove's bigger than yours", "go Chubbies!"] });
   { const kg = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.22, 0.1), toon(0x8a4a26)); kg.position.set(0, -0.05, 0.05); kid2.parts.handR.add(kg); }
   const parent = makeNPC({ x: -292, z: -493, ry: faceTo(-292, -493, -297, -491), wander: 0, staticLod: true, name: 'parent',
     palette: { suit: 0x6a5a8a, pants: 0x2a2e36, skin: 0xf0c8a0, hair: 0x2a2018 },
@@ -332,7 +332,7 @@ onWorldReady(player => {
   const door = makeNPC({ x: -180, z: -541, ry: -Math.PI / 2, wander: 0, staticLod: true, name: 'doorman',
     palette: { suit: 0x1a1a20, pants: 0x1a1a20, skin: 0x6e4632, hair: 0x140f0a },
     lines: ["rooftop's full — street's the party anyway", "ope — cash only upstairs",
-      "Murphy's since before you were born, kid", "we pour a cold one every Cubs win"] });
+      "Furphy's since before you were born, kid", "we pour a cold one every Chubs win"] });
   rePose.push(() => {                                  // folded arms across the chest
     door.parts.armL.rotation.x = -1.3; door.parts.armR.rotation.x = -1.3;
     door.parts.armL.rotation.z = 0.7; door.parts.armR.rotation.z = -0.7;

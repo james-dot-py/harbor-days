@@ -125,7 +125,7 @@ function sMitt() {                                   // catcher's mitt thump on 
 }
 
 // =====================================================================
-//  canvas sign  'SLUGGERS — FAST PITCH 25¢'
+//  canvas sign  'SLUGGARDS — FAST PITCH 25¢'
 // =====================================================================
 function signTex() {
   const cv = document.createElement('canvas'); cv.width = 512; cv.height = 128;
@@ -135,7 +135,7 @@ function signTex() {
   g.textAlign = 'center';
   g.shadowColor = '#ff5545'; g.shadowBlur = 22; g.fillStyle = '#ff5545';
   g.font = '800 52px "Trebuchet MS",Arial,sans-serif';
-  g.fillText('SLUGGERS', 256, 54); g.fillText('SLUGGERS', 256, 54);
+  g.fillText('SLUGGARDS', 256, 54); g.fillText('SLUGGARDS', 256, 54);
   g.shadowBlur = 0; g.fillStyle = '#fff8e6';
   g.font = '700 30px "Trebuchet MS",Arial,sans-serif';
   g.fillText('FAST PITCH · 25¢', 256, 98);
@@ -224,7 +224,7 @@ function nextPitch() {
 }
 function finishRound() {
   const h = round.hits;
-  const tier = h >= 5 ? 'CUB FOR A DAY' : h === 4 ? 'bleacher power!' : h >= 2 ? 'season ticket holder' : "ope — pitcher's duel";
+  const tier = h >= 5 ? 'CHUB FOR A DAY' : h === 4 ? 'bleacher power!' : h >= 2 ? 'season ticket holder' : "ope — pitcher's duel";
   toast(`${h} / 5`, tier);
   state.sluggersBest = Math.max(state.sluggersBest || 0, h);
   state.sluggersRounds = (state.sluggersRounds || 0) + 1;

@@ -4,6 +4,12 @@
 from here. When the map grows (Diversey south, Montrose north, inland neighborhoods),
 extend this document first.
 
+**Display names (task 094):** real commercial marks never appear as player-visible
+text — branded signs/toasts/lines use the pun ledger in **RENAMES.md** (Wiggly
+Field, Dibsy, Olde Stylo, Lallapawlooza…). Geographic/street/park names, honorary
+ways, person names, and the Ko-fi rail keep their real names. This file keeps
+using real names for geography truth; builders translate via RENAMES.md.
+
 ## Scale & orientation
 
 - **1 game unit = 1 m. The map is 1:2 of real-world distances** (buildings, props,

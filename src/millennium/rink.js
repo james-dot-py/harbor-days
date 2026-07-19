@@ -201,9 +201,9 @@ export function buildRink() {
       win.position.set(fx - 0.02, y + 0.66, bz); win.rotation.y = -Math.PI / 2;
       millenniumRoot.add(win);
     }
-    // PARK GRILL sign centered on the gate axis (faces the ice, west)
+    // LARK GRILL sign centered on the gate axis (faces the ice, west)
     const sg = new THREE.Mesh(new THREE.PlaneGeometry(6.0, 0.78),
-      bmat(0xffffff, { map: signTex('PARK GRILL', 512, 72, '#f2eadb', '#243428', '600 44px Georgia,serif') }));
+      bmat(0xffffff, { map: signTex('LARK GRILL', 512, 72, '#f2eadb', '#243428', '600 44px Georgia,serif') }));
     sg.position.set(fx - 0.06, y + 1.18, 800); sg.rotation.y = -Math.PI / 2;
     millenniumRoot.add(sg);
     box(0.14, 0.86, 6.3, COL.awn, fx + 0.04, y + 1.18, 800);   // sign backer board

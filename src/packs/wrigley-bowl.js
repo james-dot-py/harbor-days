@@ -131,8 +131,8 @@ function enterBowl(p) {
     } },
     { at: 1.6, fn: () => {
       transiting = false;
-      if (state.bowlVisits === 1) toast('WRIGLEY FIELD', 'game day — the friendly confines');
-      else toast('WRIGLEY FIELD', 'game day — welcome back');
+      if (state.bowlVisits === 1) toast('WIGGLY FIELD', 'game day — the wiggly confines');
+      else toast('WIGGLY FIELD', 'game day — welcome back');
     } },
   ]);
 }
@@ -156,8 +156,8 @@ function exitBowl(p, ejected) {
           ? 'banned? never. persistent? yes.'
           : "no fans on the field — box office is right there");
         // comedy pays — the biggest single payout in the park (task 079)
-        wallet.pay({ key: 'wrigley.eject', first: 10, repeat: 3, reason: 'Wrigley: ejected — worth it',
-          firstReason: 'Wrigley: EJECTED. worth it.', label: 'Wrigley' });
+        wallet.pay({ key: 'wrigley.eject', first: 10, repeat: 3, reason: 'Wiggly: ejected — worth it',
+          firstReason: 'Wiggly: EJECTED. worth it.', label: 'Wiggly' });
       }
       else toast('SEE YA AT THE CORNER', 'Clark & Addison');
     } },
@@ -286,14 +286,14 @@ onWorldReady((player) => {
       if (state.wrigleyTicket) { toast("you've got yours", 'gates at Clark & Addison'); return; }
       grantTicket();
       toast('ONE TICKET', 'game day — enter at the Marquee Gate');
-      wallet.pay({ key: 'wrigley.ticket', first: 6, repeat: 1, reason: 'Wrigley: got a ticket', label: 'Wrigley' });
+      wallet.pay({ key: 'wrigley.ticket', first: 6, repeat: 1, reason: 'Wiggly: got a ticket', label: 'Wiggly' });
     },
   });
 
   // the MARQUEE GATE — an honest door at last
   addInteraction({
     x: MARQUEE_GATE.x, z: MARQUEE_GATE.z, r: 2.8, priority: 8,
-    label: 'enter Wrigley Field — game day',
+    label: 'enter Wiggly Field — game day',
     onUse: p => enterBowl(p),
   });
 
@@ -305,7 +305,7 @@ onWorldReady((player) => {
 
   // seats: game-day spectator seats are owned by wrigley-game.js (task 064)
 
-  journalSection('wrigley-bowl', 'The Friendly Confines', () => `
+  journalSection('wrigley-bowl', 'The Wiggly Confines', () => `
     <div class="jrow"><span>Games attended</span><b>${state.bowlVisits || 0}</b></div>
     <div class="jrow"><span>Tickets torn</span><b>${state.wrigleyTickets || 0}</b></div>
     <div class="jrow"><span>Clean getaways</span><b>${state.refEscapes || 0}</b></div>

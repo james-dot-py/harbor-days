@@ -128,7 +128,7 @@ export function buildStreetwall() {
     }
     if (a.style === 'santafe') {
       // RAILWAY EXCHANGE — white terra-cotta: fine pale pier rhythm, heavy cornice,
-      // and the ROOFTOP "SANTA FE" skyline sign (self-lit, reads at 150 m).
+      // and the ROOFTOP "SANTA FLEA" skyline sign (self-lit, reads at 150 m).
       const npier = Math.max(6, Math.round(w / 2.2));
       for (let i = 0; i < npier; i++) {
         const z = cz - w / 2 + (i + 0.5) * (w / npier);
@@ -136,7 +136,7 @@ export function buildStreetwall() {
       }
       box(BACKx, h + 1.1, cz, DEPTH + 0.6, 2.4, w + 0.9, 0xeef0f2);          // heavy cornice
       const sw = 14, sh = 4, sy = h + 3, sx = FRONT + 0.6;
-      const stex = wordTex('SANTA FE', '#17335c', '#f4f6fa', 'Arial,Helvetica,sans-serif', 448, 128);
+      const stex = wordTex('SANTA FLEA', '#17335c', '#f4f6fa', 'Arial,Helvetica,sans-serif', 448, 128);
       const front = new THREE.Mesh(new THREE.PlaneGeometry(sw, sh), bmat(0xffffff, { map: stex }));
       front.position.set(sx, sy, cz); front.rotation.y = Math.PI / 2; millenniumRoot.add(front);  // FrontSide faces EAST
       const back = new THREE.Mesh(new THREE.PlaneGeometry(sw, sh), bmat(0x17335c));                // solid dark rear (no lone-DoubleSide mirror)
@@ -210,7 +210,7 @@ export function buildStreetwall() {
     if (style === 'sign-slab') {                                 // ONE PRU: flat white slab + bold PRUDENTIAL crown
       box(x, h / 2, GBACKz, w, h, GDEPTH, 0xeef0f2);
       box(x, h - 7, GFRONT - 0.15, w * 0.98, 13, 0.8, ACC);      // dark sign-crown band (reads as the Prudential cap at distance)
-      const tex = signTex('PRUDENTIAL', '#242c37', '#f4f8fc');
+      const tex = signTex('PRUDENT OWL', '#242c37', '#f4f8fc');
       const sign = new THREE.Mesh(new THREE.PlaneGeometry(w * 0.92, 12), bmat(0xffffff, { map: tex }));
       sign.position.set(x, h - 7, GFRONT + 0.2); millenniumRoot.add(sign);
       winsZ(GFRONT, x, w, h - 24, { prob: 0.16 });
@@ -293,7 +293,7 @@ export function buildStreetwall() {
   //     band x6-30, front at x30; the same generic-fill + anchor march as
   //     section 1 over z 935..1080 with the ART_M.cliffS anchors (glass Borg-
   //     Warner, ORCHESTRA HALL colonnade, white terra-cotta Railway Exchange
-  //     with its rooftop SANTA FE sign, McCormick tower). APPENDED AFTER the
+  //     with its rooftop SANTA FLEA sign, McCormick tower). APPENDED AFTER the
   //     giants so sections 1-2 rng call order is byte-identical.
   // ==================================================================
   if (M.OPEN_GRANT.artInstitute) {
@@ -367,7 +367,7 @@ export function buildStreetwall() {
   emitInstanced(new THREE.PlaneGeometry(1, 1), recs, { basic: true });
 }
 
-// dark sign band with light lettering (PRUDENTIAL) — one canvas texture
+// dark sign band with light lettering (PRUDENT OWL) — one canvas texture
 function signTex(text, bg, fg) {
   const cv = document.createElement('canvas'); cv.width = 512; cv.height = 96;
   const g = cv.getContext('2d');

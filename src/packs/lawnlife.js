@@ -102,7 +102,7 @@ function pequodsTex(){
   g.fillStyle='#141414';g.fillRect(0,0,256,256);                       // black lid
   g.fillStyle='#b3261d';g.fillRect(0,96,256,64);                       // red band
   g.fillStyle='#f2ede2';g.textAlign='center';g.textBaseline='middle';
-  g.font='800 40px "Trebuchet MS",sans-serif';g.fillText("PEQUOD'S",128,128);
+  g.font='800 36px "Trebuchet MS",sans-serif';g.fillText("PEQUILOD'S",128,128);
   g.font='600 18px "Trebuchet MS",sans-serif';g.fillStyle='#e8b34a';g.fillText('PIZZERIA',128,176);
   const t=new THREE.CanvasTexture(cv);t.anisotropy=4;return t;
 }

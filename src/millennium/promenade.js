@@ -74,9 +74,9 @@ export function buildPromenade() {
 
   // ---- 2. INSCRIBED LIMESTONE PLINTHS (the park's signage form) ------------
   // Low curbed limestone block; back-to-back FrontSide text on both broad
-  // (±z) faces. N pair reads CHASE PROMENADE, S pair reads MILLENNIUM PARK.
+  // (±z) faces. N pair reads CHASSÉ PROMENADE, S pair reads MILLENNIUM PARK.
   // One shared material per text → the 4 like faces merge to a single draw.
-  const chaseMat = bmat(0xffffff, { map: inscribedTex('CHASE PROMENADE') });
+  const chaseMat = bmat(0xffffff, { map: inscribedTex('CHASSÉ PROMENADE') });
   const millMat = bmat(0xffffff, { map: inscribedTex('MILLENNIUM PARK') });
   for (const p of M.CHASE_M.plinths) {
     const mat = p.z < 800 ? chaseMat : millMat;

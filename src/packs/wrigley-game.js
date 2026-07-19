@@ -341,7 +341,7 @@ function stepBall(dt) {
 // =====================================================================
 //  2. THE GAME  (state machine — a diorama that breathes)
 // =====================================================================
-const MSG1 = ['CUBS vs SOX', 'HOT DOGS · NO KETCHUP', 'THIS IS THE YEAR'];
+const MSG1 = ['CHUBS vs SOCKS', 'HOT DOGS · NO KETCHUP', 'THIS IS THE YEAR'];
 const G = {
   vis: new Array(10).fill(null), cubs: new Array(10).fill(null),
   inning: 6, half: 'top', batting: 'vis', outs: 0,
@@ -360,7 +360,7 @@ function disp(arr, team) {
 }
 function repaint() {
   if (G.phase === 'stretch') { bowlScoreboard({ vis: disp(G.vis, 'vis'), cubs: disp(G.cubs, 'cubs'), half: G.half, outs: G.outs, msg1: '7TH INNING STRETCH', msg2: '♪ take me out to the ball game' }); return; }
-  if (G.phase === 'win' || G.phase === 'postwin') { bowlScoreboard({ vis: G.vis, cubs: G.cubs, half: G.half, outs: 0, msg1: 'CUBS WIN!', msg2: 'FLY THE W' }); return; }
+  if (G.phase === 'win' || G.phase === 'postwin') { bowlScoreboard({ vis: G.vis, cubs: G.cubs, half: G.half, outs: 0, msg1: 'CHUBS WIN!', msg2: 'FLY THE DUB' }); return; }
   bowlScoreboard({ vis: disp(G.vis, 'vis'), cubs: disp(G.cubs, 'cubs'), half: G.half, outs: G.outs, msg1: MSG1[G.msgIdx % MSG1.length], msg2: inningMsg() });
 }
 function scoreRun(n) {
@@ -473,7 +473,7 @@ function recordHalfWatched() {
   if (seated && sittingSince <= halfStartT && game.tNow - halfStartT > 25) {
     state.halfInningsWatched = (state.halfInningsWatched || 0) + 1;
     toast('STAYED FOR THE WHOLE HALF', 'that’s a scorecard kind of day');
-    wallet.pay({ key: 'wrigley.half', first: 8, repeat: 3, reason: 'Wrigley: the whole half-inning', label: 'Wrigley' });
+    wallet.pay({ key: 'wrigley.half', first: 8, repeat: 3, reason: 'Wiggly: the whole half-inning', label: 'Wiggly' });
   }
 }
 function halfOver() {
@@ -595,7 +595,7 @@ function standUp() {
 function singAlong() {
   screenFx.flash('#ffe1a8', 550);
   singT = 3;
-  toast('♪ root, root, root for the CUBBIES');
+  toast('♪ root, root, root for the CHUBBIES');
   state.stretchesSungIn = (state.stretchesSungIn || 0) + 1;
 }
 function standPressed() {
@@ -947,7 +947,7 @@ onWorldReady((player) => {
     <div class="jrow"><span>Homers watched</span><b>${state.gameHomers || 0}</b></div>
     <div class="jrow"><span>Hot dogs</span><b>${state.hotDogs || 0}</b></div>
     <div class="jrow"><span>Stretch sing-alongs</span><b>${state.stretchesSungIn || 0}</b></div>
-    <div class="jrow"><span>Cubs wins seen</span><b>${state.cubsWinsSeen || 0}</b></div>`);
+    <div class="jrow"><span>Chubs wins seen</span><b>${state.cubsWinsSeen || 0}</b></div>`);
 
   if (bg === 'seat') sitDown(SEATS[0], true);
 

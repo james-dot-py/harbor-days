@@ -143,7 +143,7 @@ onWorldReady(player => {
   const groom = makeNPC({
     x: CPL.x + 0.7, z: CPL.z + 0.2, ry: 0, wander: 0, staticLod: true, name: 'groom', scale: 1.05,
     palette: { suit: 0x24242c, pants: 0x1c1c22, skin: 0x8a5a3c, hair: 0x181008, face: true },
-    lines: ['she picked the Bean, I picked the deep dish after', 'sixty photos and counting, bud', 'go cubs — ope, sorry, wedding voice'],
+    lines: ['she picked the Bean, I picked the deep dish after', 'sixty photos and counting, bud', 'go chubs — ope, sorry, wedding voice'],
   });
   groom.setFace('happy');
   // arms: link them at the inside — bride's right + groom's left toward each other

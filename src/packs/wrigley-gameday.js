@@ -36,8 +36,8 @@ const CYCLE = 450;                        // full game-day loop (~7.5 min)
 const T_STRETCH = 120, T_HOMER = 240, T_WIN = 390;
 const BALL_G = 20, BALL_GROUND = 0.18;    // ball gravity + resting height
 const MARQ = ['GAME IN PROGRESS', 'WELCOME MAYOR', 'THIS IS THE YEAR',
-              'CUBS VS SOX · 7:05',   // matchup line per the real board (IMG_2339), task 012
-              'OPE', 'HOT DOGS · NO KETCHUP', 'FLY THE W'];
+              'CHUBS VS SOCKS · 7:05',   // matchup line per the real board (IMG_2339), task 012
+              'OPE', 'HOT DOGS · NO KETCHUP', 'FLY THE DUB'];
 
 // volume scale by player distance from the stadium center:
 // full within 60 m, easing to 0.25x beyond 130 m.
@@ -228,7 +228,7 @@ function onSing() {
   toast('♪ TAKE me out to the BALL game');
   toast('♪ take me out with the crowd');
   toast('♪ buy me some peanuts & cracker jack');
-  toast('♪ root, root, root for the CUBBIES', "one, two, three strikes — you're out!");
+  toast('♪ root, root, root for the CHUBBIES', "one, two, three strikes — you're out!");
   if (singZone) { singZone.remove(); singZone = null; }
 }
 function endStretch() { stretchOn = false; if (singZone) { singZone.remove(); singZone = null; } }
@@ -299,8 +299,8 @@ function startWin() {
   winOn = true; winT = 0; winHook = false;
   state.cubsWinsSeen = (state.cubsWinsSeen || 0) + 1;
   roar(5.0, 0.2);
-  marqueeSetText('CUBS WIN! CUBS WIN!');
-  toast('CUBS WIN!', 'fly the W');
+  marqueeSetText('CHUBS WIN! CHUBS WIN!');
+  toast('CHUBS WIN!', 'fly the dub');
 }
 
 // ------------------------------ cycle reset ----------------------------
@@ -335,7 +335,7 @@ onWorldReady(() => {
     <div class="jrow"><span>Homers chased</span><b>${state.wrigleyHomers || 0}</b></div>
     <div class="jrow"><span>Balls caught</span><b>${state.wrigleyBallsCaught || 0}</b></div>
     <div class="jrow"><span>Stretches sung</span><b>${state.stretchesSung || 0}</b></div>
-    <div class="jrow"><span>Cubs wins seen</span><b>${state.cubsWinsSeen || 0}</b></div>
+    <div class="jrow"><span>Chubs wins seen</span><b>${state.cubsWinsSeen || 0}</b></div>
     <div class="jrow"><span>Fast-pitch best</span><b>${state.sluggersBest != null ? state.sluggersBest + ' / 5' : '—'}</b></div>
     <div class="jrow"><span>Peanut bags</span><b>${state.peanutBags || 0}</b></div>`);
 

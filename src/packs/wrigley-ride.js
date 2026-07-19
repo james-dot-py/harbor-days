@@ -117,12 +117,12 @@ function buildCar() {
   const poles = new THREE.InstancedMesh(poleG, toon(0xd8d5cf), 4);
   { const M = new THREE.Matrix4(); [-4, -1.3, 1.3, 4].forEach((oz, i) => { M.setPosition(0, 1.55, oz); poles.setMatrixAt(i, M); }); }
   poles.instanceMatrix.needsUpdate = true; add(poles);
-  { // ad card: WRIGLEY'S SPEARMINT — THE PERFECT GUM (the namesake wink)
+  { // ad card: WIGGLY'S SPEARMINT — THE PERFECT GUM (the namesake wink)
     const cv = document.createElement('canvas'); cv.width = 256; cv.height = 48;
     const c2 = cv.getContext('2d');
     c2.fillStyle = '#e9f2e4'; c2.fillRect(0, 0, 256, 48);
     c2.fillStyle = '#1e6b3a'; c2.font = '700 20px Georgia,serif'; c2.textAlign = 'center';
-    c2.fillText("WRIGLEY'S SPEARMINT", 128, 22);
+    c2.fillText("WIGGLY'S SPEARMINT", 128, 22);
     c2.font = '700 13px Georgia,serif'; c2.fillText('— THE PERFECT GUM —', 128, 40);
     const ad = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 0.36), bmat(0xffffff, { map: new THREE.CanvasTexture(cv) }));
     ad.position.set(-1.84, 2.9, 2.5); ad.rotation.y = Math.PI / 2; add(ad);   // on the west red band, faces the aisle
@@ -268,7 +268,7 @@ function boardTex(dest, bound) {
     g.fillStyle = color; g.fillText(txt, W / 2, y);
   };
   fit('→ ' + dest.stop.toUpperCase(), 900, 58, 108, '#1f1e24', 26); // → ADDISON
-  fit(dest.sub, 700, 30, 152, '#5a5148', 16);                            // Wrigley Field
+  fit(dest.sub, 700, 30, 152, '#5a5148', 16);                            // Wiggly Field
   g.fillStyle = '#8a2018'; g.font = 'italic 700 22px "Trebuchet MS",Arial,sans-serif';
   g.fillText(bound === 'howard' ? 'Howard-bound' : '95th / Dan Ryan-bound', W / 2, 190);
   g.textBaseline = 'alphabetic';
@@ -310,12 +310,12 @@ export const DEST = {
   },
   wrigleyville: {
     cell: 'wrigleyville', x: SPAWN_W.x + 1.4, z: SPAWN_W.z, y: SPAWN_W.y, yaw: 2.95, lat: 3600,  // east of the canopy post row
-    stop: 'Addison', sub: 'Wrigley Field', label: 'Addison / Wrigley Field', name: 'This is Addison.',
-    quips: ['ope — my stop too. go cubs, go!', 'day game today — the whole car empties at Addison',
-            'flash the W on the way out, huh'],
+    stop: 'Addison', sub: 'Wiggly Field', label: 'Addison / Wiggly Field', name: 'This is Addison.',
+    quips: ['ope — my stop too. go chubs, go!', 'day game today — the whole car empties at Addison',
+            'flash the dub on the way out, huh'],
     arrive: () => {
       organSting();
-      if (!state.wrigleyVisited) { state.wrigleyVisited = true; toast('WRIGLEYVILLE', 'the Friendly Confines — game day'); }
+      if (!state.wrigleyVisited) { state.wrigleyVisited = true; toast('WRIGLEYVILLE', 'the Wiggly Confines — game day'); }
       else toast('WRIGLEYVILLE', 'Addison station');
       payStop(DEST.wrigleyville);
     },

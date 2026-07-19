@@ -478,8 +478,8 @@ export const MAP_W   = { x0: -400, z0: -660, w: 300, h: 460, cw: 304, ch: 466 };
 // per-landmark discovery. n = lowercase display name; c = css dot color.
 // Coordinates derive from the exports above so the dots sit on the features.
 export const CITY_POI_W = [
-  { id: 'wrigley',   n: 'wrigley field', x: -250,   z: -481, c: '#2e7d4f' },   // STADIUM_W.poly extents centre (x -291.44..-202, z -548..-414)
+  { id: 'wrigley',   n: 'wiggly field', x: -250,   z: -481, c: '#2e7d4f' },   // STADIUM_W.poly extents centre (x -291.44..-202, z -548..-414)
   { id: 'gallagher', n: 'gallagher way', x: -283,   z: -483, c: '#5da06a' },   // GALLAGHER_W wedge plaza (z-centre of z0 -520..z1 -446)
-  { id: 'sluggers',  n: 'sluggers',      x: -334.4, z: -480, c: '#e8b64c' },   // SLUGGERS_W building origin (clarkX(-480)-22, cz)
+  { id: 'sluggers',  n: 'sluggards',      x: -334.4, z: -480, c: '#e8b64c' },   // SLUGGERS_W building origin (clarkX(-480)-22, cz)
   { id: 'rooftops',  n: 'the rooftops',  x: -171,   z: -510, c: '#b8442f' },   // ROOFTOPS_W.sheffield row centre (x -178..-164, z -534..-486)
 ];
