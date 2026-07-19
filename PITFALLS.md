@@ -909,4 +909,13 @@ few turns to find; keep each to one line of symptom + fix.
   wings over water (gate checks pave simplicity); and a tight terraced curl
   (r≈4-5 m) gaps its outer tiers at the shared 2.2 fold stride — densify the
   stride for that piece only (local xorshift, +0 draws).
+- A task spec that says "persist the player's POSITION" collides with the store.js
+  contract (the save blob may NEVER hold coordinates — hard constraint 5 / task 078
+  — so a save survives a map rework). Reconcile by persisting the RESOLVED NAME, not
+  the raw coords: task 105's welcome-back "where you left off" tracks the nearest
+  ZONES *name* live (a throttled per-frame min-distance scan, written on change via
+  setFlag `ope.lastzone.v1`) and reads that name back next session — identical player
+  intent, constraint honored, and it stays meaningful after a north-shore rework
+  (084) that would strand a raw x,z. Read the prior value in onWorldReady BEFORE the
+  tracker's first frame overwrites it.
 

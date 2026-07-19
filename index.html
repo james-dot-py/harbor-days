@@ -608,6 +608,28 @@
     font-size:16px;color:#fff;background:#5db06b;box-shadow:0 3px 0 rgba(63,138,77,.7);padding:11px 26px}
   .namebtn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(63,138,77,.7)}
   .namehint{margin-top:12px;color:#9c8168;font-size:12px}
+  /* ---------- "back already?" welcome-back card (task 105) ----------
+     A PASSIVE cream banner, not a modal: pointer-events:none so it never eats a
+     tap and never blocks a step (the whole game keeps running underneath), and it
+     dismisses on ANY input. Top-centre so it clears the top-left dibs chip / hint
+     and the bottom joystick. Gentle drop-in on show, soft lift-out on dismiss;
+     body.calm (prefers-reduced-motion) shows it instantly with no motion. */
+  #welcomeback{position:fixed;top:0;left:0;right:0;z-index:33;display:none;justify-content:center;
+    pointer-events:none;padding:max(16px,env(safe-area-inset-top)) 12px 0}
+  #welcomeback.show{display:flex}
+  .wbcard{background:var(--cream);color:var(--ink);border-radius:20px;padding:15px 22px 14px;
+    width:min(340px,90vw);box-sizing:border-box;text-align:center;
+    box-shadow:0 8px 0 rgba(122,62,44,.24),0 20px 44px rgba(122,62,44,.22);
+    transform:translateY(-16px);opacity:0;animation:wbIn .5s cubic-bezier(.2,.9,.3,1) forwards}
+  #welcomeback.calm .wbcard{animation:none;transform:none;opacity:1}
+  #welcomeback.gone .wbcard{animation:wbOut .3s ease forwards}
+  @keyframes wbIn{to{transform:translateY(0);opacity:1}}
+  @keyframes wbOut{to{transform:translateY(-16px);opacity:0}}
+  .wbtitle{font-size:19px;line-height:1.24;margin:0 2px 2px;font-weight:700}
+  .wbsub{font-size:14px;color:#7a614a;margin:0 2px 9px}
+  .wbrows{display:flex;flex-direction:column;gap:3px}
+  .wbrow{font-size:13px;line-height:1.42;color:#6f5a45}
+  .wbrow b{color:var(--ink);font-weight:700}
   /* the journal title-page signature (task 087) */
   .jsign{margin:-2px 4px 14px 0;color:#9c8168;font-size:13px;font-style:italic;letter-spacing:.02em}
 
@@ -859,6 +881,16 @@
     autocapitalize="words" autocorrect="off" spellcheck="false" aria-label="what should we call you">
   <button id="nameOk" class="namebtn">that&rsquo;s me</button>
   <div class="namehint">the whole neighborhood&rsquo;s gonna know it</div>
+</div></div>
+
+<!-- "back already?" welcome-back card (task 105): shown once at load when a save
+     exists and the calendar date has rolled over since last played. A passive
+     banner (pointer-events:none) — never blocks movement, dismisses on any input.
+     All wiring + copy in src/packs/welcome-back.js; rows filled at runtime. -->
+<div id="welcomeback"><div class="wbcard">
+  <div class="wbtitle">back already?</div>
+  <div class="wbsub">the lake missed you.</div>
+  <div class="wbrows" id="wbRows"></div>
 </div></div>
 
 <!-- avatar picker (task 089; layout rework 098): the first-play "who are ya,

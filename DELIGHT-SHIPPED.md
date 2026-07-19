@@ -637,3 +637,10 @@ cut becomes a revert task.
   hand. The guy's own bottle finally reads too: held up outboard in a gripped
   fist, cream label above the knuckles, no longer buried behind his forearm.
   — the Malörp guy + the Handshake regular on the Belmont Rocks — task 100
+- "back already? the lake missed you." — a returning player who comes back on a
+  new day is met, once, by a cream banner in the Ope! voice that tells them the
+  day is ALIVE: today's lake mood ("a little fog off the lake this morning"), a
+  neighbor who could use a hand in the giver's own voice ("Lois lost her field
+  notes to the wind"), and where they wandered off last time ("you left off near
+  Dog Beach"). A warm hello, never a streak or a guilt trip — it dismisses on any
+  input and never blocks a step. — first load of a new day, anywhere — task 105
