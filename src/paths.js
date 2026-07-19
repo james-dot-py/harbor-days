@@ -41,6 +41,37 @@ export const ribbonLanes=[];
 export const trailLanes={walk:null,bike:null,mtrWalk:null,mtrBike:null};
 export let mainCurve=null, walkCurve=null, spurCurve=null;
 
+// 106 FOOTSTEP SURFACE — the paved Lakefront Trail corridor (asphalt bike +
+// crushed-limestone walk ribbons, MAIN + Montrose, plus the peninsula SPUR),
+// registered from the DRAWN centerlines at buildPaths so the sound follows the
+// real pavement. Each lane carries a padded bbox for a cheap early-out; the hit
+// test is point-to-segment distance ≤ half-width. Module-const scratch only →
+// zero per-step allocation (footsteps fire every ~0.26 s). This is SOUND, not
+// walkability, so it needs no tools/walkprobe.mjs mirror.
+const STEP_TRAIL=[];
+function stepLane(cl,width){
+  if(!cl||cl.length<2)return;
+  let x0=Infinity,x1=-Infinity,z0=Infinity,z1=-Infinity;
+  for(const p of cl){if(p[0]<x0)x0=p[0];if(p[0]>x1)x1=p[0];if(p[1]<z0)z0=p[1];if(p[1]>z1)z1=p[1];}
+  const hw=width/2;
+  STEP_TRAIL.push({pts:cl,hw2:hw*hw,x0:x0-hw,x1:x1+hw,z0:z0-hw,z1:z1+hw});
+}
+export function onTrail(x,z){
+  for(let L=0;L<STEP_TRAIL.length;L++){
+    const t=STEP_TRAIL[L];
+    if(x<t.x0||x>t.x1||z<t.z0||z>t.z1)continue;
+    const pts=t.pts;
+    for(let i=0;i<pts.length-1;i++){
+      const ax=pts[i][0],az=pts[i][1],dx=pts[i+1][0]-ax,dz=pts[i+1][1]-az;
+      const l2=dx*dx+dz*dz;
+      let u=l2>0?((x-ax)*dx+(z-az)*dz)/l2:0;u=u<0?0:u>1?1:u;
+      const ex=x-(ax+dx*u),ez=z-(az+dz*u);
+      if(ex*ex+ez*ez<=t.hw2)return true;
+    }
+  }
+  return false;
+}
+
 function curveOf(ctrl){ return new THREE.CatmullRomCurve3(ctrl.map(p=>new THREE.Vector3(p[0],0,p[1]))); }
 
 const _frT=new THREE.Vector3();
@@ -167,7 +198,7 @@ export function buildPaths(){
   walkCurve=curveOf(walkCl.filter((_,i)=>i%8===0||i===walkCl.length-1));
   // SPUR: single ribbon.
   spurCurve=curveOf(CH.TRAIL_SPUR);
-  ribbonOn(spurCurve,st.spur.width,st.spur.color,st.spur.y,0);
+  const spurCl=ribbonOn(spurCurve,st.spur.width,st.spur.color,st.spur.y,0);
   // GHOST of the retired r=16 garden circle (task 023): push its ribbonOn-
   // identical centerline samples into pathSamples AT THE LOOP'S ORIGINAL BUILD
   // SLOT — same content, same count, same stride-3 phase — so the shared-rng
@@ -273,4 +304,13 @@ export function buildPaths(){
   // miter would fold), covering the wedge the owner-era build left in the bend.
   ribbonOn(curveOf(MP.paths.loop),MP.paths.width,st.walk.color,st.walk.y,0,pathSamples2,mpEnt.endFrame);
   flushJunctions();   // 102: one instanced mesh for every paved junction dot
+  // 106: register the DRAWN dual trail + spur centerlines as the footstep
+  // 'asphalt' corridor (onTrail). rng-free; the miters only touch edge verts, so
+  // these centerline arrays are stable for the life of the run.
+  STEP_TRAIL.length=0;
+  stepLane(trailLanes.walk,st.walk.width);
+  stepLane(trailLanes.bike,st.bike.width);
+  stepLane(trailLanes.mtrWalk,st.walk.width);
+  stepLane(trailLanes.mtrBike,st.bike.width);
+  stepLane(spurCl,st.spur.width);
 }

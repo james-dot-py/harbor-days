@@ -110,12 +110,17 @@ function startMusic(){
     }
   },200);
 }
-function noiseHit(t,dur,type,freq,q,peak){
+function noiseHit(t,dur,type,freq,q,peak,pan){
   const src=actx.createBufferSource();src.buffer=noiseBuf;
   const f=actx.createBiquadFilter();f.type=type;f.frequency.value=freq;f.Q.value=q;
   const g=actx.createGain();
   g.gain.setValueAtTime(peak,t);g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
-  src.connect(f);f.connect(g);g.connect(sfxBus);src.start(t);src.stop(t+dur+0.05);
+  src.connect(f);f.connect(g);
+  // optional stereo placement (the footstep L/R-foot skew); mono when omitted so
+  // every pre-existing caller stays bit-identical.
+  if(pan&&actx.createStereoPanner){const p=actx.createStereoPanner();p.pan.value=pan;g.connect(p);p.connect(sfxBus);}
+  else g.connect(sfxBus);
+  src.start(t);src.stop(t+dur+0.05);
 }
 export function sBoom(){if(!actx)return;const t=actx.currentTime;
   noiseHit(t,0.9,'lowpass',140,0.7,0.9);
@@ -144,10 +149,32 @@ export function sChime(){if(!actx)return;const t=actx.currentTime;
     o.connect(g);g.connect(sfxBus);o.start(t+i*0.12);o.stop(t+i*0.12+1.2);
   });
 }
-export function sStep(surf){if(!actx)return;const t=actx.currentTime;
-  if(surf==='wood')noiseHit(t,0.09,'bandpass',320,1.2,0.16);
-  else if(surf==='stone')noiseHit(t,0.07,'bandpass',950,1.5,0.13);
-  else noiseHit(t,0.08,'lowpass',480,0.8,0.1);
+// footstep timbres by SURFACE + per-step DE-REPETITION so a ~0.26 s stride never
+// reads machine-gun (design audit B2). Base tone per surface in STEP_TONE (a
+// module constant → zero per-step allocation); each step then jitters the
+// filter freq ±8% and alternates an L/R foot skew — ~15% gain up on one foot,
+// down on the other, with a small stereo pan. 100% synth: sand = a soft low
+// lowpass thud, asphalt = a quiet high bandpass click, paver = a firm concrete
+// clack; wood / stone / grass keep their shipped tone exactly.
+const STEP_TONE={
+  wood:   {dur:0.09,type:'bandpass',freq:320, q:1.2,peak:0.16},
+  stone:  {dur:0.07,type:'bandpass',freq:950, q:1.5,peak:0.13},
+  paver:  {dur:0.06,type:'bandpass',freq:680, q:1.3,peak:0.14},
+  asphalt:{dur:0.05,type:'bandpass',freq:1600,q:1.0,peak:0.075},
+  sand:   {dur:0.07,type:'lowpass', freq:300, q:0.7,peak:0.06},
+  grass:  {dur:0.08,type:'lowpass', freq:480, q:0.8,peak:0.10},
+};
+let _stepFoot=0;
+const _stepDbg={surf:'grass',freq:480,peak:0.1,pan:0,foot:0};   // mutated in place (no per-step alloc)
+export function stepDbg(){return _stepDbg;}   // debug/tools only: last footstep's varied params
+export function sStep(surf){if(!actx)return;
+  const s=STEP_TONE[surf]||STEP_TONE.grass;
+  const foot=(_stepFoot^=1);                        // alternate left/right each step
+  const freq=s.freq*(1+(Math.random()*2-1)*0.08);   // ±8% frequency jitter
+  const peak=s.peak*(foot?1.15:0.85);               // ~15% gain skew between the feet
+  const pan=foot?0.15:-0.15;                         // small L/R stereo placement
+  noiseHit(actx.currentTime,s.dur,s.type,freq,s.q,peak,pan);
+  _stepDbg.surf=surf;_stepDbg.freq=freq;_stepDbg.peak=peak;_stepDbg.pan=pan;_stepDbg.foot=foot;
 }
 function sGull(){if(!actx)return;const t=actx.currentTime;
   for(let i=0;i<2;i++){

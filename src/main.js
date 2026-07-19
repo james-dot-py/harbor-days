@@ -2,13 +2,13 @@ import * as THREE from 'three';
 import { renderer, scene, camera, amb, clamp, lerp, lerpAngle, hexRGB, pip, rng, rand, $, game, toon, chaseDistK, baseFov } from './core.js';
 import { skyGroup, clouds, buildSky } from './sky.js';
 import { buildCoast, water, waterN, coastQuery, profileTotal, tierAt, beachH, LAND } from './coast.js';
-import { buildPaths, pathSamples, pathSamples2, pathSamplesMain, ribbonLanes, trailLanes } from './paths.js';
+import { buildPaths, pathSamples, pathSamples2, pathSamplesMain, ribbonLanes, trailLanes, onTrail } from './paths.js';
 import { buildProps, colliders, walkRects, bobbers, drifter, dogTail, foam, fireflies, TREE_SPOTS } from './props.js';
 import { buildStructures } from './structures.js';
 import { mayor, mparts, buildMayor, updateCharacter, updateChibiShadows } from './character.js';
 import { updateFogCull, fogCullStats } from './fogcull.js';
 import { FX, DUST, PASTELS, fw, rockets, scheduled, boomLights, setType, updateFireworks } from './fx.js';
-import { initAudio, audioDbg, audioCtx, installAudioResumeNet, sStep, sChime, sPop, updateAmbience } from './audio.js';
+import { initAudio, audioDbg, audioCtx, installAudioResumeNet, sStep, stepDbg, sChime, sPop, updateAmbience } from './audio.js';
 import { cam, keys, joy, jump, initInput, updateCam } from './input.js';
 import { initOnboarding, updateOnboarding } from './onboard.js';
 import { initNaming, updateNaming } from './naming.js';
@@ -182,6 +182,23 @@ function surfaceY(x,z){
   if(q&&q.ae<1.2&&q.lat>0.15){const t=tierAt(q.lat,q.z);if(t)return t.h}
   return 0;
 }
+// 106: footstep-SURFACE classifier — the material under the player's feet, for
+// sStep's timbre (design audit B2: the old inline test knew only wood/stone and
+// sent sand, the paved trail, and every hard-cell sidewalk to the 'grass' tone).
+// Priority top-down: a hard cell (Wrigleyville/Millennium) is a PAVER unless its
+// kindAt declares lawn; then decks (wood) / beach sand / revetment terrace
+// (stone) / the paved Lakefront Trail corridor (asphalt) / grass fallback. Pure
+// reads, no allocation — called on each footfall + hard landing.
+function stepSurface(x,z){
+  const cw=cellWalk();
+  if(cw){const k=cellKind(),kind=k&&k(x,z);return (kind==='lawn'||kind==='grass')?'grass':'paver';}
+  if(onRect(x,z))return 'wood';
+  if(beachH(x,z)!==null)return 'sand';
+  const q=coastQuery(x,z);
+  if(q&&q.lat>0.2&&q.ae<1)return 'stone';
+  if(onTrail(x,z))return 'asphalt';
+  return 'grass';
+}
 
 // ------------------------------ zones ----------------------------------
 const ZONES=CH.ZONES;
@@ -210,6 +227,8 @@ window.__hd.input={joy,cam}; // debug/tools only: steering-bot access (062 hold-
 window.__hd.setTrap=r=>{TRAP_TEST=r||null;}; // debug/tools only: inject a synthetic non-walk block to verify the anti-trap escape (issue 025)
 window.__hd.gstate=state;    // debug/tools only: live gameplay state handle (093 rink E2E reads onIce/iceHops)
 window.__hd.trailLanes=()=>({walk:trailLanes.walk,bike:trailLanes.bike,mtrWalk:trailLanes.mtrWalk,mtrBike:trailLanes.mtrBike});   // debug/tools only: the DRAWN dual-trail centerlines (101 npc-paths gate probe — never a node-side curve mirror)
+window.__hd.stepSurf=(x,z)=>stepSurface(x===undefined?player.x:x,z===undefined?player.z:z);   // debug/tools only: footstep-surface classifier at a point (106 audit — omit args for the player's own spot)
+window.__hd.stepDbg=stepDbg;   // debug/tools only: last footstep's varied params (freq jitter + L/R foot skew, 106)
 setIdleGroundProbe((x,z)=>({walk:walkable(x,z),y:surfaceY(x,z)}));   // task 087: let the idle-charm sit only land on safe flat ground (shared engine walk data)
 window.__hd.buildMs={build:Math.round(_tm0-_tb0),merge:Math.round(_tm1-_tm0),packs:Math.round(performance.now()-_tp0)};
 console.log('[perf] world build '+window.__hd.buildMs.build+'ms · mergeCellStatic '+window.__hd.buildMs.merge+'ms · packs '+window.__hd.buildMs.packs+'ms');
@@ -356,8 +375,7 @@ function frame(now){
       player.y=surf;jphys.air=false;jphys.vy=0;
       jphys.squash=clamp(impact/9,0.25,1);
       if(impact>3){
-        const q0=coastQuery(player.x,player.z);
-        sStep(onRect(player.x,player.z)?'wood':(q0&&q0.lat>0.2&&q0.ae<1?'stone':'grass'));
+        sStep(stepSurface(player.x,player.z));
         for(let k=0;k<8;k++){const a=k/8*Math.PI*2;
           DUST.spawn(player.x+Math.cos(a)*0.3,surf+0.08,player.z+Math.sin(a)*0.3,
             Math.cos(a)*rand(1.2,2),rand(0.4,0.9),Math.sin(a)*rand(1.2,2),1,0.95,0.82,0.35,1.4,3,3);}
@@ -397,9 +415,7 @@ function frame(now){
   // footsteps + run sparkles
   stepT-=dt;
   if(!jsk.on&&!skate.on&&sp>1&&stepT<=0){
-    const q0=coastQuery(player.x,player.z);
-    const surf=onRect(player.x,player.z)?'wood':(q0&&q0.lat>0.2&&q0.ae<1?'stone':'grass');
-    sStep(surf);stepT=runF?0.26:0.42;
+    sStep(stepSurface(player.x,player.z));stepT=runF?0.26:0.42;
     DUST.spawn(player.x+rand(-0.12,0.12),player.y+0.05,player.z+rand(-0.12,0.12),   // footfall puff
       rand(-0.3,0.3),rand(0.5,1),rand(-0.3,0.3),0.98,0.93,0.8,0.28,0.95,2.2,2.5);
   }

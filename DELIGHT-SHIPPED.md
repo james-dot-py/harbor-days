@@ -644,3 +644,10 @@ cut becomes a revert task.
   notes to the wind"), and where they wandered off last time ("you left off near
   Dog Beach"). A warm hello, never a streak or a guilt trip — it dismisses on any
   input and never blocks a step. — first load of a new day, anywhere — task 105
+- Your footsteps now know the ground. Cross from the dog-beach sand (a soft low
+  thud) to the Lakefront Trail (a quiet asphalt click) to a weathered dock (the
+  hollow wood knock) to a downtown sidewalk (a firm concrete clack) and each
+  surface answers back — and no two steps sound quite alike, because every
+  footfall jitters its pitch and leans left, then right, foot to foot. The
+  machine-gun sameness of a fixed grass tick is gone. — walking anywhere,
+  every surface — task 106
