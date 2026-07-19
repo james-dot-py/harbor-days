@@ -101,7 +101,7 @@ function wire() {
 
 // build the tiles once (on open) — selection changes then only toggle the `on`
 // class via refreshSel(), so re-selecting never rebuilds the rail (no flicker,
-// and the horizontal scroll position is preserved).
+// and the rail's scroll position is preserved).
 function renderRail() {
   const rail = $('avRail'); if (!rail) return;
   rail.innerHTML = AVATARS.map(a =>
@@ -112,8 +112,11 @@ function renderRail() {
 }
 
 // mark the current selection, refresh the blurb, and slide the chosen tile into
-// view. The scroll is rail-LOCAL (scrollLeft, never scrollIntoView) so it can
-// never nudge the page/world layout.
+// view. The scroll is rail-LOCAL (scrollLeft/scrollTop, never scrollIntoView) so
+// it can never nudge the page/world layout. Both axes are centered: the rail is
+// HORIZONTAL on the touch-portrait bottom sheet and VERTICAL on the side panel
+// (desktop + touch landscape, the 098 rework) — the axis without overflow is a
+// harmless no-op.
 function refreshSel() {
   const rail = $('avRail'); if (!rail) return;
   let onTile = null;
@@ -127,6 +130,7 @@ function refreshSel() {
   if (onTile) {
     const rr = rail.getBoundingClientRect(), tr = onTile.getBoundingClientRect();
     if (rr.width) rail.scrollLeft += (tr.left - rr.left) - (rr.width - tr.width) / 2;
+    if (rr.height) rail.scrollTop += (tr.top - rr.top) - (rr.height - tr.height) / 2;
   }
 }
 

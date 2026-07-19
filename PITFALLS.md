@@ -823,3 +823,16 @@ few turns to find; keep each to one line of symptom + fix.
   demo shot. Glance ownership: applied in updateNPC order BEFORE pack updates,
   so a pack that re-poses heads still wins its frame. Gating is the 087 idle law
   (OFF under ?play=1 unless ?affordance=1) — a waypoint shot can never catch it.
+- A modal that previews the CENTER-SCREEN rig may never cover screen center
+  (098, owner 2026-07-19): the avatar picker's bottom card cropped the mayor at
+  the chest on desktop and swallowed all but the hair on touch landscape. Law:
+  side panel (vertical rail, rows = icon+full name) on desktop + touch
+  landscape; bottom sheet ONLY on touch portrait, where the 096 framing keeps
+  the rig small and high. Also: never ellipsis-truncate card text — wrap
+  (white-space:normal + overflow-wrap:break-word); and when a rail can go
+  vertical, scroll the selected tile into view on BOTH axes (scrollLeft AND
+  scrollTop — the no-overflow axis is a harmless no-op). act.mjs note:
+  puppeteer's click auto-scrolls a flex rail to an off-view tile, but the
+  landscape rail's 11th row defeated it (CLICK logged at y>viewport, a silent
+  no-op — the tile never selected): click a row that's actually visible, or
+  pre-scroll the rail in the action script first.
