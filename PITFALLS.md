@@ -791,6 +791,25 @@ few turns to find; keep each to one line of symptom + fix.
   eases to full ×1.65), and packs reconstructing the chase pos multiply
   cam.dist by chaseDistK(cam.dist). Verify every session/tight camera on
   PORTRAIT (--mobile), not just desktop.
+- The anti-trap CRAWL does NOT beat a collider RING (097): the crawl picks a
+  walkable target and steps 0.28 m/frame; the (previously unconditional) ring
+  push (r+0.34) shoved it straight back — a stable oscillation that pinned the
+  LIVE player at all 24 seam-post wedges the ring audit confirmed (barricade
+  mouths, the beer-garden fence corners, rooftop rails), and the r8 Murphy's
+  circle push-CHAINED a sim player 4.6 m into blocked ground — past ESC_RINGS'
+  4.2 m ceiling, where the crawl finds nothing. The 065 trapbot never saw any
+  of this (it injects a synthetic DATA block, no colliders). SIBLING class the
+  live approach-bot then surfaced: ADJACENT posts with interlocking rings (the
+  CPD barricade lines: spacing 2.33, ring 1.54) teleport-yank the player
+  alternately to each ring's edge — a ping-pong pin on fully WALKABLE ground
+  that held input can never beat. Permanent fix, BOTH classes: the push is
+  WALK-GATED (pushed-to point must be walkable/water or it is skipped) and
+  STEP-CLAMPED (min(penetration, 0.3 m)/frame — above the 0.21 max per-frame
+  penetration at top speed, so single-collider feel is identical, but opposing
+  overlap pushes cancel and the slide walks free). Closes every cell AND the
+  no-crawl lakefront. Re-audit any time with tools/tmp-097-colliders.mjs (ring
+  dump + gate-mirroring sim; expect 0 confirmed) + tools/tmp-097-wedgebot.mjs
+  (live drive-into-the-wedge approach test, expect all FREE).
 - The 091 interact affordance (framework.js: NPC glance + object glints) has a
   probe — `window.__hd.aff()` -> {enabled, glints, ptsVisible, glances[]} — USE
   IT before tuning visuals: both halves were "invisible" on first shots while

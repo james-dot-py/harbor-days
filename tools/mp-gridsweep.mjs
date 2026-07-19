@@ -15,6 +15,12 @@
 // (232,792), (234,802); and ONE new cell (242,758): the mouth of the west-
 // hairpin PLANTED pocket (the warming-hut lawn, intentionally non-walk —
 // extending plaza further just moves the boundary cell westward into it).
+// 097 RE-CENSUS (65 holes total; the 093 BP shorten moved the flank set):
+// (242,802) is the 093-shifted BP flank buffer (2.98 m off BP_DECK_PTS —
+// the five old 184/180/232/234 flank cells dropped out) and (120,844) is
+// the Nichols slot ledge's north-end column between the blessed x=116/122
+// columns (2.64 m off NICHOLS_DECK_PTS). Both are the same intended
+// elevated-band buffer classes; nothing outside the blessed classes remains.
 // The "worst adjacent step 13.00 at (126,908)" is a 2 m-grid ARTIFACT: the
 // grid straddles the 1.5 m non-walk strip between closed Monroe (y0) and the
 // Bluhm terrace (y13) — no walkable 1 m path crosses that edge. Re-audit

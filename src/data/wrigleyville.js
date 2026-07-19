@@ -410,6 +410,15 @@ export const WALK_W = [
     const q = APRONS_W.secorner.poly[i + 2], c = APRONS_W.secorner.poly[0];
     return { tri: [c, p, q], z0: Math.min(c[1], p[1], q[1]), z1: Math.max(c[1], p[1], q[1]), y: 0 };
   }),
+  // 097: Murphy's forecourt seam — the sidewalk pocket between the Sheffield
+  // corridor edge (x −178) and the Murphy's masses, around the beer garden.
+  // The garden fence/planter rings (r+0.34) rest here; blocked, this strip was
+  // a collider-ring wedge (the r8 main-mass circle could push-chain a player
+  // 4.6 m in — past the crawl's 4.2 m ceiling: a live freeze). Walkable, it is
+  // an ordinary patio sidewalk; the building/annex/fence colliders still seal
+  // the masses. z1 −534.2 stays north of the sheffield[0] deck plan (z −534)
+  // so no y0/elevated overlap exists (the 041/elevator law).
+  { x0: -178, x1: -171.5, z0: -548, z1: -534.2, y: 0 },
 ];
 function inTri(t, x, z) {
   let ins = false;

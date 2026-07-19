@@ -282,7 +282,19 @@ function frame(now){
   for(const c of colliders){
     if(player.y>c.h)continue;   // airborne over a low obstacle (fences are jumpable)
     const dx=player.x-c.x,dz=player.z-c.z,R=c.r+0.34,d2=dx*dx+dz*dz;
-    if(d2<R*R&&d2>1e-6){const d=Math.sqrt(d2);player.x=c.x+dx/d*R;player.z=c.z+dz/d*R}
+    if(d2<R*R&&d2>1e-6){const d=Math.sqrt(d2),k=Math.min(R-d,0.3),px=player.x+dx/d*k,pz=player.z+dz/d*k;
+      // 097 ring-wedge guard, two clauses (both live-verified by tmp-097-wedgebot):
+      // (a) WALK-GATED: never shove the player onto non-walkable ground. A ring
+      //     overlapping a walk seam used to pin the player there — the crawl
+      //     steps 0.28 toward open ground, the ring pushed it straight back, a
+      //     live freeze the synthetic trapbot never sees (24 confirmed spots).
+      // (b) STEP-CLAMPED (0.3 > the 0.21 max per-frame penetration at top
+      //     speed, so single-collider resolution feels identical): adjacent
+      //     posts with interlocking rings (barricade lines) used to teleport-
+      //     yank the player alternately to each ring edge — a ping-pong pin on
+      //     WALKABLE ground that held input could never beat. Clamped, the
+      //     opposing pushes cancel and the slide walks free.
+      if(walkable(px,pz)||isWater(px,pz)){player.x=px;player.z=pz}}
   }
   // ---- anti-trap escape (issue 025) — HARD cells only (cellWalk() non-null is
   // the SAME gate as the issue-017 water guard, so lakefront jetski/wade stays

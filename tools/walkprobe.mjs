@@ -546,6 +546,23 @@ expect('apron corner by the crosswalks (-203,-547) walkable',WV.walkableW(-203,-
 expect('apron meets the Sheffield sidewalk (-202.5,-540) walkable',WV.walkableW(-202.5,-540),true);
 expect('past the chamfer wall (-216,-534) NOT walkable (inside the park)',WV.walkableW(-216,-534),false);
 
+// ===== Task 097: Murphy's forecourt seam (the collider-ring wedge audit) =====
+// The sidewalk pocket between the Sheffield corridor edge and the Murphy's
+// masses is WALKABLE (the beer-garden fence/planter rings rest on it; blocked,
+// the r8 main-mass circle push-chained a player past the crawl's 4.2 m reach —
+// a live freeze). The masses stay collider-sealed; the pocket must stay open
+// and at street level, and must never lap the sheffield[0] deck plan (z -534).
+console.log('\n--- Task 097: Murphy\'s forecourt seam (ring-wedge closure) ---');
+expect('garden west margin (-177.5,-540) walkable',WV.walkableW(-177.5,-540),true);
+expect('garden north margin (-176,-546) walkable',WV.walkableW(-176,-546),true);
+expect('forecourt under the annex ring (-173,-538) walkable',WV.walkableW(-173,-538),true);
+expect('deep pocket by Murphy\'s mass (-172,-536) walkable',WV.walkableW(-172,-536),true);
+expect('forecourt is street level (no elevator)',WV.surfaceYW(-175,-540),0);
+expect('seam joins Waveland (-176,-548) walkable',WV.walkableW(-176,-548),true);
+expect('east of the seam (-171,-540) NOT walkable (Murphy\'s interior)',WV.walkableW(-171,-540),false);
+expect('seam/deck sliver (-175,-534.1) NOT walkable (no y0/deck lap)',WV.walkableW(-175,-534.1),false);
+expect('sheffield[0] deck plan unchanged: (-175,-530) elevated',WV.surfaceYW(-175,-530),WV.ROOFTOPS_W.roofY);
+
 // ===== Task 013: suggestion box (relocated to the AIDS Garden spawn plaza, task 023) =====
 // The box is a small collider on EXISTING walkable LAND — it must add no new
 // walkable surface and must clear every trail ribbon like any other prop.
