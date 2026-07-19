@@ -30,6 +30,12 @@ const Z_N = -1094, Z_S = 316;  // north / south ends — the full map z range (Z
 // ---- module runtime handles (built in onWorldReady) ----
 let TRAIN = null, JETS = null, WRIG = null, WRIG_GRP = null;
 let audio = null;             // persistent train-rumble nodes (built lazily)
+// SESSION-SCOPED (task 103): the lakefront CUBS-WIN notification fires at most
+// once per page load. The distant celebration (roar + west-treeline fireworks +
+// the yacht-club 'W' flag) still repeats on every ~4-7 min win; only the HUD
+// toast is one-and-done. Module-level, deliberately not persisted (a reload
+// re-greets a returning fan) — never store.js.
+let cubsWinToastShown = false;
 
 // =====================================================================
 //  canvas textures
@@ -235,7 +241,7 @@ function buildWrigley(){
 function cubsWin(player){
   roar(5.0,0.18);organRiff();
   state.cubsWins=(state.cubsWins||0)+1;
-  toast('CHUBS WIN','somewhere west, 40,000 people hug');
+  if(!cubsWinToastShown){cubsWinToastShown=true;toast('CHUBS WIN','somewhere west, 40,000 people hug');}
   // 3-4 distant bursts over the west treeline, staggered via the fx scheduler
   const cols=[0x0e3386,0xffffff,0xcc3433,0xffe08a];
   const n=3+(rng()*2|0);

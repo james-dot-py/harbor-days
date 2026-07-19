@@ -877,4 +877,22 @@ few turns to find; keep each to one line of symptom + fix.
   module BOTH import (src/pathgeom.js for ribbon seams/edges); a probe may
   mirror only what it provably locks bit-exact (the r128 CR evaluator, checked
   by the butt-join 0.000-cap expectations).
+- A CYCLE-driven celebration re-fires its HUD toast every loop, so a long session
+  spams it (owner: "Cubs win notification can fire multiple times", task 103): the
+  gameday win cycle repeats every ~7.5 min in-cell and the lakefront ambient gag
+  every ~4-7 min, each `toast('CHUBS WIN...')` on the cycle's own fired-flag (which
+  RESETS per loop by design). Gate a one-shot NOTIFICATION with a separate
+  MODULE-LEVEL session flag (`let winToastShown=false`, NOT store.js — a reload
+  re-greets a returning fan), and gate ONLY the toast: keep the counter increment
+  (state.cubsWinsSeen/cubsWins) and the visual/audio celebration firing every cycle,
+  because downstream consumers key off the counter (deepcuts.js hoists the rooftop
+  W flags per tick; wrigley-vendors.js hushes the peanut hawker 60 s per tick). An
+  IN-WORLD display is NOT a notification — the bowl scoreboard's "CHUBS WIN!"
+  (wrigley-game.js repaint) shows the result of the diorama you're watching and is
+  correct to repeat; don't gate it. To E2E a toast-count, install a MutationObserver
+  on #toastMain via evaluateOnNewDocument (before frame 1 — WRIG.winT:0 fires the
+  ambient win immediately) and separate the two by EXACT text ('CHUBS WIN!' vs
+  'CHUBS WIN'); the reload re-fire needs a long-enough wait because the negative
+  frame-1 dt (PITFALLS) pushes WRIG.winT positive and delays the first ambient win
+  ~4 s (tools/tmp-103-winonce.mjs).
 

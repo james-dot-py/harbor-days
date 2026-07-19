@@ -212,6 +212,12 @@ const ball = { active: false, phase: '', x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, 
 let ballInter = null, heldClearT = 0;
 // win
 let winOn = false, winT = 0, winHook = false;
+// SESSION-SCOPED (task 103): the win notification (HUD toast) fires at most
+// once per page load. The win CYCLE still repeats every ~7.5 min in-cell — flag,
+// marquee, roar all celebrate each time — but the toast is a one-time beat. A
+// plain module-level flag (NOT store.js): deliberately not persisted, so a
+// reload greets a returning fan with the banner again.
+let winToastShown = false;
 
 // ---------------------------- 7th-inning stretch -----------------------
 function startStretch() {
@@ -300,7 +306,7 @@ function startWin() {
   state.cubsWinsSeen = (state.cubsWinsSeen || 0) + 1;
   roar(5.0, 0.2);
   marqueeSetText('CHUBS WIN! CHUBS WIN!');
-  toast('CHUBS WIN!', 'fly the dub');
+  if (!winToastShown) { winToastShown = true; toast('CHUBS WIN!', 'fly the dub'); }
 }
 
 // ------------------------------ cycle reset ----------------------------
@@ -402,4 +408,11 @@ onWorldReady(() => {
     // --- clear the briefly-held souvenir ball ---
     if (heldClearT && game.tNow >= heldClearT) { holdItem(null); heldClearT = 0; }
   });
+
+  // debug/tools only (task 103 gate E2E): fire a WIN out-of-band to prove the
+  // notification is one-per-session. The real cycle repeats every ~7.5 min.
+  try {
+    window.__hd = window.__hd || {};
+    window.__hd.gameday = { forceWin: () => startWin(), get winToastShown() { return winToastShown; } };
+  } catch (e) { }
 });
