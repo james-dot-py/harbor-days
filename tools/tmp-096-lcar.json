@@ -1,0 +1,9 @@
+[
+  ["goto",16,100],["wait",1500],
+  ["eval","document.getElementById('prompt')?document.getElementById('prompt').textContent:'(no #prompt)'"],
+  ["key","e"],["wait",4000],
+  ["eval","window.__hd.avatarFrac()"],
+  ["shot","096-lcar-port-mid"],
+  ["wait",7000],
+  ["eval","(function(){var p=window.__hd.player;return {x:p.x,z:p.z}})()"]
+]

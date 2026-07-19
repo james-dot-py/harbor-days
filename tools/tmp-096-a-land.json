@@ -1,0 +1,3 @@
+[
+  ["goto",null,null],["wait",1500],["eval","window.__hd.avatarFrac()"],["shot","096-after-land-spawn"]
+]

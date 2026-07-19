@@ -33,7 +33,7 @@ import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { onWorldReady, registerUpdate, addInteraction, chargeThrow, camForward,
          toast, journalSection, state, getAudioCtx, wallet } from '../framework.js';
-import { scene, camera, toon, clamp, lerp, lerpAngle, pip } from '../core.js';
+import { scene, camera, toon, clamp, lerp, lerpAngle, pip, chaseDistK } from '../core.js';
 import { cam } from '../input.js';
 import { mayor } from '../character.js';
 import { DIVERSEY as D } from '../data/chicago.js';
@@ -190,8 +190,8 @@ onWorldReady(()=>{
     }
     if(sess.phase==='release'){                                   // reconstruct main.js's chase pos + look, ease onto it
       sess.releaseT+=dt;
-      const dp=Math.max(0,cam.pitch), hz=Math.cos(dp)*cam.dist;
-      _dP.set(pl.x-Math.sin(cam.yaw)*hz, Math.max(pl.y+0.55,(pl.y+1.6)+Math.sin(dp)*cam.dist), pl.z-Math.cos(cam.yaw)*hz);
+      const dp=Math.max(0,cam.pitch), dd=cam.dist*chaseDistK(cam.dist), hz=Math.cos(dp)*dd;   // 096: match main.js's portrait-scaled dist or the release lerp lands short
+      _dP.set(pl.x-Math.sin(cam.yaw)*hz, Math.max(pl.y+0.55,(pl.y+1.6)+Math.sin(dp)*dd), pl.z-Math.cos(cam.yaw)*hz);
       _dT.set(pl.x, pl.y+1.7, pl.z);
     }else{
       _dP.set(sess.bx+CAM_SIDE, CAM_Y, HIT.z+CAM_BACK);           // over-the-shoulder, inside the bay opening

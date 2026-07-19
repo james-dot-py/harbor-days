@@ -21,7 +21,7 @@ import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtil
 import { onWorldReady, registerUpdate, addInteraction, makeNPC, registerBumpable,
          toast, journalSection, state, screenFx, holdItem, getAudioCtx,
          createChibi, bakeChibiRig, wallet } from '../framework.js';
-import { toon, bmat, mulberry32, clamp, lerp, camera, game, hexRGB } from '../core.js';
+import { toon, bmat, mulberry32, clamp, lerp, camera, game, hexRGB, chaseDistK } from '../core.js';
 import { cam, keys, joy } from '../input.js';
 import { mayor, mparts } from '../character.js';
 import { getCell, activeCell } from '../cells.js';
@@ -626,8 +626,8 @@ function updateSeated(dt, player) {
   standInter.setLabel(G.phase === 'stretch' ? '♪ sing along' : 'stand up');
 }
 function updateRelease(dt, player) {
-  const pit = Math.max(0, cam.pitch), horiz = Math.cos(pit) * cam.dist;
-  _v3.set(player.x - Math.sin(cam.yaw) * horiz, Math.max(player.y + 0.55, player.y + 1.6 + Math.sin(pit) * cam.dist), player.z - Math.cos(cam.yaw) * horiz);
+  const pit = Math.max(0, cam.pitch), cd = cam.dist * chaseDistK(cam.dist), horiz = Math.cos(pit) * cd;   // 096: match main.js's portrait-scaled dist or the release lerp lands short
+  _v3.set(player.x - Math.sin(cam.yaw) * horiz, Math.max(player.y + 0.55, player.y + 1.6 + Math.sin(pit) * cd), player.z - Math.cos(cam.yaw) * horiz);
   _relLook.set(player.x, player.y + 0.1, player.z);
   const k = 1 - Math.exp(-8 * dt);
   camPosCur.lerp(_v3, k); camLookCur.lerp(_relLook, k);

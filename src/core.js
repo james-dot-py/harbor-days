@@ -48,6 +48,27 @@ export const scene = new THREE.Scene();
 scene.fog = new THREE.Fog(0xf6ab84,55,210);
 export const camera = new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,900);
 
+// 096: PORTRAIT FRAMING — the one aspect-aware chase-camera rule. The chase
+// dist/pitch/FOV defaults are tuned for a 16:9 landscape frame; a portrait
+// phone keeps the same vertical FOV, so the horizontal FOV crops to ~24° and
+// the mayor fills a third of the frame (measured hFrac 0.333, wFrac 0.42 at
+// 390x844). Below aspect 1 the chase dist and base FOV ease up together
+// (full strength ~ phone portrait) so the mayor reads at ~1/6 of frame height
+// with generous world context. aspect >= 1 returns exactly 0 / 1 / 50 —
+// desktop and landscape framing stay bit-identical. Consumers: main.js
+// (effD, fovT); packs that reconstruct the chase pos multiply cam.dist by
+// chaseDistK() (diversey / montrose-kite / wrigley-game), and any base-FOV
+// comparison uses baseFov(), never the literal 50 (nature.js binoculars).
+export function portraitK(){const a=camera.aspect;return a<1?Math.min((1-a)/0.538,1.25):0;}
+// chaseDistK(d): the dist scale RAMPS OUT below the wheel-zoom floor (5) — a
+// deliberately tight framing (L-car interior 4.5, binocular OTS 2.2) keeps its
+// exact desktop distance; pulling those back parks the camera outside the room
+// (measured: the L-car ride showed seat-back exterior on portrait). 5→8.2
+// eases 0→full, so the default chase (8.2) gets the whole pull-back. Tight
+// framings still get the baseFov widening — MORE interior in frame, safely.
+export function chaseDistK(d){return 1+0.65*portraitK()*smooth(clamp((d-5)/3.2,0,1));}
+export function baseFov(){return 50+10*portraitK();}
+
 // hemisphere: dusk-lavender sky above, soft green lawn bounce below — sits every
 // object in the same light. Keeps .intensity so the fireworks pulse still works.
 export const amb = new THREE.HemisphereLight(0x9f92d6,0x8fc98e,0.9);scene.add(amb);

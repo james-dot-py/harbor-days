@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { renderer, scene, camera, amb, clamp, lerp, lerpAngle, hexRGB, pip, rng, rand, $, game, toon } from './core.js';
+import { renderer, scene, camera, amb, clamp, lerp, lerpAngle, hexRGB, pip, rng, rand, $, game, toon, chaseDistK, baseFov } from './core.js';
 import { skyGroup, clouds, buildSky } from './sky.js';
 import { buildCoast, water, waterN, coastQuery, profileTotal, tierAt, beachH, LAND } from './coast.js';
 import { buildPaths, pathSamples, pathSamples2, pathSamplesMain, ribbonLanes } from './paths.js';
@@ -74,7 +74,19 @@ window.__hd={errs:errRing,perf:()=>({drawCalls:renderer.info.render.calls,fps:Ma
   scene,camera,THREE,
   // 088: prop-vs-path clearance audit snapshot (tools/prop-clearance.mjs). JSON-safe:
   // Infinity collider heights encode as h:-1. Trees are the FINAL nudged placements.
-  propAudit:()=>({trees:TREE_SPOTS.map(t=>[t[0],t[1],t[2]||1]),colliders:colliders.map(c=>({x:c.x,z:c.z,r:c.r,h:c.h===Infinity?-1:c.h})),lanes:ribbonLanes})};
+  propAudit:()=>({trees:TREE_SPOTS.map(t=>[t[0],t[1],t[2]||1]),colliders:colliders.map(c=>({x:c.x,z:c.z,r:c.r,h:c.h===Infinity?-1:c.h})),lanes:ribbonLanes}),
+  // 096: mobile-framing probe — the mayor's projected screen-height/width
+  // fraction at the LIVE camera (debug-only, on demand; tools compare portrait
+  // vs landscape). hFrac/wFrac are fractions of the frame (0..1).
+  avatarFrac:()=>{camera.updateMatrixWorld();
+    const bb=new THREE.Box3().setFromObject(mayor),v=new THREE.Vector3();
+    let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9;
+    for(let i=0;i<8;i++){
+      v.set(i&1?bb.max.x:bb.min.x,i&2?bb.max.y:bb.min.y,i&4?bb.max.z:bb.min.z).project(camera);
+      x0=Math.min(x0,v.x);x1=Math.max(x1,v.x);y0=Math.min(y0,v.y);y1=Math.max(y1,v.y);
+    }
+    return {hFrac:(y1-y0)/2,wFrac:(x1-x0)/2,aspect:camera.aspect,fov:camera.fov,
+      dist:cam.dist,camDist:camera.position.distanceTo(mayor.position)};}};
 
 // ---- build the world (order matters: single shared rng, top-to-bottom) ----
 // timed (task 007): __hd.buildMs reports where world-build start-up cost goes.
@@ -408,6 +420,7 @@ function frame(now){
     const k=introT*introT*(3-2*introT);
     effP=lerp(effP,0.55,k);effD=lerp(effD,26,k);cam.yaw+=dt*0.22*k;
   }
+  effD*=chaseDistK(effD);   // 096: portrait pulls the chase cam back (exactly 1 on desktop/landscape; tight interior framings exempt via the <=5 ramp)
   const pvx=player.x,pvy=player.y+1.6,pvz=player.z;
   const upT=Math.max(0,-effP),downP=Math.max(0,effP);
   const horiz=Math.cos(downP)*effD;
@@ -421,7 +434,7 @@ function frame(now){
   const shx=(Math.random()-0.5)*shA,shy=(Math.random()-0.5)*shA,shz=(Math.random()-0.5)*shA;
   camera.position.set(camPos.x+shx,camPos.y+shy,camPos.z+shz);
   camera.lookAt(pvx,pvy+0.1+Math.tan(upT)*horiz*1.35,pvz);
-  const fovT=50+(rideSpd>0?clamp((sp-7)*0.7,0,6):(runF&&sp>6?4:0))+(jphys.air?1.2:0);   // gentle speed/air FOV kick (+ a matching bike tier: eases from ~+2.5 cruising to +6 sprinting)
+  const fovT=baseFov()+(rideSpd>0?clamp((sp-7)*0.7,0,6):(runF&&sp>6?4:0))+(jphys.air?1.2:0);   // gentle speed/air FOV kick (+ a matching bike tier: eases from ~+2.5 cruising to +6 sprinting); base is aspect-aware (096, exactly 50 on desktop)
   if(Math.abs(camera.fov-fovT)>0.02){camera.fov=lerp(camera.fov,fovT,1-Math.exp(-5*dt));camera.updateProjectionMatrix()}
   skyGroup.position.set(camera.position.x,0,camera.position.z);
   fw.shake=Math.max(0,fw.shake-dt*1.6);

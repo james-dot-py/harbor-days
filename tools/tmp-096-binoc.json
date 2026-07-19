@@ -1,0 +1,13 @@
+[
+  ["goto",100,-342],["wait",1800],
+  ["eval","document.getElementById('prompt')?document.getElementById('prompt').textContent:'(no #prompt)'"],
+  ["eval","window.__hd.avatarFrac()"],
+  ["key","e"],["wait",1500],
+  ["eval","({fov:Math.round(window.__hd.camera.fov*10)/10})"],
+  ["shot","096-mob-binoc-in"],
+  ["key","e"],["wait",2500],
+  ["eval","({fov:Math.round(window.__hd.camera.fov*10)/10})"],
+  ["wait",1500],
+  ["eval","window.__hd.avatarFrac()"],
+  ["shot","096-mob-binoc-out"]
+]

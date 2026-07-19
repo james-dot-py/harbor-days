@@ -17,7 +17,7 @@
 import * as THREE from 'three';
 import { onWorldReady, registerUpdate, addInteraction, chargeThrow, toast,
          journalSection, state, getAudioCtx, bag, wallet } from '../framework.js';
-import { scene, camera, toon, bmat, clamp, lerp, lerpAngle } from '../core.js';
+import { scene, camera, toon, bmat, clamp, lerp, lerpAngle, chaseDistK } from '../core.js';
 import { cam } from '../input.js';
 import { mayor, mparts } from '../character.js';
 import { CRICKET_HILL } from '../data/chicago.js';
@@ -181,8 +181,8 @@ onWorldReady((player) => {
     // ------------------------------ session camera ------------------------------
     if(sess.phase === 'release'){                       // reconstruct main.js's chase pos, ease on
       sess.relT += dt;
-      const dp = Math.max(0, cam.pitch), hz = Math.cos(dp) * cam.dist;
-      _dP.set(pl.x - Math.sin(cam.yaw) * hz, Math.max(pl.y + 0.55, (pl.y + 1.6) + Math.sin(dp) * cam.dist), pl.z - Math.cos(cam.yaw) * hz);
+      const dp = Math.max(0, cam.pitch), dd = cam.dist * chaseDistK(cam.dist), hz = Math.cos(dp) * dd;   // 096: match main.js's portrait-scaled dist or the release lerp lands short
+      _dP.set(pl.x - Math.sin(cam.yaw) * hz, Math.max(pl.y + 0.55, (pl.y + 1.6) + Math.sin(dp) * dd), pl.z - Math.cos(cam.yaw) * hz);
       _dT.set(pl.x, pl.y + 1.7, pl.z);
     } else {
       // behind (west) + a touch south, low; look partway up the line so the mayor

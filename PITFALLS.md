@@ -777,6 +777,20 @@ few turns to find; keep each to one line of symptom + fix.
   EXEMPTED in fogcull's selfManaged (name the group — 'chibi', 'bird') — the
   userData.noFogCull flag exists but a name rule covers every child at once.
   Symptom signature: probe shows lodLive=false + BOTH twin and rig visible.
+- The chase camera's dist/pitch/FOV are desktop-tuned: a portrait phone keeps
+  the vertical FOV, so the horizontal FOV crops to ~24° and the mayor fills 1/3
+  of frame height / 42% of width (096 — measure with `__hd.avatarFrac()`, never
+  eyeball). The fix is ONE aspect rule in core.js (portraitK/chaseDistK/baseFov,
+  exactly 0/1/50 at aspect>=1 so desktop stays bit-identical) — but TWO
+  couplings bite: (a) any pack comparing camera.fov to the LITERAL 50 (nature
+  binoculars exit) fights main.js's fov lerp forever on portrait — compare to
+  baseFov(); (b) a multiplicative dist scale betrays deliberately TIGHT
+  framings: the L-car ride (cam.dist 4.5) landed the camera 2.8 m OUTSIDE the
+  car's end wall — a cream seat-back wash filled the phone. chaseDistK(d) ramps
+  OUT below the wheel-zoom floor (<=5 keeps the exact desktop distance; 5→8.2
+  eases to full ×1.65), and packs reconstructing the chase pos multiply
+  cam.dist by chaseDistK(cam.dist). Verify every session/tight camera on
+  PORTRAIT (--mobile), not just desktop.
 - The 091 interact affordance (framework.js: NPC glance + object glints) has a
   probe — `window.__hd.aff()` -> {enabled, glints, ptsVisible, glances[]} — USE
   IT before tuning visuals: both halves were "invisible" on first shots while

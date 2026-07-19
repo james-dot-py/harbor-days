@@ -24,7 +24,7 @@ import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { onWorldReady, registerUpdate, addInteraction, chargeThrow, camForward,
          holdItem, toast, journalSection, state, makeNPC, getAudioCtx, screenFx, wallet } from '../framework.js';
-import { scene, camera, toon, bmat, curveMat, gmap, clamp, lerp, WATER_Y } from '../core.js';
+import { scene, camera, toon, bmat, curveMat, gmap, clamp, lerp, WATER_Y, baseFov } from '../core.js';
 import { beachH } from '../coast.js';
 import { cam, keys, joy } from '../input.js';
 import { FX } from '../fx.js';
@@ -771,11 +771,14 @@ onWorldReady(player => {
       wallet.pay({ key: 'bingo.full', first: 10, repeat: 0, reason: 'birdwatch: BINGO', label: 'birdwatch' }); }
   }
   function updBinoc(dt, t, pl) {
-    // fov ease (24 while raised, back to 50 otherwise)
-    const tgtFov = binoc.active ? 24 : 50;
-    if (binoc.active || Math.abs(camera.fov - 50) > 0.05) {
+    // fov ease (24 while raised, back to the chase base otherwise — baseFov()
+    // is 50 on desktop, higher on portrait phones (096); a literal 50 here
+    // would fight main.js's fov lerp forever after exit on a portrait screen)
+    const B = baseFov();
+    const tgtFov = binoc.active ? 24 : B;
+    if (binoc.active || Math.abs(camera.fov - B) > 0.05) {
       camera.fov = lerp(camera.fov, tgtFov, 1 - Math.exp(-9 * dt));
-      if (!binoc.active && Math.abs(camera.fov - 50) < 0.05) camera.fov = 50;
+      if (!binoc.active && Math.abs(camera.fov - B) < 0.05) camera.fov = B;
       camera.updateProjectionMatrix();
     }
     const eNow = keys.has('e'), ePress = eNow && !binoc.ePrev; binoc.ePrev = eNow;

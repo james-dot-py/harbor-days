@@ -1,0 +1,5 @@
+[
+  ["goto",null,null],["wait",1500],["eval","window.__hd.avatarFrac()"],["shot","096-before-port-spawn"],
+  ["goto",22,-36],["wait",1500],["eval","window.__hd.avatarFrac()"],["shot","096-before-port-harbor"],
+  ["goto",55,-250],["wait",1500],["eval","window.__hd.avatarFrac()"],["shot","096-before-port-trail"]
+]
