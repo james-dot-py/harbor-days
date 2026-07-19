@@ -631,3 +631,9 @@ cut becomes a revert task.
   Chassé Promenade leads to the Arf Institvte under the Prudent Owl sign.
   Same city, one long affectionate nudge in the ribs — and the lawyers sleep
   fine. — everywhere a sign glows — task 094
+- The mayor RAISES the shot in a toast during a Malörp swig — fist and glass
+  clear of the big hair silhouette against the sky, tipped back toward the
+  mouth, then the arm rejoins the walk cycle the moment the glass leaves the
+  hand. The guy's own bottle finally reads too: held up outboard in a gripped
+  fist, cream label above the knuckles, no longer buried behind his forearm.
+  — the Malörp guy + the Handshake regular on the Belmont Rocks — task 100

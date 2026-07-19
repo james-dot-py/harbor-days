@@ -16,7 +16,8 @@
 // =====================================================================
 import * as THREE from 'three';
 import { toon } from '../core.js';
-import { holdItem, screenFx, toast, state, getAudioCtx } from '../framework.js';
+import { holdItem, screenFx, toast, state, getAudioCtx, registerUpdate } from '../framework.js';
+import { mparts } from '../character.js';   // framework doesn't re-export mparts (022 convention)
 
 // queasy detuned wobble, descending + dissonant — the taste, in sound.
 // (Moved here from npcs.js so both Malört NPCs share the one recipe.)
@@ -43,6 +44,38 @@ export function makeShotGlass(){
   return new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.04,0.09,10), toon(0xd9b44a));
 }
 
+// 100 (owner: "the bottle is attached to the player avatar ... it clips behind
+// the arm so it's barely visible"): during the swig the mayor RAISES the shot
+// in a toast — the old flat hang left the glass tucked behind the hanging
+// wrist, which read as a mystery blob glued to the avatar. The pose keys off
+// the GLASS's presence in the hand (not a timer), so it always ends exactly
+// when holdItem(null) drops it — wall-clock timers and game-dt drift apart in
+// slow frames. Lazily registers ONE updater on the first pour (this module
+// stays world-free at import); updateCharacter re-stamps the arm every frame,
+// so an unposed frame restores it for free. Registered late = runs after
+// updateCharacter, so the toast pose wins its frames.
+let toastShot=null, toastReg=false, toastOn=false;
+function toastArm(shot){
+  toastShot=shot;
+  if(toastReg)return; toastReg=true;
+  registerUpdate(()=>{
+    if(toastShot&&toastShot.parent===mparts.handR){
+      // straight UP with a wide OUTBOARD splay (+z is outboard for the +x arm —
+      // a NEGATIVE roll swings the raised fist inboard, into the face/hair). The
+      // fist + glass clear the big chibi hair silhouette entirely (fist rig-local
+      // ~(0.90,2.09,0.28)), so the toast reads against the SKY even from the
+      // chase cam behind the mayor.
+      mparts.armR.rotation.x=-2.6; mparts.armR.rotation.z=0.5;
+      toastOn=true;
+    }else if(toastOn){
+      // the glass left the hand — updateCharacter re-stamps rotation.x every
+      // frame but never rotation.z, so the splay is ours to hand back (the
+      // badminton/lolla leave convention) or the arm stays twisted forever.
+      toastOn=false; mparts.armR.rotation.z=0.25;
+    }
+  });
+}
+
 // the SWIG — the shared half of a Chicago handshake: down the shot, the screen
 // makes the face, the queasy sound, the server's reaction + a toast, bump the
 // shared Malört counter. onDone() fires ~1.3 s later (after the recovery beat)
@@ -52,7 +85,9 @@ export function makeShotGlass(){
 export function pourMalort({npc, react='it grows on ya',
     toastMain='IT GROWS ON YOU', toastSub="Jebson's Malörp", onDone}={}){
   const shot=makeShotGlass();
-  shot.position.set(0,0.13,0); holdItem(shot);
+  shot.scale.setScalar(1.25);                              // chibi-chunky, like the guy's bottle — a toast must READ
+  shot.position.set(0,-0.10,0.02); shot.rotation.x=2.3;   // just past the raised fist, tipped back — the drain-it tilt (100 toast pose)
+  holdItem(shot); toastArm(shot);
   screenFx.filter('saturate(0.2) contrast(1.35) hue-rotate(-20deg)',2600);
   screenFx.shake(0.35); sMalort();
   if(npc){ npc.setFace('surprised'); npc.say(react,3); }

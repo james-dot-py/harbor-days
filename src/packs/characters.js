@@ -118,11 +118,16 @@ onWorldReady(() => {
       name:'malort', lines:["you ever had Malörp?","it's a Chicago thing, ya know","builds character","tastes like a burnt bandage — want some?"]});
     guy.group.position.y = y;
     // 091 (owner: "mallort guy should have a bottle of mallort he's holding"):
-    // the old single olive cylinder read as a speck lost against his rust suit
-    // (audit shot). Chibi-chunky Jeppson's instead — amber body, a CREAM LABEL
-    // band (the read), gold cap — same recipe/colors as the stash bottle, so
-    // toon()'s cache shares materials. Small handR-local offset only (PITFALLS
-    // 047: the hand is re-posed every frame, so the prop rides it).
+    // chibi-chunky Jeppson's — amber body, a CREAM LABEL band (the read), gold
+    // cap — same recipe/colors as the stash bottle, so toon()'s cache shares
+    // materials. 100 (owner: "the bottle clips behind the arm, barely visible"):
+    // 091's −0.34 z-roll actually swung the raised arm INBOARD (positive z is
+    // outboard for the +x arm), burying the bottle against the belly. The arm
+    // now poses −0.70 pitch / +0.33 roll, fist at rig-local ~(0.77,1.17,0.40) —
+    // clear of the belly ellipsoid — and the bottle sits ~0.135 above the fist
+    // with its bottom inside the hand sphere (gripped, not floating). Small
+    // handR-local offset only (PITFALLS 047: the hand is re-posed every frame,
+    // so the prop rides it).
     const bottle = new THREE.Group();
     const bBody = new THREE.Mesh(new THREE.CylinderGeometry(0.062,0.085,0.30,10), toon(0x8a5a16));
     const bLabel = new THREE.Mesh(new THREE.CylinderGeometry(0.089,0.089,0.13,10), toon(0xe9d79a));
@@ -132,8 +137,9 @@ onWorldReady(() => {
     const bCap = new THREE.Mesh(new THREE.CylinderGeometry(0.031,0.031,0.05,8), toon(0xd8b13a));
     bCap.position.y = 0.295;
     bottle.add(bBody,bLabel,bNeck,bCap);
-    bottle.position.set(0, 0.10, 0.07);
-    bottle.rotation.x = 0.95;   // counter the raised arm's -1.05 pitch so the bottle stands near-upright in world (the label band reads)
+    bottle.position.set(0.06, 0.08, 0.10);
+    bottle.rotation.x = 0.95;   // counter the raised arm's pitch so the bottle stands near-upright in world (the label band reads)
+    bottle.rotation.z = -0.5;   // + a touch of outboard lean — a bottle held up, not a bottle bolted to the wrist
     guy.parts.handR.add(bottle);
     buildMalortStash(X, Z, groundY);                 // his bottle + Old Style case on the step
 
@@ -156,7 +162,7 @@ onWorldReady(() => {
     malortHooks.guy = guy; malortHooks.inter = guyInter; malortHooks.swig = swig;
 
     rePose.push((dt, t) => {
-      guy.parts.armR.rotation.x = -1.05; guy.parts.armR.rotation.z = -0.34;   // outboard so the bottle silhouettes clear of the belly (091)
+      guy.parts.armR.rotation.x = -0.70; guy.parts.armR.rotation.z = 0.33;   // raised OUTBOARD (+z is outboard for the +x arm) — the bottle silhouettes clear of the belly (100)
       guy.parts.armL.rotation.x = -0.25;
       if(swig.cool>0){ swig.cool-=dt; if(swig.cool<=0) guyInter.setLabel('burnt bandage?'); }
       if(malortHooks.rePose) malortHooks.rePose(dt, t);   // task 078: favor pack's per-frame hook (duet arm + label)

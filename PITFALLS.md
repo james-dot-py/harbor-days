@@ -836,3 +836,14 @@ few turns to find; keep each to one line of symptom + fix.
   landscape rail's 11th row defeated it (CLICK logged at y>viewport, a silent
   no-op — the tile never selected): click a row that's actually visible, or
   pre-scroll the rail in the action script first.
+- updateCharacter re-stamps chibi arm/leg rotation.X every frame but NEVER
+  rotation.Z (and the rig's rest splay is armR.z=+0.25, not 0): a pack that
+  poses a mayor arm z for a timed moment (the 100 Malört toast) OWNS the
+  restore on release (the badminton/lolla leave convention), or the arm stays
+  twisted for the rest of the session. And +z is OUTBOARD for the +x arm — a
+  negative z-roll on a raised right arm swings the fist INBOARD into the
+  face/hair (the 100 first cut posed z=−0.5 believing it outboard and buried
+  the toast glass in the mayor's afro; the comment's claimed fist coords
+  actually matched +0.5). Verify a raised-arm pose by Euler math from the
+  template's hl AND a front screenshot — never trust the pose comment.
+
