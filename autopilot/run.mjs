@@ -190,8 +190,9 @@ function turnBudget(taskFile, planner) {
 // Fable's remaining allowance goes to judgment-heavy work; the grind runs on
 // Opus at roughly half the usage burn. Task frontmatter `model:` overrides;
 // otherwise: sign-offs + planner picks (rare, taste-critical) get Fable,
-// everything else Opus. Values accept aliases 'fable' / 'opus'.
-const MODEL_IDS = { fable: 'claude-fable-5', opus: 'claude-opus-4-8' };
+// everything else Opus. Values accept aliases 'fable' / 'opus' / 'kimi'
+// (kimi = kimi-k3; owner 2026-07-19: kimi runs today's queue, no fable).
+const MODEL_IDS = { fable: 'claude-fable-5', opus: 'claude-opus-4-8', kimi: 'kimi-k3' };
 function taskModel(taskFile, planner) {
   if (planner) return MODEL_IDS.fable;
   const fm = frontmatter(taskFile);
