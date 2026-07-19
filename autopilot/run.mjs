@@ -66,16 +66,21 @@ const START_BACKOFF_MS = 15 * 60 * 1000;   // 15 min
 // CALIBRATES: it accumulates weighted tokens per ~5h window (fable ×2, cache
 // reads ×0.1 — mirroring billing weights); the first time a window limit
 // actually fires, the accumulated figure becomes the calibrated cap. From
-// then on the loop pauses BETWEEN iterations at (100 − reservePct)% of cap
-// and sleeps to the window reset — the reserve is the owner's phone slice.
-// Approximate by design; raise reservePct in usage-governor.json for margin.
+// then on the loop pauses BETWEEN iterations, and the gate is PREDICTIVE
+// (2026-07-18): a session's usage lands in one lump at session end, so gating
+// on the tally alone overshoots by a whole session (hit 135% of cap) — the
+// gate now also requires headroom for the next task's expected cost (per-model
+// EMA ×1.25). The cap is a live estimate, not gospel: the tally passing it
+// without a real limit firing disproves it, so it auto-raises to the observed
+// floor; a real limit hit still recalibrates it exactly. The reserve is the
+// owner's phone slice — raise reservePct in usage-governor.json for margin.
 const GOV_FILE = join(HERE, 'usage-governor.json');
 const WINDOW_MS = 5 * 60 * 60 * 1000;
 const MODEL_WEIGHT = m => /fable|mythos/i.test(m || '') ? 2 : 1;
 function govLoad() {
   let g = {};
   try { g = JSON.parse(readFileSync(GOV_FILE, 'utf8')); } catch { }
-  return { reservePct: 2, windowStart: 0, windowWeighted: 0, calibratedCap: null, ...g };
+  return { reservePct: 2, windowStart: 0, windowWeighted: 0, calibratedCap: null, avgCost: {}, ...g };
 }
 function govSave(g) { try { writeFileSync(GOV_FILE, JSON.stringify(g, null, 2)); } catch { } }
 function govRoll(g) {
@@ -85,10 +90,16 @@ function govRoll(g) {
 function govRecord(usage, model) {
   if (!usage) return;
   const g = govRoll(govLoad());
-  const w = MODEL_WEIGHT(model) * (
+  const w = Math.round(MODEL_WEIGHT(model) * (
     (usage.input_tokens || 0) + (usage.output_tokens || 0) * 5 +
-    (usage.cache_creation_input_tokens || 0) * 1.25 + (usage.cache_read_input_tokens || 0) * 0.1);
-  g.windowWeighted += Math.round(w);
+    (usage.cache_creation_input_tokens || 0) * 1.25 + (usage.cache_read_input_tokens || 0) * 0.1));
+  g.windowWeighted += w;
+  g.avgCost = g.avgCost || {};
+  g.avgCost[model] = Math.round(g.avgCost[model] ? 0.6 * g.avgCost[model] + 0.4 * w : w);
+  if (g.calibratedCap && g.windowWeighted > g.calibratedCap) {
+    g.calibratedCap = g.windowWeighted;
+    log({ event: 'governor-floor-raise', msg: 'tally passed the cap with no limit fired — cap raised to proven floor ' + g.windowWeighted });
+  }
   govSave(g);
 }
 function govCalibrate() {   // a real window limit fired: current tally ≈ the cap
@@ -99,8 +110,14 @@ function govShouldPause() {
   const g = govRoll(govLoad()); govSave(g);
   if (!g.calibratedCap) return null;
   const threshold = g.calibratedCap * (1 - (g.reservePct || 2) / 100);
-  if (g.windowWeighted < threshold) return null;
-  return { until: g.windowStart + WINDOW_MS, used: g.windowWeighted, cap: g.calibratedCap, reservePct: g.reservePct || 2 };
+  let expected = 0;
+  try {
+    const t = pickTask();
+    const m = t ? taskModel(t.file, false) : MODEL_IDS.fable;
+    expected = Math.round(((g.avgCost || {})[m] || 0) * 1.25);
+  } catch { /* no queue peek — fall back to the plain threshold check */ }
+  if (g.windowWeighted + expected < threshold) return null;
+  return { until: g.windowStart + WINDOW_MS, used: g.windowWeighted, cap: g.calibratedCap, reservePct: g.reservePct || 2, expected };
 }
 
 // ---- logging --------------------------------------------------------------
@@ -347,7 +364,7 @@ async function iterationOnce() {
   const pause = govShouldPause();
   if (pause) {
     const untilIso = new Date(pause.until).toISOString();
-    log({ event: 'governor-pause', msg: pause.used + '/' + pause.cap + ' weighted (' + pause.reservePct + '% reserved) — sleeping until ' + untilIso });
+    log({ event: 'governor-pause', msg: pause.used + '/' + pause.cap + ' weighted (+~' + (pause.expected || 0) + ' expected next, ' + pause.reservePct + '% reserved) — sleeping until ' + untilIso });
     await notify('Harbor Days autopilot: usage reserve reached', 'Pausing to leave ~' + pause.reservePct + '% of the window for your personal Claude use. Resuming ~' + untilIso + '.', { priority: 'default' });
     await sleep(Math.max(60000, pause.until - Date.now()));
   }
