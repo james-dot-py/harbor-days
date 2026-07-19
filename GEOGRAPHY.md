@@ -842,8 +842,8 @@ arrival. Dev spawn SPAWN_M = (55, 800), on the sidewalk beside the kiosk.
 | Feature | Position | Note |
 |---|---|---|
 | **Wrigley Square + Millennium Monument (NW)** | peristyle = semicircular arc, center (68, 724.5), OPEN SIDE SE over its lawn; paired Doric rings R 9.0 outer / 7.6 inner, 12 columns each; curved base h 2.2 + columns 8.0 + entablature ≈ 1.3 → crown ~11.5; built bbox 57.9–75.8 × 714.4–732.3 = **1:1 object scale** (the 040 plinth rect 61–73 × 721–727 was the raw 1:2 osm plan — Cloud Gate precedent, center kept) | BUILT task 050 from the owner night photo (refs/millennium-park/owner-wrigley-square-night.webp = ground truth for structure AND lighting): columns washed PURPLE by uplights over a WARM GOLD base band (self-lit `bmat` atlas — the Crown-lantern register, no dynamic lights; perpetual dusk IS the photo's hour), dark dedication band "TO THE FOUNDERS OF MILLENNIUM PARK" across the base front (sign register), fountain basin r 2.4 at (70.8, 727.3) with a single warm-lit jet, planter urns on the chord-end piers (73.9, 718.6) / (62.1, 730.4), twin quad-globe period lamps at the lawn approach (77.1, 721.8) / (65.3, 733.6); lawn SE (58–90 × 730–750) = the photo's foreground apron, owner vantage (85.4, 734.5) minted as waypoint mp-wrigley-square; low inscribed WRIGLEY SQUARE wall at (78, 749); plaza walk 57–96 × 713–752; base arc + piers + basin + lamps are builder colliders (statue pattern), the exedra interior stays walkable through the open SE side |
-| **McCormick Tribune Plaza (ICE RINK)** | 57–76 × 772–826, **sunken y −1.6** | THE ICE RINK (owner override 2026-07-11, task 049 — supersedes the 040 "cafe, no rink ever" call; refs owner-aerial-use-this.jpg + owner-mccormick-ice-skating.jpg): a white ice SHEET 61.5–72.5 × 780–818 (kind `ice` — skates-on glide movement) ringed by chunky white boards w/ cream caps (0.8 non-walk gap; 45° corner-cut boards + r 1.5 corner colliders), a rubber apron ring at y −1.6, ENTRY = stair-ramp from the Michigan spine x 57→60.2 at z 798.5–801.5 (y 0→−1.6, enclosed cheeks — elevator rule) → landing 60.2–61.5 × 797.5–802.5 → the 5 m boards GATE. Non-walk rim buffer ~1.4–1.6 all around (W planter rim 57–58.6, N 772–773.6, S 824.9–826, E 74.9–76 = the PARK GRILL facade band under the Bean-plaza balustrade at railX 76 — cream wall + green awnings + warm windows, per the owner skating photo) |
-| **Cloud Gate / AT&T Plaza** | bean 80.3–93.3 × 787.7–807.7 = **1:1 object scale 13 × 20, h 10** (center (86.8, 797.7) kept from osm; the 040 rect 83.1–90.5 × 792.8–802.6 was the raw 1:2-compressed osm plan — enlarged per the map-wide 1:1 object-scale law, task 043), long axis N–S | toon HOMAGE w/ PAINTED reflection wrap (copyright register; never a computed envMap); plaza walk 76–98 × 776–826, **continuous UNDER the E–W omphalos arch** (soffit ~3.7 rising to ~4.9 at the navel; ground-contact lobes (86.8, 792.2) / (86.8, 803.2) r 2.2 are the only colliders) |
+| **McCormick Tribune Plaza (ICE RINK)** | 57–78 × 770–826, **sunken y −1.6** | THE ICE RINK (owner override 2026-07-11, task 049 — supersedes the 040 "cafe, no rink ever" call; refs owner-aerial-use-this.jpg + owner-mccormick-ice-skating.jpg). **GROWN ~1.5× (093, owner note 2026-07-18 "more space to skate around and do tricks"): the pit takes the 2 m lawn strip up to the Washington walk (z0 770) and 2 m of the Bean plaza (railX 78)** — a recorded play-over-realism liberty. A white ice SHEET 61–74.5 × 775.5–822 (13.5 × 46.5 ≈ 628 m²; kind `ice` — skates-on glide movement) ringed by chunky white boards w/ cream caps (0.8 non-walk gap; 45° corner-cut boards + r 1.5 corner colliders), a rubber apron ring at y −1.6, ENTRY = stair-ramp from the Michigan spine x 57→60 at z 798.5–801.5 (y 0→−1.6 over 3.0 m, slope ≤ the 0.55 walk guard, enclosed cheeks — elevator rule) → landing 60–61 × 797.5–802.5 → the 5 m boards GATE. Non-walk rim buffer ~1.1–1.6 all around (W planter rim 57–58.6, N 770–771.6, S 824.4–826, E 76.9–78 = the PARK GRILL facade band under the Bean-plaza balustrade at railX 78 — cream wall + green awnings + warm windows, per the owner skating photo) |
+| **Cloud Gate / AT&T Plaza** | bean 80.3–93.3 × 787.7–807.7 = **1:1 object scale 13 × 20, h 10** (center (86.8, 797.7) kept from osm; the 040 rect 83.1–90.5 × 792.8–802.6 was the raw 1:2-compressed osm plan — enlarged per the map-wide 1:1 object-scale law, task 043), long axis N–S | toon HOMAGE w/ PAINTED reflection wrap (copyright register; never a computed envMap); plaza walk 78–98 × 776–826 (x0 78 since 093 — the rink balustrade overlook took 2 m of the west strip), **continuous UNDER the E–W omphalos arch** (soffit ~3.7 rising to ~4.9 at the navel; ground-contact lobes (86.8, 792.2) / (86.8, 803.2) r 2.2 are the only colliders) |
 | **Crown Fountain (SW)** | pool 66–73.5 × 847–881; towers 68–71.5 × 850–853 and 68.5–72 × 875.5–878.5, h 15.2 | walkable WET plaza (walk 57–86 × 838–886, y 0, wet film is visual); glass-block LED-face towers = colliders; homage register. BUILT task 045: two SELF-LIT amber glass-block tower shells (`bmat` + painted block-glow map — the Bean's escape from the toon ramp, so they read as lit-from-within lanterns at dusk, no green ground-bounce), inner LED faces = canvas-texture toon CITIZENS (blink idle, rotate 4 faces, purse on the spout), a wet-mirror pool skim + PAINTED amber reflections + amber glow pooling at each tower foot (layered at distinct y — issue-003 discipline, no z-fight). LIVE layer in `src/packs/crown-fountain.js`: BOTH towers purse + SPOUT arcs into pool centre on a ~40 s local-seed cycle (instanced droplets + splash ring + synth audio); standing in the landing zone soaks the player (screenFx + single toast); kid NPCs shriek-and-scatter. Flanking elm bosques hug the strip OUTER edges (x 58–62 / 80–84) to keep the pool framings clear |
 | **Pritzker Pavilion (NE)** | stage 123–170 × 747–758, mouth faces SOUTH | ribbon-petal crown homage; Harris Theater flybox adjoins north (129–163 × 715–747); speaker towers flank (118, 752) / (175, 752). BUILT task 044: exploding stainless RIBBON headdress (14 hand-modeled curved shells, two-tone silver/warm merged to 2 tone meshes — burst silhouette, not panel-accurate), open proscenium showing a warm-fir interior + dark-red curtain + music-stand/timpani silhouettes (the soundcheck GAG is 047), canted steel buttresses, flanking black line-array speaker towers |
 | **Seating bowl + Great Lawn** | bowl 118–186 × 758–788 (red seat field, walkable); lawn 118–186 × 788–846 | **trellis** pipe-arc dome over the lawn on perimeter columns, 120–166 × 792–844 (east edge stops at the BP approach). BUILT task 044: instanced red folding seats fill the bowl (decorative, no colliders — the bowl stays walkable per WALK_M, with a centre + two side aisles); the trellis = two diagonal criss-cross arc families (`bays` 6 paired posts per long edge at x0/x1, arcs spring from post tops `colH` 9 to `apexH` 14) merged to one steel mesh, paired speaker pods hung at the crossings; mowed-stripe lawn tint + a low lawn-edge hedge/planter line (W + S + SE runs — the south run is the **pad 046's Lurie shoulder hedge rises from**) + scattered picnic blankets & lounging figures (local seed). Stage is a solid visual mass, NOT enterable (walkableM ends at z758; no dead stair — Diversey rule) |
@@ -868,11 +868,12 @@ Madison (57–96 × 826–838) cross walks, Bean plaza, Crown wet plaza, the
 bowl (118–186 × 758–788), the lawn carved around the BP approach (lawnW
 118–168 × 788–846, lawnSE 168–186 × 812–846), Lurie NE gate (170–179 ×
 843–852) + Seam boardwalk + SW link (138–149 × 870–880) + south rim, and the
-SUNKEN RINK GROUP at y −1.6 (task 049; ordered ramp → landing/gate → apron
-ring → ice): entry ramp 57→60.2 × 798.5–801.5 (y 0→−1.6), landing 60.2–61.5
-× 797.5–802.5, apron W 58.6–60.7 × 773.6–797.5 + 802.5–824.9 (split at the
-entry), apron E 73.3–74.9 × 773.6–824.9, apron N/S 60.7–73.3 × 773.6–779.2 /
-818.8–824.9, ICE 61.5–72.5 × 780–818 (`kindAtM` = 'ice' → the main.js glide).
+SUNKEN RINK GROUP at y −1.6 (task 049; grown 093; ordered ramp → landing/gate
+→ apron ring → ice): entry ramp 57→59.7 × 798.5–801.5 (y 0→−1.6), landing
+59.7–61 × 797.5–802.5, apron W 58.6–60.2 × 771.6–797.5 + 802.5–824.4 (split
+at the entry), apron E 75.3–76.9 × 771.6–824.4, apron N/S 60.2–75.3 ×
+771.6–774.7 / 822.8–824.4, ICE 61–74.5 × 775.5–822 (`kindAtM` = 'ice' → the
+main.js glide).
 The boards line (0.8), the rink rim buffers, all planting plates, hedges,
 backstage pockets and every road
 stay non-walkable; buildings standing on walks (Exelon cubes, Crown towers,
@@ -908,9 +909,11 @@ kiosk) are builder colliders, exactly like Wrigleyville statues.
 - **Michigan Ave straightened to x 40** (real centerline drifts to ~48 north of
   Washington).
 - **Skateable sunken rink**: the McCormick terrace is fully walkable-glidable
-  (049; supersedes "view-only cafe") — the Bean-plaza balustrade at x 76 stays
-  as the overlook above the toon PARK GRILL band (1.6 m facade compression of
-  the real full-storey grill front — recorded liberty).
+  (049; supersedes "view-only cafe") — the Bean-plaza balustrade (railX,
+  x 78 since 093) stays as the overlook above the toon PARK GRILL band
+  (1.6 m facade compression of the real full-storey grill front — recorded
+  liberty). **093 growth liberty (owner 2026-07-18): the sheet is ~1.5× the
+  real rink's proportion to its block — trick room beats plan fidelity.**
 - Editorial compression: bowl/lawn spans trimmed to drop redundant panels
   (§5.4 — topological ORDER preserved everywhere: peristyle NW → cafe/bean →
   Crown SW → Lurie SE behind its hedge → bridge snaking E from the lawn's SE).
@@ -965,18 +968,23 @@ x 200–336 of Monroe, all of closed Columbus, and the south-rim gate knits with
 `butler`. Diegesis pre-061: "LOLLA LOAD-IN" (cones, a pallet, the fence going
 up — 060 dresses its segment).
 
-### Zone A — BP CROSSING, fully built out (058; flag `maggie`)
-- **The REAL serpentine** (osm way 25026666, 64 pts, verbatim in both osm
-  extracts): launches at the Great Lawn's SE corner **(172.6, 834.9)**, runs
-  NORTH hugging the lawn's east rim (first wiggle out to x 179.4 at z 828,
-  back to x 176.3 at z 818), bends EAST at z ≈ 796, crosses Columbus at
-  z ≈ 790–792 (deck y 5 over the road), then the famous **double-hairpin
-  S-hook** (out to x 224.8 z 798 → north to z 787.9 → back south through
-  (231.3, 801.7)) descends into Maggie Daley, landing at **(242.1, 806.9) →
-  grade apron (247, 807.5)**. Hand-fit 28-node curve + y profile in
-  `BP_CROSSING_M` (millennium.js); 058 sweeps treads/parapets by CatmullRom
-  tangent (the 048 contour law) and REPLACES the shipped simplified deck +
-  approach (BP_BRIDGE_M stays in data for the pre-flip world).
+### Zone A — BP CROSSING, fully built out (058; flag `maggie`; SHORTENED 093)
+- **The SHORTENED serpentine (093 owner liberty, 2026-07-18: "maggie daley
+  bridge should be a bit shorter even if that's unrealistic")**: both landings
+  keep — launches at the Great Lawn's SE corner **(172.6, 834.9)**, ONE rim
+  wiggle north (out to x 179.4 at z 824.9, back to x 178.3 at z 819.5),
+  snakes NE and crosses Columbus at **z ≈ 801** (deck y 5 over the road; the
+  osm line crossed at z ≈ 790 — the crossing moved ~11 south, closer to the
+  straight launch→landing chord), then **ONE hairpin** (the famous S-hook
+  compressed to a single curl: out to x 223.7 z 799 → apex (233, 795.6) →
+  back south through (239, 802.6)) descends into Maggie Daley, curling in
+  from the west at z ≥ 805 (so the deck edge only meets the grade landing
+  plaza where deck y ≤ ~0.4 — never a side cliff), landing at **grade apron
+  (247, 807.5)**. Polyline ~104 m vs the 058 osm-verbatim ~144 m — **the
+  crossing walk is ~28% shorter**. Hand-fit 21-node curve + y profile in
+  `BP_CROSSING_M` (millennium.js); bridge.js sweeps treads/parapets by
+  CatmullRom tangent (the 048 contour law). The 058 osm-verbatim 28-node
+  alignment is retired (git history holds it).
 - Walkable = a continuous half-width BAND over the SAME CatmullRom the
   geometry sweeps (062/issue 023: the old per-segment segQ chain left
   outside-of-bend wedge slivers at every joint — "stopped every few meters").
@@ -985,10 +993,12 @@ up — 060 dresses its segment).
   off the parapet inner face at 2.6), circular caps at joints. Ramp-only at
   both ends; flank rules: lawn SE quad shrinks to the launch esplanade
   (168–186 × 833–846), a planted non-walk buffer under the rising north run,
-  Columbus rim walks re-split for the new overflight (N: 713–784; S:
-  x 185.8–189 z 808–846 then full-width 846–886). Slope compressed like the
-  shipped approach (recorded).
-- Columbus below reads as a road TRENCH passing under (visual only).
+  Columbus rim walks re-split for the 093 overflight (N: 713–784; S:
+  x 185.8–189 z 813–846 then full-width 846–886; the E-rim promenade splits
+  706–795.5 / 808–888). Slope ≤ ~10% everywhere (gentler than the pre-057
+  approach ramp's 21%).
+- Columbus below reads as a road TRENCH passing under (visual only), moved
+  with the crossing: x 190–200, z 793–809, floor −1.7.
 
 ### Zone B — MAGGIE DALEY PARK, all of it (058 terrain/park + 059 ice; flags `maggie`, `ribbonIce`)
 Bounds x 198–338, z 699.5–892 (osm relation 224231352, west of straightened

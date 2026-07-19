@@ -760,6 +760,14 @@ few turns to find; keep each to one line of symptom + fix.
   overlapping pavements >=0.006 apart; markings above their own asphalt, BELOW
   crossing pavements) + tools/prop-clearance.mjs (no tree/prop base on any ribbon)
   both run inside walkprobe — fix data, never silence the tools.
+- Rerouting an ELEVATED band (bridge deck) near grade walks: the walkprobe 0.55
+  elevator guard measures the band EDGE (±hw, plus the CR curve's bulge past the
+  node polyline), not the centerline — a tail that reaches y0.45 ON-centerline at
+  the plaza edge still cliffed 1.1 m where the band's side lapped the plaza 3 m
+  north (093; a 0.8-threshold datacheck missed it twice). Descend to <=0.6 BEFORE
+  the band comes within 1 m of any walkable grade, approach along the grade
+  quad's edge (not across its corner), and keep data ramps <=0.55 y per meter
+  (the 093 rink ramp at 1.6/2.7 = 0.59 failed; 1.6/3.0 passes).
 - The 091 interact affordance (framework.js: NPC glance + object glints) has a
   probe — `window.__hd.aff()` -> {enabled, glints, ptsVisible, glances[]} — USE
   IT before tuning visuals: both halves were "invisible" on first shots while

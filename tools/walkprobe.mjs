@@ -666,8 +666,9 @@ for(const [label,x,z] of [
   // now WALKABLE curb-to-curb — see the BUTLER block below. Columbus NORTH of
   // Monroe (z<894) stays open SCENERY (the BP bridge is the only way to Maggie).
   ['Columbus roadway N of Monroe',195,750],
-  ['rink boards gap W',61.3,790],['rink boards gap E',73,800],['rink boards gap N',66,779.5],['rink boards gap S',67,818.5],
-  ['rink rim buffer W',58,780],['rink rim buffer E (Park Grill band)',75.5,800],['rink rim buffer N',66,773],['rink rim buffer S',66,825.5],['rink stair cheek',59,798],
+  // 093: rink grew — these gap/buffer probes moved onto the NEW board-gap / rim-buffer lines
+  ['rink boards gap W',60.6,790],['rink boards gap E',74.9,800],['rink boards gap N',66,775.1],['rink boards gap S',67,822.4],
+  ['rink rim buffer W',58,780],['rink rim buffer E (Park Grill band)',77.5,800],['rink rim buffer N',66,771],['rink rim buffer S',66,825.5],['rink stair cheek',59,798],
   ['Lurie light plate',153.6,852.5],['Lurie dark plate',167.7,870.7],
   ['Lurie N hedge',150,848],['Lurie W hedge',126,860],
   ['backstage pocket E of stage',175,730],['pocket between promenade and Lurie',123,866],
@@ -686,21 +687,25 @@ for(const s of MP.LURIE_M.seam.sits){
 
 console.log('\n--- Millennium: McCormick ICE RINK — walkable-glidable (task 049, owner override) ---');
 for(const [label,x,z] of [
-  ['ice sheet centre (owner spot)',64.4,800.1],['ice N',67,782],['ice S',67,816],['ice E lane',72,800],
-  ['gate threshold',61.3,800],['landing',60.8,800],['apron W',60,790],['apron E',74,800],
-  ['apron N',66,776],['apron S',70,822],['apron SW of entry',59,803],['apron NW of entry',59,797],
+  // 093: probe the GROWN extents honestly (ice 61-74.5 x 775.5-822, apron ring wider)
+  ['ice sheet centre (owner spot)',64.4,800.1],['ice N',67,776.2],['ice S',67,821.2],['ice E lane',74,800],
+  ['gate threshold',61.3,800],['landing',60.8,800],['apron W',60,790],['apron E',76,800],
+  ['apron N',66,773.5],['apron S',70,823.5],['apron SW of entry',59,803],['apron NW of entry',59,797],
+  ['ice new NE room (093)',74,776.2],['ice new SE room (093)',73.5,820.5],
 ]) expect(`${label} (${x},${z}) walkable`,MP.walkableM(x,z),true);
 // surfaceY descends down the entry ramp (0 spine -> -1.6 pit floor), tolerance ±0.26
 for(const [label,x,z,want] of [
-  ['spine at stair head',57,800,0],['ramp mid',58.6,800,-0.8],['ramp foot',60.1,800,-1.55],
-  ['landing floor',61,800,-1.6],['ice sheet',67,799,-1.6],['apron floor',74,800,-1.6],
+  // 093: shorter ramp (x 57->59.7) + ice edge now at x61 (61 is knife-edge, sample landing at 60.8)
+  ['spine at stair head',57,800,0],['ramp mid',58.35,800,-0.8],['landing (was ramp foot)',59.6,800,-1.54],
+  ['landing floor',60.8,800,-1.6],['ice sheet',67,799,-1.6],['apron floor',76,800,-1.6],
 ]){ const y=MP.surfaceYM(x,z); expect(`${label} surfaceY (${x},${z})=${y.toFixed(2)} ~ ${want} (±0.26)`,Math.abs(y-want)<=0.26,true); }
 // kind contract: 'ice' only inside the ice rect; landing/apron/plaza are null
 // (skates not yet on the sheet). kindAtM returns null, not undefined — expect === matches.
 expect('kindAtM(64.4,800.1) === ice (owner spot)',MP.kindAtM(64.4,800.1),'ice');
 expect('kindAtM(63,782) === ice',MP.kindAtM(63,782),'ice');
 expect('kindAtM(60.8,800) === null (landing — skates not yet on)',MP.kindAtM(60.8,800),null);
-expect('kindAtM(66,776) === null (apron)',MP.kindAtM(66,776),null);
+expect('kindAtM(66,773.5) === null (apron — 66,776 is now ice after the growth)',MP.kindAtM(66,773.5),null);
+expect("kindAtM(74,820.5) === 'ice' (093 growth: outside the 049 bounds)",MP.kindAtM(74,820.5),'ice');
 expect('kindAtM(86.8,797.7) === null (Bean plaza)',MP.kindAtM(86.8,797.7),null);
 
 // ===== issue 017 / task 048 item 0a — the cell answers walkability DEFINITIVELY.
@@ -719,17 +724,19 @@ expect('Lurie NE corner link (180,848) walkable',MP.walkableM(180,848),true);
 expect('Lurie NE corner link (180,850) walkable',MP.walkableM(180,850),true);
 expect('Lurie NE corner link at grade y0',MP.surfaceYM(180,848),0);
 
-console.log('\n--- Millennium: BP CROSSING (058) — real serpentine, ramp-only, crests Columbus, lands in Maggie ---');
-// The deck GOES somewhere now: launch (172.6,834.9) grade -> north rim wiggle
-// -> east over Columbus at z~790 (y5) -> double-hairpin -> grade (247,807.5).
+console.log('\n--- Millennium: BP CROSSING (058; 093 shortened) — serpentine, ramp-only, crests Columbus, lands in Maggie ---');
+// 093 shortening liberty: 20 nodes now, ONE hairpin (apex ~(233,795.6)). The deck
+// GOES somewhere: launch (172.6,834.9) grade -> north rim wiggle -> east over
+// Columbus at z~801 (y5) -> single hairpin -> grade (247,807.5).
 expect('launch foot at grade (173,834.5) walkable y~0',MP.walkableM(173,834.5)&&MP.surfaceYM(173,834.5)<0.4,true);
 expect('launch esplanade (176,838) walkable at grade',MP.walkableM(176,838)&&MP.surfaceYM(176,838)===0,true);
-{ const yR=MP.surfaceYM(191,791);
-  expect(`crossing rises over Columbus approach (191,791) elevated (${yR.toFixed(2)})`,yR>3.5&&yR<5.05,true); }
-expect('crest over Columbus (200,790) at y~5',MP.surfaceYM(200,790)>4.7,true);
-expect('deck elevated over the trench roadway (196,790)',MP.surfaceYM(196,790)>4.4,true);
-{ const yL=MP.surfaceYM(240,806);
-  expect(`S-hook descends toward Maggie (240,806) mid-height (${yL.toFixed(2)})`,yL>0.4&&yL<2.6,true); }
+{ const yR=MP.surfaceYM(192,803);
+  expect(`crossing rises over Columbus approach (192,803) elevated (${yR.toFixed(2)})`,yR>3.5&&yR<5.05,true); }
+expect('crest over Columbus (202,800.5) at y~5',MP.surfaceYM(202,800.5)>4.7,true);
+// 093: chain y over the trench is ~4.3 now — honest 3.9 floor (relaxed from 4.4)
+expect('deck elevated over the trench roadway (196,801.5)',MP.surfaceYM(196,801.5)>3.9,true);
+{ const yL=MP.surfaceYM(238,799);
+  expect(`hairpin descends toward Maggie (238,799) mid-height (${yL.toFixed(2)})`,yL>0.4&&yL<2.6,true); }
 expect('lands at grade in Maggie (247,807.5) walkable y~0',MP.walkableM(247,807.5)&&MP.surfaceYM(247,807.5)<0.3,true);
 // seam continuity along the chain (adjacent samples never jump > 0.15)
 { let worst=0,at=''; for(let i=1;i<MP.BP_CROSSING_M.nodes.length;i++){
@@ -738,12 +745,12 @@ expect('lands at grade in Maggie (247,807.5) walkable y~0',MP.walkableM(247,807.
     const y1=MP.surfaceYM(a[0]*0.5+mx*0.5,a[1]*0.5+mz*0.5),y2=MP.surfaceYM(mx,mz);
     const d=Math.abs(y1-y2); if(d>worst){worst=d;at=`(${mx.toFixed(0)},${mz.toFixed(0)})`;} }
   expect(`chain deck y continuous end-to-end (worst mid-seam ${worst.toFixed(2)} at ${at})`,worst<0.6,true); }
-// the trench FLOOR is visual road only — never a walk surface
-expect('Columbus trench floor is not a walk surface (you ride the deck over it)',MP.surfaceYM(196,790)>4,true);
-// enclosure buffers (PITFALLS elevator rule): the deck flanks / planted buffers never touch grade walks
+// the trench FLOOR is visual road only — never a walk surface (093: trench moved to z 793-809)
+expect('Columbus trench floor is not a walk surface (you ride the deck over it)',MP.surfaceYM(196,801.5)>3.9,true);
+// enclosure buffers (PITFALLS elevator rule): the deck flanks / planted buffers never touch grade walks (093: refreshed points)
 for(const [label,x,z] of [
-  ['planted N-rim flank buffer',184,810],['launch-flank planted buffer',184,812],
-  ['rimN/deck gap',187,789],['Columbus-corridor buffer',190,808],
+  ['planted W-flank buffer',174.5,822],['planted crossing-N buffer',190,795],
+  ['rimN/deck gap',187,789],['Columbus-corridor buffer',190,810],
 ]) expect(`${label} (${x},${z}) NOT walkable`,MP.walkableM(x,z),false);
 
 console.log('\n--- Millennium: MAGGIE DALEY (058) — rim net, ribbon bed, island, play garden, CSG all walkable ---');
@@ -948,7 +955,7 @@ console.log('\n--- Millennium: flood fill from the spawn — one connected netwo
   for(const [label,x,z] of [
     ['peristyle plaza',67,730],['Bean plaza',87,798],['Crown pool',70,864],
     ['seating bowl',147,777],['Great Lawn',150,820],['Seam boardwalk',159,862],
-    ['BP crest',200,790],['NW corner',50,709],['SW corner',50,890],
+    ['BP crest',202,800],['NW corner',50,709],['SW corner',50,890],
     // Maggie Daley (058) — every zone reached ONLY over the BP crossing
     ['BP landing plaza',250,808],['ribbon bed',276,738],['climbing island',260,741],
     ['play garden',285,830],['Slide Crater',305,858],['CSG',330,760],['fieldhouse esplanade',280,732],

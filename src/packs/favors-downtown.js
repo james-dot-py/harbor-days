@@ -37,7 +37,7 @@ import { RINK_M } from '../data/millennium.js';
 import { bandHooks } from './lolla.js';       // the drummer rig (set in lolla's onWorldReady, runs earlier)
 import { skaterHooks } from './skating.js';   // the rink skater groups (set earlier)
 
-const ICE_Y = RINK_M.ice.y;                   // −1.6
+const ICE_Y = RINK_M.y;                       // −1.6
 
 // ---- fixed placements (verified walkable + clear of waypoint stands) ------
 const THEO      = { x: 260, z: 753 };         // south face of climbing Wall A (mid-plaza walk)
@@ -45,8 +45,8 @@ const CHALK_BAG = { x: 264, z: 729.5 };       // fieldhouse esplanade, just N of
 const DRUM_OFFER = { x: 224, z: 998 };        // crowd side of the rail, on the stage-mouth axis
 const STICK0    = { x: 240, z: 990 };         // out in the Lolla crowd field (walkable)
 const STAGE     = { x0: 212, x1: 232, z0: 1002, z1: 1018, deckY: 1.6, catchZ: 1004 }; // Petrillo deck footprint (generous)
-const BEV       = { x: 67, z: 782.3 };        // rink NORTH end (best clearance off looper tops + beginner edge)
-const DOT       = { x: 72, z: 816.5 };        // rink SE corner (clear of the mp-rink-overlook f2 camera cone)
+const BEV       = { x: 66, z: 778.3 };        // rink NORTH end (≥1.8 m clear of the derived looper tops + the beginner lane, 093 sheet)
+const DOT       = { x: 68, z: 819.8 };        // rink SOUTH end, mid-sheet (≥1.2 m clear of the beginner's corner arcs + looper bottoms)
 
 // ================================ props ================================
 // small one-off meshes (cached toon materials; each is +1 frustum-culled draw)
@@ -271,7 +271,8 @@ onWorldReady(player => {
     cardWorld.position.set(cardPos.x, ICE_Y + 0.05, cardPos.z); cardWorld.visible = true;
   }
   function stepSlide(dt, t) {
-    cardPos.x = clamp(cardPos.x + cardVel.x * dt, 62, 72); cardPos.z = clamp(cardPos.z + cardVel.z * dt, 781, 817);
+    cardPos.x = clamp(cardPos.x + cardVel.x * dt, RINK_M.ice.x0 + 1, RINK_M.ice.x1 - 1);   // skitter stays on the sheet
+    cardPos.z = clamp(cardPos.z + cardVel.z * dt, RINK_M.ice.z0 + 1, RINK_M.ice.z1 - 1);   // (derives — 093 resize)
     const k = Math.exp(-1.3 * dt); cardVel.x *= k; cardVel.z *= k;
     cardWorld.position.set(cardPos.x, ICE_Y + 0.05, cardPos.z); cardWorld.rotation.z += 6 * dt;
     if (Math.hypot(cardVel.x, cardVel.z) < 0.18) { cardVel.x = cardVel.z = 0; cardState = 'landed'; }

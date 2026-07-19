@@ -72,7 +72,7 @@ export function buildRink() {
   // scattered along the ring. Same attribute signature -> merges to 1 draw.
   {
     const geos = [];
-    const sheet = new THREE.PlaneGeometry(iw, id, 22, 76);
+    const sheet = new THREE.PlaneGeometry(iw, id, Math.round(iw * 2), Math.round(id * 2));
     sheet.rotateX(-Math.PI / 2);
     const pos = sheet.attributes.position, n = pos.count;
     const col = new Float32Array(n * 3);
@@ -93,7 +93,7 @@ export function buildRink() {
     sheet.translate(icx, y + 0.008, icz);
     geos.push(sheet);
     // scratches — short thin strips, heaviest on the traffic ring
-    for (let i = 0; i < 90; i++) {
+    for (let i = 0; i < 135; i++) {
       const onRing = i % 3 !== 0;
       const a = rr(0, Math.PI * 2);
       const ex = Math.cos(a) * iw * (onRing ? rr(0.3, 0.42) : rr(0.05, 0.3));
@@ -189,11 +189,12 @@ export function buildRink() {
   // the sign, all hung WEST of the wall face so they read from the ice.
   const warm = bmat(0xffd98a);                    // ONE shared self-lit material
   {
-    box(0.6, wallH, R.z1 - R.z0, COL.plaza, 75.5, wY, (R.z0 + R.z1) / 2);      // cream grill front
-    box(0.7, 0.28, R.z1 - R.z0, COL.gran, 75.48, -0.14, (R.z0 + R.z1) / 2);    // dark bulkhead under the balustrade
-    const fx = 75.17;                             // facade face plane (west of the wall)
-    for (let k = 0; k < 8; k++) {                 // four bays each side of the sign (at z 800)
-      const bz = k < 4 ? 777.5 + k * 5.6 : 805.5 + (k - 4) * 5.6;
+    box(0.6, wallH, R.z1 - R.z0, COL.plaza, R.x1 - 0.5, wY, (R.z0 + R.z1) / 2);      // cream grill front (derives from R.x1)
+    box(0.7, 0.28, R.z1 - R.z0, COL.gran, R.x1 - 0.52, -0.14, (R.z0 + R.z1) / 2);    // dark bulkhead under the balustrade
+    const fx = R.x1 - 0.83;                       // facade face plane (west of the wall)
+    // 4 bays each side of the sign (at z 800) — explicit centers on the 770-826
+    // wall, all clear of the sign backer (z 796.85-803.15) and the wall ends.
+    for (const bz of [774, 780.2, 786.4, 792.6, 806, 811.3, 816.6, 821.9]) {
       const awn = box(0.55, 0.09, 4.6, COL.awn, fx - 0.2, y + 1.38, bz);       // sloped green awning
       awn.rotation.z = -0.5;
       const win = new THREE.Mesh(new THREE.PlaneGeometry(3.8, 0.72), warm);    // warm lit window band
@@ -217,7 +218,8 @@ export function buildRink() {
   }
 
   // ---- 8. corner light MASTS with banner boxes (the photo's fixture) ---
-  for (const [mx, mz] of [[59.7, 775.6], [59.7, 822.8], [73.9, 775.6], [73.9, 822.8]]) {
+  const A = R.apron;   // masts stand ON the walkable apron ring, one per corner
+  for (const [mx, mz] of [[A.x0 + 0.8, A.z0 + 1.6], [A.x0 + 0.8, A.z1 - 0.8], [A.x1 - 0.8, A.z0 + 1.6], [A.x1 - 0.8, A.z1 - 0.8]]) {
     const mh = 7.2;
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.13, 0.19, mh, 7), toon(COL.gran));
     pole.position.set(mx, y + mh / 2, mz); millenniumRoot.add(pole);

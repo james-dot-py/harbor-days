@@ -83,18 +83,23 @@ export const WRIGLEY_SQ_M = {
 // (kind 'ice' -> the main.js skate glide) ringed by chunky boards (0.8 m
 // non-walk gap — wider than the worst per-frame step so a fast glide can't
 // tunnel), a rubber apron ring, a west stair-ramp entry from the Michigan
-// spine, and a ~1.4-1.6 m non-walk rim buffer all around (elevator rule:
+// spine, and a ~1.1-1.6 m non-walk rim buffer all around (elevator rule:
 // no y0 walk may sit grid-adjacent to the y -1.6 floor). East rim band
-// (74.9-76) carries the toon PARK GRILL facade under the balustrade at
+// (76.9-78) carries the toon PARK GRILL facade under the balustrade at
 // railX. Perpetual-dusk seasonal liberty recorded in GEOGRAPHY + BRIEF.
+// 093 (owner note 2026-07-18 "more space to skate around and do tricks"):
+// the sheet GREW 13.5 x 46.5 ≈ 628 m² (~1.5x the 049 sheet 11 x 38) — pit
+// pushed 2 north to the Washington walk edge (770) and 2 east into the Bean
+// plaza (railX 78; the balustrade overlook composition keeps), west entry /
+// gate / Park Grill band / apron ring pattern intact.
 export const RINK_M = {
-  x0: 57, x1: 76, z0: 772, z1: 826, y: -1.6, railX: 76,
-  ice:     { x0: 61.5, x1: 72.5, z0: 780, z1: 818 },     // the sheet (kind 'ice')
+  x0: 57, x1: 78, z0: 770, z1: 826, y: -1.6, railX: 78,
+  ice:     { x0: 61, x1: 74.5, z0: 775.5, z1: 822 },      // the sheet (kind 'ice')
   boardW: 0.8, boardH: 1.05,                              // boards gap/wall around the ice
   gate:    { z0: 797.5, z1: 802.5 },                      // opening in the WEST boards
-  ramp:    { x0: 57, x1: 60.2, z0: 798.5, z1: 801.5 },    // stair-ramp, y 0 -> -1.6 along x
-  landing: { x0: 60.2, x1: 61.5, z0: 797.5, z1: 802.5 },  // foot of the stairs, through the gate
-  apron:   { x0: 58.6, x1: 74.9, z0: 773.6, z1: 824.9 },  // walkable ring outer bounds
+  ramp:    { x0: 57, x1: 60, z0: 798.5, z1: 801.5 },      // stair-ramp, y 0 -> -1.6 along x (3.0 m: slope 0.53 <= the 0.55 elevator guard)
+  landing: { x0: 60, x1: 61, z0: 797.5, z1: 802.5 },      // foot of the stairs, through the gate
+  apron:   { x0: 58.6, x1: 76.9, z0: 771.6, z1: 824.4 },  // walkable ring outer bounds
   cornerR: 1.5,                                           // 45° corner-cut colliders (builder)
 };
 // surface KIND at (x,z) — the engine (cells.js cellKind) and any tool read
@@ -118,7 +123,7 @@ export function kindAtM(x, z) {
 // archHalf: the walk-under arch's half-span along z (soffit hits 0 there);
 // the lobes sit just outboard of it.
 export const CLOUD_GATE_M = {
-  plaza: { x0: 76, x1: 98, z0: 776, z1: 826 },   // walk quad
+  plaza: { x0: 78, x1: 98, z0: 776, z1: 826 },   // walk quad (x0 78: the 093 rink growth — balustrade overlook at railX)
   bean: { x0: 80.3, x1: 93.3, z0: 787.7, z1: 807.7, cx: 86.8, cz: 797.7, h: 10, axis: 'ns' },
   legs: [{ x: 86.8, z: 792.2, r: 2.2 }, { x: 86.8, z: 803.2, r: 2.2 }],
   archHalf: 4.6,
@@ -294,36 +299,41 @@ export const CLOSURE_M = {
 };
 
 // ---------------- Zone A: BP CROSSING (058, flag maggie) ---------------
-// The REAL serpentine (osm way 25026666, verbatim in both extracts): lawn-SE
-// launch → north along the lawn rim (first wiggle) → east over Columbus at
-// z≈790 (y 5) → the double-hairpin S-hook → grade at (247, 807.5) in Maggie.
-// Hand-fit 28 nodes [x, z, y]; 058 sweeps treads/parapets by CatmullRom
-// tangent (048 contour law) and REPLACES the shipped BP_BRIDGE_M deck.
-// Slope compressed like the shipped approach (recorded liberty).
+// 093 SHORTENED serpentine (owner note 2026-07-18 "maggie daley bridge
+// should be a bit shorter even if that's unrealistic" — recorded liberty,
+// GEOGRAPHY.md). Both landings keep: lawn-SE launch (172.6, 834.9) → ONE
+// rim wiggle → east over Columbus at z≈801 (y 5; the crossing moved ~11
+// south of the osm line, closer to the straight launch→landing chord) →
+// ONE hairpin (the famous S-hook compressed to a single curl) → grade at
+// (247, 807.5) in Maggie. Polyline ~104 m vs the 058 osm-verbatim ~144 m
+// (~28% shorter walk). Hand-fit 21 nodes [x, z, y]; bridge.js sweeps
+// treads/parapets by CatmullRom tangent (048 contour law).
 export const BP_CROSSING_M = {
   deckW: 5.2, parapetH: 1.4, halfW: 2.6,
   nodes: [
-    [172.6, 834.9, 0],   [176.5, 831.9, 0.25], [179.4, 827.9, 0.6],
-    [177.5, 822.5, 1.05],[176.3, 818.0, 1.4],  [178.5, 815.0, 1.75],
-    [181.2, 811.5, 2.1], [180.5, 806.0, 2.55], [181.0, 801.0, 3.0],
-    [183.5, 796.0, 3.5], [188.4, 792.0, 4.1],  [193.3, 790.2, 4.6],
-    [199.6, 789.8, 5.0], [206.5, 791.6, 5.0],  [212.4, 795.9, 4.8],
-    [217.5, 802.8, 4.5], [222.5, 802.0, 4.2],  [224.8, 797.5, 3.9],
-    [225.5, 791.5, 3.5], [228.6, 788.2, 3.2],  [232.5, 789.0, 2.9],
-    [234.6, 792.5, 2.6], [232.6, 797.5, 2.2],  [231.4, 801.7, 1.9],
-    [232.8, 805.5, 1.5], [236.5, 806.3, 1.1],  [242.1, 806.9, 0.5],
-    [247.0, 807.5, 0],
+    [172.6, 834.9, 0],   [176.8, 830.3, 0.55], [179.4, 824.9, 1.1],
+    [178.3, 819.5, 1.6], [180.3, 814.1, 2.15], [183.9, 809.1, 2.75],
+    [188.5, 805.1, 3.4], [193.7, 802.3, 4.0],  [198.9, 800.8, 4.6],
+    [202.6, 800.5, 5.0], [208.3, 802.6, 4.45], [213.9, 803.6, 3.95],
+    [219.3, 802.3, 3.5], [223.7, 799.2, 3.0],  [228.1, 796.2, 2.5],
+    [233.0, 795.6, 2.05],[236.8, 799.0, 1.3],  [239.0, 802.6, 0.6],
+    [240.4, 805.8, 0.38],[243.2, 807.2, 0.2],  [247.0, 807.5, 0],
+    // tail curls in from the WEST at z>=805 and is DOWN to <=0.6 by x 239, so
+    // wherever the +-2.35 band reaches within 1 m of the grade landing plaza
+    // (x0 243, z0 800) the deck sits <=~0.45 — never a side cliff onto y0
+    // (the walkprobe 0.55 elevator guard, 093).
   ],
   launchPad: { x0: 168, x1: 186, z0: 833, z1: 846 },   // the shrunk lawn-SE esplanade
-  // Columbus rim re-split for the new overflight (replaces the 788/818 gap):
+  // Columbus rim re-split for the 093 overflight (band at x 185.8-189 tops
+  // out z≈809.8, buffer 2.5 both sides):
   rimN: { x0: 181, x1: 189, z0: 713, z1: 784 },
-  rimS: [{ x0: 185.8, x1: 189, z0: 808, z1: 846 }, { x0: 181, x1: 189, z0: 846, z1: 886 }],
+  rimS: [{ x0: 185.8, x1: 189, z0: 813, z1: 846 }, { x0: 181, x1: 189, z0: 846, z1: 886 }],
   // Columbus reads as a road TRENCH passing beneath the deck (visual only,
   // never walkable): the road band under the overflight is cut to floorY with
   // retaining walls at each curb (index.js carves the grade carpet + the
   // streets.js road plane around it — the 041 pit law; bridge.js builds the
-  // sunken roadbed + walls). Spans the deck footprint at Columbus (z≈790, y5).
-  trench: { x0: 190, x1: 200, z0: 783, z1: 799, floorY: -1.7 },
+  // sunken roadbed + walls). Spans the deck footprint at Columbus (z≈801, y5).
+  trench: { x0: 190, x1: 200, z0: 793, z1: 809, floorY: -1.7 },
 };
 
 // ---------------- Zone B: MAGGIE DALEY (058 + 059) ---------------------
@@ -552,9 +562,9 @@ export const RIBBON_SEGS_M = (() => {
 // ---- flag-gated Grant walk sets (see GEOGRAPHY.md GRANT walkability) ----
 const MAGGIE_WALK = [
   // E-rim promenade (east of Columbus) — split under the BP crest overflight
-  // (chain footprint z 787-798.5 at this x; ≥2.5 m planted buffer both sides)
-  { x0: 201, x1: 209, z0: 706, z1: 784.5, y: 0 },
-  { x0: 201, x1: 209, z0: 801, z1: 888, y: 0 },
+  // (093 chain footprint z 798.2-805.3 at this x; ≥2.5 m planted buffer both sides)
+  { x0: 201, x1: 209, z0: 706, z1: 795.5, y: 0 },
+  { x0: 201, x1: 209, z0: 808, z1: 888, y: 0 },
   { x0: 201, x1: 338, z0: 705, z1: 711.5, y: 0 }, // Randolph-side north walk
   { x0: 209, x1: 323, z0: 728, z1: 736, y: 0 },   // fieldhouse esplanade
   { x0: 296, x1: 318, z0: 711.5, z1: 728, y: 0 }, // tennis pad (relocated — NE-wedge fold)
@@ -688,11 +698,11 @@ export const WALK_M = [
     z0: RINK_M.ramp.z0, z1: RINK_M.ramp.z1, rampX: true, y0: 0, y1: -1.6 }, // entry stair-ramp
   { x0: RINK_M.landing.x0, x1: RINK_M.landing.x1,
     z0: RINK_M.landing.z0, z1: RINK_M.landing.z1, y: -1.6 },  // landing + boards GATE threshold
-  { x0: 58.6, x1: 60.7, z0: 773.6, z1: 797.5, y: -1.6 },      // apron W (north of the entry)
-  { x0: 58.6, x1: 60.7, z0: 802.5, z1: 824.9, y: -1.6 },      // apron W (south of the entry)
-  { x0: 73.3, x1: 74.9, z0: 773.6, z1: 824.9, y: -1.6 },      // apron E (under the Park Grill band)
-  { x0: 60.7, x1: 73.3, z0: 773.6, z1: 779.2, y: -1.6 },      // apron N
-  { x0: 60.7, x1: 73.3, z0: 818.8, z1: 824.9, y: -1.6 },      // apron S
+  { x0: 58.6, x1: 60.2, z0: 771.6, z1: 797.5, y: -1.6 },      // apron W (north of the entry)
+  { x0: 58.6, x1: 60.2, z0: 802.5, z1: 824.4, y: -1.6 },      // apron W (south of the entry)
+  { x0: 75.3, x1: 76.9, z0: 771.6, z1: 824.4, y: -1.6 },      // apron E (under the Park Grill band)
+  { x0: 60.2, x1: 75.3, z0: 771.6, z1: 774.7, y: -1.6 },      // apron N
+  { x0: 60.2, x1: 75.3, z0: 822.8, z1: 824.4, y: -1.6 },      // apron S
   { x0: RINK_M.ice.x0, x1: RINK_M.ice.x1,
     z0: RINK_M.ice.z0, z1: RINK_M.ice.z1, y: -1.6 },          // THE ICE (kindAtM -> 'ice')
   { x0: CROWN_M.plaza.x0, x1: CROWN_M.plaza.x1,
@@ -805,7 +815,7 @@ export const MAP_M = (G.maggie || G.artInstitute || G.butler)
 // maggie + ribbon, artInstitute → art, butler → lolla).
 export const CITY_POI_M = [
   { id: 'bean',     n: 'the bean',        x: 86.8,  z: 797.7, c: '#d8dde4' },   // CLOUD_GATE_M.bean cx/cz
-  { id: 'rink',     n: 'the rink',        x: 67,    z: 799,   c: '#cfe3ee' },   // RINK_M.ice centre
+  { id: 'rink',     n: 'the rink',        x: 67.75, z: 798.75, c: '#cfe3ee' },  // RINK_M.ice centre (093 sheet)
   { id: 'crown',    n: 'crown fountain',  x: 69.8,  z: 864,   c: '#e8b64c' },   // CROWN_M.pool centre
   { id: 'pritzker', n: 'the pavilion',    x: 146.5, z: 752,   c: '#d8d2c4' },   // PRITZKER_M.stage centre
   { id: 'lurie',    n: 'lurie garden',    x: 151.5, z: 867,   c: '#7a9e4f' },   // LURIE_M.bounds centre

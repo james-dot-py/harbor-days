@@ -196,6 +196,7 @@ worldReady(player);
 window.__hd.player=player;   // debug/tools only: live player handle (act.mjs E2E reads coords / teleports within a cell)
 window.__hd.input={joy,cam}; // debug/tools only: steering-bot access (062 hold-forward crossing assertions)
 window.__hd.setTrap=r=>{TRAP_TEST=r||null;}; // debug/tools only: inject a synthetic non-walk block to verify the anti-trap escape (issue 025)
+window.__hd.gstate=state;    // debug/tools only: live gameplay state handle (093 rink E2E reads onIce/iceHops)
 setIdleGroundProbe((x,z)=>({walk:walkable(x,z),y:surfaceY(x,z)}));   // task 087: let the idle-charm sit only land on safe flat ground (shared engine walk data)
 window.__hd.buildMs={build:Math.round(_tm0-_tb0),merge:Math.round(_tm1-_tm0),packs:Math.round(performance.now()-_tp0)};
 console.log('[perf] world build '+window.__hd.buildMs.build+'ms · mergeCellStatic '+window.__hd.buildMs.merge+'ms · packs '+window.__hd.buildMs.packs+'ms');

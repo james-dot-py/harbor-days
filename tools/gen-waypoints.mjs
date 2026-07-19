@@ -1012,7 +1012,12 @@ const VOLS_M = [];
   // tracing each flank at lateral 2.6+0.35 from the deck centerline, so a
   // down-the-deck camera BETWEEN the parapets never registers (the L-car
   // interior doctrine) but a cross-body stand parked in a parapet would.
-  { const B = M.BP_BRIDGE_M, nodes = [[168, 0, 796], [186, 3.8, 796], [196, 5, 804], [205, 5, 810]];
+  { const B = M.BP_BRIDGE_M,
+        // trace the LIVE deck: the 058+ serpentine (nodes [x,z,y] -> [x,y,z])
+        // when maggie is on, else the pre-057 simplified deck (093).
+        nodes = M.OPEN_GRANT.maggie
+          ? M.BP_CROSSING_M.nodes.map(n => [n[0], n[2], n[1]])
+          : [[168, 0, 796], [186, 3.8, 796], [196, 5, 804], [205, 5, 810]];
     for (let p = 0; p < nodes.length - 1; p++) {
       const a = nodes[p], b = nodes[p + 1];
       const dx = b[0] - a[0], dz = b[2] - a[2], L = Math.hypot(dx, dz);
@@ -1150,17 +1155,21 @@ addM('mp-wrigley-square', [
 // overlook f0 pitches DOWN from mid-ice so the 1.6 m Park Grill band
 // (awnings, lit windows, sign) fills the east read instead of Bean-and-sky
 // (the first-run f0 aimed level and the band compressed to slivers).
+// 093: stands re-centred on the GROWN sheet (61-74.5 x 775.5-822); f1 stands
+// on the Bean-plaza balustrade rim (x0 78 now) pitched DOWN into the pit —
+// the 041 carve-verify framing; f2 looks down the long axis from deeper south.
 addM('mp-rink-overlook', [
-  { x: 66.5, z: 800, yaw: 1.5708, pitch: 0.10, dist: 5.5 },
-  { x: 78, z: 806, yaw: -2.2, pitch: 0.42, dist: 8 },
-  { x: 67, z: 812, yaw: Math.PI, pitch: 0.05, dist: 9 },
+  { x: 67.75, z: 800, yaw: 1.5708, pitch: 0.10, dist: 5.5 },
+  { x: 79, z: 806, yaw: -2.2, pitch: 0.42, dist: 8 },
+  { x: 67, z: 815, yaw: Math.PI, pitch: 0.05, dist: 9 },
 ]);
 // entry f2 stands at the landing looking NE across the sheet — the first-run
 // f2 camera parked ~0.3 m from the SKATE RENTAL board and it filled the frame.
+// (093: f2 stand off the x-61 landing/ice knife-edge; ramp is 57-59.7 now.)
 addM('mp-rink-entry', [
   { x: 59, z: 800, yaw: 1.5708, pitch: 0.12, dist: 4.5 },
   { x: 65.5, z: 800, yaw: -1.5708, pitch: -0.12, dist: 5 },
-  { x: 61, z: 799, yaw: 2.0, pitch: 0.16, dist: 6 },
+  { x: 60.8, z: 799, yaw: 2.0, pitch: 0.16, dist: 6 },
 ]);
 // 043: f0/f3 dists widened for the 1:1 shell (13 x 20 — the 040 dists were
 // authored against the raw osm plan and crop it); both cameras verified on
@@ -1201,15 +1210,16 @@ addM('mp-lurie', [
   { x: 159.5, z: 862, yaw: -0.91, pitch: 0.05, dist: 6 },
   { x: 174, z: 848, yaw: -0.80, pitch: 0.05, dist: 6 },
 ]);
-// 058: the BP bridge is a FULL CROSSING now (the pre-057 mp-bp-bridge-crest
-// dead-end is retired — its stand (199,806.5) is off the rebuilt deck). The
-// crossing reads from three down-deck stands (parapets block cross-body lines
-// — the L-car doctrine); the S-hook sweep, the crest looking back west, and
-// the descent east into Maggie.
+// 058: the BP bridge is a FULL CROSSING (the pre-057 mp-bp-bridge-crest
+// dead-end is retired). 093 SHORTENED the serpentine (owner liberty): the
+// crossing moved south (crest z≈801) and the double-hairpin compressed to a
+// SINGLE curl (apex ~(233, 795.6)) — stands re-derived on the new chain.
+// Three down-deck stands (parapets block cross-body lines — the L-car
+// doctrine): the hairpin looking back west, and the crest both ways.
 addM('mp-bp-crossing', [
-  { x: 231.5, z: 800, yaw: 2.8, pitch: 0.02, dist: 5 },     // down the S-hook (hairpin sweep + Columbus trench + Maggie ahead)
-  { x: 203, z: 791, yaw: -1.35, pitch: 0.02, dist: 5.5 },   // crest looking WEST: deck curve + pavilion ribbons + skyline
-  { x: 206, z: 791.6, yaw: 1.3, pitch: 0.02, dist: 5.5 },   // crest looking EAST: descent into Maggie (X-masts + fieldhouse)
+  { x: 233, z: 795.8, yaw: -1.95, pitch: 0.02, dist: 5 },   // hairpin apex looking back W: curl + trench + Bean/skyline
+  { x: 206, z: 802.2, yaw: -1.42, pitch: 0.02, dist: 5.5 }, // crest looking WEST: deck curve + pavilion ribbons + skyline
+  { x: 208, z: 802.6, yaw: 1.35, pitch: 0.02, dist: 5.5 },  // crest looking EAST: hairpin + descent into Maggie (X-masts + fieldhouse)
 ]);
 addM('mp-ribbon', [
   { x: 252, z: 757, yaw: -2.2, pitch: 0.05, dist: 6 },      // SW lobe sweeping around the rockwork, wall shoulder in-frame

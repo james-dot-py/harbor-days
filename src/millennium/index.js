@@ -114,7 +114,7 @@ function addQuad(x0, x1, z0, z1, y, color) {
 // it occludes the pit from above. paveRegion tiles a rect into quads that skip
 // any hole (a z-band scanline split — handles several disjoint holes cleanly).
 const KHOLE  = { x0: 47, x1: 53, z0: 794.5, z1: 806.5 };   // subway stair pit
-const CHOLE  = { x0: 57, x1: 76, z0: 772,   z1: 826 };     // McCormick sunken cafe
+const CHOLE  = { x0: M.RINK_M.x0, x1: M.RINK_M.x1, z0: M.RINK_M.z0, z1: M.RINK_M.z1 };   // McCormick sunken rink pit (derives — 093 resize)
 const HOLES  = [KHOLE, CHOLE];
 function paveRegion(x0, x1, z0, z1, y, color, holes) {
   const zc = new Set([z0, z1]);

@@ -5,7 +5,7 @@
 //  (state.onIce / state.iceHops / mayor.rotation.z carve-lean). This pack
 //  owns everything ALIVE on the ice:
 //    * SIX NPC skaters parented to millenniumRoot (cell-culled for free) —
-//      five LOOPERS carving hardcoded ellipses around the sheet centre and
+//      five LOOPERS carving data-derived ellipses around the sheet centre and
 //      one wobbly BEGINNER hugging the boards on a rounded-rect path
 //      (arms out, body wobble, an ~11 s near-fall);
 //    * the MAYOR'S SKATES — white boot + steel blade assemblies parented
@@ -30,9 +30,14 @@ import { toon, mulberry32, clamp, lerpAngle } from '../core.js';
 import { activeCell } from '../cells.js';
 import { millenniumRoot } from '../millennium/index.js';
 import { mayor, mparts } from '../character.js';
+import { RINK_M } from '../data/millennium.js';
 
 const CITIZEN = 0.74;               // canonical chibi scale (matches the mayor)
-const CX = 67, CZ = 799, ICE_Y = -1.6;   // ice-rect centre + floor height (RINK_M.ice)
+// ice-rect centre + floor height, derived from RINK_M (093 law: paths follow
+// whatever sheet the data ships, not constants). Leaf data module — import-safe.
+const _I = RINK_M.ice;
+const CX = (_I.x0 + _I.x1) / 2, CZ = (_I.z0 + _I.z1) / 2, ICE_Y = RINK_M.y;
+const HX = (_I.x1 - _I.x0) / 2, HZ = (_I.z1 - _I.z0) / 2;      // sheet half-spans
 const SHOE_WHITE = 0xf5f2ec;        // skate-boot white (reads as blades on the shoes)
 const MAYOR_SHOE = 0x241b13;        // the mayor's default shoe color (restore on exit)
 const _r = mulberry32(0x534b4154);  // local 'SKAT' rng — never the shared world rng
@@ -60,20 +65,22 @@ const LOOP_LINES = ["ope — comin' through!", "lookin' good out there", "mind t
 const BEG_LINES  = ["ope — still learning!", "whoa whoa whoa", "the wall is my friend",
                     "ope! almost went down", "you make it look easy"];
 
-// ---- five loopers: per-skater hardcoded ellipse (A=x semi-axis, B=z semi-
-// axis, dir=±1, w=base ang.speed sized so tangential speed ~2.2–5 m/s, ph=
-// phase). All axes fit inside the ice rect (x 61.5–72.5, z 780–818). ----
+// ---- five loopers: per-skater data-derived ellipse expressed as FRACTIONS of
+// the sheet half-spans (fA·HX, fB·HZ) so the loops fill whatever sheet RINK_M
+// ships (093 law); dir=±1, ph=phase, spd=target tangential speed (~2.2–2.7
+// m/s), and w = spd / √(A·B) solves for the same feel at any sheet size. ----
 const LOOPERS = [
-  { A: 3.4, B: 13.0, dir:  1, w: 0.34, ph: 0.0 },
-  { A: 2.8, B: 10.0, dir: -1, w: 0.42, ph: 2.1 },
-  { A: 4.0, B: 15.5, dir:  1, w: 0.30, ph: 4.3 },
-  { A: 3.0, B: 11.0, dir: -1, w: 0.40, ph: 1.2, handsBack: true },  // hands clasped behind
-  { A: 3.8, B:  9.0, dir:  1, w: 0.46, ph: 5.4, spinner: true },    // the stylish one
-];
+  { fA: 0.62, fB: 0.68, dir:  1, spd: 2.26, ph: 0.0 },
+  { fA: 0.51, fB: 0.53, dir: -1, spd: 2.22, ph: 2.1 },
+  { fA: 0.73, fB: 0.82, dir:  1, spd: 2.36, ph: 4.3 },
+  { fA: 0.55, fB: 0.58, dir: -1, spd: 2.30, ph: 1.2, handsBack: true },  // hands clasped behind
+  { fA: 0.69, fB: 0.47, dir:  1, spd: 2.69, ph: 5.4, spinner: true },    // the stylish one
+].map(c => { const A = c.fA * HX, B = c.fB * HZ;
+  return { ...c, A, B, w: c.spd / Math.sqrt(A * B) }; });
 
-// ---- beginner rounded-rect path: inset 1.0 m inside the ice rect
-// (x 62.5–71.5, z 781–817), corner radius 2.6, parameterised by arclength. ----
-const BR_CX = 67, BR_CZ = 799, BR_HX = 4.5, BR_HZ = 18, BR_R = 2.6;
+// ---- beginner rounded-rect path: inset 1.0 m inside the ice rect (derived
+// from the sheet half-spans), corner radius 2.6, parameterised by arclength. ----
+const BR_CX = CX, BR_CZ = CZ, BR_HX = HX - 1, BR_HZ = HZ - 1, BR_R = 2.6;
 const BR_A = BR_HX - BR_R, BR_B = BR_HZ - BR_R, BR_ARC = Math.PI / 2 * BR_R;
 const BR_P = 4 * BR_A + 4 * BR_B + 2 * Math.PI * BR_R;   // perimeter ≈ 85.5 m
 const BEG_SPD = 0.7;                                     // slow wall-hugging crawl (m/s)
