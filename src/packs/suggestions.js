@@ -22,20 +22,35 @@ const NTFY_TITLE = 'Ope! player suggestion';
 const MAILTO = 'mailto:jimbo@playope.com?subject=Ope!%20neighborhood%20suggestion';   // owner directive 2026-07-10
 const MAX = 500;
 
-// -------- the painted front label ("WHERE NEXT? — drop a suggestion") --------
+// -------- the painted front label ("OPE! — welcome to the lakefront") --------
+// 099 (owner 2026-07-19): the old 'WHERE NEXT? — drop a suggestion' read as
+// real-world/meta sign text at the spawn. The label is now the in-world
+// welcome/orientation sign in the Ope! voice, echoing the title card ("the
+// rocks, the harbor — and the L up to wrigleyville"). The reader faces the
+// label looking ESE, so the directions are true from here: the rocks ahead
+// (east), the harbor left (north), the L behind (west — the Belmont platform
+// stub over the berm). '✉ press E' stays — the box still takes suggestions
+// (the mail slot above keeps its meaning). TEXT SWAP ONLY (owner 099): same
+// canvas, palette roles, and layout ladder as the old label.
 function labelTex() {
   const W = 384, H = 320, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const g = cv.getContext('2d');
   g.fillStyle = '#fdf6e6'; g.fillRect(0, 0, W, H);                       // cream field
   g.strokeStyle = '#c9a97a'; g.lineWidth = 12; g.strokeRect(10, 10, W - 20, H - 20);
   g.textAlign = 'center';
-  g.fillStyle = '#2f6b46'; g.font = '800 74px "Trebuchet MS",sans-serif';
-  g.fillText('WHERE', W / 2, 96); g.fillText('NEXT?', W / 2, 168);
-  g.strokeStyle = '#d8b48a'; g.lineWidth = 4; g.beginPath(); g.moveTo(96, 196); g.lineTo(W - 96, 196); g.stroke();
-  g.fillStyle = '#4a3b2f'; g.font = '600 34px "Trebuchet MS",sans-serif';
-  g.fillText('drop a suggestion', W / 2, 240);
-  g.fillStyle = '#e0766a'; g.font = '700 40px "Trebuchet MS",sans-serif';
-  g.fillText('✉  press  E', W / 2, 292);                            // ✉ press E
+  const fit = (text, y, px, weight) => {                               // shrink-to-fit inside the border
+    let s = px;
+    g.font = `${weight} ${s}px "Trebuchet MS",sans-serif`;
+    while (s > 14 && g.measureText(text).width > W - 64) { s--; g.font = `${weight} ${s}px "Trebuchet MS",sans-serif`; }
+    g.fillText(text, W / 2, y);
+  };
+  g.fillStyle = '#2f6b46'; fit('OPE!', 88, 68, '800');
+  g.fillStyle = '#4a3b2f'; fit('welcome to the lakefront', 134, 30, '600');
+  g.strokeStyle = '#d8b48a'; g.lineWidth = 4; g.beginPath(); g.moveTo(96, 158); g.lineTo(W - 96, 158); g.stroke();
+  g.fillStyle = '#4a3b2f';
+  fit('the rocks ↑ · the harbor ←', 194, 26, '600');
+  fit('the L behind ya — wrigleyville', 230, 26, '600');
+  g.fillStyle = '#e0766a'; fit('✉  press  E', 286, 38, '700');         // ✉ press E
   const tex = new THREE.CanvasTexture(cv);
   tex.anisotropy = 4; tex.minFilter = THREE.LinearFilter; tex.generateMipmaps = false;
   return tex;

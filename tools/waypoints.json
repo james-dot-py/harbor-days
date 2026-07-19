@@ -1,5 +1,5 @@
 {
- "generated": "2026-07-19T16:06:42.958Z",
+ "generated": "2026-07-19T16:57:48.643Z",
  "count": 139,
  "waypoints": [
   {
@@ -21,7 +21,7 @@
      "dist": 14
     }
    ],
-   "expectation": "The FRONT-DOOR spawn (task 023, owner-sited): the chibi mayor on the decomposed-granite forecourt FACING THE WATER — open lawn running east to the Belmont Rocks steps and the blue lake with sailboats; the grey monument wall (gold letters, bronze ginkgo scatter) along the frame's right with white sitting blocks and the leaning boulder, the upsized WHERE NEXT suggestion box ahead-right, the crushed-limestone entrance path heading toward the lake, Dibsy dock (094 pun sign) + Lakefront Trail behind-left. Must match baseline.png composition."
+   "expectation": "The FRONT-DOOR spawn (task 023, owner-sited): the chibi mayor on the decomposed-granite forecourt FACING THE WATER — open lawn running east to the Belmont Rocks steps and the blue lake with sailboats; the grey monument wall (gold letters, bronze ginkgo scatter) along the frame's right with white sitting blocks and the leaning boulder, the upsized OPE!-welcome suggestion box ahead-right, the crushed-limestone entrance path heading toward the lake, Dibsy dock (094 pun sign) + Lakefront Trail behind-left. Must match baseline.png composition."
   },
   {
    "id": "zone-aids-garden-chicago",
@@ -1131,7 +1131,7 @@
      "dist": 4.5
     }
    ],
-   "expectation": "The park-district suggestion box at KIOSK scale (owner upsize 2026-07-10): wood post, green painted body, gabled lid, brass mail slot, cream front label 'WHERE NEXT? — drop a suggestion / press E' legible — standing ahead-right of the new monument spawn on the forecourt's east lawn, monument wall and/or entrance path in frame. Reads at spawn distance, not birdhouse-tiny."
+   "expectation": "The park-district suggestion box at KIOSK scale (owner upsize 2026-07-10): wood post, green painted body, gabled lid, brass mail slot, cream front label with the 099 in-world welcome/orientation copy — 'OPE! / welcome to the lakefront / the rocks ↑ · the harbor ← / the L behind ya — wrigleyville / ✉ press E' — legible — standing ahead-right of the new monument spawn on the forecourt's east lawn, monument wall and/or entrance path in frame. Reads at spawn distance, not birdhouse-tiny."
   },
   {
    "id": "ag-entrance",

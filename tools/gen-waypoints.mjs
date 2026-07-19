@@ -411,7 +411,7 @@ for (const s of CH.SIGNS) {
 }
 
 // suggestion box (task 013; relocated + upsized by owner direction during 023):
-// the diegetic "WHERE NEXT?" kiosk ahead-right of the new monument spawn.
+// the diegetic "OPE! — welcome" kiosk (099 copy swap; was "WHERE NEXT?") ahead-right of the new monument spawn.
 // Stand SE of it and aim NW; a dead-on aim hides the box behind the chibi, so
 // the framings skew the yaw a little to keep the box (and its label) beside
 // the mayor.
