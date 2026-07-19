@@ -248,6 +248,17 @@ add('mood-rain', 'lakefront', 'lakefront', 40.5, -236.5, [
 // curved BAY cove that replaced the blank golf-to-Montrose lawn (the golf is a
 // compact vignette; the whole Montrose block slid +436 in z). mt-gate is the
 // Montrose underpass, shifted +436 to z-771. All lakefront lawn, walkable via LAND.
+// 102 TRAIL HAND-OFF: the MAIN->MONTROSE splice at [208,-572], where the golf
+// course's white north fence ends beside the trail — the owner's 2026-07-19
+// malformed-seam report. The mitered join (paths.js/pathgeom.js) is gate-
+// checked mechanically by path-continuity.mjs; this waypoint keeps the spot
+// under VISUAL regression watch too (doubled dashes / edge notches / z-fight
+// band are what the owner saw).
+add('trail-handoff', 'montrose', 'lakefront', 208, -572, [
+  { x: 208, z: -567, yaw: 3.14, pitch: 0.85, dist: 13 },  // top-down over the seam: single dash line, smooth edges
+  { x: 206, z: -590, yaw: 3.14, pitch: 0.28, dist: 9 },   // north along the trail through the seam
+  { x: 205, z: -556, yaw: 3.10, pitch: 0.16, dist: 7 },   // grazing: the white fence end beside the clean pavement
+]);
 add('mt-arrival', 'montrose', 'lakefront', 150, -604, [
   { yaw: 2.36, pitch: 0.12, dist: 11 },    // NE across the 084 bay cove -> the hook mole + entrance light across the water
   { yaw: 2.0,  pitch: 0.10, dist: 14 },    // ENE wider: open cove water + the revetment steps wrapping the curve

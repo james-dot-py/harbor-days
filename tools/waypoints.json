@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-19T19:34:34.016Z",
- "count": 139,
+ "generated": "2026-07-19T21:39:16.889Z",
+ "count": 140,
  "waypoints": [
   {
    "id": "spawn",
@@ -482,6 +482,37 @@
    ],
    "expectation": "090 LAKE MOODS — FIREFLY NIGHT'S-EDGE (SANCTUARY): the Bird Sanctuary interior glowing with a SURGE of warm firefly motes — clearly denser than the everyday handful of 70 map-wide, drifting/blinking among the clearings and understory — under an extra-golden cast (warmer horizon, honeyed light). Cozy and magical, NOT particle spam; the sanctuary room (loop path, grove, deck rail) reads exactly as usual beneath the motes.",
    "q": "mood=firefly"
+  },
+  {
+   "id": "trail-handoff",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 208,
+   "z": -572,
+   "framings": [
+    {
+     "x": 208,
+     "z": -567,
+     "yaw": 3.14,
+     "pitch": 0.85,
+     "dist": 13
+    },
+    {
+     "x": 206,
+     "z": -590,
+     "yaw": 3.14,
+     "pitch": 0.28,
+     "dist": 9
+    },
+    {
+     "x": 205,
+     "z": -556,
+     "yaw": 3.1,
+     "pitch": 0.16,
+     "dist": 7
+    }
+   ],
+   "expectation": "102 TRAIL HAND-OFF (owner 2026-07-19, the white-fence report): the MAIN->MONTROSE splice where the golf course's white north fence ends beside the trail. ONE continuous asphalt bike ribbon and ONE limestone walk ribbon flow through the seam: a SINGLE line of yellow center dashes at an even rhythm (no doubled/side-by-side dash pairs), smooth unbroken pavement edges (no jagged rectangular notches, no width step, no double-wide z-fighting band — the 069 overlap bug), and the white fence ending BESIDE the pavement, posts clear of both ribbons."
   },
   {
    "id": "mt-arrival",

@@ -1474,15 +1474,20 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
 
 // ===== 088 PERMANENT GUARDS — spawned as gate categories so the standard
 // verify (step 1 = this file) mechanically runs them every time:
-//   path-layers.mjs    — path/decal y-ladder assertion (issue 028; pure Node)
-//   prop-clearance.mjs — tree/prop-vs-ribbon sweep (issue 029; spawns its OWN
-//                        vite + headless page, ~25 s — the cost of "tree-on-path
-//                        can never ship again")
+//   path-layers.mjs      — path/decal y-ladder assertion (issue 028; pure Node)
+//   prop-clearance.mjs   — tree/prop-vs-ribbon sweep (issue 029; spawns its OWN
+//                          vite + headless page, ~25 s — the cost of "tree-on-path
+//                          can never ship again")
+//   path-continuity.mjs  — ribbon seam/edge malformation sweep (task 102, the
+//                          owner's white-fence report; pure Node, shares
+//                          src/pathgeom.js with the engine so it measures the
+//                          SHIPPED geometry — malformed path seams can never
+//                          ship again)
 // Skip with WALKPROBE_FAST=1 only for tight inner-loop iteration; the final
 // gate run must include them.
 if(process.env.WALKPROBE_FAST!=='1'){
   const {spawnSync}=await import('child_process');
-  for(const tool of['path-layers.mjs','prop-clearance.mjs']){
+  for(const tool of['path-layers.mjs','prop-clearance.mjs','path-continuity.mjs']){
     console.log(`\n--- 088 guard: ${tool} ---`);
     const r=spawnSync(process.execPath,[new URL(tool,import.meta.url).pathname.replace(/^\/([A-Za-z]:)/,'$1')],{encoding:'utf8',timeout:180000});
     const out=(r.stdout||'')+(r.stderr||'');

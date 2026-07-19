@@ -860,4 +860,21 @@ few turns to find; keep each to one line of symptom + fix.
   probed LIVE: __hd.trail positions + __hd.trailLanes drawn-ribbon polylines,
   sampled over N seconds by tools/npc-paths.mjs (gate check 1b) — no node-side
   curve mirror to drift.
+- NEVER join two ribbons by OVERLAPPING them ("start B ~10 m before A ends so
+  they join with no gap", the 069 Montrose line): two full ribbons at identical
+  y double-pave the strip — z-fight band, rectangular edge notches where the
+  caps chop off, doubled center dashes (the owner's 2026-07-19 white-fence
+  report, task 102). A continuation ribbon SHARES the predecessor's exact
+  endpoint in data and ribbonOn splices it via pathgeom.joinSeam (mitered
+  shared seam edge; hard kinks fall back to a paved junction disc sized to
+  cover the overlap wedge). tools/path-continuity.mjs asserts all of this
+  map-wide inside walkprobe — fix data/geometry, never widen its tolerances.
+- A gate tool that MIRRORS engine geometry with its own reimplementation
+  measures fiction the moment the engine changes: 102's draft gate carried a
+  foldClamp edge-repair while paths.js shipped radiusClamp — 5 of its 7 FAILs
+  were artifacts of the fork, and a real green could have hidden real jank the
+  same way. The 052 walkability law generalizes: shared math lives in ONE
+  module BOTH import (src/pathgeom.js for ribbon seams/edges); a probe may
+  mirror only what it provably locks bit-exact (the r128 CR evaluator, checked
+  by the butt-join 0.000-cap expectations).
 

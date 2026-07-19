@@ -638,9 +638,13 @@ export const TRAIL_CONNECTOR=[[16,105],[34,108],[54,112],[70,116],[79,120]];
 // TRAIL_MAIN's golf-lakeside north end (~211,-782) up the new Montrose lawn toward
 // the Point. A NEW ribbon (never reshape TRAIL_MAIN — pathSamples is phase-
 // sensitive); paths.js draws it LAST and registers its samples in pathSamples2
-// only. Starts ~z-770 (overlapping TRAIL_MAIN's end so the ribbons join with no
-// gap) and runs to z-1024, holding x~200-211 (clear of the revetment x~234 and the
-// west hedge x14). 070-073 re-route locally as the harbor/Point/beach carve in.
+// only. 102: the hand-off is a SHARED ENDPOINT — TRAIL_MONTROSE[0] IS
+// TRAIL_MAIN's last point [208,-572] — and paths.js splices the two ribbons
+// with a mitered join (the 071 Point-paths idiom generalized). NEVER reintroduce
+// the 069 "overlap so the ribbons join with no gap" line: two full ribbons
+// coexisting for ~10 m at identical y double-paved the seam (z-fight band,
+// edge notches, doubled dashes — the owner's 2026-07-19 white-fence report).
+// 070-073 re-route locally as the harbor/Point/beach carve in.
 // 070 re-routes the harbor stretch WEST of the basin (the basin water sits x186-218,
 // z-677..-852) so the promenade hugs the mainland harbor edge and never crosses
 // water; determinism-safe (pathSamples2, merged after buildProps; scatter caps z>=-800).
@@ -649,7 +653,7 @@ export const TRAIL_CONNECTOR=[[16,105],[34,108],[54,112],[70,116],[79,120]];
 // top) then the SHIFTED harbor-north alignment (pre-084 points +436 from
 // [172,-699] on — the promenade/Point/beach run translates rigidly).
 export const TRAIL_MONTROSE=[
-  [209,-562],[206,-580],[196,-598],[178,-608],[160,-616],[148,-626],
+  [208,-572],[206,-580],[196,-598],[178,-608],[160,-616],[148,-626],
   [146,-638],[154,-648],[168,-658],[176,-672],
   // 088 REROUTE (issue 030, owner "shoreline placement"): the shipped tail
   // ([199,-924],[206,-978],[210,-1024]) ran the asphalt + dashes ACROSS the

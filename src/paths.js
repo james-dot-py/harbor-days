@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import { scene, toon, bmat } from './core.js';
 import * as CH from './data/chicago.js';
+// 102: seam/edge geometry SHARED with tools/path-continuity.mjs (the
+// permanent gate) — one definition, engine and probe can never fork.
+import { dirOf, radiusClamp, joinSeam, weldSeam } from './pathgeom.js';
 export { TRAIL_MAIN, TRAIL_SPUR, TRAIL_LOOP, TRAIL_CONNECTOR, TRAIL_ENTRANCE } from './data/chicago.js';
 
 // ------------------------------- paths --------------------------------
@@ -48,19 +51,77 @@ const _frT=new THREE.Vector3();
 // identical values.)
 export function trailFrame(curve,u,p,n){ curve.getPoint(u,p); curve.getTangent(u,_frT); n.set(-_frT.z,0,_frT.x); }
 
+// Junction discs — a hard-kink join whose miter would fold instead keeps both
+// ribbons' natural caps and covers the junction with a paved DOT (one shared
+// mesh via flushJunctions, y+0.006 up the 088 ladder): no wedge, no fold, no
+// z-fight — a real paved node where paths meet at a corner. Task 102.
+export const junctions=[];
+function addJunction(x,z,r,y,color){ junctions.push({x,z,r,y,color}); }
+export function flushJunctions(){
+  if(!junctions.length)return;
+  const byColor=new Map();
+  for(const j of junctions){ const a=byColor.get(j.color)||[]; a.push(j); byColor.set(j.color,a); }
+  for(const [color,list] of byColor){
+    const inst=new THREE.InstancedMesh(new THREE.CircleGeometry(1,24),toon(color),list.length);
+    const M=new THREE.Matrix4(),Q=new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2,0,0)),S=new THREE.Vector3(),V=new THREE.Vector3();
+    list.forEach((j,i)=>{ M.compose(V.set(j.x,j.y,j.z),Q,S.set(j.r,j.r,1)); inst.setMatrixAt(i,M); });
+    inst.instanceMatrix.needsUpdate=true; scene.add(inst);
+  }
+}
+
 // Draw a paved ribbon of `width` following `curve`, with its centerline
 // shifted laterally by `shift` (along the left normal). Collects the shifted
 // centerline into pathSamples (so props stay off BOTH ribbons) and returns it.
-function ribbonOn(curve,width,color,y,shift,samples=pathSamples){
+// JOIN/MITRE (task 102 — "malformed path seams impossible, not patched"):
+// a ribbon that CONTINUES a previous one passes the predecessor's returned
+// `cl.endFrame`; its first centerline station snaps to the predecessor's last
+// (bit-exact) and BOTH seam stations' edges are replaced by the two miter
+// intersections (each side's edge lines extended to a shared point, paired by
+// side so >90° kinks don't swap) — the seam then shares ONE edge exactly: no
+// gap, no overlap, no step, at any kink angle. A ribbon whose curve is a
+// CLOSED outline (first==last control point — the garden peanut, the
+// sanctuary loop) miters its own weld the same way. Determinism-safe: miters
+// move only EDGE vertices; centerline samples (the frozen arrays) never move.
+function ribbonOn(curve,width,color,y,shift,samples=pathSamples,join=null){
   const n=Math.max(60,Math.round(curve.getLength()/2));
-  const pos=[],idx=[],cl=[];
+  const cl=[],EL=[],ER=[];
   const p=new THREE.Vector3(),t=new THREE.Vector3();
   for(let i=0;i<=n;i++){
     const u=i/n; trailFrame(curve,u,p,t);
     const nx=t.x,nz=t.z,w=width/2;
     const cx=p.x+nx*shift,cz=p.z+nz*shift;
-    cl.push([cx,cz]); samples.push([cx,cz]);
-    pos.push(cx+nx*w,y,cz+nz*w, cx-nx*w,y,cz-nz*w);
+    cl.push([cx,cz]);
+    EL.push([cx+nx*w,cz+nz*w]);ER.push([cx-nx*w,cz-nz*w]);
+  }
+  const halfW=width/2;
+  radiusClamp(cl,EL,+1); radiusClamp(cl,ER,-1);   // 102: no inner-edge darts, anywhere
+  // CONTINUATION JOIN (shared math: pathgeom.joinSeam): snap our first
+  // station to the predecessor's last and miter both seam stations — the
+  // predecessor's last quad is rewritten through its position attribute
+  // (build-time, pre-render, so no upload race). A hard kink whose miter
+  // would fold keeps both natural caps under a paved dot (junctions[]).
+  if(join){
+    const res=joinSeam(join,cl,EL,ER,halfW);
+    if(res.disc){
+      addJunction(res.disc.x,res.disc.z,res.disc.r,y+0.006,color);
+    }else{
+      const A=join.attr.array,o=join.n*6;
+      A[o]=res.mL[0];A[o+2]=res.mL[1]; A[o+3]=res.mR[0];A[o+5]=res.mR[1];
+      join.attr.needsUpdate=true;
+    }
+  }
+  // WELD: a closed outline (first==last control point) miters its own
+  // start/end meeting — the garden peanut + the sanctuary loop weld clean
+  // (shared math: pathgeom.weldSeam; hard kinks fall back to a paved dot).
+  const P0=curve.points[0],P1=curve.points[curve.points.length-1];
+  if(Math.hypot(P0.x-P1.x,P0.z-P1.z)<1e-6&&n>=4){
+    const res=weldSeam(cl,EL,ER,halfW);
+    if(res.disc) addJunction(res.disc.x,res.disc.z,res.disc.r,y+0.006,color);
+  }
+  const pos=[],idx=[];
+  for(let i=0;i<=n;i++){
+    samples.push([cl[i][0],cl[i][1]]);
+    pos.push(EL[i][0],y,EL[i][1], ER[i][0],y,ER[i][1]);
     // wind faces UP (normals +y) so the ribbon is visible from above — the
     // old winding faced down and got back-face culled ("no walkways" bug).
     if(i<n){const a=i*2;idx.push(a,a+2,a+1,a+1,a+2,a+3);}
@@ -70,6 +131,9 @@ function ribbonOn(curve,width,color,y,shift,samples=pathSamples){
   g.setIndex(idx);g.computeVertexNormals();
   scene.add(new THREE.Mesh(g,toon(color)));
   ribbonLanes.push({pts:cl,w:width});   // 088: register the real drawn ribbon
+  // the chainable end frame (join target for a continuing ribbon; the attr
+  // handle lets the successor rewrite THIS ribbon's last quad to the miter)
+  cl.endFrame={c:cl[n],pc:cl[n-1],l:EL[n],r:ER[n],pl:EL[n-1],pr:ER[n-1],dir:dirOf(cl[n-1],cl[n]),attr:g.getAttribute('position'),n};
   return cl;
 }
 
@@ -159,17 +223,37 @@ export function buildPaths(){
     }
   }
   const montroseCurve=curveOf(CH.TRAIL_MONTROSE);
-  trailLanes.mtrWalk=ribbonOn(montroseCurve,st.walk.width,st.walk.color,st.walk.y,walkOff,pathSamplesMain);
-  trailLanes.mtrBike=ribbonOn(montroseCurve,st.bike.width,st.bike.color,st.bike.y,0,pathSamplesMain);
+  // 102 JOINS: the Montrose run CONTINUES MAIN (shared endpoint [208,-572] in
+  // the data) — splice each ribbon to its MAIN counterpart's end frame so the
+  // hand-off is one shared mitered edge (no gap/overlap/step by construction;
+  // replaces the 069 "overlap so the ribbons join" double-pave seam).
+  trailLanes.mtrWalk=ribbonOn(montroseCurve,st.walk.width,st.walk.color,st.walk.y,walkOff,pathSamplesMain,walkCl.endFrame);
+  trailLanes.mtrBike=ribbonOn(montroseCurve,st.bike.width,st.bike.color,st.bike.y,0,pathSamplesMain,trailLanes.bike.endFrame);
   // yellow center dashes on the paved BIKE path + the SPUR + Montrose (not the walkway)
+  // 102: dashes belong to the NETWORK's arc length, not to each curve's
+  // parameter — a curve that CONTINUES the previous one (shares its exact
+  // endpoint, MAIN->MONTROSE) keeps the dash PHASE across the seam so the
+  // paint rhythm never stutters at a join (the old per-curve u=(i+0.5)/n
+  // placement landed two dashes ~1 m apart at the hand-off). Forks/standalone
+  // curves (the spur) start their own phase. rng-free, visual-only.
+  // ORDER: montrose directly AFTER main — the carry compares each curve's
+  // start against the PREVIOUS list entry's end, so the continuation must be
+  // adjacent (main,spur,montrose silently never carried; the gate mirrors
+  // this list).
   {
     const dashes=[];
-    for(const cv of[mainCurve,spurCurve,montroseCurve]){
-      const L=cv.getLength(),n=Math.floor(L/st.dash.spacing);
-      for(let i=0;i<n;i++){
-        const u=(i+0.5)/n,p=cv.getPoint(u),tg=cv.getTangent(u);
-        dashes.push({x:p.x,z:p.z,rot:Math.atan2(tg.x,tg.z)});
+    let carry=null;      // arc-length from the last placed dash to the previous curve's end
+    let prevEnd=null;
+    for(const cv of[mainCurve,montroseCurve,spurCurve]){
+      const L=cv.getLength();
+      const cont=carry!==null&&cv.getPoint(0).distanceTo(prevEnd)<1e-3;
+      const s0=cont?st.dash.spacing-carry:st.dash.spacing/2;
+      let last=-1;
+      for(let s=s0;s<L;s+=st.dash.spacing){
+        const p=cv.getPointAt(s/L),tg=cv.getTangentAt(s/L);
+        dashes.push({x:p.x,z:p.z,rot:Math.atan2(tg.x,tg.z)});last=s;
       }
+      carry=last<0?(cont?carry:0)+L:L-last; prevEnd=cv.getPoint(1);
     }
     const inst=new THREE.InstancedMesh(new THREE.PlaneGeometry(st.dash.w,st.dash.len),bmat(st.dash.color),dashes.length);
     const M=new THREE.Matrix4(),S=new THREE.Vector3(1,1,1),V=new THREE.Vector3();
@@ -183,6 +267,10 @@ export function buildPaths(){
   // the east end, + the tip loop back to the mole-root walk. Crushed limestone
   // (walk styling); NEW ribbons -> pathSamples2 ONLY (ribbonOn is rng-free).
   const MP=CH.MONTROSE_POINT;
-  ribbonOn(curveOf(MP.paths.entrance),MP.paths.width,st.walk.color,st.walk.y,0,pathSamples2);
-  ribbonOn(curveOf(MP.paths.loop),MP.paths.width,st.walk.color,st.walk.y,0,pathSamples2);
+  const mpEnt=ribbonOn(curveOf(MP.paths.entrance),MP.paths.width,st.walk.color,st.walk.y,0,pathSamples2);
+  // 102 JOIN: the tip loop continues the entrance path at the shared [232,-902]
+  // — spliced; the ~100° kink there falls back to a paved junction dot (the
+  // miter would fold), covering the wedge the owner-era build left in the bend.
+  ribbonOn(curveOf(MP.paths.loop),MP.paths.width,st.walk.color,st.walk.y,0,pathSamples2,mpEnt.endFrame);
+  flushJunctions();   // 102: one instanced mesh for every paved junction dot
 }

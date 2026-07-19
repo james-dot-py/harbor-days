@@ -357,7 +357,13 @@ interim shoreline, not holes).
 band all extend north to the new edge (data: `LSD.berm.z0`, `LAKEVIEW_BAND.zr`;
 ambient.js `Z_N`). The dual **Lakefront Trail** continues from its golf-lakeside
 north end as a NEW ribbon (`TRAIL_MONTROSE`, registered via `pathSamples2` — never
-reshape `TRAIL_MAIN`) running the lawn up toward the Point. The **Montrose Ave
+reshape `TRAIL_MAIN`) running the lawn up toward the Point. **Trail hand-off law
+(task 102):** `TRAIL_MONTROSE[0]` IS `TRAIL_MAIN`'s last point `[208,-572]` and
+`paths.js` splices the two ribbons with a MITERED join (shared seam edge, no
+gap/overlap/step by construction) — the 069-era "overlap the ribbons ~10 m so
+they join" double-pave is forbidden anywhere on the map (it z-fights, notches
+the edges, and doubles the dashes; the garden-peanut + sanctuary closed loops
+miter their own welds the same way). The **Montrose Ave
 underpass gate** (x 0–14, z −1207) matches the Belmont/Addison/Irving register
 (fenced dead-end door, no gag sign). North map edge z −1516 with the north-cap
 hedge; `WATER` plane grown so the far-north lake never runs out.
