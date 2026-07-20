@@ -1467,6 +1467,10 @@ export const ZOO = {
     { id:'farm-house', x:-64, z:968, w:8,  d:8,  ry:0 },
     { id:'livestock',  x:-46, z:982, w:8,  d:7,  ry:0 },
   ],
+  fixtures:[  // ride/attraction fixtures (RENAMES.md: brand marks -> generic in-game names)
+    { id:'carousel',  x:-24, z:824, r:4, name:'Endangered Species Carousel' },  // AT&T brand dropped
+    { id:'zoo-train', x:-72, z:826, w:6, d:3, name:'the Zoo Train' },           // Lionel -> generic
+  ],
 };
 
 // ---- CONSERVATORY + FORMAL GARDEN + Bates fountain + Lily Pool (116) --------
