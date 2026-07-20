@@ -2,6 +2,7 @@
 id: 120
 area: lincolnpark
 type: signoff
+model: opus
 turns: 120
 title: Lincoln Park sign-off (§5.2) — formalize the stretch, unlock the planner
 acceptance: >

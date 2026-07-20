@@ -2,7 +2,7 @@
 id: 114
 area: lincolnpark
 type: build
-model: fable
+model: opus
 turns: 140
 title: Lincoln Park Zoo CAMPUS — the hero build: open gates, the Seal Pool, the Lion House, the brick armature
 acceptance: >

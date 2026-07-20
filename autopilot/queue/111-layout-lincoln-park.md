@@ -2,7 +2,7 @@
 id: 111
 area: lincolnpark
 type: layout
-model: fable
+model: opus
 turns: 120
 title: Lincoln Park LAYOUT — GEOGRAPHY.md first: the west crossing + compression rulings, then staged chicago.js data + the plan for 112-117
 acceptance: >
@@ -84,6 +84,15 @@ refs:
   - PITFALLS.md (pathSamples phase sensitivity; instanced buckets are
     GLOBAL draws; walkprobe/engine sharing; small toon animals don't read)
 ---
+
+> AUTOPILOT NOTE (2026-07-19, task 112 remediation): parked after three Fable-5
+> usage-limit 429s (not real failures — org Fable overage disabled, window resets
+> ~2026-07-24; run.mjs's LIMIT_RE never matched "reached your Fable 5 limit" so it
+> struck instead of sleeping). Re-modeled fable->opus and unparked per the owner's
+> 2026-07-19 "no fable today" directive. Your output (GEOGRAPHY.md Lincoln Park
+> section + refs/lincoln-park/BRIEF.md BUILD-PLAN/WAYPOINTS + staged bit-identical
+> chicago.js consts) is what 112 applies — 112 is blocked until this ships.
+> refs/lincoln-park/osm.json is already fetched (110's head start). See issues/112.md.
 
 Judgment task: this file fixes the coordinate truth every Lincoln Park build
 cites, and it carries TWO structural firsts — land west of the Drive, and a

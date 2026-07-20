@@ -2,7 +2,7 @@
 id: 110
 area: lincolnpark
 type: scout
-model: fable
+model: opus
 turns: 100
 title: Lincoln Park SCOUT — refs, osm.json (WORLD frame), BRIEF.md, the west-reach numbers, delight candidates, draft expectations
 acceptance: >
@@ -86,6 +86,15 @@ refs:
   - RENAMES.md (the de-brand law + the person-name KEEP precedent)
   - refs/inbox/ (owner photo channel — check every task)
 ---
+
+> AUTOPILOT NOTE (2026-07-19, task 112 remediation): this task was parked after
+> three "failures" that were actually Fable-5 usage-limit 429s ("You've reached
+> your Fable 5 limit") — the org's Fable overage is disabled and its 7-day window
+> resets ~2026-07-24, and run.mjs's LIMIT_RE never matched that phrasing so it
+> struck+parked instead of sleeping. Re-modeled fable->opus per the owner's
+> 2026-07-19 "no fable today" directive and the "queue back on claude models"
+> precedent, then unparked. See autopilot/issues/112.md. Do the task as written —
+> the Lincoln Park build tasks (112 first) are blocked until this ships.
 
 First task of the Lincoln Park pipeline (planner 2026-07-19, §5.3 pick:
 recognizability + contiguity + variety — the map's first animals). REFERENCE
