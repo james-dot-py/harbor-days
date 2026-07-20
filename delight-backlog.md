@@ -106,3 +106,35 @@ doors · Wrigley's Spearmint ad inside the L car.
   at the sand line; the bartender hums along off-key — The Dock at Montrose
   Beach — beach-bar ambience without a speaker in sight. (source: task 067;
   The Dock register, 072 build)
+- [proposed] Seal feeding time: a keeper with a fish bucket rings a bell at the
+  historic Sea Lion Pool and the sea lions arc, bark and haul out on the
+  rockwork while a rail of onlookers leans in — an "ope" splash if you stand too
+  close — Lincoln Park Zoo Sea Lion Pool — the real daily feeding ritual at
+  Chicago's free zoo. (source: task 110; Seals_or_sea_lions B&W + pool refs)
+- [proposed] Conservatory humidity wall: stepping through the glasshouse FREE
+  ADMISSION doors fogs the screen edges, warms the fog color and swells a
+  tropical hush + birdsong (definePlace grade, the Jarvis room precedent) —
+  Lincoln Park Conservatory — the wall of warm wet air every Chicagoan walks
+  into in January. (source: task 110; Fern Room / Orchid House interior refs)
+- [proposed] Paddleboat on South Pond: rent a green (or white swan) paddleboat
+  at Café Brauer and pedal a slow loop of the pond, mallards scattering off your
+  bow — Café Brauer / South Pond — the summer paddleboat ritual. (source: task
+  110; Café Brauer with paddle boats ref)
+- [proposed] Cricket & frog chorus at dusk: linger on the Nature Boardwalk after
+  sundown and a synth cricket/spring-peeper chorus swells over the reeds;
+  fireflies gather where you stand still — Nature Boardwalk / South Pond — the
+  restored-wetland dusk in the middle of the city. (source: task 110; South Pond
+  dusk refs; nature.js firefly precedent)
+- [proposed] Night-heron rookery: a black-crowned night-heron colony (Illinois-
+  endangered, and famous for choosing the zoo itself to nest) roosts in a
+  boardwalk tree; peek and the hunched grey birds squawk-shuffle along the
+  branch — Nature Boardwalk — the zoo's real celebrated wild rookery. (source:
+  task 110; South Pond heron/wetland refs)
+- [proposed] The carousel actually rides: E / ✋ at the Endangered Species
+  Carousel mounts a carved animal for a slow synth-waltz spin (a session-camera
+  vignette, the Topgolf-bay precedent) — Lincoln Park Zoo — the kid ritual.
+  (source: task 110; carousel osm 210686222 — de-branded per RENAMES)
+- [proposed] Farm chicken chase: a loose red hen darts around the Farm-in-the-
+  Zoo yard and a keeper-kid asks you to shoo it back toward the coop — gentle,
+  the goose-chase register — Farm-in-the-Zoo — petting-farm comedy dropped into
+  the city. (source: task 110; Farm-in-the-Zoo folk sign ref)
