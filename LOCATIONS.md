@@ -63,17 +63,30 @@ feasibility inside perf + single-file constraints.
 
 ## In progress
 
-- (no location build in flight — Montrose signed off 2026-07-16. The queue
-  carries the owner's cross-cutting direction next: 077 mobile-first
-  experience, 078–082 the fun layer (economy/dibs/tote/favors), 083 the
-  App Store rail. The §5.3 next-location planner runs when the queue
-  empties.)
+- **Lincoln Park Zoo and the conservatory** ("lincolnpark") — PLANNER PICK
+  2026-07-19 (§5.3, queue 110–120). Contiguous 1:2 growth SOUTH-WEST
+  through the staged Diversey-Lincoln Park gate (GEOGRAPHY.md's SW
+  terminus, trail end ~(30,406)): Diversey Harbor channel + Theater on
+  the Lake as connective tissue (112/113), then the free zoo — open
+  gates, the Seal Pool, the Kovler Lion House, the habitat cast,
+  Farm-in-the-Zoo (114/115) — the conservatory + Bates fountain + formal
+  garden (116), and South Pond's Nature Boardwalk + honeycomb pavilion +
+  Café Brauer (117); delight 118, polish 119, sign-off 120. Rationale
+  vs criteria: recognizability (iconic to every Chicago kid, four
+  distinct silhouettes), connectivity (adjacent growth, no hard cell —
+  and it serves the owner's vision line "Lincoln Park + conservatory +
+  ponds" directly), variety (the map's FIRST ANIMALS; a glasshouse and a
+  channel harbor are new registers; North Ave Beach deferred — a third
+  beach scores lowest on variety), feasibility (staged narrow like
+  Montrose 067–076). Structural firsts for the layout task to rule with
+  the 084/east-reach precedents: land WEST of LSD (the L backdrop +
+  Lakeview band relocate) and the map's first WORKING underpass at
+  Fullerton.
 
 ## Candidates (famous Chicago spots, seeded per §5.3)
 - North Avenue Beach — adjacent south; the chess pavilion + boat-shaped
-  beach house silhouette.
-- Lincoln Park Zoo and conservatory — adjacent south-west; free zoo, iconic
-  to every Chicago kid.
+  beach house silhouette. (Deferred at the 2026-07-19 pick on variety —
+  third beach; the Lincoln Park growth walks the map toward it.)
 - The 606 and Wicker Park — elevated trail, distinct texture; likely hard cell.
 - Logan Square — the eagle column + boulevards; hard cell via Blue Line motif.
 - Andersonville — water tower + Swedish flag stripe; hard cell.
