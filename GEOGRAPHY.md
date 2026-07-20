@@ -32,14 +32,23 @@ using real names for geography truth; builders translate via RENAMES.md.
 | Roscoe St (3400 N) | +0.25 mi | **−200** |
 | Belmont Ave (3200 N) | 0 | **0** |
 | Briar Pl (~3100 N) | −0.125 mi | **+100** |
-| Diversey/Fullerton point (~2800 N) | −0.2 mi | **+340…+403** (the corner wrap) |
-| South map edge (~2750 N) | | **+415** |
+| Diversey Pkwy (2800 N) | −0.5 mi | **+403…+410** (the corner wrap → Lincoln Park) |
+| Wrightwood (2600 N) | −0.75 mi | **+543** (Lincoln Park §; raw +603, ×2⁄3 south-compressed) |
+| Fullerton Pkwy (2400 N) | −1.0 mi | **+671** (the WORKING underpass; raw +794) |
+| Webster (2200 N) | −1.25 mi | **+807** (raw +999) |
+| Armitage (2000 N) | −1.5 mi | **+942** (raw +1201) |
+| South map edge (~South Pond, 1900 N) | | **+1020…+1060** |
 
-Map bounds: **x −10…245, z −1084…+415** (≈ 255 × 1,499 m) as of the 084
-compression (v0.7). Player clamp a few m inside (WORLD_CLAMP.zMin = −1084,
-zMax = 408). Minimap aspect follows (MAP.z0 = −1124, MAP.h = 1549 — the
-compression reshapes the HUD minimap; a [baseline-regen] task, like the v0.6
-growth was).
+Map bounds (v0.8, task 111 — the LINCOLN PARK growth): **x −112…245,
+z −1084…+1060** (≈ 357 × 2,144 m). Player clamp a few m inside
+(**WORLD_CLAMP = { xMin: −112, xMax: 244, zMin: −1084, zMax: 1020 }** — the
+west edge opens into the park, the south edge reaches South Pond). Minimap
+follows (**MAP = { x0: −170, z0: −1124, w: 576, h: 2184, cw: 304, ch: 412 }**
+— h 1549→2184; the HUD minimap reshapes, a [baseline-regen] task like 084).
+**These are FINAL numbers task 112 applies ONCE** (this task, 111, only
+STAGES the data and leaves the live constants at their pre-Lincoln values —
+the world stays bit-identical until 112). North-of-Diversey (z<408) is the
+compressed v0.7 frame above; south is the v0.8 Lincoln Park frame, ruled below.
 
 ## THE 084 COMPRESSION (owner-granted liberty, 2026-07-16 — v0.7)
 
@@ -141,6 +150,18 @@ removed distance is almost entirely the blank golf/lawn stretch.
    gag signs were removed in task 030 per owner feedback — the portals stay, the
    signs are gone). The berm, road, L-track backdrop and Lakeview band all run the
    full new map length (z −1520…+418).
+   **ONE EXCEPTION — the Lincoln Park band (z ≳ 408, v0.8).** This "strip is
+   constant for the whole map" holds NORTH of the Diversey corner. South of it
+   the map's FIRST land west of the Drive opens: the **park panel** occupies
+   NEGATIVE x (Diversey Harbor lagoon → zoo → conservatory), so the L-track +
+   Lakeview band **RELOCATE WEST** — from x −8/−16 to ≈ **x −118** (just west
+   of the built park), representing the Clark St / Lincoln Ave residential wall
+   (the standing "L as backdrop, really ~1.5 km inland" liberty, now a west-of-
+   the-park liberty). The berm/DuSable-LSD stays x 0–14; the **Fullerton
+   underpass** (z ≈ 656–666) is the map's FIRST WORKING crossing of the Drive.
+   See the Lincoln Park section for the full ruling. (Determinism: the band's
+   south segment marches with its OWN local seed, the Montrose `zrN` precedent —
+   the existing arrays stay byte-identical, 0 new InstancedMesh buckets.)
    The Belmont stop moved from z 0 to z +105 to sit on the AIDS-garden/Keith-Haring
    axis; a short paved connector links its mouth (~x 14, z 105) east to the loop.
 2. **x 14–~85 — inner parkland**: lawns, meadows, tree groves, the inner branch of
@@ -614,6 +635,168 @@ dog beach or vice-versa.
   gate). Data: `DIVERSEY` (`bays.deck`, `bays.hit`, `mini.holes[].fair/tee/cup`);
   builder `buildDiversey()`; play in `src/packs/diversey.js`.
 
+### Lincoln Park, z +408…+1060 (v0.8 — the map's first land WEST of the Drive)
+
+The lakefront's growth SOUTH of the Diversey corner: Diversey Harbor's sailboat
+lagoon, Theater on the Lake, the **free** Lincoln Park Zoo, the copper-green
+Conservatory, and South Pond with its Nature Boardwalk + Café Brauer. Coordinates
+cite `refs/lincoln-park/osm.json` (`provenance.scout110`) via the SCOUT BRIEF
+(`refs/lincoln-park/BRIEF.md`). Staged in `chicago.js` as the `LINCOLN_*`/`LP_*`/
+`ZOO` consts (all UNCONSUMED this task — the world is bit-identical until 112).
+The build order: **112** flips the bounds/clamp/minimap + berm/LAND/L-band once
+and regenerates baseline.png; **113** Diversey Harbor + Theater + the underpass;
+**114/115** the zoo; **116** the conservatory; **117** South Pond. Each water body
+and zone is a SEPARATE const so a build owns its patch without touching the
+others' rng (the Montrose 069 model).
+
+**THE FRAME (framing B — the WEST CROSSING).** Real Lincoln Park sits WEST of Lake
+Shore Drive (Belmont/Diversey harbors sit EAST of it — the map flips at the
+corner). So: the berm / **DuSable LSD stays x 0–14**; the **park panel opens into
+NEGATIVE x**; a thin lakefront strip (Lakefront Trail + Theater on the Lake) stays
+EAST at x > 14 with the lake beyond; and the L-track + Lakeview backdrop band
+RELOCATE to the new far-west edge (≈ x −118) for the southern band. Two osm
+reaches will not fit a sane 1:2 frame, so both are **compressed as standing
+liberties** (numbers below), keeping topological ORDER intact:
+
+- **WEST reach** — `x_game = 14 − (LSDx(z) − x_raw)·0.5` (a further 2× squeeze
+  beyond the 1:2 base — the west mirror of the Montrose ~2.8× east-reach). `LSDx(z)`
+  is the LOCAL DuSable-LSD east edge, which drifts EAST going south (≈ x196 at
+  Diversey → x324 at Armitage, BRIEF §1b / `LP_LSD_DRIFT`), so every latitude
+  re-anchors to the Drive, never a fixed x. This holds LSD at the berm and pulls
+  the park's raw ~209-unit west reach (LSD→Stockton) to ≈ 104 units.
+- **SOUTH reach** — `z_game = 410 + (z_raw − 403)·(2⁄3)`, Diversey corner
+  z_raw 403 → z_game 410 (**the 084 COMPRESSION precedent**). The raw south reach
+  (corner → Armitage ≈ +1210 / South Pond ≈ +1310) squeezes to +942 / +1015, so
+  the walk Diversey→zoo→South Pond carries no 084-class blank stretch.
+
+**THE RELATIVE ARRANGEMENT (the law — §5.4; do not reorder).** East→west across
+Fullerton: **lake — Lakefront Trail — DuSable LSD (x0–14) — Diversey Harbor lagoon
+— Cannon Dr — the ZOO — Stockton Dr — the Conservatory** (backdrop city west of
+that). North→south: the **lagoon** threads the park's east side (Cannon its west
+bank) from the Diversey corner down under Fullerton; **Theater on the Lake** sits
+ALONE on the east lakefront strip at Fullerton; the **zoo** is a fenced-but-open
+campus SOUTH of Fullerton (historic Sea Lion Pool + Lion House at its north-center,
+z≈820); the **conservatory + formal garden + Bates fountain + Lily Pool** cluster
+NW of the zoo across Fullerton (z≈695–780); **South Pond** hangs off the zoo's
+SOUTH end (z≈895–1015) with the **boardwalk ring** around it, **Café Brauer** at
+its NW shoulder and the **honeycomb pavilion** on its SE boardwalk peninsula;
+**Farm-in-the-Zoo** just NW of the pond.
+
+#### STRUCTURAL FIRST #1 — THE WEST CROSSING (standing liberty, task 111)
+- **The berm/road (x 0–14) stays**; the park opens WEST. The LAND polygon extends
+  west to ≈ x −104 (Stockton) in the Lincoln Park band ONLY; north of the corner
+  its west edge stays x14 (the L/city, non-park). `WORLD_CLAMP.xMin` drops 14 → −112.
+- **The Fullerton underpass (z ≈ 656–666) is the map's FIRST WORKING crossing of
+  the Drive** — a walkable tunnel through the berm linking the east lakefront strip
+  (x14–24) to the west park (x < 0). The Belmont/Addison/Irving/Montrose portals
+  stay fenced dead-end doors; **only Fullerton opens.** Axis-aligned E–W (the
+  camera-math interior rule). Data: `LP_UNDERPASS`.
+- **Diversey gets NO second pedestrian crossing.** The real Diversey inlet crosses
+  under LSD as WATER (a water-under-causeway detail, optional for 113); it is not a
+  foot gate. One working crossing keeps the structural first clean.
+- **WEST-WADE GUARD (binding on 112; issue-017 class).** The lakefront's `isWater()`
+  reads any non-LAND spot as water (jetski/wade). With `xMin` −112, the berm's WEST
+  face (x < 14) NORTH of the corner must read **BLOCKED, not water** — else the
+  Belmont player wades into the L/city. 112 keeps the berm a non-walkable, non-water
+  embankment for the whole map and opens LAND west-of-berm ONLY where z > 408, in the
+  SHARED walkability data (engine + `walkprobe.mjs` lockstep — never fork the two).
+
+#### STRUCTURAL FIRST #2 — THE SOUTH/WEST COMPRESSION (standing liberty, task 111)
+Both reaches are compressed per the transforms above. This is the 084 COMPRESSION
+liberty (documented golf/blank squeeze) applied on two axes at once, and the west
+mirror of the recorded Montrose east-reach compression. The ORDER survives on both
+axes; only distance is squeezed. Every feature keeps its own footprint at 1:1
+object scale (buildings/props never shrink — the scale law); the compression pulls
+their CENTER positions together, tightening the connective LAND, not the halls.
+
+#### STRUCTURAL RULING — THE SKYLINE-BILLBOARD GATE (binding on 112/113)
+The global downtown skyline billboard (`sky.js`, world **z 504–677**, fog:false,
+InstancedMesh fills, drawn in EVERY view) sits in what used to be empty south lake.
+Contiguous Lincoln Park now fills z 410–1020 — INTO and PAST the billboard — so
+from inside the park the billboard would read to the NORTH over the zoo and
+interpenetrate the north halls. Per the BRIEF §7 physics ruling the skyline
+CANNOT/should not render from Lincoln Park (far plane 900 + fog opaque 210) anyway.
+**Ruling: the billboard is Z-GATED** — full north of the Diversey corner (the
+signature Belmont Rocks read, baseline.png, UNCHANGED), faded across the corner
+transition (z 403→503), hidden south of it. From the park the compressed downtown
+backdrop yields to Lincoln Park's own enclosure (the relocated west L/Lakeview band,
+big elms, park halls). This is the contiguous-growth analog of the cell
+visibility-swap that already isolates the billboard from the Millennium cell.
+**Keep the fade band (z 450–560) content-LOW** — lagoon water + docks + modest masts
+only; the tall halls all sit at z ≥ 671 (Fullerton and south), well past the fade.
+Determinism: the billboard geometry + its `mulberry32(0x5c1000)` extents are
+FROZEN (`tools/tmp-billboard-extent.mjs`); only a player-z visibility/opacity
+uniform is added — no rng, no new buckets, same draw count when visible. Data:
+`LP_SKYLINE_GATE`.
+
+#### The features (compressed-frame anchors — scaffolding; 113–117 refine)
+- **Diversey Harbor** (the connective lagoon, z ≈ 415–636, west of the berm): a long
+  narrow sailboat lagoon, ≈ x −8 (east/berm bank) to x −44 (**Cannon Dr**, its west
+  bank / the zoo's east flank). Wooden finger docks + rows of moored white sailboats
+  + dock-box lamps + stone-block revetment. Its OWN coast/water piece
+  (`LP_DIVERSEY_WATER`/`LP_DIVERSEY_CANNON`), KEPT OUT of `COAST_SEGS`. **A Signal of
+  Peace** (Dallin equestrian) at the Diversey head; **Goethe Monument** on the west
+  backdrop. Statuary = verdigris bronze + granite (persons/civic — KEPT real).
+- **Theater on the Lake** (≈ 30, 615): the 1920 Prairie-brick venue, ALONE on the
+  east lakefront strip east of the Drive at Fullerton. *(Commons imagery gap — 113
+  hand-models the Prairie-brick type; re-fetch/inbox first.)*
+- **Lincoln Park Conservatory** (glasshouse ≈ x −70, z 716): copper-green vaulted
+  glass roofs + a white-pyramid vestibule (FREE ADMISSION doors), red-brick base,
+  over a **formal garden** (clipped beds + feathery straw grasses, z 740–790) on the
+  **Eli Bates "Storks at Play" fountain** axis (≈ −73, 776), with the **Alfred
+  Caldwell Lily Pool** (≈ −58, 697) NE. Glass goes self-lit `bmat` (the Bean/Crown
+  green-ground-bounce dodge). Data: `LP_CONSERVATORY`.
+- **The ZOO** (a fenced-but-**open** campus, z ≈ 738–1008, x −8…−99; perimeter +
+  OPEN gates in `ZOO`). **FREE ADMISSION — open gates, no ticket booth, no
+  turnstile** (the opposite of the Wrigley box office; a signature Chicago civic
+  fact + a delight). The **west/Stockton gate** is a bronze lion pair on a granite
+  LINCOLN PARK ZOO plinth before a limestone hall; the **east gate** takes the
+  Fullerton underpass; the **south gate** opens to the Farm + pond. Hero pair at the
+  north-center: the **Sea Lion Pool** (≈ −56, 822 — the historic craggy-limestone
+  rock-rimmed pool, arcing sea lions) before the **Kovler Lion House** (≈ −34, 831 —
+  the 1912 red-brick arched hall). Ring the campus with flamingos, polar bear,
+  giraffe, gorilla; **Farm-in-the-Zoo** (red barns + picket fences, ≈ −55, 980) NW of
+  the pond carries the pettable cow/goat/hen set. **The map's first animals** — all
+  via the NPC/pack register (per-mesh, culled >145 m — the `makeNPC`/crowd.js
+  precedent), NEVER global instanced buckets.
+- **South Pond + Nature Boardwalk** (z ≈ 895–1015, x −90…−14): a rounded restored
+  pond with naturalized cattail/lily margins; a low wood **boardwalk ring** on
+  pilings zigzags its S/E (a walkable low deck — the Millennium band-polyline
+  walkability precedent, `LP_BOARDWALK`), the **honeycomb pavilion** (Studio Gang
+  open timber, ≈ −30, 958) on its SE peninsula, and the **Bridge Over South Pond**
+  carrying the NATURE BOARDWALK lettering. **Café Brauer** (the 1908 Prairie
+  refectory — warm brick, green-glazed frieze, broad green hip roof, two loggia arms,
+  green + swan paddleboats, ≈ −52, 906) is the pond's NW shoulder. The pond is its
+  OWN coast/water piece (`LP_SOUTHPOND_WATER`), KEPT OUT of `COAST_SEGS`.
+
+#### DISPLAY NAMES (RENAMES.md — task 111 records the ledger lines)
+Commercial fixture marks → generic/pun (see RENAMES.md): **People's Gas Education
+Pavilion → "the Honeycomb Pavilion"**, **AT&T Endangered Species Carousel →
+"Endangered Species Carousel"** (drop the brand), **Lionel Train Adventure → "the
+Zoo Train"** ("Loco Train" pun alt). Donor/person names read as honorary and STAY
+real (Kovler, Regenstein, Brauer, Bates, Pepper, Pritzker, Walter, Helen Brach,
+McCormick, Searle, Foreman, Alfred Caldwell, Laflin, Eli Bates), as do all
+geographic/civic names (Lincoln Park, Diversey Harbor, South/North Pond, Stockton,
+Cannon, Theater on the Lake, Nature Boardwalk, Chicago Park District/Harbors).
+
+#### Standing liberties (Lincoln Park — deliberate, keep)
+- **West-reach compression 2×** (LSD→Stockton raw ~209 → ~104) — the west mirror of
+  Montrose's east-reach liberty. Order preserved; distance squeezed.
+- **South-reach compression 2⁄3** (corner→South Pond raw ~907 → ~605) — the 084
+  precedent on the N–S axis.
+- **The L-track + Lakeview band relocate west** (x −8/−16 → ≈ −118) for the south
+  band, representing Clark/Lincoln — the standing "L as backdrop" liberty, mirrored.
+- **The skyline billboard is z-gated** off in Lincoln Park (above).
+- **The map's first animals** live at the zoo (NPC/pack register).
+
+#### Determinism / build plan (binding on 112–117)
+The full determinism + perf plan (coast pieces OUT of `COAST_SEGS`; ribbons via
+`pathSamples2`, never reshape `TRAIL_MAIN`; LOCAL scatter seeds; ZERO new
+InstancedMesh buckets; animals on the NPC register; the zoo `definePlace` cell) is
+in `refs/lincoln-park/BRIEF.md` §BUILD-PLAN, with the final `lp-*` waypoint STAND
+list under §WAYPOINTS. Lincoln Park is z +410…+1020 — scatter-free virgin ground
+(all shared scatter caps at z ≥ −800), so the LAND carve here perturbs no world rng.
+
 ### Open lake (east of everything)
 - Water from the revetment/peninsula line to the horizon. Drifting sailboat lane
   x > 240. Skyline due south (unchanged, uncurved backdrop).
@@ -632,9 +815,10 @@ dog beach or vice-versa.
   Beyond the north edge (z −1520 / ~Wilson Ave), the real Lakefront Trail
   continues to Foster/Ardmore — the next north growth.
 - South: the Diversey range + mini golf are BUILT inland at z +242…+306; the
-  south lawn, corner-wrap revetment, Chevron and pier are BUILT to z +415. Further
-  Diversey/Lincoln Park growth beyond the SW terminus (the trail ends at a future
-  Diversey-Lincoln Park gate ~x55, z395) is still open.
+  south lawn, corner-wrap revetment, Chevron and pier are BUILT to z +415.
+  **LINCOLN PARK (z +408…+1060) is LAID OUT (task 111 — see the Lincoln Park
+  section) and BUILDING (112 shell → 117 South Pond).** Beyond South Pond the map
+  continues toward North Ave / downtown — the next south growth.
 - West: neighborhoods behind LSD via the underpasses; ridable L.
 
 ## WRIGLEY_GEOGRAPHY — neighborhood two (the Wrigleyville cell)

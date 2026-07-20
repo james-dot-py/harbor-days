@@ -1498,6 +1498,53 @@ const sv5=await import('../src/store.js?sv=wp5');
 expect('082 fresh player dibs',sv5.getSave().dibs,0);
 expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
 
+// ===== LINCOLN PARK (task 111 LAYOUT) — STAGED rules (pure data mirror). The
+// consts are NOT consumed by builders yet (bit-identical world), so these are
+// coordinate/topology asserts on the staged data; 112-117 replace them with
+// live walkability expects as each piece is wired. Exit 0 pre-build.
+{ const B=CH.LINCOLN_BOUNDS, A=CH.LINCOLN_ANCHORS, Z=CH.ZOO;
+  console.log('\n--- LINCOLN PARK 111 (staged data mirror) ---');
+  // (1) the FRAME grew: west opens (xMin<14) and south reaches the pond (zMax>408)
+  expect('LP clamp opens WEST of the berm (xMin<14)', B.clamp.xMin<14, true);
+  expect('LP clamp grows SOUTH past the corner (zMax>408)', B.clamp.zMax>408, true);
+  expect('LP clamp keeps the lake east (xMax==244)', B.clamp.xMax, 244);
+  expect('LP clamp keeps the Montrose north edge (zMin==-1084)', B.clamp.zMin, -1084);
+  // (2) TOPOLOGY law (§5.4 east->west): lake — trail — LSD(0..14) — lagoon —
+  //     Cannon — zoo — Stockton/conservatory. x DECREASES the whole way west.
+  expect('Theater alone on the EAST lakefront strip (x>14)', A.theaterOnLake.x>14, true);
+  expect('Diversey Harbor lagoon is WEST of the berm (x<0)', A.diverseyHarbor.x<0, true);
+  expect('the zoo sea-lion pool is west of the lagoon', A.seaLionPool.x<A.diverseyHarbor.x, true);
+  expect('the conservatory is west of the lion house', A.conservatory.x<A.lionHouse.x, true);
+  expect('South Pond hangs off the zoo SOUTH end (z below the sea-lion pool)', A.southPond.z>A.seaLionPool.z, true);
+  expect('Café Brauer is the pond NW shoulder (N & W of pond centre)',
+    A.cafeBrauer.z<A.southPond.z && A.cafeBrauer.x<=A.southPond.x, true);
+  // (3) THE WEST CROSSING: the Fullerton underpass STRADDLES the berm (x0..14)
+  expect('Fullerton underpass tunnels THROUGH the berm (x0<0 && x1>14)',
+    CH.LP_UNDERPASS.walk.x0<0 && CH.LP_UNDERPASS.walk.x1>14, true);
+  expect('the underpass sits at Fullerton latitude (z 640..700)',
+    CH.LP_UNDERPASS.walk.z0>640 && CH.LP_UNDERPASS.walk.z1<700, true);
+  // (4) the FREE zoo — OPEN gates, no ticket booth (open-admission civic fact)
+  expect('zoo has >=1 OPEN gate (no closed/ticketed flag)',
+    Array.isArray(Z.gatesOpen) && Z.gatesOpen.length>=1 && Z.gatesOpen.every(g=>!g.closed), true);
+  expect('zoo halls include the Sea Lion Pool + Kovler Lion House hero pair',
+    Z.halls.some(h=>h.id==='sea-lion-pool') && Z.halls.some(h=>h.id==='kovler-lion'), true);
+  // (5) compression transforms are internally consistent (spot-check the laws)
+  const zg = zr => B.southZ0 + (zr - B.southRef)*B.southLiberty;
+  expect('south transform: Fullerton z_raw794 -> ~671', Math.abs(zg(794)-671)<2, true);
+  expect('south transform: South Pond z_raw1310 -> ~1015 (<=zMax)', zg(1310)<=B.clamp.zMax+1, true);
+  // (6) every new coast/water piece is a NON-EMPTY closed-ish polyline (its OWN
+  //     piece — 113/117 keep it OUT of COAST_SEGS, the Montrose-stub law)
+  for(const [nm,p] of [['LP_DIVERSEY_WATER',CH.LP_DIVERSEY_WATER],['LP_SOUTHPOND_WATER',CH.LP_SOUTHPOND_WATER],['LP_BOARDWALK',CH.LP_BOARDWALK]]){
+    expect(`${nm} is a non-trivial polyline (>=6 pts)`, Array.isArray(p)&&p.length>=6, true);
+  }
+  // (7) the skyline-billboard gate fades BEFORE the tall halls (z>=671)
+  expect('skyline gate hidden before the first zoo hall (hiddenSouthOf < zoo z)',
+    CH.LP_SKYLINE_GATE.hiddenSouthOf < A.seaLionPool.z, true);
+  // (8) trails exist for pathSamples2 (NEVER reshape TRAIL_MAIN)
+  expect('LP has a lake-side trail + a west park spine (both non-empty)',
+    CH.LP_TRAIL_LAKE.length>2 && CH.LP_TRAIL_PARK.length>2, true);
+}
+
 // ===== 088 PERMANENT GUARDS — spawned as gate categories so the standard
 // verify (step 1 = this file) mechanically runs them every time:
 //   path-layers.mjs      — path/decal y-ladder assertion (issue 028; pure Node)

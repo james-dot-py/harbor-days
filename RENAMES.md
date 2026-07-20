@@ -48,6 +48,9 @@ Display strings only — ids, save keys, function names, file names are unchange
 | Rolleiflex (in sign lore) | "the twin-lens camera" | Vivian Maier honorary-way lore |
 | "Go, Cubs, Go" (song title in lore) | "the one the whole ballpark sings" | Steve Goodman honorary-way lore |
 | Cloud Gate (artwork title in journal) | **the Bean** ("officially it's something fancier") | journal entry |
+| People's Gas Education Pavilion (Lincoln Park, South Pond) | **the Honeycomb Pavilion** (generic descriptive; "Prairie Gas" pun alt) | boardwalk pavilion sign/journal |
+| AT&T Endangered Species Carousel (Lincoln Park Zoo) | **Endangered Species Carousel** (brand dropped, civic name kept) | carousel sign/prompt |
+| Lionel Train Adventure (Lincoln Park Zoo) | **the Zoo Train** (generic; "Loco Train" pun alt) | mini-train ride sign/prompt |
 
 ## Considered and KEPT (with reasons)
 
@@ -65,6 +68,9 @@ Display strings only — ids, save keys, function names, file names are unchange
 | ROUTE 66 shield + "get your kicks" | Historic public highway designation |
 | Chicago Park District, Chicago Police, CFD Engine Co. 78 | Municipal bodies, not commercial marks |
 | Hendricks/Hottovy, Bartman-era, Coltrane, Mellencamp, Harry Caray "Holy Cow!" | Real people referenced factually, not marks |
+| Lincoln Park donor/person names (Kovler, Regenstein, Brauer, Eli Bates, Pepper, Pritzker, Walter, Helen Brach, McCormick, Searle, Foreman, Alfred Caldwell, Laflin, Peggy Notebaert, Hans Christian Andersen, Grant, Garibaldi, Goethe) | Honorary/philanthropic + monument subjects — the honorary-way person-name KEEP precedent |
+| Lincoln Park geographic/civic names (Lincoln Park, Diversey Harbor, South/North Pond, Stockton Dr, Cannon Dr, Theater on the Lake, Nature Boardwalk, Grandmother's Garden, Café Brauer, Chicago Park District, Chicago Harbors) | Public place/park/civic names — the recognizability law |
+| Bird's Eye Bar & Grill (zoo restaurant), Wild Things / Wild Gifts (gift shops) | Read as generic puns / descriptive words already — no distinctive mark; note if a legible sign is ever built |
 | BP Bridge, Boeing, Exelon, AT&T Plaza, McDonald's Cycle Center, McCormick Tribune, Chase Tower massing, Willis/Hancock/Aon | Geometry/comments only — no player-visible text exists |
 | USPS mailbox eagle decal | Stylized canvas shapes, no lettering |
 

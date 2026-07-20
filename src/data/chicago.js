@@ -1335,3 +1335,177 @@ export const CITY_POI = [
   { id:'rocks',          n:'the belmont rocks', x:150, z:150,    c:'#e0574a', zone:'The Belmont Rocks' },
   { id:'diversey',       n:'diversey range',    x:58,  z:262.5,  c:'#4f9b46' },  // DIVERSEY.range centre ((28+88)/2,(242+283)/2) — no zone key: the Diversey Point circle (100,378 r34) never covers the range, so gating on it would keep the dot dim while you stand on the tee line
 ];
+
+/* ==================================================================== *
+ *  LINCOLN PARK — task 111 LAYOUT (STAGED data; NOTHING consumed yet)   *
+ * ==================================================================== *
+ * The map's growth SOUTH of the Diversey corner: Diversey Harbor lagoon,
+ * Theater on the Lake, the FREE zoo, the conservatory + formal garden,
+ * South Pond + the Nature Boardwalk + Café Brauer. Authored task 111 from
+ * refs/lincoln-park/osm.json (provenance.scout110) + BRIEF.md.
+ * GEOGRAPHY.md "Lincoln Park" is the law; this block STAGES it.
+ *
+ * BIT-IDENTICAL GUARANTEE: every const below is NEW and UNCONSUMED — no
+ * builder/pack imports it this task, no rng runs at import (crChain math
+ * only), so the world stays byte-for-byte unchanged (the 111 gate: canonical
+ * spawn shot ~= baseline.png). 112 wires the bounds/clamp/minimap ONCE and
+ * regenerates baseline.png; 113-117 swap in these pieces ONE area per task
+ * (the Montrose 069 stub-const model — each piece is its own const so a build
+ * touches only its patch and never the others' rng).
+ *
+ * ---- THE FRAME (framing B — the WEST CROSSING; GEOGRAPHY.md §Lincoln Park) -
+ * The berm / DuSable LSD stays x 0-14. The PARK opens WEST into NEGATIVE x;
+ * the thin lakefront strip (Lakefront Trail + Theater on the Lake) stays EAST
+ * at x>14; the L-track + Lakeview band RELOCATE to the new far-west edge for
+ * the southern band. Two STANDING LIBERTIES place the raw osm reaches:
+ *   WEST compression:  x_game = 14 - (LSDx(z) - x_raw) * 0.5
+ *     (a further 2x squeeze beyond the 1:2 base — the west mirror of Montrose's
+ *      ~2.8x east-reach). LSDx(z) is the LOCAL DuSable-LSD east edge, which
+ *      DRIFTS EAST going south (~196 at Diversey -> ~324 at Armitage, BRIEF
+ *      §1b) so every latitude re-anchors to the Drive, never a fixed x.
+ *   SOUTH compression: z_game = 410 + (z_raw - 403) * (2/3)
+ *     (the 084 precedent — keep topological ORDER, squeeze the connective
+ *      distance so Diversey->zoo->South Pond has no 084-class blank stretch).
+ * Positions below are COMPRESSED-frame anchors: SCAFFOLDING for 112-117 to
+ * refine against osm.json + these transforms, NOT final vertex law.            */
+
+// FINAL bounds/clamp/minimap 112 applies ONCE (the live WORLD_CLAMP/MAP/LSD/
+// LAKEVIEW_BAND stay put THIS task — that is the bit-identical guarantee):
+export const LINCOLN_BOUNDS = {
+  clamp:{ xMin:-112, xMax:244, zMin:-1084, zMax:1020 },     // was {14,244,-1084,408}: west opens into the park, south reaches South Pond (~z1018)
+  map:{ x0:-170, z0:-1124, w:576, h:2184, cw:304, ch:412 }, // z0/x0/w unchanged; h 1549->2184 (bottom z+425 -> z+1060 = zMax1020 + 40 pad). 112 tunes ch for the HUD aspect (a [baseline-regen], like 084)
+  westLiberty:0.5,   // x_game = 14 - (LSDx(z) - x_raw)*westLiberty
+  southRef:403, southZ0:410, southLiberty:2/3,   // z_game = southZ0 + (z_raw - southRef)*southLiberty
+};
+
+// LOCAL DuSable-LSD east edge by raw z (BRIEF §1b) — the anchor the west
+// transform re-references at each latitude (the Drive drifts EAST going south).
+// Piecewise-linear; interp between rows. Pure data (no rng).
+export const LP_LSD_DRIFT = [ [403,196],[600,195],[794,234],[1000,283],[1200,324],[1310,345] ];
+
+// The SKYLINE-BILLBOARD gate (a STRUCTURAL FIRST — GEOGRAPHY.md §Lincoln Park):
+// the global downtown billboard (sky.js, world z 504..677, fog:false) would
+// interpenetrate contiguous Lincoln Park content and read to the NORTH from
+// inside the park. It is Z-GATED: full north of the Diversey corner (the
+// signature Belmont read, baseline.png, UNCHANGED), faded across the corner
+// transition, hidden in the park. 112/113 add the gate (a player-z uniform/
+// visibility flag — the billboard geometry + its mulberry32(0x5c1000) extents
+// stay frozen; zero new buckets, zero rng). Keep the fade band (z 450..560)
+// content-LOW (lagoon water + docks, no tall halls — the halls start z>=671).
+export const LP_SKYLINE_GATE = { fadeZ0:403, fadeZ1:503, hiddenSouthOf:503 };
+
+// ---- FEATURE ANCHORS (compressed-frame landmark centres; scaffolding) -------
+export const LINCOLN_ANCHORS = {
+  diverseyHarbor:{ x:-24, z:520 },   // lagoon mid (west of berm)
+  theaterOnLake: { x:30,  z:615 },   // ALONE on the east lakefront strip (x>14)
+  fullertonUnderpass:{ x:6, z:661 }, // the FIRST working crossing (through the berm)
+  conservatory:  { x:-70, z:715 },   // NW of the zoo, across Fullerton
+  batesFountain: { x:-73, z:776 },   // formal-garden axis S of the glasshouse
+  lilyPool:      { x:-58, z:697 },   // Caldwell lily pool, NE of the conservatory
+  zooGate:       { x:-92, z:858 },   // the FREE open west/Stockton entrance (lion plinth)
+  seaLionPool:   { x:-56, z:822 },   // the hero — historic rock-rimmed pool
+  lionHouse:     { x:-34, z:831 },   // Kovler Lion House (1912 red brick)
+  farm:          { x:-55, z:980 },   // Farm-in-the-Zoo (barns), NW of the pond
+  southPond:     { x:-52, z:958 },   // pond centre
+  cafeBrauer:    { x:-52, z:906 },   // pond NW shoulder (the Prairie refectory)
+  honeycombPav:  { x:-30, z:958 },   // Studio Gang pavilion, boardwalk SE peninsula
+};
+
+// ---- COAST / WATER pieces — each its OWN deterministic piece, KEPT OUT of
+// COAST_SEGS (the Montrose-stub / COAST_TIP precedent). 113/117 fold each via a
+// LOCAL xorshift + append its own walkability SEGS; NO shared world rng shifts.
+// Diversey Harbor: a long narrow lagoon west of the berm (Cannon = west bank).
+export const LP_DIVERSEY_WATER = crChain([
+  [-2,420],[-5,480],[-7,558],[-8,636],           // east bank (berm side), narrowing south
+  [-44,636],[-43,558],[-41,480],[-36,420],[-2,420],  // west bank (Cannon side) back to start
+],3);
+export const LP_DIVERSEY_CANNON = crChain([[-46,420],[-49,560],[-54,700],[-60,820],[-66,940],[-70,1000]],4);  // Cannon Dr: lagoon west bank -> the zoo's east flank (curving south)
+// South Pond: a rounded restored pond hanging off the zoo's south end.
+export const LP_SOUTHPOND_WATER = crChain([
+  [-15,905],[-22,895],[-52,892],[-80,902],[-90,950],
+  [-82,1006],[-46,1016],[-18,1006],[-14,958],[-15,905],
+],3);
+// The two big land panels 112 unions into buildLAND (west park + east strip).
+export const LP_LAND_WEST = [ [0,412],[-14,470],[-40,560],[-70,700],[-100,860],[-104,960],[-96,1018],[-40,1024],[-14,1010],[0,900],[0,412] ];  // the west park outline (berm x0 -> conservatory/Stockton ~x-104 -> pond south)
+export const LP_LAND_EAST = [ [14,412],[46,470],[52,560],[48,640],[40,700],[26,700],[16,640],[14,470],[14,412] ];  // the thin lakefront strip east of the berm (trail + Theater; lake beyond)
+
+// The FULLERTON UNDERPASS — the map's FIRST WORKING crossing of the Drive (the
+// Belmont/Addison/Irving/Montrose gates stay fenced dead-ends; Diversey gets
+// NO second pedestrian crossing — its inlet is a water-under-causeway detail).
+// A walkable tunnel THROUGH the berm (x0-14) linking the east strip to the west
+// park. Axis-aligned E-W (camera-math doctrine for interiors/tunnels).
+export const LP_UNDERPASS = {
+  walk:{ x0:-12, x1:24, z0:656, z1:666, h:0 },   // walkRect through the berm
+  portalE:[16,661], portalW:[-2,661], w:9, h:4.2,
+};
+
+// ---- THE ZOO — a FENCED-but-OPEN campus (free admission; open gates, no
+// ticket booth). Perimeter + gates + hall footprints (scaffolding; 114/115
+// refine). Animals are NPC/pack register (culled >145 m), NEVER instanced
+// buckets (§BUILD-PLAN). Halls: {id, x, z, w, d, ry} centre + footprint.
+export const ZOO = {
+  perimeter:[ [-10,738],[-95,742],[-99,900],[-96,1002],[-46,1008],[-12,1004],[-8,900],[-10,738] ],
+  gatesOpen:[ { id:'west',  x:-92, z:858, ry:Math.PI/2 },   // the lion-plinth FREE entrance (Stockton side)
+              { id:'east',  x:-12, z:830, ry:-Math.PI/2 },  // from the Fullerton underpass / lagoon side
+              { id:'south', x:-46, z:1006, ry:0 } ],        // to Farm-in-the-Zoo + South Pond
+  halls:[
+    { id:'sea-lion-pool',  x:-56, z:822, r:6,  round:true },              // the historic rock-rimmed hero pool
+    { id:'kovler-lion',    x:-34, z:831, w:34, d:13, ry:0 },              // 1912 red-brick Lion House
+    { id:'searle-center',  x:-40, z:806, w:16, d:10, ry:0, stack:true },  // Searle visitor center + the red-brick smokestack
+    { id:'regenstein-apes',x:-8,  z:900, w:24, d:15, ry:0 },              // African Apes (gorillas)
+    { id:'african-journey',x:-58, z:906, w:26, d:16, ry:0 },              // Regenstein African Journey (giraffes)
+    { id:'small-mammal',   x:-70, z:848, w:20, d:14, ry:0 },
+    { id:'primate-house',  x:-30, z:846, w:14, d:12, ry:0 },              // Helen Brach Primate House
+    { id:'bird-house',     x:-46, z:800, w:16, d:12, ry:0 },              // McCormick Bird House
+    { id:'polar-tundra',   x:-48, z:790, w:14, d:10, ry:0 },              // Walter Arctic Tundra (polar bear)
+    { id:'penguin-cove',   x:-42, z:794, w:8,  d:6,  ry:0 },
+    { id:'childrens-zoo',  x:-88, z:830, w:24, d:18, ry:0 },              // Pritzker Children's Zoo (west)
+  ],
+  farm:[  // Farm-in-the-Zoo barns (red hip-roofs + picket fences), NW of the pond
+    { id:'main-barn',  x:-56, z:980, w:12, d:10, ry:0 },
+    { id:'dairy-barn', x:-54, z:958, w:10, d:8,  ry:0 },
+    { id:'farm-house', x:-64, z:968, w:8,  d:8,  ry:0 },
+    { id:'livestock',  x:-46, z:982, w:8,  d:7,  ry:0 },
+  ],
+};
+
+// ---- CONSERVATORY + FORMAL GARDEN + Bates fountain + Lily Pool (116) --------
+export const LP_CONSERVATORY = {
+  glasshouse:{ x:-70, z:716, w:22, d:30, ry:0, vestibule:[-70,700] },   // copper-green vaulted glass; white pyramid vestibule N (FREE ADMISSION doors)
+  formalGarden:{ x0:-84, x1:-56, z0:740, z1:790 },                      // clipped beds + feathery straw grasses S of the glasshouse
+  batesFountain:{ x:-73, z:776 },                                       // Eli Bates "Storks at Play" (person; KEPT)
+  lilyPool:{ x0:-64, x1:-52, z0:678, z1:713 },                          // Alfred Caldwell Lily Pool (person; KEPT), NE
+};
+
+// ---- CAFÉ BRAUER + Nature Boardwalk + honeycomb pavilion (117) -------------
+export const LP_CAFE_BRAUER = { x:-52, z:906, w:22, d:12, ry:0 };       // Prairie refectory, two loggia arms, pond NW shoulder
+export const LP_HONEYCOMB   = { x:-30, z:958, r:5 };                    // Studio Gang open-timber pavilion, boardwalk SE
+export const LP_BOARDWALK = crChain([   // the low wood-on-pilings ring zigzagging the pond's S/E margins (walkable low deck — the millennium band-polyline precedent)
+  [-14,912],[-16,958],[-22,996],[-30,1010],[-46,1015],[-64,1012],[-30,958],[-24,940],[-14,912],
+],3);
+export const LP_POND_BRIDGE = [ [-40,938],[-55,942] ];                  // "Bridge Over South Pond" (NATURE BOARDWALK lettering)
+
+// ---- TRAILS — all NEW ribbons registered via pathSamples2 (NEVER reshape
+// TRAIL_MAIN; pathSamples is PHASE-sensitive — PITFALLS). LP_TRAIL_LAKE
+// continues the Lakefront Trail south on the EAST strip; LP_TRAIL_PARK is the
+// west park's interior spine (through the underpass into the zoo/pond).
+export const LP_TRAIL_LAKE = crChain([[22,412],[26,470],[30,560],[28,650],[24,720],[22,820],[24,960],[26,1016]],4);
+export const LP_TRAIL_PARK = crChain([[6,661],[-8,690],[-24,740],[-40,820],[-48,900],[-52,960],[-48,1010]],4);  // underpass -> zoo east -> pond
+export const LP_TRAIL_STOCKTON = crChain([[-92,700],[-96,820],[-99,900],[-96,1000]],4);   // the west campus walk (Stockton side)
+
+// ---- ZONES (discovery) + PROPS (statues) — LINCOLN_* mirrors of ZONES/props
+export const LINCOLN_ZONES = [
+  { n:'Diversey Harbor',      x:-24, z:520,  r:44 },
+  { n:'Theater on the Lake',  x:30,  z:615,  r:20 },
+  { n:'Lincoln Park Conservatory', x:-70, z:716, r:30 },
+  { n:'Lincoln Park Zoo',     x:-50, z:860,  r:80 },
+  { n:'Farm-in-the-Zoo',      x:-55, z:980,  r:26 },
+  { n:'South Pond',           x:-52, z:958,  r:48 },
+];
+export const LINCOLN_PROPS = {   // verdigris-bronze + granite statuary (persons/civic — all KEPT real)
+  signalOfPeace:{ x:-6,  z:415 },   // A Signal of Peace (Dallin), Diversey
+  goethe:       { x:-100,z:432 },   // Goethe Monument (west backdrop)
+  grantMemorial:{ x:-70, z:876 },   // Ulysses S. Grant (equestrian, ridge N of the pond)
+  andersen:     { x:-98, z:893 },   // Hans Christian Andersen
+  garibaldi:    { x:-44, z:1018 },  // Garibaldi (S of the pond)
+};

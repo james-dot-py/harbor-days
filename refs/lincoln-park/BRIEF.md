@@ -479,3 +479,137 @@ flamingos ×2, meerkats.
   it is scatter-free virgin ground — but 111 must confirm no shared-rng consumer keys
   off the new south bounds, and every new ribbon goes via `pathSamples2` / every new
   coast piece stays OUT of `COAST_SEGS` (the Montrose laws).
+
+---
+
+## BUILD-PLAN (task 111 ruling — BINDING on 112–117)
+
+The frame is ruled in **GEOGRAPHY.md §Lincoln Park** (framing B, the west crossing,
+the two compression liberties, the skyline gate) and STAGED in `chicago.js`
+(`LINCOLN_*`/`LP_*`/`ZOO`). This is the determinism + perf + per-task plan.
+
+**Per-task hand-off (each build owns its patch; the Montrose 069 stub model):**
+- **112 — SHELL (the map grows).** Apply the FINAL bounds ONCE: `WORLD_CLAMP`
+  `{xMin:-112,xMax:244,zMin:-1084,zMax:1020}`, `MAP` `{x0:-170,z0:-1124,w:576,
+  h:2184,cw:304,ch:412}` (tune `ch` for the HUD aspect), extend `LSD.berm`/`road`
+  south, union `LP_LAND_WEST` + `LP_LAND_EAST` into `buildLAND`, relocate the
+  L-track + `LAKEVIEW_BAND` west (≈ x −118) for z>408 via a NEW local-seed segment
+  (the `zrN` precedent — existing arrays byte-identical). Wire the **Fullerton
+  underpass** (`LP_UNDERPASS`) as the first working crossing + the **WEST-WADE
+  GUARD** (berm west face reads BLOCKED-not-water north of z408; issue-017). Add
+  the **skyline z-gate** (`LP_SKYLINE_GATE`). Then **regenerate baseline.png ONCE**
+  (canonical recipe, pill-free crop check) — 113–117 diff the fresh baseline.
+- **113 — Diversey Harbor + Theater + underpass dressing.** Carve the lagoon from
+  `LP_DIVERSEY_WATER` (its OWN coast piece), docks/moorings/sailboats REUSING the
+  Belmont/Montrose dock+hull+mast+can buckets (LOCAL seeds, +0 InstancedMesh
+  buckets — the Montrose harbor plan). Theater on the Lake hand-modelled Prairie
+  brick (re-fetch imagery / owner inbox first). Keep the fade band (z 450–560) low.
+- **114/115 — the FREE zoo.** Open gate (no ticket booth — the anti-Wrigley
+  arrival), Sea Lion Pool + Kovler Lion House hero pair (`ZOO.halls`), the
+  chibi-chunky cast + Farm-in-the-Zoo. **The map's first animals**: a shared
+  animal-instancing/NPC approach (the crowd.js / baked-LOD-twin precedent) so N
+  animals = few draws, per-mesh live rigs near + baked twins far, culled >145 m.
+  Grade the campus with a `definePlace` **ambience cell** (denser green fog, ducked
+  exterior ambience, boosted birdcall — the Bird Sanctuary machinery).
+- **116 — Conservatory** (`LP_CONSERVATORY`): a glasshouse is a NEW register —
+  self-lit `bmat` glass to dodge the toon green-ground-bounce (the Bean/Crown glass
+  law) — + formal garden + Bates "Storks at Play" fountain + Caldwell Lily Pool.
+- **117 — South Pond** (`LP_SOUTHPOND_WATER`, its OWN coast piece) + Nature
+  Boardwalk (`LP_BOARDWALK`, a walkable low deck — the Millennium band-polyline
+  walkability precedent) + honeycomb pavilion + Café Brauer + paddleboats.
+
+**Determinism / perf LAWS (every build):**
+- **(a) Coast/water pieces stay OUT of `COAST_SEGS`.** Every new water body (Diversey
+  lagoon, South Pond, any lakefront re-cut south of the corner) is its OWN
+  deterministic const with its OWN walkability SEGS + a LOCAL-xorshift terrace/edge
+  fold (the `COAST_TIP`/Montrose-stub precedent). NO shared world rng shifts.
+- **(b) Trails via `pathSamples2` — never reshape `TRAIL_MAIN`.** All extensions
+  (`LP_TRAIL_LAKE`/`LP_TRAIL_PARK`/`LP_TRAIL_STOCKTON`, the boardwalk) are NEW
+  ribbons registered via `pathSamples2` (merged AFTER buildProps). `pathSamples` is
+  PHASE-sensitive; a reshaped MAIN ribbon needs a byte-identical GHOST (the 084 law).
+- **(c) All new scatter uses LOCAL seeds** (index-gated 2nd-seed grow of the existing
+  instanced packs — the Montrose sanctuary/dune precedent).
+- **(d) ZERO new InstancedMesh buckets.** r128 instanced buckets draw in EVERY view
+  (the Millennium worst view sits at 478/480). Reuse existing buckets + fold one-off
+  geometry into the static merge pool (`emitMerged`, cached toon colors already in
+  the pool — check the color's CONSUMER type, PITFALLS). Any exception is NAMED +
+  justified with its global draw cost.
+- **(e) ANIMALS use the NPC/pack register** (per-mesh, culled >145 m — the `makeNPC`
+  precedent), NEVER global instanced buckets. The zoo `definePlace` cell (above).
+- Lincoln Park is z +410…+1020 — **scatter-free virgin ground** (all shared scatter
+  caps at z ≥ −800), so the LAND carve perturbs no world rng. 111 confirmed no
+  shared-rng consumer keys off the new south bounds (the staged consts are inert;
+  the spawn shot is bit-identical vs baseline).
+
+---
+
+## WAYPOINTS (final) — the `lp-*` STAND list (114–117 site; 112 wires expect.json)
+
+Positions are compressed-frame game coords (GEOGRAPHY.md §Lincoln Park). Framing
+per the camera-math doctrine: **interiors + the underpass need AXIS-ALIGNED framings**
+(cross-body cameras exit tunnels/rooms); **hero subjects (pool, lion, fountain) are
+shot from BESIDE with the yaw aimed OFF-axis** so the mayor doesn't occlude them
+(the 047 pitfall). **NO string promises the downtown skyline** (§7 physics ruling).
+Do NOT write `tools/waypoints.expect.json` yet — 112 wires these.
+
+| id | stand (x,z) | framing (yaw / pitch / dist) | target |
+|---|---|---|---|
+| `lp-arrival` | (22, 445) | yaw 0 (S) / +0.15 / 7 | park opens; lagoon on the right, halls ahead |
+| `lp-diversey-harbor` | (−4, 470) | yaw 0 (S) / +0.10 / 6 | down the lagoon axis — docks, sailboats, the bridge |
+| `lp-underpass` | (18, 661) | yaw −1.57 (W) / 0 / 4 (**axis-aligned**) | down the tunnel into the park |
+| `lp-zoo-gate` | (−88, 862) | yaw +1.40 (E, off-axis) / +0.10 / 6 | lion plinth + limestone hall, open gate |
+| `lp-seal-pool` | (−52, 831) | yaw 3.00 (NNW, off-axis) / +0.05 / 5 | rock-rimmed pool + arcing sea lions + hall arches |
+| `lp-lion-house` | (−30, 843) | yaw 3.05 (N, off-axis) / +0.15 / 7 | 1912 red-brick hall + lion on the ledge + bronze lion |
+| `lp-conservatory` | (−66, 748) | yaw 3.05 (N) / +0.15 / 9 | glasshouse + pyramid vestibule over the formal beds |
+| `lp-bates-fountain` | (−69, 786) | yaw 3.00 (N, off-axis) / +0.10 / 5 | bronze cranes + fish + jets, glasshouse behind |
+| `lp-cafe-brauer` | (−34, 950) | yaw −2.75 (NNW) / +0.10 / 10 | brick refectory + loggia arms + swan paddleboats |
+| `lp-boardwalk` | (−20, 985) | yaw −2.79 (NW) / +0.05 / 8 | zigzag boardwalk + reeds + honeycomb pavilion |
+| `lp-farm` | (−55, 992) | yaw 3.14 (N) / +0.10 / 8 | red barns + picket fence + cow/goat/hens + windmill |
+| `lp-conservatory-interior` *(opt, if 116 builds a room)* | (−70, 720) | yaw 3.14 (N) / 0 / 4 (**axis-aligned**) | flagstone path, tree ferns, orchids, koi, glass trusses |
+
+**Final expectation strings** (framing-B reworded from §10; the connective ones —
+arrival/harbor/underpass — reflect the lagoon being WEST of the Drive):
+
+- **lp-arrival** — "The lakefront path leaves the Belmont corner and broad old
+  parkland opens ahead: on the right a long lagoon of moored white sailboats runs
+  south under big elms, red-brick park halls and a green-glass glasshouse stand among
+  the trees beyond, and the Drive runs south on the left toward a low stone underpass."
+- **lp-diversey-harbor** — "A long narrow lagoon runs south between grassy banks,
+  lined with wooden finger docks and rows of moored white-hulled sailboats; a low park
+  bridge crosses it ahead and old shade trees lean over the calm green water — the
+  inner harbor that threads the park."
+- **lp-underpass** — "A low stone underpass tunnels beneath Lake Shore Drive, the
+  lakefront path passing under the roadway and opening on the far side into the green
+  heart of the park — the first place the way actually crosses the Drive instead of
+  dead-ending at a fenced portal."
+- **lp-zoo-gate** — "An open, ungated zoo entrance with no ticket booth: a bronze pair
+  of lions lounges on a granite LINCOLN PARK ZOO plinth on a brick-paved plaza, a grand
+  columned limestone hall stands behind among the trees, and visitors stream freely in."
+- **lp-seal-pool** — "A round pool rimmed with craggy grey limestone rockwork sits
+  before red-brick hall arches; dark sleek sea-lion shapes arc and roll through the
+  green water, and a rail of onlookers leans in to watch."
+- **lp-lion-house** — "A long 1912 red-brick hall with tall arched windows under a
+  green-tiled roof faces a planted terrace; in the rockwork habitat a big tawny lion
+  lies on a warm ledge, and a chunky bronze lion sits by the door."
+- **lp-conservatory** — "A great copper-green glasshouse of vaulted glass roofs rises
+  behind a formal garden of clipped flower beds and feathery straw-colored grasses; a
+  small white pyramid-roofed vestibule marks the FREE ADMISSION doors, framed by dark
+  evergreens."
+- **lp-bates-fountain** — "A low round garden pool holds a dark-bronze fountain — tall
+  cranes with spread wings and small figures wrestling fish, jets of water arcing over
+  them — set on the axis between the formal flower beds and the green glasshouse behind."
+- **lp-cafe-brauer** — "A grand Prairie-style pavilion of warm red brick under a broad
+  green-tiled hip roof, its green-glazed geometric frieze and two open loggia arms
+  embracing a terrace above the pond; green and white swan-shaped paddleboats cluster
+  on the dark-green water below."
+- **lp-boardwalk** — "A low wood boardwalk on pilings zigzags across a naturalized pond
+  thick with cattails, reeds and lily pads; an open honeycomb-latticed timber pavilion
+  curves over the water at the far bend, and herons and turtles work the green shallows."
+- **lp-farm** — "A cluster of red hip-roofed barns and a yellow clapboard farmhouse
+  behind white picket fences; a brown-and-white cow, a white goat and red hens stand in
+  a straw-strewn yard with a windmill turning slowly behind — a working farm in the
+  middle of the city zoo."
+- **lp-conservatory-interior** *(optional)* — "Inside the humid glasshouse a terracotta
+  flagstone path winds between towering tree ferns and palms over mossy grey rockwork,
+  hanging orchid baskets overhead and a dark koi pool beside the path, the glass roof
+  trusses bright above."
