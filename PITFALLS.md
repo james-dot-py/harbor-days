@@ -918,4 +918,28 @@ few turns to find; keep each to one line of symptom + fix.
   intent, constraint honored, and it stays meaningful after a north-shore rework
   (084) that would strand a raw x,z. Read the prior value in onWorldReady BEFORE the
   tracker's first frame overwrites it.
+- A "pulse" on the interaction pill (#prompt) must NEVER animate `transform`: the
+  DESKTOP pill is centred with `transform:translateX(-50%)` and the TOUCH pill is
+  right-aligned with `transform:none` (+ a `.pressed` scale) — a transform-based
+  scale/breathe keyframe fights both (the pill jumps to screen-left on desktop, and
+  clobbers the press feedback on touch). Pulse with a breathing BOX-SHADOW halo
+  instead (`0 0 0 0 → 0 0 0 10px rgba(...,0)`, the 078 toteNudge pattern), which is
+  transform-free and layers over the existing drop shadow (task 108). And the
+  static calm-mode ring needs specificity above `body.touch #prompt` (1id/1class/
+  1type) — `body #prompt.teach:not(.teachpulse)` clears it without `!important`; a
+  running keyframe already overrides any static box-shadow regardless of specificity.
+- A first-run TEACHING decoration hung on a SHARED HUD element (task 108 pulses the
+  pill + adds a caption while the flag `ope.firste.v1` is unset) must default OFF
+  under `?play=1`, forced on with its own `?firste=1` — exactly the 087 idle / 091
+  affordance play-gate law. Otherwise every FRESH-profile headless waypoint shot
+  that happens to stand inside an interaction's grace radius sprouts the coach
+  caption (each shot is a clean browser context → the flag is never set), silently
+  polluting unrelated shots and the baseline. Gate: `ENABLED = firste==='0'?false:
+  (play?firste==='1':true)`. Crucially the FLAG check (done) must still win over the
+  force param, so the "reload shows neither after the press" test loads with
+  `firste=1` on BOTH loads yet reads clean on the second (localStorage persists the
+  flag across a same-context puppeteer reload; wait out the 600 ms save debounce
+  before reloading). Verified via an OWN-vite self-contained harness
+  (tools/tmp-108-verify.mjs) using incognito browser contexts for per-scenario
+  storage isolation + `emulateMediaFeatures` reduced-motion for the calm path.
 

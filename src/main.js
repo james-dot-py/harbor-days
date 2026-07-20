@@ -11,6 +11,7 @@ import { FX, DUST, PASTELS, fw, rockets, scheduled, boomLights, setType, updateF
 import { initAudio, audioDbg, audioCtx, installAudioResumeNet, sStep, stepDbg, sChime, sPop, updateAmbience } from './audio.js';
 import { cam, keys, joy, jump, initInput, updateCam } from './input.js';
 import { initOnboarding, updateOnboarding } from './onboard.js';
+import { initFirstPress, updateFirstPress } from './firstpress.js';
 import { initNaming, updateNaming } from './naming.js';
 import { initSettings } from './settings.js';
 import { initAvatarSelect, updateAvatarSelect } from './avatarselect.js';
@@ -521,6 +522,7 @@ function frame(now){
   updateChibiShadows();   // after runUpdates: rigs have moved; one InstancedMesh re-stamp
   updateFogCull(dt);      // hide fully-fogged meshes (pixel-neutral draw-call cut)
   updateOnboarding(dt);   // touch coach marks — after runUpdates so state.distanceWalked/interactionsUsed are current
+  updateFirstPress(dt);   // task 108: teach the first E/tap press (desktop+touch) — after updateOnboarding so it defers to the walk/look marks
   updateNaming(dt);       // task 087: name-your-mayor card, once, after the coach marks
   updateAvatarSelect(dt); // task 089: first-play avatar picker (before naming) + its turntable
 
@@ -555,6 +557,7 @@ function runStart(){
   $('btnKofi').style.display='flex';   // ♥ Ko-fi support button, beside "?"
   $('btnSettings').style.display='flex';   // ⚙ settings card (task 085), beside "?" / ♥
   initOnboarding();    // touch only: ghost thumbs teach walk / look / interact (task 077)
+  initFirstPress();    // task 108: arm the "teach the first press" pill nudge (desktop + touch)
   initNaming();        // task 087: arm the name-your-mayor card (shows after the coach marks)
 }
 

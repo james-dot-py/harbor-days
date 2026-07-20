@@ -651,3 +651,9 @@ cut becomes a revert task.
   footfall jitters its pitch and leans left, then right, foot to foot. The
   machine-gun sameness of a fixed grass tick is gone. — walking anywhere,
   every surface — task 106
+- The first-ever nudge: walk the spawn plaza toward the water and the OPE!
+  suggestion box's prompt pill starts breathing — a soft coral halo — with one
+  coral caption over it, "say hi — press E" (or "tap ✋" on a phone). It teaches
+  the one press every system in the game hangs on, then vanishes forever the
+  instant you press it — never seen again on any later visit. — spawn → the
+  Rocks, the suggestion-box kiosk — task 108

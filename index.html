@@ -308,6 +308,24 @@
     box-shadow:0 4px 0 rgba(122,62,44,.18),0 0 0 2px rgba(224,118,106,.30);}
   body.touch #prompt.pressed{transform:scale(.95);filter:brightness(.97);
     box-shadow:0 2px 0 rgba(122,62,44,.18),0 0 0 2px rgba(224,118,106,.45);}
+  /* ---- teach the first E/tap press (task 108): a gently pulsing pill + one
+     coral caption, until the first-ever interaction. The pulse is a breathing
+     box-shadow HALO, never a transform — the desktop pill is centred with
+     translateX(-50%) and the touch pill is right-aligned; a transform pulse
+     would fight both. prefersCalm() drops the animation (static ring). ---- */
+  #coachPress{display:none;position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%);
+    white-space:nowrap;background:rgba(224,118,106,.96);color:#fff;font-size:12px;font-weight:600;
+    letter-spacing:.03em;padding:5px 12px;border-radius:999px;box-shadow:0 3px 0 rgba(122,62,44,.28);pointer-events:none}
+  #coachPress::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);width:0;height:0;
+    border:6px solid transparent;border-top-color:rgba(224,118,106,.96)}
+  #prompt.teach #coachPress{display:block}
+  body.touch #prompt #coachPress{left:auto;right:4px;transform:none}
+  body.touch #prompt #coachPress::after{left:auto;right:16px;transform:none}
+  @keyframes coachPulse{0%,100%{box-shadow:0 4px 0 rgba(122,62,44,.18),0 0 0 0 rgba(224,118,106,.55)}
+    55%{box-shadow:0 4px 0 rgba(122,62,44,.18),0 0 0 10px rgba(224,118,106,0)}}
+  #prompt.teachpulse{animation:coachPulse 1.8s ease-in-out infinite}
+  body #prompt.teach:not(.teachpulse){box-shadow:0 4px 0 rgba(122,62,44,.18),0 0 0 3px rgba(224,118,106,.5)}
+  html.uiscaled #coachPress{font-size:calc(12px * var(--uiscale,1))}
   #pwrmeter{position:fixed;bottom:calc(96px + var(--sab));left:50%;transform:translateX(-50%);z-index:20;width:180px;height:12px;
     border-radius:999px;background:rgba(74,59,47,.35);overflow:hidden;display:none;box-shadow:0 3px 0 rgba(122,62,44,.18);}
   #pwrfill{height:100%;width:0%;background:linear-gradient(90deg,#8fce74,#ffd166,#e0766a);border-radius:999px}
@@ -813,7 +831,7 @@
 <button id="btnTote">&#129530;<span id="toteN"></span></button>
 
 <!-- framework HUD -->
-<div id="prompt"><span class="pk"></span><span id="promptlabel"></span></div>
+<div id="prompt"><span class="pk"></span><span id="promptlabel"></span><span id="coachPress"></span></div>
 <div id="pwrmeter"><div id="pwrfill"></div></div>
 <div id="toast"><span class="tsp">&#10024;</span><div class="ttext"><div id="toastMain"></div><div id="toastSub"></div></div></div>
 <div id="journal"><div class="jcard"><button id="journalClose">&times;</button><h1 class="jtitle">Journal</h1><div id="journalBody"></div></div></div>
