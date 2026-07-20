@@ -942,4 +942,21 @@ few turns to find; keep each to one line of symptom + fix.
   before reloading). Verified via an OWN-vite self-contained harness
   (tools/tmp-108-verify.mjs) using incognito browser contexts for per-scenario
   storage isolation + `emulateMediaFeatures` reduced-motion for the calm path.
+- To make dense vegetation "brushable" (task 109 rustle) WITHOUT touching the
+  determinism-frozen placement loops, read the positions BACK from the finished
+  InstancedMeshes at world-ready: props.js just pushes the brushable meshes onto
+  an exported `RUSTLE_MESHES` array (no rng, no logic change), and rustle.js
+  decomposes every instance matrix into a static hash grid ONCE — zero shared-rng
+  draws, so world layout stays byte-identical (spawn diff 0.128%). Decompose
+  skips zero-scaled instances for free (the tuft on-pad/off-land hides in props.js
+  stamp at scale 0), so only real vegetation rustles. The per-frame query is
+  alloc-free: CELL>=R so the 3x3 cells around the player fully cover the R disc,
+  keyed by a packed integer `(cx+OFF)*MUL+(cz+OFF)` (Map.get on a number, no
+  strings). And the general rule the task clarified: RUNTIME rand()/rng() in the
+  frame loop (footfall puffs, the landing dust, sparkles) is determinism-SAFE —
+  the gate compares BUILD-time layout, fixed before frame 1; only MODULE-IMPORT /
+  build-time rng shifts the world. Throttle clocks: the rustle throttle counts
+  game.tNow (dt-based), while rustleDbg.t stamps actx.currentTime — both advance
+  ~real-time, and dt's 0.05 cap can only STRETCH a gap, never shrink it, so a
+  ">= throttle" assertion on actx-time gaps is safe.
 

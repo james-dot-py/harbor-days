@@ -657,3 +657,9 @@ cut becomes a revert task.
   the one press every system in the game hangs on, then vanishes forever the
   instant you press it — never seen again on any later visit. — spawn → the
   Rocks, the suggestion-box kiosk — task 108
+- The ground answers back: land a jump and it lands — a soft low thud that gets
+  heavier the farther you fell, a puff of dust, and the camera settles a hair on
+  the impact (calm mode keeps it still). And wading through the AIDS-Garden flower
+  beds or a patch of tall grass whispers — a soft leafy "shhk" as you brush past,
+  spaced out so it never drones. — jumping anywhere; the garden beds & prairie
+  planting — task 109

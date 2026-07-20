@@ -3,12 +3,13 @@ import { renderer, scene, camera, amb, clamp, lerp, lerpAngle, hexRGB, pip, rng,
 import { skyGroup, clouds, buildSky } from './sky.js';
 import { buildCoast, water, waterN, coastQuery, profileTotal, tierAt, beachH, LAND } from './coast.js';
 import { buildPaths, pathSamples, pathSamples2, pathSamplesMain, ribbonLanes, trailLanes, onTrail } from './paths.js';
-import { buildProps, colliders, walkRects, bobbers, drifter, dogTail, foam, fireflies, TREE_SPOTS } from './props.js';
+import { buildProps, colliders, walkRects, bobbers, drifter, dogTail, foam, fireflies, TREE_SPOTS, RUSTLE_MESHES } from './props.js';
 import { buildStructures } from './structures.js';
 import { mayor, mparts, buildMayor, updateCharacter, updateChibiShadows } from './character.js';
 import { updateFogCull, fogCullStats } from './fogcull.js';
 import { FX, DUST, PASTELS, fw, rockets, scheduled, boomLights, setType, updateFireworks } from './fx.js';
-import { initAudio, audioDbg, audioCtx, installAudioResumeNet, sStep, stepDbg, sChime, sPop, updateAmbience } from './audio.js';
+import { initAudio, audioDbg, audioCtx, installAudioResumeNet, sStep, stepDbg, sLand, landDbg, rustleDbg, sChime, sPop, updateAmbience } from './audio.js';
+import { initRustle, updateRustle, rustleStats } from './rustle.js';
 import { cam, keys, joy, jump, initInput, updateCam } from './input.js';
 import { initOnboarding, updateOnboarding } from './onboard.js';
 import { initFirstPress, updateFirstPress } from './firstpress.js';
@@ -113,7 +114,7 @@ buildMayor();
 const player={x:dbgNum('x')??CH.SPAWN.player.x,z:dbgNum('z')??CH.SPAWN.player.z,y:0,vx:0,vz:0};
 // vertical: grounded (lerp to surface) vs airborne (ballistic jump / edge fall)
 const JUMP_V=7.2,GRAV=26;
-const jphys={air:false,vy:0,coyote:0,squash:0};
+const jphys={air:false,vy:0,coyote:0,squash:0,landPitch:0};   // landPitch: 109 transient camera settle on touchdown (decays each frame)
 const MSCL=mayor.scale.clone();   // base scale for jump squash/stretch
 
 // ---- jetski: jump or wade into the lake and ride it like a Divvy ----
@@ -223,6 +224,7 @@ initAvatarSelect();   // task 089: apply the saved/?avatar= rig before frame 1 (
 // ---- framework: run queued pack setup now the world exists ----
 const _tp0=performance.now();
 worldReady(player);
+initRustle(RUSTLE_MESHES);   // 109: hash the brushable tuft/flower positions into the static rustle grid (zero rng — reads matrices only)
 window.__hd.player=player;   // debug/tools only: live player handle (act.mjs E2E reads coords / teleports within a cell)
 window.__hd.input={joy,cam}; // debug/tools only: steering-bot access (062 hold-forward crossing assertions)
 window.__hd.setTrap=r=>{TRAP_TEST=r||null;}; // debug/tools only: inject a synthetic non-walk block to verify the anti-trap escape (issue 025)
@@ -230,6 +232,10 @@ window.__hd.gstate=state;    // debug/tools only: live gameplay state handle (09
 window.__hd.trailLanes=()=>({walk:trailLanes.walk,bike:trailLanes.bike,mtrWalk:trailLanes.mtrWalk,mtrBike:trailLanes.mtrBike});   // debug/tools only: the DRAWN dual-trail centerlines (101 npc-paths gate probe — never a node-side curve mirror)
 window.__hd.stepSurf=(x,z)=>stepSurface(x===undefined?player.x:x,z===undefined?player.z:z);   // debug/tools only: footstep-surface classifier at a point (106 audit — omit args for the player's own spot)
 window.__hd.stepDbg=stepDbg;   // debug/tools only: last footstep's varied params (freq jitter + L/R foot skew, 106)
+window.__hd.landDbg=landDbg;   // debug/tools only: last landing thud {n,fall,peak,t} (109)
+window.__hd.rustleDbg=rustleDbg;   // debug/tools only: last brush rustle {n,freq,t} (109)
+window.__hd.rustleStats=rustleStats;   // debug/tools only: rustle-grid census {cells,pts,cool} (109)
+window.__hd.landPitch=()=>jphys.landPitch;   // debug/tools only: live landing camera-settle offset (109)
 setIdleGroundProbe((x,z)=>({walk:walkable(x,z),y:surfaceY(x,z)}));   // task 087: let the idle-charm sit only land on safe flat ground (shared engine walk data)
 window.__hd.buildMs={build:Math.round(_tm0-_tb0),merge:Math.round(_tm1-_tm0),packs:Math.round(performance.now()-_tp0)};
 console.log('[perf] world build '+window.__hd.buildMs.build+'ms · mergeCellStatic '+window.__hd.buildMs.merge+'ms · packs '+window.__hd.buildMs.packs+'ms');
@@ -376,7 +382,14 @@ function frame(now){
       player.y=surf;jphys.air=false;jphys.vy=0;
       jphys.squash=clamp(impact/9,0.25,1);
       if(impact>3){
+        // 109 (design audit B5): the ground answers a landing. Surface click +
+        // a soft low THUD scaled by fall height, a dust ring ~2x the footfall
+        // puff, and a brief camera pitch settle (~0.02 rad, skipped when calm —
+        // the firework-sway rule, task 085).
+        const fall=clamp(impact/9,0,1);
         sStep(stepSurface(player.x,player.z));
+        sLand(fall);
+        if(!game.calm)jphys.landPitch=0.014+0.006*fall;
         for(let k=0;k<8;k++){const a=k/8*Math.PI*2;
           DUST.spawn(player.x+Math.cos(a)*0.3,surf+0.08,player.z+Math.sin(a)*0.3,
             Math.cos(a)*rand(1.2,2),rand(0.4,0.9),Math.sin(a)*rand(1.2,2),1,0.95,0.82,0.35,1.4,3,3);}
@@ -427,6 +440,8 @@ function frame(now){
       rand(-0.4,0.4),rand(0.6,1.4),rand(-0.4,0.4),c[0],c[1],c[2],0.5,0.55,-1,2);
     sparkT=0.05;
   }
+  // 109: soft brush rustle when walking through grass tufts / flower beds
+  updateRustle(dt,player.x,player.z,sp,!jsk.on&&!skate.on&&!jphys.air&&game.running);
 
   // ---- camera ---- (orbit moved to Z/C so E is free for framework interact)
   updateCam(dt);   // touch look-inertia coast (no-op on desktop / while dragging)
@@ -443,6 +458,7 @@ function frame(now){
   if(showTgt){if(mag>0.2)showTgt*=0.6;if(cam.freeT>0)showTgt*=0.5}
   assistAmt=lerp(assistAmt,showTgt,1-Math.exp(-3*dt));
   let effP=lerp(cam.pitch,-0.3,assistAmt),effD=cam.dist+assistAmt*1.6;
+  effP+=jphys.landPitch;jphys.landPitch*=Math.exp(-20*dt);   // 109: landing camera settle (~50 ms; 0 at rest, so no baseline shift)
   if(!game.running){effP=0.30;effD=17}   // title-screen establishing shot behind the
   // translucent card (task 035) — ?play=1 runs runStart before the first frame,
   // so tooling/baseline framings never see this

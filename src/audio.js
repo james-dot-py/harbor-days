@@ -176,6 +176,30 @@ export function sStep(surf){if(!actx)return;
   noiseHit(actx.currentTime,s.dur,s.type,freq,s.q,peak,pan);
   _stepDbg.surf=surf;_stepDbg.freq=freq;_stepDbg.peak=peak;_stepDbg.pan=pan;_stepDbg.foot=foot;
 }
+// 109 (design audit B5 — "the ground answers back"): two land-touch feedbacks.
+// sLand — a soft low body-THUMP on jump landing, gain scaled by fall height
+// (0..1) and capped small, so a gentle hop barely speaks while a big drop lands
+// with weight. One lowpass noise burst, 100% synth, guards actx. Pairs with the
+// surface sStep + dust burst the engine already fires on touchdown.
+const _landDbg={n:0,fall:0,peak:0,t:-1};
+export function landDbg(){return _landDbg;}   // debug/tools only: last landing thud
+export function sLand(fall){if(!actx)return;
+  const k=fall<0?0:fall>1?1:fall;
+  const peak=0.045+0.09*k;                          // ~0.045..0.135 — capped small
+  noiseHit(actx.currentTime,0.12+0.05*k,'lowpass',170+50*k,0.8,peak);
+  _landDbg.n++;_landDbg.fall=k;_landDbg.peak=peak;_landDbg.t=actx.currentTime;
+}
+// sRustle — a soft leafy "shhk" when the mayor brushes past grass tufts / flower
+// beds. Lowpass-filtered noise, low peak; a small deterministic freq wobble off
+// game.tNow (NOT rng, no alloc) keeps repeats from reading identical, the way
+// sStep de-repeats footfalls. The caller throttles it (>=300 ms). Guards actx.
+const _rustleDbg={n:0,freq:0,t:-1};
+export function rustleDbg(){return _rustleDbg;}   // debug/tools only: last brush rustle
+export function sRustle(){if(!actx)return;
+  const freq=1250+Math.sin(game.tNow*6.3)*220;
+  noiseHit(actx.currentTime,0.16,'lowpass',freq,0.7,0.05);
+  _rustleDbg.n++;_rustleDbg.freq=freq;_rustleDbg.t=actx.currentTime;
+}
 function sGull(){if(!actx)return;const t=actx.currentTime;
   for(let i=0;i<2;i++){
     const o=actx.createOscillator(),g=actx.createGain();

@@ -11,6 +11,10 @@ export const walkRects=[];
 export function collide(x,z,r,h=Infinity){colliders.push({x,z,r,h})}   // h: jumpable when player.y > h
 
 export const bobbers=[];
+// 109: the InstancedMeshes whose instances a passing player can brush (grass
+// tufts + flower heads). Filled during buildProps; src/rustle.js decomposes them
+// into a static spatial grid at world-ready (zero rng — read-only on the matrices).
+export const RUSTLE_MESHES=[];
 export let drifter=null;
 export let dogTail=null;
 export const foam={pts:null,ph:[],base:[]};
@@ -444,7 +448,7 @@ export function buildProps(){
       if(parts.length)scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(parts),toon(PR.strawColor)));
     }
     tuft.count=placed;                                   // trim any unfilled tail (no stray tuft at origin)
-    tuft.instanceMatrix.needsUpdate=true;scene.add(tuft);
+    tuft.instanceMatrix.needsUpdate=true;scene.add(tuft);RUSTLE_MESHES.push(tuft);   // 109: brushable
   }
 
   // ---- AIDS Garden: flowers + sculpture tribute ----
@@ -492,7 +496,7 @@ export function buildProps(){
       stems.count=heads.count=idx;
     }
     stems.instanceMatrix.needsUpdate=heads.instanceMatrix.needsUpdate=true;heads.instanceColor.needsUpdate=true;
-    scene.add(stems,heads);
+    scene.add(stems,heads);RUSTLE_MESHES.push(heads);   // 109: garden + Montrose wildflower heads are brushable
 
     // Keith Haring "Self-Portrait": a bold bright-green OUTLINED figure — tube
     // limbs, an OPEN ring torso + faceless ring head (visible gaps within the
@@ -615,7 +619,7 @@ export function buildProps(){
     }
     grass.instanceMatrix.needsUpdate=stems.instanceMatrix.needsUpdate=heads.instanceMatrix.needsUpdate=true;
     grass.instanceColor.needsUpdate=heads.instanceColor.needsUpdate=true;
-    scene.add(grass,stems,heads);
+    scene.add(grass,stems,heads);RUSTLE_MESHES.push(grass,heads);   // 109: prairie blades + coneflower heads are brushable
   }
 
   // ---- summer life on the rocks: towels, umbrellas, coolers, blocks ----
