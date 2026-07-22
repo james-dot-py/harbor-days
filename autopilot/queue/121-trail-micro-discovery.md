@@ -1,5 +1,5 @@
 ---
-id: 107
+id: 121
 area: lakefront
 type: delight
 model: opus
@@ -32,3 +32,9 @@ refs:
 Owner license (2026-07-19): 'you can change things not listed if you see
 fit' — adjacent improvements beyond this spec are allowed where clearly
 right, with determinism + all gates green.
+
+Supervisor note (2026-07-22): renumbered 107→121 and re-queued. It was NOT a
+merit park — all three attempts on 2026-07-20 00:00–00:04Z died on
+Anthropic-side HTTP 500 storms (server error, never got a real run). Moved
+behind the Lincoln Park expansion (114–120) so that build lands uninterrupted;
+this touches the EXISTING lakefront (independent area), no conflict.

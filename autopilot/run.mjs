@@ -192,16 +192,22 @@ function turnBudget(taskFile, planner) {
 // otherwise: sign-offs + planner picks (rare, taste-critical) get Fable,
 // everything else Opus. Values accept aliases 'fable' / 'opus' / 'kimi'
 // (kimi = kimi-k3; owner 2026-07-19: kimi runs today's queue, no fable).
+// 2026-07-22: owner's Fable credits are EXHAUSTED — the implicit Fable
+// defaults (planner + untyped sign-offs) now route to Opus so the loop can't
+// stall on an empty-credit model. A frontmatter `model: fable` still honors
+// the request (and will fail loudly) — this only changes the DEFAULTS. Revert
+// the two DEFAULT_MODEL uses below to MODEL_IDS.fable when credits return.
 const MODEL_IDS = { fable: 'claude-fable-5', opus: 'claude-opus-4-8', kimi: 'kimi-k3' };
+const DEFAULT_MODEL = MODEL_IDS.opus;   // was fable for planner/signoff; see note above
 function taskModel(taskFile, planner) {
-  if (planner) return MODEL_IDS.fable;
+  if (planner) return DEFAULT_MODEL;
   const fm = frontmatter(taskFile);
   const m = (fm.model || '').trim().toLowerCase();
   if (MODEL_IDS[m]) return MODEL_IDS[m];
   if (m.startsWith('claude-')) return fm.model.trim();   // explicit full model id
   // unknown aliases ('any', typos) fall back to the default instead of
   // becoming a bogus --model arg (parked 024 three times, 2026-07-10)
-  return (fm.type === 'signoff') ? MODEL_IDS.fable : MODEL_IDS.opus;
+  return (fm.type === 'signoff') ? DEFAULT_MODEL : MODEL_IDS.opus;
 }
 
 // ---- bookkeeping durability -------------------------------------------------
