@@ -1249,6 +1249,133 @@ function buildTheDock(){
   grp.position.set(D.x,0,D.z);grp.rotation.y=D.ry;scene.add(grp);
 }
 
+// ---- THEATER ON THE LAKE (task 113) — the 1920 Dwight Perkins Prairie-brick
+// pavilion, ALONE on the Fullerton lakefront strip. No photo refs (Commons
+// gap): modeled from the documented type — a LOW long hall whose whole read is
+// the RHYTHMIC ARCADE of tall round-arched openings marching down every face
+// between brick piers, a pale spring-line course, and a broad low hip roof
+// with deep Prairie eaves. The arches are glazed today → one merged warm bmat
+// glow band (toon glass goes green — the 044 law). All placement from
+// CH.LP_THEATER; zero rng; NO walkRects, NO colliders (the footprint is carved
+// from walkability in data — the anti-trap law). 12 draws total:
+// plinth + 4 walls + glow + trim + roof + doors + stoop + sign + backing.
+function buildTheaterOnTheLake(){
+  const T=CH.LP_THEATER,grp=new THREE.Group();
+  const cx=(T.x0+T.x1)/2,cz=(T.z0+T.z1)/2;
+  const hx=(T.x1-T.x0)/2,hz=(T.z1-T.z0)/2;            // 9 x 13 — long axis N-S
+  const wallT=0.5,sill=0.45,r=T.archW/2,spring=sill+(T.archH-r);  // arch springs at rect top
+  const pitch=3.5;   // ONE arcade beat on every face (pier 1.4 ≥ 1.2); the
+                     // leftover goes to fatter CORNER piers — the rhythm
+                     // marches around the building instead of re-stretching per face
+
+  // (1) base course — plinth, footprint +0.3 each side
+  const plinth=new THREE.Mesh(new THREE.BoxGeometry(hx*2+0.6,0.35,hz*2+0.6),toon(T.base));
+  plinth.position.y=0.175;grp.add(plinth);
+
+  // (2) walls — each face ONE ExtrudeGeometry: outer rect minus arch holes
+  // (rect + absarc semicircle cap; the 0.5 extrude gives real brick reveals).
+  // Shape plane = the OUTER face; extrude runs inward. N/S walls shortened one
+  // wall-thickness each end to butt the long walls' inner faces — the long
+  // walls' end caps finish the corners flush (no coplanar overlap, no z-fight).
+  const brickM=toon(T.brick);
+  function wallGeo(len,n){
+    const s=new THREE.Shape();
+    s.moveTo(-len/2,0);s.lineTo(len/2,0);s.lineTo(len/2,T.wallH);s.lineTo(-len/2,T.wallH);s.closePath();
+    for(let i=0;i<n;i++){
+      const c=(i-(n-1)/2)*pitch,h=new THREE.Path();
+      h.moveTo(c-r,sill);h.lineTo(c+r,sill);h.lineTo(c+r,spring);
+      h.absarc(c,spring,r,0,Math.PI,false);h.lineTo(c-r,sill);
+      s.holes.push(h);
+    }
+    return new THREE.ExtrudeGeometry(s,{depth:wallT,bevelEnabled:false,curveSegments:12});
+  }
+  const longG=wallGeo(hz*2,T.nLong),shortG=wallGeo(hx*2-2*wallT,T.nShort);
+  const wW=new THREE.Mesh(longG,brickM);wW.rotation.y=Math.PI/2; wW.position.set(-hx,0.35,0);grp.add(wW);
+  const wE=new THREE.Mesh(longG,brickM);wE.rotation.y=-Math.PI/2;wE.position.set( hx,0.35,0);grp.add(wE);
+  const wN=new THREE.Mesh(shortG,brickM);                        wN.position.set(0,0.35,-hz);grp.add(wN);
+  const wS=new THREE.Mesh(shortG,brickM);wS.rotation.y=Math.PI;  wS.position.set(0,0.35, hz);grp.add(wS);
+
+  // (3) glow windows — ONE merged mesh: a warm pane just larger than each
+  // opening, 0.18 inside the outer face, facing out (bmat, NEVER toon — 044
+  // law). The two door arches (west+east centres) are SKIPPED so the recessed
+  // doors read as doors, not more glass.
+  const panes=[],pw=T.archW+0.15,ph=T.archH+0.15,py=0.35+sill+T.archH/2;
+  function paneRow(n,skip,place){
+    for(let i=0;i<n;i++){
+      if(i===skip)continue;
+      const g=new THREE.PlaneGeometry(pw,ph);place(g,(i-(n-1)/2)*pitch);panes.push(g);
+    }
+  }
+  const inx=hx-0.18,inz=hz-0.18,mid=(T.nLong-1)/2;
+  paneRow(T.nLong,mid,(g,c)=>{g.rotateY(-Math.PI/2);g.translate(-inx,py,c);});  // west
+  paneRow(T.nLong,mid,(g,c)=>{g.rotateY( Math.PI/2);g.translate( inx,py,c);});  // east
+  paneRow(T.nShort,-1,(g,c)=>{g.rotateY(Math.PI);   g.translate(c,py,-inz);});  // north
+  paneRow(T.nShort,-1,(g,c)=>{                      g.translate(c,py, inz);});  // south
+  grp.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(panes),bmat(T.glow)));
+
+  // (4) trim — ONE merged mesh: the pale spring-line course + an eaves-line
+  // course round all four faces (0.08 proud; N/S strips BUTT the W/E strips at
+  // x=±(hx-0.08) so no coplanar overlap ever shimmers), plus the fascia ring
+  // hung just under the roof's eave edge (0.01 clear of the roof cap plane).
+  const trims=[];
+  function band(y,t){
+    const g1=new THREE.BoxGeometry(0.16,t,hz*2+0.32);          // W/E wrap the corners
+    for(const sx of[-1,1]){const g=g1.clone();g.translate(sx*hx,y,0);trims.push(g);}
+    const g2=new THREE.BoxGeometry(hx*2-0.16,t,0.16);          // N/S butt in between
+    for(const sz of[-1,1]){const g=g2.clone();g.translate(0,y,sz*hz);trims.push(g);}
+  }
+  band(0.35+spring,0.18);                                       // spring line (limestone impost)
+  band(0.35+T.wallH-0.10,0.18);                                 // eaves line, top 0.01 shy of wall top
+  const ex=hx+T.eave,ez=hz+T.eave,roofY=0.35+T.wallH;           // eave rect / wall-top y
+  const f1=new THREE.BoxGeometry(0.16,0.14,ez*2);
+  for(const sx of[-1,1]){const g=f1.clone();g.translate(sx*(ex-0.08),roofY-0.08,0);trims.push(g);}
+  const f2=new THREE.BoxGeometry(ex*2-0.32,0.14,0.16);
+  for(const sz of[-1,1]){const g=f2.clone();g.translate(0,roofY-0.08,sz*(ez-0.08));trims.push(g);}
+  grp.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(trims),toon(T.trim)));
+
+  // (5) hip roof — one 4-side pyramid frustum: r=√2 makes the π/4-turned square
+  // cylinder's FLAT-side half-extent exactly 1, so per-axis scale = the target
+  // eave half-extents (corners land exactly on the eave rect). Top cap 22% =
+  // the short flat ridge; the 1.15 overhang is the deep-Prairie-eaves read.
+  const roofG=new THREE.CylinderGeometry(0.22*Math.SQRT2,Math.SQRT2,T.roofH,4,1);
+  roofG.rotateY(Math.PI/4);roofG.scale(ex,1,ez);
+  const roof=new THREE.Mesh(roofG,toon(T.roof));roof.position.y=roofY+T.roofH/2;grp.add(roof);
+
+  // (6) doors — dark recessed doubles in the west + east CENTRE arches, 0.35
+  // into the opening (glow skipped there above). Two boxes merged → 1 draw.
+  const doorGs=[];
+  for(const sx of[-1,1]){
+    const g=new THREE.BoxGeometry(0.1,2.4,T.archW-0.3);
+    g.translate(sx*(hx-0.35),0.35+sill+1.2,0);doorGs.push(g);
+  }
+  grp.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(doorGs),toon(T.door)));
+
+  // (7) stoop at the west (trail-side) door, lapped 0.05 into the plinth so no
+  // coplanar butt face
+  const stoop=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.18,3.2),toon(T.base));
+  stoop.position.set(-hx-0.85,0.09,0);grp.add(stoop);
+
+  // (8) 'THEATER ON THE LAKE' — bronze plaque high on the WEST face (the trail
+  // side), on the blank brick band between arch crowns (3.9) and the eaves
+  // course (4.76). Own canvas, measureText-FITTED (headless fallback font
+  // measures wider); FrontSide plane 0.025 PROUD of the backing box (z-fight
+  // law — never coplanar); backing lapped 0.01 into the brick. The solid wall
+  // + backing behind it = no mirrored-text risk.
+  const cv=document.createElement('canvas');cv.width=1024;cv.height=128;const g=cv.getContext('2d');
+  g.fillStyle='#2c2620';g.fillRect(0,0,1024,128);
+  g.fillStyle='#f0e8d2';g.textAlign='center';g.textBaseline='middle';
+  let fs=72;g.font=`800 ${fs}px "Trebuchet MS",sans-serif`;
+  while(g.measureText(T.sign).width>940&&fs>18){fs-=2;g.font=`800 ${fs}px "Trebuchet MS",sans-serif`;}
+  g.fillText(T.sign,512,66);
+  const stex=new THREE.CanvasTexture(cv);stex.anisotropy=4;
+  const back=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.84,7.66),toon(0x2c2620));
+  back.position.set(-hx-0.02,4.32,0);grp.add(back);
+  const board=new THREE.Mesh(new THREE.PlaneGeometry(7.5,0.72),curveMat(new THREE.MeshBasicMaterial({map:stex})));
+  board.rotation.y=-Math.PI/2;board.position.set(-hx-0.075,4.32,0);grp.add(board);
+
+  grp.position.set(cx,0,cz);scene.add(grp);
+}
+
 // ---- Montrose Point / the Magic Hedge sanctuary (task 071) -----------------
 // The refs' timber BIRD SANCTUARY gateway (opening faces WEST, arrivals from the
 // Lakefront Trail — the entrance path leaves EAST), split-rail flanks, a dark
@@ -1420,6 +1547,7 @@ export function buildStructures(){
   buildParkBait();
   buildBeachHouse();
   buildTheDock();
+  buildTheaterOnTheLake();   // 113: the Fullerton lakefront pavilion (zero rng — det-safe insert)
   buildYachtClub();
   buildGolfClubhouse();
   buildChevron();

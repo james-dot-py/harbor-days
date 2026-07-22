@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { scene, rng, rand, clamp, smooth, gmap, toon, bmat, curveMat, pip, WATER_Y, CURV } from './core.js';
 import * as CH from './data/chicago.js';
 
@@ -704,6 +705,148 @@ export function buildCoast(){
       const c2=new THREE.Mesh(new THREE.IcosahedronGeometry(1.5*s,0),leaf2);c2.position.set(0.9*s,3.4*s,0.5*s);g.add(c2);
       const c3=new THREE.Mesh(new THREE.IcosahedronGeometry(1.4*s,0),leaf1);c3.position.set(-0.8*s,3.5*s,-0.6*s);g.add(c3);
       g.position.set(x,0,z);scene.add(g);
+    }
+  }
+
+  // ---- DIVERSEY HARBOR dressing (113): bulkhead seawall + promenade + Fullerton culvert + mouth arch + lamps ----
+  // Everything derives from CH.LP_DIVERSEY / CH.LP_DIVERSEY_WATER — the walls
+  // follow the SAMPLED polygon points exactly (the 071 sampled-curve law), the
+  // banks come from lpDivBank (the same single truth props/moorings/walkprobe
+  // read). ZERO rng of any kind; 8 lone frustum-culled Meshes, no InstancedMesh
+  // buckets, no walk changes (walkability = lpLandHit/lpWaterHit in chicago.js).
+  // Nothing here draws unless a lagoon view frames it.
+  {
+    const LD=CH.LP_DIVERSEY,P=CH.LP_DIVERSEY_WATER;
+    const stoneDS=toon(LD.stone,{mat:{side:THREE.DoubleSide}});   // walls/plates read from water AND land sides
+    const mkGeo=(pos,nor,uv,idx)=>{const g=new THREE.BufferGeometry();
+      g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+      g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+      g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));   // uv REQUIRED: attribute-set mismatches abort later merges
+      g.setIndex(idx);return g;};
+
+    // 1) BULKHEAD SEAWALL — one vertical quad per sampled polygon edge, from
+    // wallTop down past the waterline. Wraps the WHOLE loop, including under
+    // the culvert deck and around the south apex — intentional, so no walkable
+    // water-shelf exists at any end (the Montrose terraced-tip law).
+    {
+      const pos=[],nor=[],uv=[],idx=[];
+      for(let i=0;i<P.length-1;i++){
+        const ax=P[i][0],az=P[i][1],bx=P[i+1][0],bz=P[i+1][1];
+        const l=Math.hypot(bx-ax,bz-az);if(l<1e-6)continue;
+        const nx=-(bz-az)/l,nz=(bx-ax)/l;                        // horizontal; facing handled by DoubleSide
+        const b=pos.length/3;
+        pos.push(ax,LD.wallTop,az, bx,LD.wallTop,bz, bx,LD.wallBot,bz, ax,LD.wallBot,az);
+        nor.push(nx,0,nz, nx,0,nz, nx,0,nz, nx,0,nz);
+        uv.push(0,0, 1,0, 1,1, 0,1);
+        idx.push(b,b+1,b+2, b,b+2,b+3);
+      }
+      scene.add(new THREE.Mesh(mkGeo(pos,nor,uv,idx),stoneDS));
+    }
+
+    // 2) RIM CAP — the stone lip at wallTop along every edge: 0.2 over the
+    // water, 0.35 over the land. Offset = the edge normal flipped AWAY from
+    // the water (pip against the same polygon: inside = lagoon). Corner
+    // overlaps are coplanar + identically-shaded -> invisible. DoubleSide:
+    // the loop runs down one bank and back up the other, so winding flips.
+    {
+      const pos=[],nor=[],uv=[],idx=[];
+      for(let i=0;i<P.length-1;i++){
+        const ax=P[i][0],az=P[i][1],bx=P[i+1][0],bz=P[i+1][1];
+        const l=Math.hypot(bx-ax,bz-az);if(l<1e-6)continue;
+        let nx=-(bz-az)/l,nz=(bx-ax)/l;
+        if(pip((ax+bx)/2+nx*0.5,(az+bz)/2+nz*0.5,P)){nx=-nx;nz=-nz;}   // flip landward
+        const b=pos.length/3,y=LD.wallTop;
+        pos.push(ax-nx*0.2,y,az-nz*0.2, bx-nx*0.2,y,bz-nz*0.2, bx+nx*0.35,y,bz+nz*0.35, ax+nx*0.35,y,az+nz*0.35);
+        nor.push(0,1,0, 0,1,0, 0,1,0, 0,1,0);
+        uv.push(0,0, 1,0, 1,1, 0,1);
+        idx.push(b,b+1,b+2, b,b+2,b+3);
+      }
+      scene.add(new THREE.Mesh(mkGeo(pos,nor,uv,idx),toon(LD.cap,{mat:{side:THREE.DoubleSide}})));
+    }
+
+    // 3+4) PROMENADE PAVE — the east bank walk + the west (Cannon) quay, one
+    // z-sampled triangle strip each (banks from lpDivBank so the pave hugs the
+    // sampled curve), merged with the culvert DECK box into ONE mesh (same
+    // pave color; the deck is 0.6 thick so it hides the hole edges below).
+    {
+      const pos=[],nor=[],uv=[],idx=[];
+      const strip=(z0,z1,xw,xe)=>{        // xw/xe: west/east edge at z (xe>xw)
+        const n=Math.ceil((z1-z0)/4),b=pos.length/3;
+        for(let k=0;k<=n;k++){
+          const z=z0+(z1-z0)*k/n;
+          pos.push(xw(z),LD.paveY,z, xe(z),LD.paveY,z);
+          nor.push(0,1,0, 0,1,0);
+          uv.push(0,k/n, 1,k/n);
+          if(k<n){const a=b+k*2;idx.push(a,a+2,a+1, a+1,a+2,a+3);}   // +y winding
+        }
+      };
+      const E=LD.eastPave,W=LD.westPave,C=LD.culvert;
+      strip(E.z0,E.z1,z=>CH.lpDivBank(z).e+0.05,z=>Math.min(CH.lpDivBank(z).e+0.05+E.w,E.xIn));   // a path BAND along the bank, lawn behind (not a bank-to-berm esplanade)
+      strip(W.z0,W.z1,z=>CH.lpDivBank(z).w-W.w,z=>CH.lpDivBank(z).w-0.05);
+      const deck=new THREE.BoxGeometry(C.x1-C.x0,0.6,C.z1-C.z0);
+      deck.translate((C.x0+C.x1)/2,C.deckY-0.3,(C.z0+C.z1)/2);
+      scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries([mkGeo(pos,nor,uv,idx),deck],false),toon(LD.pave)));
+    }
+
+    // 5+6) CULVERT stonework + the NE MOUTH arch — ONE merged stone mesh.
+    // Both arch faces are Shape-with-hole extrudes: the water reads THROUGH
+    // the openings (WATER_S continues beneath the deck / the causeway hint).
+    {
+      const C=LD.culvert,A=C.arch,M=LD.mouth;
+      // face plate w/ a flat-top opening, corners rounded by `rise` (the
+      // underpass portal vocabulary — structures.js). Hole bottom sits 0.05
+      // above the plate bottom (holes must not touch the outer boundary).
+      const plate=(x0,x1,top,bot,o0,o1,oTop,rise)=>{
+        const s=new THREE.Shape();
+        s.moveTo(x0,bot);s.lineTo(x1,bot);s.lineTo(x1,top);s.lineTo(x0,top);s.closePath();
+        const h=new THREE.Path();
+        h.moveTo(o0,bot+0.05);h.lineTo(o1,bot+0.05);h.lineTo(o1,oTop-rise);
+        h.quadraticCurveTo(o1,oTop,o1-rise*2,oTop);h.lineTo(o0+rise*2,oTop);
+        h.quadraticCurveTo(o0,oTop,o0,oTop-rise);h.closePath();
+        s.holes.push(h);
+        return new THREE.ExtrudeGeometry(s,{depth:0.5,bevelEnabled:false});
+      };
+      const parts=[];
+      // north parapet ON the deck (overhangs the water edge — unreachable, no collider)
+      const par=new THREE.BoxGeometry(24,C.parapetH,0.5);par.translate(-22,C.deckY+C.parapetH/2,C.z0-0.2);parts.push(par.toNonIndexed());
+      // south curb — low, steppable-looking (visual only)
+      const curb=new THREE.BoxGeometry(24,0.16,0.4);curb.translate(-22,0.08,C.z1+0.15);parts.push(curb.toNonIndexed());
+      // culvert NORTH arch face, extruded southward under the deck
+      const nf=plate(-34,-10,C.deckY,-2.95,A.x0,A.x1,A.topY,A.rise);nf.translate(0,0,C.z0-0.05);parts.push(nf);
+      // MOUTH face at the NE head — length runs along z, extruded 0.5 EAST.
+      // Shape x = -world z (rotateY(PI/2) maps local +x -> world -z, +z -> +x).
+      const mf=plate(-M.z1,-M.z0,LD.wallTop,-2.95,-(M.z1-1.2),-(M.z0+1.2),-0.6,0.5);
+      mf.rotateY(Math.PI/2);mf.translate(M.x,0,0);parts.push(mf);
+      scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(parts,false),stoneDS));
+
+      // dark recesses — the near-black passage planes behind both openings
+      // (the portal recess vocabulary, structures.js)
+      const r1=new THREE.PlaneGeometry(A.x1-A.x0+1,3);r1.rotateY(Math.PI);r1.translate((A.x0+A.x1)/2,-1.3,C.z0+2.2);       // faces north (-z)
+      const r2=new THREE.PlaneGeometry(M.z1-M.z0+1,3);r2.rotateY(-Math.PI/2);r2.translate(M.x+1.2,-1.5,(M.z0+M.z1)/2);    // faces west (-x)
+      scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries([r1,r2],false),toon(0x120f13)));
+
+      // voussoir trim — flattened half-tori over both openings (the exact
+      // structures.js flattened-torus recipe). The culvert band rises above
+      // the deck: the segmental bridge silhouette read from across the lagoon.
+      const v1=new THREE.TorusGeometry((A.x1-A.x0)/2+0.4,0.22,6,18,Math.PI);
+      v1.scale(1,0.35,1);v1.translate((A.x0+A.x1)/2,A.topY+0.1,C.z0-0.1);
+      const v2=new THREE.TorusGeometry((M.z1-M.z0-2.4)/2+0.4,0.16,6,16,Math.PI);
+      v2.scale(1,0.3,1);v2.rotateY(Math.PI/2);v2.translate(M.x-0.1,-0.5,(M.z0+M.z1)/2);
+      scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries([v1,v2],false),toon(0xe8dcc2)));
+    }
+
+    // 7) DOCK-BOX LAMPS — east promenade, every lampEvery from z 440. All
+    // posts in ONE merged mesh (toon) + all glow tops in ONE (bmat: self-lit,
+    // never toon — the harbor-light bulb register).
+    {
+      const posts=[],glows=[];
+      for(let z=440;z<=632;z+=LD.lampEvery){
+        const x=CH.lpDivBank(z).e+0.55;
+        const p=new THREE.CylinderGeometry(0.07,0.07,1.15,8);p.translate(x,0.575,z);posts.push(p);
+        const g=new THREE.SphereGeometry(0.13,8,6);g.translate(x,1.24,z);glows.push(g);
+      }
+      scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(posts,false),toon(LD.lampPost)));
+      scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(glows,false),bmat(LD.lampGlow)));
     }
   }
 

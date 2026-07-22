@@ -669,3 +669,15 @@ cut becomes a revert task.
   to the green on the far side, carrying the path from the lakefront strip under
   Lake Shore Drive into the heart of Lincoln Park. The old south fence opens; the
   parkland keeps going. — the Fullerton underpass (x0–14, z661); task 112
+
+- The water slides under your feet. At the lagoon's south end the Fullerton
+  crossing simply continues WEST over the channel — a low stone culvert with a
+  flattened voussoir arch, dark passage beneath, the water reading through the
+  mouth — so from the promenade the vista closes on "a low park bridge crosses
+  it ahead," and from the crossing the harbor opens north: eight finger docks,
+  white dock boxes, warm dock-box lamps, slips full of sailboats, and a
+  nose-to-tail quay line riding cans down the far bank — the third kind of
+  harbor (Belmont a basin, Montrose a hook, Diversey a channel you walk
+  beside), with Theater on the Lake's glowing arcade band standing across the
+  Drive. — Diversey Harbor + the Fullerton lagoon culvert (x −8…−36, z 415–668);
+  task 113

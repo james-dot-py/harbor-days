@@ -730,16 +730,37 @@ uniform is added — no rng, no new buckets, same draw count when visible. Data:
 `LP_SKYLINE_GATE`.
 
 #### The features (compressed-frame anchors — scaffolding; 113–117 refine)
-- **Diversey Harbor** (the connective lagoon, z ≈ 415–636, west of the berm): a long
-  narrow sailboat lagoon, ≈ x −8 (east/berm bank) to x −44 (**Cannon Dr**, its west
-  bank / the zoo's east flank). Wooden finger docks + rows of moored white sailboats
-  + dock-box lamps + stone-block revetment. Its OWN coast/water piece
-  (`LP_DIVERSEY_WATER`/`LP_DIVERSEY_CANNON`), KEPT OUT of `COAST_SEGS`. **A Signal of
-  Peace** (Dallin equestrian) at the Diversey head; **Goethe Monument** on the west
-  backdrop. Statuary = verdigris bronze + granite (persons/civic — KEPT real).
-- **Theater on the Lake** (≈ 30, 615): the 1920 Prairie-brick venue, ALONE on the
-  east lakefront strip east of the Drive at Fullerton. *(Commons imagery gap — 113
-  hand-models the Prairie-brick type; re-fetch/inbox first.)*
+- **Diversey Harbor** (the connective lagoon — BUILT 113): z ≈ 415–664 west of the
+  berm, ≈ x −5 (east/berm bank) to x −44 (**Cannon Dr side**, its west bank / the
+  zoo's east flank), narrowing to a ~15 m neck at Fullerton where the water slides
+  UNDER the crossing through a low stone CULVERT (deck z 646–668 spanning x −36…−8,
+  WALKABLE — the Fullerton ground simply continues west over the water; voussoir
+  arch face + dark recess at its north edge so the water reads through; the neck
+  apex z ≈ 664 is wrapped UNDER the deck — no walkable water-shelf, the Montrose
+  terraced-tip law). A flush stone BULKHEAD seawall lines the whole loop (its OWN
+  piece, KEPT OUT of `COAST_SEGS`/`SHORE_SEGS` — the 076 bulkhead-color law) under
+  paved promenade tops on both banks; 8 wooden finger docks jut west off the east
+  promenade (walkable decks, white dock boxes, dock-box lamps); moored white
+  sailboats fill the slips + a nose-to-tail quay row rides cans off the west bank
+  (all boat fields share moorings.js's instanced buckets — LOCAL seeds, +0 draws).
+  A small arch at the NE head (z 417–427) reads the REAL Diversey inlet passing
+  under the Drive as water (the recorded water-under-causeway detail; still NO
+  second pedestrian crossing). Data: `LP_DIVERSEY` + `LP_DIVERSEY_WATER`
+  (+ `lpDivBank`); `LP_DIVERSEY_CANNON` stays staged for 114's zoo flank.
+  **A Signal of Peace** (Dallin equestrian) at the Diversey head; **Goethe
+  Monument** on the west backdrop — statuary = verdigris bronze + granite
+  (persons/civic — KEPT real; unbuilt, 119-polish scope).
+- **Theater on the Lake** (BUILT 113, centre ≈ 42, 613; footprint x 33–51,
+  z 600–626): the 1920 Prairie-brick venue ALONE on the east lakefront strip at
+  Fullerton — warm red-brick arcade band (7 tall glow-window arches on the long
+  faces, 4 on the ends) under a broad deep-eave hip roof with limestone trim,
+  THEATER ON THE LAKE lettered over the west arches (real name — geographic/
+  civic). The Lakefront Trail sweeps past its west front (x ≈ 28); footprint
+  carved from walk (`lpBlockedHit` — BLOCKED, never water; no colliders, the
+  anti-trap law). **Recorded liberty:** the real ~35×20 E–W footprint turns 90°
+  (long axis N–S, 18×26) to fit the 111-planned strip bulge (x ≤ 52) — order/
+  adjacency unchanged. *(Commons imagery gap stands — hand-modeled from the
+  documented Perkins Prairie-brick type.)*
 - **Lincoln Park Conservatory** (glasshouse ≈ x −70, z 716): copper-green vaulted
   glass roofs + a white-pyramid vestibule (FREE ADMISSION doors), red-brick base,
   over a **formal garden** (clipped beds + feathery straw grasses, z 740–790) on the
@@ -788,6 +809,8 @@ Cannon, Theater on the Lake, Nature Boardwalk, Chicago Park District/Harbors).
   band, representing Clark/Lincoln — the standing "L as backdrop" liberty, mirrored.
 - **The skyline billboard is z-gated** off in Lincoln Park (above).
 - **The map's first animals** live at the zoo (NPC/pack register).
+- **Theater on the Lake rotates 90°** (long axis N–S, 18×26 footprint) to fit the
+  111-planned east-strip bulge (x ≤ 52) — recorded 113; order/adjacency unchanged.
 
 #### Determinism / build plan (binding on 112–117)
 The full determinism + perf plan (coast pieces OUT of `COAST_SEGS`; ribbons via

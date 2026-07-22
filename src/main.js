@@ -168,7 +168,7 @@ function walkable(x,z){
   if(CH.beachCarved(x,z))return false;             // task 072: roped plover dune + beach-house hall (data carve, no collider — 065 law)
   const bh=beachH(x,z);if(bh!==null)return CH.beachWalkable(x,z);   // dog + Montrose beaches
   if(pip(x,z,LAND))return true;
-  if(CH.lpLandHit(x,z)||CH.lpUnderpassHit(x,z))return true;   // 112 LINCOLN PARK: west park + east strip + the Fullerton underpass floor (shared data — walkprobe mirrors)
+  if((CH.lpLandHit(x,z)&&!CH.lpBlockedHit(x,z))||CH.lpUnderpassHit(x,z))return true;   // 112/113 LINCOLN PARK: west park + east strip + Fullerton underpass/culvert, minus the Theater footprint carve (shared data — walkprobe mirrors)
   const q=coastQuery(x,z);
   if(q&&q.ae<0.9&&q.lat>-0.6){
     const t=tierAt(q.lat,q.z);

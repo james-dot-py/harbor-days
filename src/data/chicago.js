@@ -1315,6 +1315,8 @@ export const MAP_LANDMARKS = [
   { x:132, z:-510, c:'#4f9b46', r:6 },   // golf (084 vignette)
   { x:96,  z:372,  c:'#2f63d0', r:5 },   // Chevron sculpture (south lawn)
   { x:121, z:400,  c:'#8f6234', r:4 },   // corner pier
+  { x:-24, z:520,  c:'#4a9fc9', r:5 },   // Diversey Harbor lagoon (113)
+  { x:42,  z:613,  c:'#b0573f', r:5 },   // Theater on the Lake (113)
 ];
 
 /* ----------------------------- CITY POI ------------------------------ */
@@ -1344,6 +1346,8 @@ export const CITY_POI = [
   { id:'aids-garden',    n:'the aids garden',   x:95,  z:120,    c:'#37a457', zone:'AIDS Garden Chicago' },
   { id:'rocks',          n:'the belmont rocks', x:150, z:150,    c:'#e0574a', zone:'The Belmont Rocks' },
   { id:'diversey',       n:'diversey range',    x:58,  z:262.5,  c:'#4f9b46' },  // DIVERSEY.range centre ((28+88)/2,(242+283)/2) — no zone key: the Diversey Point circle (100,378 r34) never covers the range, so gating on it would keep the dot dim while you stand on the tee line
+  { id:'diversey-harbor',n:'diversey harbor',   x:-24, z:520,    c:'#4a9fc9' },  // 113: the channel lagoon (no zone key — the Montrose ungated precedent)
+  { id:'theater-lake',   n:'theater on the lake', x:42, z:613,   c:'#b0573f' },  // 113: the Fullerton point pavilion (real name — geographic/civic)
 ];
 
 /* ==================================================================== *
@@ -1425,10 +1429,57 @@ export const LINCOLN_ANCHORS = {
 // COAST_SEGS (the Montrose-stub / COAST_TIP precedent). 113/117 fold each via a
 // LOCAL xorshift + append its own walkability SEGS; NO shared world rng shifts.
 // Diversey Harbor: a long narrow lagoon west of the berm (Cannon = west bank).
+// 113 FINAL: the channel narrows to a ~15 m NECK at Fullerton and slides UNDER
+// the crossing (the LP_DIVERSEY.culvert deck covers z 646-668); the south apex
+// (z~664) is wrapped UNDER that deck so no walkable water-shelf exists at any
+// end (the Montrose terraced-tip law). The polygon is the SINGLE truth for the
+// land hole, walkability, minimap AND the 113 seawall (coast.js builds walls
+// from these SAMPLED points — the 071 sampled-curve law).
 export const LP_DIVERSEY_WATER = crChain([
-  [-2,420],[-5,480],[-7,558],[-8,636],           // east bank (berm side), narrowing south
-  [-44,636],[-43,558],[-41,480],[-36,420],[-2,420],  // west bank (Cannon side) back to start
+  [-2,420],[-5,480],[-7,558],[-9,610],[-12,640],[-13,652],   // east bank (berm side), narrowing to the neck
+  [-16,664],[-24,664],                                        // south apex UNDER the Fullerton culvert deck
+  [-27,652],[-29,640],[-33,610],[-43,558],[-41,480],[-36,420],[-2,420],  // west bank (Cannon side) back north
 ],3);
+// bank x at latitude z from the SAMPLED lagoon polygon (071 law: measure the
+// sampled curve, not the control points). {e: east bank, w: west bank} or null.
+// Shared by coast.js (seawall/promenade), props.js (finger docks), moorings.js
+// (boat rows) and tools/walkprobe.mjs (dock rects) — the single-truth banks.
+export function lpDivBank(z){
+  let e=null,w=null;const P=LP_DIVERSEY_WATER;
+  for(let i=0,j=P.length-1;i<P.length;j=i++){
+    const zi=P[i][1],zj=P[j][1];
+    if((zi>z)!==(zj>z)){
+      const x=P[j][0]+(P[i][0]-P[j][0])*(z-zj)/(zi-zj);
+      if(e===null||x>e)e=x;if(w===null||x<w)w=x;
+    }
+  }
+  return e===null?null:{e,w};
+}
+// ---- DIVERSEY HARBOR dressing data (113) — single truth for coast.js
+// (seawall/promenade/culvert/mouth/lamps), props.js (finger docks + sign),
+// moorings.js (the third boat field) and walkprobe (dock rects + expects).
+export const LP_DIVERSEY = {
+  pave:0xc9c3b4, stone:0x93968c, cap:0x7b7f74,              // promenade pave / bulkhead stone / rim cap (113 shot round 1: the first stone 0xa8a696 washed to CREAM in toon sun — the whole west wall+cap read as a sandy beach band from across the channel; cooler greys read as stone block)
+  lampPost:0x4a4f46, lampGlow:0xffd9a0,                     // dock-box lamps (posts + warm glow tops)
+  boxCream:0xece4cf, deckWood:0x8a6a44, postWood:0x9c6a3a,  // dock boxes + the Montrose dock wood vocabulary
+  wallTop:0.14, wallBot:-2.9, paveY:0.02,
+  eastPave:{ z0:424, z1:645, xIn:-0.2, w:3.3 },   // east promenade: a 3.3 m path band hugging the bank (capped east at xIn where the strip narrows) — lawn between it and the berm (round 1 paved bank->berm and the whole east half read as a white esplanade)
+  westPave:{ z0:424, z1:640, w:2.4 },      // narrow quay walk on the west (Cannon) bank
+  // the Fullerton CULVERT: the crossing ground continues WEST over the neck.
+  // The rect is WALKABLE (lpLandHit returns true here BEFORE the water
+  // subtraction — shared by engine + walkprobe); the deck/parapets/arch are
+  // coast.js visuals. Water reads through the north arch face.
+  culvert:{ x0:-36, x1:-8, z0:646, z1:668, deckY:0.055, parapetH:0.55,
+            arch:{ x0:-28, x1:-12, topY:-0.3, rise:0.7 } },
+  mouth:{ x:-1.7, z0:417, z1:427 },        // NE head: the Diversey inlet under the Drive (water-under-causeway hint, faces W)
+  dockRows:[444,468,492,516,540,564,588,612],  // 8 east-bank finger docks (jut WEST off the promenade)
+  dockLen:7.6, dockHalfW:0.9, deckY:0.12,
+  slipDz:2.8, slipXOff:3.4,                // moored slip boats beside each finger (x = bankE+0.6-slipXOff)
+  westRow:{ z0:452, z1:628, step:6.4, off:4.2 },  // nose-to-tail quay line riding cans off the WEST bank
+  headBoats:[[-24,430],[-14,434],[-31,437]],      // a few boats on cans in the wide north head
+  lampEvery:36,                            // dock-box lamps along the east promenade
+  sign:{ x:-3.0, z:610, ry:-0.4, text:'DIVERSEY HARBOR' },  // real name — geographic/civic (RENAMES law). On the WIDE south promenade (bank e~-9 there), SW-facing toward the underpass/culvert arrival; the head promenade (z<450) is <3 m wide — a 3.2 m board + its ring doesn't fit
+};
 export const LP_DIVERSEY_CANNON = crChain([[-46,420],[-49,560],[-54,700],[-60,820],[-66,940],[-70,1000]],4);  // Cannon Dr: lagoon west bank -> the zoo's east flank (curving south)
 // South Pond: a rounded restored pond hanging off the zoo's south end.
 export const LP_SOUTHPOND_WATER = crChain([
@@ -1455,8 +1506,8 @@ export const LP_LAND_WEST = [
 export const LP_LAND_EAST = [
   [14,402],                    // NW (berm east face, overlapping the pre-112 corner land)
   [40,410],[48,450],           // wide north mouth -> shore NE (connects the trail exiting the corner at ~x30)
-  [52,536],[52,602],           // Theater-on-the-Lake bulge (widest, x52)
-  [46,662],[38,702],           // narrowing south
+  [54,536],[54,612],           // Theater-on-the-Lake bulge (113: widened x52->54 so the pavilion's east wall x51 keeps >=1.3 m of ground through z626; z<700 so the millennium CLAMP_FULL_M disjointness holds)
+  [48,662],[38,702],           // narrowing south
   [28,726],[16,714],           // SE tip (Fullerton / trail south end)
   [14,640],[14,470],[14,402],  // WEST edge = the berm's east face (x14)
 ];
@@ -1483,13 +1534,41 @@ function _pipLP(x,z,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;
 export function lpWaterHit(x,z){return z>408&&_pipLP(x,z,LP_DIVERSEY_WATER);}
 // Walkable Lincoln Park LAND: the west park (minus the lagoon hole) + the east
 // lakefront strip. z>408 only (north of the corner is the untouched pre-112 world).
+// 113: the Fullerton CULVERT deck reads as LAND (checked BEFORE the water
+// subtraction) — the crossing walks OVER the lagoon neck; the water below is
+// covered by the coast.js deck. Shared engine + walkprobe (never forked).
 export function lpLandHit(x,z){
   if(z<=408)return false;
+  const c=LP_DIVERSEY.culvert;
+  if(x>=c.x0&&x<=c.x1&&z>=c.z0&&z<=c.z1)return true;
   if(_pipLP(x,z,LP_DIVERSEY_WATER))return false;   // the lagoon is subtracted out
   return _pipLP(x,z,LP_LAND_WEST)||_pipLP(x,z,LP_LAND_EAST);
 }
+// 113: Theater on the Lake footprint — BLOCKED land, never water (isWater keeps
+// reading lpLandHit=true here, so the issue-017 wade class can't fire; walkable()
+// in main.js AND walkprobe subtract this — the 052 footprint-carve law, no
+// colliders per the anti-trap law).
+export function lpBlockedHit(x,z){
+  const T=LP_THEATER;
+  return x>=T.x0&&x<=T.x1&&z>=T.z0&&z<=T.z1;
+}
 // The Fullerton underpass floor — a flat walk rect through the berm (surfaceY 0).
 export function lpUnderpassHit(x,z){const u=LP_UNDERPASS.walk;return x>=u.x0&&x<=u.x1&&z>=u.z0&&z<=u.z1;}
+
+// ---- THEATER ON THE LAKE (113) — the 1920 Perkins Prairie-brick venue, ALONE
+// on the east lakefront strip at Fullerton. Hand-modeled (Commons imagery gap —
+// BRIEF §11); the arcade band is the read. RECORDED LIBERTY (GEOGRAPHY.md): the
+// real ~35x20 E-W footprint turns 90° (long axis N-S, 18x26) to fit the
+// 111-planned strip bulge (x<=52). Footprint = the lpBlockedHit carve;
+// structures.js builds from this const. Real name stays (geographic/civic).
+export const LP_THEATER = {
+  x0:33, x1:51, z0:600, z1:626,        // footprint carve — walls sit ON this rect
+  brick:0x8e4f3c, trim:0xd9ccb2, roof:0x40604f, glow:0xffe2ae, door:0x5c4632, base:0x9a9282,
+  wallH:4.6, roofH:3.0, eave:1.15,     // brick walls + broad low hip roof w/ deep eaves
+  archW:2.1, archH:3.1,                // arched openings: rect + semicircle top (archW/2 radius)
+  nLong:7, nShort:4,                   // arch rhythm: 7 on the west/east (26 m) faces, 4 on the ends
+  sign:'THEATER ON THE LAKE',
+};
 
 // ---- THE ZOO — a FENCED-but-OPEN campus (free admission; open gates, no
 // ticket booth). Perimeter + gates + hall footprints (scaffolding; 114/115
@@ -1554,10 +1633,11 @@ export const LP_TRAIL_STOCKTON = crChain([[-92,700],[-96,820],[-99,900],[-96,100
 // the lagoon, the trails, and the underpass. 113-117 replace the interim lawn.
 export const LP_TREES = [
   [-56,468,1.4],[-76,520,1.2],[-80,584,1.15],[-84,640,1.3],   // west of the Diversey lagoon
+  [-48,500,1.25],[-46,572,1.15],                               // 113: west-bank leaners — old shade trees over the quay walk (BRIEF harbor read)
   [-64,704,1.2],[-84,762,1.35],[-60,812,1.2],[-70,868,1.25],   // west park interior (between the trails)
   [-84,910,1.15],[-60,922,1.3],[-72,966,1.2],[-58,884,1.1],
   [-40,868,1.25],[-38,936,1.1],[-24,908,1.15],[-30,984,1.2],   // east/south park lawn
-  [42,478,1.2],[48,540,1.3],[44,606,1.15],[46,658,1.1],        // east lakefront strip
+  [42,478,1.2],[48,540,1.3],[44,576,1.15],[46,658,1.1],        // east lakefront strip (113: the z606 elm moved N of the Theater footprint)
 ];
 // ---- ZONES (discovery) + PROPS (statues) — LINCOLN_* mirrors of ZONES/props
 export const LINCOLN_ZONES = [

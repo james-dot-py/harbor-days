@@ -1,7 +1,8 @@
 // =====================================================================
 //  MOORINGS — Belmont Harbor's mooring field (plus a second, smaller
 //  MONTROSE Harbor field laid at the bottom of onWorldReady from its own
-//  local rng seed 7071, reusing every instanced mesh below → ZERO new
+//  local rng seed 7071, and a third DIVERSEY HARBOR channel field from
+//  seed 9113 — both reusing every instanced mesh below → ZERO new
 //  draw calls). The real basin reads two
 //  ways from the air: tidy north-south rows of sailboats on cans, AND
 //  distinctive STAR DOCKS — radial clusters where 8-9 boats moor nose-in
@@ -25,6 +26,7 @@
 import { onWorldReady, registerUpdate } from '../framework.js';
 import * as THREE from 'three';
 import { scene, toon, WATER_Y } from '../core.js';
+import * as CH from '../data/chicago.js';
 
 // local deterministic rng — never the shared core rng()/rand()
 function m32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
@@ -242,6 +244,51 @@ onWorldReady(() => {
     }
   });
 
+  // =====================================================================
+  //  DIVERSEY HARBOR — a third field in the narrow channel lagoon at
+  //  Lincoln Park (113). Laid here (after Belmont + Montrose populate
+  //  boats[], before N is taken) so it rides the SAME instanced meshes
+  //  below → ZERO new draw calls. Its own local rng (seed 9113) leaves
+  //  Belmont's rnd and Montrose's rnd2 draw orders bit-identical. The
+  //  channel is too narrow for star clusters, so it reads three ways
+  //  instead: slip boats beside the east-bank finger docks, a nose-to-tail
+  //  quay line riding cans off the west (Cannon) bank, and a few head
+  //  boats on cans in the wide north head. Banks come from CH.lpDivBank(z)
+  //  — the sampled lagoon polygon (single truth with coast.js / props.js).
+  // =====================================================================
+  const montroseBoatCount = boats.length;   // Montrose's rnd2 draws end here; Diversey is rnd3 only
+  const rnd3 = m32(9113);
+
+  // ---- slip boats: 2 per finger dock, bow toward the dock from both sides (the Belmont slip convention) ----
+  for (const zc of CH.LP_DIVERSEY.dockRows){
+    const bx = CH.lpDivBank(zc).e + 0.6 - CH.LP_DIVERSEY.slipXOff;   // mid-dock beside the finger
+    for (const s of [-1, 1]) boats.push({
+      x: bx + (rnd3() * 2 - 1) * 0.25,
+      z: zc + s * CH.LP_DIVERSEY.slipDz + (rnd3() * 2 - 1) * 0.2,
+      ry: (s > 0 ? -Math.PI / 2 : Math.PI / 2) + (rnd3() * 2 - 1) * 0.06,
+      ph: rnd3() * Math.PI * 2, jib: -1, can: false,
+    });
+  }
+
+  // ---- west quay line: nose-to-tail down the channel, bows weathervaned north like the Belmont rows ----
+  for (let z = CH.LP_DIVERSEY.westRow.z0; z <= CH.LP_DIVERSEY.westRow.z1; z += CH.LP_DIVERSEY.westRow.step){
+    const w = CH.lpDivBank(z).w;
+    boats.push({
+      x: w + CH.LP_DIVERSEY.westRow.off + (rnd3() * 2 - 1) * 0.4,
+      z: z + (rnd3() * 2 - 1) * 0.8,
+      ry: BASE_HEAD + (rnd3() * 2 - 1) * 0.2,
+      ph: rnd3() * Math.PI * 2, jib: -1, can: true,   // each rides its own mooring can (spawns ahead of the bow)
+    });
+  }
+
+  // ---- head boats: a few on cans in the wide north head ----
+  for (const [hx, hz] of CH.LP_DIVERSEY.headBoats) boats.push({
+    x: hx + (rnd3() * 2 - 1) * 0.3,
+    z: hz + (rnd3() * 2 - 1) * 0.3,
+    ry: BASE_HEAD + (rnd3() * 2 - 1) * 0.25,
+    ph: rnd3() * Math.PI * 2, jib: -1, can: true,
+  });
+
   // Belmont + Montrose star-dock floats share one InstancedMesh
   const ALL_CLUSTERS = [...CLUSTERS, ...MONTROSE_CLUSTERS];
   // a few loose Montrose cans out in the open east water
@@ -297,7 +344,7 @@ onWorldReady(() => {
     setPart(masts, i, mastLocal);
     setPart(booms, i, boomLocal);
     if (b.jib >= 0) setPart(jibs, b.jib, jibLocal);
-    const crng = (i < belmontBoatCount) ? rnd : rnd2;   // Belmont draws stay bit-identical; Montrose from rnd2
+    const crng = (i < belmontBoatCount) ? rnd : (i < montroseBoatCount) ? rnd2 : rnd3;   // Belmont/Montrose draws stay bit-identical; Diversey from rnd3
     const hex = (crng() < DARK_PROB) ? DARK[(crng() * DARK.length) | 0] : LIGHT[(crng() * LIGHT.length) | 0];
     hulls.setColorAt(i, _col.setHex(hex));
     hulls.setColorAt(N + i, _col.setHex(WLINE_HEX));   // setColorAt zero-fills unset instances -> every slot set explicitly

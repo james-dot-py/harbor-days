@@ -406,6 +406,22 @@ add('lp-westpanel', 'lincolnpark', 'lakefront', -50, 820, [
   { yaw: 2.95, pitch: 0.14, dist: 12 },  // N back toward the lagoon + the underpass, more elms + open lawn
 ]);
 
+// 113 — Diversey Harbor + Theater on the Lake. The harbor's money shot is the
+// DOWN-THE-CHANNEL axis (docks + slips + the quay row + both banks + the
+// Fullerton culvert closing the vista). f1 stands SOUTH of the skyline z-gate
+// fade (z>503 hides the billboard entirely); f2 reads the channel back NORTH.
+// Theater: oblique stands (047 law — never aim yaw dead at the subject).
+add('lp-diversey-harbor', 'lincolnpark', 'lakefront', -4.5, 479, [
+  { yaw: 0.15, pitch: 0.09, dist: 6 },                 // S down-channel from the east promenade (between dock rows — no near-deck clutter)
+  { x: -6, z: 574, yaw: 0.06, pitch: 0.08, dist: 6 },  // south of the billboard fade: channel to the Fullerton culvert bridge (~75 m — the arch reads)
+  { x: -6, z: 588, yaw: 2.92, pitch: 0.10, dist: 7 },  // from the promenade looking N up the channel: docks + boats + the head
+]);
+add('lp-theater', 'lincolnpark', 'lakefront', 24, 588, [
+  { yaw: 0.95, pitch: 0.12, dist: 8 },                 // SE oblique: west arcade band angling away, lake glinting past the south end
+  { yaw: 0.72, pitch: 0.10, dist: 10 },                // wider pull: the whole pavilion — arcade + deep-eave hip roof + lake beyond
+  { x: 26, z: 636, yaw: 2.62, pitch: 0.10, dist: 7 },  // from the S on the trail: arcade + sign + the strip running north
+]);
+
 // Diversey ENTERABLE bay (task 028): stand on the ground hitting deck at a
 // middle bay's hitting spot and look NORTH down the range — the axis-aligned
 // interior framing for the bay pocket (a cross-body camera sits in a divider);

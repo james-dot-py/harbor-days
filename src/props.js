@@ -1050,6 +1050,62 @@ export function buildProps(){
     }
   }
 
+  // ---- Diversey Harbor east-bank finger docks (113): the channel's slip fingers — Montrose wood vocabulary, merged (draw diet) ----
+  // ZERO rng, ZERO new InstancedMesh buckets: every value comes from CH.LP_DIVERSEY
+  // + the sampled-bank lpDivBank (the single truth shared with coast.js, moorings.js
+  // and tools/walkprobe.mjs). All 8 docks FOLD to three merged meshes (decks /
+  // posts+knobs / dock boxes) → ~3 draws for the whole harbor; walkRects use the
+  // EXACT formula mirrored in walkprobe — never fork it.
+  {
+    const LD=CH.LP_DIVERSEY;
+    const deckGs=[],postGs=[],boxGs=[];
+    for(const zc of LD.dockRows){
+      const e=CH.lpDivBank(zc).e,root=e+0.6,tip=root-LD.dockLen;   // rooted 0.6 onto the promenade so the deck reads flush (issue-016 flush-root law)
+      const deck=new THREE.BoxGeometry(LD.dockLen,0.24,LD.dockHalfW*2);
+      deck.translate((root+tip)/2,LD.deckY,zc);deckGs.push(deck.toNonIndexed());
+      const postH=LD.deckY+2.9;                        // deck underside down below the lagoon water (~-2.34)
+      for(const px of[tip+0.5,tip+3.2,tip+5.9]){
+        if(px>e-0.2)continue;                          // over-water stations only — no post punching through the promenade
+        for(const pz of[zc-LD.dockHalfW,zc+LD.dockHalfW]){
+          const post=new THREE.CylinderGeometry(0.14,0.14,postH,6);
+          post.translate(px,LD.deckY-postH/2+0.02,pz);postGs.push(post.toNonIndexed());   // top flush with the deck underside
+          const knob=new THREE.SphereGeometry(0.17,7,6);
+          knob.translate(px,LD.deckY+0.34,pz);postGs.push(knob.toNonIndexed());           // piling cap
+        }
+      }
+      const box=new THREE.BoxGeometry(0.85,0.55,0.5);                       // the refs' white dock box at each slip root
+      box.translate(root-1.1,LD.deckY+0.395,zc+LD.dockHalfW-0.05);boxGs.push(box.toNonIndexed());
+      walkRects.push({x1:root-LD.dockLen,x2:root+0.3,z1:zc-LD.dockHalfW,z2:zc+LD.dockHalfW,h:LD.deckY});   // walkable deck (EXACT formula mirrored in tools/walkprobe.mjs)
+    }
+    scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(deckGs),toon(LD.deckWood)));
+    scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(postGs),toon(LD.postWood)));
+    scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(boxGs),toon(LD.boxCream)));
+
+    // 'DIVERSEY HARBOR' park-district board — own navy canvas, TWO back-to-back
+    // FrontSide planes (mirrored-text law: never one DoubleSide canvas plane),
+    // posts BEHIND the board ending at the panel's bottom edge (lollipop law).
+    // One collider on open promenade, walkable all around (makeSign convention).
+    {
+      const cv=document.createElement('canvas');cv.width=512;cv.height=96;const g=cv.getContext('2d');
+      g.fillStyle='#20406a';g.fillRect(0,0,512,96);
+      g.strokeStyle='#fdf6e6';g.lineWidth=4;g.strokeRect(2,2,508,92);
+      g.fillStyle='#fdf6e6';g.textAlign='center';g.textBaseline='middle';
+      let fs=34;g.font=`700 ${fs}px "Trebuchet MS",sans-serif`;
+      while(g.measureText(LD.sign.text).width>470&&fs>18){fs-=2;g.font=`700 ${fs}px "Trebuchet MS",sans-serif`;}
+      g.fillText(LD.sign.text,256,48);
+      const tex=new THREE.CanvasTexture(cv);
+      const grp=new THREE.Group();
+      for(const sx of[-1.2,1.2]){
+        const post=new THREE.Mesh(new THREE.CylinderGeometry(0.09,0.11,1.7,6),toon(0xa9713f));
+        post.position.set(sx,0.85,-0.25);grp.add(post);   // top y 1.7 ~ the board's bottom edge (1.54) — never bisects the text
+      }
+      const board=new THREE.Mesh(new THREE.PlaneGeometry(3.2,0.72),curveMat(new THREE.MeshBasicMaterial({map:tex})));board.position.y=1.9;grp.add(board);
+      const back=new THREE.Mesh(new THREE.PlaneGeometry(3.2,0.72),bmat(0xe8d7b4));back.rotation.y=Math.PI;back.position.y=1.9;grp.add(back);
+      grp.position.set(LD.sign.x,0,LD.sign.z);grp.rotation.y=LD.sign.ry;scene.add(grp);
+      collide(LD.sign.x,LD.sign.z,0.5);
+    }
+  }
+
   // ---- Montrose DUNE natural area: sand mounds + piping-plover story + sign ---
   // All INDIVIDUAL frustum-culled meshes (fixed CH coords) → +0 draws unless the
   // dune is framed. ZERO rng of any kind — every value comes from CH data.

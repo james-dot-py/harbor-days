@@ -55,6 +55,9 @@ for(const d of CH.DECKS)walkRects.push(d.walk);
   walkRects.push({x1:B.x0,x2:B.x1,z1:B.z0,z2:B.z1,h:B.h}); }
 { const D=CH.THE_DOCK.deckRect;                   // task 072: The Dock raised wood deck (matches structures.js walkRects.push)
   walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:CH.THE_DOCK.deckY}); }
+{ const D=CH.LP_DIVERSEY;                         // 113: Diversey finger docks (matches props.js walkRects.push — same lpDivBank formula)
+  for(const zc of D.dockRows){const root=CH.lpDivBank(zc).e+0.6;
+    walkRects.push({x1:root-D.dockLen,x2:root+0.3,z1:zc-D.dockHalfW,z2:zc+D.dockHalfW,h:D.deckY});} }
 function onRect(x,z){for(const r of walkRects)if(x>=r.x1&&x<=r.x2&&z>=r.z1&&z<=r.z2)return r;return null}
 
 function walkable(x,z){
@@ -62,7 +65,7 @@ function walkable(x,z){
   if(CH.beachCarved(x,z))return false;             // task 072: roped dune + beach-house hall (data carve, no collider)
   const bh=beachH(x,z);if(bh!==null)return CH.beachWalkable(x,z);   // task 072: dog + Montrose sand
   if(pip(x,z,LAND))return true;
-  if(CH.lpLandHit(x,z)||CH.lpUnderpassHit(x,z))return true;   // 112 LINCOLN PARK: west park + east strip + Fullerton underpass (shared data — mirrors main.js walkable(), same position after pip(LAND))
+  if((CH.lpLandHit(x,z)&&!CH.lpBlockedHit(x,z))||CH.lpUnderpassHit(x,z))return true;   // 112/113 LINCOLN PARK: west park + east strip + Fullerton underpass/culvert, minus the Theater carve (shared data — mirrors main.js walkable(), same position after pip(LAND))
   const q=coastQuery(x,z);
   if(q&&q.ae<0.9&&q.lat>-0.6){const t=tierAt(q.lat,q.z);if(t&&q.lat<profileTotal(q.z)-0.3)return true;}
   return false;
@@ -1565,7 +1568,7 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
   for(const [x,z] of [[-40,700],[-60,760],[-80,640],[-52,880],[-40,940],[-70,980],[-90,900],[-60,460]])
     expect(`west park lawn (${x},${z})`,walkable(x,z),true);
   // (b) the east lakefront strip WALKS (Lakefront Trail south + Theater bulge)
-  for(const [x,z] of [[30,450],[44,540],[40,600],[30,660],[20,700]])
+  for(const [x,z] of [[30,450],[44,540],[40,594],[30,660],[20,700]])   // 113: (40,600) moved to (40,594) — the old point is now honestly inside the Theater footprint carve
     expect(`east strip (${x},${z})`,walkable(x,z),true);
   // (c) the Fullerton UNDERPASS floor WALKS end to end — the map's first working
   //     crossing: east strip -> through the berm gap (x0..14) -> west park
@@ -1589,6 +1592,55 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
   //     underpass has none — the 065/097 law), so no collider ring can push the
   //     player onto non-walkable LP ground. (Recorded; nothing to sweep.)
   expect('LP shell adds no colliders (anti-trap by construction)',true,true);
+}
+
+// ===== LINCOLN PARK 113 (Diversey Harbor + Theater on the Lake) — LIVE
+// walkability via the SAME shared chicago.js functions the engine uses
+// (lpLandHit incl. the Fullerton culvert rect, lpBlockedHit theater carve,
+// lpDivBank-derived dock rects — never forked).
+{ console.log('\n--- LINCOLN PARK 113 (Diversey Harbor + Theater) ---');
+  const LD=CH.LP_DIVERSEY,T=CH.LP_THEATER;
+  // (a) promenade TOPS walk — east bank (bank edge -> berm face) + west quay
+  for(const [x,z] of [[-3,440],[-4,470],[-5,520],[-6,560],[-7,600],[-8,632]])
+    expect(`east promenade (${x},${z})`,walkable(x,z),true);
+  for(const [x,z] of [[-42,470],[-44,520],[-44.5,560],[-34,616]])
+    expect(`west quay (${x},${z})`,walkable(x,z),true);
+  // (b) finger-dock DECKS walk (walkRects mirrored from the same lpDivBank
+  //     formula props.js pushes) at deck height
+  for(const zc of LD.dockRows){
+    const root=CH.lpDivBank(zc).e+0.6,mid=root-LD.dockLen/2;
+    expect(`dock deck z${zc} walks`,walkable(mid,zc),true);
+    const r=onRect(mid,zc);
+    expect(`dock deck z${zc} at deckY`,!!r&&r.h===LD.deckY,true);
+  }
+  // (c) the Fullerton CULVERT deck walks E-W (the crossing continues WEST over
+  //     the lagoon neck — lpLandHit's culvert rect, engine-shared)
+  for(const [x,z] of [[-10,657],[-16,660],[-24,660],[-32,660],[-35,666],[-20,650]])
+    expect(`culvert deck (${x},${z})`,walkable(x,z),true);
+  // (d) the channel stays BLOCKED water (not wadeable, not walkable) — incl.
+  //     both ENDS: the head + the open neck north of the culvert (no
+  //     water-shelf; the apex z~664 is wrapped UNDER the walkable deck)
+  for(const [x,z] of [[-20,500],[-25,560],[-15,630],[-20,640],[-20,643],[-20,424],[-30,428]])
+    expect(`channel water blocked (${x},${z})`,walkable(x,z),false);
+  // (e) land continues SOUTH of the culvert (the crossing goes somewhere)
+  for(const [x,z] of [[-20,672],[-20,690]])
+    expect(`land S of culvert (${x},${z})`,walkable(x,z),true);
+  // (f) THEATER carve: footprint BLOCKED (052 footprint law), perimeter +
+  //     trail stay walkable, and the block is LAND not water (issue-017 class
+  //     can't fire: lpLandHit stays true inside the carve)
+  for(const [x,z] of [[42,613],[34,601],[50,625],[T.x0+0.1,T.z0+0.1],[T.x1-0.1,T.z1-0.1]])
+    expect(`theater footprint blocked (${x.toFixed?x.toFixed(1):x},${z.toFixed?z.toFixed(1):z})`,walkable(x,z),false);
+  for(const [x,z] of [[31,613],[42,598],[42,628],[28,612],[52,598]])
+    expect(`theater perimeter walks (${x},${z})`,walkable(x,z),true);
+  expect('theater is LAND under the carve (never water)',CH.lpLandHit(42,613),true);
+  // (g) trail ribbons still clear: no LP_TRAIL_LAKE sample inside the carve
+  expect('LP_TRAIL_LAKE clear of the theater carve',
+    CH.LP_TRAIL_LAKE.every(p=>!CH.lpBlockedHit(p[0],p[1])),true);
+  // (h) ANTI-TRAP: 113 adds ONE collider (the DIVERSEY HARBOR sign post,
+  //     r0.5 on open promenade — ring fully on walkable ground) and NO
+  //     colliders at the theater/culvert/docks; the carve is the seal.
+  expect('sign collider ring on walkable ground',
+    [[0.9,0],[0,0.9],[-0.9,0],[0,-0.9]].every(([dx,dz])=>walkable(LD.sign.x+dx,LD.sign.z+dz)),true);
 }
 
 // ===== 088 PERMANENT GUARDS — spawned as gate categories so the standard

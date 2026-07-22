@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-22T18:22:47.895Z",
- "count": 143,
+ "generated": "2026-07-22T19:23:40.228Z",
+ "count": 147,
  "waypoints": [
   {
    "id": "spawn",
@@ -937,7 +937,7 @@
      "dist": 8
     }
    ],
-   "expectation": "LINCOLN PARK SHELL (task 112) — the map opens SOUTH past the old z408 fence: broad new green parkland spreads ahead, scattered with big chunky shade elms, a pale crushed-limestone trail curving on into it, and Lake Shore Drive with its low embankment carrying south along one side. Reads as the lakefront FINALLY continuing into a big open park — honest interim lawn (the lagoon docks, zoo and gardens come in 113-117), NOT a hole and NOT a dead-end fence. No crisp downtown skyline is promised (far plane 900 + fog + the z-gate fade it out)."
+   "expectation": "LINCOLN PARK ARRIVAL (112 shell + 113 harbor): the map opens SOUTH past the old z408 fence — broad green parkland ahead, scattered with big chunky shade elms, a pale crushed-limestone trail curving on into it, and Lake Shore Drive with its low embankment carrying south along one side. Reads as the lakefront FINALLY continuing into a big open park — honest lawn (the zoo and gardens come in 114-117), NOT a hole and NOT a dead-end fence; a few sailboat mast tips MAY show over the embankment to the right (the new Diversey lagoon, not required). No crisp downtown skyline is promised (far plane 900 + fog + the z-gate fade it out)."
   },
   {
    "id": "lp-underpass",
@@ -989,7 +989,63 @@
      "dist": 12
     }
    ],
-   "expectation": "LINCOLN PARK'S NEW WEST PARKLAND (task 112 — the map's first ground WEST of the Drive): broad open green lawn under scattered big shade elms, a crushed-limestone path winding through, and a low backdrop wall of brick apartment blocks + city trees closing off the western edge (the Clark/Lincoln neighborhood). Honest interim lawn that 113-117 fill with the lagoon, zoo, conservatory and pond — reads as real enclosed parkland, NOT an empty flat or a hole; NO water shows west of the park behind the buildings (the city, not the lake, sits west)."
+   "expectation": "LINCOLN PARK'S NEW WEST PARKLAND (task 112 — the map's first ground WEST of the Drive): broad open green lawn under scattered big shade elms, a crushed-limestone path winding through, and a low backdrop wall of brick apartment blocks + city trees closing off the western edge (the Clark/Lincoln neighborhood). Honest interim lawn that 114-117 fill with the zoo, conservatory and pond (the Diversey lagoon + its docks now close its north end) — reads as real enclosed parkland, NOT an empty flat or a hole; NO water shows west of the park behind the buildings (the city, not the lake, sits west)."
+  },
+  {
+   "id": "lp-diversey-harbor",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -4.5,
+   "z": 479,
+   "framings": [
+    {
+     "yaw": 0.15,
+     "pitch": 0.09,
+     "dist": 6
+    },
+    {
+     "x": -6,
+     "z": 574,
+     "yaw": 0.06,
+     "pitch": 0.08,
+     "dist": 6
+    },
+    {
+     "x": -6,
+     "z": 588,
+     "yaw": 2.92,
+     "pitch": 0.1,
+     "dist": 7
+    }
+   ],
+   "expectation": "A long narrow lagoon runs south between grassy banks, lined with wooden finger docks and rows of moored white-hulled sailboats; a low park bridge crosses it ahead (the Fullerton culvert — must read in at least one framing) and shade trees lean near the calm water — the inner harbor that threads the park. The docks jut from a stone promenade path on the near (east) bank with dock-box lamp posts and white dock boxes; a nose-to-tail line of boats rides cans along the far bank, whose edge reads as a grey stone bulkhead (NOT a sandy beach band; no terraced apron, no walkable shelf). Boats sit ON the water with freeboard + a dark waterline band, and the channel reads OPEN down the middle. (Water is the house teal — the BRIEF's 'green' is not required.)"
+  },
+  {
+   "id": "lp-theater",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": 24,
+   "z": 588,
+   "framings": [
+    {
+     "yaw": 0.95,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "yaw": 0.72,
+     "pitch": 0.1,
+     "dist": 10
+    },
+    {
+     "x": 26,
+     "z": 636,
+     "yaw": 2.62,
+     "pitch": 0.1,
+     "dist": 7
+    }
+   ],
+   "expectation": "THEATER ON THE LAKE at the Fullerton point: a long LOW Prairie-brick pavilion standing alone on the lakefront strip — a rhythmic arcade band of tall round-arched openings glowing warm between brick piers, limestone trim at the spring line, all under a broad hip roof with deep overhanging eaves; THEATER ON THE LAKE lettered over the west arches. The crushed-limestone Lakefront Trail sweeps past its west front and the open lake glints beyond the pavilion. Reads as a landmark civic building, not a shed: the arches dominate the walls and the roof reads wide and low."
   },
   {
    "id": "dv-bay-deck",
@@ -1340,6 +1396,56 @@
     }
    ],
    "expectation": "The harbor house: a small red-roofed harbor office building on the inner-park side of the basin."
+  },
+  {
+   "id": "landmark-9",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": -33,
+   "z": 520,
+   "framings": [
+    {
+     "yaw": 1.57,
+     "pitch": 0.16,
+     "dist": 14
+    },
+    {
+     "yaw": 1.12,
+     "pitch": 0.16,
+     "dist": 12
+    },
+    {
+     "yaw": 2.02,
+     "pitch": 0.24,
+     "dist": 16
+    }
+   ],
+   "expectation": ""
+  },
+  {
+   "id": "landmark-10",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 33,
+   "z": 613,
+   "framings": [
+    {
+     "yaw": 1.57,
+     "pitch": 0.16,
+     "dist": 14
+    },
+    {
+     "yaw": 1.12,
+     "pitch": 0.16,
+     "dist": 12
+    },
+    {
+     "yaw": 2.02,
+     "pitch": 0.24,
+     "dist": 16
+    }
+   ],
+   "expectation": ""
   },
   {
    "id": "dv-corner-chevron",
