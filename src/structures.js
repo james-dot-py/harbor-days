@@ -1877,6 +1877,261 @@ function buildZoo(POSTS,RAILS){
   emit(gBack,toon(0x2c2620));   emit(gPost,toon(0x6b5c48));
 }
 
+// ---- LINCOLN PARK ZOO habitats + Farm-in-the-Zoo (task 115) ----------------
+// Four open DIORAMAS lining the north habitat walk (snow-monkey knoll, penguin
+// cove, polar tundra, flamingo lagoon) + the Farm-in-the-Zoo yard (the red
+// GAMBREL barn / yellow farmhouse / windmill tower / split-rail paddock).
+// EVERY placement from CH.ZOO.habitats / CH.ZOO.farmyard or a literal below —
+// zero rng, NO colliders (walkability is data-carved in zooBlockedHit), rails
+// tail-append POSTS/RAILS via fenceRun collide:false. Same fold discipline as
+// buildZoo: per-material world-coord accumulators -> ONE merged mesh each;
+// water = bmat (self-lit — toon bands weirdly on water, the 044 law). The
+// animal cast + the spinning windmill wheel come from packs/zoo-habitats.js —
+// the flat ledge/shelf/terrace tops + the mill head's +x side stay CLEAR.
+function buildZooHabitats(POSTS,RAILS){
+  const HB=CH.ZOO.habitats,FY=CH.ZOO.farmyard;
+  const MQ=HB.macaque,PG=HB.penguin,PL=HB.polar,FL=HB.flamingo,B=FY.barn,FH=FY.farmhouse,WM=FY.windmill;
+
+  // -- per-material accumulators (merged + scene.add'd at the end) -----------
+  const gGrey=[],gGrey2=[],gPale=[],gPale2=[],gDirt=[],gBank=[],
+        gRed=[],gTrimW=[],gRoofG=[],gDoor=[],gClap=[],gFhRoof=[],gFhTrim=[],
+        gStraw=[],gLeafA=[],gLeafB=[],gGlow=[],gWaterA=[],gWaterT=[],gWaterF=[],
+        gBack=[],gPost=[];
+  const box=(arr,w,h,d,x,y,z,ry)=>{const g=new THREE.BoxGeometry(w,h,d);if(ry)g.rotateY(ry);g.translate(x,y,z);arr.push(g);};
+  const emit=(geos,mat)=>{if(!geos.length)return;
+    scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(geos.map(g=>g.index?g.toNonIndexed():g)),mat));};
+  const fit=(g,t,mw,fs,w)=>{g.font=`${w} ${fs}px "Trebuchet MS",sans-serif`;
+    while(g.measureText(t).width>mw&&fs>10){fs-=2;g.font=`${w} ${fs}px "Trebuchet MS",sans-serif`;}};
+  const sign=(px,pz,ry,w,h,cy,postR,cw,ch,draw)=>{
+    const bot=cy-h/2;
+    if(postR>0){const pg=new THREE.CylinderGeometry(postR,postR,bot,8);pg.translate(px,bot/2,pz);gPost.push(pg);}
+    box(gBack,w+0.07,h+0.07,0.05,px,cy,pz,ry);
+    const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;const g=cv.getContext('2d');
+    draw(g);
+    const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
+    const pl=new THREE.Mesh(new THREE.PlaneGeometry(w,h),curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide})));
+    pl.rotation.y=ry;pl.position.set(px+Math.sin(ry)*0.045,cy,pz+Math.cos(ry)*0.045);scene.add(pl);
+  };
+  // the habitat name plate (the lion-plate shape): bold title / italic sub
+  const plate=(S,title,sub)=>sign(S.x,S.z,S.ry,1.35,0.6,1.25,0.05,512,224,g=>{
+    g.fillStyle='#efe6cd';g.fillRect(0,0,512,224);
+    g.textAlign='center';g.textBaseline='middle';
+    g.fillStyle='#3a2f24';fit(g,title,460,64,'800');g.fillText(title,256,82);
+    g.fillStyle='#6b5c48';fit(g,sub,470,28,'italic 700');g.fillText(sub,256,168);
+  });
+  const disc=(arr,r,seg,x,y,z,sx,sz)=>{const g=new THREE.CircleGeometry(r,seg);if(sx)g.scale(sx,sz,1);g.rotateX(-Math.PI/2);g.translate(x,y,z);arr.push(g);};
+  const gnd=(arr,w,d,x,y,z)=>{const g=new THREE.PlaneGeometry(w,d);g.rotateX(-Math.PI/2);g.translate(x,y,z);arr.push(g);};
+  // sloped roof panel: profile line (z0,y0)->(z1,y1) (offsets off cx/cz), a
+  // box sw wide (x) x th thick, extended e0 past the start / e1 past the end,
+  // lifted noff (default th/2) along the outward normal so the panel SITS ON
+  // the profile edge instead of bisecting it
+  const slope=(arr,cx,cz,sw,th,z0,y0,z1,y1,e0,e1,noff)=>{
+    const dz=z1-z0,dy=y1-y0,L=Math.hypot(dz,dy),uz=dz/L,uy=dy/L;
+    const k=uz>=0?1:-1,nz=-uy*k,ny=uz*k,no=noff!=null?noff:th/2,off=(e1-e0)/2;
+    const g=new THREE.BoxGeometry(sw,th,L+e0+e1);
+    g.rotateX(-Math.atan2(dy,dz));
+    g.translate(cx,(y0+y1)/2+off*uy+ny*no,cz+(z0+z1)/2+off*uz+nz*no);
+    arr.push(g);
+  };
+
+  // (1) SNOW-MONKEY KNOLL — stacked-slab rockwork mound (the SLABS grotto
+  // recipe, smaller), the stack biased NE so the spring pool reads at the SW
+  // base; the SOUTH mid-ledge stays flat + clear (the pack seats a grooming
+  // pair there)
+  const MSLAB=[  // [w,h,d, ox,cy,oz, ry, alt] off the mound centre
+    [3.4,.5,2.6,  .4,.25,.5,  .15,0],[2.9,.45,2.2, .6,.68,.2, -.25,1],
+    [2.4,.4,1.9,  .2,1.03,.6, .4, 0],[1.9,.38,1.5, .5,1.32,.3, -.2,1],
+    [1.3,.32,1.05,.35,1.5,.45,.55,0],                          // top ~1.66
+    [2.0,.38,1.5,-1.1,.19,1.2,.6,1],[1.7,.35,1.3,1.5,.18,-.7,-.5,0],  // base spread
+    [2.3,.4,1.6,   0,.6,1.5,  .08,0],                          // the SOUTH ledge — flat top y .8
+  ];
+  for(const[w,h,d,ox,cy,oz,ry,alt]of MSLAB)box(alt?gGrey2:gGrey,w,h,d,MQ.x+ox,cy,MQ.z+oz,ry);
+  disc(gWaterA,MQ.pool.r,20,MQ.pool.x,0.14,MQ.pool.z);         // the steaming spring pool
+  box(gGrey2,0.8,0.32,0.55,-51.9,0.16,794.4,.5);               // two low rocks at the pool lip
+  box(gGrey,0.65,0.26,0.5,-50.1,0.13,793.6,-.4);
+  {  // viewing rail — one closed 14-segment circle at railR (first pt repeated)
+    const pts=[];
+    for(let i=0;i<=14;i++){const a=i/14*Math.PI*2;pts.push([MQ.x+Math.cos(a)*MQ.railR,MQ.z+Math.sin(a)*MQ.railR]);}
+    fenceRun(pts,{spacing:1.8,postH:0.85,color:0x3a3f3a,collide:false},POSTS,RAILS);
+  }
+  plate(MQ.sign,MQ.plate,MQ.sub);
+
+  // (2) PENGUIN COVE — PALE rockwork bowl: rim slabs N/W/E, the flat huddle
+  // SHELF at the south viewing edge, stepped slabs down to the water wedge
+  gnd(gPale,PG.x1-PG.x0,PG.z1-PG.z0,(PG.x0+PG.x1)/2,0.024,(PG.z0+PG.z1)/2);   // pale floor kills the grass inside the bowl
+  const PRIM=[  // rim slabs [x,z, w,d, h, ry, alt]
+    [-67.6,776.2,2.4,1.3,.9, .12,0],[-65.2,775.9,2.2,1.2,.7,-.08,1],
+    [-62.9,776.1,2.5,1.3,.95,.06,0],[-60.4,775.9,2.2,1.2,.75,-.1,1],[-58.2,776.3,2.0,1.3,.85,.15,0],  // north rim
+    [-68.1,777.9,1.3,2.3,.8,-.06,1],[-68.0,780.2,1.2,2.2,.95,.08,0],
+    [-68.1,782.5,1.3,2.3,.7,-.1,1],[-68.0,784.8,1.2,2.2,.85,.07,0],   // west rim
+    [-57.9,777.9,1.3,2.3,.85,.09,0],[-58.0,780.2,1.2,2.2,.7,-.07,1],
+    [-57.9,782.5,1.3,2.3,.9,.1,0],[-58.0,784.7,1.2,2.2,.75,-.06,1],   // east rim
+    [-67.9,785.4,1.4,1.2,.6,.1,0],[-58.1,785.3,1.3,1.1,.55,-.08,1],   // south corners
+  ];
+  for(const[x,z,w,d,h,ry,alt]of PRIM)box(alt?gPale2:gPale,w,h,d,x,h/2,z,ry);
+  box(gPale,4.8,PG.shelfY,2.8,-63,PG.shelfY/2,784.3,0);        // the huddle SHELF — flat top y .5 at the viewing edge
+  box(gPale2,3.6,0.4,1.4,-63.4,0.2,782.5,.04);                 // steps down to the water
+  box(gPale,2.6,0.3,1.2,-64.6,0.15,781.6,-.06);
+  {const W=PG.water;box(gWaterT,W.x1-W.x0,0.26,W.z1-W.z0,(W.x0+W.x1)/2,W.y-0.13,(W.z0+W.z1)/2,0);}  // wedge top y .28
+  box(gPale,1.1,0.5,0.8,-64.9,0.25,779.4,.4);                  // two pale slabs poke from the water
+  box(gPale2,0.9,0.44,0.7,-62.3,0.22,780.6,-.5);
+  fenceRun(PG.rail,{spacing:2.2,postH:0.9,color:0x3a3f3a,collide:false},POSTS,RAILS);
+  plate(PG.sign,PG.plate,PG.sub);
+
+  // (3) POLAR TUNDRA — dirt ground, the two-course stacked back wall W+N
+  // (grey stacked-rockwork ref), scattered boulders, the plunge pool + its
+  // north rim arc, the low terrace the bear stands by
+  gnd(gDirt,PL.x1-PL.x0,PL.z1-PL.z0,(PL.x0+PL.x1)/2,0.025,(PL.z0+PL.z1)/2);
+  const PWALL=[  // [x,z, w,d, h,cy, ry, alt] — course 1 low, course 2 bond-offset on top
+    [-88.5,779.9,1.5,3.6,1.25,.625,-.05,0],[-88.6,783.5,1.5,3.6,1.15,.575,.04,1],
+    [-88.5,787.1,1.5,3.6,1.25,.625,-.04,0],[-88.6,790.7,1.5,3.6,1.2,.6,.05,1],   // west course 1
+    [-88.4,781.7,1.35,3.4,1.0,1.7,.03,1],[-88.5,785.3,1.35,3.4,.95,1.65,-.04,0],
+    [-88.4,788.9,1.35,3.4,1.0,1.7,.05,1],[-88.5,791.6,1.35,1.8,.9,1.6,-.03,0],   // west course 2 — top ~2.2
+    [-86.9,778.7,3.6,1.5,1.2,.6,.04,1],[-83.3,778.6,3.6,1.5,1.25,.625,-.05,0],
+    [-79.7,778.7,3.6,1.5,1.15,.575,.05,1],[-76.1,778.6,3.6,1.5,1.25,.625,-.04,0], // north course 1
+    [-85.1,778.8,3.4,1.35,1.0,1.65,-.04,0],[-81.5,778.7,3.4,1.35,.95,1.7,.04,1],
+    [-77.9,778.8,3.4,1.35,1.0,1.65,-.05,0],                                       // north course 2
+  ];
+  for(const[x,z,w,d,h,cy,ry,alt]of PWALL)box(alt?gGrey:gPale2,w,h,d,x,cy,z,ry);
+  box(gPale2,1.1,0.7,0.9,-84,0.35,786,.5);box(gGrey,0.9,0.55,0.75,-79.5,0.27,782,-.4);   // boulders
+  box(gPale2,0.7,0.45,0.6,-76.5,0.22,786.5,.8);box(gGrey,0.8,0.5,0.65,-86,0.25,790.5,-.6);
+  box(gPale2,0.6,0.4,0.5,-81.5,0.2,791,.3);
+  disc(gWaterT,PL.pool.r,20,PL.pool.x,PL.pool.y,PL.pool.z);    // the plunge pool
+  box(gGrey,1.1,0.5,0.75,-80.83,0.25,787.45,.98);              // low rock rim arc on the pool's north
+  box(gPale2,1.0,0.42,0.7,-79.54,0.21,786.42,.38);
+  box(gGrey,1.1,0.48,0.75,-77.89,0.24,786.46,-.22);
+  box(gPale2,1.0,0.44,0.7,-76.6,0.22,787.23,-.82);
+  box(gPale2,3.2,0.45,2.2,-80.5,0.225,784.5,.06);              // the low terrace — flat top y .45, the bear stands by it
+  fenceRun(PL.rail,{spacing:2.2,postH:0.95,color:0x3a3f3a,collide:false},POSTS,RAILS);
+  plate(PL.sign,PL.plate,PL.sub);
+
+  // (4) FLAMINGO LAGOON — mud bank + the kidney of algae-green water (two
+  // squashed discs, the B disc 4 mm up — same-colour lap, no fight) + reeds
+  // on the south + east margins
+  gnd(gBank,FL.x1-FL.x0,FL.z1-FL.z0,(FL.x0+FL.x1)/2,0.02,(FL.z0+FL.z1)/2);
+  disc(gWaterF,1,24,-30,FL.waterY,861.5,4.2,3.2);
+  disc(gWaterF,1,24,-26.6,FL.waterY+0.004,863.8,3.9,3.3);
+  const REED=[  // [x,z, r, alt] squashed-sphere clumps
+    [-24.3,866.4,.45,0],[-23.9,866.15,.34,1],[-22.9,864.0,.42,1],[-23.25,863.7,.3,0],
+    [-23.4,861.0,.4,0],[-23.1,860.6,.3,1],[-26.1,867.2,.44,1],[-26.5,866.9,.32,0],
+    [-29.6,866.9,.46,0],[-30.0,866.6,.33,1],[-32.4,865.6,.4,1],[-32.7,865.25,.3,0],
+    [-23.1,858.6,.38,0],[-22.85,858.3,.28,1],
+  ];
+  for(const[x,z,r,alt]of REED){const g=new THREE.SphereGeometry(r,8,6);g.scale(1,.7,1);g.translate(x,r*.55,z);(alt?gLeafB:gLeafA).push(g);}
+  fenceRun(FL.rail,{spacing:2.2,postH:0.9,color:0x3a3f3a,collide:false},POSTS,RAILS);
+  plate(FL.sign,FL.plate,FL.sub);
+
+  // (5a) THE GAMBREL BARN — pentagon gable ends E/W (ExtrudeGeometry), red
+  // side walls to the eave, 4 grey slope panels with eave + rake overhang,
+  // white corner/rake/fascia trim; the EAST gable is the postcard face down
+  // the farm lane: sliding X-brace door + hayloft door under the peak
+  const hw=B.w/2,hd=B.d/2,bw=2.6;   // bw = the gambrel break half-width
+  const gam=()=>{const s=new THREE.Shape();
+    s.moveTo(-hd,0);s.lineTo(hd,0);s.lineTo(hd,B.eaveH);s.lineTo(bw,B.breakH);s.lineTo(0,B.ridgeH);
+    s.lineTo(-bw,B.breakH);s.lineTo(-hd,B.eaveH);s.closePath();
+    return new THREE.ExtrudeGeometry(s,{depth:0.3,bevelEnabled:false});};
+  {const e=gam();e.rotateY(Math.PI/2);e.translate(B.x+hw-0.3,0,B.z);gRed.push(e);}
+  {const w=gam();w.rotateY(-Math.PI/2);w.translate(B.x-hw+0.3,0,B.z);gRed.push(w);}
+  for(const sz of[-1,1])box(gRed,B.w-0.6,B.eaveH,0.35,B.x,B.eaveH/2,B.z+sz*(hd-0.175),0);   // N/S side walls butt the ends
+  slope(gRoofG,B.x,B.z,B.w+0.7,0.18,-hd,B.eaveH,-bw,B.breakH,0.35,0.05);   // N lower slope
+  slope(gRoofG,B.x,B.z,B.w+0.7,0.18,-bw,B.breakH,0,B.ridgeH,0.2,0.12);     // N upper (crosses the ridge — reads as the ridge line)
+  slope(gRoofG,B.x,B.z,B.w+0.7,0.18, hd,B.eaveH, bw,B.breakH,0.35,0.05);   // S lower
+  slope(gRoofG,B.x,B.z,B.w+0.7,0.18, bw,B.breakH,0,B.ridgeH,0.2,0.12);     // S upper
+  for(const sx of[-1,1])for(const sz of[-1,1])box(gTrimW,0.24,B.eaveH,0.24,B.x+sx*hw,B.eaveH/2,B.z+sz*hd,0);  // corner boards
+  for(const sz of[-1,1])box(gTrimW,B.w-0.4,0.18,0.1,B.x,B.eaveH-0.08,B.z+sz*(hd+0.03),0);   // eave fascia
+  const rkx=B.x+hw+0.1;   // rake boards proud of the EAST gable face
+  slope(gTrimW,rkx,B.z,0.12,0.16,-hd,B.eaveH,-bw,B.breakH,0.05,0.05,-0.06);
+  slope(gTrimW,rkx,B.z,0.12,0.16,-bw,B.breakH,0,B.ridgeH,0.05,0.05,-0.06);
+  slope(gTrimW,rkx,B.z,0.12,0.16, hd,B.eaveH, bw,B.breakH,0.05,0.05,-0.06);
+  slope(gTrimW,rkx,B.z,0.12,0.16, bw,B.breakH,0,B.ridgeH,0.05,0.05,-0.06);
+  box(gDoor,0.14,3.0,2.8,B.x+hw+0.05,1.5,B.z,0);               // the big sliding door, slightly proud
+  for(const sz of[-1,1])box(gTrimW,0.1,3.15,0.16,B.x+hw+0.08,1.575,B.z+sz*1.48,0);   // white frame
+  box(gTrimW,0.1,0.16,3.12,B.x+hw+0.08,3.1,B.z,0);
+  for(const sgn of[1,-1]){const g=new THREE.BoxGeometry(0.05,0.12,3.8);g.rotateX(sgn*0.82);g.translate(B.x+hw+0.14,1.5,B.z);gTrimW.push(g);}  // the X-brace
+  box(gDoor,0.1,1.5,1.3,B.x+hw+0.04,4.9,B.z,0);                // hayloft door under the peak
+  for(const sz of[-1,1])box(gTrimW,0.08,1.66,0.12,B.x+hw+0.06,4.9,B.z+sz*0.71,0);
+  for(const sy of[-1,1])box(gTrimW,0.08,0.12,1.54,B.x+hw+0.06,4.9+sy*0.81,B.z,0);
+  for(const sz of[-1,1]){  // one small white-framed glow window each, N + S walls
+    const p=new THREE.PlaneGeometry(0.9,0.9);if(sz<0)p.rotateY(Math.PI);
+    p.translate(B.x,2.1,B.z+sz*(hd+0.06));gGlow.push(p);
+    for(const sx of[-1,1])box(gTrimW,0.1,1.14,0.08,B.x+sx*0.52,2.1,B.z+sz*(hd+0.03),0);
+    for(const sy of[-1,1])box(gTrimW,1.14,0.1,0.08,B.x,2.1+sy*0.52,B.z+sz*(hd+0.03),0);
+  }
+
+  // (5b) FARMHOUSE — yellow clapboard + gable roof, white door/window trim on
+  // the SOUTH (farm-facing) face, a small stone stoop
+  const fhw=FH.w/2,fhd=FH.d/2,fz=FH.z+fhd;
+  box(gClap,FH.w,FH.wallH,FH.d,FH.x,FH.wallH/2,FH.z,0);
+  const tri=()=>{const s=new THREE.Shape();
+    s.moveTo(-fhd,FH.wallH);s.lineTo(fhd,FH.wallH);s.lineTo(0,FH.wallH+FH.roofH);s.closePath();
+    return new THREE.ExtrudeGeometry(s,{depth:0.3,bevelEnabled:false});};
+  {const e=tri();e.rotateY(Math.PI/2);e.translate(FH.x+fhw-0.3,0,FH.z);gClap.push(e);}
+  {const w=tri();w.rotateY(-Math.PI/2);w.translate(FH.x-fhw+0.3,0,FH.z);gClap.push(w);}
+  slope(gFhRoof,FH.x,FH.z,FH.w+0.7,0.16,-fhd,FH.wallH,0,FH.wallH+FH.roofH,0.4,0.12);
+  slope(gFhRoof,FH.x,FH.z,FH.w+0.7,0.16, fhd,FH.wallH,0,FH.wallH+FH.roofH,0.4,0.12);
+  box(gDoor,1.0,2.0,0.12,FH.x,1.0,fz+0.02,0);                  // door + white frame
+  for(const sx of[-1,1])box(gFhTrim,0.1,2.15,0.1,FH.x+sx*0.6,1.075,fz+0.03,0);
+  box(gFhTrim,1.3,0.1,0.1,FH.x,2.12,fz+0.03,0);
+  for(const ox of[-2,2]){                                      // two glow windows + frames
+    const p=new THREE.PlaneGeometry(0.7,0.9);p.translate(FH.x+ox,1.8,fz+0.05);gGlow.push(p);
+    for(const sx of[-1,1])box(gFhTrim,0.08,1.06,0.08,FH.x+ox+sx*0.41,1.8,fz+0.02,0);
+    for(const sy of[-1,1])box(gFhTrim,0.86,0.08,0.08,FH.x+ox,1.8+sy*0.49,fz+0.02,0);
+  }
+  box(gPale2,1.5,0.18,0.8,FH.x,0.09,fz+0.45,0);                // stoop slab
+
+  // (5c) WINDMILL TOWER — 4 leaning legs, 3 brace rings, top platform, the
+  // west tail vane. NO wheel: the pack spins it at head height on the +x side
+  const tilt=0.061;   // lean: base half 0.7 -> top half 0.175 over h 8.5
+  for(const sx of[-1,1])for(const sz of[-1,1]){
+    const g=new THREE.BoxGeometry(0.1,8.6,0.1);g.translate(0,4.3,0);
+    g.rotateX(-tilt*sz);g.rotateZ(tilt*sx);
+    g.translate(WM.x+sx*0.7,0,WM.z+sz*0.7);gRoofG.push(g);
+  }
+  for(const[y,bh]of[[2.2,0.564],[4.4,0.428],[6.6,0.292]])      // cross-brace rings
+    for(const s of[-1,1]){
+      box(gRoofG,bh*2+0.12,0.07,0.07,WM.x,y,WM.z+s*bh,0);
+      box(gRoofG,0.07,0.07,bh*2+0.12,WM.x+s*bh,y,WM.z,0);
+    }
+  box(gRoofG,1.0,0.14,1.0,WM.x,8.55,WM.z,0);                   // top platform
+  box(gRoofG,0.7,0.08,0.08,WM.x-0.45,8.5,WM.z,0);              // tail boom -x
+  box(gRoofG,1.3,0.55,0.06,WM.x-1.15,8.5,WM.z,0);              // the VANE plate, pointing west
+
+  // (5d) PADDOCK — split-rail runs (the east gap = the open gate), flattened
+  // straw discs + the dark water trough by the gate
+  for(const run of FY.paddock.runs)
+    fenceRun(run,{spacing:FY.paddock.spacing,postH:FY.paddock.postH,color:FY.paddock.color,collide:false},POSTS,RAILS);
+  for(const[x,z,r]of[[-85.2,977.8,1.8],[-79.3,976.4,1.3],[-87.1,990.5,2.0],[-80.2,993.2,1.5],[-76.1,984.6,1.2]])
+    disc(gStraw,r,12,x,0.015,z);
+  box(gDoor,1.4,0.5,0.7,-73.5,0.25,984,0.2);                   // trough by the gate
+
+  // (5e) FARM SIGN — the folk directory board (ref Lincoln_Park_Farm_Zoo.jpg):
+  // bold header + tag + a painted red-barn glyph over a green ground stripe
+  const FS=FY.sign;
+  sign(FS.x,FS.z,FS.ry,1.7,1.2,1.5,0.06,512,384,g=>{
+    g.fillStyle='#efe6cd';g.fillRect(0,0,512,384);
+    g.fillStyle='#7fae6b';g.fillRect(0,292,512,92);            // green ground stripe
+    g.textAlign='center';g.textBaseline='middle';
+    g.fillStyle='#2d3a2c';fit(g,FS.title,460,54,'800');g.fillText(FS.title,256,52);
+    g.fillStyle='#5a5142';fit(g,FS.sub,440,30,'italic 700');g.fillText(FS.sub,256,102);
+    g.fillStyle='#b3402e';
+    g.fillRect(196,228,120,78);                                // barn body
+    g.beginPath();g.moveTo(186,230);g.lineTo(206,184);g.lineTo(256,164);g.lineTo(306,184);g.lineTo(326,230);g.closePath();g.fill();  // pentagon gambrel roof
+    g.fillStyle='#f0ece0';g.fillRect(244,258,24,48);           // door
+  });
+
+  // -- emit: ONE merged mesh per material --------------------------------
+  emit(gGrey,toon(MQ.rock));   emit(gGrey2,toon(MQ.rock2));
+  emit(gPale,toon(PG.rock));   emit(gPale2,toon(PG.rock2));
+  emit(gDirt,toon(PL.dirt));   emit(gBank,toon(FL.bank));
+  emit(gRed,toon(B.red));      emit(gTrimW,toon(B.trim));   emit(gRoofG,toon(B.roof));
+  emit(gDoor,toon(B.door));    emit(gClap,toon(FH.clap));   emit(gFhRoof,toon(FH.roof));
+  emit(gFhTrim,toon(FH.trim)); emit(gStraw,toon(FY.paddock.straw));
+  emit(gLeafA,toon(0x5aa64f)); emit(gLeafB,toon(0x74bd63));
+  emit(gGlow,bmat(0xffe2ae));
+  emit(gWaterA,bmat(MQ.pool.water)); emit(gWaterT,bmat(PG.water.color)); emit(gWaterF,bmat(FL.water));
+  emit(gBack,toon(0x2c2620));  emit(gPost,toon(0x6b5c48));
+}
+
 export function buildStructures(){
   const POSTS=[],RAILS=[];
   buildDogFence(POSTS,RAILS);
@@ -1889,6 +2144,7 @@ export function buildStructures(){
   fenceRun(CH.MONTROSE_DUNE.fence, {spacing:2.6, postH:0.5, color:0xcbb994, collide:false}, POSTS, RAILS);   // low rope line, NO colliders (dune interior blocked by walk data — 065 law)
   buildMontrosePoint(POSTS,RAILS);   // task 071: sanctuary gateway/flanks/ropes append to POSTS/RAILS tail (indices unchanged); statics drawn directly
   buildZoo(POSTS,RAILS);             // task 114: zoo campus — perimeter/gates/pool/lion house/yard append to the tail (collide:false, data-carved walkability)
+  buildZooHabitats(POSTS,RAILS);     // task 115: habitat dioramas + Farm-in-the-Zoo — rails append to the tail (collide:false, data-carved walkability)
   emitFences(POSTS,RAILS);
   buildFieldhouse();
   buildParkBait();

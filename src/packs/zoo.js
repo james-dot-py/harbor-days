@@ -31,7 +31,7 @@ import * as CH from '../data/chicago.js';
 
 // ---------------------------- geometry helpers -------------------------
 // scale -> rotateX -> rotateY -> translate, so parts pose before placing.
-function sph(r, seg, sx, sy, sz, x, y, z, ry = 0, rx = 0) {
+export function sph(r, seg, sx, sy, sz, x, y, z, ry = 0, rx = 0) {
   const g = new THREE.SphereGeometry(r, seg, Math.max(4, (seg * 0.75) | 0));
   g.scale(sx, sy, sz);
   if (rx) g.rotateX(rx);
@@ -39,7 +39,7 @@ function sph(r, seg, sx, sy, sz, x, y, z, ry = 0, rx = 0) {
   g.translate(x, y, z);
   return g;
 }
-function box(w, h, d, x, y, z) {
+export function box(w, h, d, x, y, z) {
   const g = new THREE.BoxGeometry(w, h, d);
   g.translate(x, y, z);
   return g;

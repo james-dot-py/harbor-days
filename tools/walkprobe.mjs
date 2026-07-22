@@ -1721,6 +1721,105 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
     CH.LP_TRAIL_PARK.every(p=>!CH.lpBlockedHit(p[0],p[1])),true);
 }
 
+// ===== LINCOLN PARK 115 (habitats + farm) — LIVE walkability via the SAME
+// shared chicago.js functions the engine uses (the 115 habitat/farm carves
+// live in zooBlockedHit -> lpBlockedHit; walkN/lane are pathSamples2 ribbons;
+// the pond RULING is guarded with point-in-poly vs LP_SOUTHPOND_WATER using
+// the file's pip helper — walkability is never forked).
+{ console.log('\n--- LINCOLN PARK 115 (habitats + farm) ---');
+  const Z=CH.ZOO,HB=Z.habitats,FY=Z.farmyard;
+  // (a) the NEW ribbons run on walkable ground AND clear every carve, point by
+  //     point (walkN Ts off the loop at (-42,801.5), rejoins at (-69.5,820);
+  //     the lane Ts off the spur at (-52,962), rejoins at ~(-49.4,997))
+  for(const p of HB.walkN){
+    expect(`habitat walkN (${p[0].toFixed(1)},${p[1].toFixed(1)}) walks`,walkable(p[0],p[1]),true);
+    expect(`habitat walkN (${p[0].toFixed(1)},${p[1].toFixed(1)}) clear of carves`,!CH.lpBlockedHit(p[0],p[1]),true);
+  }
+  for(const p of FY.lane){
+    expect(`farm lane (${p[0].toFixed(1)},${p[1].toFixed(1)}) walks`,walkable(p[0],p[1]),true);
+    expect(`farm lane (${p[0].toFixed(1)},${p[1].toFixed(1)}) clear of carves`,!CH.lpBlockedHit(p[0],p[1]),true);
+  }
+  // (b) habitat carves BLOCK: the macaque knoll disc (centre + a ring inside
+  //     blockR by 0.3), penguin/polar/flamingo rects (centre + 4 inset corners
+  //     0.3 in from each corner)
+  const MQ=HB.macaque;
+  expect(`macaque knoll centre (${MQ.x},${MQ.z}) blocked`,walkable(MQ.x,MQ.z),false);
+  for(let k=0;k<4;k++){const a=k*Math.PI/2,r=MQ.blockR-0.3,x=MQ.x+Math.cos(a)*r,z=MQ.z+Math.sin(a)*r;
+    expect(`macaque ring r${r.toFixed(1)} a${k} (${x.toFixed(1)},${z.toFixed(1)}) blocked`,walkable(x,z),false);}
+  for(const [nm,R] of [['penguin cove',HB.penguin],['polar tundra',HB.polar],['flamingo lagoon',HB.flamingo]]){
+    const cx=(R.x0+R.x1)/2,cz=(R.z0+R.z1)/2;
+    expect(`${nm} centre (${cx},${cz}) blocked`,walkable(cx,cz),false);
+    for(const [x,z] of [[R.x0+0.3,R.z0+0.3],[R.x1-0.3,R.z0+0.3],[R.x0+0.3,R.z1-0.3],[R.x1-0.3,R.z1-0.3]])
+      expect(`${nm} corner inset (${x.toFixed(1)},${z.toFixed(1)}) blocked`,walkable(x,z),false);
+  }
+  // (c) VIEWING EDGES walk — 1.2 m off each rail-side face (the player can
+  //     stand at every rail); the macaque ring at blockR+0.9 at the 4 cardinal
+  //     angles (all verified clear of every other carve via lpBlockedHit)
+  expect(`penguin S viewing edge (${(HB.penguin.x0+HB.penguin.x1)/2},${HB.penguin.z1+1.2}) walks`,
+    walkable((HB.penguin.x0+HB.penguin.x1)/2,HB.penguin.z1+1.2),true);
+  expect(`polar S viewing edge (${(HB.polar.x0+HB.polar.x1)/2},${HB.polar.z1+1.2}) walks`,
+    walkable((HB.polar.x0+HB.polar.x1)/2,HB.polar.z1+1.2),true);
+  expect(`polar E viewing edge (${HB.polar.x1+1.2},${(HB.polar.z0+HB.polar.z1)/2}) walks`,
+    walkable(HB.polar.x1+1.2,(HB.polar.z0+HB.polar.z1)/2),true);
+  expect(`flamingo N viewing edge (${(HB.flamingo.x0+HB.flamingo.x1)/2},${HB.flamingo.z0-1.2}) walks`,
+    walkable((HB.flamingo.x0+HB.flamingo.x1)/2,HB.flamingo.z0-1.2),true);
+  for(let k=0;k<4;k++){const a=k*Math.PI/2,r=MQ.blockR+0.9,x=MQ.x+Math.cos(a)*r,z=MQ.z+Math.sin(a)*r;
+    expect(`macaque viewing ring r${r.toFixed(1)} a${k} (${x.toFixed(1)},${z.toFixed(1)}) walks`,walkable(x,z),true);}
+  // (d) FARM carves: the gambrel barn (centre + 4 inset corners), the
+  //     farmhouse, the windmill legs; the lane frontage 1.2 m east of the east
+  //     gable + 1.5 m beside the windmill walks
+  const B=FY.barn,bx=B.w/2,bz=B.d/2;
+  expect(`barn centre (${B.x},${B.z}) blocked`,walkable(B.x,B.z),false);
+  for(const [x,z] of [[B.x-bx+0.3,B.z-bz+0.3],[B.x+bx-0.3,B.z-bz+0.3],[B.x-bx+0.3,B.z+bz-0.3],[B.x+bx-0.3,B.z+bz-0.3]])
+    expect(`barn corner inset (${x.toFixed(1)},${z.toFixed(1)}) blocked`,walkable(x,z),false);
+  expect(`barn E gable +1.2 m (${(B.x+bx+1.2).toFixed(1)},${B.z}) walks`,walkable(B.x+bx+1.2,B.z),true);
+  expect(`farmhouse centre (${FY.farmhouse.x},${FY.farmhouse.z}) blocked`,walkable(FY.farmhouse.x,FY.farmhouse.z),false);
+  expect(`windmill legs (${FY.windmill.x},${FY.windmill.z}) blocked`,walkable(FY.windmill.x,FY.windmill.z),false);
+  expect(`beside the windmill (${FY.windmill.x+1.5},${FY.windmill.z}) walks`,walkable(FY.windmill.x+1.5,FY.windmill.z),true);
+  // (e) PADDOCK split-rail band (points projected ONTO FY.paddock.runs like
+  //     the 114 fence onRun helper): band blocked + BOTH sides open 0.9 m (the
+  //     anti-trap both-sides law); the east GATE through-line (gap z 982-986)
+  //     walks end to end; the interior cow/goat/hens spots are reachable
+  const onRunF=(ri,si,t)=>{const run=FY.paddock.runs[ri],a=run[si],b=run[si+1];
+    const dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz);
+    return {x:a[0]+dx*t,z:a[1]+dz*t,nx:-dz/L,nz:dx/L};};
+  for(const [ri,si,t,nm] of [[0,0,0.5,'north'],[4,0,0.5,'west'],[2,0,0.5,'east B']]){
+    const p=onRunF(ri,si,t);
+    expect(`paddock ${nm} band blocked (${p.x.toFixed(1)},${p.z.toFixed(1)})`,walkable(p.x,p.z),false);
+    expect(`paddock ${nm} side A open 0.9 m (${(p.x+p.nx*0.9).toFixed(1)},${(p.z+p.nz*0.9).toFixed(1)})`,walkable(p.x+p.nx*0.9,p.z+p.nz*0.9),true);
+    expect(`paddock ${nm} side B open 0.9 m (${(p.x-p.nx*0.9).toFixed(1)},${(p.z-p.nz*0.9).toFixed(1)})`,walkable(p.x-p.nx*0.9,p.z-p.nz*0.9),true);
+  }
+  for(const [x,z] of [[-70.5,984],[-72,984],[-73.5,984],[-75,984]])
+    expect(`paddock gate through-line (${x},${z}) walks`,walkable(x,z),true);
+  for(const [nm,s] of [['cow',FY.cow],['goat',FY.goat],['hens',FY.hens]])
+    expect(`paddock interior ${nm} spot (${s.x},${s.z}) walks`,walkable(s.x,s.z),true);
+  // (f) POND RULING guards (115 resolved the 114 conflict note: the pond
+  //     compresses EAST of the built spur) — point-in-poly (pip) vs the
+  //     reshaped LP_SOUTHPOND_WATER oval
+  const POND=CH.LP_SOUTHPOND_WATER;
+  expect('every ZOO.spur point OUTSIDE the ruled pond',Z.spur.every(p=>!pip(p[0],p[1],POND)),true);
+  expect('every farm lane point OUTSIDE the ruled pond',FY.lane.every(p=>!pip(p[0],p[1],POND)),true);
+  expect(`barn centre (${B.x},${B.z}) OUTSIDE the ruled pond`,pip(B.x,B.z,POND),false);
+  expect('paddock mid (-80,985) OUTSIDE the ruled pond',pip(-80,985,POND),false);
+  expect('flamingo centre (-28,862) OUTSIDE the ruled pond',
+    pip((HB.flamingo.x0+HB.flamingo.x1)/2,(HB.flamingo.z0+HB.flamingo.z1)/2,POND),false);
+  const apes=Z.halls.find(h=>h.id==='regenstein-apes');
+  expect(`regenstein-apes hall entry (${apes.x},${apes.z}) OUTSIDE the ruled pond`,pip(apes.x,apes.z,POND),false);
+  expect('LP_HONEYCOMB centre INSIDE the ruled pond (the pavilion stands OVER the water — intended)',
+    pip(CH.LP_HONEYCOMB.x,CH.LP_HONEYCOMB.z,POND),true);
+  // (g) interpretive PLATES stand on walkable ground (outside every carve)
+  for(const [nm,S] of [['macaque',MQ.sign],['penguin',HB.penguin.sign],['polar',HB.polar.sign],['flamingo',HB.flamingo.sign],['farm',FY.sign]])
+    expect(`${nm} plate (${S.x},${S.z}) walks`,walkable(S.x,S.z),true);
+  // (h) REGRESSION: the three 114 gate through-lines still walk (the 115
+  //     carves/ribbons must not have closed a campus door)
+  for(const [x,z] of [[-6,830],[-10.2,830],[-14,830]])
+    expect(`114 east gate through-line still walks (${x},${z})`,walkable(x,z),true);
+  for(const [x,z] of [[-96,855.5],[-94.2,855.5],[-92,855.5]])
+    expect(`114 west gate through-line still walks (${x},${z})`,walkable(x,z),true);
+  for(const [x,z] of [[-49,1002],[-49,1005.5],[-49,1009]])
+    expect(`114 south gate through-line still walks (${x},${z})`,walkable(x,z),true);
+}
+
 // ===== 088 PERMANENT GUARDS — spawned as gate categories so the standard
 // verify (step 1 = this file) mechanically runs them every time:
 //   path-layers.mjs      — path/decal y-ladder assertion (issue 028; pure Node)

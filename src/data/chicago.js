@@ -1419,9 +1419,9 @@ export const LINCOLN_ANCHORS = {
   zooGate:       { x:-10, z:830 },   // 114: the FRONT DOOR — the EAST gate off Cannon (arch + FREE SINCE 1868); the west lion-plinth gate is secondary at (-93.9,858)
   seaLionPool:   { x:-60, z:820 },   // the hero — historic rock-rimmed pool (114: refined -56,822 -> -60,820 to clear the Lion House NW corner; recorded in GEOGRAPHY.md)
   lionHouse:     { x:-34, z:831 },   // Kovler Lion House (1912 red brick)
-  farm:          { x:-55, z:980 },   // Farm-in-the-Zoo (barns), NW of the pond
-  southPond:     { x:-52, z:958 },   // pond centre
-  cafeBrauer:    { x:-52, z:906 },   // pond NW shoulder (the Prairie refectory)
+  farm:          { x:-79, z:980 },   // Farm-in-the-Zoo (115 RE-SITE to the campus SW — the honest west-reach math; the old (-55,980) staging was the eyeball error), NW of the ruled pond
+  southPond:     { x:-30, z:952 },   // pond centre (115 RULING: the pond compresses EAST of the built spur)
+  cafeBrauer:    { x:-61, z:908 },   // pond NW shoulder ACROSS the spur (115 re-stage; 117 refines)
   honeycombPav:  { x:-30, z:958 },   // Studio Gang pavilion, boardwalk SE peninsula
 };
 
@@ -1487,9 +1487,15 @@ export const LP_DIVERSEY = {
 // northern reach reads as the 113 west-bank quay (recorded in GEOGRAPHY.md).
 export const LP_DIVERSEY_CANNON = crChain([[-6,670],[-4,690],[-3.2,720],[-3,760],[-3.4,800],[-3.8,840],[-4.2,880],[-5,920],[-6.3,955],[-7.5,985],[-8.5,1008]],4);
 // South Pond: a rounded restored pond hanging off the zoo's south end.
+// 115 RULING (resolving the 114 conflict note): the pond compresses EAST of
+// the built 114 pond spur (the spur is its west promenade, the east campus
+// fence its east bound) — clear of the re-sited farm, the flamingo lagoon,
+// primate-house and regenstein-apes. 117 builds it (and must reshape
+// LP_BOARDWALK/LP_POND_BRIDGE to this oval + re-site the three LP_TREES
+// inside it: (-24,908),(-38,936),(-30,984) — lawn today, water after).
 export const LP_SOUTHPOND_WATER = crChain([
-  [-15,905],[-22,895],[-52,892],[-80,902],[-90,950],
-  [-82,1006],[-46,1016],[-18,1006],[-14,958],[-15,905],
+  [-44,902],[-30,896],[-18,902],[-14,920],[-13.5,950],[-15,975],
+  [-19,995],[-30,1002],[-40,999],[-45,985],[-47,962],[-46,930],[-44,902],
 ],3);
 // The two big land panels 112 renders + walks (SEPARATE from buildLAND so the
 // pre-112 world polygon stays byte-identical — see lpLandHit). 112 reconciled the
@@ -1587,6 +1593,29 @@ export function zooBlockedHit(x,z){
       if(z<Math.min(a[1],b[1])-0.5||z>Math.max(a[1],b[1])+0.5)continue;
       if(_segD2(x,z,a[0],a[1],b[0],b[1])<=b2)return true;   // the fence band
     }
+  // ---- 115 habitat + farm carves (pure data, NO colliders — anti-trap) ----
+  const HB=ZOO.habitats;
+  {const dx2=x-HB.macaque.x,dz2=z-HB.macaque.z;
+   if(dx2*dx2+dz2*dz2<=HB.macaque.blockR*HB.macaque.blockR)return true;}  // snow-monkey knoll
+  const PG=HB.penguin;
+  if(x>=PG.x0&&x<=PG.x1&&z>=PG.z0&&z<=PG.z1)return true;                  // penguin cove
+  const PL=HB.polar;
+  if(x>=PL.x0&&x<=PL.x1&&z>=PL.z0&&z<=PL.z1)return true;                  // polar tundra
+  const FL=HB.flamingo;
+  if(x>=FL.x0&&x<=FL.x1&&z>=FL.z0&&z<=FL.z1)return true;                  // flamingo lagoon
+  const FY=ZOO.farmyard,B=FY.barn,FH=FY.farmhouse;
+  if(x>=B.x-B.w/2&&x<=B.x+B.w/2&&z>=B.z-B.d/2&&z<=B.z+B.d/2)return true;  // the gambrel barn
+  if(x>=FH.x-FH.w/2&&x<=FH.x+FH.w/2&&z>=FH.z-FH.d/2&&z<=FH.z+FH.d/2)return true;  // farmhouse
+  {const dxw=x-FY.windmill.x,dzw=z-FY.windmill.z;
+   if(dxw*dxw+dzw*dzw<=0.9*0.9)return true;}                              // windmill legs
+  const pb2=FY.paddock.band*FY.paddock.band;
+  for(const run of FY.paddock.runs)
+    for(let i=0;i<run.length-1;i++){
+      const a=run[i],b=run[i+1];
+      if(x<Math.min(a[0],b[0])-0.5||x>Math.max(a[0],b[0])+0.5)continue;
+      if(z<Math.min(a[1],b[1])-0.5||z>Math.max(a[1],b[1])+0.5)continue;
+      if(_segD2(x,z,a[0],a[1],b[0],b[1])<=pb2)return true;  // split-rail band (the east gate is a gap between runs — walkable by construction)
+    }
   return false;
 }
 // point-in-campus (definePlace contains + tools) — the closed perimeter poly
@@ -1655,32 +1684,78 @@ export const ZOO = {
   place:{ fadeS:2.2,   // inside-the-zoo ambience cell (framework definePlace)
           grade:{ fogColor:0x9fbe8d, fogNear:30, fogFar:175, ambGround:0x7fb474, ambI:0.98, sunI:0.85 },
           amb:{ ext:0.55, bird:1.5 } },
-  // 115 SCAFFOLDING (unconsumed) — re-staged 114 clear of the built loop/pool/
-  // yard/fence. HONEST CONFLICT (see GEOGRAPHY.md): regenstein-apes + the farm
-  // sit inside the staged LP_SOUTHPOND_WATER polygon — 117 shrinks the pond or
-  // 115 re-sites them BEFORE building; do not build both as staged.
+  // ---- 115 HABITATS (BUILT) — each a small diorama: rockwork/water/rails
+  // from structures.js buildZooHabitats (statics, zero rng), the animal cast +
+  // idle motion from packs/zoo-habitats.js (pack meshes, culled — NEVER
+  // instanced buckets). Blocking = data carves in zooBlockedHit below (NO
+  // colliders, the anti-trap law); rails are POSTS/RAILS collide:false.
+  // walkN = the NORTH HABITAT WALK (limestone): T off the loop at its
+  // (-42,801.5) control point, west past the three dioramas, rejoining the
+  // loop at (-69.5,820) — no dead ends. Plate positions are checked ≥2.5 m off
+  // ribbon centerlines + off every lp-* stand/camera (the furniture-at-stands
+  // trap).
+  habitats:{
+    walkN: crChain([[-42,801.5],[-45,793],[-53,789.5],[-63,789],[-71,791.5],[-75.5,799],[-74,810],[-69.5,820]],3),
+    macaque:{ x:-49.5, z:796.2, moundR:2.9, railR:3.5, blockR:3.6,       // Regenstein Macaque Forest: stacked-slab knoll + steaming spring pool + a grooming pair
+              rock:0x8f8f88, rock2:0x71726a, pool:{ x:-50.6, z:795.0, r:1.2, water:0x4e8a7a },
+              sign:{ x:-46, z:799.5, ry:1.1 }, plate:'THE SNOW MONKEYS', sub:'Regenstein Macaque Forest' },
+    penguin:{ x0:-68.5, x1:-57.5, z0:775.5, z1:786,                      // Pritzker Penguin Cove: pale rockwork bowl + water wedge; huddle + one mid-waddle
+              rock:0xc9c3b4, rock2:0x9a988c, shelfY:0.5,
+              water:{ x0:-67, x1:-60.5, z0:777, z1:783, y:0.28, color:0x3e6e7e },
+              rail:[[-68.5,786.6],[-57.5,786.6]],                        // south viewing rail along the walk
+              sign:{ x:-57, z:786.8, ry:0.6 }, plate:'THE PENGUINS', sub:'Pritzker Penguin Cove' },
+    polar:{ x0:-89, x1:-74.5, z0:778, z1:792.5,                          // Walter Family Arctic Tundra: pale rock terrace + plunge pool + one big chunky white bear
+            rock:0x9a988c, rock2:0x8f8f88, dirt:0xb59a72,
+            pool:{ x:-78.5, z:789, r:2.6, y:0.18, color:0x3e6e7e },
+            rail:[[-89,793.2],[-74,793.2],[-74,779]],                    // south face + east face rails
+            sign:{ x:-75, z:792.8, ry:0.75 }, plate:'THE POLAR BEAR', sub:'Walter Family Arctic Tundra' },
+    flamingo:{ x0:-34.5, x1:-21.5, z0:855.5, z1:868.5,                   // Waterfowl Lagoon: green water + mud bank + a pink one-legged cluster
+               bank:0xc4a878, water:0x6a9a58, waterY:0.12,
+               rail:[[-35,854.8],[-21,854.8]],                           // north viewing rail toward the loop
+               sign:{ x:-26, z:853.8, ry:2.99 }, plate:'THE FLAMINGOS', sub:'Waterfowl Lagoon' },   // faces NORTH toward the loop viewers (ry -0.15 showed its back — d115 diag)
+  },
+  // FARM-IN-THE-ZOO (115 RE-SITE to the campus SW — the honest west-reach
+  // math; GEOGRAPHY.md standing liberty). The red GAMBREL barn is the read.
+  // lane = the brick FARM LANE: T off the spur at its (-52,962) control point,
+  // around the paddock's east side, rejoining the spur at z~997 (loopStyle
+  // brick y 0.066 tucks UNDER the limestone spur at both junctions). The
+  // paddock is ENTERABLE through the east gate gap (pettable register).
+  farmyard:{
+    lane: crChain([[-52,962],[-61,956.5],[-68,959.5],[-70.5,967],[-70.5,981],[-67.5,993],[-59,999],[-52.5,1000.5],[-49.4,997]],3),
+    barn:{ x:-80.5, z:964.5, w:13, d:9,                                  // long axis E-W; the GAMBREL gable faces EAST down the lane
+           eaveH:3.4, breakH:5.4, ridgeH:6.6,
+           red:0xa8402e, trim:0xe8e2d2, roof:0x9a9282, door:0x6e3020 },
+    farmhouse:{ x:-70, z:950, w:7, d:6, wallH:3.0, roofH:2.2,            // yellow clapboard + porch
+                clap:0xe0c368, roof:0x8a6a50, trim:0xf0ece0 },
+    windmill:{ x:-89.5, z:955, h:8.5, wheelR:1.5 },                      // tower/vane static; the WHEEL spins in the pack
+    paddock:{ x0:-90, x1:-72, z0:972, z1:998, straw:0xd9c087,
+              runs:[                                                     // split-rail runs; the EAST GATE is the gap z 982-986
+                [[-90,972],[-72,972]],                                   // north
+                [[-72,972],[-72,982]],                                   // east A (gap 982-986 = GATE)
+                [[-72,986],[-72,998]],                                   // east B
+                [[-72,998],[-90,998]],                                   // south
+                [[-90,998],[-90,972]],                                   // west
+              ], band:0.4, postH:1.05, spacing:2.4, color:0x8a6a44 },
+    cow:{ x:-77.5, z:983, ry:1.35 }, goat:{ x:-75, z:990, ry:0.6 }, hens:{ x:-74.5, z:979 },
+    sign:{ x:-65.5, z:962.5, ry:2.5, title:'FARM-IN-THE-ZOO', sub:'a working farm in the city' },
+  },
+  // Remaining hall SCAFFOLDING (unconsumed) — 115 re-staged clear of
+  // everything built (walkN/lane/habitats/farm + the ruled pond). penguin-cove
+  // + polar-tundra hall boxes are GONE (built as open dioramas above).
   halls:[
     { id:'sea-lion-pool',  x:-60, z:820, r:6,  round:true, built:114 },
     { id:'kovler-lion',    x:-34, z:831, w:34, d:13, ry:0, built:114 },
     { id:'searle-center',  x:-20, z:786, w:16, d:10, ry:0, stack:true },  // Searle visitor center + the red-brick smokestack
     { id:'bird-house',     x:-30, z:772, w:16, d:12, ry:0 },              // McCormick Bird House
-    { id:'african-journey',x:-52, z:774, w:26, d:16, ry:0 },              // Regenstein African Journey (giraffes)
-    { id:'polar-tundra',   x:-78, z:776, w:14, d:10, ry:0 },              // Walter Arctic Tundra (polar bear)
-    { id:'penguin-cove',   x:-72, z:790, w:8,  d:6,  ry:0 },
-    { id:'childrens-zoo',  x:-84, z:804, w:14, d:12, ry:0 },              // Pritzker Children's Zoo (west)
-    { id:'small-mammal',   x:-82, z:862, w:20, d:14, ry:0 },
+    { id:'african-journey',x:-52, z:765, w:20, d:14, ry:0 },              // Regenstein African Journey (giraffes; 115 re-stage N of the penguin cove)
+    { id:'childrens-zoo',  x:-85.5,z:806, w:11, d:11, ry:0 },             // Pritzker Children's Zoo (115 re-stage clear of walkN + the west fence)
+    { id:'small-mammal',   x:-80, z:866, w:16, d:12, ry:0 },              // (115 re-stage clear of the west-gate through-line)
     { id:'primate-house',  x:-26, z:880, w:14, d:12, ry:0 },              // Helen Brach Primate House
-    { id:'regenstein-apes',x:-8,  z:900, w:24, d:15, ry:0, conflict:'pond' },  // African Apes (gorillas)
-  ],
-  farm:[  // Farm-in-the-Zoo barns (115; conflict:'pond' — see above)
-    { id:'main-barn',  x:-56, z:980, w:12, d:10, ry:0 },
-    { id:'dairy-barn', x:-54, z:958, w:10, d:8,  ry:0 },
-    { id:'farm-house', x:-64, z:968, w:8,  d:8,  ry:0 },
-    { id:'livestock',  x:-46, z:982, w:8,  d:7,  ry:0 },
+    { id:'regenstein-apes',x:-80, z:890, w:16, d:12, ry:0 },              // African Apes (115 re-site WEST, clear of the ruled pond)
   ],
   fixtures:[  // ride/attraction fixtures (RENAMES.md: brand marks -> generic in-game names)
-    { id:'carousel',  x:-68, z:798, r:4, name:'Endangered Species Carousel' },  // AT&T brand dropped
-    { id:'zoo-train', x:-72, z:826, w:6, d:3, name:'the Zoo Train' },           // Lionel -> generic
+    { id:'carousel',  x:-42, z:813, r:4, name:'Endangered Species Carousel' },  // AT&T brand dropped (115 re-stage inside the loop, clear of walkN; 119 re-judges the lp-lion-house f1 view when building)
+    { id:'zoo-train', x:-78, z:830, w:6, d:3, name:'the Zoo Train' },           // Lionel -> generic (115 re-stage clear of the loop west bend)
   ],
 };
 
@@ -1693,12 +1768,12 @@ export const LP_CONSERVATORY = {
 };
 
 // ---- CAFÉ BRAUER + Nature Boardwalk + honeycomb pavilion (117) -------------
-export const LP_CAFE_BRAUER = { x:-52, z:906, w:22, d:12, ry:0 };       // Prairie refectory, two loggia arms, pond NW shoulder
-export const LP_HONEYCOMB   = { x:-30, z:958, r:5 };                    // Studio Gang open-timber pavilion, boardwalk SE
-export const LP_BOARDWALK = crChain([   // the low wood-on-pilings ring zigzagging the pond's S/E margins (walkable low deck — the millennium band-polyline precedent)
+export const LP_CAFE_BRAUER = { x:-61, z:908, w:12, d:22, ry:0 };       // Prairie refectory (115 re-stage: WEST of the spur, long axis N-S, facing E over the spur to the ruled pond; 117 refines)
+export const LP_HONEYCOMB   = { x:-30, z:958, r:5 };                    // Studio Gang open-timber pavilion, boardwalk SE peninsula (inside the ruled pond — correct: it stands OVER the water)
+export const LP_BOARDWALK = crChain([   // STALE vs the 115 pond ruling — 117 MUST reshape this ring (+ LP_POND_BRIDGE) to the ruled LP_SOUTHPOND_WATER oval before building
   [-14,912],[-16,958],[-22,996],[-30,1010],[-46,1015],[-64,1012],[-30,958],[-24,940],[-14,912],
 ],3);
-export const LP_POND_BRIDGE = [ [-40,938],[-55,942] ];                  // "Bridge Over South Pond" (NATURE BOARDWALK lettering)
+export const LP_POND_BRIDGE = [ [-40,938],[-55,942] ];                  // "Bridge Over South Pond" (NATURE BOARDWALK lettering; 117 re-sites to the ruled oval)
 
 // ---- TRAILS — all NEW ribbons registered via pathSamples2 (NEVER reshape
 // TRAIL_MAIN; pathSamples is PHASE-sensitive — PITFALLS). LP_TRAIL_LAKE
@@ -1715,10 +1790,10 @@ export const LP_TREES = [
   [-56,468,1.4],[-76,520,1.2],[-80,584,1.15],[-84,640,1.3],   // west of the Diversey lagoon
   [-48,500,1.25],[-46,572,1.15],                               // 113: west-bank leaners — old shade trees over the quay walk (BRIEF harbor read)
   [-64,704,1.2],[-84,762,1.35],[-60,812,1.2],[-70,868,1.25],   // west park interior (between the trails)
-  [-84,910,1.15],[-60,922,1.3],[-72,966,1.2],[-58,884,1.1],
-  [-40,868,1.25],[-38,936,1.1],[-24,908,1.15],[-30,984,1.2],   // east/south park lawn
+  [-84,910,1.15],[-60,922,1.3],[-62,944,1.2],[-58,884,1.1],    // 115: the (-72,966) elm moved to (-62,944) — its old spot is the farm forecourt (lane clearance)
+  [-40,868,1.25],[-38,936,1.1],[-24,908,1.15],[-30,984,1.2],   // east/south park lawn ((-38,936)/(-24,908)/(-30,984) stand inside the RULED pond — lawn today; 117 re-sites them with the carve)
   [42,478,1.2],[48,540,1.3],[44,576,1.15],[46,658,1.1],        // east lakefront strip (113: the z606 elm moved N of the Theater footprint)
-  [-78,792,1.2],[-86,828,1.25],[-79,876,1.15],[-66,876,1.2],   // 114: zoo campus shade elms (clear of loop/spur/fence/pool/yard + the re-staged 115 halls)
+  [-78,842,1.2],[-86,828,1.25],[-79,876,1.15],[-66,876,1.2],   // 114: zoo campus shade elms (115: the (-78,792) elm moved to (-78,842) — its old spot is inside the polar tundra)
   [-16,880,1.15],[-34,790,1.1],
 ];
 // ---- ZONES (discovery) + PROPS (statues) — LINCOLN_* mirrors of ZONES/props
@@ -1727,8 +1802,8 @@ export const LINCOLN_ZONES = [
   { n:'Theater on the Lake',  x:30,  z:615,  r:20 },
   { n:'Lincoln Park Conservatory', x:-70, z:716, r:30 },
   { n:'Lincoln Park Zoo',     x:-50, z:860,  r:80 },
-  { n:'Farm-in-the-Zoo',      x:-55, z:980,  r:26 },
-  { n:'South Pond',           x:-52, z:958,  r:48 },
+  { n:'Farm-in-the-Zoo',      x:-79, z:982,  r:20 },   // 115 re-site (campus SW)
+  { n:'South Pond',           x:-30, z:952,  r:34 },   // 115 ruling (east of the spur)
 ];
 export const LINCOLN_PROPS = {   // verdigris-bronze + granite statuary (persons/civic — all KEPT real)
   signalOfPeace:{ x:-6,  z:415 },   // A Signal of Peace (Dallin), Diversey

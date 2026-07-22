@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-22T20:55:13.840Z",
- "count": 149,
+ "generated": "2026-07-22T22:13:05.665Z",
+ "count": 151,
  "waypoints": [
   {
    "id": "spawn",
@@ -1052,6 +1052,78 @@
     }
    ],
    "expectation": "KOVLER LION HOUSE + THE YARD (task 114): the long 1912 red-brick hall — tall glow-window arches marching between brick piers under limestone courses, a green-tile hip roof with a raised clerestory monitor on the ridge, KOVLER LION HOUSE lettered on the north face and a chunky bronze lion by the door (the bronze reads in the oblique framing); on its north flank the open lion YARD: sandy ground, warm rock ledges, a low viewing rail — with a chunky tawny toon LION (dark mane) lying on the ledge and a lioness clustered near the rail. Chibi-chunky reads over realism; NOT a bare lawn, NOT an empty yard."
+  },
+  {
+   "id": "lp-zoo-loop",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -58,
+   "z": 789.2,
+   "framings": [
+    {
+     "yaw": -1.35,
+     "pitch": 0.08,
+     "dist": 6
+    },
+    {
+     "x": -52,
+     "z": 791.5,
+     "yaw": -1.05,
+     "pitch": 0.1,
+     "dist": 7
+    },
+    {
+     "x": -70,
+     "z": 790.5,
+     "yaw": -2.25,
+     "pitch": 0.14,
+     "dist": 8
+    },
+    {
+     "x": -50.5,
+     "z": 805,
+     "yaw": 2.75,
+     "pitch": 0.08,
+     "dist": 5
+    },
+    {
+     "x": -26,
+     "z": 848,
+     "yaw": 0.28,
+     "pitch": 0.1,
+     "dist": 6
+    }
+   ],
+   "expectation": "THE HABITAT WALK (task 115): the campus lined with small animal dioramas, each behind a low dark rail with a lollipop name plate: chunky black-and-white PENGUINS huddled (one mid-waddle) on pale rockwork beside a water wedge (Pritzker Penguin Cove); the pale rock terrace of the Walter Arctic Tundra with a BIG chunky white POLAR BEAR over a plunge pool; a rocky snow-monkey knoll with a small spring pool whose grey grooming PAIR reads from the LOOP side (the f3 north-looking framing); and off the loop's SE stretch the FLAMINGO lagoon — a pink one-legged cluster on the mud shore of green water (the f4 framing). Animals read chibi-chunky and CLUSTERED at the viewing edges — the zoo alive along the path (each diorama must read in at least one framing), NOT empty pens."
+  },
+  {
+   "id": "lp-farm",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -68,
+   "z": 961,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.08,
+     "dist": 8
+    },
+    {
+     "x": -70.5,
+     "z": 975,
+     "yaw": -2,
+     "pitch": 0.1,
+     "dist": 7
+    },
+    {
+     "x": -68,
+     "z": 988,
+     "yaw": -2.65,
+     "pitch": 0.12,
+     "dist": 9
+    }
+   ],
+   "expectation": "FARM-IN-THE-ZOO (task 115): a red GAMBREL-roofed barn with white trim — the classic broken-slope barn profile, gable facing the lane — over a straw-strewn paddock behind split-rail fences; a brown-and-white chunky COW, a white GOAT up on her stump and red HENS potter near the rail, a windmill stands behind the barn, and a yellow clapboard farmhouse sits at the yard's north side (may catch only a frame edge). A working farm in the middle of the city zoo — pettable-cozy chibi animals, NOT a generic shed and NOT an empty paddock."
   },
   {
    "id": "lp-diversey-harbor",

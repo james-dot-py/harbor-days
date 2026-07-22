@@ -51,6 +51,7 @@ Display strings only — ids, save keys, function names, file names are unchange
 | People's Gas Education Pavilion (Lincoln Park, South Pond) | **the Honeycomb Pavilion** (generic descriptive; "Prairie Gas" pun alt) | boardwalk pavilion sign/journal |
 | AT&T Endangered Species Carousel (Lincoln Park Zoo) | **Endangered Species Carousel** (brand dropped, civic name kept) | carousel sign/prompt |
 | Lionel Train Adventure (Lincoln Park Zoo) | **the Zoo Train** (generic; "Loco Train" pun alt) | mini-train ride sign/prompt |
+| Farm-in-the-Zoo "Presented by John Deere" | **Farm-in-the-Zoo** (presenter dropped, civic name kept) | farm entry board (task 115) |
 
 ## Considered and KEPT (with reasons)
 

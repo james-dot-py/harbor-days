@@ -424,6 +424,23 @@ add('lp-lion-house', 'lincolnpark', 'lakefront', -20, 802, [
   { x: -16, z: 806, yaw: -0.70, pitch: 0.12, dist: 6.5 }, // over-the-yard from the NE: lions + rail + plate, full west sweep of the hall
 ]);
 
+// 115 — the HABITATS: a habitat-lined stretch of the north walk (penguin cove
+// + polar tundra + snow-monkey knoll) and Farm-in-the-Zoo (the red GAMBREL
+// barn + paddock). Stands on the new walkN/lane ribbons; plates/rails checked
+// against every stand + camera point (the 114 furniture-at-stands trap).
+add('lp-zoo-loop', 'lincolnpark', 'lakefront', -58, 789.2, [
+  { yaw: -1.35, pitch: 0.08, dist: 6 },                   // W down-the-walk: penguin huddle at the rail right, pale tundra + white bear beyond
+  { x: -52, z: 791.5, yaw: -1.05, pitch: 0.10, dist: 7 }, // WSW from the east stretch: snow-monkey knoll near-left (spring pool side), cove + tundra lined beyond
+  { x: -70, z: 790.5, yaw: -2.25, pitch: 0.14, dist: 8 }, // SW higher: the tundra terrace + plunge pool + bear, the walk curving through frame
+  { x: -50.5, z: 805, yaw: 2.75, pitch: 0.08, dist: 5 },  // from the LOOP looking N: the grooming pair on the knoll's south ledge (they face the loop; cam clears the -48,808 bench + the -60,812 elm)
+  { x: -26, z: 848, yaw: 0.28, pitch: 0.10, dist: 6 },    // from the loop SE stretch looking S: the flamingo cluster + green lagoon + plate (yaw 0.15 parked the mayor's head on the plate title — art-director round 1)
+]);
+add('lp-farm', 'lincolnpark', 'lakefront', -68, 961, [
+  { yaw: -1.57, pitch: 0.08, dist: 8 },                   // W axis-aligned down the lane: the red GAMBREL gable + white trim, windmill behind-right
+  { x: -70.5, z: 975, yaw: -2.0, pitch: 0.10, dist: 7 },  // SW over the paddock rail: cow + goat + hens, barn behind
+  { x: -68, z: 988, yaw: -2.65, pitch: 0.12, dist: 9 },   // NW from the lane's south bend: the whole yard — animals + barn + windmill
+]);
+
 // 113 — Diversey Harbor + Theater on the Lake. The harbor's money shot is the
 // DOWN-THE-CHANNEL axis (docks + slips + the quay row + both banks + the
 // Fullerton culvert closing the vista). f1 stands SOUTH of the skyline z-gate

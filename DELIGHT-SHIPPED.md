@@ -691,3 +691,15 @@ cut becomes a revert task.
   Kovler Lion House glows through nine brick arches while a chunky maned lion
   and his lioness lounge at the yard rail three meters from your face. — the
   Sea Lion Pool (−60, 820) + the east gate (−10, 830); task 114
+- Down the new habitat walk the zoo fills from armature to alive: a five-penguin
+  huddle shoulders together on the pale rockwork of Pritzker Penguin Cove while
+  a sixth waddles the bowl rim in little rocking steps; the big cream polar
+  bear sways his head over his plunge pool on the Walter Arctic Tundra; two
+  snow monkeys sit grooming on their knoll above a steaming spring; a pink
+  flock stands one-legged on the mud shore of the green Waterfowl Lagoon — and
+  at the campus south, behind split-rail fences, the red GAMBREL barn of
+  FARM-IN-THE-ZOO presides over a straw-strewn paddock where a brown-patched
+  cow swishes her tail, red hens double-peck, the white goat surveys it all
+  from her stump, and the windmill turns slowly against the dusk while hen
+  clucks, goat bleats and a rare low moo drift over the fence. — the habitat
+  walk (−58, 789) + Farm-in-the-Zoo (−79, 975); task 115

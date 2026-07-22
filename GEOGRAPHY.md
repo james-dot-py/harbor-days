@@ -801,27 +801,52 @@ uniform is added — no rng, no new buckets, same draw count when visible. Data:
   rock ledges, viewing rail, chunky toon lion pair clustered at the rail edge).
   Campus fabric: planted beds, benches, habitat name plates, a `definePlace`
   ambience cell (ducked lakefront ambience + distant synthesized animal calls).
-  **114 re-staged the 115 hall scaffolding** north/west of the loop (searle,
-  bird-house, polar-tundra, penguin-cove, african-journey, small-mammal,
-  primate-house). **HONEST CONFLICT NOTE for 115/117:** the staged South Pond
-  polygon (`LP_SOUTHPOND_WATER`, z 892–1016 × x −14…−90) overlaps the staged
-  Farm-in-the-Zoo barns, regenstein-apes and the 114 pond spur alignment — 117
-  must shrink/reshape the pond (or 115 re-site those pieces) BEFORE building;
-  do not build both as staged. Ring the campus with flamingos, polar bear,
-  giraffe, gorilla (115); **Farm-in-the-Zoo** (red barns + picket fences,
-  ≈ −55, 980) NW of the pond carries the pettable cow/goat/hen set (115). **The
-  map's first animals** (114: sea lions + lions) — all via the NPC/pack register
-  (per-mesh, culled >145 m — the `makeNPC`/crowd.js precedent), NEVER global
-  instanced buckets.
-- **South Pond + Nature Boardwalk** (z ≈ 895–1015, x −90…−14): a rounded restored
-  pond with naturalized cattail/lily margins; a low wood **boardwalk ring** on
-  pilings zigzags its S/E (a walkable low deck — the Millennium band-polyline
-  walkability precedent, `LP_BOARDWALK`), the **honeycomb pavilion** (Studio Gang
-  open timber, ≈ −30, 958) on its SE peninsula, and the **Bridge Over South Pond**
-  carrying the NATURE BOARDWALK lettering. **Café Brauer** (the 1908 Prairie
-  refectory — warm brick, green-glazed frieze, broad green hip roof, two loggia arms,
-  green + swan paddleboats, ≈ −52, 906) is the pond's NW shoulder. The pond is its
-  OWN coast/water piece (`LP_SOUTHPOND_WATER`), KEPT OUT of `COAST_SEGS`.
+  **HABITATS BUILT, task 115** (`ZOO.habitats` + `ZOO.farmyard`) — the campus
+  fills from armature to alive, each habitat a small readable diorama with its
+  chibi-chunky cast CLUSTERED at the viewing edge, one idle-motion beat each,
+  a lollipop name plate (114 sign vocab; donor names real per RENAMES law) and
+  POSTS/RAILS rails (collide:false; blocking = data carves in `zooBlockedHit`):
+  a **NORTH HABITAT WALK** (limestone, T off the loop's (−42,801.5) control
+  point, arcing west and rejoining at (−69.5,820) — no dead ends) lines up the
+  **snow-monkey knoll** (Regenstein Macaque Forest — stacked-slab rockwork +
+  steaming spring pool + a grooming pair, ≈ −49.5, 796), the **penguin cove**
+  (Pritzker Penguin Cove — pale rockwork bowl + water wedge, a huddle + one
+  mid-waddle, x −68.5…−57.5 z 775.5…786) and the **polar-bear tundra** (Walter
+  Family Arctic Tundra — pale rock terrace + plunge pool + one big chunky white
+  bear, x −89…−74.5 z 778…792.5); the **flamingo lagoon** (Waterfowl Lagoon —
+  green water + mud bank + a pink one-legged cluster, x −34.5…−21.5
+  z 855.5…868.5) sits off the loop's SE corner. **FARM-IN-THE-ZOO is RE-SITED
+  to the campus SW** — the honest west-reach math (raw farm x 108–149 →
+  x_game −94…−73; the old (−55,980) staging was the eyeball error): red
+  **GAMBREL** main barn (white trim, the second architectural read after the
+  Lion House, x −87…−74 z 960…969), yellow clapboard farmhouse (−70,950),
+  windmill (−89.5,955, wheel turning), split-rail **paddock** (x −90…−72,
+  z 972…998, gate gap on the east rail z 982–986) with brown-and-white cow +
+  white goat (on her stump) + red hens, reached by a brick **FARM LANE** (T off
+  the spur's (−52,962) control point, around the paddock's east side, rejoining
+  the spur at z ≈ 997). 115 also re-staged the remaining hall scaffolding clear
+  of everything built (african-journey −52,765; small-mammal −80,866;
+  regenstein-apes −80,890 west of the ruled pond; carousel −42,813 inside the
+  loop; zoo-train −78,830). **The map's first animals** (114: sea lions +
+  lions; 115: penguins, polar bear, snow monkeys, flamingos, cow/goat/hens) —
+  all via the NPC/pack register (per-mesh groups, culled >145 m — the
+  `makeNPC`/crowd.js precedent), NEVER global instanced buckets.
+- **South Pond + Nature Boardwalk** (**RULED 115**, resolving the 114 conflict
+  note; built 117): the pond compresses **EAST of the built 114 pond spur** —
+  `LP_SOUTHPOND_WATER` reshaped to x −47…−13.5, z 896…1002 (a rounded N–S oval;
+  the spur is its west promenade, the east campus fence its east bound), CLEAR
+  of the re-sited farm, the flamingo lagoon, primate-house and regenstein-apes.
+  Naturalized cattail/lily margins; the low wood **boardwalk ring** on pilings
+  zigzags its S/E (walkable low deck — the Millennium band-polyline precedent,
+  `LP_BOARDWALK` — **117 must reshape the staged chain + `LP_POND_BRIDGE` to
+  the ruled oval**, and re-site the three LP_TREES inside it: (−24,908),
+  (−38,936), (−30,984) — lawn today, water after the carve), the **honeycomb
+  pavilion** (Studio Gang open timber, ≈ −30, 958) on its SE peninsula.
+  **Café Brauer** (the 1908 Prairie refectory — warm brick, green-glazed
+  frieze, broad green hip roof, two loggia arms, green + swan paddleboats)
+  re-stages **WEST of the spur, long axis N–S (≈ −61, 908, 12×22), facing east
+  over the spur to the pond** — 117 refines. The pond is its OWN coast/water
+  piece (`LP_SOUTHPOND_WATER`), KEPT OUT of `COAST_SEGS`.
 
 #### DISPLAY NAMES (RENAMES.md — task 111 records the ledger lines)
 Commercial fixture marks → generic/pun (see RENAMES.md): **People's Gas Education
@@ -846,6 +871,11 @@ Cannon, Theater on the Lake, Nature Boardwalk, Chicago Park District/Harbors).
   111-planned east-strip bulge (x ≤ 52) — recorded 113; order/adjacency unchanged.
 - **Cannon Dr's built reach is Fullerton→south** (the zoo flank, x −3…−9); its
   lagoon-bank northern reach reads as the 113 west quay — recorded 114.
+- **South Pond compresses EAST of the built pond spur** (x −47…−13.5 — roughly
+  half the staged width) and **Farm-in-the-Zoo re-sites to the campus SW**
+  (the honest west-reach numbers) — recorded 115, resolving the 114 pond
+  conflict; order/adjacency preserved (farm NW of the pond, Brauer its NW
+  shoulder across the spur).
 - **The park spine passes THROUGH the free zoo** (east gate → south gate) — the
   campus is open ground on the walk south, not a detour; recorded 114 (the
   112-scaffold spine through the campus interior/hall footprints is superseded;

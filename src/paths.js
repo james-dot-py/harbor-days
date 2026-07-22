@@ -322,6 +322,14 @@ export function buildPaths(){
   ribbonOn(curveOf(CH.ZOO.loop),CH.ZOO.loopStyle.width,CH.ZOO.loopStyle.color,CH.ZOO.loopStyle.y,0,pathSamples2);
   ribbonOn(curveOf(CH.ZOO.spur),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
   ribbonOn(curveOf(CH.LP_DIVERSEY_CANNON),4.6,st.bike.color,st.bike.y,0,pathSamples2);
+  // 115 ZOO HABITATS: two NEW ribbons — the limestone NORTH HABITAT WALK (Ts
+  // off the loop's (-42,801.5) control point, west past the dioramas, rejoins
+  // the loop at (-69.5,820)) and the brick FARM LANE (loopStyle; Ts off the
+  // spur's (-52,962) control point, rejoins the spur at ~(-49.4,997) — the
+  // brick y 0.066 tucks UNDER the limestone spur at both T-junctions,
+  // intended). pathSamples2 ONLY (ribbonOn is rng-free) — world scatter frozen.
+  ribbonOn(curveOf(CH.ZOO.habitats.walkN),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
+  ribbonOn(curveOf(CH.ZOO.farmyard.lane),CH.ZOO.loopStyle.width,CH.ZOO.loopStyle.color,CH.ZOO.loopStyle.y,0,pathSamples2);
   flushJunctions();   // 102: one instanced mesh for every paved junction dot
   // 106: register the DRAWN dual trail + spur centerlines as the footstep
   // 'asphalt' corridor (onTrail). rng-free; the miters only touch edge verts, so

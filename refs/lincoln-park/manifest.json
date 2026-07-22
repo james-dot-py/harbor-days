@@ -441,6 +441,71 @@
       "description": "Lincoln Park Conservatory building exterior, fountain, plants, trees and gardens. Looking north, Stockton Avenue, Chicago, Illinois. 1899. Eli Bates Fountain (also called Storks at Play) by Augustus Saint-Gaudens installed in 1887. Lincoln Park Conservatory built in 1890 designed by architect, Joseph L. Silsbee. Original size and material: 4x5 inch glass negative Digital Identifier: CSB5252 Part of the Illinois Urban Landscapes Project: http://www.fieldmuseum.org/urbanlandscapes/",
       "fetchDate": "2026-07-20T01:35:34.519Z",
       "bytes": 221455
+    },
+    {
+      "source": "wikimedia-commons",
+      "file": "Lincolnparkzoo.jpg",
+      "title": "File:Lincolnparkzoo.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lincolnparkzoo.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d9/Lincolnparkzoo.jpg",
+      "author": "Marc Heiden - User: (WT-shared) Gorilla Jones at wts wikivoyage",
+      "license": "CC BY-SA 3.0",
+      "credit": "Own work",
+      "description": "Penguin triumphant. Lincoln Park Zoo, Chicago, Illinois",
+      "fetchDate": "2026-07-22T21:14:04.199Z",
+      "bytes": 3086634
+    },
+    {
+      "source": "wikimedia-commons",
+      "file": "Jigokudani_hotspring_in_Nagano_Japan_001.jpg",
+      "title": "File:Jigokudani hotspring in Nagano Japan 001.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jigokudani_hotspring_in_Nagano_Japan_001.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8c/Jigokudani_hotspring_in_Nagano_Japan_001.jpg",
+      "author": "Yosemite",
+      "license": "CC BY-SA 3.0",
+      "credit": "Own work",
+      "description": "Japanese Macaques (Macaca fuscata). Jigokudani Hot Spring, Nagano Prefecture, Japan. Monkeys taking a bath in those springs are famous. Image taken in February 14, 2005.",
+      "fetchDate": "2026-07-22T21:14:05.827Z",
+      "bytes": 133586
+    },
+    {
+      "source": "wikimedia-commons",
+      "file": "Macaca_fuscata_juvenile_yawning.jpg",
+      "title": "File:Macaca fuscata juvenile yawning.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Macaca_fuscata_juvenile_yawning.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Macaca_fuscata_juvenile_yawning.jpg/1920px-Macaca_fuscata_juvenile_yawning.jpg",
+      "author": "Daisuke Tashiro",
+      "license": "CC BY-SA 2.0",
+      "credit": "Flickr",
+      "description": "Japanese macaque (Macaca fuscata) juvenile yawning at the Jigokudani Monkey Park, Nagano, Japan.",
+      "fetchDate": "2026-07-22T21:14:06.509Z",
+      "bytes": 436103
+    },
+    {
+      "source": "wikimedia-commons",
+      "file": "Kopfstudie_eines_Japanmakaken_(Macaca_fuscata)_im_Jigokudani_Yaen_Kōen,_Japan.jpg",
+      "title": "File:Kopfstudie eines Japanmakaken (Macaca fuscata) im Jigokudani Yaen Kōen, Japan.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Kopfstudie_eines_Japanmakaken_(Macaca_fuscata)_im_Jigokudani_Yaen_K%C5%8Den,_Japan.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Kopfstudie_eines_Japanmakaken_%28Macaca_fuscata%29_im_Jigokudani_Yaen_K%C5%8Den%2C_Japan.jpg/1920px-Kopfstudie_eines_Japanmakaken_%28Macaca_fuscata%29_im_Jigokudani_Yaen_K%C5%8Den%2C_Japan.jpg",
+      "author": "Frank Schulenburg",
+      "license": "CC BY-SA 4.0",
+      "credit": "Own work",
+      "description": "Headshot of a Japanese macaque (Macaca fuscata) at Jigokudani Yaen Kōen, Japan",
+      "fetchDate": "2026-07-22T21:14:16.430Z",
+      "bytes": 1192149
+    },
+    {
+      "source": "wikimedia-commons",
+      "file": "Eliason_Barn_Gypsum_Kansas_west_view.jpg",
+      "title": "File:Eliason Barn Gypsum Kansas west view.jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Eliason_Barn_Gypsum_Kansas_west_view.jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Eliason_Barn_Gypsum_Kansas_west_view.jpg/1920px-Eliason_Barn_Gypsum_Kansas_west_view.jpg",
+      "author": "SharonPapierdreams",
+      "license": "CC BY-SA 4.0",
+      "credit": "Own work",
+      "description": "Eliason Barn",
+      "fetchDate": "2026-07-22T21:14:29.132Z",
+      "bytes": 663266
     }
   ]
 }
