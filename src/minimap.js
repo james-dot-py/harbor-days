@@ -59,7 +59,7 @@ export function drawLakefrontBase(g,M,opts={}){
     g.stroke();
   });
   g.strokeStyle='#e8cfa4';g.lineWidth=2*S;
-  [TRAIL_LOOP,TRAIL_ENTRANCE,CH.LP_TRAIL_LAKE,CH.LP_TRAIL_PARK,CH.LP_TRAIL_STOCKTON].forEach(pts=>{   // peanut plaza loop + entrance→lake path (023) + Lincoln Park ribbons (112)
+  [TRAIL_LOOP,TRAIL_ENTRANCE,CH.LP_TRAIL_LAKE,CH.LP_TRAIL_PARK,CH.LP_TRAIL_STOCKTON,CH.ZOO.loop,CH.ZOO.spur,CH.LP_DIVERSEY_CANNON].forEach(pts=>{   // peanut plaza loop + entrance→lake path (023) + Lincoln Park ribbons (112) + zoo loop/spur + Cannon Dr (114)
     g.beginPath();
     pts.forEach((p,i)=>{const[mx,my]=wm(p[0],p[1]);i?g.lineTo(mx,my):g.moveTo(mx,my)});
     g.stroke();

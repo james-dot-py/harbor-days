@@ -1531,6 +1531,352 @@ function buildMontrosePoint(POSTS,RAILS){
   }
 }
 
+// ---- LINCOLN PARK ZOO campus (task 114) ------------------------------------
+// The fenced-but-OPEN free zoo: ornamental perimeter fence (gates = gaps between
+// runs), the east front-door arch + open leaves, the Sea Lion Pool with its
+// stacked-slab grotto (B&W ref), the 1912 Kovler Lion House (Theater arcade
+// recipe + clerestory ridge monitor), the lion yard, the west lion-plinth gate,
+// plain south piers, benches + planted beds. EVERY placement from CH.ZOO —
+// zero rng, NO colliders anywhere (walkability is data-carved in chicago.js,
+// the anti-trap law), fences tail-append POSTS/RAILS via fenceRun collide:false.
+// Statics fold aggressively: per-material world-coord accumulators -> ONE
+// merged mesh each (all geometry normalized toNonIndexed so Box/Extrude/Torus/
+// Sphere merge under one material — identical position/normal/uv sets).
+function buildZoo(POSTS,RAILS){
+  const Z=CH.ZOO,LH=Z.lionHouse,GE=Z.gates.east,GW=Z.gates.west,GS=Z.gates.south,P=Z.pool,Y=Z.yard;
+
+  // -- per-material accumulators (merged + scene.add'd at the end) -----------
+  const gBrick=[],gTrim=[],gBase=[],gIron=[],gRoof=[],gDoor=[],gGlow=[],gRock=[],gRock2=[],
+        gLedge=[],gBronze=[],gBoll=[],gBench=[],gSoil=[],gLeafA=[],gLeafB=[],gBlmA=[],gBlmB=[],
+        gBack=[],gPost=[];
+  const box=(arr,w,h,d,x,y,z,ry)=>{const g=new THREE.BoxGeometry(w,h,d);if(ry)g.rotateY(ry);g.translate(x,y,z);arr.push(g);};
+  const emit=(geos,mat)=>{if(!geos.length)return;
+    scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(geos.map(g=>g.index?g.toNonIndexed():g)),mat));};
+  // fitted-font helper (word-sign law: measureText-FITTED, headless fallback
+  // fonts measure wider). w = the css weight prefix ('800', 'italic 700', ...)
+  const fit=(g,t,mw,fs,w)=>{g.font=`${w} ${fs}px "Trebuchet MS",sans-serif`;
+    while(g.measureText(t).width>mw&&fs>10){fs-=2;g.font=`${w} ${fs}px "Trebuchet MS",sans-serif`;}};
+  // lollipop plate: post ENDS at panel bottom (never bisects), solid dark
+  // backing box, FrontSide plate 0.02 proud of the backing face. Own canvas.
+  const sign=(px,pz,ry,w,h,cy,postR,cw,ch,draw)=>{
+    const bot=cy-h/2;
+    if(postR>0){const pg=new THREE.CylinderGeometry(postR,postR,bot,8);pg.translate(px,bot/2,pz);gPost.push(pg);}
+    box(gBack,w+0.07,h+0.07,0.05,px,cy,pz,ry);
+    const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;const g=cv.getContext('2d');
+    draw(g);
+    const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
+    const pl=new THREE.Mesh(new THREE.PlaneGeometry(w,h),curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide})));
+    pl.rotation.y=ry;pl.position.set(px+Math.sin(ry)*0.045,cy,pz+Math.cos(ry)*0.045);scene.add(pl);
+  };
+  // open iron gate leaf parked swung open: top+bottom rails + 4 vertical bars,
+  // hinged at (x,z), local +z rotated by ry (leaves fold back INTO the campus)
+  const leaf=(x,z,ry,len,hgt)=>{
+    const parts=[[0.06,0.06,len,0,hgt,len/2],[0.06,0.06,len,0,hgt*0.18,len/2]];
+    for(let i=0;i<4;i++)parts.push([0.05,hgt*0.92,0.05,0,hgt*0.5,(i+0.5)*len/4]);
+    for(const[w,h,d,ox,oy,oz]of parts){const g=new THREE.BoxGeometry(w,h,d);g.translate(ox,oy,oz);g.rotateY(ry);g.translate(x,0,z);gIron.push(g);}
+  };
+  // chunky reclining bronze lion (cute > anatomical): stretched-sphere body,
+  // head + muzzle, flattened mane shell, two forward leg boxes. Local +z =
+  // facing; s scales the whole cat. Merged into ONE bronze mesh with the rest.
+  const lion=(s,x,y0,z,ry)=>{
+    const parts=[];
+    const add=(g,sx,sy,sz,lx,ly,lz)=>{g.scale(sx*s,sy*s,sz*s);g.translate(lx*s,ly*s,lz*s);g.rotateY(ry);g.translate(x,y0,z);parts.push(g);};
+    add(new THREE.SphereGeometry(0.45,10,8),1.6,0.78,1.05, 0,0.36,-0.05);   // body
+    add(new THREE.SphereGeometry(0.26,10,8),1,1,1,          0,0.62,0.55);   // head
+    add(new THREE.BoxGeometry(0.22,0.16,0.2),1,1,1,         0,0.55,0.74);   // muzzle
+    add(new THREE.SphereGeometry(0.36,10,8),1.05,1,0.55,    0,0.58,0.34);   // mane shell
+    for(const sx of[-1,1])add(new THREE.BoxGeometry(0.14,0.15,0.55),1,1,1,sx*0.19,0.1,0.6);  // front legs
+    for(const g of parts)gBronze.push(g);
+  };
+
+  // (1) PERIMETER FENCE — the whole ornamental ring; gates are the gaps
+  // between runs. collide:false — blocking is the data band (zooBlockedHit).
+  for(const run of Z.fence.runs)
+    fenceRun(run,{spacing:Z.fence.spacing,postH:Z.fence.postH,color:Z.fence.color,collide:false},POSTS,RAILS);
+
+  // (2) EAST GATE — the front door off Cannon. Brick piers + limestone caps.
+  for(const pz of[GE.z0,GE.z1]){
+    box(gBrick,0.9,3.4,0.9,GE.x,1.7,pz,0);
+    box(gTrim,1.15,0.18,1.15,GE.x,3.49,pz,0);
+  }
+  {  // iron ARCH between the pier tops: shallow torus arc, flattened, crown y 4.5
+    const a=new THREE.TorusGeometry(5.0,0.13,6,20,2.2);
+    a.rotateZ(Math.PI/2-1.1);                 // centre the 2.2-rad arc at the top
+    a.scale(1,0.35,1);                        // flatten shallow
+    a.rotateY(Math.PI/2);                     // arc spans world z
+    a.translate(GE.x,2.75,(GE.z0+GE.z1)/2);   // crown 5*0.35+2.75 = 4.5
+    gIron.push(a);
+  }
+  box(gIron,0.1,0.18,9.2,GE.x,3.62,(GE.z0+GE.z1)/2,0);   // chord bar tying the piers (the sign band hangs on it)
+  {  // 'LINCOLN PARK ZOO / · FREE SINCE 1868 ·' band facing EAST (+x)
+    const cv=document.createElement('canvas');cv.width=1024;cv.height=192;const g=cv.getContext('2d');
+    g.fillStyle='#2c2f2b';g.fillRect(0,0,1024,192);
+    g.textAlign='center';g.textBaseline='middle';
+    g.fillStyle='#f0e8d2';fit(g,GE.sign,940,92,'800');g.fillText(GE.sign,512,76);
+    const reg='· '+GE.register+' ·';
+    g.fillStyle='#e5c56a';fit(g,reg,700,40,'700');g.fillText(reg,512,156);
+    const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
+    box(gBack,0.08,1.45,7.8,-10.14,4.35,830,0);           // solid backing over the chord
+    const pg=new THREE.PlaneGeometry(7.6,1.35);pg.rotateY(Math.PI/2);       // front faces +x
+    const pl=new THREE.Mesh(pg,curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide})));
+    pl.position.set(-10.06,4.35,830);scene.add(pl);
+  }
+  // OPEN leaves parked swung fully back INTO the campus, flat-ish along the
+  // fence (the spec's ±0.6-rad park landed the tips ON the loop pavers — the
+  // loop's first points hug this corner; 0.35 rad folded N/S clears them).
+  leaf(-10.6,825.6,Math.PI+0.35,3.4,1.6);
+  leaf(-10.6,834.4,-0.35,3.4,1.6);
+  {  // brick paver PAD under the gate (GE.pad rect)
+    const pd=GE.pad;
+    const m=new THREE.Mesh(new THREE.BoxGeometry(pd.x1-pd.x0,0.05,pd.z1-pd.z0),toon(Z.loopStyle.color));
+    m.position.set((pd.x0+pd.x1)/2,0.056,(pd.z0+pd.z1)/2);scene.add(m);    // top y 0.081
+  }
+  // DIRECTORY BOARD, NE-facing toward the gate: header + tag line + a painted
+  // suggestive mini-map (green blob / pool dot / red halls / you-are-here)
+  sign(-16.5,818.5,2.35,1.6,1.15,1.5,0.06,512,384,g=>{
+    g.fillStyle='#efe6cd';g.fillRect(0,0,512,384);
+    g.textAlign='center';g.textBaseline='middle';
+    g.fillStyle='#2d3a2c';fit(g,GE.sign,450,50,'800');g.fillText(GE.sign,256,44);
+    g.fillStyle='#5a5142';const tag='free · open · since 1868';fit(g,tag,430,26,'700');g.fillText(tag,256,86);
+    g.fillStyle='#7fae6b';g.beginPath();g.ellipse(256,236,200,122,0,0,7);g.fill();      // the campus blob
+    g.strokeStyle='#c8b98e';g.lineWidth=7;g.beginPath();g.moveTo(430,236);g.bezierCurveTo(360,300,220,300,120,240);g.stroke();  // the loop walk
+    g.fillStyle='#5a8fae';g.beginPath();g.arc(190,222,20,0,7);g.fill();                 // pool dot
+    g.fillStyle='#b3402e';g.fillRect(268,196,74,28);g.fillRect(210,282,44,20);g.fillRect(140,152,36,22);  // hall rects
+    g.fillStyle='#d43b2a';g.beginPath();g.arc(408,238,10,0,7);g.fill();                 // you are here
+    g.beginPath();g.moveTo(398,208);g.lineTo(418,208);g.lineTo(408,224);g.closePath();g.fill();  // arrow down to it
+  });
+
+  // (3) SEA LION POOL — rim ring (open cylinders + flat cap, DoubleSide)
+  {
+    const wo=new THREE.CylinderGeometry(7.0,7.0,P.rimH,28,1,true);wo.translate(P.x,P.rimH/2,P.z);
+    const wi=new THREE.CylinderGeometry(6.55,6.55,P.rimH,28,1,true);wi.translate(P.x,P.rimH/2,P.z);
+    const cap=new THREE.RingGeometry(6.55,7.15,28);cap.rotateX(-Math.PI/2);cap.translate(P.x,P.rimH,P.z);
+    scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries([wo,wi,cap].map(g=>g.index?g.toNonIndexed():g)),
+      toon(P.rim,{mat:{side:THREE.DoubleSide}})));
+    const wat=new THREE.CircleGeometry(P.waterR,26);wat.rotateX(-Math.PI/2);wat.translate(P.x,0.45,P.z);
+    scene.add(new THREE.Mesh(wat,bmat(P.water)));      // self-lit water (toon bands weirdly — 044 law)
+  }
+  // GROTTO — the signature craggy stacked-slab limestone mound rising out of
+  // the water. Slab centres pulled toward the pool centre (grotto anchor sits
+  // 5.15 out — literal slabs there would poke the rim) so every extent stays
+  // inside waterR. Alternating greys -> the two rock meshes.
+  const gx=-62.2,gz=816.2;   // mound origin (biased in from P.grotto toward centre)
+  const SLABS=[  // [w,h,d, ox,cy,oz, ry, alt]
+    [2.6,.5,1.9,   0,.25,  0,  .2,0],[2.3,.45,1.7, .25,.72,-.15,-.3,1],
+    [2.4,.4,1.5, -.2,1.13, .2, .55,0],[2.0,.45,1.4,.15,1.55,-.1,-.15,1],
+    [2.2,.4,1.2, .55,1.95,.35, .9,0],                         // the cantilevered overhang
+    [1.6,.4,1.2,-.15,2.33,  0, -.5,1],[1.4,.35,1.0,.1,2.7,.1,.35,0],
+    [1.0,.35,.8,   0,3.0,-.05,-.7,1],                         // top ~3.17
+    [1.8,.4,1.3,-1.1,.2,  .6,  .7,1],[1.6,.35,1.1,.9,.18,-.8,-.4,0],  // base spread
+    [1.5,.4,1.0,  .7,.6,  .9, 1.1,0],[1.3,.35,.9,-.9,.65,-.6,-.9,1],
+  ];
+  for(const[w,h,d,ox,cy,oz,ry,alt]of SLABS)box(alt?gRock2:gRock,w,h,d,gx+ox,cy,gz+oz,ry);
+  {  // dark cave recess plane tucked on the SE face (edges buried in slab)
+    const cm=new THREE.Mesh(new THREE.PlaneGeometry(1.4,1.0),toon(0x1a1a1c));
+    cm.rotation.y=Math.PI/4;cm.position.set(-61.4,0.9,817.0);scene.add(cm);
+  }
+  box(gRock,2.2,0.5,1.4,-60.8,0.37,817.4,0.15);   // HAUL-OUT SHELF, flat top y 0.62 (the pack lies a seal here)
+  // two low rock islets
+  box(gRock,1.4,0.35,1.0,-57,0.175,823.5,0.5);  box(gRock2,1.0,0.28,0.7,-56.8,0.36,823.3,-0.3);
+  box(gRock2,1.5,0.35,1.1,-63,0.175,823.3,-0.6);box(gRock,0.9,0.25,0.6,-63.2,0.37,823.1,0.8);
+  // hanging 'SEA LIONS' board off the grotto top — L-arm (two thin iron boxes),
+  // small board facing SE toward the south-east rail (the spec's ry -2.5 is the
+  // NW anti-parallel of its own 'facing SE' word — the word wins, ry 0.79)
+  box(gIron,0.08,1.0,0.08,-62.0,2.7,816.4,0);                       // vertical stub buried in the top slabs
+  {const arm=new THREE.BoxGeometry(0.08,0.08,1.1);arm.translate(0,0,0.55);arm.rotateY(0.79);arm.translate(-62.0,2.67,816.4);gIron.push(arm);}
+  sign(-61.4,817.0,0.79,1.0,0.5,2.3,0,256,128,g=>{
+    g.fillStyle='#242422';g.fillRect(0,0,256,128);
+    g.textAlign='center';g.textBaseline='middle';
+    g.fillStyle='#f0e8d2';fit(g,P.sign,230,52,'800');g.fillText(P.sign,128,66);
+  });
+  {  // VIEWING RAIL — one closed 21-segment circle at railR (first pt repeated)
+    const pts=[];
+    for(let i=0;i<=21;i++){const a=i/21*Math.PI*2;pts.push([P.x+Math.cos(a)*P.railR,P.z+Math.sin(a)*P.railR]);}
+    fenceRun(pts,{spacing:2.1,postH:P.railH,color:0x3a3f3a,collide:false},POSTS,RAILS);
+  }
+  // 'SEA LION POOL' plate SE of the rail on the approach side (word 'SE' wins
+  // over the spec's anti-parallel ry -2.4, as above)
+  sign(-52.6,827.6,0.75,1.3,0.5,1.3,0.05,512,192,g=>{
+    g.fillStyle='#efe6cd';g.fillRect(0,0,512,192);
+    g.textAlign='center';g.textBaseline='middle';
+    g.fillStyle='#2f4a3f';fit(g,'SEA LION POOL',460,54,'800');g.fillText('SEA LION POOL',256,98);
+  });
+
+  // (4) KOVLER LION HOUSE — the Theater arcade recipe with the long faces
+  // turned N/S (9 beats), 3-arch ends, and the 1912 clerestory ridge monitor.
+  {
+    const hx=LH.w/2,hz=LH.d/2,wallT=0.5,sill=0.5,r=LH.archW/2,spring=sill+LH.archH-r,pitch=3.5;
+    box(gBase,LH.w+0.6,0.35,LH.d+0.6,LH.x,0.175,LH.z,0);           // plinth, +0.3 oversize
+    function wallGeo(len,n){                                       // outer rect minus arch holes
+      const s=new THREE.Shape();
+      s.moveTo(-len/2,0);s.lineTo(len/2,0);s.lineTo(len/2,LH.wallH);s.lineTo(-len/2,LH.wallH);s.closePath();
+      for(let i=0;i<n;i++){
+        const c=(i-(n-1)/2)*pitch,h=new THREE.Path();
+        h.moveTo(c-r,sill);h.lineTo(c+r,sill);h.lineTo(c+r,spring);
+        h.absarc(c,spring,r,0,Math.PI,false);h.lineTo(c-r,sill);
+        s.holes.push(h);
+      }
+      return new THREE.ExtrudeGeometry(s,{depth:wallT,bevelEnabled:false,curveSegments:12});
+    }
+    // long N/S walls full-length; E/W ends shortened one wall-T each side to
+    // butt them (the long walls' end caps finish the corners — Theater law)
+    const gN=wallGeo(LH.w,LH.nLong);                       gN.translate(LH.x,0.35,LH.z-hz);gBrick.push(gN);
+    const gS=wallGeo(LH.w,LH.nLong);gS.rotateY(Math.PI);   gS.translate(LH.x,0.35,LH.z+hz);gBrick.push(gS);
+    const gW=wallGeo(LH.d-2*wallT,LH.nShort);gW.rotateY( Math.PI/2);gW.translate(LH.x-hx,0.35,LH.z);gBrick.push(gW);
+    const gEw=wallGeo(LH.d-2*wallT,LH.nShort);gEw.rotateY(-Math.PI/2);gEw.translate(LH.x+hx,0.35,LH.z);gBrick.push(gEw);
+    // glow panes in every arch EXCEPT the two door centres; monitor strips too
+    const pw=LH.archW+0.15,ph=LH.archH+0.15,py=0.35+sill+LH.archH/2,mid=(LH.nLong-1)/2;
+    const pane=(w,h,ry,x,y,z)=>{const g=new THREE.PlaneGeometry(w,h);if(ry)g.rotateY(ry);g.translate(x,y,z);gGlow.push(g);};
+    for(let i=0;i<LH.nLong;i++){
+      if(i===mid)continue;const c=(i-mid)*pitch;
+      pane(pw,ph,Math.PI,LH.x+c,py,LH.z-(hz-0.18));                // north row (doors skip centre)
+      pane(pw,ph,0,      LH.x+c,py,LH.z+(hz-0.18));                // south row
+    }
+    for(let i=0;i<LH.nShort;i++){
+      const c=(i-(LH.nShort-1)/2)*pitch;
+      pane(pw,ph,-Math.PI/2,LH.x-(hx-0.18),py,LH.z+c);             // west end
+      pane(pw,ph, Math.PI/2,LH.x+(hx-0.18),py,LH.z+c);             // east end
+    }
+    // trim: spring-line + eaves courses (W/E wrap corners, N/S butt between —
+    // no coplanar overlap), then the fascia ring under the eave edge
+    const band=(y,t)=>{
+      for(const sx of[-1,1])box(gTrim,0.16,t,LH.d+0.32,LH.x+sx*hx,y,LH.z,0);
+      for(const sz of[-1,1])box(gTrim,LH.w-0.16,t,0.16,LH.x,y,LH.z+sz*hz,0);
+    };
+    band(0.35+spring,0.18);band(0.35+LH.wallH-0.10,0.18);
+    const ex=hx+LH.eave,ez=hz+LH.eave,roofY=0.35+LH.wallH;
+    for(const sx of[-1,1])box(gTrim,0.16,0.14,ez*2,LH.x+sx*(ex-0.08),roofY-0.08,LH.z,0);
+    for(const sz of[-1,1])box(gTrim,ex*2-0.32,0.14,0.16,LH.x,roofY-0.08,LH.z+sz*(ez-0.08),0);
+    // hip roof — the √2 frustum trick lands the corners exactly on the eave rect
+    const roofG=new THREE.CylinderGeometry(0.22*Math.SQRT2,Math.SQRT2,LH.roofH,4,1);
+    roofG.rotateY(Math.PI/4);roofG.scale(ex,1,ez);roofG.translate(LH.x,roofY+LH.roofH/2,LH.z);gRoof.push(roofG);
+    // CLERESTORY MONITOR on the ridge (the 1912 silhouette): brick box sunk
+    // into the roof slopes, 4-pane glow strips N+S, its own small hip cap
+    const M=LH.monitor,my=roofY+LH.roofH-0.1;                      // centre y 9.05 (bottom buried on all sides)
+    box(gBrick,M.w,M.h,M.d,LH.x,my,LH.z,0);
+    for(const sz of[-1,1])for(let i=0;i<4;i++)
+      pane(2.6,1.0,sz<0?Math.PI:0,LH.x-6+i*4,my+0.3,LH.z+sz*(M.d/2+0.02));
+    const mr=new THREE.CylinderGeometry(0.22*Math.SQRT2,Math.SQRT2,M.roofH,4,1);
+    mr.rotateY(Math.PI/4);mr.scale(M.w/2+0.5,1,M.d/2+0.5);
+    mr.translate(LH.x,my+M.h/2-0.06+M.roofH/2,LH.z);gRoof.push(mr);   // base sunk 0.06 into the box top (no coplanar cap)
+    // doors: dark recessed boxes + stoops in the north + south CENTRE arches.
+    // Full arch height (shot round 2: a 2.4 door left the transom OPEN — the
+    // arch read see-through green over the door in the south-face framing).
+    for(const sz of[-1,1]){
+      box(gDoor,LH.archW-0.3,LH.archH+0.25,0.1,LH.x,0.35+sill+(LH.archH+0.25)/2,LH.z+sz*(hz-0.35),0);
+      box(gBase,3.2,0.18,1.2,LH.x,0.09,LH.z+sz*(hz+0.85),0);       // stoop, lapped 0.05 into the plinth
+    }
+    // 'KOVLER LION HOUSE' plaque high on the NORTH face (pool/yard side), on
+    // the blank band between arch crowns (4.45) and the eaves course (5.76)
+    {
+      const cv=document.createElement('canvas');cv.width=1024;cv.height=128;const g=cv.getContext('2d');
+      g.fillStyle='#2c2620';g.fillRect(0,0,1024,128);
+      g.textAlign='center';g.textBaseline='middle';
+      g.fillStyle='#f0e8d2';fit(g,LH.sign,940,72,'800');g.fillText(LH.sign,512,66);
+      const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
+      box(gBack,7.66,0.84,0.06,LH.x,5.1,LH.z-hz-0.02,0);           // lapped 0.01 into the brick
+      const pg=new THREE.PlaneGeometry(7.5,0.72);pg.rotateY(Math.PI);
+      const pl=new THREE.Mesh(pg,curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide})));
+      pl.position.set(LH.x,5.1,LH.z-hz-0.055);scene.add(pl);       // 0.025 proud of the backing face
+    }
+  }
+  // BRONZE LION by the north door, reclining on a stone plinth, facing north
+  box(gBase,1.7,0.45,1.0,-36.6,0.225,822.9,0);
+  lion(1,-36.6,0.45,822.9,Math.PI);
+
+  // (5) LION YARD — dirt ground, NW ledge group (lions lie on the tall one),
+  // low slab walls W + E edges, loose rocks; south side is the house plinth
+  {
+    const gnd=new THREE.PlaneGeometry(Y.x1-Y.x0,Y.z1-Y.z0);gnd.rotateX(-Math.PI/2);
+    const m=new THREE.Mesh(gnd,toon(Y.dirt));m.position.set((Y.x0+Y.x1)/2,0.03,(Y.z0+Y.z1)/2);scene.add(m);
+  }
+  box(gLedge,2.6,0.75,1.9,-28.5,0.375,814.5,0);    // the lie slab — flat top y 0.75, kept ≥2.2x1.6
+  box(gLedge,2.2,0.55,1.7,-26.8,0.275,815.9,0.4);
+  box(gLedge,1.8,0.4,1.5,-29.9,0.2,815.7,-0.35);
+  const WALL=[  // [x,z, h, d, ry] slab rows along the W (x0) and E (x1) edges
+    [Y.x0,812.6,.6,2.6,.08],[Y.x0,815.2,.5,2.4,-.06],[Y.x0,817.9,.7,2.5,.1],[Y.x0,820.5,.55,2.4,-.09],[Y.x0,823.1,.6,2.6,.05],
+    [Y.x1,812.5,.55,2.6,-.07],[Y.x1,815.1,.65,2.4,.09],[Y.x1,817.8,.5,2.5,-.05],[Y.x1,820.4,.6,2.4,.08],[Y.x1,823.2,.7,2.6,-.1],
+  ];
+  for(const[x,z,h,d,ry]of WALL)box(gRock,0.8,h,d,x,h/2,z,ry);
+  box(gRock,0.6,0.4,0.5,-22,0.2,818.5,0.5);box(gRock,0.5,0.35,0.45,-29.5,0.175,820.8,-0.7);box(gRock,0.45,0.3,0.4,-20.5,0.15,813.8,0.9);
+  fenceRun([[-32,814],[-32,811],[-18,811],[-18,814]],{spacing:2.2,postH:Y.railH,color:0x3a3f3a,collide:false},POSTS,RAILS);
+  // habitat plate, facing NORTH toward approaching viewers
+  sign(-25,809.8,Math.PI,1.35,0.6,1.25,0.05,512,224,g=>{
+    g.fillStyle='#efe6cd';g.fillRect(0,0,512,224);
+    g.textAlign='center';g.textBaseline='middle';
+    g.fillStyle='#3a2f24';fit(g,'THE LIONS',460,64,'800');g.fillText('THE LIONS',256,82);
+    const sub='Pepper Family Wildlife Center';
+    g.fillStyle='#6b5c48';fit(g,sub,470,28,'italic 700');g.fillText(sub,256,168);
+  });
+
+  // (6) WEST GATE — the ref-identity octagonal 2-tier lion plinth (flats E/W)
+  for(const[rt,rb,h,cy,c]of[[1.55,1.55,0.5,0.25,0xd8d2c2],[1.25,1.4,0.45,0.72,0x8b8f92],[1.0,1.15,0.28,1.08,0x3c4043]]){
+    const g=new THREE.CylinderGeometry(rt,rb,h,8);g.rotateY(Math.PI/8);g.translate(GW.x,cy,GW.z);
+    scene.add(new THREE.Mesh(g,toon(c)));
+  }
+  {  // 'LINCOLN PARK ZOO' plate on the light band's WEST flat (Stockton side);
+     // the octagon band itself is the solid backing (flat face x -95.33)
+    const cv=document.createElement('canvas');cv.width=1024;cv.height=160;const g=cv.getContext('2d');
+    g.fillStyle='#d8d2c2';g.fillRect(0,0,1024,160);
+    g.textAlign='center';g.textBaseline='middle';
+    g.fillStyle='#3a352c';fit(g,GW.sign,980,84,'800');g.fillText(GW.sign,512,82);
+    const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
+    const pg=new THREE.PlaneGeometry(1.9,0.3);pg.rotateY(-Math.PI/2);       // faces -x (west)
+    const pl=new THREE.Mesh(pg,curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide})));
+    pl.position.set(-95.35,0.27,GW.z);scene.add(pl);
+  }
+  lion(0.8,-94.05,1.22,857.75,0.5);          // two reclining bronzes on the top
+  lion(0.8,-93.75,1.22,858.25,Math.PI-0.5);  // slab, back-to-back-ish
+  for(const[bx,bz]of GW.bollards){
+    const c=new THREE.CylinderGeometry(0.14,0.14,0.8,8);c.translate(bx,0.4,bz);gBoll.push(c);
+    const s=new THREE.SphereGeometry(0.16,8,6);s.translate(bx,0.8,bz);gBoll.push(s);
+  }
+
+  // (7) SOUTH GATE — plain brick piers + trim caps + small open leaves folded
+  // back along the fence (the pond spur crosses the gap at x ~ -48.9)
+  for(const px of[GS.x0,GS.x1]){
+    box(gBrick,GS.pierW,GS.pierH,GS.pierW,px,GS.pierH/2,GS.z,0);
+    box(gTrim,0.95,0.16,0.95,px,GS.pierH+0.08,GS.z,0);
+  }
+  leaf(GS.x0+0.4,GS.z-0.4,-1.92,1.8,1.2);
+  leaf(GS.x1-0.4,GS.z-0.4, 1.92,1.8,1.2);
+
+  // (9) BENCHES — the props park-bench geometry (seat/back/2 legs) as plain
+  // merged boxes, dock-wood tone; each ≥2.5 m off every path centreline
+  const bench=(x,z,ry)=>{   // CHIBI scale (shot round 1: 0.62 seat read grown-up next to the 1.2 m mayor)
+    const parts=[];
+    const seat=new THREE.BoxGeometry(1.7,0.12,0.55);seat.translate(0,0.42,0);parts.push(seat);
+    const back=new THREE.BoxGeometry(1.7,0.42,0.1);back.rotateX(-0.15);back.translate(0,0.72,-0.26);parts.push(back);
+    for(const sx of[-0.72,0.72]){const l=new THREE.BoxGeometry(0.12,0.42,0.5);l.translate(sx,0.21,0);parts.push(l);}
+    for(const g of parts){g.rotateY(ry);g.translate(x,0,z);gBench.push(g);}
+  };
+  bench(-48,808,0);          // back north, faces the yard/pool ground
+  bench(-73,843,2.77);       // faces NE toward the pool (round 1: -67,838 sat IN the lp-seal-pool f0 camera)
+  bench(-14.5,808,-1.45);    // back to the trail, faces W toward the yard (round 1: -18.5,801 sat IN the lp-lion-house f0 camera)
+  // (10) PLANTED BEDS x2 — squashed soil disc + chunky blossom mounds + leaf
+  // balls (LP canopy greens; blossoms reuse this file's windmill red + finial gold)
+  const bed=(bx,bz)=>{   // round 2: r.27-.4 blossom blobs merged into a striped 'fallen pole' at grazing angles — smaller heads over a green shrub base reads as a bed
+    const soil=new THREE.CircleGeometry(1.3,16);soil.rotateX(-Math.PI/2);soil.scale(1,1,0.692);soil.translate(bx,0.02,bz);gSoil.push(soil);
+    const SHR=[[-.5,-.2,.34],[.15,.25,.38],[.55,-.15,.3]];   // low green mounds first...
+    for(const[ox,oz,r]of SHR){const g=new THREE.SphereGeometry(r,8,6);g.scale(1,0.6,1);g.translate(bx+ox,r*0.35,bz+oz);gLeafA.push(g);}
+    const BLM=[[-.62,.18,.16,0],[-.28,-.42,.18,1],[-.1,.42,.15,0],[.3,-.32,.17,0],[.5,.3,.16,1],[.75,-.02,.14,0],[-.75,-.1,.15,1]];   // ...small blossom heads dotted atop
+    for(const[ox,oz,r,alt]of BLM){const g=new THREE.SphereGeometry(r,7,5);g.scale(1,0.6,1);g.translate(bx+ox,0.32,bz+oz);(alt?gBlmB:gBlmA).push(g);}
+    for(const[ox,oz,r,alt]of[[-.35,.55,.3,0],[.72,-.12,.26,1]]){const g=new THREE.SphereGeometry(r,8,6);g.scale(1,0.8,1);g.translate(bx+ox,r*0.5,bz+oz);(alt?gLeafB:gLeafA).push(g);}
+  };
+  bed(-12.5,841);bed(-58,845);
+
+  // -- emit: ONE merged mesh per material --------------------------------
+  emit(gBrick,toon(LH.brick));  emit(gTrim,toon(LH.trim));  emit(gBase,toon(LH.base));
+  emit(gDoor,toon(LH.door));    emit(gRoof,toon(LH.roof));  emit(gGlow,bmat(LH.glow));
+  emit(gIron,toon(Z.fence.color));
+  emit(gRock,toon(P.rock));     emit(gRock2,toon(P.rock2)); emit(gLedge,toon(Y.ledge));
+  emit(gBronze,toon(0x6a5233)); emit(gBoll,toon(0x4a4f46)); emit(gBench,toon(0x8a6a44));
+  emit(gSoil,toon(0x5c4a38));
+  emit(gLeafA,toon(0x5aa64f));  emit(gLeafB,toon(0x74bd63));
+  emit(gBlmA,toon(0xb3402e));   emit(gBlmB,toon(0xf0d98a));
+  emit(gBack,toon(0x2c2620));   emit(gPost,toon(0x6b5c48));
+}
+
 export function buildStructures(){
   const POSTS=[],RAILS=[];
   buildDogFence(POSTS,RAILS);
@@ -1542,6 +1888,7 @@ export function buildStructures(){
   fenceRun(CH.MT_HOOK_RAIL.line, {spacing:CH.MT_HOOK_RAIL.spacing, postH:CH.MT_HOOK_RAIL.postH, color:CH.MT_HOOK_RAIL.color, collideR:CH.MT_HOOK_RAIL.collideR}, POSTS, RAILS);
   fenceRun(CH.MONTROSE_DUNE.fence, {spacing:2.6, postH:0.5, color:0xcbb994, collide:false}, POSTS, RAILS);   // low rope line, NO colliders (dune interior blocked by walk data — 065 law)
   buildMontrosePoint(POSTS,RAILS);   // task 071: sanctuary gateway/flanks/ropes append to POSTS/RAILS tail (indices unchanged); statics drawn directly
+  buildZoo(POSTS,RAILS);             // task 114: zoo campus — perimeter/gates/pool/lion house/yard append to the tail (collide:false, data-carved walkability)
   emitFences(POSTS,RAILS);
   buildFieldhouse();
   buildParkBait();

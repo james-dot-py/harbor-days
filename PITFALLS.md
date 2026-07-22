@@ -959,4 +959,20 @@ few turns to find; keep each to one line of symptom + fix.
   game.tNow (dt-based), while rustleDbg.t stamps actx.currentTime — both advance
   ~real-time, and dt's 0.05 cap can only STRETCH a gap, never shrink it, so a
   ">= throttle" assertion on actx-time gaps is safe.
+- definePlace's grade SELF-RELEASED on any spawn-INSIDE-a-place load (114): the
+  077 dt clamp makes frame 1's dt exactly 0, so on the entry frame _placeF was
+  still 0 and `if(f<=0)_gradePlace=null` dropped the grade before it ever
+  climbed — the toast/onEnter fired (scan-driven) while fog/amb stayed base, so
+  EVERY teleport-spawn shot since 077 silently showed sanctuary/zoo rooms
+  UNGRADED (walking in was unaffected, which is why nobody saw it). Fixed in
+  framework.js (release requires _placeCur!==_gradePlace — i.e. actually fading
+  OUT). Diagnostic that cracked it: the onEnter toast firing while fog.far
+  never moved — proof the scan ran and only the fade died.
+- Waypoint STANDS are furniture magnets (114, twice in one pass): benches sited
+  "facing the subject" landed 1.5-2 m from the very stands whose cameras face
+  the same subject — a giant bench back filled two f0 frames (the 061/080
+  NPC-keeper-blocks-camera pitfall, furniture edition; a directory board's
+  solid back later ate a third framing the same way). Before siting ANY
+  prop/NPC near a hero subject, diff its position against every framing's
+  STAND and CAMERA point (stand − dir·dist), not just the subject's sightline.
 

@@ -312,6 +312,16 @@ export function buildPaths(){
   const lpLake=ribbonOn(curveOf(CH.LP_TRAIL_LAKE),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
   ribbonOn(curveOf(CH.LP_TRAIL_PARK),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
   ribbonOn(curveOf(CH.LP_TRAIL_STOCKTON),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
+  // 114 ZOO CAMPUS: three NEW ribbons — the red-brick paver MAIN LOOP (closed
+  // outline, first==last control point -> ribbonOn's weldSeam miters its own
+  // start/end), the limestone SPUR south to the pond ground (Ts off the loop at
+  // [-44,847]; the miterless T seam is covered by a paved junction disc from
+  // structures), and Cannon Dr (asphalt park drive down the zoo's east flank).
+  // pathSamples2 ONLY (ribbonOn is rng-free; LP is scatter-free ground, so the
+  // tree post-filter sees nothing in range) — world scatter frozen.
+  ribbonOn(curveOf(CH.ZOO.loop),CH.ZOO.loopStyle.width,CH.ZOO.loopStyle.color,CH.ZOO.loopStyle.y,0,pathSamples2);
+  ribbonOn(curveOf(CH.ZOO.spur),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
+  ribbonOn(curveOf(CH.LP_DIVERSEY_CANNON),4.6,st.bike.color,st.bike.y,0,pathSamples2);
   flushJunctions();   // 102: one instanced mesh for every paved junction dot
   // 106: register the DRAWN dual trail + spur centerlines as the footstep
   // 'asphalt' corridor (onTrail). rng-free; the miters only touch edge verts, so

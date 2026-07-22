@@ -1538,9 +1538,11 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
     CH.LP_UNDERPASS.walk.x0<0 && CH.LP_UNDERPASS.walk.x1>14, true);
   expect('the underpass sits at Fullerton latitude (z 640..700)',
     CH.LP_UNDERPASS.walk.z0>640 && CH.LP_UNDERPASS.walk.z1<700, true);
-  // (4) the FREE zoo — OPEN gates, no ticket booth (open-admission civic fact)
-  expect('zoo has >=1 OPEN gate (no closed/ticketed flag)',
-    Array.isArray(Z.gatesOpen) && Z.gatesOpen.length>=1 && Z.gatesOpen.every(g=>!g.closed), true);
+  // (4) the FREE zoo — OPEN gates, no ticket booth (open-admission civic
+  //     fact). 114 built the campus: the staged gatesOpen[] became the
+  //     ZOO.gates.{east,west,south} shape (gates are GAPS between fence runs).
+  expect('zoo has all three OPEN gates (east front door + west plinth + south)',
+    !!(Z.gates && Z.gates.east && Z.gates.west && Z.gates.south), true);
   expect('zoo halls include the Sea Lion Pool + Kovler Lion House hero pair',
     Z.halls.some(h=>h.id==='sea-lion-pool') && Z.halls.some(h=>h.id==='kovler-lion'), true);
   // (5) compression transforms are internally consistent (spot-check the laws)
@@ -1641,6 +1643,82 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
   //     colliders at the theater/culvert/docks; the carve is the seal.
   expect('sign collider ring on walkable ground',
     [[0.9,0],[0,0.9],[-0.9,0],[0,-0.9]].every(([dx,dz])=>walkable(LD.sign.x+dx,LD.sign.z+dz)),true);
+}
+
+// ===== LINCOLN PARK 114 (the zoo campus) — LIVE walkability via the SAME
+// shared chicago.js functions the engine uses (zooBlockedHit folded into
+// lpBlockedHit — fence band / pool / yard / hall / pier pads are DATA carves,
+// NO colliders per the anti-trap law; the three gates are GAPS between the
+// ZOO.fence.runs, so the campus can never trap the player).
+{ console.log('\n--- LINCOLN PARK 114 (the zoo campus) ---');
+  const Z=CH.ZOO;
+  // (a) the FENCE BAND blocks at mid-run points, and BOTH sides stay open
+  //     0.9 m away (the anti-trap both-sides-open law). Sample points are
+  //     projected ONTO real run segments (run idx, seg idx, fraction t) so
+  //     they sit exactly on the band regardless of future data nudges.
+  const onRun=(ri,si,t)=>{const run=Z.fence.runs[ri],a=run[si],b=run[si+1];
+    const dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz);
+    return {x:a[0]+dx*t,z:a[1]+dz*t,nx:-dz/L,nz:dx/L};};
+  for(const [ri,si,t,nm] of [[0,0,0.5,'north'],[2,1,0.5,'west B'],[6,0,0.5,'east B'],[4,0,0.5,'south B']]){
+    const p=onRun(ri,si,t);
+    expect(`fence ${nm} band blocked (${p.x.toFixed(1)},${p.z.toFixed(1)})`,walkable(p.x,p.z),false);
+    expect(`fence ${nm} side A open 0.9 m (${(p.x+p.nx*0.9).toFixed(1)},${(p.z+p.nz*0.9).toFixed(1)})`,walkable(p.x+p.nx*0.9,p.z+p.nz*0.9),true);
+    expect(`fence ${nm} side B open 0.9 m (${(p.x-p.nx*0.9).toFixed(1)},${(p.z-p.nz*0.9).toFixed(1)})`,walkable(p.x-p.nx*0.9,p.z-p.nz*0.9),true);
+  }
+  // (b) all three GATE through-lines walk end to end (outside -> in): east off
+  //     Cannon (LP_TRAIL_PARK crosses the fence line at z~828, inside the
+  //     825-835 gap), west north of the lion plinth, south (ZOO.spur crosses
+  //     at x~-48.9, inside the -53..-45 gap)
+  for(const [x,z] of [[-6,830],[-8.5,830],[-10.2,830],[-12,830],[-14,830]])
+    expect(`east gate through-line (${x},${z})`,walkable(x,z),true);
+  for(const [x,z] of [[-96,855.5],[-94.2,855.5],[-92,855.5]])
+    expect(`west gate through-line (${x},${z})`,walkable(x,z),true);
+  for(const [x,z] of [[-49,1002],[-49,1005.5],[-49,1009]])
+    expect(`south gate through-line (${x},${z})`,walkable(x,z),true);
+  // (c) the gate FURNITURE blocks (pier pads + the west lion plinth)
+  const GE=Z.gates.east,GW=Z.gates.west,GS=Z.gates.south;
+  expect(`east gate N pier pad (${GE.x},${GE.z0}) blocked`,walkable(GE.x,GE.z0),false);
+  expect(`east gate S pier pad (${GE.x},${GE.z1}) blocked`,walkable(GE.x,GE.z1),false);
+  expect(`west gate lion plinth (${GW.x},${GW.z}) blocked`,walkable(GW.x,GW.z),false);
+  expect(`south gate W pier pad (${GS.x0},${GS.z}) blocked`,walkable(GS.x0,GS.z),false);
+  expect(`south gate E pier pad (${GS.x1},${GS.z}) blocked`,walkable(GS.x1,GS.z),false);
+  // (d) the SEA LION POOL disc: centre + a ring inside carveR 7.5 blocked;
+  //     a ring at 8.1 (the rim promenade) walks all the way around
+  const P=Z.pool;
+  expect(`pool centre (${P.x},${P.z}) blocked`,walkable(P.x,P.z),false);
+  for(let k=0;k<8;k++){const a=k*Math.PI/4,c=Math.cos(a),s=Math.sin(a);
+    expect(`pool ring r7.3 a${k} blocked`,walkable(P.x+c*7.3,P.z+s*7.3),false);
+    expect(`pool rim r8.1 a${k} walks`,walkable(P.x+c*8.1,P.z+s*8.1),true);
+  }
+  // (e) the LION YARD rect blocks; its north flank walks; NO walkable sliver
+  //     between yard and house (yard z1 824.6 laps the house carve z0 824.5)
+  expect('lion yard (-25,817) blocked',walkable(-25,817),false);
+  expect('yard north flank (-25,809.8) walks',walkable(-25,809.8),true);
+  expect('no yard->house sliver (-25,824.55) blocked',walkable(-25,824.55),false);
+  // (f) KOVLER LION HOUSE rect (x -51..-17, z 824.5..837.5): centre + inset
+  //     corners blocked; 1.2 m off each face walks (west probe clear of the
+  //     pool carve; north probe clear of the yard rect)
+  const H=Z.lionHouse,hx=H.w/2,hz=H.d/2;
+  expect(`lion house centre (${H.x},${H.z}) blocked`,walkable(H.x,H.z),false);
+  for(const [x,z] of [[H.x-hx+0.3,H.z-hz+0.3],[H.x+hx-0.3,H.z-hz+0.3],[H.x-hx+0.3,H.z+hz-0.3],[H.x+hx-0.3,H.z+hz-0.3]])
+    expect(`lion house corner inset (${x.toFixed(1)},${z.toFixed(1)}) blocked`,walkable(x,z),false);
+  expect('house N face +1.2 m (-44,823.3) walks',walkable(-44,823.3),true);
+  expect('house S face +1.2 m (-34,838.7) walks',walkable(-34,838.7),true);
+  expect('house E face +1.2 m (-15.8,831) walks',walkable(-15.8,831),true);
+  expect('house W face +1.2 m (-52.5,833) walks',walkable(-52.5,833),true);
+  // (g) the zoo RIBBONS run on walkable ground, every sampled point (skip
+  //     none — loop, pond spur, and Cannon Dr were designed walkable)
+  for(const p of Z.loop) expect(`zoo loop (${p[0].toFixed(1)},${p[1].toFixed(1)})`,walkable(p[0],p[1]),true);
+  for(const p of Z.spur) expect(`zoo spur (${p[0].toFixed(1)},${p[1].toFixed(1)})`,walkable(p[0],p[1]),true);
+  for(const p of CH.LP_DIVERSEY_CANNON) expect(`Cannon Dr (${p[0].toFixed(1)},${p[1].toFixed(1)})`,walkable(p[0],p[1]),true);
+  // (h) the campus predicate (definePlace contains): inside vs the lawn north
+  expect('zooInside(-50,860) inside the campus',CH.zooInside(-50,860),true);
+  expect('zooInside(-50,700) outside (north lawn)',CH.zooInside(-50,700),false);
+  // (i) the 114-RESHAPED LP_TRAIL_PARK (underpass mouth -> zoo flank -> east
+  //     gate) is walked point-by-point in the 112 (d) block above; assert here
+  //     it also clears every zoo carve (fence/pool/yard/hall/pads)
+  expect('LP_TRAIL_PARK clear of all zoo carves',
+    CH.LP_TRAIL_PARK.every(p=>!CH.lpBlockedHit(p[0],p[1])),true);
 }
 
 // ===== 088 PERMANENT GUARDS — spawned as gate categories so the standard

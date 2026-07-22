@@ -400,10 +400,28 @@ add('lp-underpass', 'lincolnpark', 'lakefront', 18, 661, [
   { yaw: -1.57, pitch: 0.07, dist: 5.5 },            // wider/higher: the stone voussoir arch + the far mouth glowing beyond
   { x: -8, z: 661, yaw: 1.57, pitch: 0.05, dist: 5 }, // from the PARK side, back EAST through the tunnel toward the lakefront strip
 ]);
-add('lp-westpanel', 'lincolnpark', 'lakefront', -50, 820, [
-  { yaw: 0.0,  pitch: 0.18, dist: 14 },  // SOUTH down the new west parkland: trail winding through open lawn under big shade elms
-  { yaw: -1.35, pitch: 0.12, dist: 13 }, // WSW at the west edge: the low brick-flats backdrop wall closing off the park
-  { yaw: 2.95, pitch: 0.14, dist: 12 },  // N back toward the lagoon + the underpass, more elms + open lawn
+// (lp-westpanel RETIRED task 114 — its stand is now inside the zoo campus; the
+// three lp-zoo-* stands below supersede the honest-interim-lawn read.)
+
+// 114 — the FREE zoo campus: the east front-door gate off Cannon, the Sea Lion
+// Pool hero (pool + rail + arcing seals + the brick hall behind), and the
+// Kovler Lion House + lion yard. Stands per the 047 law (yaw aimed OFF the
+// subject so the mayor doesn't occlude it); the f2 pool stand is the low
+// over-the-rail read; the lion-house f2 reads the south face + monitor.
+add('lp-zoo-gate', 'lincolnpark', 'lakefront', -5.5, 814, [
+  { yaw: -0.75, pitch: 0.10, dist: 6.5 },               // SW oblique from the Cannon verge: BOTH piers + arch letters + open gap, house behind
+  { x: -5, z: 844, yaw: -2.35, pitch: 0.08, dist: 6 },  // from the south: pier + arch band + pad, house SE corner + monitor
+  { x: -6, z: 808, yaw: -0.55, pitch: 0.12, dist: 8 },  // wide NE establishing: Cannon + trail leading in, gate + house + lion yard in one frame
+]);
+add('lp-seal-pool', 'lincolnpark', 'lakefront', -66.5, 836, [
+  { yaw: 2.35, pitch: 0.06, dist: 5.5 },                 // NE from the SW lawn: pool + grotto + rail, Lion House arches behind
+  { x: -69, z: 829, yaw: 1.9, pitch: 0.08, dist: 6 },    // from the WEST loop: the postcard axis — pool + hauled seal BEFORE the hall
+  { x: -60, z: 829.6, yaw: 2.95, pitch: 0.02, dist: 4.5 }, // LOW at the rail: over the rail into the water — the leaning-in read
+]);
+add('lp-lion-house', 'lincolnpark', 'lakefront', -20, 802, [
+  { yaw: -0.30, pitch: 0.12, dist: 7 },                 // S from the north lawn: yard rail + lion ledge + the long north facade
+  { x: -44, z: 807, yaw: 1.05, pitch: 0.10, dist: 8 },  // ESE oblique: plaque + facade raking away, both lions + keeper at the rail
+  { x: -16, z: 806, yaw: -0.70, pitch: 0.12, dist: 6.5 }, // over-the-yard from the NE: lions + rail + plate, full west sweep of the hall
 ]);
 
 // 113 — Diversey Harbor + Theater on the Lake. The harbor's money shot is the

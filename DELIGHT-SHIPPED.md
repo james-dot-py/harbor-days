@@ -681,3 +681,13 @@ cut becomes a revert task.
   beside), with Theater on the Lake's glowing arcade band standing across the
   Drive. — Diversey Harbor + the Fullerton lagoon culvert (x −8…−36, z 415–668);
   task 113
+- THE MAP'S FIRST ANIMALS, and they're FREE. Walk south past Fullerton and an
+  iron arch spells it out — LINCOLN PARK ZOO · FREE SINCE 1868 — gates swung
+  open, no booth, no turnstile, the toast saying "walk right in — since 1868."
+  Inside, the postcard: dark chunky sea lions CRUISE the rock-rimmed pool and
+  every few seconds one ARCS clear of the green water (nose-first, splash puffs,
+  a bark if you're close) under the hanging SEA LIONS board, one hauled out on
+  the grotto shelf, onlookers leaning on the rail — and behind it the 1912
+  Kovler Lion House glows through nine brick arches while a chunky maned lion
+  and his lioness lounge at the yard rail three meters from your face. — the
+  Sea Lion Pool (−60, 820) + the east gate (−10, 830); task 114

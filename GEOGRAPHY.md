@@ -767,19 +767,52 @@ uniform is added — no rng, no new buckets, same draw count when visible. Data:
   **Eli Bates "Storks at Play" fountain** axis (≈ −73, 776), with the **Alfred
   Caldwell Lily Pool** (≈ −58, 697) NE. Glass goes self-lit `bmat` (the Bean/Crown
   green-ground-bounce dodge). Data: `LP_CONSERVATORY`.
-- **The ZOO** (a fenced-but-**open** campus, z ≈ 738–1008, x −8…−99; perimeter +
-  OPEN gates in `ZOO`). **FREE ADMISSION — open gates, no ticket booth, no
-  turnstile** (the opposite of the Wrigley box office; a signature Chicago civic
-  fact + a delight). The **west/Stockton gate** is a bronze lion pair on a granite
-  LINCOLN PARK ZOO plinth before a limestone hall; the **east gate** takes the
-  Fullerton underpass; the **south gate** opens to the Farm + pond. Hero pair at the
-  north-center: the **Sea Lion Pool** (≈ −56, 822 — the historic craggy-limestone
-  rock-rimmed pool, arcing sea lions) before the **Kovler Lion House** (≈ −34, 831 —
-  the 1912 red-brick arched hall). Ring the campus with flamingos, polar bear,
-  giraffe, gorilla; **Farm-in-the-Zoo** (red barns + picket fences, ≈ −55, 980) NW of
-  the pond carries the pettable cow/goat/hen set. **The map's first animals** — all
-  via the NPC/pack register (per-mesh, culled >145 m — the `makeNPC`/crowd.js
-  precedent), NEVER global instanced buckets.
+- **The ZOO** (a fenced-but-**open** campus, z ≈ 738–1006, x −9…−95; **CAMPUS
+  ARMATURE BUILT, task 114** — fence runs/gates/pool/Lion House/loop in `ZOO`).
+  **FREE ADMISSION — open gates, no ticket booth, no turnstile** (the opposite of
+  the Wrigley box office; a signature Chicago civic fact + a delight). Ornamental
+  dark post-and-rail perimeter (instanced POSTS/RAILS tail-append; walkability =
+  a thin BLOCKED band under the fence line in shared data, no colliders — the
+  anti-trap law; gates are gaps between runs). **Three OPEN gates:** the **EAST
+  GATE off Cannon Dr is the front door** (brick piers + iron arch lettered
+  LINCOLN PARK ZOO with the honest FREE SINCE 1868 register, gate leaves swung
+  open, brick-paver pad + bollards, directory board inside) — the arrival from
+  the Fullerton underpass; the **west/Stockton gate** is the bronze lion pair on
+  the layered granite LINCOLN PARK ZOO plinth (the entrance-identity ref; the
+  ref's limestone Academy hall is OUTSIDE the zoo — not built, backdrop scope);
+  the **south gate** (plain piers) opens toward the Farm + pond ground (115/117).
+  **Cannon Dr is BUILT as the zoo's east flank** — a modest asphalt park drive
+  x ≈ −3…−9, z 670–1012, emerging from the Fullerton culvert crossing and running
+  south beside the fence; its lagoon-bank NORTHERN reach is represented by the
+  113 west-bank quay (recorded refinement — the LP_DIVERSEY_CANNON scaffolding
+  polyline through the campus interior was wrong and is superseded). The park
+  spine (`LP_TRAIL_PARK`, RESHAPED 114) runs the flank between Cannon and the
+  fence and enters THROUGH the east gate; inside, a **red-brick-paver main loop**
+  (the Searle-plaza herringbone ground read) rings the hero pair, with a
+  limestone spur continuing south out the south gate to the pond ground.
+  Hero pair at the north-center: the **Sea Lion Pool** (**−60, 820** — refined
+  from the −56,822 scaffold to clear the hall; the historic craggy stacked-slab
+  limestone grotto + rock-rimmed pool per the B&W ref, murky-green water, SEA
+  LIONS hanging sign, viewing rail ring, arcing dark sea lions + one hauled out)
+  before the **Kovler Lion House** (≈ −34, 831 — the 1912 red-brick hall,
+  hand-modeled from type: tall glow arches between brick piers, limestone
+  courses, green-tile hip roof + clerestory monitor, bronze lion by the door)
+  with the **lion YARD on its north flank east half** (x −32…−18, z 811…824:
+  rock ledges, viewing rail, chunky toon lion pair clustered at the rail edge).
+  Campus fabric: planted beds, benches, habitat name plates, a `definePlace`
+  ambience cell (ducked lakefront ambience + distant synthesized animal calls).
+  **114 re-staged the 115 hall scaffolding** north/west of the loop (searle,
+  bird-house, polar-tundra, penguin-cove, african-journey, small-mammal,
+  primate-house). **HONEST CONFLICT NOTE for 115/117:** the staged South Pond
+  polygon (`LP_SOUTHPOND_WATER`, z 892–1016 × x −14…−90) overlaps the staged
+  Farm-in-the-Zoo barns, regenstein-apes and the 114 pond spur alignment — 117
+  must shrink/reshape the pond (or 115 re-site those pieces) BEFORE building;
+  do not build both as staged. Ring the campus with flamingos, polar bear,
+  giraffe, gorilla (115); **Farm-in-the-Zoo** (red barns + picket fences,
+  ≈ −55, 980) NW of the pond carries the pettable cow/goat/hen set (115). **The
+  map's first animals** (114: sea lions + lions) — all via the NPC/pack register
+  (per-mesh, culled >145 m — the `makeNPC`/crowd.js precedent), NEVER global
+  instanced buckets.
 - **South Pond + Nature Boardwalk** (z ≈ 895–1015, x −90…−14): a rounded restored
   pond with naturalized cattail/lily margins; a low wood **boardwalk ring** on
   pilings zigzags its S/E (a walkable low deck — the Millennium band-polyline
@@ -811,6 +844,13 @@ Cannon, Theater on the Lake, Nature Boardwalk, Chicago Park District/Harbors).
 - **The map's first animals** live at the zoo (NPC/pack register).
 - **Theater on the Lake rotates 90°** (long axis N–S, 18×26 footprint) to fit the
   111-planned east-strip bulge (x ≤ 52) — recorded 113; order/adjacency unchanged.
+- **Cannon Dr's built reach is Fullerton→south** (the zoo flank, x −3…−9); its
+  lagoon-bank northern reach reads as the 113 west quay — recorded 114.
+- **The park spine passes THROUGH the free zoo** (east gate → south gate) — the
+  campus is open ground on the walk south, not a detour; recorded 114 (the
+  112-scaffold spine through the campus interior/hall footprints is superseded;
+  reshape is det-safe: Lincoln Park is scatter-free ground, z ≥ 409 sits past
+  every shared-scatter cap, so pathSamples2 content there feeds no tree filter).
 
 #### Determinism / build plan (binding on 112–117)
 The full determinism + perf plan (coast pieces OUT of `COAST_SEGS`; ribbons via

@@ -574,7 +574,7 @@ function updatePlaces(dt,player){
   if(g.sunI    !==undefined)sun.intensity=_pBase.sunI+(g.sunI-_pBase.sunI)*f;
   const am=_gradePlace.amb;
   if(am)setAmbienceGrade(1+((am.ext??1)-1)*f,1+((am.bird??1)-1)*f);
-  if(f<=0)_gradePlace=null;                 // fully outside — release the grade
+  if(f<=0&&_placeCur!==_gradePlace)_gradePlace=null;   // fully outside — release the grade. 114: the release must require ACTUALLY fading out — a spawn-INSIDE load's first frame has dt clamped to 0 (the 077 clamp), so f was still 0 on the entry frame and the grade self-released before it ever climbed (every teleport-spawn shot since 077 silently showed the ungraded room; walking in was unaffected)
 }
 
 // --------------------------------- toast -------------------------------

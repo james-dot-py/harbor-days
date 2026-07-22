@@ -1416,8 +1416,8 @@ export const LINCOLN_ANCHORS = {
   conservatory:  { x:-70, z:715 },   // NW of the zoo, across Fullerton
   batesFountain: { x:-73, z:776 },   // formal-garden axis S of the glasshouse
   lilyPool:      { x:-58, z:697 },   // Caldwell lily pool, NE of the conservatory
-  zooGate:       { x:-92, z:858 },   // the FREE open west/Stockton entrance (lion plinth)
-  seaLionPool:   { x:-56, z:822 },   // the hero — historic rock-rimmed pool
+  zooGate:       { x:-10, z:830 },   // 114: the FRONT DOOR — the EAST gate off Cannon (arch + FREE SINCE 1868); the west lion-plinth gate is secondary at (-93.9,858)
+  seaLionPool:   { x:-60, z:820 },   // the hero — historic rock-rimmed pool (114: refined -56,822 -> -60,820 to clear the Lion House NW corner; recorded in GEOGRAPHY.md)
   lionHouse:     { x:-34, z:831 },   // Kovler Lion House (1912 red brick)
   farm:          { x:-55, z:980 },   // Farm-in-the-Zoo (barns), NW of the pond
   southPond:     { x:-52, z:958 },   // pond centre
@@ -1480,7 +1480,12 @@ export const LP_DIVERSEY = {
   lampEvery:36,                            // dock-box lamps along the east promenade
   sign:{ x:-3.0, z:610, ry:-0.4, text:'DIVERSEY HARBOR' },  // real name — geographic/civic (RENAMES law). On the WIDE south promenade (bank e~-9 there), SW-facing toward the underpass/culvert arrival; the head promenade (z<450) is <3 m wide — a 3.2 m board + its ring doesn't fit
 };
-export const LP_DIVERSEY_CANNON = crChain([[-46,420],[-49,560],[-54,700],[-60,820],[-66,940],[-70,1000]],4);  // Cannon Dr: lagoon west bank -> the zoo's east flank (curving south)
+// Cannon Dr (BUILT 114 — the zoo's east flank): a modest asphalt park drive
+// emerging from the Fullerton culvert crossing and running south between the
+// berm and the zoo fence to the pond ground. The old scaffolding polyline ran
+// through the campus interior (wrong) and is SUPERSEDED; the lagoon-bank
+// northern reach reads as the 113 west-bank quay (recorded in GEOGRAPHY.md).
+export const LP_DIVERSEY_CANNON = crChain([[-6,670],[-4,690],[-3.2,720],[-3,760],[-3.4,800],[-3.8,840],[-4.2,880],[-5,920],[-6.3,955],[-7.5,985],[-8.5,1008]],4);
 // South Pond: a rounded restored pond hanging off the zoo's south end.
 export const LP_SOUTHPOND_WATER = crChain([
   [-15,905],[-22,895],[-52,892],[-80,902],[-90,950],
@@ -1550,8 +1555,42 @@ export function lpLandHit(x,z){
 // colliders per the anti-trap law).
 export function lpBlockedHit(x,z){
   const T=LP_THEATER;
-  return x>=T.x0&&x<=T.x1&&z>=T.z0&&z<=T.z1;
+  if(x>=T.x0&&x<=T.x1&&z>=T.z0&&z<=T.z1)return true;
+  return zooBlockedHit(x,z);   // 114: the zoo campus carves (fence band / pool / yard / hall / pier pads)
 }
+// 114 ZOO walkability carves — pure data, NO colliders (anti-trap law): the
+// fence is a thin BLOCKED band under the rail line (both sides walkable, gates
+// are gaps between runs), the pool/yard/hall are honest footprint carves.
+// Shared engine + walkprobe via lpBlockedHit above.
+function _segD2(x,z,ax,az,bx,bz){
+  const dx=bx-ax,dz=bz-az,l2=dx*dx+dz*dz;
+  let t=l2?((x-ax)*dx+(z-az)*dz)/l2:0;t=t<0?0:t>1?1:t;
+  const ex=ax+dx*t-x,ez=az+dz*t-z;return ex*ex+ez*ez;
+}
+export function zooBlockedHit(x,z){
+  if(z<730||z>1012||x>-5.5||x<-98)return false;        // campus bbox early-out
+  const P=ZOO.pool,dx=x-P.x,dz=z-P.z;
+  if(dx*dx+dz*dz<=P.carveR*P.carveR)return true;       // the Sea Lion Pool
+  const Y=ZOO.yard;
+  if(x>=Y.x0&&x<=Y.x1&&z>=Y.z0&&z<=Y.z1)return true;   // the lion yard
+  const H=ZOO.lionHouse,hx=H.w/2,hz=H.d/2;
+  if(x>=H.x-hx&&x<=H.x+hx&&z>=H.z-hz&&z<=H.z+hz)return true;  // Kovler Lion House
+  const GE=ZOO.gates.east,GW=ZOO.gates.west,GS=ZOO.gates.south;
+  if(Math.abs(x-GE.x)<0.62&&(Math.abs(z-GE.z0)<0.62||Math.abs(z-GE.z1)<0.62))return true;  // east gate pier pads
+  if(Math.abs(z-GS.z)<0.55&&(Math.abs(x-GS.x0)<0.55||Math.abs(x-GS.x1)<0.55))return true;  // south gate pier pads
+  if(Math.abs(x-GW.x)<GW.plinth.w/2+0.35&&Math.abs(z-GW.z)<GW.plinth.d/2+0.35)return true; // west lion plinth
+  const b2=ZOO.fence.band*ZOO.fence.band;
+  for(const run of ZOO.fence.runs)
+    for(let i=0;i<run.length-1;i++){
+      const a=run[i],b=run[i+1];
+      if(x<Math.min(a[0],b[0])-0.5||x>Math.max(a[0],b[0])+0.5)continue;
+      if(z<Math.min(a[1],b[1])-0.5||z>Math.max(a[1],b[1])+0.5)continue;
+      if(_segD2(x,z,a[0],a[1],b[0],b[1])<=b2)return true;   // the fence band
+    }
+  return false;
+}
+// point-in-campus (definePlace contains + tools) — the closed perimeter poly
+export function zooInside(x,z){return z>735&&z<1008&&x<-8&&x>-96&&_pipLP(x,z,ZOO.perimeter);}
 // The Fullerton underpass floor — a flat walk rect through the berm (surfaceY 0).
 export function lpUnderpassHit(x,z){const u=LP_UNDERPASS.walk;return x>=u.x0&&x<=u.x1&&z>=u.z0&&z<=u.z1;}
 
@@ -1571,35 +1610,76 @@ export const LP_THEATER = {
 };
 
 // ---- THE ZOO — a FENCED-but-OPEN campus (free admission; open gates, no
-// ticket booth). Perimeter + gates + hall footprints (scaffolding; 114/115
-// refine). Animals are NPC/pack register (culled >145 m), NEVER instanced
-// buckets (§BUILD-PLAN). Halls: {id, x, z, w, d, ry} centre + footprint.
+// ticket booth). CAMPUS ARMATURE BUILT task 114: fence runs + 3 open gates +
+// the Sea Lion Pool + Kovler Lion House + lion yard + paver loop/spur/Cannon.
+// Animals are NPC/pack register (culled >145 m), NEVER instanced buckets
+// (§BUILD-PLAN). Walkability: zooBlockedHit below (data carves, NO colliders —
+// the anti-trap law), folded into lpBlockedHit so engine + walkprobe share it.
 export const ZOO = {
-  perimeter:[ [-10,738],[-95,742],[-99,900],[-96,1002],[-46,1008],[-12,1004],[-8,900],[-10,738] ],
-  gatesOpen:[ { id:'west',  x:-92, z:858, ry:Math.PI/2 },   // the lion-plinth FREE entrance (Stockton side)
-              { id:'east',  x:-12, z:830, ry:-Math.PI/2 },  // from the Fullerton underpass / lagoon side
-              { id:'south', x:-46, z:1006, ry:0 } ],        // to Farm-in-the-Zoo + South Pond
+  // closed polygon (spans the gate gaps) — definePlace contains + minimap
+  perimeter:[ [-10.2,738],[-88,741],[-92,790],[-93.5,853],[-94.4,863],[-95,900],[-94,950],[-93,1000],[-72,1004],[-53,1005.5],[-45,1005.5],[-28,1005],[-12,1003],[-10,940],[-9,900],[-9.6,860],[-10.2,825],[-10.2,738] ],
+  // the ornamental fence = these RUNS (gates are the gaps between them);
+  // POSTS/RAILS tail-append, collide:false — blocking is the data band below
+  fence:{ runs:[
+    [[-10.2,738],[-88,741]],                          // north
+    [[-88,741],[-92,790],[-93.5,853]],                // west A (gap 853-863 = WEST GATE)
+    [[-94.4,863],[-95,900],[-94,950],[-93,1000]],     // west B
+    [[-93,1000],[-72,1004],[-53,1005.5]],             // south A (gap x -53..-45 = SOUTH GATE)
+    [[-45,1005.5],[-28,1005],[-12,1003]],             // south B
+    [[-12,1003],[-10,940],[-9,900],[-9.6,860],[-10.2,835]],  // east A (gap 825-835 = EAST GATE)
+    [[-10.2,825],[-10.2,738]],                        // east B
+  ], band:0.45, postH:1.3, spacing:2.7, color:0x2f3430 },
+  gates:{
+    east:{ x:-10.2, z0:825, z1:835, pierW:0.9, pierH:3.4,   // THE FRONT DOOR off Cannon: brick piers + iron arch + open leaves
+           sign:'LINCOLN PARK ZOO', register:'FREE SINCE 1868',
+           pad:{ x0:-16, x1:-8, z0:824, z1:836, y:0.081 } },   // top of the path y-ladder (>=0.006 over the 0.074 walks crossing under it)
+    west:{ x:-93.9, z:858, z0:853, z1:863,                  // the lion-plinth secondary gate (Stockton side; ref identity)
+           plinth:{ w:2.8, d:2.2 }, sign:'LINCOLN PARK ZOO',
+           bollards:[[-92.2,854.5],[-92.2,861.5]] },
+    south:{ z:1005.5, x0:-53, x1:-45, pierW:0.7, pierH:2.6 },  // plain piers toward the Farm/pond ground (115/117)
+  },
+  pool:{ x:-60, z:820, waterR:6.3, rimR:7.0, rimH:0.75, carveR:7.5, railR:7.25, railH:0.95,
+         water:0x4e8a7a, rim:0x9a988c, rock:0x8f8f88, rock2:0x71726a, shelfY:0.55,
+         grotto:{ x:-62.5, z:815.5 }, sign:'SEA LIONS' },   // stacked-slab grotto mound (B&W ref) carries the hanging sign + the haul-out shelf
+  yard:{ x0:-32, x1:-18, z0:811, z1:824.6, dirt:0xb59a72, ledge:0xa8916c, rock:0x8f8f88, railH:1.05 },  // z1 laps the house carve 0.1 — no walkable sliver between yard + hall
+  lionHouse:{ x:-34, z:831, w:34, d:13, wallH:5.6, roofH:3.2, eave:1.25,
+              brick:0x8e4f3c, trim:0xd9ccb2, roof:0x527a58, glow:0xffe2ae, door:0x5c4632, base:0x9a9282,  // Theater palette reuse (merged-bucket fold); roof = the green-tile signature (named +1 merged color)
+              nLong:9, nShort:3, archW:2.0, archH:3.6,
+              monitor:{ w:16, d:5, h:2.2, roofH:1.6 },      // the clerestory ridge monitor (1912 silhouette)
+              sign:'KOVLER LION HOUSE' },
+  // the red-brick-paver MAIN LOOP (closed — weldSeam), the limestone pond SPUR
+  // (T off the loop at [-44,847]) and Cannon Dr; all pathSamples2 ribbons
+  loop: crChain([[-11.5,830],[-14,820],[-20,806.5],[-30,802],[-42,801.5],[-53,806],[-64,810],[-69.5,820],[-66,834],[-56,842],[-44,847],[-31,849],[-20,845],[-13,837],[-11.5,830]],3),
+  loopStyle:{ width:2.2, color:0x9a5a44, y:0.066 },   // Searle-plaza herringbone brick read (below walk 0.074, above dashes)
+  spur: crChain([[-44,847],[-46,866],[-50,905],[-52,962],[-48.9,1005.5],[-48,1012]],4),
+  place:{ fadeS:2.2,   // inside-the-zoo ambience cell (framework definePlace)
+          grade:{ fogColor:0x9fbe8d, fogNear:30, fogFar:175, ambGround:0x7fb474, ambI:0.98, sunI:0.85 },
+          amb:{ ext:0.55, bird:1.5 } },
+  // 115 SCAFFOLDING (unconsumed) — re-staged 114 clear of the built loop/pool/
+  // yard/fence. HONEST CONFLICT (see GEOGRAPHY.md): regenstein-apes + the farm
+  // sit inside the staged LP_SOUTHPOND_WATER polygon — 117 shrinks the pond or
+  // 115 re-sites them BEFORE building; do not build both as staged.
   halls:[
-    { id:'sea-lion-pool',  x:-56, z:822, r:6,  round:true },              // the historic rock-rimmed hero pool
-    { id:'kovler-lion',    x:-34, z:831, w:34, d:13, ry:0 },              // 1912 red-brick Lion House
-    { id:'searle-center',  x:-40, z:806, w:16, d:10, ry:0, stack:true },  // Searle visitor center + the red-brick smokestack
-    { id:'regenstein-apes',x:-8,  z:900, w:24, d:15, ry:0 },              // African Apes (gorillas)
-    { id:'african-journey',x:-58, z:906, w:26, d:16, ry:0 },              // Regenstein African Journey (giraffes)
-    { id:'small-mammal',   x:-70, z:848, w:20, d:14, ry:0 },
-    { id:'primate-house',  x:-30, z:846, w:14, d:12, ry:0 },              // Helen Brach Primate House
-    { id:'bird-house',     x:-46, z:800, w:16, d:12, ry:0 },              // McCormick Bird House
-    { id:'polar-tundra',   x:-48, z:790, w:14, d:10, ry:0 },              // Walter Arctic Tundra (polar bear)
-    { id:'penguin-cove',   x:-42, z:794, w:8,  d:6,  ry:0 },
-    { id:'childrens-zoo',  x:-88, z:830, w:24, d:18, ry:0 },              // Pritzker Children's Zoo (west)
+    { id:'sea-lion-pool',  x:-60, z:820, r:6,  round:true, built:114 },
+    { id:'kovler-lion',    x:-34, z:831, w:34, d:13, ry:0, built:114 },
+    { id:'searle-center',  x:-20, z:786, w:16, d:10, ry:0, stack:true },  // Searle visitor center + the red-brick smokestack
+    { id:'bird-house',     x:-30, z:772, w:16, d:12, ry:0 },              // McCormick Bird House
+    { id:'african-journey',x:-52, z:774, w:26, d:16, ry:0 },              // Regenstein African Journey (giraffes)
+    { id:'polar-tundra',   x:-78, z:776, w:14, d:10, ry:0 },              // Walter Arctic Tundra (polar bear)
+    { id:'penguin-cove',   x:-72, z:790, w:8,  d:6,  ry:0 },
+    { id:'childrens-zoo',  x:-84, z:804, w:14, d:12, ry:0 },              // Pritzker Children's Zoo (west)
+    { id:'small-mammal',   x:-82, z:862, w:20, d:14, ry:0 },
+    { id:'primate-house',  x:-26, z:880, w:14, d:12, ry:0 },              // Helen Brach Primate House
+    { id:'regenstein-apes',x:-8,  z:900, w:24, d:15, ry:0, conflict:'pond' },  // African Apes (gorillas)
   ],
-  farm:[  // Farm-in-the-Zoo barns (red hip-roofs + picket fences), NW of the pond
+  farm:[  // Farm-in-the-Zoo barns (115; conflict:'pond' — see above)
     { id:'main-barn',  x:-56, z:980, w:12, d:10, ry:0 },
     { id:'dairy-barn', x:-54, z:958, w:10, d:8,  ry:0 },
     { id:'farm-house', x:-64, z:968, w:8,  d:8,  ry:0 },
     { id:'livestock',  x:-46, z:982, w:8,  d:7,  ry:0 },
   ],
   fixtures:[  // ride/attraction fixtures (RENAMES.md: brand marks -> generic in-game names)
-    { id:'carousel',  x:-24, z:824, r:4, name:'Endangered Species Carousel' },  // AT&T brand dropped
+    { id:'carousel',  x:-68, z:798, r:4, name:'Endangered Species Carousel' },  // AT&T brand dropped
     { id:'zoo-train', x:-72, z:826, w:6, d:3, name:'the Zoo Train' },           // Lionel -> generic
   ],
 };
@@ -1625,7 +1705,7 @@ export const LP_POND_BRIDGE = [ [-40,938],[-55,942] ];                  // "Brid
 // continues the Lakefront Trail south on the EAST strip; LP_TRAIL_PARK is the
 // west park's interior spine (through the underpass into the zoo/pond).
 export const LP_TRAIL_LAKE = crChain([[27,409],[29,450],[31,520],[30,590],[27,650],[23,700]],4);  // 112: the Lakefront Trail continues south on the EAST strip from the corner exit down to the Fullerton underpass mouth (then LP_TRAIL_PARK carries it west into the park)
-export const LP_TRAIL_PARK = crChain([[22,660],[6,661],[-6,663],[-14,692],[-28,748],[-42,826],[-50,905],[-52,962],[-48,1010]],4);  // through the underpass mouth -> zoo east flank -> pond
+export const LP_TRAIL_PARK = crChain([[22,660],[6,661],[-4,664],[-6.5,684],[-8,714],[-8.2,752],[-8,788],[-8,810],[-8.6,824],[-11.5,830]],4);  // 114 RESHAPE: underpass mouth -> south along the zoo flank (between Cannon and the fence) -> THROUGH the east gate (ends at the gate pad; ZOO.loop takes over inside, ZOO.spur continues to the pond). Det-safe: LP is scatter-free ground (GEOGRAPHY liberty note); the old spine ran through the campus interior/hall footprints
 export const LP_TRAIL_STOCKTON = crChain([[-92,700],[-96,820],[-99,900],[-96,1000]],4);   // the west campus walk (Stockton side)
 
 // 112 SHELL: hand-placed shade elms on the new parkland (individual frustum-culled
@@ -1638,6 +1718,8 @@ export const LP_TREES = [
   [-84,910,1.15],[-60,922,1.3],[-72,966,1.2],[-58,884,1.1],
   [-40,868,1.25],[-38,936,1.1],[-24,908,1.15],[-30,984,1.2],   // east/south park lawn
   [42,478,1.2],[48,540,1.3],[44,576,1.15],[46,658,1.1],        // east lakefront strip (113: the z606 elm moved N of the Theater footprint)
+  [-78,792,1.2],[-86,828,1.25],[-79,876,1.15],[-66,876,1.2],   // 114: zoo campus shade elms (clear of loop/spur/fence/pool/yard + the re-staged 115 halls)
+  [-16,880,1.15],[-34,790,1.1],
 ];
 // ---- ZONES (discovery) + PROPS (statues) — LINCOLN_* mirrors of ZONES/props
 export const LINCOLN_ZONES = [

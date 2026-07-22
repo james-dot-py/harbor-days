@@ -73,7 +73,7 @@ function fogged(m){
 // composes independently with any group-level toggling.
 function selfManaged(o){
   if (o.userData && o.userData.noFogCull) return true;
-  for (let p = o; p; p = p.parent) if (p.name === 'chibi' || p.name === 'bird') return true;
+  for (let p = o; p; p = p.parent) if (p.name === 'chibi' || p.name === 'bird' || p.name === 'zooanim') return true;
   return false;
 }
 
