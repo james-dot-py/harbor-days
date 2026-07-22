@@ -383,6 +383,29 @@ add('mt-shore-waterline', 'montrose', 'lakefront', 228, -1000, [
   ]);
 }
 
+// LINCOLN PARK SHELL (task 112 — the map's FIRST growth WEST of the Drive and south
+// of the old z408 fence). The connective SHELL waypoints; 113-117 add the lagoon
+// docks / zoo / conservatory / pond and site their own lp-* stands. Framings per
+// refs/lincoln-park/BRIEF.md §WAYPOINTS, REWORDED for the honest shell (the BRIEF
+// grants 112 the connective strings). PHYSICS: far plane 900 + fog 210 + the
+// skyline z-gate (fades z403->503) mean no string promises a crisp downtown skyline.
+// lp-underpass is AXIS-ALIGNED (interior/tunnel — cross-body cameras exit tunnels).
+add('lp-arrival', 'lincolnpark', 'lakefront', 22, 445, [
+  { yaw: 0.0,  pitch: 0.15, dist: 7 },   // SOUTH: the parkland opening past the old fence — lawn, elms, the trail, the Drive one side
+  { yaw: 0.4,  pitch: 0.12, dist: 9 },   // SSE wider: the crushed-limestone trail + lake glinting to the left, elms ahead
+  { yaw: -0.35, pitch: 0.14, dist: 8 },  // SSW: the Drive + its low embankment carrying south, open park lawn to the right
+]);
+add('lp-underpass', 'lincolnpark', 'lakefront', 18, 661, [
+  { yaw: -1.57, pitch: 0.0,  dist: 4 },              // WEST, axis-aligned: straight down the tunnel, open arch, see-through to the park
+  { yaw: -1.57, pitch: 0.07, dist: 5.5 },            // wider/higher: the stone voussoir arch + the far mouth glowing beyond
+  { x: -8, z: 661, yaw: 1.57, pitch: 0.05, dist: 5 }, // from the PARK side, back EAST through the tunnel toward the lakefront strip
+]);
+add('lp-westpanel', 'lincolnpark', 'lakefront', -50, 820, [
+  { yaw: 0.0,  pitch: 0.18, dist: 14 },  // SOUTH down the new west parkland: trail winding through open lawn under big shade elms
+  { yaw: -1.35, pitch: 0.12, dist: 13 }, // WSW at the west edge: the low brick-flats backdrop wall closing off the park
+  { yaw: 2.95, pitch: 0.14, dist: 12 },  // N back toward the lagoon + the underpass, more elms + open lawn
+]);
+
 // Diversey ENTERABLE bay (task 028): stand on the ground hitting deck at a
 // middle bay's hitting spot and look NORTH down the range — the axis-aligned
 // interior framing for the bay pocket (a cross-body camera sits in a divider);

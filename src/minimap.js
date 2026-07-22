@@ -37,6 +37,15 @@ export function drawLakefrontBase(g,M,opts={}){
   g.fillStyle='#7ecb6f';g.beginPath();
   LAND.forEach((p,i)=>{const[mx,my]=wm(p[0],p[1]);i?g.lineTo(mx,my):g.moveTo(mx,my)});
   g.closePath();g.fill();
+  // 112 LINCOLN PARK: the west park + east lakefront strip, then the Diversey lagoon hole
+  [CH.LP_LAND_WEST,CH.LP_LAND_EAST].forEach(poly=>{
+    g.fillStyle='#7ecb6f';g.beginPath();
+    poly.forEach((p,i)=>{const[mx,my]=wm(p[0],p[1]);i?g.lineTo(mx,my):g.moveTo(mx,my)});
+    g.closePath();g.fill();
+  });
+  g.fillStyle='#2f9fb1';g.beginPath();
+  CH.LP_DIVERSEY_WATER.forEach((p,i)=>{const[mx,my]=wm(p[0],p[1]);i?g.lineTo(mx,my):g.moveTo(mx,my)});
+  g.closePath();g.fill();
   // golf course tint
   {const G=CH.MAP_GOLF,[ax,ay]=wm(G.x0,G.z0),[bx2,by2]=wm(G.x1,G.z1);
    g.fillStyle=G.color;g.fillRect(Math.min(ax,bx2),Math.min(ay,by2),Math.abs(bx2-ax),Math.abs(by2-ay));}
@@ -50,7 +59,7 @@ export function drawLakefrontBase(g,M,opts={}){
     g.stroke();
   });
   g.strokeStyle='#e8cfa4';g.lineWidth=2*S;
-  [TRAIL_LOOP,TRAIL_ENTRANCE].forEach(pts=>{   // peanut plaza loop + entrance→lake path (task 023)
+  [TRAIL_LOOP,TRAIL_ENTRANCE,CH.LP_TRAIL_LAKE,CH.LP_TRAIL_PARK,CH.LP_TRAIL_STOCKTON].forEach(pts=>{   // peanut plaza loop + entrance→lake path (023) + Lincoln Park ribbons (112)
     g.beginPath();
     pts.forEach((p,i)=>{const[mx,my]=wm(p[0],p[1]);i?g.lineTo(mx,my):g.moveTo(mx,my)});
     g.stroke();

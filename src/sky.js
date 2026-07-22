@@ -150,6 +150,29 @@ export function buildSky(){
     // park, but the south lawn no longer walks into billboard walls.
     grp.scale.setScalar(2.2);
     scene.add(grp);
+
+    // 112 LINCOLN PARK skyline z-gate: contiguous park now fills z 410..1020, INTO
+    // and PAST this billboard (world z 504..669) — from inside the park it reads to
+    // the NORTH over the zoo + interpenetrates the halls, and the far-plane(900)/
+    // fog(210) physics kill it there anyway. Fade it out as the player crosses the
+    // Diversey corner (z fadeZ0..fadeZ1) and hide it south. GATED: while the player
+    // is NORTH of the corner the materials stay OPAQUE (transparent=false) so the
+    // signature Belmont read (baseline.png) is BYTE-IDENTICAL — no rng, frozen
+    // mulberry32(0x5c1000) geometry + instance counts untouched, same draw count.
+    { const G=CH.LP_SKYLINE_GATE, sMats=[];
+      grp.traverse(o=>{ if(o.material){ const a=Array.isArray(o.material)?o.material:[o.material]; for(const m of a) sMats.push(m); } });
+      let gated=false;
+      skyGroup.userData.skylineGate=(pz)=>{
+        if(pz<=G.fadeZ0){                                   // north of the corner: fully opaque + visible (the frozen read)
+          if(gated){ for(const m of sMats){ m.transparent=false; m.opacity=1; m.needsUpdate=true; } grp.visible=true; gated=false; }
+          return;
+        }
+        gated=true;
+        const f=1-Math.min(1,(pz-G.fadeZ0)/(G.fadeZ1-G.fadeZ0));   // 1 at the corner -> 0 by fadeZ1
+        grp.visible=f>0.002;
+        if(grp.visible) for(const m of sMats){ m.transparent=true; m.opacity=f; }
+      };
+    }
   }
 
   buildLakeviewBand();
@@ -186,7 +209,7 @@ function buildLakeviewBand(){
   // arrays: the existing backdrop never re-tiles, and the 3 InstancedMeshes just
   // grow (zero new draw calls). WIN_CAP is shared, so the south band claims its
   // windows first exactly as before; the north extension adds windows only if room.
-  const march=(z0,z1,seed)=>{
+  const march=(z0,z1,seed,fx=front)=>{                     // fx: per-span front line (112: the south band sits far west at B.frontS)
     let hs=seed>>>0;
     const jr=()=>{hs^=hs<<13;hs>>>=0;hs^=hs>>>17;hs^=hs<<5;hs>>>=0;return hs/4294967296;};
     const rr=(a,b)=>a+(b-a)*jr();
@@ -198,7 +221,7 @@ function buildLakeviewBand(){
       const h=tall?rr(B.tallH[0],B.tallH[1]):rr(B.h[0],B.h[1]);
       const d=rr(B.depth[0],B.depth[1]);
       const col=new THREE.Color(B.colors[(jr()*B.colors.length)|0]);
-      const zc=z+w/2, xc=front-d/2;                        // east face at x=front, extends west
+      const zc=z+w/2, xc=fx-d/2;                           // east face at x=fx, extends west
       bodies.push({w,h,d,x:xc,z:zc,c:col});
       caps.push({w,h,d,x:xc,z:zc,c:col.clone().lerp(white,0.34)});   // limestone cornice lip
 
@@ -212,7 +235,7 @@ function buildLakeviewBand(){
             if(jr()>=B.winLitProb) continue;
             const zz=(zc-w/2)+((c+1)/(cols+1))*w+(jr()*2-1)*0.18;
             const yy=(f+0.5)*fh+(jr()*2-1)*0.12;
-            wins.push({x:front+0.08,y:yy,z:zz});
+            wins.push({x:fx+0.08,y:yy,z:zz});
           }
         }
       }
@@ -221,6 +244,7 @@ function buildLakeviewBand(){
   };
   march(B.zr[0],B.zr[1],0x2f6b1c07);                       // original span, original seed -> byte-identical
   if(B.zrN) march(B.zrN[0],B.zrN[1],0x6d21f8a3);           // MONTROSE north extension, own seed
+  if(B.zrS) march(B.zrS[0],B.zrS[1],0x3ac91d55,B.frontS);  // 112 LINCOLN PARK south extension: far-west front (Clark/Lincoln wall), own seed
 
   const M=new THREE.Matrix4(),V=new THREE.Vector3(),Q=new THREE.Quaternion(),S=new THREE.Vector3();
 

@@ -180,6 +180,7 @@ export function beachH(x,z){const b=CH.DOG_BEACH.bounds,s=CH.DOG_BEACH.slope;if(
 // wrong (issue 026), so main.js ticks both now.
 export let water=null;
 export let waterN=null;
+export let waterS=null;   // 112 LINCOLN PARK south water plane (lagoon + south lake)
 
 // Living toon water. A MeshToonMaterial patched via onBeforeCompile: the same
 // world-curve as curveMat, plus (1) a gentle 2-octave swell, (2) sparse warm
@@ -662,6 +663,49 @@ export function buildCoast(){
       g.computeVertexNormals();
       const mesh=new THREE.Mesh(g,toon(MB.sand,{}));mesh.position.set(m.cx,0,m.cz);scene.add(mesh);
     }
+
+  // ---- LINCOLN PARK ground + water + shade trees (112 SHELL) --------------
+  // The map's FIRST land WEST of the Drive. The west park (with the Diversey
+  // lagoon carved as a HOLE) + the east lakefront strip render as the same park
+  // green as LAND; the zoo/conservatory/South Pond read as interim lawn (113-117
+  // carve them piece-for-piece). WATER_S is a lone frustum-culled living-water
+  // plane (the WATER_N precedent) for the south lake + the lagoon. Trees are
+  // individual frustum-culled meshes (0 draws unless a Lincoln Park view frames
+  // them) — NO shared rng, NO new InstancedMesh bucket, NO change to any pre-112
+  // view (the whole block sits z>408, past the fog from every existing waypoint).
+  {
+    const lpGreen=toon(0x7ecb6f);   // the LAND park green
+    const ws=shapeFrom(CH.LP_LAND_WEST);   // west park...
+    { const H=CH.LP_DIVERSEY_WATER,hp=new THREE.Path();   // ...minus the lagoon (a hole)
+      hp.moveTo(H[0][0],-H[0][1]);for(let i=1;i<H.length;i++)hp.lineTo(H[i][0],-H[i][1]);hp.closePath();
+      ws.holes.push(hp); }
+    const wg=new THREE.ShapeGeometry(ws);wg.rotateX(-Math.PI/2);
+    scene.add(new THREE.Mesh(wg,lpGreen));
+    scene.add(flatShape(CH.LP_LAND_EAST,0,lpGreen));       // east lakefront strip
+
+    // WATER_S — south lake + Diversey lagoon (living water, shore-banded like main)
+    { const N=CH.WATER_S;
+      const ng=new THREE.PlaneGeometry(N.size,N.size,N.seg,N.seg);ng.rotateX(-Math.PI/2);
+      const pos=ng.attributes.position,nn=pos.count,aSh=new Float32Array(nn);
+      for(let i=0;i<nn;i++)aSh[i]=shoreDist(pos.getX(i)+N.cx,pos.getZ(i)+N.cz);
+      ng.setAttribute('aShore',new THREE.BufferAttribute(aSh,1));
+      const wn=new THREE.Mesh(ng,livingWaterMat(0x2fa3b5));
+      wn.userData.live=true;                                // animated + local swell -> exempt from the cell merge
+      wn.position.set(N.cx,WATER_Y+N.yOff,N.cz);scene.add(wn);
+      waterS=wn;
+    }
+
+    // shade elms — hand-placed, individual frustum-culled meshes (CH.LP_TREES)
+    const bark=toon(0x7a5a3c),leaf1=toon(0x5aa64f),leaf2=toon(0x74bd63);
+    for(const[x,z,s]of CH.LP_TREES){
+      const g=new THREE.Group();
+      const tr=new THREE.Mesh(new THREE.CylinderGeometry(0.28*s,0.42*s,3.4*s,6),bark);tr.position.y=1.7*s;g.add(tr);
+      const c1=new THREE.Mesh(new THREE.IcosahedronGeometry(2.0*s,0),leaf1);c1.position.y=4.0*s;c1.scale.set(1,0.85,1);g.add(c1);
+      const c2=new THREE.Mesh(new THREE.IcosahedronGeometry(1.5*s,0),leaf2);c2.position.set(0.9*s,3.4*s,0.5*s);g.add(c2);
+      const c3=new THREE.Mesh(new THREE.IcosahedronGeometry(1.4*s,0),leaf1);c3.position.set(-0.8*s,3.5*s,-0.6*s);g.add(c3);
+      g.position.set(x,0,z);scene.add(g);
+    }
+  }
 
   // mottled grass patches (instanced — one draw call). Reject any placement
   // outside the LAND polygon (pip test PER TRY); if no land point turns up

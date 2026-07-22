@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { renderer, scene, camera, amb, clamp, lerp, lerpAngle, hexRGB, pip, rng, rand, $, game, toon, chaseDistK, baseFov } from './core.js';
 import { skyGroup, clouds, buildSky } from './sky.js';
-import { buildCoast, water, waterN, coastQuery, profileTotal, tierAt, beachH, LAND } from './coast.js';
+import { buildCoast, water, waterN, waterS, coastQuery, profileTotal, tierAt, beachH, LAND } from './coast.js';
 import { buildPaths, pathSamples, pathSamples2, pathSamplesMain, ribbonLanes, trailLanes, onTrail } from './paths.js';
 import { buildProps, colliders, walkRects, bobbers, drifter, dogTail, foam, fireflies, TREE_SPOTS, RUSTLE_MESHES } from './props.js';
 import { buildStructures } from './structures.js';
@@ -139,7 +139,7 @@ const skate={on:false,lean:0,spinT:0,spinD:0.45,spinBase:0,spinDir:1};
 // lakefront alone — guard the CLASS so a downtown coverage gap can never mount the
 // jetski (issue 017), no matter which spot has the hole. cellWalk() is null only
 // on the lakefront, where the historic water logic runs unchanged.
-function isWater(x,z){return !cellWalk()&&x>20&&!pip(x,z,LAND)&&!onRect(x,z)&&beachH(x,z)===null;}
+function isWater(x,z){return !cellWalk()&&x>20&&!pip(x,z,LAND)&&!CH.lpLandHit(x,z)&&!CH.lpUnderpassHit(x,z)&&!onRect(x,z)&&beachH(x,z)===null;}   // 112: the Lincoln Park east strip + underpass are LAND, not lake (the lagoon is x<20, already non-water)
 function splash(k){
   if(game.tNow-jsk.splashT<0.15)return;   // throttle — transitions can cluster
   jsk.splashT=game.tNow;
@@ -168,6 +168,7 @@ function walkable(x,z){
   if(CH.beachCarved(x,z))return false;             // task 072: roped plover dune + beach-house hall (data carve, no collider — 065 law)
   const bh=beachH(x,z);if(bh!==null)return CH.beachWalkable(x,z);   // dog + Montrose beaches
   if(pip(x,z,LAND))return true;
+  if(CH.lpLandHit(x,z)||CH.lpUnderpassHit(x,z))return true;   // 112 LINCOLN PARK: west park + east strip + the Fullerton underpass floor (shared data — walkprobe mirrors)
   const q=coastQuery(x,z);
   if(q&&q.ae<0.9&&q.lat>-0.6){
     const t=tierAt(q.lat,q.z);
@@ -484,12 +485,14 @@ function frame(now){
   const fovT=baseFov()+(rideSpd>0?clamp((sp-7)*0.7,0,6):(runF&&sp>6?4:0))+(jphys.air?1.2:0);   // gentle speed/air FOV kick (+ a matching bike tier: eases from ~+2.5 cruising to +6 sprinting); base is aspect-aware (096, exactly 50 on desktop)
   if(Math.abs(camera.fov-fovT)>0.02){camera.fov=lerp(camera.fov,fovT,1-Math.exp(-5*dt));camera.updateProjectionMatrix()}
   skyGroup.position.set(camera.position.x,0,camera.position.z);
+  if(skyGroup.userData.skylineGate)skyGroup.userData.skylineGate(player.z);   // 112: fade/hide the downtown billboard once the player crosses into Lincoln Park
   fw.shake=Math.max(0,fw.shake-dt*1.6);
   fw.ambPulse*=Math.exp(-3*dt);amb.intensity=0.9+fw.ambPulse;
 
   // ---- world life ----
   if(water.material.userData.sh)water.material.userData.sh.uniforms.uTime.value=t;
   if(waterN&&waterN.material.userData.sh)waterN.material.userData.sh.uniforms.uTime.value=t;   // the Montrose plane swells too (issue 026: it shipped frozen)
+  if(waterS&&waterS.material.userData.sh)waterS.material.userData.sh.uniforms.uTime.value=t;   // 112: the Lincoln Park south plane swells too
   for(const b of bobbers){
     b.position.y=b.userData.by+Math.sin(t*1.1+b.userData.ph)*0.09;
     b.rotation.z=Math.sin(t*0.9+b.userData.ph)*0.05;

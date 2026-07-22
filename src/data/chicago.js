@@ -319,6 +319,13 @@ export const WATER = { size:1650, seg:180, cx:110, cz:-260 };
 // LOWER so the existing plane wins there (no z-fight, no seam). Frustum-culled
 // (a lone Mesh) so it costs 0 draws in any view not looking at the far north.
 export const WATER_N = { size:1000, seg:84, cx:190, cz:-1064, yOff:-0.02 };
+// LINCOLN PARK growth (112): a THIRD water plane for the south stretch (the main
+// WATER plane's south edge is only z +565). Same rules as WATER_N — SEPARATE (so
+// the spawn/lakefront surface stays BIT-IDENTICAL), same living-water mat + aShore,
+// overlaps the main plane in z 400..565 and sits 0.02 m LOWER so the main plane
+// wins there (no z-fight/seam). Frustum-culled lone Mesh (0 draws unless the south
+// is framed). Blankets the open lake east of the strip AND the Diversey lagoon hole.
+export const WATER_S = { size:820, seg:82, cx:360, cz:740, yOff:-0.02 };   // cx 60->360: the plane's WEST edge tucks to x~-50 (covers the Diversey lagoon hole + the whole east lake to the horizon) so no water shows WEST of the park behind the residential backdrop band (x-118) — the city, not the lake, sits west of Lincoln Park
 
 // dog beach — sloped sand cove at the basin's NORTH tip. beachH (coast.js)
 // reads t = (z - ref)/span so it is 0 (dry) at the north edge and dips to
@@ -737,7 +744,7 @@ export const ZONES=[
 // Rocks steps and the lake. Monument wall front-right of the view, suggestion
 // box ahead-right, Divvy dock behind-left across the trail. Camera due west.
 export const SPAWN = { player:{ x:109.5, z:156.6 }, yaw:1.57, camera:{ x:87.5, y:4.5, z:156.6 } };
-export const WORLD_CLAMP = { xMin:14, xMax:244, zMin:-1084, zMax:408 };   // zMin -1084 (was -822): the MONTROSE north growth (v0.6). zMax 408: the south lawn + pier tip (z406), short of the skyline billboard (z504+)
+export const WORLD_CLAMP = { xMin:-112, xMax:244, zMin:-1084, zMax:1020 };   // 112 LINCOLN PARK: xMin 14->-112 (the park opens WEST of the Drive), zMax 408->1020 (south to South Pond). The berm/lake keep the player east of x14 north of the corner (walkability, not clamp); LAND opens west only where z>408
 
 /* ------------------------------- PROPS ------------------------------- */
 
@@ -774,7 +781,7 @@ export const HEDGES = {
   // leaves the underpass mouth at (16,105); Addison z-400, Irving Park z-800).
   west:{ x:14, z0:-1080, z1:412, step:5.5, gaps:[[95,115],[-410,-390],[-610,-590],[-781,-761]] },   // z0 -1080 (084 frame); 3rd gap = Irving Park at the vignette golf's north (z-600), 4th = the Montrose underpass (z-771)
   north:{ z:-1079, x0:14, x1:200, step:5.5 },   // north cap MOVED to the new map edge (was z-812); caps the lawn x14-200, the closure revetment is the shore east of it
-  cap:{ z:406, x0:14, x1:23, step:5.5 },   // SW corner cap only (x14-23): the aerial-canonical trail now exits the map at (30,406) — the cap stops short of the gate so the ribbon passes clear
+  cap:null,   // 112 LINCOLN PARK: the old SW-corner cap (z406, x14-23 — the "future Diversey-Lincoln Park gate" hedge at the map's old south terminus) is REMOVED, opening the terminus into the new stretch so the parkland flows continuously south. Determinism-safe: HEDGES uses no shared rng (fixed spots + the Magic Hedge's own local seed), so dropping 2 hedge instances shifts nothing
   scale:[3,2.2,2.8], y:1.1, color:0x4c9a55,
 };
 
@@ -963,9 +970,11 @@ export const BENCHES = [
 // nearer/lower) with a LOCAL deterministic rng — the shared world rng is
 // never touched.
 export const LAKEVIEW_BAND = {
-  front:-16,                 // band front line (the L track is the backdrop at x~-8)
+  front:-16,                 // band front line (the L track is the backdrop at x~-8) — the NORTH band (z<=408, east-of-park)
+  frontS:-118,               // 112 LINCOLN PARK: the SOUTH band relocates FAR WEST (~x-118) — the Clark/Lincoln residential wall WEST of the park (framing B). The L stops at the corner; the south backdrop is brick flats, not an elevated track
   zr:[-812,408],             // the ORIGINAL span — marched FIRST with the original seed so every existing block stays byte-identical
   zrN:[-1080,-812],          // MONTROSE growth: the north extension, marched SECOND with its OWN seed (existing band unperturbed; same 3 InstancedMeshes -> 0 new buckets)
+  zrS:[416,1016],            // 112 LINCOLN PARK south extension: marched THIRD at frontS with its OWN seed (existing band byte-identical; same 3 InstancedMeshes -> 0 new buckets)
   spacing:[15,30],           // street-ish gaps between buildings
   depth:[8,14],              // how far the blocks extend west
   w:[10,22],                 // frontage widths
@@ -1022,7 +1031,8 @@ export const DOG_PROPS = {
 // Toon cars slide N/S in
 // the `lsd.js` content pack; the static berm/road/portals build here.
 export const LSD = {
-  berm:{ x0:0, x1:14, z0:-1094, z1:418, h:1.0, color:0x6f9e5c },   // z0 -1094 (was -846): MONTROSE growth — berm/road run the full new length; z1 418 past the south lawn
+  berm:{ x0:0, x1:14, z0:-1094, z1:1020, h:1.0, color:0x6f9e5c },   // z1 418->1020 (112 LINCOLN PARK): the berm/road/Drive continue SOUTH as an INTERIOR ribbon (park on BOTH sides). buildLSD splits the berm at the Fullerton underpass gap (LP_UNDERPASS)
+  gap:{ z0:654, z1:668 },   // the Fullerton working-underpass cut in the berm (structures.js splits the box here; the road bridges over)
   road:{ x0:2.5, x1:11.5, y:1.02, color:0x8f9298 },
   lane:{ color:0xf2ede0, w:0.16, len:2.4, gap:3.2, count:7 },   // dashed center lines
   underpasses:[105, -400, -600, -771],                        // Belmont z105, Addison -400, Irving -600 (084: at the vignette golf's north), Montrose -771 (084 frame)
@@ -1293,7 +1303,7 @@ export const SKYLINE_TOWERS = {
 // minimap world->canvas mapping and landmark dots. The world is very tall
 // now (z -850..320); px/unit is kept near-uniform (mild ~1.5x horizontal
 // spread for legibility) so shapes read true and the open lake letterboxes.
-export const MAP = { x0:-170, z0:-1124, w:576, h:1549, cw:304, ch:412 };   // 084 COMPRESSION: z0 -1560->-1124, h 1985->1549 (north edge now z-1084 + 40 pad; bottom stays z+425); ch/cw unchanged -> the shorter map breathes vertically (HUD minimap aspect change -> the 084 baseline.png regen)
+export const MAP = { x0:-170, z0:-1124, w:576, h:2184, cw:304, ch:412 };   // 112 LINCOLN PARK: h 1549->2184 (bottom z+425 -> z+1060 = zMax1020 + 40 pad; z0/x0/w/cw/ch unchanged). The taller map compresses vertically in the same 304x412 HUD box -> the 112 baseline.png regen (like 084)
 export const MAP_GOLF = { x0:60, x1:205, z0:-580, z1:-440, color:'#8fce74' };   // 084 vignette
 export const MAP_LANDMARKS = [
   { x:60,  z:-100, c:'#d0705c', r:6 },   // harbor house
@@ -1425,9 +1435,31 @@ export const LP_SOUTHPOND_WATER = crChain([
   [-15,905],[-22,895],[-52,892],[-80,902],[-90,950],
   [-82,1006],[-46,1016],[-18,1006],[-14,958],[-15,905],
 ],3);
-// The two big land panels 112 unions into buildLAND (west park + east strip).
-export const LP_LAND_WEST = [ [0,412],[-14,470],[-40,560],[-70,700],[-100,860],[-104,960],[-96,1018],[-40,1024],[-14,1010],[0,900],[0,412] ];  // the west park outline (berm x0 -> conservatory/Stockton ~x-104 -> pond south)
-export const LP_LAND_EAST = [ [14,412],[46,470],[52,560],[48,640],[40,700],[26,700],[16,640],[14,470],[14,412] ];  // the thin lakefront strip east of the berm (trail + Theater; lake beyond)
+// The two big land panels 112 renders + walks (SEPARATE from buildLAND so the
+// pre-112 world polygon stays byte-identical — see lpLandHit). 112 reconciled the
+// 111 scaffolding so the panels contain their features: WEST is the whole park
+// (x0 -> Stockton ~x-104), with the Diversey lagoon (LP_DIVERSEY_WATER) as a
+// contained WATER HOLE and the zoo/conservatory/South Pond STUBBED as its lawn
+// (113-117 carve them). EAST is the continuous thin lakefront strip carrying the
+// Lakefront Trail south, bulging at Fullerton for Theater on the Lake; lake beyond.
+export const LP_LAND_WEST = [
+  [0,412],                              // NE (berm west face x the Diversey corner)
+  [0,560],[0,720],[0,900],[0,1006],     // EAST edge = the berm's west face (x0)
+  [-28,1024],[-64,1028],[-94,1022],     // SOUTH edge (South Pond lawn — stubbed for 117)
+  [-104,958],[-104,876],                // SW corner
+  [-102,792],[-98,706],                 // WEST edge (Stockton / conservatory frontage) N-bound (holds LP_TRAIL_STOCKTON x-92..-99)
+  [-88,624],[-80,540],
+  [-74,470],[-70,414],                  // NW corner
+  [0,412],                              // NORTH edge back to NE (wide lawn north of the lagoon)
+];
+export const LP_LAND_EAST = [
+  [14,402],                    // NW (berm east face, overlapping the pre-112 corner land)
+  [40,410],[48,450],           // wide north mouth -> shore NE (connects the trail exiting the corner at ~x30)
+  [52,536],[52,602],           // Theater-on-the-Lake bulge (widest, x52)
+  [46,662],[38,702],           // narrowing south
+  [28,726],[16,714],           // SE tip (Fullerton / trail south end)
+  [14,640],[14,470],[14,402],  // WEST edge = the berm's east face (x14)
+];
 
 // The FULLERTON UNDERPASS — the map's FIRST WORKING crossing of the Drive (the
 // Belmont/Addison/Irving/Montrose gates stay fenced dead-ends; Diversey gets
@@ -1438,6 +1470,26 @@ export const LP_UNDERPASS = {
   walk:{ x0:-12, x1:24, z0:656, z1:666, h:0 },   // walkRect through the berm
   portalE:[16,661], portalW:[-2,661], w:9, h:4.2,
 };
+
+// ---- SHARED LINCOLN PARK WALKABILITY (the engine main.js AND tools/walkprobe.mjs
+// import these — NEVER fork the two, the standing pitfall). chicago.js keeps no
+// engine imports, so a LOCAL pip lives here. The pre-112 world polygon (buildLAND)
+// is untouched; Lincoln Park walks via these separate panels so nothing north of
+// the Diversey corner moves (the bit-identical guarantee + the west-wade guard:
+// isWater's x>20 gate already blocks wading west of the berm, so the west park is
+// simply BLOCKED where it is not LAND — never open water).
+function _pipLP(x,z,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const xi=poly[i][0],zi=poly[i][1],xj=poly[j][0],zj=poly[j][1];if(((zi>z)!==(zj>z))&&(x<(xj-xi)*(z-zi)/(zj-zi)+xi))c=!c}return c}
+// The Diversey Harbor lagoon — a WATER HOLE in the west park (blocked, not wadeable).
+export function lpWaterHit(x,z){return z>408&&_pipLP(x,z,LP_DIVERSEY_WATER);}
+// Walkable Lincoln Park LAND: the west park (minus the lagoon hole) + the east
+// lakefront strip. z>408 only (north of the corner is the untouched pre-112 world).
+export function lpLandHit(x,z){
+  if(z<=408)return false;
+  if(_pipLP(x,z,LP_DIVERSEY_WATER))return false;   // the lagoon is subtracted out
+  return _pipLP(x,z,LP_LAND_WEST)||_pipLP(x,z,LP_LAND_EAST);
+}
+// The Fullerton underpass floor — a flat walk rect through the berm (surfaceY 0).
+export function lpUnderpassHit(x,z){const u=LP_UNDERPASS.walk;return x>=u.x0&&x<=u.x1&&z>=u.z0&&z<=u.z1;}
 
 // ---- THE ZOO — a FENCED-but-OPEN campus (free admission; open gates, no
 // ticket booth). Perimeter + gates + hall footprints (scaffolding; 114/115
@@ -1493,10 +1545,20 @@ export const LP_POND_BRIDGE = [ [-40,938],[-55,942] ];                  // "Brid
 // TRAIL_MAIN; pathSamples is PHASE-sensitive — PITFALLS). LP_TRAIL_LAKE
 // continues the Lakefront Trail south on the EAST strip; LP_TRAIL_PARK is the
 // west park's interior spine (through the underpass into the zoo/pond).
-export const LP_TRAIL_LAKE = crChain([[22,412],[26,470],[30,560],[28,650],[24,720],[22,820],[24,960],[26,1016]],4);
-export const LP_TRAIL_PARK = crChain([[6,661],[-8,690],[-24,740],[-40,820],[-48,900],[-52,960],[-48,1010]],4);  // underpass -> zoo east -> pond
+export const LP_TRAIL_LAKE = crChain([[27,409],[29,450],[31,520],[30,590],[27,650],[23,700]],4);  // 112: the Lakefront Trail continues south on the EAST strip from the corner exit down to the Fullerton underpass mouth (then LP_TRAIL_PARK carries it west into the park)
+export const LP_TRAIL_PARK = crChain([[22,660],[6,661],[-6,663],[-14,692],[-28,748],[-42,826],[-50,905],[-52,962],[-48,1010]],4);  // through the underpass mouth -> zoo east flank -> pond
 export const LP_TRAIL_STOCKTON = crChain([[-92,700],[-96,820],[-99,900],[-96,1000]],4);   // the west campus walk (Stockton side)
 
+// 112 SHELL: hand-placed shade elms on the new parkland (individual frustum-culled
+// meshes built in coast.js — NO scatter rng, NO new InstancedMesh bucket). Clear of
+// the lagoon, the trails, and the underpass. 113-117 replace the interim lawn.
+export const LP_TREES = [
+  [-56,468,1.4],[-76,520,1.2],[-80,584,1.15],[-84,640,1.3],   // west of the Diversey lagoon
+  [-64,704,1.2],[-84,762,1.35],[-60,812,1.2],[-70,868,1.25],   // west park interior (between the trails)
+  [-84,910,1.15],[-60,922,1.3],[-72,966,1.2],[-58,884,1.1],
+  [-40,868,1.25],[-38,936,1.1],[-24,908,1.15],[-30,984,1.2],   // east/south park lawn
+  [42,478,1.2],[48,540,1.3],[44,606,1.15],[46,658,1.1],        // east lakefront strip
+];
 // ---- ZONES (discovery) + PROPS (statues) — LINCOLN_* mirrors of ZONES/props
 export const LINCOLN_ZONES = [
   { n:'Diversey Harbor',      x:-24, z:520,  r:44 },

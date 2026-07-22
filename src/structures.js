@@ -115,9 +115,14 @@ function buildUnderpass(zc,P,stone,dark){
 function buildLSD(){
   const L=CH.LSD,B=L.berm,R=L.road,LN=L.lane;
   const zc=(B.z0+B.z1)/2,len=B.z1-B.z0,xc=(B.x0+B.x1)/2,w=B.x1-B.x0;
+  // 112 LINCOLN PARK: the berm runs the full new length but is SPLIT at the
+  // Fullerton underpass gap (B.gap) so the path passes through (the road bridges
+  // over). Two box segments instead of one; the road/dashes stay continuous.
+  const bermSeg=(z0,z1)=>{const l=z1-z0;if(l<=0.5)return;const sz=Math.max(2,Math.round(l/6));
+    const m=new THREE.Mesh(new THREE.BoxGeometry(w,B.h,l,1,1,sz),toon(B.color));m.position.set(xc,B.h/2,(z0+z1)/2);scene.add(m);};
+  if(B.gap){ bermSeg(B.z0,B.gap.z0); bermSeg(B.gap.z1,B.z1); }
+  else bermSeg(B.z0,B.z1);
   const segZ=Math.max(2,Math.round(len/6));                       // z subdivisions for the world curve
-  const berm=new THREE.Mesh(new THREE.BoxGeometry(w,B.h,len,1,1,segZ),toon(B.color));
-  berm.position.set(xc,B.h/2,zc);scene.add(berm);
   const rw=R.x1-R.x0,rxc=(R.x0+R.x1)/2;
   const road=new THREE.Mesh(new THREE.BoxGeometry(rw,0.12,len,1,1,segZ),toon(R.color));
   road.position.set(rxc,R.y,zc);scene.add(road);
@@ -151,6 +156,32 @@ function buildLSD(){
     });
     arch.instanceMatrix.needsUpdate=inner.instanceMatrix.needsUpdate=lant.instanceMatrix.needsUpdate=true;
     scene.add(arch,inner,lant);
+  }
+  buildLPUnderpass();   // 112: the Fullerton WORKING crossing (open both ends, walkable)
+}
+
+// 112 LINCOLN PARK — the map's FIRST WORKING underpass. Unlike the fenced dead-end
+// portals (dark door plane), BOTH mouths are OPEN — you see straight through to the
+// far side (the invitation). A crushed paved floor makes it walkable; the berm is
+// split around it (buildLSD) so the passage is a real opening, the road bridging
+// over. Axis-aligned E-W. No collider (the anti-trap law) — walkability is the rect.
+function buildLPUnderpass(){
+  const U=CH.LP_UNDERPASS,wr=U.walk,z=U.portalE[1],hw=U.w/2,H=U.h;
+  const stone=toon(CH.LSD.portal.arch),voussoir=toon(0xe8dcc2),paveM=toon(0xc9c3b4);
+  // walkable paved floor through the cut (a crushed-limestone path)
+  const floor=new THREE.Mesh(new THREE.BoxGeometry(wr.x1-wr.x0,0.1,wr.z1-wr.z0),paveM);
+  floor.position.set((wr.x0+wr.x1)/2,0.05,(wr.z0+wr.z1)/2);scene.add(floor);
+  walkRects.push({x1:wr.x0,x2:wr.x1,z1:wr.z0,z2:wr.z1,h:wr.h});
+  // two OPEN stone portal mouths (no dark door): east faces the lakefront strip,
+  // west faces the park. Voussoir arch + flank posts, mirroring the dead-end frame.
+  const QY=new THREE.Euler(0,Math.PI/2,0);
+  for(const px of[U.portalE[0],U.portalW[0]]){
+    const g=new THREE.Group();
+    for(const s of[-1,1]){const post=new THREE.Mesh(new THREE.BoxGeometry(1.0,H,1.0),stone);post.position.set(0,H/2,s*(hw+0.5));g.add(post);}
+    const lintel=new THREE.Mesh(new THREE.BoxGeometry(1.3,0.9,U.w+2.6),stone);lintel.position.set(0,H-0.35,0);g.add(lintel);
+    const arch=new THREE.Mesh(new THREE.TorusGeometry(hw+0.5,0.26,6,18,Math.PI),voussoir);
+    arch.rotation.copy(QY);arch.position.set(0,H-0.35,0);g.add(arch);
+    g.position.set(px,0,z);scene.add(g);
   }
 }
 

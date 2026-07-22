@@ -817,7 +817,11 @@ list under §WAYPOINTS. Lincoln Park is z +410…+1020 — scatter-free virgin g
 - South: the Diversey range + mini golf are BUILT inland at z +242…+306; the
   south lawn, corner-wrap revetment, Chevron and pier are BUILT to z +415.
   **LINCOLN PARK (z +408…+1060) is LAID OUT (task 111 — see the Lincoln Park
-  section) and BUILDING (112 shell → 117 South Pond).** Beyond South Pond the map
+  section); the SHELL is BUILT (task 112 — bounds/clamp/minimap flipped, the west
+  park + east lakefront strip + the Fullerton WORKING underpass + the relocated
+  west L/Lakeview band; the Diversey lagoon is a water hole; the zoo/conservatory/
+  South Pond are STUBBED as honest interim lawn). 113–117 fill it (Diversey Harbor
+  + Theater → zoo → conservatory → South Pond).** Beyond South Pond the map
   continues toward North Ave / downtown — the next south growth.
 - West: neighborhoods behind LSD via the underpasses; ridable L.
 

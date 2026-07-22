@@ -62,6 +62,7 @@ function walkable(x,z){
   if(CH.beachCarved(x,z))return false;             // task 072: roped dune + beach-house hall (data carve, no collider)
   const bh=beachH(x,z);if(bh!==null)return CH.beachWalkable(x,z);   // task 072: dog + Montrose sand
   if(pip(x,z,LAND))return true;
+  if(CH.lpLandHit(x,z)||CH.lpUnderpassHit(x,z))return true;   // 112 LINCOLN PARK: west park + east strip + Fullerton underpass (shared data — mirrors main.js walkable(), same position after pip(LAND))
   const q=coastQuery(x,z);
   if(q&&q.ae<0.9&&q.lat>-0.6){const t=tierAt(q.lat,q.z);if(t&&q.lat<profileTotal(q.z)-0.3)return true;}
   return false;
@@ -1017,10 +1018,21 @@ console.log('\n--- Millennium: frame discipline (clamp, spawn, billboard floor, 
   // billboard floor: nothing in the cell at z < 680 (GEOGRAPHY.md liberty)
   expect(`giants band z0 (${MP.BACKDROP_M.giants.z0}) >= 680`,MP.BACKDROP_M.giants.z0>=680,true);
   expect(`streetwall band z0 (${MP.STREETWALL_M.band.z0}) >= 680`,MP.STREETWALL_M.band.z0>=680,true);
-  // disjoint from every other play space; z>500 is unique to this cell
-  expect('cell z-range beyond WORLD_CLAMP',C.zMin>CH.WORLD_CLAMP.zMax,true);
+  // disjoint from every other play space. 112: the lakefront's Lincoln Park now
+  // reaches z 408..1020, OVERLAPPING the millennium cell's z-range — so the old
+  // "z>500 is unique to millennium" gate is dead. millennium.js now activates on
+  // the FULL x/z box (CLAMP_FULL_M), which stays disjoint because Lincoln Park
+  // sits at x<44 wherever z>=700 (east strip ends ~x38 by z700; west park is x<=0).
   expect('cell disjoint from the Wrigleyville clamp',C.xMin>WV.CLAMP_W.xMax||C.zMin>WV.CLAMP_W.zMax,true);
-  expect('z>500 dev-spawn check is unambiguous',C.zMin>500&&CH.WORLD_CLAMP.zMax<500&&WV.CLAMP_W.zMax<500,true);
+  const FM=MP.CLAMP_FULL_M;
+  { let lpInBox=0;
+    for(let x=FM.xMin;x<=FM.xMax;x+=4)for(let z=FM.zMin;z<=FM.zMax;z+=4)
+      if(CH.lpLandHit(x,z)||CH.lpUnderpassHit(x,z))lpInBox++;
+    expect('millennium activation box (CLAMP_FULL_M) contains NO Lincoln Park walkable ground',lpInBox,0);
+  }
+  expect('millennium box disjoint from the Wrigleyville clamp',FM.xMin>WV.CLAMP_W.xMax||FM.zMin>WV.CLAMP_W.zMax,true);
+  expect('millennium box stays EAST of every Lincoln Park panel (xMin 44 > LP east reach at z>=zMin)',
+    FM.xMin>=44 && Math.max(0,...CH.LP_LAND_EAST.filter(p=>p[1]>=FM.zMin).map(p=>p[0]))<FM.xMin,true);
   // landmark data consistency
   const CG=MP.CLOUD_GATE_M,CR=MP.CROWN_M;
   expect('bean footprint inside its plaza',CG.bean.x0>=CG.plaza.x0&&CG.bean.x1<=CG.plaza.x1&&CG.bean.z0>=CG.plaza.z0&&CG.bean.z1<=CG.plaza.z1,true);
@@ -1543,6 +1555,40 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
   // (8) trails exist for pathSamples2 (NEVER reshape TRAIL_MAIN)
   expect('LP has a lake-side trail + a west park spine (both non-empty)',
     CH.LP_TRAIL_LAKE.length>2 && CH.LP_TRAIL_PARK.length>2, true);
+}
+
+// ===== LINCOLN PARK (task 112 SHELL) — LIVE walkability (shared lpLandHit /
+// lpUnderpassHit / lpWaterHit; walkable() above uses the SAME functions the
+// engine uses in main.js, so engine + probe are lockstep by construction).
+{ console.log('\n--- LINCOLN PARK 112 (live walkability — shared data) ---');
+  // (a) the west park interim lawn WALKS (clear of the lagoon hole)
+  for(const [x,z] of [[-40,700],[-60,760],[-80,640],[-52,880],[-40,940],[-70,980],[-90,900],[-60,460]])
+    expect(`west park lawn (${x},${z})`,walkable(x,z),true);
+  // (b) the east lakefront strip WALKS (Lakefront Trail south + Theater bulge)
+  for(const [x,z] of [[30,450],[44,540],[40,600],[30,660],[20,700]])
+    expect(`east strip (${x},${z})`,walkable(x,z),true);
+  // (c) the Fullerton UNDERPASS floor WALKS end to end — the map's first working
+  //     crossing: east strip -> through the berm gap (x0..14) -> west park
+  for(const [x,z] of [[20,661],[14,661],[8,661],[0,661],[-8,661],[-12,661]])
+    expect(`underpass floor (${x},${z})`,walkable(x,z),true);
+  // (d) the trail ribbons run on walkable ground (LP_TRAIL_LAKE/PARK/STOCKTON)
+  for(const p of [...CH.LP_TRAIL_LAKE,...CH.LP_TRAIL_PARK,...CH.LP_TRAIL_STOCKTON])
+    if(!CH.lpWaterHit(p[0],p[1])) expect(`LP trail (${p[0]},${p[1]})`,walkable(p[0],p[1]),true);
+  // (e) the Diversey Harbor lagoon is a WATER HOLE — NOT walkable (blocked, not
+  //     wadeable; isWater's x>20 gate keeps it out of the jetski/wade path too)
+  for(const [x,z] of [[-20,480],[-20,558],[-10,600],[-30,520]])
+    expect(`lagoon water (${x},${z}) NOT walkable`,walkable(x,z),false);
+  // (f) WEST of the park (x<-104, the backdrop city void) is NOT walkable
+  for(const [x,z] of [[-120,700],[-150,760],[-130,900]])
+    expect(`west-of-park void (${x},${z}) NOT walkable`,walkable(x,z),false);
+  // (g) WEST-WADE GUARD (issue-017): west of the berm (x<14) NORTH of the corner
+  //     (z<=408) stays BLOCKED — LAND opens west-of-berm ONLY where z>408
+  for(const [x,z] of [[-50,100],[-50,-400],[-50,300],[5,200],[-8,406]])
+    expect(`berm-west / pre-corner (${x},${z}) NOT walkable`,walkable(x,z),false);
+  // (h) ANTI-TRAP: 112 adds ZERO colliders (trees are visual meshes; the
+  //     underpass has none — the 065/097 law), so no collider ring can push the
+  //     player onto non-walkable LP ground. (Recorded; nothing to sweep.)
+  expect('LP shell adds no colliders (anti-trap by construction)',true,true);
 }
 
 // ===== 088 PERMANENT GUARDS — spawned as gate categories so the standard

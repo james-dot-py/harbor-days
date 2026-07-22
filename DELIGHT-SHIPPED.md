@@ -663,3 +663,9 @@ cut becomes a revert task.
   beds or a patch of tall grass whispers — a soft leafy "shhk" as you brush past,
   spaced out so it never drones. — jumping anywhere; the garden beds & prairie
   planting — task 109
+- The map finally crosses the Drive. Every other portal on the lakefront is a
+  fenced dead-end door, but the Fullerton underpass is the first tunnel you can
+  actually walk THROUGH — a low stone arch, open at both ends so you see straight
+  to the green on the far side, carrying the path from the lakefront strip under
+  Lake Shore Drive into the heart of Lincoln Park. The old south fence opens; the
+  parkland keeps going. — the Fullerton underpass (x0–14, z661); task 112

@@ -303,6 +303,15 @@ export function buildPaths(){
   // — spliced; the ~100° kink there falls back to a paved junction dot (the
   // miter would fold), covering the wedge the owner-era build left in the bend.
   ribbonOn(curveOf(MP.paths.loop),MP.paths.width,st.walk.color,st.walk.y,0,pathSamples2,mpEnt.endFrame);
+  // 112 LINCOLN PARK: three NEW crushed-limestone ribbons — the Lakefront Trail
+  // continuing south on the east strip, the west park spine (through the Fullerton
+  // underpass into the zoo/pond), and the Stockton campus walk. pathSamples2 ONLY
+  // (merged into pathSamples AFTER buildProps in main.js -> world scatter frozen);
+  // NEVER reshape TRAIL_MAIN. Standalone starts (no bit-exact shared endpoint), so
+  // no miter join. crChain-densified already (chicago.js) -> curveOf directly.
+  const lpLake=ribbonOn(curveOf(CH.LP_TRAIL_LAKE),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
+  ribbonOn(curveOf(CH.LP_TRAIL_PARK),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
+  ribbonOn(curveOf(CH.LP_TRAIL_STOCKTON),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
   flushJunctions();   // 102: one instanced mesh for every paved junction dot
   // 106: register the DRAWN dual trail + spur centerlines as the footstep
   // 'asphalt' corridor (onTrail). rng-free; the miters only touch edge verts, so

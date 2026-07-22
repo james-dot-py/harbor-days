@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-19T22:53:45.538Z",
- "count": 140,
+ "generated": "2026-07-22T18:22:47.895Z",
+ "count": 143,
  "waypoints": [
   {
    "id": "spawn",
@@ -913,6 +913,83 @@
     }
    ],
    "expectation": "THE SANCTUARY GATEWAY (task 071): a weathered timber gateway spans the sanctuary path — MONTROSE POINT BIRD SANCTUARY in chunky yellow letters on the header beam, split-rail fence at its flanks and a dark rules board at the jamb; beyond it the pale crushed-limestone path curves into meadow and hedge. The likeness register: two heavy posts + header beam (not an arch), routed-yellow lettering LEGIBLE and not mirrored, rails reading as split timber; a chibi songbird greeter on the beam is a plus. NOT a generic sign on a stick, NOT floating, the path visibly passing under it."
+  },
+  {
+   "id": "lp-arrival",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": 22,
+   "z": 445,
+   "framings": [
+    {
+     "yaw": 0,
+     "pitch": 0.15,
+     "dist": 7
+    },
+    {
+     "yaw": 0.4,
+     "pitch": 0.12,
+     "dist": 9
+    },
+    {
+     "yaw": -0.35,
+     "pitch": 0.14,
+     "dist": 8
+    }
+   ],
+   "expectation": "LINCOLN PARK SHELL (task 112) — the map opens SOUTH past the old z408 fence: broad new green parkland spreads ahead, scattered with big chunky shade elms, a pale crushed-limestone trail curving on into it, and Lake Shore Drive with its low embankment carrying south along one side. Reads as the lakefront FINALLY continuing into a big open park — honest interim lawn (the lagoon docks, zoo and gardens come in 113-117), NOT a hole and NOT a dead-end fence. No crisp downtown skyline is promised (far plane 900 + fog + the z-gate fade it out)."
+  },
+  {
+   "id": "lp-underpass",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": 18,
+   "z": 661,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0,
+     "dist": 4
+    },
+    {
+     "yaw": -1.57,
+     "pitch": 0.07,
+     "dist": 5.5
+    },
+    {
+     "x": -8,
+     "z": 661,
+     "yaw": 1.57,
+     "pitch": 0.05,
+     "dist": 5
+    }
+   ],
+   "expectation": "THE FIRST WORKING CROSSING OF THE DRIVE (task 112): a low stone underpass tunnels beneath Lake Shore Drive — a pale voussoir arch on stone posts over a paved walkway — OPEN at both ends so you see straight through to the green park on the far side. Unlike the Belmont/Addison/Irving/Montrose portals (fenced dead-end doors), this one is a real passage the mayor walks through: the mayor stands on the tunnel floor, the far mouth an inviting opening onto lawn, NOT a wall. Axis-aligned down-the-tunnel framing."
+  },
+  {
+   "id": "lp-westpanel",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -50,
+   "z": 820,
+   "framings": [
+    {
+     "yaw": 0,
+     "pitch": 0.18,
+     "dist": 14
+    },
+    {
+     "yaw": -1.35,
+     "pitch": 0.12,
+     "dist": 13
+    },
+    {
+     "yaw": 2.95,
+     "pitch": 0.14,
+     "dist": 12
+    }
+   ],
+   "expectation": "LINCOLN PARK'S NEW WEST PARKLAND (task 112 — the map's first ground WEST of the Drive): broad open green lawn under scattered big shade elms, a crushed-limestone path winding through, and a low backdrop wall of brick apartment blocks + city trees closing off the western edge (the Clark/Lincoln neighborhood). Honest interim lawn that 113-117 fill with the lagoon, zoo, conservatory and pond — reads as real enclosed parkland, NOT an empty flat or a hole; NO water shows west of the park behind the buildings (the city, not the lake, sits west)."
   },
   {
    "id": "dv-bay-deck",
