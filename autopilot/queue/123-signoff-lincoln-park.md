@@ -1,5 +1,5 @@
 ---
-id: 120
+id: 123
 area: lincolnpark
 type: signoff
 model: opus
@@ -43,3 +43,15 @@ someone else built it. The evocation reviewer is the owner's proxy: if it
 can't say "Lincoln Park — the zoo, the seal pool, the conservatory, the
 honeycomb boardwalk" unprompted, the stretch isn't done, no matter how
 green the mechanics are.
+
+---
+RENUMBERED 120 → 123 by the 2026-07-24 sign-off attempt (iteration script
+step 8): the sign-off found the pipeline INCOMPLETE — the conservatory
+(parked 116) is unbuilt (orphaned data, consumed by no builder), and it is
+named in this very note and the owner's vision line as part of "done". Filed
+task 122 to build it and issue 031 documenting the blocker. This retry runs
+AFTER 122 lands. When it does: the §5.2 walkthrough of record must be ONE
+fresh full run that INCLUDES lp-conservatory + lp-bates; everything else was
+already verified green here (walkprobe 1554/0, single-file build, 118+ delight
+lines present, no LP issues/feedback) so this retry is mostly the conservatory
+waypoints + the contiguity/evocation/minimap passes + writing SIGNOFF.md.

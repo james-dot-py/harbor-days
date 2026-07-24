@@ -82,6 +82,14 @@ feasibility inside perf + single-file constraints.
   the 084/east-reach precedents: land WEST of LSD (the L backdrop +
   Lakeview band relocate) and the map's first WORKING underpass at
   Fullerton.
+  - **SIGN-OFF BLOCKED 2026-07-24** (task 120 attempt, issue 031): the
+    stretch is one signature landmark short — the **conservatory** (planned
+    116) is parked-unbuilt (`LP_CONSERVATORY` data orphaned, consumed by no
+    builder). It is named in the owner's vision line and task 120's evocation
+    note, so it is required, not deferrable. Everything else verified green
+    (walkprobe 1554/0, single-file build, 118+ delight, no LP issues/feedback).
+    Filed task **122** (build conservatory, staged 116 head-start) and
+    renumbered the sign-off **120 → 123** to run after it. NOT shipped yet.
 
 ## Candidates (famous Chicago spots, seeded per §5.3)
 - North Avenue Beach — adjacent south; the chess pavilion + boat-shaped
