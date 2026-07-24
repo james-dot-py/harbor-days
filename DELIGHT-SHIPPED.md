@@ -715,3 +715,30 @@ cut becomes a revert task.
   bank and, every so often, stabs at the water with a soft quawk; turtles doze
   on a half-log and teal dragonflies stitch the air over the lily pads. — the
   Nature Boardwalk pavilion (−30, 958) + Café Brauer (−61, 908); task 117
+- FEEDING TIME AT THE SEA LION POOL. A keeper waits at the south rail with a
+  galvanized fish bucket while three beggar seals crowd the near water, noses up —
+  they know it's almost two. Press E / the hand ("watch feeding time") and the
+  ritual fires: she reaches into the pail and TOSSES silver fish that arc into the
+  pool, the seals lunge and bark in a splashing frenzy, the whole rail leans in, and
+  stand in the front row and you get soaked — "ope — front row gets wet." The real
+  daily ritual at Chicago's free zoo, on demand. — the Sea Lion Pool (-56.5, 827.5),
+  src/packs/lp-seal-feeding.js — task 118
+- SPOT THE NIGHT-HERON. A birder's spotting scope stands on the Nature Boardwalk,
+  trained on the hunched grey bird working the SE reeds. Look through it (E / the
+  hand) and a round eyepiece vignette drops you onto the black-crowned night-heron,
+  big in the glass — "a lifer · a black-crowned night-heron — Illinois-endangered,
+  and it chose this pond." The real celebrated rookery that came home to the zoo,
+  the heart of the pond, one press away. — Nature Boardwalk scope (-20.5, 981),
+  src/packs/lp-heron-scope.js — task 118
+- TOSS THE FEED AT FARM-IN-THE-ZOO. Loose red hens potter the paddock and SCATTER
+  with a flap and a cluck when you wander too close; a keeper kid frets "they got
+  out again!" Step to the feed pail and toss a handful (E / the hand) — "here chick
+  chick chick" — and the whole flock comes RUNNING to peck at your feet. Petting-
+  farm comedy dropped into the middle of the city zoo. — Farm-in-the-Zoo paddock
+  (-74, 985), src/packs/lp-farm-antics.js — task 118
+- THE SOUTH POND DUSK CHORUS. Linger on the Nature Boardwalk and the restored
+  wetland sings: a quiet synth cricket bed breathes up over the reeds while spring
+  peepers preep in the dark, swelling as you near the water and fading as you leave
+  — 100% WebAudio, actx-guarded, softened for reduced-motion. The prairie-pond-in-
+  the-city at perpetual dusk, heard not seen. — South Pond / Nature Boardwalk
+  (cull center -30, 952), src/packs/lp-dusk-chorus.js — task 118
