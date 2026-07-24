@@ -32,6 +32,7 @@ const RESULT = join(HERE, 'result.json');
 const LOGS = join(HERE, 'logs');
 const FAILCOUNTS = join(LOGS, 'failcounts.json');
 const STOP = join(ROOT, 'STOP');
+const NO_EXPAND = join(ROOT, 'NO-EXPAND');   // owner 2026-07-24 AAA-quality hold: block the planner from picking NEW neighborhoods until the existing 4 (Wrigleyville, Millennium/Grant, Montrose, Lincoln Park) are AAA. Delete this file to re-enable expansion.
 const LOCATIONS = join(ROOT, 'LOCATIONS.md');
 const REFS = join(ROOT, 'refs');
 
@@ -197,7 +198,8 @@ function turnBudget(taskFile, planner) {
 // stall on an empty-credit model. A frontmatter `model: fable` still honors
 // the request (and will fail loudly) — this only changes the DEFAULTS. Revert
 // the two DEFAULT_MODEL uses below to MODEL_IDS.fable when credits return.
-const MODEL_IDS = { fable: 'claude-fable-5', opus: 'claude-opus-4-8', kimi: 'kimi-k3' };
+const MODEL_IDS = { fable: 'claude-fable-5', opus: 'claude-opus-5', kimi: 'kimi-k3' };   // opus alias bumped 4.8 -> 5 (owner 2026-07-24, Opus 5 launch day: same $5/$25, better, and Fable/Kimi are both out). 'opus4' kept as an escape hatch below.
+const MODEL_ALIASES = { opus4: 'claude-opus-4-8', opus5: 'claude-opus-5' };
 const DEFAULT_MODEL = MODEL_IDS.opus;   // was fable for planner/signoff; see note above
 function taskModel(taskFile, planner) {
   if (planner) return DEFAULT_MODEL;
@@ -398,6 +400,11 @@ async function iterationOnce() {
   let planner = false;
   if (!task) {
     const so = anySignoff();
+    if (so && existsSync(NO_EXPAND)) {
+      log({ event: 'halt', msg: 'queue drained + signoff present, but NO-EXPAND gate set — owner AAA-quality hold on new neighborhoods' });
+      await notify('Harbor Days: expansion held (NO-EXPAND)', 'Queue is empty and a location is signed off, but the NO-EXPAND gate is set: the loop will NOT plan a NEW neighborhood until the existing 4 are AAA. Queue more AAA-polish tasks, or delete the repo-root NO-EXPAND file to allow the planner.', { priority: 'high' });
+      return { halt: true };
+    }
     if (so) { planner = true; log({ event: 'planner', msg: 'queue empty; signoff at ' + basename(dirname(so)) }); }
     else {
       log({ event: 'halt', msg: 'queue empty and no SIGNOFF.md' });
