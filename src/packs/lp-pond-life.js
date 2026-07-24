@@ -136,6 +136,8 @@ function pedalBoat() {
     green: merge([
       box(1.10, 0.44, 1.70, 0, 0.03, 0),                         // hull box (top 0.25 proud)
       sph(1, 7, 0.55, 0.22, 0.45, 0, 0.03, 0.85),                // rounded prow
+    ]),
+    deck: merge([                                                // PALE cockpit — a light value spot so the boat separates from the algae-green water + lily pads (090 green-on-green law; the ref boats' pale seats)
       box(0.90, 0.10, 0.36, 0, 0.27, -0.70),                     // stern deck
       box(0.44, 0.36, 0.11, 0.26, 0.42, -0.30),                  // two seat backs
       box(0.44, 0.36, 0.11, -0.26, 0.42, -0.30),
@@ -177,7 +179,7 @@ onWorldReady(() => {
         LEGC = toon(H.leg), BEAKC = toon(H.beak);
   const SHELL = toon(T.shell), SHELL2 = toon(T.shell2), WOOD = toon(T.log);
   const LILY1 = toon(SP.lily.color), LILY2 = toon(SP.lily.color2);
-  const GREENB = toon(PB.green), SWANW = toon(PB.swan), BDARK = toon(PB.dark);
+  const GREENB = toon(PB.green), DECKC = toon(PB.deck), SWANW = toon(PB.swan), BDARK = toon(PB.dark);
 
   // ---- the one pond-life group (fogcull selfManaged exemption by name) --
   const grp = new THREE.Group(); grp.name = 'zooanim'; scene.add(grp);
@@ -308,7 +310,7 @@ onWorldReady(() => {
     for (const [x, z] of PB.spots) { cx += x; cz += z; }
     cx /= PB.spots.length; cz /= PB.spots.length;
     boatG.position.set(cx, 0, cz);
-    const greens = [], whites = [], darks = [];
+    const greens = [], decks = [], whites = [], darks = [];
     for (let i = 0; i < PB.spots.length; i++) {
       const [x, z, ry] = PB.spots[i];
       if (i === PB.spots.length - 1) {                           // the ONE white swan boat
@@ -318,10 +320,12 @@ onWorldReady(() => {
       } else {
         const p = pedalBoat();
         greens.push(put(p.green, x - cx, WY, z - cz, ry));
+        decks.push(put(p.deck, x - cx, WY, z - cz, ry));
         darks.push(put(p.dark, x - cx, WY, z - cz, ry));
       }
     }
     if (greens.length) boatG.add(new THREE.Mesh(merge(greens), GREENB));
+    if (decks.length) boatG.add(new THREE.Mesh(merge(decks), DECKC));
     if (whites.length) boatG.add(new THREE.Mesh(merge(whites), SWANW));
     if (darks.length) boatG.add(new THREE.Mesh(merge(darks), BDARK));
     grp.add(boatG);

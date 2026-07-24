@@ -448,7 +448,7 @@ add('lp-farm', 'lincolnpark', 'lakefront', -68, 961, [
 // (the DOWNTOWN-SKYLINE PHYSICS RULING). 118 will add a heron interaction here.
 add('lp-cafe-brauer', 'lincolnpark', 'lakefront', -49, 920, [
   { yaw: -2.30, pitch: 0.12, dist: 8 },                   // hero: Brauer E/S face + loggia + green hip + twin lanterns + clock, paddleboats right
-  { x: -15, z: 918, yaw: -1.73, pitch: 0.08, dist: 9 },   // across the north water from the deck: paddleboats + loggia band + reflection
+  { x: -22, z: 912, yaw: -1.95, pitch: 0.09, dist: 9 },   // establishing: café face + clock + loggia + green hip over the pond, the paddleboat raft (green pedal boats + white swan) reading in front
   { x: -47, z: 900, yaw: 3.00, pitch: 0.10, dist: 7 },    // the north loggia arm + terrace along the shore
 ]);
 add('lp-boardwalk', 'lincolnpark', 'lakefront', -25, 974, [

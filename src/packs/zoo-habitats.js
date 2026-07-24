@@ -88,7 +88,8 @@ onWorldReady(() => {
   const BELLY = toon(0xf0ede4);   // penguin belly white
   const BEAK = toon(0xd9822b);    // penguin beak orange
   const BEAR = toon(0xeae6da);    // polar cream-white
-  const MONK = toon(0x9a8d7c);    // macaque grey-tan (+ goat horns)
+  const MONK = toon(0x9a8d7c);    // goat horns (grey-tan)
+  const MONKEY = toon(0x9c7a54);  // macaque warm brown — reads against the grey knoll rock (grey-tan 0x9a8d7c vanished on 0x8f8f88; real Japanese macaques are brown); pack meshes so the recolor is +0 draws
   const FACE = toon(0xd98a74);    // macaque pink faces
   const PINK = toon(0xe8919e);    // flamingo pink
   const COWW = toon(0xece8dc);    // cow white
@@ -177,7 +178,7 @@ onWorldReady(() => {
     sph(1, 8, 0.24, 0.32, 0.24, -0.28, 0.36, -0.12),              // groomer: seated behind/beside
     sph(0.16, 7, 1, 1, 1, -0.28, 0.80, -0.06),                    // groomer head (static)
     sph(1, 6, 0.09, 0.13, 0.09, -0.42, 0.16, 0.08),               // groomer knee
-  ], false), MONK));
+  ], false), MONKEY));
   mkG.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries([
     sph(0.085, 6, 1, 0.9, 0.6, 0.30, 0.67, 0.30),                 // groomee face
     sph(0.075, 6, 1, 0.9, 0.6, -0.25, 0.80, 0.07, 0.45),          // groomer face, angled to partner
@@ -187,10 +188,10 @@ onWorldReady(() => {
     sph(1, 6, 0.075, 0.06, 0.08, 0, 0.00, 0.14),                  // muzzle
     sph(0.05, 5, 1, 1, 1, 0.13, 0.14, -0.02),                     // ears
     sph(0.05, 5, 1, 1, 1, -0.13, 0.14, -0.02),
-  ], false), MONK);
+  ], false), MONKEY);
   mkHead.position.set(0.30, 0.60, 0.14);
   mkG.add(mkHead);
-  const mkArm = new THREE.Mesh(box(0.07, 0.07, 0.36, 0, 0, 0.18), MONK);  // groomer forearm, pivot at the shoulder
+  const mkArm = new THREE.Mesh(box(0.07, 0.07, 0.36, 0, 0, 0.18), MONKEY);  // groomer forearm, pivot at the shoulder
   mkArm.rotation.order = 'YXZ';
   mkArm.position.set(-0.14, 0.60, 0.00);
   mkArm.rotation.y = 1.35; mkArm.rotation.x = 0.30;               // extended to the partner's back

@@ -975,4 +975,32 @@ few turns to find; keep each to one line of symptom + fix.
   solid back later ate a third framing the same way). Before siting ANY
   prop/NPC near a hero subject, diff its position against every framing's
   STAND and CAMERA point (stand − dir·dist), not just the subject's sightline.
+- The SIGN-OFF polish pass is where SAME-HUE props vanish at waypoint distance —
+  the 090 green-on-green overlay law, but for solid habitat props (task 119, LP):
+  the Café Brauer GREEN pedal boats (0x2f6a4a) dissolved into the algae-green pond
+  (0x4e8a7a) + lily pads (both green), and the snow-monkey GREY bodies (0x9a8d7c)
+  dissolved into the grey knoll rock (0x8f8f88) — each was faithfully colored (real
+  boats ARE green; macaques ARE grey-brown) yet read as "empty water / bare rock" in
+  the establishing shots, meeting "reads in one framing" but failing "reads like the
+  place". These pass EVERY mechanical gate (perf/walkprobe/determinism) — only READING
+  the PNG against the expectation catches them. Fix at the object, not the background:
+  add a LIGHT-value accent to break the prop off its field (a pale cream cockpit on the
+  green boat — matching the ref's pale seats — the value contrast reads where hue alone
+  didn't) and/or warm/cool the animal AWAY from the rock hue (macaques -> warm brown
+  0x9c7a54). Determinism-safe: these are pack meshes / data hexes, no rng, +0-1 draws
+  (a new light mesh is one frustum+distance-culled Mesh, not a global InstancedMesh).
+  And re-target the establishing FRAMING to actually feature the fixed prop (the café
+  f1 was reframed south to put the boat raft in front of the loggia). The reference
+  photo is the tell: if the real thing contrasts its background but yours shares its
+  hue, your WATER/GROUND is the wrong color for that prop — recolor the prop, never the
+  signature pond/rock.
+- LP continuity is a WALK, not a teleport-sample: the whole area is ONE lakefront cell
+  (no cell-boundary clamp) with NO colliders (the anti-trap law), scatter-free ground,
+  and data-carved non-walk (pond subtracted, buildings). walkprobe's reachability
+  flood-fill already proves the network is connected; the live steering bot
+  (tools/tmp-119-continuity.mjs, the 076 tmp-contiguity-bot pattern) proves it is
+  TRAVERSABLE with no deck-seam elevator pops — drive the narrow boardwalk (half-width
+  1.35) at WALK speed (joy.len 0.85) with a TIGHT look-ahead (1.6) on the exact
+  LP_BOARDWALK centerline points, or steering overshoot false-stalls it into the pond
+  edge. maxDy/frame 0.040 over the whole run = no elevator seam anywhere.
 

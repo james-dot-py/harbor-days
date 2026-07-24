@@ -1846,9 +1846,9 @@ export const LP_SOUTHPOND = {
     edgeMin:0.8, ringR:9.0,   // scatter annulus: dist to the pond edge in [edgeMin, ringR], on LAND, off the boardwalk+pavilion
   },
   lily:{ seed:0x3a7e11, pads:78, r:[0.5,0.95], color:0x4e7a3a, color2:0x3d6630, edgeMax:9 },  // lily-pad discs near the pond edges (pack merged mesh; +1 draw)
-  paddleboats:{ green:0x2f6a4a, swan:0xf2f2ea, dark:0x223a2b, spots:[[-40,913,0.4],[-37,917,1.1],[-42,919,-0.6],[-38,922,2.2],[-34,916,-1.4]] },  // green pedal boats + one white swan, clustered on the NW water off the Brauer terrace (freeboard + dark waterline, the 076 law)
+  paddleboats:{ green:0x3a8f4a, deck:0xe8e2d2, swan:0xf2f2ea, dark:0x223a2b, spots:[[-40,913,0.4],[-37,917,1.1],[-42,919,-0.6],[-38,922,2.2],[-34,916,-1.4]] },  // green pedal boats (brighter kelly-green hull + a pale cockpit deck so the raft reads over the algae-green pond — the 090 green-on-green law; the ref boats' pale seats) + one white swan, clustered on the NW water off the Brauer terrace (freeboard + dark waterline, the 076 law)
   herons:{  // chibi-chunky BLACK-CROWNED NIGHT HERONS (the endangered rookery — the delight hook); pack-owned, culled
-    body:0x9aa4ad, belly:0xe8ecee, crown:0x1c1f24, leg:0xd0c26a, beak:0x2a2a2a,
+    body:0x7b8a99, belly:0xe8ecee, crown:0x1c1f24, leg:0xd0c26a, beak:0x2a2a2a,   // body slate blue-grey (was washed-pale 0x9aa4ad — read as a white gull at deck distance; deeper slate reads as a grey night heron under the white belly/crown)
     perched:[ [-27,955,2.0], [-24,966,-1.0] ],   // two perched by the pavilion (a piling + the deck edge)
     hunched:[ -17,976,-2.4 ],                     // one hunched at the SE bank with an idle strike/stare beat (x,z,ry)
   },
