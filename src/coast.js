@@ -677,9 +677,14 @@ export function buildCoast(){
   {
     const lpGreen=toon(0x7ecb6f);   // the LAND park green
     const ws=shapeFrom(CH.LP_LAND_WEST);   // west park...
-    { const H=CH.LP_DIVERSEY_WATER,hp=new THREE.Path();   // ...minus the lagoon (a hole)
+    // ...minus the Diversey lagoon AND (117) South Pond — both punched as HOLES
+    // in the same green (note the -z negation shapeFrom uses; neither polygon
+    // touches the outer boundary, so the earcut triangulation stays valid).
+    for(const H of[CH.LP_DIVERSEY_WATER,CH.LP_SOUTHPOND_WATER]){
+      const hp=new THREE.Path();
       hp.moveTo(H[0][0],-H[0][1]);for(let i=1;i<H.length;i++)hp.lineTo(H[i][0],-H[i][1]);hp.closePath();
-      ws.holes.push(hp); }
+      ws.holes.push(hp);
+    }
     const wg=new THREE.ShapeGeometry(ws);wg.rotateX(-Math.PI/2);
     scene.add(new THREE.Mesh(wg,lpGreen));
     scene.add(flatShape(CH.LP_LAND_EAST,0,lpGreen));       // east lakefront strip
@@ -694,6 +699,43 @@ export function buildCoast(){
       wn.userData.live=true;                                // animated + local swell -> exempt from the cell merge
       wn.position.set(N.cx,WATER_Y+N.yOff,N.cz);scene.add(wn);
       waterS=wn;
+    }
+
+    // ---- SOUTH POND water (117) — a SHALLOW SELF-LIT sheet, NOT the deep-teal
+    // WATER_S living plane: the 044 register (bmat, like the habitat pools) so
+    // the algae green reads flat and the cattail/lily margins sit on top of it.
+    // The green above is punched out at LP_SOUTHPOND_WATER, so three lone
+    // frustum-culled meshes render the pond (0 draws unless a pond view frames
+    // them): the water sheet, a darker centre pool, and the MUD RIM skirt --
+    // one quad per polygon edge, starting 0.6 m OUTSIDE the hole (tucked under
+    // the park green at rimY) and ramping 2 m inward to just below the
+    // waterline, so it masks the land-hole vertical drop and reads as muddy
+    // shallows. ZERO rng, ZERO InstancedMesh buckets, no walkability touch
+    // (lpLandHit already subtracts the pond; the deck walks over it).
+    {
+      const SP=CH.LP_SOUTHPOND,P=CH.LP_SOUTHPOND_WATER;
+      scene.add(flatShape(P,SP.waterY,bmat(SP.water)));
+      { const cg=new THREE.CircleGeometry(1,30);cg.rotateX(-Math.PI/2);cg.scale(10,1,30);   // deeper middle (an inset ellipse well clear of the rim)
+        const cm=new THREE.Mesh(cg,bmat(SP.water2));cm.position.set(-30,SP.waterY+0.015,950);scene.add(cm); }
+      { const pos=[],nor=[],uv=[],idx=[],out=0.6,inw=2.0,yIn=SP.waterY-0.06;
+        for(let i=0;i<P.length-1;i++){
+          const ax=P[i][0],az=P[i][1],bx=P[i+1][0],bz=P[i+1][1];
+          const l=Math.hypot(bx-ax,bz-az);if(l<1e-6)continue;
+          let nx=-(bz-az)/l,nz=(bx-ax)/l;
+          if(!pip((ax+bx)/2+nx*0.5,(az+bz)/2+nz*0.5,P)){nx=-nx;nz=-nz;}   // flip to point INTO the pond
+          const b=pos.length/3;
+          pos.push(ax-nx*out,SP.rimY,az-nz*out, bx-nx*out,SP.rimY,bz-nz*out, bx+nx*inw,yIn,bz+nz*inw, ax+nx*inw,yIn,az+nz*inw);
+          nor.push(0,1,0, 0,1,0, 0,1,0, 0,1,0);
+          uv.push(0,0, 1,0, 1,1, 0,1);                                    // uv kept: attribute-set parity with the other coast quads
+          idx.push(b,b+1,b+2, b,b+2,b+3);
+        }
+        const rg=new THREE.BufferGeometry();
+        rg.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+        rg.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+        rg.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+        rg.setIndex(idx);
+        scene.add(new THREE.Mesh(rg,bmat(SP.mud,{side:THREE.DoubleSide})));   // DoubleSide: convex/concave corners flip the quad winding
+      }
     }
 
     // shade elms — hand-placed, individual frustum-culled meshes (CH.LP_TREES)

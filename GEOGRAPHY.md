@@ -831,22 +831,41 @@ uniform is added — no rng, no new buckets, same draw count when visible. Data:
   lions; 115: penguins, polar bear, snow monkeys, flamingos, cow/goat/hens) —
   all via the NPC/pack register (per-mesh groups, culled >145 m — the
   `makeNPC`/crowd.js precedent), NEVER global instanced buckets.
-- **South Pond + Nature Boardwalk** (**RULED 115**, resolving the 114 conflict
-  note; built 117): the pond compresses **EAST of the built 114 pond spur** —
-  `LP_SOUTHPOND_WATER` reshaped to x −47…−13.5, z 896…1002 (a rounded N–S oval;
-  the spur is its west promenade, the east campus fence its east bound), CLEAR
-  of the re-sited farm, the flamingo lagoon, primate-house and regenstein-apes.
-  Naturalized cattail/lily margins; the low wood **boardwalk ring** on pilings
-  zigzags its S/E (walkable low deck — the Millennium band-polyline precedent,
-  `LP_BOARDWALK` — **117 must reshape the staged chain + `LP_POND_BRIDGE` to
-  the ruled oval**, and re-site the three LP_TREES inside it: (−24,908),
-  (−38,936), (−30,984) — lawn today, water after the carve), the **honeycomb
-  pavilion** (Studio Gang open timber, ≈ −30, 958) on its SE peninsula.
-  **Café Brauer** (the 1908 Prairie refectory — warm brick, green-glazed
-  frieze, broad green hip roof, two loggia arms, green + swan paddleboats)
-  re-stages **WEST of the spur, long axis N–S (≈ −61, 908, 12×22), facing east
-  over the spur to the pond** — 117 refines. The pond is its OWN coast/water
-  piece (`LP_SOUTHPOND_WATER`), KEPT OUT of `COAST_SEGS`.
+- **South Pond + Nature Boardwalk** (**RULED 115 / BUILT 117**, resolving the
+  114 conflict note): the pond compresses **EAST of the built 114 pond spur** —
+  `LP_SOUTHPOND_WATER` at x −47…−13.5, z 896…1002 (a rounded N–S oval; the spur
+  is its west promenade, the east campus fence its east bound), CLEAR of the
+  re-sited farm, the flamingo lagoon, primate-house and regenstein-apes. The
+  water is its OWN piece (`LP_SOUTHPOND_WATER`, KEPT OUT of `COAST_SEGS`),
+  rendered as a **SHALLOW self-lit algae-green surface** (y −0.5, the 044
+  habitat-pool register — NOT the deep teal `WATER_S` plane) with a mud rim, so
+  the naturalized **cattail/reed + lily margins** read; banks carry golden
+  prairie grass + magenta-liatris/purple-ironweed/goldenrod drifts (index-gated
+  2nd-seed grow of the existing tuft/flower buckets — LOCAL seeds, +0 buckets).
+  The low wood **BOARDWALK ring** on pilings (`LP_BOARDWALK`, RESHAPED to the
+  ruled oval) hugs the pond's N/E/S margin + a SE peninsula bulge THROUGH the
+  pavilion, welding to the spur at NW+SW — no dead ends; it is a walkable DECK
+  over the water margin (`lpBoardwalkHit` — the Millennium band-polyline
+  precedent via the shared `_segD2` kernel; NO walkable water-shelf, NO
+  colliders), with a dark post-and-cable water-side rail and interpretive
+  plates. The **honeycomb PAVILION** (Studio Gang open timber, ≈ −30, 958 — a
+  curved laminated-timber lattice TUNNEL-ARCH you walk under, stylized hex cells)
+  stands over the water on the SE peninsula. The lettered **Bridge Over South
+  Pond** (`LP_POND_BRIDGE`, a low stone causeway/abutment at the south outlet —
+  NATURE BOARDWALK / LINCOLN PARK ZOO) reads the postcard. **Café Brauer** (the
+  1908 Prairie refectory — warm brick, green-glazed frieze, broad green hip roof
+  + twin lantern cupolas, two open loggia arms, a facade clock, green + swan
+  paddleboats on the water below) sits **WEST of the spur, long axis N–S (≈ −61,
+  908, 14×24), facing east over the spur to the pond**. **POND LIFE** (the
+  endangered black-crowned NIGHT-HERON rookery — 2 perched + 1 hunched at the
+  bank with a strike beat — turtles on a half-log, teal dragonflies) is
+  pack-owned (`packs/lp-pond-life.js`), culled, LOCAL seeds. The three
+  `LP_TREES` that stood inside the ruled oval re-site to its shoulders
+  ((−38,936)→(−55,940) W of the spur; (−24,908)→(−30,1010) + (−30,984)→(−42,1012)
+  on the south lawn). **EXPECTATION HONESTY:** the real postcard puts the downtown
+  skyline behind the pavilion; the DOWNTOWN-SKYLINE PHYSICS RULING (far plane 900,
+  fog 210 m) means the game CANNOT show it — the `lp-boardwalk`/`lp-cafe-brauer`
+  strings promise the pavilion arch + pond + Café Brauer + paddleboats instead.
 
 #### DISPLAY NAMES (RENAMES.md — task 111 records the ledger lines)
 Commercial fixture marks → generic/pun (see RENAMES.md): **People's Gas Education

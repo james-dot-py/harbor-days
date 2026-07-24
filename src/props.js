@@ -133,6 +133,28 @@ export function buildProps(){
   const mpSeg2=(px,pz,ax,az,bx,bz)=>{const dx=bx-ax,dz=bz-az,L=dx*dx+dz*dz;let t=L?((px-ax)*dx+(pz-az)*dz)/L:0;t=t<0?0:t>1?1:t;const cx=ax+t*dx,cz=az+t*dz;return (px-cx)**2+(pz-cz)**2;};
   const mpPoly2=(px,pz,pts)=>{let m=Infinity;for(let i=0;i<pts.length-1;i++){const d=mpSeg2(px,pz,pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1]);if(d<m)m=d;}return m;};
   const mpN=[];for(let i=0;i<pathSamples2.length;i++)if(pathSamples2[i][1]<-844)mpN.push(pathSamples2[i]);
+  // ---- South Pond BANKS (117): the shared LOCAL bank test + sampling box for
+  // the tuft and flower grows below (pure math, ZERO rng). The scatter annulus
+  // is: distance to the LP_SOUTHPOND_WATER edge in [banks.edgeMin, dMax], on
+  // Lincoln Park land, clear of the boardwalk deck, the pavilion and the
+  // interpretive plates. NOTE the land test is lpLandHit/lpBlockedHit, NOT
+  // pip(x,z,LAND) — LAND is the pre-112 world polygon and does not contain the
+  // park (112 renders/walks LP through its own panels). Every polygon and hit
+  // function is the chicago.js single truth (never forked). ----
+  const spB=CH.LP_SOUTHPOND.banks,spPond=CH.LP_SOUTHPOND_WATER;
+  const spEdge2=spB.edgeMin*spB.edgeMin,spDeck2=(CH.LP_BOARDWALK_HALF+0.6)**2;
+  const spBox=(()=>{let x0=Infinity,x1=-Infinity,z0=Infinity,z1=-Infinity;
+    for(const p of spPond){if(p[0]<x0)x0=p[0];if(p[0]>x1)x1=p[0];if(p[1]<z0)z0=p[1];if(p[1]>z1)z1=p[1]}
+    const R=spB.ringR;return{x0:x0-R,x1:x1+R,z0:z0-R,z1:z1+R}})();
+  const spBank=(x,z,dMax2)=>{
+    const d2=mpPoly2(x,z,spPond);
+    if(d2<spEdge2||d2>dMax2)return false;                                  // the bank annulus
+    if(!CH.lpLandHit(x,z)||CH.lpBlockedHit(x,z))return false;              // LP land minus the pond + the zoo carves
+    if(mpPoly2(x,z,CH.LP_BOARDWALK)<spDeck2)return false;                  // >=0.6 m off the deck edge
+    if((x-CH.LP_HONEYCOMB.x)**2+(z-CH.LP_HONEYCOMB.z)**2<16)return false;  // off the pavilion
+    for(const p of CH.LP_SOUTHPOND.plates)if((x-p.x)**2+(z-p.z)**2<1)return false;
+    return true;
+  };
   // ---- trees ----
   {
     const T=CH.TREES;
@@ -372,7 +394,7 @@ export function buildProps(){
   // ---- grass tufts (small, dense — human scale) ----
   {
     const TU=CH.TUFTS,n=TU.count,tm=toon(TU.color);
-    const tuft=new THREE.InstancedMesh(new THREE.ConeGeometry(0.09,0.3,5),tm,n+CH.MONTROSE_DUNE.grass.count+CH.MONTROSE_POINT.prairie.tufts);
+    const tuft=new THREE.InstancedMesh(new THREE.ConeGeometry(0.09,0.3,5),tm,n+CH.MONTROSE_DUNE.grass.count+CH.MONTROSE_POINT.prairie.tufts+spB.tufts+spB.reeds);   // 117: + the South Pond bank grass/reeds (APPENDED — every existing index is unchanged)
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
     // no grass poking through the entrance monument's decomposed-granite pad
     // (task 023): the scaleY rand is still drawn (rng order frozen), the tuft
@@ -447,6 +469,28 @@ export function buildProps(){
       base.dispose();
       if(parts.length)scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(parts),toon(PR.strawColor)));
     }
+    // ---- South Pond BANKS (117): prairie grass ringing the restored pond +
+    // taller cattail/reed clusters hugging the waterline — grown into the SAME
+    // tuft bucket in place (placed continues past the Point prairie → +0
+    // InstancedMesh buckets, +0 draws). LOCAL banks.tuftSeed / .reedSeed rngs,
+    // rejection-sampled through spBank (the annulus + LP land + deck/pavilion/
+    // plate clearance). ZERO shared rng — this runs strictly AFTER the frozen
+    // fill above, so every pre-117 tuft matrix is byte-identical.
+    // The bucket is ONE toon material and r128's color_fragment only applies
+    // vColor under USE_COLOR (instanceColor alone is inert), so banks.tuftColor
+    // / .reedColor read as HEIGHT — the Montrose dune-grass precedent. ----
+    {
+      const grow=(seed,count,sy,dMax,tries)=>{
+        const r=mkrng(seed),d2=dMax*dMax;
+        for(let i=0;i<count;i++)for(let t=0;t<tries;t++){
+          const x=spBox.x0+r()*(spBox.x1-spBox.x0),z=spBox.z0+r()*(spBox.z1-spBox.z0);
+          if(!spBank(x,z,d2))continue;
+          M.compose(V.set(x,0.14,z),Q.identity(),S.set(1,sy[0]+r()*(sy[1]-sy[0]),1));tuft.setMatrixAt(placed++,M);break;
+        }
+      };
+      grow(spB.tuftSeed,spB.tufts,spB.tuftScaleY,spB.ringR,26);                    // grass across the whole 9 m bank ring (~32% accept -> all 300 land)
+      grow(spB.reedSeed,spB.reeds,spB.reedScaleY,Math.min(spB.ringR,3.2),60);      // cattails in a tight 3.2 m waterline band (the brief's "reeds nearer the water")
+    }
     tuft.count=placed;                                   // trim any unfilled tail (no stray tuft at origin)
     tuft.instanceMatrix.needsUpdate=true;scene.add(tuft);RUSTLE_MESHES.push(tuft);   // 109: brushable
   }
@@ -460,8 +504,11 @@ export function buildProps(){
     // Montrose Point (071): grow BOTH flower buckets in place by M = the wildflower
     // drift total (goldenrod + aster) — +0 InstancedMesh buckets, +0 draws.
     const MP=CH.MONTROSE_POINT,FL=MP.flowers,mpM=FL.drifts.length*FL.perDrift+FL.asters.length*FL.perAster;
-    const stems=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05,0.05,0.55,5),toon(0x4f9f52,{}),n+mpM);
-    const heads=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.19,0),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),n+mpM);
+    // 117: + the South Pond bank drifts (liatris / ironweed / goldenrod) — the
+    // same index-gated grow, APPENDED after Montrose (existing indices unchanged).
+    const spM=spB.drifts.length*spB.perDrift;
+    const stems=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05,0.05,0.55,5),toon(0x4f9f52,{}),n+mpM+spM);
+    const heads=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.19,0),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),n+mpM+spM);
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
     for(let i=0;i<n;i++){
       let x,z;
@@ -493,6 +540,32 @@ export function buildProps(){
       };
       for(const d of FL.drifts)for(let k=0;k<FL.perDrift;k++)drift(d[0],d[1],d[2],gcol);
       for(const d of FL.asters)for(let k=0;k<FL.perAster;k++)drift(d[0],d[1],d[2],acol);
+      stems.count=heads.count=idx;
+    }
+    // ---- South Pond bank WILDFLOWER drifts (117): magenta liatris / purple
+    // ironweed / goldenrod pools on the pond banks — grown into the SAME
+    // stems+heads buckets in place (idx continues past the Montrose grow → +0
+    // InstancedMesh buckets, +0 draws). LOCAL banks.flowerSeed rng, uniform
+    // sqrt-radius discs around each banks.drifts entry, rejection-sampled
+    // through the shared spBank annulus test. ZERO shared rng (strictly after
+    // the frozen fill). setColorAt tints each drift by species — inert under
+    // r128 (the heads material has no vertexColors, like every head above), but
+    // kept so the species survive a three upgrade. ----
+    {
+      const fr=mkrng(spB.flowerSeed),ring2=spB.ringR*spB.ringR;
+      const cols=[new THREE.Color(spB.liatris),new THREE.Color(spB.ironweed),new THREE.Color(spB.goldenrod)];
+      let idx=stems.count;                                  // continues past the Montrose grow
+      spB.drifts.forEach((d,di)=>{
+        const col=cols[di%cols.length];
+        for(let k=0;k<spB.perDrift;k++)for(let tries=0;tries<30;tries++){
+          const a=fr()*Math.PI*2,rr=Math.sqrt(fr())*d[2],x=d[0]+Math.cos(a)*rr,z=d[1]+Math.sin(a)*rr;
+          if(!spBank(x,z,ring2))continue;
+          const s=0.9+fr()*0.5;
+          M.compose(V.set(x,0.28*s,z),Q.identity(),S.set(1,s,1));stems.setMatrixAt(idx,M);
+          M.compose(V.set(x,0.62*s,z),Q.identity(),S.set(1,0.8,1));heads.setMatrixAt(idx,M);
+          heads.setColorAt(idx,col);idx++;break;             // idx advances ONLY on a placed flower (no uncolored gaps)
+        }
+      });
       stems.count=heads.count=idx;
     }
     stems.instanceMatrix.needsUpdate=heads.instanceMatrix.needsUpdate=true;heads.instanceColor.needsUpdate=true;

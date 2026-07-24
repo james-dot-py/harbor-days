@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-22T22:13:05.665Z",
- "count": 151,
+ "generated": "2026-07-24T19:28:52.055Z",
+ "count": 153,
  "waypoints": [
   {
    "id": "spawn",
@@ -1124,6 +1124,64 @@
     }
    ],
    "expectation": "FARM-IN-THE-ZOO (task 115): a red GAMBREL-roofed barn with white trim — the classic broken-slope barn profile, gable facing the lane — over a straw-strewn paddock behind split-rail fences; a brown-and-white chunky COW, a white GOAT up on her stump and red HENS potter near the rail, a windmill stands behind the barn, and a yellow clapboard farmhouse sits at the yard's north side (may catch only a frame edge). A working farm in the middle of the city zoo — pettable-cozy chibi animals, NOT a generic shed and NOT an empty paddock."
+  },
+  {
+   "id": "lp-cafe-brauer",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -49,
+   "z": 920,
+   "framings": [
+    {
+     "yaw": -2.3,
+     "pitch": 0.12,
+     "dist": 8
+    },
+    {
+     "x": -15,
+     "z": 918,
+     "yaw": -1.73,
+     "pitch": 0.08,
+     "dist": 9
+    },
+    {
+     "x": -47,
+     "z": 900,
+     "yaw": 3,
+     "pitch": 0.1,
+     "dist": 7
+    }
+   ],
+   "expectation": "CAFÉ BRAUER on the pond's north shoulder (task 117): a grand two-storey Prairie-School refectory of warm red brick under a broad GREEN-tiled hip roof with twin roof lanterns, a green-glazed geometric frieze band below the deep eaves, tall arched sage-framed windows glowing warm, a round clock on the pond face, and TWO open brick-pier loggia arms embracing a terrace above the water; GREEN and white swan-shaped paddleboats cluster on the dark algae-green pond below. Reads as a grand civic pavilion (brick mass + green roof + loggia + clock), NOT a shed; the paddleboats sit ON the water with freeboard. (No downtown skyline — the physics ruling.)"
+  },
+  {
+   "id": "lp-boardwalk",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -25,
+   "z": 974,
+   "framings": [
+    {
+     "yaw": 2.78,
+     "pitch": 0.06,
+     "dist": 8
+    },
+    {
+     "x": -33,
+     "z": 964,
+     "yaw": 2.68,
+     "pitch": 0.06,
+     "dist": 7
+    },
+    {
+     "x": -15,
+     "z": 946,
+     "yaw": 3.1,
+     "pitch": 0.06,
+     "dist": 9
+    }
+   ],
+   "expectation": "THE NATURE BOARDWALK (task 117): a low wood boardwalk on pilings with a dark cable rail on the water side runs across a naturalized pond thick with green prairie grass, cattails and lily pads; an open laminated-timber HONEYCOMB PAVILION — a curved wooden lattice tunnel-arch of stylized hexagonal cells — curves over the water at the bend (you can walk under it); chunky black-crowned NIGHT HERONS work the green shallows (a couple perched, one hunched at the bank) and turtles bask on a half-log, dragonflies over the water. Reads as a living restored wetland — the deck + rail lead the eye to the pavilion arch, the herons READ chibi-chunky — NOT an empty pond. (No downtown skyline — the physics ruling.)"
   },
   {
    "id": "lp-diversey-harbor",

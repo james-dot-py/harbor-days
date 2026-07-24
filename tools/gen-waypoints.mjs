@@ -441,6 +441,22 @@ add('lp-farm', 'lincolnpark', 'lakefront', -68, 961, [
   { x: -68, z: 988, yaw: -2.65, pitch: 0.12, dist: 9 },   // NW from the lane's south bend: the whole yard — animals + barn + windmill
 ]);
 
+// 117 — South Pond Nature Boardwalk. Café Brauer on the NW shoulder (across the
+// water); the boardwalk deck + honeycomb pavilion + night herons. Stands are all
+// on WALKABLE ground (deck/bank — the pond interior is non-walkable water) and
+// cameras sit over the water, clear of the east fence (verified). NO skyline
+// (the DOWNTOWN-SKYLINE PHYSICS RULING). 118 will add a heron interaction here.
+add('lp-cafe-brauer', 'lincolnpark', 'lakefront', -49, 920, [
+  { yaw: -2.30, pitch: 0.12, dist: 8 },                   // hero: Brauer E/S face + loggia + green hip + twin lanterns + clock, paddleboats right
+  { x: -15, z: 918, yaw: -1.73, pitch: 0.08, dist: 9 },   // across the north water from the deck: paddleboats + loggia band + reflection
+  { x: -47, z: 900, yaw: 3.00, pitch: 0.10, dist: 7 },    // the north loggia arm + terrace along the shore
+]);
+add('lp-boardwalk', 'lincolnpark', 'lakefront', -25, 974, [
+  { yaw: 2.78, pitch: 0.06, dist: 8 },                    // N at the pavilion arch from the south deck: deck + dark rail + reeds + arch + herons (camera over water)
+  { x: -33, z: 964, yaw: 2.68, pitch: 0.06, dist: 7 },    // NE through the arch from the west deck — the walk-under-the-tunnel read
+  { x: -15, z: 946, yaw: 3.10, pitch: 0.06, dist: 9 },    // N up the east deck: rail + reeds + a heron + Café Brauer far
+]);
+
 // 113 — Diversey Harbor + Theater on the Lake. The harbor's money shot is the
 // DOWN-THE-CHANNEL axis (docks + slips + the quay row + both banks + the
 // Fullerton culvert closing the vista). f1 stands SOUTH of the skyline z-gate

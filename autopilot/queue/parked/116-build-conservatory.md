@@ -58,3 +58,19 @@ green-white frame, and the fountain's spray animating the garden axis.
 If the interior-palms-through-glass read fights the toon shader, palms
 ABOVE the ridge line (poking through an open lantern) is an honest
 fallback the real building supports.
+
+---
+AUTOPILOT NOTE (session 117, 2026-07-24): when 117 (South Pond) started, this
+parked task's DATA work was still uncommitted in the working tree (GEOGRAPHY.md
++ src/data/chicago.js: LP_CONSERVATORY reshape, conservatoryBlockedHit wired
+into lpBlockedHit, LP_GARDEN_* walk consts, LP_LAND_WEST Grandmother's bulge,
+LP_TRAIL_STOCKTON control point, one LP_TREES re-site). No structures.js/pack
+consumed it, so it added an INVISIBLE walkability block (glasshouse footprint
+with nothing rendered) — an active defect. It also muddied 117's determinism
+baseline and would have ridden into 117's commit under the wrong task. 117
+reverted these two tracked files to the 115-green tree and PRESERVED the full
+diff as autopilot/queue/parked/116-orphaned-data.patch. When 116 is retried,
+`git apply autopilot/queue/parked/116-orphaned-data.patch` recovers the staged
+data + the GEOGRAPHY 116 ruling (conservatory re-sites N of the built fence,
+vestibule flips to the SOUTH face, Grandmother's bulge) as a starting point —
+verify it still applies against the then-current tree first.

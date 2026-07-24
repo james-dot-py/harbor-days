@@ -703,3 +703,15 @@ cut becomes a revert task.
   from her stump, and the windmill turns slowly against the dusk while hen
   clucks, goat bleats and a rare low moo drift over the fence. — the habitat
   walk (−58, 789) + Farm-in-the-Zoo (−79, 975); task 115
+- The pipeline's quiet finale: South Pond opens teal and still, ringed by a low
+  wood boardwalk on pilings that carries you out over the water and UNDER a
+  curved wooden-lattice honeycomb pavilion — the one place in the whole map
+  where the architecture is timber woven into an arch you walk through. Café
+  Brauer's grand Prairie-brick hall watches from the far shore under its green
+  hip roof and twin lantern cupolas, green and white-swan paddleboats idling on
+  the water below. And working the reedy green shallows are the herons — the
+  real Chicago story, an endangered black-crowned night-heron rookery that chose
+  the zoo pond and came home: a couple hunch on the pilings while one stalks the
+  bank and, every so often, stabs at the water with a soft quawk; turtles doze
+  on a half-log and teal dragonflies stitch the air over the lily pads. — the
+  Nature Boardwalk pavilion (−30, 958) + Café Brauer (−61, 908); task 117

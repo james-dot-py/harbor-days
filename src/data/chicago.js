@@ -1542,7 +1542,23 @@ export const LP_UNDERPASS = {
 // simply BLOCKED where it is not LAND — never open water).
 function _pipLP(x,z,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const xi=poly[i][0],zi=poly[i][1],xj=poly[j][0],zj=poly[j][1];if(((zi>z)!==(zj>z))&&(x<(xj-xi)*(z-zi)/(zj-zi)+xi))c=!c}return c}
 // The Diversey Harbor lagoon — a WATER HOLE in the west park (blocked, not wadeable).
-export function lpWaterHit(x,z){return z>408&&_pipLP(x,z,LP_DIVERSEY_WATER);}
+export function lpWaterHit(x,z){return z>408&&(_pipLP(x,z,LP_DIVERSEY_WATER)||_pipLP(x,z,LP_SOUTHPOND_WATER));}
+// 117: the Nature Boardwalk DECK — a walkable wood ribbon on pilings over the
+// pond margin. Point-to-polyline distance to LP_BOARDWALK <= half-width (the
+// millennium band law; _segD2 is the shared kernel, hoisted below). Checked in
+// lpLandHit BEFORE the pond-water subtraction so the deck walks OVER the water
+// (no walkable water-shelf — the Montrose terraced-tip law); the rest of the
+// pond stays non-walkable. NO colliders (anti-trap law) — the pilings stand in
+// water no walker can reach. Shared engine + walkprobe (NEVER fork).
+export function lpBoardwalkHit(x,z){
+  if(z<896||z>1010||x<-52||x>-12)return false;              // ring bbox early-out
+  const h2=LP_BOARDWALK_HALF*LP_BOARDWALK_HALF;
+  for(let i=0;i<LP_BOARDWALK.length-1;i++){
+    const a=LP_BOARDWALK[i],b=LP_BOARDWALK[i+1];
+    if(_segD2(x,z,a[0],a[1],b[0],b[1])<=h2)return true;
+  }
+  return false;
+}
 // Walkable Lincoln Park LAND: the west park (minus the lagoon hole) + the east
 // lakefront strip. z>408 only (north of the corner is the untouched pre-112 world).
 // 113: the Fullerton CULVERT deck reads as LAND (checked BEFORE the water
@@ -1552,7 +1568,9 @@ export function lpLandHit(x,z){
   if(z<=408)return false;
   const c=LP_DIVERSEY.culvert;
   if(x>=c.x0&&x<=c.x1&&z>=c.z0&&z<=c.z1)return true;
+  if(lpBoardwalkHit(x,z))return true;              // 117: the boardwalk deck walks OVER the pond margin (before the water subtraction)
   if(_pipLP(x,z,LP_DIVERSEY_WATER))return false;   // the lagoon is subtracted out
+  if(_pipLP(x,z,LP_SOUTHPOND_WATER))return false;  // 117: South Pond subtracted out (non-walkable; x<20 so isWater's west-wade guard keeps it BLOCKED, never jetski-able)
   return _pipLP(x,z,LP_LAND_WEST)||_pipLP(x,z,LP_LAND_EAST);
 }
 // 113: Theater on the Lake footprint — BLOCKED land, never water (isWater keeps
@@ -1562,6 +1580,8 @@ export function lpLandHit(x,z){
 export function lpBlockedHit(x,z){
   const T=LP_THEATER;
   if(x>=T.x0&&x<=T.x1&&z>=T.z0&&z<=T.z1)return true;
+  const B=LP_CAFE_BRAUER;   // 117: Café Brauer hall footprint — SOLID (the 052 sink law; open loggia arms east of the hall stay walkable terrace; NO colliders, anti-trap)
+  if(x>=B.x-B.w/2-0.3&&x<=B.x+B.w/2+0.3&&z>=B.z-B.d/2-0.3&&z<=B.z+B.d/2+0.3)return true;
   return zooBlockedHit(x,z);   // 114: the zoo campus carves (fence band / pool / yard / hall / pier pads)
 }
 // 114 ZOO walkability carves — pure data, NO colliders (anti-trap law): the
@@ -1767,13 +1787,78 @@ export const LP_CONSERVATORY = {
   lilyPool:{ x0:-64, x1:-52, z0:678, z1:713 },                          // Alfred Caldwell Lily Pool (person; KEPT), NE
 };
 
-// ---- CAFÉ BRAUER + Nature Boardwalk + honeycomb pavilion (117) -------------
-export const LP_CAFE_BRAUER = { x:-61, z:908, w:12, d:22, ry:0 };       // Prairie refectory (115 re-stage: WEST of the spur, long axis N-S, facing E over the spur to the ruled pond; 117 refines)
-export const LP_HONEYCOMB   = { x:-30, z:958, r:5 };                    // Studio Gang open-timber pavilion, boardwalk SE peninsula (inside the ruled pond — correct: it stands OVER the water)
-export const LP_BOARDWALK = crChain([   // STALE vs the 115 pond ruling — 117 MUST reshape this ring (+ LP_POND_BRIDGE) to the ruled LP_SOUTHPOND_WATER oval before building
-  [-14,912],[-16,958],[-22,996],[-30,1010],[-46,1015],[-64,1012],[-30,958],[-24,940],[-14,912],
+// ---- CAFÉ BRAUER + Nature Boardwalk + honeycomb pavilion (BUILT 117) --------
+// The pond is the pipeline's quiet finale — a NATURALIZED prairie pond (algae-
+// green shallow water, cattail/lily margins) with a walkable wood BOARDWALK on
+// pilings ringing its N/E/S margin (welds to ZOO.spur, the west promenade — no
+// dead ends), the honeycomb PAVILION arching over the water on the SE peninsula,
+// and CAFÉ BRAUER (1908 Prairie refectory) on the NW shoulder. structures.js
+// builds Brauer/pavilion/boardwalk/rails/plates/bridge (zero rng, merged pool);
+// coast.js renders the shallow water piece; props.js grows the bank grass +
+// wildflowers (index-gated 2nd seed, existing buckets); packs/lp-pond-life.js
+// owns the herons/turtles/dragonflies/lily-pads/paddleboats (culled, LOCAL
+// seeds). Walkability = lpBoardwalkHit + the pond subtraction in lpLandHit
+// (shared engine + walkprobe, NO colliders — the anti-trap law).
+export const LP_CAFE_BRAUER = {
+  x:-61, z:908, w:14, d:24, ry:0,        // central 2-storey brick refectory; long axis N-S; the EAST face (x-54) fronts the spur/pond
+  brick:0x8e4f3c, trim:0xd9ccb2, roof:0x527a58, glow:0xffe2ae, door:0x5c4632, base:0x9a9282,  // Theater/Lion-House palette reuse (all pooled -> +0 draws; 0x527a58 green tile = the Lion House roof)
+  frieze:0x2e4f38, friezeTile:0x6fa08a, frame:0x8a9a7a,   // NAMED: green-glazed Prairie frieze band + its square inset tiles + sage window frames
+  wallH:6.4, roofH:3.4, eave:1.25,       // tall 2-storey mass under a broad deep-eave GREEN hip roof
+  nLong:5, nShort:3, archW:1.9, archH:3.0,   // tall arched window rhythm (5 on the E/W long faces, 3 on the N/S ends)
+  towers:{ w:2.6, h:2.2, roofH:1.5, dx:4.6 },  // TWIN LANTERN cupolas on the ridge at +/-dx (the Lion-House clerestory-monitor recipe run twice)
+  clock:{ r:0.85, y:3.7 },               // round facade clock on the EAST (pond) face, over the doors
+  loggia:{ depth:3.6, postH:3.2, roofH:1.3, nBay:4, armLen:12 },  // TWO open loggia arms (N + S) off the east face embracing the terrace
+  terrace:{ x0:-54, x1:-47.5, z0:896, z1:920, y:0.13 },  // brick terrace east of the hall (the paddleboat overlook, over the spur toward the pond)
+  sign:'CAFÉ BRAUER',   // person name — KEPT real (RENAMES law)
+};
+export const LP_HONEYCOMB = {
+  x:-30, z:958, ry:-1.1,                 // pond-center-south peninsula; long axis along the boardwalk TANGENT (stands OVER the water — walkprobe reads x,z only)
+  len:12, spanW:5.6, crownH:4.2,         // curved laminated-timber lattice TUNNEL-ARCH: 12m long (walk-through), 5.6m span, 4.2m crown — the READ is "walk under a wooden honeycomb"
+  ribs:7, cells:4,                       // stylized hex-cell lattice: 7 arch ribs along the length x ~4 hex divisions per rib face (NOT literal)
+  timber:0xc9a075, timber2:0xab8755,     // pale WARM laminated-glulam timber (reads as wood, not rusty steel truss, at distance)
+  deckY:0.12,
+};
+// The walkable wood BOARDWALK ring (crChain, densely sampled). Hugs the pond's
+// N/E/S margin on pilings + a SE bulge THROUGH the pavilion (walk-through), and
+// welds to ZOO.spur at the NW (near spur (-50,905)) and SW (near spur
+// (-48.9,1005.5)) so the loop closes with no dead ends. structures.js sweeps
+// the deck-on-pilings from THESE samples (the same polyline lpBoardwalkHit
+// uses — geometry + walkability can't drift). NOT a pathSamples2 ribbon (it is
+// a deck, not a ground decal; LP is scatter-free so no tree-filter is needed).
+export const LP_BOARDWALK = crChain([
+  [-48.5,905],[-38,903],[-24,901],[-16,910],[-14.5,932],[-15,952],
+  [-21,960],[-30,958],[-33,966],[-25,974],[-18,984],[-22,996],[-36,1001],[-49,1004],
 ],3);
-export const LP_POND_BRIDGE = [ [-40,938],[-55,942] ];                  // "Bridge Over South Pond" (NATURE BOARDWALK lettering; 117 re-sites to the ruled oval)
+export const LP_BOARDWALK_HALF = 1.35;   // deck half-width — SHARED by the deck geometry (structures.js), lpBoardwalkHit (engine) and walkprobe (NEVER fork)
+export const LP_BOARDWALK_STYLE = { deckY:0.12, deckTh:0.22, wood:0x8a6a44, wood2:0x9c6a3a, plankStep:0.9, railColor:0x2f3430, railH:1.0, railSpace:2.6, pileEvery:3.2 };  // reuse the dock-wood pool colors; dark mesh rail on the water side (POSTS/RAILS)
+export const LP_POND_BRIDGE = { x:-40, z:1004, w:16, h:1.5, d:1.4, faceZ:1003.2, stone:0x9a988c, sign:'NATURE BOARDWALK', sub:'LINCOLN PARK ZOO' };  // the postcard "Bridge Over South Pond" — a low stone causeway/abutment at the pond's SOUTH outlet; lettering on its NORTH face (toward the pond/boardwalk viewer)
+// Pond render + bank scatter + pond-life data (its OWN piece; the water is a
+// SHALLOW self-lit bmat surface — the 044 habitat-pool register, NOT the deep
+// teal WATER_S plane — so cattail/lily margins read).
+export const LP_SOUTHPOND = {
+  waterY:-0.35, water:0x4e8a7a, water2:0x3a6e64,  // shallow pond — TEAL-green (self-lit bmat, the habitat-pool register) so it READS as water vs the grass; raised to -0.35 for less near-level occlusion
+  mud:0xa89468, rimY:-0.08,                       // mud/shallows rim skirt masking the land-hole edge (reeds mask the rest)
+  banks:{   // index-gated 2nd-seed grow of the EXISTING props.js tuft + flower buckets (LOCAL seeds; +0 buckets)
+    tuftSeed:0x5e17a3, tufts:300, tuftScaleY:[1.7,3.0], tuftColor:0xbfa96a,          // golden prairie grass ringing the pond
+    reedSeed:0x2c91f0, reeds:170, reedScaleY:[2.4,3.8], reedColor:0x9caf5e,          // taller cattail/reed clusters at the water margin (same tuft bucket, taller)
+    flowerSeed:0x6a1d90, drifts:[[-46,910,2.0],[-12.5,940,1.8],[-18,1005,2.2],[-13,924,2.4],[-12.5,958,2.4],[-13,986,2.6],[-30,1009,3.2],[-42,1010,2.6]],  // on ACCESSIBLE banks (E strip + S lawn + NW terrace corner) — the tight spur/water west edge holds no drift
+    perDrift:15, liatris:0x9a3f8c, ironweed:0x6b3fa0, goldenrod:0xf2c14e,            // magenta liatris / purple ironweed / goldenrod drifts on the banks
+    edgeMin:0.8, ringR:9.0,   // scatter annulus: dist to the pond edge in [edgeMin, ringR], on LAND, off the boardwalk+pavilion
+  },
+  lily:{ seed:0x3a7e11, pads:78, r:[0.5,0.95], color:0x4e7a3a, color2:0x3d6630, edgeMax:9 },  // lily-pad discs near the pond edges (pack merged mesh; +1 draw)
+  paddleboats:{ green:0x2f6a4a, swan:0xf2f2ea, dark:0x223a2b, spots:[[-40,913,0.4],[-37,917,1.1],[-42,919,-0.6],[-38,922,2.2],[-34,916,-1.4]] },  // green pedal boats + one white swan, clustered on the NW water off the Brauer terrace (freeboard + dark waterline, the 076 law)
+  herons:{  // chibi-chunky BLACK-CROWNED NIGHT HERONS (the endangered rookery — the delight hook); pack-owned, culled
+    body:0x9aa4ad, belly:0xe8ecee, crown:0x1c1f24, leg:0xd0c26a, beak:0x2a2a2a,
+    perched:[ [-27,955,2.0], [-24,966,-1.0] ],   // two perched by the pavilion (a piling + the deck edge)
+    hunched:[ -17,976,-2.4 ],                     // one hunched at the SE bank with an idle strike/stare beat (x,z,ry)
+  },
+  turtles:{ shell:0x5a6a3a, shell2:0x3f4a28, log:0x8a6a44, x:-22, z:948, ry:0.5, count:3 },  // turtles basking on a half-log in the shallows just W of the boardwalk (reads in the lp-boardwalk hero view)
+  dragonflies:{ seed:0x11c7a3, n:12, color:[0.35,0.9,0.85], yLo:0.1, yHi:1.4 },  // teal Points motes darting over the water (pack; 1 draw, not a bucket)
+  plates:[ { x:-13, z:924, ry:-1.57, title:'NATURE BOARDWALK', sub:'a restored prairie pond' },
+           { x:-13, z:972, ry:-1.57, title:'NIGHT HERONS',    sub:'an endangered colony, home' },
+           { x:-26, z:1008, ry:3.05, title:'SOUTH POND',      sub:'a naturalized pond, 2010' } ],   // interpretive plates on the bank (zoo plate() vocab; off centerlines + off stands)
+  cull:{ x:-30, z:952, r:150 },   // pond-life distance-cull center + radius
+};
 
 // ---- TRAILS — all NEW ribbons registered via pathSamples2 (NEVER reshape
 // TRAIL_MAIN; pathSamples is PHASE-sensitive — PITFALLS). LP_TRAIL_LAKE
@@ -1791,7 +1876,7 @@ export const LP_TREES = [
   [-48,500,1.25],[-46,572,1.15],                               // 113: west-bank leaners — old shade trees over the quay walk (BRIEF harbor read)
   [-64,704,1.2],[-84,762,1.35],[-60,812,1.2],[-70,868,1.25],   // west park interior (between the trails)
   [-84,910,1.15],[-60,922,1.3],[-62,944,1.2],[-58,884,1.1],    // 115: the (-72,966) elm moved to (-62,944) — its old spot is the farm forecourt (lane clearance)
-  [-40,868,1.25],[-38,936,1.1],[-24,908,1.15],[-30,984,1.2],   // east/south park lawn ((-38,936)/(-24,908)/(-30,984) stand inside the RULED pond — lawn today; 117 re-sites them with the carve)
+  [-40,868,1.25],[-55,940,1.1],[-30,1010,1.15],[-42,1012,1.2],   // 117: the three elms that stood inside the RULED pond re-sited to its shoulders — (-38,936)->(-55,940) W of the spur (S of Café Brauer), (-24,908)->(-30,1010) + (-30,984)->(-42,1012) on the south lawn; clear of the boardwalk/pavilion/Brauer/plates + Garibaldi
   [42,478,1.2],[48,540,1.3],[44,576,1.15],[46,658,1.1],        // east lakefront strip (113: the z606 elm moved N of the Theater footprint)
   [-78,842,1.2],[-86,828,1.25],[-79,876,1.15],[-66,876,1.2],   // 114: zoo campus shade elms (115: the (-78,792) elm moved to (-78,842) — its old spot is inside the polar tundra)
   [-16,880,1.15],[-34,790,1.1],

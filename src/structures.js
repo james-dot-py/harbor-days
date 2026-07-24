@@ -2132,6 +2132,471 @@ function buildZooHabitats(POSTS,RAILS){
   emit(gBack,toon(0x2c2620));  emit(gPost,toon(0x6b5c48));
 }
 
+// ---- SOUTH POND — CAFÉ BRAUER + the Nature Boardwalk (task 117) -------------
+// The pipeline's quiet finale, all in ONE builder so the whole precinct folds
+// to one merged mesh per material: the 1908 Prairie refectory on the pond's NW
+// shoulder (brick mass, broad GREEN-tile hip, green-glazed frieze band, tall
+// arched sage-framed glow windows, a facade clock, twin roof lanterns, two open
+// loggia arms embracing the terrace), the Studio-Gang honeycomb PAVILION (a
+// curved laminated-timber lattice tunnel-arch you walk under), the boardwalk
+// DECK on pilings swept from the same LP_BOARDWALK polyline lpBoardwalkHit uses
+// (geometry + walkability can never drift), its dark post-and-cable rails, the
+// three interpretive plates and the south-outlet bridge parapet.
+// EVERY placement from CH.LP_CAFE_BRAUER / LP_HONEYCOMB / LP_BOARDWALK(+_HALF/
+// _STYLE) / LP_POND_BRIDGE / LP_SOUTHPOND — ZERO rng (literal geometry only),
+// NO colliders and NO walkRects (walkability is data-carved: lpBoardwalkHit +
+// the pond subtraction in lpLandHit — the anti-trap law; the player walks y0
+// under the 0.12 deck, the culvert precedent), rails tail-append POSTS/RAILS
+// via fenceRun collide:false so every earlier instance index is unchanged.
+// ZERO new InstancedMesh buckets; glow/glass = self-lit bmat (the 044 law).
+function buildSouthPond(POSTS,RAILS){
+  const B=CH.LP_CAFE_BRAUER,HC=CH.LP_HONEYCOMB,BW=CH.LP_BOARDWALK,
+        HALF=CH.LP_BOARDWALK_HALF,ST=CH.LP_BOARDWALK_STYLE,
+        BR=CH.LP_POND_BRIDGE,SP=CH.LP_SOUTHPOND;
+
+  // -- per-material accumulators (merged + scene.add'd at the end) -----------
+  const gBrick=[],gTrim=[],gBase=[],gRoof=[],gDoor=[],gGlow=[],
+        gFrieze=[],gTile=[],gFrame=[],gPave=[],gStone=[],gWood=[],gBack=[];
+  const box=(arr,w,h,d,x,y,z,ry)=>{const g=new THREE.BoxGeometry(w,h,d);if(ry)g.rotateY(ry);g.translate(x,y,z);arr.push(g);};
+  const emit=(geos,mat)=>{if(!geos.length)return;
+    scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(geos.map(g=>g.index?g.toNonIndexed():g)),mat));};
+  const fit=(g,t,mw,fs,w)=>{g.font=`${w} ${fs}px "Trebuchet MS",sans-serif`;
+    while(g.measureText(t).width>mw&&fs>10){fs-=2;g.font=`${w} ${fs}px "Trebuchet MS",sans-serif`;}};
+  // lollipop plate (the zoo vocab): post ENDS at the panel bottom, solid dark
+  // backing box, own canvas, FrontSide plate 0.045 proud of the backing face
+  const sign=(px,pz,ry,w,h,cy,postR,cw,ch,draw)=>{
+    const bot=cy-h/2;
+    if(postR>0){const pg=new THREE.CylinderGeometry(postR,postR,bot,8);pg.translate(px,bot/2,pz);gWood.push(pg);}
+    box(gBack,w+0.07,h+0.07,0.05,px,cy,pz,ry);
+    const cv=document.createElement('canvas');cv.width=cw;cv.height=ch;const g=cv.getContext('2d');
+    draw(g);
+    const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
+    const pl=new THREE.Mesh(new THREE.PlaneGeometry(w,h),curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide})));
+    pl.rotation.y=ry;pl.position.set(px+Math.sin(ry)*0.045,cy,pz+Math.cos(ry)*0.045);scene.add(pl);
+  };
+  // auto-oriented quad -> two triangles in a plain non-indexed attribute soup
+  // (the coast.js per-edge-quad pattern; the winding is derived from the wanted
+  // normal so mitred ribbons can never flip inside-out)
+  const quad=(P,N,U,a,b,c,d,nx,ny,nz)=>{
+    const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2];
+    const kx=uy*vz-uz*vy,ky=uz*vx-ux*vz,kz=ux*vy-uy*vx;
+    const q=(kx*nx+ky*ny+kz*nz)<0?[a,d,c,b]:[a,b,c,d];
+    for(const p of[q[0],q[1],q[2],q[0],q[2],q[3]]){P.push(p[0],p[1],p[2]);N.push(nx,ny,nz);}
+    U.push(0,0, 1,0, 1,1, 0,0, 1,1, 0,1);
+  };
+  const mkGeo=(P,N,U)=>{const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));
+    g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));
+    g.setAttribute('uv',new THREE.Float32BufferAttribute(U,2));return g;};
+
+  // =====================================================================
+  // (1) CAFÉ BRAUER — the Theater/Lion-House arcade recipe grown to two
+  // storeys: long axis N-S (the 24 m E/W faces carry nLong arches), the EAST
+  // face fronts the terrace/pond and swaps its centre arch for the entrance
+  // bay (solid brick -> doors + the facade clock + the name plaque).
+  // =====================================================================
+  const cx=B.x,cz=B.z,hx=B.w/2,hz=B.d/2;              // -61, 908, 7, 12
+  const wallT=0.5,sill=0.5,ar=B.archW/2,spring=sill+B.archH-ar,pitch=4.2;
+  const plY=0.35,roofY=plY+B.wallH,ex=hx+B.eave,ez=hz+B.eave;   // 6.75 / 8.25 / 13.25
+  const midL=(B.nLong-1)/2,midS=(B.nShort-1)/2;
+
+  box(gBase,B.w+0.6,0.35,B.d+0.6,cx,0.175,cz,0);      // plinth, +0.3 oversize
+
+  // walls — each face ONE ExtrudeGeometry: outer rect minus arch holes. Long
+  // (E/W) walls run full length; the short N/S ends are shortened one wall-T
+  // each side so the long walls' end caps finish the corners (Theater law).
+  function wallGeo(len,n,skip){
+    const s=new THREE.Shape();
+    s.moveTo(-len/2,0);s.lineTo(len/2,0);s.lineTo(len/2,B.wallH);s.lineTo(-len/2,B.wallH);s.closePath();
+    for(let i=0;i<n;i++){
+      if(i===skip)continue;
+      const c=(i-(n-1)/2)*pitch,h=new THREE.Path();
+      h.moveTo(c-ar,sill);h.lineTo(c+ar,sill);h.lineTo(c+ar,spring);
+      h.absarc(c,spring,ar,0,Math.PI,false);h.lineTo(c-ar,sill);
+      s.holes.push(h);
+    }
+    return new THREE.ExtrudeGeometry(s,{depth:wallT,bevelEnabled:false,curveSegments:12});
+  }
+  {const g=wallGeo(B.d,B.nLong);      g.rotateY( Math.PI/2);g.translate(cx-hx,plY,cz);gBrick.push(g);}   // west (centre arch = service door)
+  {const g=wallGeo(B.d,B.nLong,midL); g.rotateY(-Math.PI/2);g.translate(cx+hx,plY,cz);gBrick.push(g);}   // east — centre bay SOLID (entrance + clock)
+  {const g=wallGeo(B.w-2*wallT,B.nShort);                   g.translate(cx,plY,cz-hz);gBrick.push(g);}   // north
+  {const g=wallGeo(B.w-2*wallT,B.nShort);g.rotateY(Math.PI);g.translate(cx,plY,cz+hz);gBrick.push(g);}   // south
+
+  // glow panes 0.18 inside each opening (bmat, never toon — 044 law) + the
+  // sage FRAME set (jambs + centre mullion + transom bar) sitting proud of the
+  // face; the two door bays are skipped so the doors read as doors.
+  const pane=(w,h,ry,x,y,z)=>{const g=new THREE.PlaneGeometry(w,h);if(ry)g.rotateY(ry);g.translate(x,y,z);gGlow.push(g);};
+  const frameAt=(ry,x,y,z)=>{
+    const fh=B.archH+0.2,hw=B.archW/2;
+    const put=(w,h,d,ox,oy)=>{const g=new THREE.BoxGeometry(w,h,d);g.translate(ox,oy,0);if(ry)g.rotateY(ry);g.translate(x,y,z);gFrame.push(g);};
+    put(0.12,fh,0.14,-(hw+0.06),0);put(0.12,fh,0.14,(hw+0.06),0);   // jambs
+    put(0.09,fh-0.3,0.12,0,0);                                      // centre mullion
+    put(B.archW+0.12,0.10,0.12,0,-0.35);                            // transom bar
+  };
+  const pw=B.archW+0.15,ph=B.archH+0.15,py=plY+sill+B.archH/2;
+  for(let i=0;i<B.nLong;i++){
+    const c=(i-midL)*pitch;
+    if(i!==midL){pane(pw,ph,-Math.PI/2,cx-(hx-0.18),py,cz+c);frameAt(-Math.PI/2,cx-hx-0.02,py,cz+c);}   // west row
+    if(i!==midL){pane(pw,ph, Math.PI/2,cx+(hx-0.18),py,cz+c);frameAt( Math.PI/2,cx+hx+0.02,py,cz+c);}   // east row
+  }
+  for(let i=0;i<B.nShort;i++){
+    const c=(i-midS)*pitch;
+    pane(pw,ph,Math.PI,cx+c,py,cz-(hz-0.18));frameAt(Math.PI,cx+c,py,cz-hz-0.02);                       // north end
+    pane(pw,ph,0,      cx+c,py,cz+(hz-0.18));frameAt(0,      cx+c,py,cz+hz+0.02);                       // south end
+  }
+  // SECOND-STOREY windows — the wall is solid up here, so pane + sage frame sit
+  // PROUD of the brick (the farmhouse-window recipe). East centre is skipped:
+  // the clock and the name plaque own that bay.
+  const upWin=(ry,x,y,z)=>{
+    const w=1.1,h=1.25;
+    const p=new THREE.PlaneGeometry(w,h);if(ry)p.rotateY(ry);p.translate(x,y,z);gGlow.push(p);
+    const put=(bw,bh,ox,oy)=>{const g=new THREE.BoxGeometry(bw,bh,0.1);g.translate(ox,oy,-0.03);if(ry)g.rotateY(ry);g.translate(x,y,z);gFrame.push(g);};
+    put(0.10,h+0.2,-(w/2+0.05),0);put(0.10,h+0.2,(w/2+0.05),0);
+    put(w+0.2,0.10,0,(h/2+0.05));put(w+0.2,0.10,0,-(h/2+0.05));
+    put(0.08,h,0,0);
+  };
+  for(let i=0;i<B.nLong;i++){
+    const c=(i-midL)*pitch;
+    upWin(-Math.PI/2,cx-hx-0.05,5.00,cz+c);
+    if(i!==midL)upWin(Math.PI/2,cx+hx+0.05,5.00,cz+c);
+  }
+  for(let i=0;i<B.nShort;i++){
+    const c=(i-midS)*pitch;
+    upWin(Math.PI,cx+c,5.00,cz-hz-0.05);upWin(0,cx+c,5.00,cz+hz+0.05);
+  }
+
+  // limestone courses — E/W wrap the corners, N/S butt in between (no coplanar
+  // overlap ever shimmers). gapE opens the EAST band across the clock bay so
+  // the roundel isn't sliced by a string course.
+  const band=(y,t,gapE)=>{
+    for(const sx of[-1,1]){
+      if(sx>0&&gapE){
+        const L=(B.d+0.32)/2-gapE;
+        for(const sz of[-1,1])box(gTrim,0.16,t,L,cx+hx,y,cz+sz*(gapE+L/2),0);
+      } else box(gTrim,0.16,t,B.d+0.32,cx+sx*hx,y,cz,0);
+    }
+    for(const sz of[-1,1])box(gTrim,B.w-0.16,t,0.16,cx,y,cz+sz*hz,0);
+  };
+  band(plY+spring,0.18,1.35);   // spring-line impost (2.90)
+  band(4.20,0.18,1.35);         // second-storey belt course
+  band(5.86,0.12,0);            // course under the frieze
+  band(6.62,0.12,0);            // course over the frieze
+  for(const sx of[-1,1])box(gTrim,0.16,0.14,ez*2,cx+sx*(ex-0.08),roofY-0.08,cz,0);          // fascia ring
+  for(const sz of[-1,1])box(gTrim,ex*2-0.32,0.14,0.16,cx,roofY-0.08,cz+sz*(ez-0.08),0);
+
+  // GREEN-GLAZED PRAIRIE FRIEZE — a dark-green band under the eaves with square
+  // friezeTile accents (one big + a small over/under, the geometric Prairie
+  // rhythm), each lapped 0.01 into the band so nothing floats.
+  const fy=6.24,fh=0.62;
+  for(const sx of[-1,1])box(gFrieze,0.20,fh,B.d+0.4,cx+sx*hx,fy,cz,0);
+  for(const sz of[-1,1])box(gFrieze,B.w-0.2,fh,0.20,cx,fy,cz+sz*hz,0);
+  for(const sx of[-1,1])for(let i=0;i<20;i++){
+    const z=cz-11.4+i*1.2,x=cx+sx*(hx+0.12);
+    box(gTile,0.06,0.30,0.30,x,fy,z,0);
+    box(gTile,0.06,0.14,0.14,x,fy+0.23,z,0);box(gTile,0.06,0.14,0.14,x,fy-0.23,z,0);
+  }
+  for(const sz of[-1,1])for(let i=0;i<11;i++){
+    const x=cx-6.0+i*1.2,z=cz+sz*(hz+0.12);
+    box(gTile,0.30,0.30,0.06,x,fy,z,0);
+    box(gTile,0.14,0.14,0.06,x,fy+0.23,z,0);box(gTile,0.14,0.14,0.06,x,fy-0.23,z,0);
+  }
+
+  // broad GREEN-TILE HIP ROOF — the √2 frustum trick lands the corners exactly
+  // on the eave rect; the 1.25 overhang is the deep-Prairie-eaves read.
+  {const g=new THREE.CylinderGeometry(0.22*Math.SQRT2,Math.SQRT2,B.roofH,4,1);
+   g.rotateY(Math.PI/4);g.scale(ex,1,ez);g.translate(cx,roofY+B.roofH/2,cz);gRoof.push(g);}
+
+  // TWIN LANTERN CUPOLAS on the ridge at ±towers.dx — the Lion-House clerestory
+  // MONITOR recipe run twice: a brick box whose bottom is sunk under the roof
+  // slope on all four sides, glow strips on all four faces, a cornice, and its
+  // own small √2 hip cap sunk 0.06 into the box top (no coplanar cap).
+  {
+    const T=B.towers,my=roofY+B.roofH-0.1,top=my+T.h/2;
+    for(const sd of[-1,1]){
+      const tz=cz+sd*T.dx;
+      box(gBrick,T.w,T.h,T.w,cx,my,tz,0);
+      pane(1.9,0.92,Math.PI,   cx,10.56,tz-(T.w/2+0.02));   // 10.10 bottom clears the roof slope (10.03) at the near face
+      pane(1.9,0.92,0,         cx,10.56,tz+(T.w/2+0.02));
+      pane(1.9,0.92,-Math.PI/2,cx-(T.w/2+0.02),10.56,tz);
+      pane(1.9,0.92, Math.PI/2,cx+(T.w/2+0.02),10.56,tz);
+      box(gTrim,T.w+0.3,0.12,T.w+0.3,cx,top-0.06,tz,0);
+      const mr=new THREE.CylinderGeometry(0.22*Math.SQRT2,Math.SQRT2,T.roofH,4,1);
+      mr.rotateY(Math.PI/4);mr.scale(T.w/2+0.4,1,T.w/2+0.4);
+      mr.translate(cx,top-0.06+T.roofH/2,tz);gRoof.push(mr);
+    }
+  }
+
+  // WEST service door (centre arch, full arch height — a short door leaves the
+  // transom see-through, the 114 round-2 lesson) + its stoop
+  box(gDoor,0.10,B.archH+0.25,B.archW-0.3,cx-(hx-0.35),plY+sill+(B.archH+0.25)/2,cz,0);
+  box(gBase,1.2,0.18,3.2,cx-hx-0.85,0.09,cz,0);
+
+  // EAST ENTRANCE BAY — double doors in a limestone surround, the round facade
+  // CLOCK on a limestone roundel above (roundel + lintel are BOTH gTrim, so the
+  // 0.06 they share is an invisible same-material lap), and the name plaque up
+  // in the second-storey band.
+  box(gDoor,0.14,2.30,2.60,cx+hx+0.07,plY+1.15,cz,0);
+  box(gFrame,0.16,2.30,0.10,cx+hx+0.09,plY+1.15,cz,0);                     // sage meeting mullion
+  for(const sz of[-1,1])box(gTrim,0.18,2.45,0.18,cx+hx+0.05,plY+1.225,cz+sz*1.44,0);
+  box(gTrim,0.18,0.18,3.06,cx+hx+0.05,2.72,cz,0);                          // lintel
+  {
+    const rd=new THREE.CylinderGeometry(B.clock.r+0.12,B.clock.r+0.12,0.18,20);
+    rd.rotateZ(Math.PI/2);rd.translate(cx+hx+0.06,B.clock.y,cz);gTrim.push(rd);
+    const fc=new THREE.CircleGeometry(B.clock.r,24);fc.rotateY(Math.PI/2);
+    const m=new THREE.Mesh(fc,bmat(0xffffff,{map:clockTex(B.trim),side:THREE.FrontSide}));
+    m.position.set(cx+hx+0.195,B.clock.y,cz);scene.add(m);
+  }
+  {  // 'CAFÉ BRAUER' — bronze plaque on the entrance bay, between the belt
+     // course (4.29) and the under-frieze course (5.80). Own canvas, fitted
+     // font, FrontSide plane 0.025 proud of a solid backing lapped into the brick.
+    const cv=document.createElement('canvas');cv.width=1024;cv.height=128;const g=cv.getContext('2d');
+    g.fillStyle='#2c2620';g.fillRect(0,0,1024,128);
+    g.textAlign='center';g.textBaseline='middle';
+    g.fillStyle='#f0e8d2';fit(g,B.sign,940,72,'800');g.fillText(B.sign,512,66);
+    const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
+    box(gBack,0.06,0.92,6.12,cx+hx+0.02,5.05,cz,0);
+    const pg=new THREE.PlaneGeometry(6.0,0.8);pg.rotateY(Math.PI/2);
+    const pl=new THREE.Mesh(pg,curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide})));
+    pl.position.set(cx+hx+0.075,5.05,cz);scene.add(pl);
+  }
+
+  // TERRACE + the TWO LOGGIA ARMS. The terrace is a paved slab east of the hall
+  // (it laps 0.01 over the boardwalk's NW weld — no coplanar z-fight); each arm
+  // is three arcade screens (both long edges + the east end) on a slab that
+  // runs down to -0.75 so the south arm's tip, which reaches over the pond,
+  // reads as a solid quay instead of piers floating above the water.
+  {
+    const TR=B.terrace,LG=B.loggia;
+    // the court between the arms (the arm floors below tile the remaining z, so
+    // no two paving tops are ever coplanar — the same-material shimmer trap)
+    {const g=new THREE.BoxGeometry(TR.x1-TR.x0,0.63,(TR.z1-TR.z0)-2*LG.depth);
+     g.translate((TR.x0+TR.x1)/2,TR.y-0.315,(TR.z0+TR.z1)/2);gPave.push(g);}
+    const arcGeo=(len,n,ptch)=>{
+      const s=new THREE.Shape(),aw=1.9,ah=2.4,rr=aw/2,sl=0.05,sp=sl+ah-rr;
+      s.moveTo(-len/2,0);s.lineTo(len/2,0);s.lineTo(len/2,LG.postH);s.lineTo(-len/2,LG.postH);s.closePath();
+      for(let i=0;i<n;i++){
+        const c=(i-(n-1)/2)*ptch,h=new THREE.Path();
+        h.moveTo(c-rr,sl);h.lineTo(c+rr,sl);h.lineTo(c+rr,sp);
+        h.absarc(c,sp,rr,0,Math.PI,false);h.lineTo(c-rr,sl);
+        s.holes.push(h);
+      }
+      return new THREE.ExtrudeGeometry(s,{depth:0.4,bevelEnabled:false,curveSegments:10});
+    };
+    const aX0=cx+hx,aX1=aX0+LG.armLen,aXc=(aX0+aX1)/2;      // -54 -> -42
+    for(const sd of[-1,1]){
+      const zEdge=cz+sd*hz,zIn=zEdge-sd*LG.depth,zc2=zEdge-sd*LG.depth/2;
+      const outRy=sd<0?0:Math.PI,inRy=sd<0?Math.PI:0;
+      {const g=new THREE.BoxGeometry(LG.armLen,0.88,LG.depth);g.translate(aXc,TR.y-0.44,zc2);gPave.push(g);}
+      {const g=arcGeo(LG.armLen,LG.nBay,2.8);if(outRy)g.rotateY(outRy);g.translate(aXc,TR.y,zEdge);gBrick.push(g);}
+      {const g=arcGeo(LG.armLen,LG.nBay,2.8);if(inRy) g.rotateY(inRy); g.translate(aXc,TR.y,zIn);  gBrick.push(g);}
+      {const g=arcGeo(LG.depth,1,2.8);g.rotateY(-Math.PI/2);g.translate(aX1,TR.y,zc2);gBrick.push(g);}
+      const eaveY=TR.y+LG.postH;
+      box(gFrieze,LG.armLen+0.32,0.26,LG.depth+0.32,aXc,eaveY-0.05,zc2,0);   // green frieze strip
+      box(gTrim,LG.armLen+0.5,0.30,LG.depth+0.5,aXc,eaveY+0.24,zc2,0);       // cornice
+      const rg=new THREE.CylinderGeometry(0.22*Math.SQRT2,Math.SQRT2,LG.roofH,4,1);
+      rg.rotateY(Math.PI/4);rg.scale(LG.armLen/2+0.45,1,LG.depth/2+0.45);
+      rg.translate(aXc,eaveY+0.33+LG.roofH/2,zc2);gRoof.push(rg);            // low green hip, base sunk 0.06 into the cornice
+    }
+  }
+
+  // =====================================================================
+  // (2) THE BOARDWALK DECK on pilings — swept from the DENSE LP_BOARDWALK
+  // samples with MITRED offsets (±HALF along the averaged segment normal, so
+  // bends have no V-notch; the residual under-coverage vs the lpBoardwalkHit
+  // distance band is <=0.07 m at the sharpest bend): a deck-top ribbon at
+  // deckY, a fascia skirt one deckTh deep, end caps at both spur welds, and
+  // piling rows just inside each edge (cylinder + sphere pile-head collar).
+  // The skirt stops at deckY-deckTh (-0.10), NOT at the brief's -0.35: the pond
+  // surface is at LP_SOUTHPOND.waterY -0.5, so a 0.47 skirt would have swallowed
+  // the pilings whole — this leaves the honest 0.40 m of piling standing out of
+  // the water, which IS the "on pilings" read.
+  // ONE merged deck mesh + the shared gWood mesh; no colliders, no walkRects.
+  // =====================================================================
+  const NS=BW.length,NXA=new Array(NS),NZA=new Array(NS);
+  for(let i=0;i<NS;i++){
+    let dx=0,dz=0;
+    if(i>0){const l=Math.hypot(BW[i][0]-BW[i-1][0],BW[i][1]-BW[i-1][1])||1;dx+=(BW[i][0]-BW[i-1][0])/l;dz+=(BW[i][1]-BW[i-1][1])/l;}
+    if(i<NS-1){const l=Math.hypot(BW[i+1][0]-BW[i][0],BW[i+1][1]-BW[i][1])||1;dx+=(BW[i+1][0]-BW[i][0])/l;dz+=(BW[i+1][1]-BW[i][1])/l;}
+    const l=Math.hypot(dx,dz)||1;NXA[i]=-dz/l;NZA[i]=dx/l;
+  }
+  const edge=(i,s)=>[BW[i][0]+s*NXA[i]*HALF,BW[i][1]+s*NZA[i]*HALF];
+  {
+    const DP=[],DN=[],DU=[],FP=[],FN=[],FU=[],dy=ST.deckY,fb=ST.deckY-ST.deckTh;
+    for(let i=0;i<NS-1;i++){
+      const L0=edge(i,-1),R0=edge(i,1),L1=edge(i+1,-1),R1=edge(i+1,1);
+      const sx=BW[i+1][0]-BW[i][0],sz=BW[i+1][1]-BW[i][1],sl=Math.hypot(sx,sz)||1;
+      const nx=-sz/sl,nz=sx/sl;
+      quad(DP,DN,DU,[L0[0],dy,L0[1]],[R0[0],dy,R0[1]],[R1[0],dy,R1[1]],[L1[0],dy,L1[1]],0,1,0);
+      quad(FP,FN,FU,[R0[0],dy,R0[1]],[R1[0],dy,R1[1]],[R1[0],fb,R1[1]],[R0[0],fb,R0[1]], nx,0, nz);
+      quad(FP,FN,FU,[L0[0],dy,L0[1]],[L1[0],dy,L1[1]],[L1[0],fb,L1[1]],[L0[0],fb,L0[1]],-nx,0,-nz);
+    }
+    for(const[i,s]of[[0,-1],[NS-1,1]]){                       // end caps at the two spur welds
+      const L=edge(i,-1),R=edge(i,1);
+      quad(FP,FN,FU,[L[0],dy,L[1]],[R[0],dy,R[1]],[R[0],fb,R[1]],[L[0],fb,L[1]],s*NZA[i],0,-s*NXA[i]);
+    }
+    scene.add(new THREE.Mesh(mkGeo(DP,DN,DU),toon(ST.wood2)));              // deck planks
+    gWood.push(mkGeo(FP,FN,FU));                                            // fascia -> the dark-wood pool
+    let run=0,next=0;
+    for(let i=0;i<NS-1;i++){
+      const seg=Math.hypot(BW[i+1][0]-BW[i][0],BW[i+1][1]-BW[i][1]);
+      while(next<=run+seg){
+        const t=seg>1e-6?(next-run)/seg:0;
+        for(const s of[-1,1]){
+          const a=edge(i,s),b=edge(i+1,s);
+          const px=a[0]+(b[0]-a[0])*t,pz=a[1]+(b[1]-a[1])*t;
+          const ix=BW[i][0]+(BW[i+1][0]-BW[i][0])*t,iz=BW[i][1]+(BW[i+1][1]-BW[i][1])*t;
+          const qx=ix+(px-ix)*0.89,qz=iz+(pz-iz)*0.89;        // 0.15 in from the deck edge
+          const cyl=new THREE.CylinderGeometry(0.16,0.16,2.9,6);cyl.translate(qx,fb-1.45,qz);gWood.push(cyl);
+          const cap=new THREE.SphereGeometry(0.21,8,6);cap.translate(qx,fb-0.03,qz);gWood.push(cap);   // pile-head collar peeking under the fascia
+        }
+        next+=ST.pileEvery;
+      }
+      run+=seg;
+    }
+  }
+
+  // (3) POST-AND-CABLE RAILS — the dark mesh rail. LP_BOARDWALK runs INSIDE the
+  // pond polygon for 52 of its 58 samples (the deck is over open water almost
+  // end to end), so BOTH mitred edges get a rail line — a single-sided rail
+  // would leave an open drop on the pond side of most of the run. Tail-appended
+  // to POSTS/RAILS (collide:false, +0 InstancedMesh buckets).
+  for(const s of[-1,1]){
+    const line=[];for(let i=0;i<NS;i++)line.push(edge(i,s));
+    fenceRun(line,{spacing:ST.railSpace,postH:ST.railH,color:ST.railColor,collide:false},POSTS,RAILS);
+  }
+
+  // =====================================================================
+  // (4) THE HONEYCOMB PAVILION — a CURVED laminated-timber lattice TUNNEL-ARCH
+  // over the water at LP_HONEYCOMB. The ribs are struck PERPENDICULAR to the
+  // boardwalk at arc-length stations centred on (x,z), NOT extruded along a
+  // straight ry: LP_BOARDWALK swings ~68° through this station (it is the SE
+  // bulge's corner), so a straight 12 m barrel at ry -1.1 walks clean off the
+  // deck — measured, the far rib feet landed ON the planks. Following the walk
+  // keeps every rib foot exactly spanW/2 from the deck centreline (1.45 m
+  // outboard of the edge — nothing to walk into), the crown always crownH over
+  // the deck, and delivers the data's own word: a CURVED tunnel-arch whose
+  // centre tangent is the ry -1.1 the data records. Parabolic ribs springing
+  // from pilings in the water + two diagonal families + longitudinal purlins =
+  // the stylized hex/diamond CELLS. Pritzker trellis recipe: every member is a
+  // TubeGeometry on a curve, ALL merged into ONE toon(timber) mesh. NO
+  // colliders — you walk straight under it.
+  // =====================================================================
+  {
+    const sp=HC.spanW/2,springY=-0.35,dlt=HC.crownH-springY,pav=[];
+    const CUM=[0];                                          // arc length along the walk
+    for(let i=1;i<NS;i++)CUM[i]=CUM[i-1]+Math.hypot(BW[i][0]-BW[i-1][0],BW[i][1]-BW[i-1][1]);
+    let i0=0,d0=1e9;
+    for(let i=0;i<NS;i++){const d=Math.hypot(BW[i][0]-HC.x,BW[i][1]-HC.z);if(d<d0){d0=d;i0=i;}}
+    const at=s=>{                                           // position on the walk at arc length s
+      const t=Math.max(0,Math.min(CUM[NS-1],s));
+      let i=1;while(i<NS-1&&CUM[i]<t)i++;
+      const f=(t-CUM[i-1])/((CUM[i]-CUM[i-1])||1);
+      return[BW[i-1][0]+(BW[i][0]-BW[i-1][0])*f,BW[i-1][1]+(BW[i][1]-BW[i-1][1])*f];
+    };
+    const step=HC.len/(HC.ribs-1),s0=CUM[i0]-HC.len/2;
+    const RB=[];                                            // per-rib frame {p, n} (n = unit normal, smoothed)
+    for(let k=0;k<HC.ribs;k++){
+      const p=at(s0+k*step),a=at(s0+(k-1)*step),b=at(s0+(k+1)*step);
+      const dx=b[0]-a[0],dz=b[1]-a[1],l=Math.hypot(dx,dz)||1;
+      RB.push({x:p[0],z:p[1],nx:-dz/l,nz:dx/l});            // finite-difference tangent -> smooth, fold-free frames
+    }
+    const ribPt=(r,t)=>{const u=sp*(2*t-1);
+      return new THREE.Vector3(r.x+r.nx*u,springY+4*dlt*t*(1-t),r.z+r.nz*u);};
+    for(const r of RB){
+      const c=new THREE.QuadraticBezierCurve3(
+        new THREE.Vector3(r.x-r.nx*sp,springY,r.z-r.nz*sp),
+        new THREE.Vector3(r.x,springY+2*dlt,r.z),
+        new THREE.Vector3(r.x+r.nx*sp,springY,r.z+r.nz*sp));
+      pav.push(new THREE.TubeGeometry(c,16,0.17,6,false));
+      for(const s of[-1,1]){const p=new THREE.CylinderGeometry(0.18,0.18,2.7,6);   // 0.18: the ribs crowd to 0.48 apart on the inside of the bend
+        p.translate(r.x+s*r.nx*sp,springY-1.35,r.z+s*r.nz*sp);pav.push(p);}
+    }
+    const nd=HC.cells*2;                                    // 8 stations -> cells diamonds per bay
+    for(let b=0;b<HC.ribs-1;b++)for(let k=0;k<nd;k+=2){
+      const t0=k/nd,t1=(k+2)/nd,tm=(k+1)/nd;
+      const mid={x:(RB[b].x+RB[b+1].x)/2,z:(RB[b].z+RB[b+1].z)/2,
+                 nx:(RB[b].nx+RB[b+1].nx)/2,nz:(RB[b].nz+RB[b+1].nz)/2};
+      for(const[ta,tb]of[[t0,t1],[t1,t0]]){
+        const p0=ribPt(RB[b],ta),p2=ribPt(RB[b+1],tb),m=ribPt(mid,tm);
+        const ctrl=new THREE.Vector3(2*m.x-(p0.x+p2.x)/2,2*m.y-(p0.y+p2.y)/2,2*m.z-(p0.z+p2.z)/2);
+        pav.push(new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(p0,ctrl,p2),8,0.11,5,false));
+      }
+    }
+    for(const t of[0.12,0.3,0.5,0.7,0.88]){                 // longitudinal purlins riding the curve
+      const pts=RB.map(r=>ribPt(r,t));
+      pav.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),24,0.10,5,false));
+    }
+    scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(pav.map(g=>g.index?g.toNonIndexed():g)),toon(HC.timber)));
+  }
+
+  // =====================================================================
+  // (5) INTERPRETIVE PLATES — the three LP_SOUTHPOND.plates on the bank, the
+  // habitat-plate shape (bold title over an italic sub), each facing per ry.
+  // =====================================================================
+  for(const P of SP.plates)
+    sign(P.x,P.z,P.ry,1.35,0.6,1.25,0.05,512,224,g=>{
+      g.fillStyle='#efe6cd';g.fillRect(0,0,512,224);
+      g.textAlign='center';g.textBaseline='middle';
+      g.fillStyle='#3a2f24';fit(g,P.title,460,64,'800');g.fillText(P.title,256,82);
+      g.fillStyle='#6b5c48';fit(g,P.sub,470,28,'italic 700');g.fillText(P.sub,256,168);
+    });
+
+  // =====================================================================
+  // (6) THE BRIDGE — the low stone causeway at the pond's south outlet. The
+  // data rect (x -48..-32, z 1003.3..1004.7) is NOT clear of the walk: the
+  // boardwalk's SW tail runs diagonally into it and at x -48 the box centreline
+  // sits 0.21 m off the deck centreline, so a literal 1.5 m box would stand a
+  // stone wall THROUGH the walkway (no collider = walk-into-a-wall, the worse
+  // half of the anti-trap law). So the causeway is sliced every 0.5 m and each
+  // slice's NORTH face is pushed clear of the lpBoardwalkHit band (measured off
+  // the SAME polyline, so it can never drift): slices the walk owns keep only
+  // the low abutment the deck sits on, the rest carry the full parapet + coping.
+  // 'NATURE BOARDWALK / LINCOLN PARK ZOO' goes on the parapet's NORTH face over
+  // the full-height run (own canvas, fitted font, FrontSide plane proud of the
+  // solid stone — the box IS the backing, no mirror artifact).
+  // =====================================================================
+  {
+    const d2walk=(px,pz)=>{let b=1e9;
+      for(let i=0;i<NS-1;i++){
+        const ax=BW[i][0],az=BW[i][1],dx=BW[i+1][0]-ax,dz=BW[i+1][1]-az,l2=dx*dx+dz*dz;
+        let t=l2?((px-ax)*dx+(pz-az)*dz)/l2:0;t=t<0?0:t>1?1:t;
+        const ex=ax+dx*t-px,ez=az+dz*t-pz,d=ex*ex+ez*ez;if(d<b)b=d;
+      }
+      return Math.sqrt(b);};
+    const zN=BR.z-BR.d/2,zS=BR.z+BR.d/2,clr=HALF+0.06,sw=0.5;
+    let fx0=Infinity,fx1=-Infinity;
+    for(let k=0,nk=Math.round(BR.w/sw);k<nk;k++){
+      const mx=BR.x-BR.w/2+(k+0.5)*sw;
+      box(gStone,sw+0.02,0.62,BR.d,mx,-0.41,BR.z,0);              // abutment under the deck (-0.72 -> -0.10)
+      let nz=zN;while(nz<zS&&d2walk(mx,nz)<clr)nz+=0.05;
+      const dp=zS-nz;
+      if(dp<0.3)continue;                                          // the walk owns this slice
+      box(gStone,sw+0.02,BR.h,dp,mx,BR.h/2,nz+dp/2,0);
+      box(gTrim,sw+0.02,0.16,dp+0.28,mx,BR.h+0.08,nz+dp/2,0);      // coping cap
+      if(dp>BR.d-0.12){fx0=Math.min(fx0,mx-sw/2);fx1=Math.max(fx1,mx+sw/2);}
+    }
+    const lw=Math.min(9.0,fx1-fx0-0.8);
+    if(lw>2.5){
+      const cv=document.createElement('canvas');cv.width=1024;cv.height=192;const g=cv.getContext('2d');
+      g.fillStyle='#6f6d63';g.fillRect(0,0,1024,192);              // shadowed stone panel
+      g.textAlign='center';g.textBaseline='middle';
+      g.fillStyle='#f2efe4';fit(g,BR.sign,960,90,'800');g.fillText(BR.sign,512,72);
+      g.fillStyle='#dcd8c8';fit(g,BR.sub,860,44,'700');g.fillText(BR.sub,512,146);
+      const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
+      const pg=new THREE.PlaneGeometry(lw,1.05);pg.rotateY(Math.PI);   // 0.34 -> 1.39, inside the 1.5 parapet
+      const pl=new THREE.Mesh(pg,curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide})));
+      pl.position.set((fx0+fx1)/2,0.86,BR.faceZ);scene.add(pl);
+    }
+  }
+
+  // -- emit: ONE merged mesh per material --------------------------------
+  emit(gBrick,toon(B.brick));   emit(gTrim,toon(B.trim));      emit(gBase,toon(B.base));
+  emit(gRoof,toon(B.roof));     emit(gDoor,toon(B.door));      emit(gGlow,bmat(B.glow));
+  emit(gFrieze,toon(B.frieze)); emit(gTile,toon(B.friezeTile));emit(gFrame,toon(B.frame));
+  emit(gPave,toon(CH.ZOO.loopStyle.color));                    emit(gStone,toon(BR.stone));
+  emit(gWood,toon(ST.wood));    emit(gBack,toon(0x2c2620));
+}
+
 export function buildStructures(){
   const POSTS=[],RAILS=[];
   buildDogFence(POSTS,RAILS);
@@ -2145,6 +2610,7 @@ export function buildStructures(){
   buildMontrosePoint(POSTS,RAILS);   // task 071: sanctuary gateway/flanks/ropes append to POSTS/RAILS tail (indices unchanged); statics drawn directly
   buildZoo(POSTS,RAILS);             // task 114: zoo campus — perimeter/gates/pool/lion house/yard append to the tail (collide:false, data-carved walkability)
   buildZooHabitats(POSTS,RAILS);     // task 115: habitat dioramas + Farm-in-the-Zoo — rails append to the tail (collide:false, data-carved walkability)
+  buildSouthPond(POSTS,RAILS);       // task 117: Café Brauer + honeycomb pavilion + Nature Boardwalk deck/rails/plates/bridge — rails append to the tail (collide:false, zero rng)
   emitFences(POSTS,RAILS);
   buildFieldhouse();
   buildParkBait();

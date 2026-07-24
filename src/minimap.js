@@ -46,6 +46,11 @@ export function drawLakefrontBase(g,M,opts={}){
   g.fillStyle='#2f9fb1';g.beginPath();
   CH.LP_DIVERSEY_WATER.forEach((p,i)=>{const[mx,my]=wm(p[0],p[1]);i?g.lineTo(mx,my):g.moveTo(mx,my)});
   g.closePath();g.fill();
+  // 117 SOUTH POND: algae-green, not lagoon blue (it renders as the shallow
+  // self-lit pond, LP_SOUTHPOND.water2 — so the map matches what you walk to)
+  g.fillStyle='#4e6a3e';g.beginPath();
+  CH.LP_SOUTHPOND_WATER.forEach((p,i)=>{const[mx,my]=wm(p[0],p[1]);i?g.lineTo(mx,my):g.moveTo(mx,my)});
+  g.closePath();g.fill();
   // golf course tint
   {const G=CH.MAP_GOLF,[ax,ay]=wm(G.x0,G.z0),[bx2,by2]=wm(G.x1,G.z1);
    g.fillStyle=G.color;g.fillRect(Math.min(ax,bx2),Math.min(ay,by2),Math.abs(bx2-ax),Math.abs(by2-ay));}

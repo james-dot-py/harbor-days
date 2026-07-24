@@ -1567,8 +1567,8 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
 // engine uses in main.js, so engine + probe are lockstep by construction).
 { console.log('\n--- LINCOLN PARK 112 (live walkability — shared data) ---');
   // (a) the west park interim lawn WALKS (clear of the lagoon hole)
-  for(const [x,z] of [[-40,700],[-60,760],[-80,640],[-52,880],[-40,940],[-70,980],[-90,900],[-60,460]])
-    expect(`west park lawn (${x},${z})`,walkable(x,z),true);
+  for(const [x,z] of [[-40,700],[-60,760],[-80,640],[-52,880],[-62,930],[-70,980],[-90,900],[-60,460]])
+    expect(`west park lawn (${x},${z})`,walkable(x,z),true);   // 117: (-40,940) retired — now inside the ruled South Pond (non-walkable water); (-62,930) is the equivalent west-park-lawn read
   // (b) the east lakefront strip WALKS (Lakefront Trail south + Theater bulge)
   for(const [x,z] of [[30,450],[44,540],[40,594],[30,660],[20,700]])   // 113: (40,600) moved to (40,594) — the old point is now honestly inside the Theater footprint carve
     expect(`east strip (${x},${z})`,walkable(x,z),true);
@@ -1818,6 +1818,65 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
     expect(`114 west gate through-line still walks (${x},${z})`,walkable(x,z),true);
   for(const [x,z] of [[-49,1002],[-49,1005.5],[-49,1009]])
     expect(`114 south gate through-line still walks (${x},${z})`,walkable(x,z),true);
+}
+
+// ===== LINCOLN PARK 117 (South Pond + Nature Boardwalk) — LIVE walkability via
+// the SAME shared chicago.js functions the engine uses (lpBoardwalkHit is
+// checked INSIDE lpLandHit BEFORE the pond subtraction, so the deck walks OVER
+// the water while the rest of the pond stays blocked; NO colliders — the
+// anti-trap law). The 115 pond RULING guards above (pip vs LP_SOUTHPOND_WATER,
+// incl. the pavilion-centre-inside-the-pond guard) still stand; this block adds
+// the walkability half. Never re-derive the math — call the shared functions.
+{ console.log('\n--- LINCOLN PARK 117 (South Pond + Nature Boardwalk) ---');
+  const POND=CH.LP_SOUTHPOND_WATER,BW=CH.LP_BOARDWALK;
+  // the lakefront branch of walkable() above (line ~68), spelled out so a
+  // failure names the deck rather than the whole predicate
+  const deckWalks=(x,z)=>CH.lpLandHit(x,z)&&!CH.lpBlockedHit(x,z);
+  // (a) the BOARDWALK deck walks — sampled control points + the whole polyline
+  //     (structures.js sweeps the deck from these same samples, so geometry and
+  //     walkability cannot drift)
+  for(const i of [0,6,12,18,24,30,36,BW.length-1]){const p=BW[i];
+    expect(`boardwalk deck pt [${i}] (${p[0].toFixed(1)},${p[1].toFixed(1)}) walks`,deckWalks(p[0],p[1]),true);}
+  expect('EVERY LP_BOARDWALK sample walks (deck over the pond margin)',BW.every(p=>deckWalks(p[0],p[1])),true);
+  // (b) the honeycomb PAVILION is a walk-through arch: its centre stands over
+  //     the water on the deck bulge, so it must WALK (no collider, no carve)
+  expect('pavilion centre (-30,958) WALKS (walk-through tunnel-arch on the deck)',deckWalks(-30,958),true);
+  // (c) the pond interior is NON-walkable WATER (blocked, not wadeable — x<20
+  //     keeps isWater's west-wade guard on it)
+  for(const [x,z] of [[-30,949],[-30,930]]){
+    expect(`pond interior (${x},${z}) NOT land`,CH.lpLandHit(x,z),false);
+    expect(`pond interior (${x},${z}) IS lp water`,CH.lpWaterHit(x,z),true);
+    expect(`pond interior (${x},${z}) NOT walkable`,walkable(x,z),false);
+  }
+  // (d) NO walkable water-shelf off the deck (the Montrose terraced-tip law):
+  //     a point just INSIDE the pond, off the deck band, is blocked
+  expect('no water-shelf: just inside the pond off the deck (-30,935) NOT walkable',walkable(-30,935),false);
+  expect('  (-30,935) is inside the pond poly',pip(-30,935,POND),true);
+  expect('  (-30,935) is off the deck band',CH.lpBoardwalkHit(-30,935),false);
+  // (e) the BANKS walk all round (NW shoulder / east strip / south lawn)
+  for(const [x,z] of [[-49,915],[-13,948],[-30,1008]])
+    expect(`pond bank (${x},${z}) walks`,walkable(x,z),true);
+  // (f) the boardwalk WELDS continuous to the 114 pond spur at both ends — the
+  //     bands overlap (deck halfW 1.35 + spur halfW 1.2 = 2.55), so the loop
+  //     closes with no dead end
+  const nearSpur=(p)=>{let d=1e9;for(const s of CH.ZOO.spur){const dd=Math.hypot(p[0]-s[0],p[1]-s[1]);if(dd<d)d=dd}return d};
+  const dN=nearSpur([-48.5,905]),dS=nearSpur([-49,1004]);
+  expect(`N weld (-48.5,905) welds to the spur (nearest ${dN.toFixed(2)} m < 2.55)`,dN<2.55,true);
+  expect(`S weld (-49,1004) welds to the spur (nearest ${dS.toFixed(2)} m < 2.55)`,dS<2.55,true);
+  // (g) the three re-sited LP_TREES are out: no tree stands in the water
+  expect('no LP_TREES inside the pond (the 115 ruling re-site landed)',
+    CH.LP_TREES.every(t=>!pip(t[0],t[1],POND)),true);
+  // (h) confirm the 115 guard from this block too: the pavilion stands OVER the
+  //     water (inside the polygon) — that is the intended read, not a bug
+  expect('LP_HONEYCOMB centre INSIDE the pond poly (pavilion over the water — intended)',
+    pip(CH.LP_HONEYCOMB.x,CH.LP_HONEYCOMB.z,POND),true);
+  // (i) Café Brauer hall is SOLID (117 footprint carve — the 052 sink law; the
+  //     open loggia arms + terrace EAST of the hall stay walkable)
+  { const CB=CH.LP_CAFE_BRAUER;
+    expect('Café Brauer hall centre is SOLID (not walkable)',walkable(CB.x,CB.z),false);
+    for(const [dx,dz] of [[-5,-8],[5,8],[-6,0],[6,0],[0,-10],[0,10]])
+      expect(`Brauer footprint (${CB.x+dx},${CB.z+dz}) blocked`,CH.lpBlockedHit(CB.x+dx,CB.z+dz),true);
+    expect('the terrace/spur east of the hall still walks (-49,908)',walkable(-49,908),true); }
 }
 
 // ===== 088 PERMANENT GUARDS — spawned as gate categories so the standard

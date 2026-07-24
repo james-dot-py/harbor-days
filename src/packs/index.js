@@ -53,6 +53,7 @@ import './montrose-kite.js';   // FLY A KITE on Cricket Hill — hold-to-launch,
 import './montrose-point.js';   // THE MAGIC HEDGE — Montrose Point sanctuary life: birders + scopes + clustered chibi migrants + graded birdsong (task 071)
 import './zoo.js';   // LINCOLN PARK ZOO — the map's first animals: seal pool arcs + lions + free-gate ambience (task 114)
 import './zoo-habitats.js';   // ZOO HABITATS — penguins/polar bear/snow monkeys/flamingos/farm cast + windmill wheel (task 115)
+import './lp-pond-life.js';   // SOUTH POND LIFE — night herons + turtles + dragonflies + paddleboats + lily pads (task 117)
 import './favors-pilot.js';   // THE ECONOMY's pilot favor — "an Old Style for the Malört guy" (task 078)
 import './economy-pilot.js';   // THE ECONOMY's beach kiosk + pilot toys — popcorn/tennis ball/bucket hat (task 078)
 import './economy-payouts.js';   // THE ECONOMY's unowned dibs — zone discovery, the fireworks finale, the jetski (task 079)
