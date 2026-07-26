@@ -569,6 +569,26 @@ add('lp-zoo-lakeview', 'lincolnpark', 'lakefront', -1, 838, [
   { x: -3, z: 900, yaw: 1.45, pitch: 0.12, dist: 10 },   // further south along the flank: same read, nobody on the water
 ]);
 
+// 122 — THE CONSERVATORY + the formal garden + Eli Bates. The glasshouse is the
+// hero: stands sit in the garden SOUTH of the doors looking NORTH up the axis,
+// so the ogee bells read against sky. Every stand/camera is on garden walk or
+// soft bed (never inside the glasshouse/vestibule/basin carves) and stays north
+// of the zoo's fence band (z~738-741). Obliques per the 047 aim-off law.
+// RE-SITED after the first shot pass: the chase-cam mayor pins to frame centre,
+// so every framing aims its view AXIS beside the subjects (fountain >=7deg off,
+// vestibule/sign flanking) instead of through them — the dead-on first cut hid
+// the thicket + doors behind the mayor's head in all six shots.
+add('lp-conservatory', 'lincolnpark', 'lakefront', -67.8, 730.8, [
+  { yaw: -3.08, pitch: 0.09, dist: 6.5 },                  // f0 — up the axis aimed a hair W: fountain left-third, bells fill the sky (stand nudged W so the SE lamp leaves frame centre)
+  { x: -63.5, z: 730.5, yaw: -2.62, pitch: 0.07, dist: 5.5 },// f1 — the key-photo SE diagonal: fountain left, vestibule + sign + bells right-of-centre, beds foreground
+  { x: -70.6, z: 712.6, yaw: -3.00, pitch: 0.03, dist: 6.5 },// f2 — the doors: dist 6.5 shrinks the chibi head below the awning line so the lettering clears above it (dist 4 buried LINCOLN behind the mayor)
+]);
+add('lp-bates', 'lincolnpark', 'lakefront', -67, 733.8, [
+  { yaw: -3.05, pitch: 0.10, dist: 4.6 },                  // f0 — ring + thicket at left-third, glasshouse behind (the 9719113515 composition, mayor over lawn)
+  { x: -73.2, z: 732.8, yaw: 2.98, pitch: 0.09, dist: 4.8 },// f1 — from the SW: fountain right-third, gable + east wing behind
+  { x: -69.4, z: 729.8, yaw: -2.60, pitch: 0.07, dist: 4.6 },// f2 — close from the apron collar: thicket + figures right of the mayor (dist 3.4 dead-on put his head through the thicket)
+]);
+
 // Diversey ENTERABLE bay (task 028): stand on the ground hitting deck at a
 // middle bay's hitting spot and look NORTH down the range — the axis-aligned
 // interior framing for the bay pocket (a cross-body camera sits in a divider);

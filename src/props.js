@@ -394,7 +394,7 @@ export function buildProps(){
   // ---- grass tufts (small, dense — human scale) ----
   {
     const TU=CH.TUFTS,n=TU.count,tm=toon(TU.color);
-    const tuft=new THREE.InstancedMesh(new THREE.ConeGeometry(0.09,0.3,5),tm,n+CH.MONTROSE_DUNE.grass.count+CH.MONTROSE_POINT.prairie.tufts+spB.tufts+spB.reeds);   // 117: + the South Pond bank grass/reeds (APPENDED — every existing index is unchanged)
+    const tuft=new THREE.InstancedMesh(new THREE.ConeGeometry(0.09,0.3,5),tm,n+CH.MONTROSE_DUNE.grass.count+CH.MONTROSE_POINT.prairie.tufts+spB.tufts+spB.reeds+CH.LP_CONSERVATORY.flora.tufts);   // 117: + the South Pond bank grass/reeds; 122: + the conservatory straw grasses (APPENDED — every existing index is unchanged)
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
     // no grass poking through the entrance monument's decomposed-granite pad
     // (task 023): the scaleY rand is still drawn (rng order frozen), the tuft
@@ -491,6 +491,31 @@ export function buildProps(){
       grow(spB.tuftSeed,spB.tufts,spB.tuftScaleY,spB.ringR,26);                    // grass across the whole 9 m bank ring (~32% accept -> all 300 land)
       grow(spB.reedSeed,spB.reeds,spB.reedScaleY,Math.min(spB.ringR,3.2),60);      // cattails in a tight 3.2 m waterline band (the brief's "reeds nearer the water")
     }
+    // ---- 122 CONSERVATORY straw grasses: feathery fountain grasses through the
+    // formal garden's lawn panels — grown into the SAME tuft bucket in place
+    // (placed continues past the South Pond banks → +0 InstancedMesh buckets,
+    // +0 draws). LOCAL flora.tuftSeed rng, rejection-sampled inside the
+    // formalGarden rect: off the glasshouse/vestibule/Bates carves, out of the
+    // parterre bed rects (those are the flowers' soil slabs) and >=1.4 m clear
+    // of every garden-walk centreline inside the rect (LOOP / Bates RING / both
+    // AXIS stubs — EAST and the STOCKTON crossing leave the rect immediately).
+    // ZERO shared rng — strictly after the frozen fill, so every pre-122 tuft
+    // matrix is byte-identical. HEIGHT is the read: nothing ever calls
+    // setColorAt on this bucket, so it has no instanceColor and stays one flat
+    // toon green — the dune/prairie precedent. ----
+    {
+      const LPC=CH.LP_CONSERVATORY,FG=LPC.formalGarden,FLO=LPC.flora,gr=mkrng(FLO.tuftSeed);
+      const gWalks=[CH.LP_GARDEN_LOOP,CH.LP_BATES_RING,CH.LP_GARDEN_AXIS_N,CH.LP_GARDEN_AXIS_S];
+      const inBed=(x,z)=>{for(const b of LPC.beds)if(x>=b.x0&&x<=b.x1&&z>=b.z0&&z<=b.z1)return true;return false};
+      const gClr2=1.4*1.4;
+      for(let i=0;i<FLO.tufts;i++)for(let t=0;t<30;t++){
+        const x=FG.x0+gr()*(FG.x1-FG.x0),z=FG.z0+gr()*(FG.z1-FG.z0);
+        if(CH.conservatoryBlockedHit(x,z)||inBed(x,z))continue;
+        let bad=false;for(const w of gWalks)if(mpPoly2(x,z,w)<gClr2){bad=true;break}
+        if(bad)continue;
+        M.compose(V.set(x,0.14,z),Q.identity(),S.set(1,FLO.tuftScaleY[0]+gr()*(FLO.tuftScaleY[1]-FLO.tuftScaleY[0]),1));tuft.setMatrixAt(placed++,M);break;
+      }
+    }
     tuft.count=placed;                                   // trim any unfilled tail (no stray tuft at origin)
     tuft.instanceMatrix.needsUpdate=true;scene.add(tuft);RUSTLE_MESHES.push(tuft);   // 109: brushable
   }
@@ -507,8 +532,12 @@ export function buildProps(){
     // 117: + the South Pond bank drifts (liatris / ironweed / goldenrod) — the
     // same index-gated grow, APPENDED after Montrose (existing indices unchanged).
     const spM=spB.drifts.length*spB.perDrift;
-    const stems=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05,0.05,0.55,5),toon(0x4f9f52,{}),n+mpM+spM);
-    const heads=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.19,0),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),n+mpM+spM);
+    // 122: + the conservatory parterre beds and Grandmother's Garden clumps —
+    // the same index-gated grow, APPENDED after South Pond (existing indices
+    // unchanged). Derived from the data, never a copied literal.
+    const LPC=CH.LP_CONSERVATORY,lpcM=LPC.beds.length*LPC.flora.bedPer+LPC.grandmothers.clumps.length*LPC.flora.gmPer;
+    const stems=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05,0.05,0.55,5),toon(0x4f9f52,{}),n+mpM+spM+lpcM);
+    const heads=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.19,0),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),n+mpM+spM+lpcM);
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
     for(let i=0;i<n;i++){
       let x,z;
@@ -548,9 +577,10 @@ export function buildProps(){
     // InstancedMesh buckets, +0 draws). LOCAL banks.flowerSeed rng, uniform
     // sqrt-radius discs around each banks.drifts entry, rejection-sampled
     // through the shared spBank annulus test. ZERO shared rng (strictly after
-    // the frozen fill). setColorAt tints each drift by species — inert under
-    // r128 (the heads material has no vertexColors, like every head above), but
-    // kept so the species survive a three upgrade. ----
+    // the frozen fill). setColorAt tints each drift by species — LIVE under
+    // r128 after all (WebGLProgram defines USE_COLOR when instancingColor is
+    // present; verified visually, task 122 — the earlier "inert" note here was
+    // wrong, which is why the drifts always did read as their species). ----
     {
       const fr=mkrng(spB.flowerSeed),ring2=spB.ringR*spB.ringR;
       const cols=[new THREE.Color(spB.liatris),new THREE.Color(spB.ironweed),new THREE.Color(spB.goldenrod)];
@@ -561,6 +591,59 @@ export function buildProps(){
           const a=fr()*Math.PI*2,rr=Math.sqrt(fr())*d[2],x=d[0]+Math.cos(a)*rr,z=d[1]+Math.sin(a)*rr;
           if(!spBank(x,z,ring2))continue;
           const s=0.9+fr()*0.5;
+          M.compose(V.set(x,0.28*s,z),Q.identity(),S.set(1,s,1));stems.setMatrixAt(idx,M);
+          M.compose(V.set(x,0.62*s,z),Q.identity(),S.set(1,0.8,1));heads.setMatrixAt(idx,M);
+          heads.setColorAt(idx,col);idx++;break;             // idx advances ONLY on a placed flower (no uncolored gaps)
+        }
+      });
+      stems.count=heads.count=idx;
+    }
+    // ---- 122 CONSERVATORY PARTERRE beds: the hot ribbon-bed planting (reds /
+    // magenta / silver-white edging) — grown into the SAME stems+heads buckets
+    // in place (idx continues past the South Pond grow → +0 InstancedMesh
+    // buckets, +0 draws). ONE LOCAL flora.bedSeed rng walked across the beds in
+    // ARRAY ORDER; uniform inside each bed rect inset 0.15 so no flower hangs
+    // over the soil-slab edge. Dense and even — the formal read, no rejection
+    // sampling (the rects are already clear of the carves and the walks).
+    // The beds sit on 0.12 m soil slabs (structures.js), so both composes lift
+    // by SOIL_H. setColorAt tints each panel from bedColors and DOES render:
+    // r128's fragment prefix (WebGLProgram.js) defines USE_COLOR when
+    // instancingColor is present, not only when the material sets vertexColors
+    // — so the hot red / magenta / silver-white parterre palette is the read
+    // (verified in tools/shots/s122-beds.png). ZERO shared rng. ----
+    const SOIL_H=0.12;   // parterre soil-slab height (structures.js) — the flowers stand ON it
+    {
+      const br=mkrng(LPC.flora.bedSeed),bcols=LPC.bedColors.map(c=>new THREE.Color(c));
+      let idx=stems.count;                                  // continues past the South Pond grow
+      for(const b of LPC.beds){
+        const col=bcols[b.c%bcols.length];
+        for(let k=0;k<LPC.flora.bedPer;k++){
+          const x=b.x0+0.15+br()*(b.x1-b.x0-0.3),z=b.z0+0.15+br()*(b.z1-b.z0-0.3),s=0.9+br()*0.5;
+          M.compose(V.set(x,SOIL_H+0.28*s,z),Q.identity(),S.set(1,s,1));stems.setMatrixAt(idx,M);
+          M.compose(V.set(x,SOIL_H+0.62*s,z),Q.identity(),S.set(1,0.8,1));heads.setMatrixAt(idx,M);
+          heads.setColorAt(idx,col);idx++;
+        }
+      }
+      stems.count=heads.count=idx;
+    }
+    // ---- 122 GRANDMOTHER'S GARDEN clumps: the informal cottage half west across
+    // the Stockton crossing — loose goldenrod/liatris/ironweed/orange drifts in
+    // open lawn (NO soil slabs, y-base 0). Same index-gated grow into the
+    // stems+heads buckets (+0 buckets, +0 draws), LOCAL flora.gmSeed rng,
+    // sqrt-radius disc per clump, rejection-sampled on LP land minus the carves,
+    // clear of the crossing's bench focal and of the crossing ribbon itself.
+    // ZERO shared rng. ----
+    {
+      const GM=LPC.grandmothers,gfr=mkrng(LPC.flora.gmSeed),gcols=GM.colors.map(c=>new THREE.Color(c));
+      let idx=stems.count;                                  // continues past the parterre beds
+      GM.clumps.forEach((c,ci)=>{
+        const col=gcols[ci%gcols.length];
+        for(let k=0;k<LPC.flora.gmPer;k++)for(let tries=0;tries<30;tries++){
+          const a=gfr()*Math.PI*2,rr=Math.sqrt(gfr())*c[2],x=c[0]+Math.cos(a)*rr,z=c[1]+Math.sin(a)*rr;
+          if(!CH.lpLandHit(x,z)||CH.lpBlockedHit(x,z))continue;                       // LP land minus every carve
+          if((x-GM.bench.x)**2+(z-GM.bench.z)**2<1.44)continue;                       // >=1.2 m off the bench
+          if(mpPoly2(x,z,CH.LP_STOCKTON_CROSSING)<1.69)continue;                      // >=1.3 m off the crossing walk
+          const s=0.9+gfr()*0.5;
           M.compose(V.set(x,0.28*s,z),Q.identity(),S.set(1,s,1));stems.setMatrixAt(idx,M);
           M.compose(V.set(x,0.62*s,z),Q.identity(),S.set(1,0.8,1));heads.setMatrixAt(idx,M);
           heads.setColorAt(idx,col);idx++;break;             // idx advances ONLY on a placed flower (no uncolored gaps)

@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-26T18:38:46.984Z",
- "count": 164,
+ "generated": "2026-07-26T22:14:35.394Z",
+ "count": 166,
  "waypoints": [
   {
    "id": "spawn",
@@ -1556,6 +1556,64 @@
     }
    ],
    "expectation": "THE LAKE EAST OF THE ZOO IS EMPTY WATER (task 120, issue 036 — the owner: \"lots of people just sitting out in the water east of the zoo\"). Looking east from the zoo’s Cannon flank across Lake Shore Drive: the berm, the roadway, and then OPEN LAKE to the horizon with nothing standing on it — no chibi figures, no benches, no props adrift. Just water, whitecaps and sky. The high framing sweeps the whole surface; a single person out there is a fail."
+  },
+  {
+   "id": "lp-conservatory",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -67.8,
+   "z": 730.8,
+   "framings": [
+    {
+     "yaw": -3.08,
+     "pitch": 0.09,
+     "dist": 6.5
+    },
+    {
+     "x": -63.5,
+     "z": 730.5,
+     "yaw": -2.62,
+     "pitch": 0.07,
+     "dist": 5.5
+    },
+    {
+     "x": -70.6,
+     "z": 712.6,
+     "yaw": -3,
+     "pitch": 0.03,
+     "dist": 6.5
+    }
+   ],
+   "expectation": "THE CONSERVATORY (the glasshouse hero, task 122): a great Victorian glasshouse of pale-green glass rises against the sky at the head of the formal garden — the tall Palm House sweeping up in a soft double curve to a flat verdigris ridge with dark palm heads cresting through its lantern, lower glass wings stepping down each side over a warm rusticated stone base; a small glass pyramid vestibule fronts the south face, its dark-green awning band marking the FREE ADMISSION doors, flanked by dark evergreens, with hot parterre beds, straw grasses and gravel walks in the garden foreground."
+  },
+  {
+   "id": "lp-bates",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -67,
+   "z": 733.8,
+   "framings": [
+    {
+     "yaw": -3.05,
+     "pitch": 0.1,
+     "dist": 4.6
+    },
+    {
+     "x": -73.2,
+     "z": 732.8,
+     "yaw": 2.98,
+     "pitch": 0.09,
+     "dist": 4.8
+    },
+    {
+     "x": -69.4,
+     "z": 729.8,
+     "yaw": -2.6,
+     "pitch": 0.07,
+     "dist": 4.6
+    }
+   ],
+   "expectation": "STORKS AT PLAY (Eli Bates fountain, task 122): a low broad ring of grey granite — a sitting-ledge basin — holds a tall near-black thicket of bronze reeds and cattails, two storks with spread wings and small merboys wrestling fish reading as dark silhouettes at its base, a modest plume of water rising over them; hot red and magenta parterre beds flank the lawn axis and the green glasshouse fills the view behind."
   },
   {
    "id": "dv-bay-deck",

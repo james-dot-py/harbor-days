@@ -1962,6 +1962,39 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
     expect('skyline hidden before the first park hall (z 671)',G.fadeZ1<671,true); }
 }
 
+// ===== LINCOLN PARK (task 122 CONSERVATORY) — LIVE walkability (shared carves)
+{ console.log('\n--- LINCOLN PARK 122 (conservatory + formal garden + Grandmother\'s) ---');
+  const C=CH.LP_CONSERVATORY;
+  // (a) every garden walk runs on walkable ground, clear of every carve
+  for(const [nm,arr] of [['loop',CH.LP_GARDEN_LOOP],['ring',CH.LP_BATES_RING],['axisN',CH.LP_GARDEN_AXIS_N],['axisS',CH.LP_GARDEN_AXIS_S],['east',CH.LP_GARDEN_EAST],['crossing',CH.LP_STOCKTON_CROSSING]]){
+    expect(`garden ${nm} fully walkable`,arr.every(p=>walkable(p[0],p[1])),true);
+    expect(`garden ${nm} clear of all carves`,arr.every(p=>!CH.lpBlockedHit(p[0],p[1])),true);
+  }
+  // (b) the glasshouse footprint is BLOCKED (centre + inset corners), aprons walk
+  for(const [x,z] of [[-70,688],[-80.5,673.5],[-59.5,673.5],[-80.5,702.5],[-59.5,702.5]])
+    expect(`glasshouse carve (${x},${z}) blocked`,walkable(x,z),false);
+  for(const [x,z] of [[-70,671.8],[-78,704.2],[-57.8,688],[-82.2,688]])
+    expect(`glasshouse apron (${x},${z}) walks`,walkable(x,z),true);
+  // (c) the vestibule porch carve + the door threshold
+  expect('vestibule carve blocked',walkable(-70,705.5),false);
+  expect('door threshold (-70,709.2) walks',walkable(-70,709.2),true);
+  // (d) the Bates basin disc: centre + inside carveR blocked; carveR+0.6 walks
+  for(const [x,z] of [[-70,726],[-70,723],[-72.5,727.5]])
+    expect(`Bates basin (${x},${z}) blocked`,walkable(x,z),false);
+  for(const [x,z] of [[-70,721.8],[-74.2,726],[-70,730.2],[-65.8,726]])
+    expect(`Bates ring walk (${x},${z}) walks`,walkable(x,z),true);
+  // (e) Grandmother's Garden rides the LAND bulge; the void past x -107 stays void
+  expect('Grandmother\'s bench spot walks',walkable(C.grandmothers.bench.x,C.grandmothers.bench.z),true);
+  expect('Grandmother\'s clumps all walk',C.grandmothers.clumps.every(c=>walkable(c[0],c[1])),true);
+  for(const [x,z] of [[-100,720],[-105,750],[-98,780]])
+    expect(`bulge lawn (${x},${z}) walks`,walkable(x,z),true);
+  for(const [x,z] of [[-109,750],[-112,700],[-120,760]])
+    expect(`west void (${x},${z}) NOT walkable`,walkable(x,z),false);
+  // (f) topology: the garden sits BETWEEN the vestibule and the zoo's north fence
+  expect('garden z-band S of the doors',C.formalGarden.z0>C.vestCarve.z1,true);
+  expect('garden stops N of the zoo fence band',C.formalGarden.z1<738,true);
+}
+
 // ===== 088 PERMANENT GUARDS — spawned as gate categories so the standard
 // verify (step 1 = this file) mechanically runs them every time:
 //   path-layers.mjs      — path/decal y-ladder assertion (issue 028; pure Node)

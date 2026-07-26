@@ -2700,6 +2700,445 @@ function buildSouthPond(POSTS,RAILS){
   emit(gWood,toon(ST.wood));    emit(gBack,toon(0x2c2620));
 }
 
+// ---- 122: THE conservatory glass texture. ONE canvas shared by every glass
+// surface (walls, ogee roofs, the vestibule pyramid, the ridge lantern) on ONE
+// self-lit bmat — the 044 law: big slabs seen from below go bmat, never toon,
+// or the green hemisphere bounce turns the whole glasshouse into a lawn. Pale
+// mint field + a soft warm interior wash toward the lower centre + white
+// glazing bars; every quad carries plain 0..1 uvs so the pattern repeats once
+// per pane (no RepeatWrapping needed, so it can never seam).
+function conservatoryGlassTex(field,warm){
+  const cv=document.createElement('canvas');cv.width=cv.height=128;const g=cv.getContext('2d');
+  g.fillStyle='#'+field.toString(16).padStart(6,'0');g.fillRect(0,0,128,128);
+  const w=new THREE.Color(warm),rgb=[w.r*255|0,w.g*255|0,w.b*255|0].join(',');
+  const gr=g.createRadialGradient(64,122,3,64,122,94);          // canvas bottom = v 0 = the pane's foot
+  gr.addColorStop(0,'rgba('+rgb+',0.92)');gr.addColorStop(0.5,'rgba('+rgb+',0.40)');gr.addColorStop(1,'rgba('+rgb+',0)');
+  g.fillStyle=gr;g.fillRect(0,0,128,128);
+  g.strokeStyle='rgba(255,255,255,0.55)';g.lineWidth=3.2;       // white glazing bars, up the slope
+  for(let i=0;i<=8;i++){const x=i*16;g.beginPath();g.moveTo(x,0);g.lineTo(x,128);g.stroke();}
+  g.strokeStyle='rgba(104,138,122,0.34)';g.lineWidth=2;         // darker transom bars
+  for(let i=0;i<=4;i++){const y=i*32;g.beginPath();g.moveTo(0,y);g.lineTo(128,y);g.stroke();}
+  const t=new THREE.CanvasTexture(cv);t.anisotropy=4;return t;
+}
+// ---- 122: the Bates spray atlas (the Millennium/Crown vocabulary, static):
+// LEFT half (u 0..0.5) a soft splash bloom, RIGHT half (u 0.5..1) the plume —
+// canvas BOTTOM = v 0 = the nozzle, so a plane's foot is the spout.
+function conservatorySprayTex(){
+  const cv=document.createElement('canvas');cv.width=cv.height=256;const g=cv.getContext('2d');
+  g.clearRect(0,0,256,256);
+  const sp=g.createRadialGradient(64,128,2,64,128,62);
+  sp.addColorStop(0,'rgba(255,255,255,0.80)');sp.addColorStop(0.45,'rgba(226,244,240,0.34)');sp.addColorStop(1,'rgba(226,244,240,0)');
+  g.fillStyle=sp;g.beginPath();g.arc(64,128,62,0,7);g.fill();
+  for(let y=0;y<256;y++){
+    const f=y/255,w=7+30*Math.pow(1-f,1.5),a=0.10+0.60*Math.pow(f,1.2);
+    const lg=g.createLinearGradient(192-w,0,192+w,0);
+    lg.addColorStop(0,'rgba(255,255,255,0)');
+    lg.addColorStop(0.5,'rgba(248,253,251,'+a.toFixed(3)+')');
+    lg.addColorStop(1,'rgba(255,255,255,0)');
+    g.fillStyle=lg;g.fillRect(192-w,y,2*w,1.5);
+  }
+  g.fillStyle='rgba(255,255,255,0.88)';g.fillRect(188,44,8,212);     // bright core
+  const fl=g.createRadialGradient(192,250,2,192,250,40);
+  fl.addColorStop(0,'rgba(255,255,255,0.85)');fl.addColorStop(1,'rgba(240,252,250,0)');
+  g.fillStyle=fl;g.beginPath();g.ellipse(192,250,40,13,0,0,7);g.fill();
+  const t=new THREE.CanvasTexture(cv);t.anisotropy=4;return t;
+}
+
+// =====================================================================
+// 122 — THE LINCOLN PARK CONSERVATORY + the formal garden + the Eli Bates
+// "Storks at Play" fountain, the whole precinct folded to one merged mesh per
+// material (the buildSouthPond idiom). The 116 ruling, owner-approved
+// 2026-07-26: the vestibule flips to the SOUTH face over the garden axis.
+//   THE TWO WIN CONDITIONS (refs/lincoln-park/BATES-FOUNTAIN.md + the
+//   9719113515 photo):
+//     (a) the OGEE profile against sky — every pavilion roof is lofted from
+//         its eave rect to its flat copper ridge cap on a SMOOTHSTEP inset
+//         (f(t)=t*t*(3-2*t), 7 bands). Smoothstep is vertical at BOTH ends,
+//         which is exactly the ref: a straight glass shoulder off the eave,
+//         a hard convex sweep through the middle, and the short vertical
+//         clerestory collar under the copper. NOT an arch, NOT a pyramid.
+//     (b) the fountain = a LOW BROAD grey sitting ring under a tall
+//         near-black bronze reed/cattail THICKET (3-4x the bird height);
+//         the 2 beak-spouting storks and 3 merboys-with-fish are silhouette
+//         detail at its base, never the mass.
+// EVERY placement reads out of CH.LP_CONSERVATORY. ZERO rng()/rand() (index
+// hashes only) so no towel/flower in the world moves. NO colliders and NO
+// walkRects — walkability is already data-carved by conservatoryBlockedHit
+// (the anti-trap law). All glass shares ONE bmat (044); toon() is cached per
+// hex so repeated colours reuse one material.
+// =====================================================================
+function buildConservatory(){
+  const C=CH.LP_CONSERVATORY,V=C.vestibule,B=C.batesFountain;
+
+  // -- per-material accumulators (merged + scene.add'd at the end) ---------
+  const gStone=[],gStoneD=[],gGlass=[],gFrame=[],gCopper=[],gPalm=[],gPalm2=[],
+        gTrunk=[],gAwn=[],gBrown=[],gGlow=[],gGrey=[],gBronze=[],gReed=[],
+        gApron=[],gDark=[],gWood=[],gLamp=[],gFx=[],gWater=[];
+  const box=(arr,w,h,d,x,y,z,ry)=>{const g=new THREE.BoxGeometry(w,h,d);if(ry)g.rotateY(ry);g.translate(x,y,z);arr.push(g);};
+  const emit=(geos,mat)=>{if(!geos.length)return;
+    scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(geos.map(g=>g.index?g.toNonIndexed():g)),mat));};
+  const fit=(g,t,mw,fs,w)=>{g.font=`${w} ${fs}px "Trebuchet MS",sans-serif`;
+    while(g.measureText(t).width>mw&&fs>10){fs-=2;g.font=`${w} ${fs}px "Trebuchet MS",sans-serif`;}};
+  const mkGeo=(P,N,U)=>{const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.Float32BufferAttribute(P,3));
+    g.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));
+    g.setAttribute('uv',new THREE.Float32BufferAttribute(U,2));return g;};
+  // FIXED corner->uv quad (a=bottom-left, b=bottom-right, c=top-right,
+  // d=top-left). The winding flips to match the wanted normal, the uv
+  // assignment NEVER does: buildSouthPond's quad() reorders the CORNERS on a
+  // flip, which mirrors the uv set — harmless for a flat ribbon, but it would
+  // run the glazing bars sideways on half the panes here.
+  const gquad=(P,N,U,a,b,c,d,nx,ny,nz)=>{
+    const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=d[0]-a[0],vy=d[1]-a[1],vz=d[2]-a[2];
+    const kx=uy*vz-uz*vy,ky=uz*vx-ux*vz,kz=ux*vy-uy*vx;
+    const W=[a,b,c,d],UV=[[0,0],[1,0],[1,1],[0,1]];
+    const T=(kx*nx+ky*ny+kz*nz)<0?[0,3,2,0,2,1]:[0,1,2,0,2,3];
+    for(const i of T){P.push(W[i][0],W[i][1],W[i][2]);N.push(nx,ny,nz);U.push(UV[i][0],UV[i][1]);}
+  };
+  const gtri=(P,N,U,a,b,c,nx,ny,nz)=>{
+    const ux=b[0]-a[0],uy=b[1]-a[1],uz=b[2]-a[2],vx=c[0]-a[0],vy=c[1]-a[1],vz=c[2]-a[2];
+    const kx=uy*vz-uz*vy,ky=uz*vx-ux*vz,kz=ux*vy-uy*vx;
+    const W=[a,b,c],UV=[[0,0],[1,0],[0.5,1]];
+    const T=(kx*nx+ky*ny+kz*nz)<0?[0,2,1]:[0,1,2];
+    for(const i of T){P.push(W[i][0],W[i][1],W[i][2]);N.push(nx,ny,nz);U.push(UV[i][0],UV[i][1]);}
+  };
+  const uvTo=(g,u0,v0,u1,v1)=>{const uv=g.attributes.uv;
+    for(let i=0;i<uv.count;i++)uv.setXY(i,u0+(u1-u0)*uv.getX(i),v0+(v1-v0)*uv.getY(i));return g;};
+  const hsh=i=>{const s=Math.sin(i*127.1+311.7)*43758.5453;return s-Math.floor(s);};   // index hash — deterministic, rng-free
+
+  // =====================================================================
+  // (1) THE GLASSHOUSE — nested ogee pavilions on a rusticated sandstone base
+  // =====================================================================
+  const BASE_H=1.10;                                   // rusticated plinth height
+  const wingCap=w=>({cw:0.9,cd:w.d-3});                // wings carry no capW/capD: a narrow ridge instead
+  const PAV=[{p:C.palm ,rL:8,rS:6},{p:C.gable,rL:5,rS:4},
+             {p:C.wings[0],rL:6,rS:2},{p:C.wings[1],rL:6,rS:2}];
+  // the smoothstep ogee profile: level(t) -> {y, half-width, half-depth}
+  const levOf=p=>{
+    const cw=p.capW!==undefined?p.capW:wingCap(p).cw,cd=p.capD!==undefined?p.capD:wingCap(p).cd;
+    return t=>{const s=t*t*(3-2*t);
+      return {y:p.eaveH+(p.capH-p.eaveH)*t,hw:p.w/2+(cw/2-p.w/2)*s,hd:p.d/2+(cd/2-p.d/2)*s};};
+  };
+
+  // -- rusticated warm-sandstone plinth: a solid course ring, a recessed dark
+  // shadow joint, and two courses of proud blocks whose lengths stagger off an
+  // index cycle (no rng) so the coursing never reads as one long extrusion.
+  const plinth=(cx,cz,w,d)=>{
+    const hw=w/2+0.22,hd=d/2+0.22;
+    for(const sz of[-1,1])box(gStone,hw*2,BASE_H,0.44,cx,BASE_H/2,cz+sz*(d/2),0);
+    for(const sx of[-1,1])box(gStone,0.44,BASE_H,d-0.44,cx+sx*(w/2),BASE_H/2,cz,0);
+    // the shadow joint rides PROUD of the wall face but 0.05 SHY of the block
+    // courses — buried inside the wall box it renders as nothing at all.
+    for(const sz of[-1,1])box(gStoneD,hw*2+0.02,0.13,0.10,cx,0.585,cz+sz*(hd+0.005),0);
+    for(const sx of[-1,1])box(gStoneD,0.10,0.13,hd*2-0.16,cx+sx*(hw+0.005),0.585,cz,0);
+    for(const[cy,ch,ph]of[[0.28,0.44,0],[0.87,0.40,1]]){
+      for(const sz of[-1,1]){let t=-hw,k=ph;
+        while(t<hw-0.35){const L=Math.min(1.35+0.5*((k*5)%3),hw-t);
+          box(gStone,L-0.08,ch,0.11,cx+t+L/2,cy,cz+sz*(hd+0.05),0);t+=L;k++;}}
+      for(const sx of[-1,1]){let t=-hd,k=ph+1;
+        while(t<hd-0.35){const L=Math.min(1.35+0.5*((k*5)%3),hd-t);
+          box(gStone,0.11,ch,L-0.08,cx+sx*(hw+0.05),cy,cz+t+L/2,0);t+=L;k++;}}
+    }
+    for(const sz of[-1,1])box(gStone,hw*2+0.16,0.16,0.60,cx,BASE_H+0.05,cz+sz*(d/2),0);   // cap course the glass sits on
+    for(const sx of[-1,1])box(gStone,0.60,0.16,d-0.30,cx+sx*(w/2),BASE_H+0.05,cz,0);
+  };
+
+  for(const{p,rL,rS}of PAV){
+    plinth(p.x,p.z,p.w,p.d);
+    const lev=levOf(p),hw=p.w/2,hd=p.d/2;
+    // -- vertical glass walls, plinth top -> eave -------------------------
+    {
+      const P=[],N=[],U=[],y0=BASE_H+0.13,y1=p.eaveH;
+      gquad(P,N,U,[p.x-hw,y0,p.z+hd],[p.x+hw,y0,p.z+hd],[p.x+hw,y1,p.z+hd],[p.x-hw,y1,p.z+hd],0,0,1);
+      gquad(P,N,U,[p.x+hw,y0,p.z-hd],[p.x-hw,y0,p.z-hd],[p.x-hw,y1,p.z-hd],[p.x+hw,y1,p.z-hd],0,0,-1);
+      gquad(P,N,U,[p.x+hw,y0,p.z+hd],[p.x+hw,y0,p.z-hd],[p.x+hw,y1,p.z-hd],[p.x+hw,y1,p.z+hd],1,0,0);
+      gquad(P,N,U,[p.x-hw,y0,p.z-hd],[p.x-hw,y0,p.z+hd],[p.x-hw,y1,p.z+hd],[p.x-hw,y1,p.z-hd],-1,0,0);
+      gGlass.push(mkGeo(P,N,U));
+    }
+    // -- THE OGEE ROOF: 7 lofted bands, smoothstep on the inset ------------
+    {
+      const P=[],N=[],U=[],NB=7;
+      for(let i=0;i<NB;i++){
+        const a=lev(i/NB),b=lev((i+1)/NB),dy=b.y-a.y;
+        let dr=b.hd-a.hd,L=Math.hypot(dy,dr)||1;
+        gquad(P,N,U,[p.x-a.hw,a.y,p.z+a.hd],[p.x+a.hw,a.y,p.z+a.hd],[p.x+b.hw,b.y,p.z+b.hd],[p.x-b.hw,b.y,p.z+b.hd],0,-dr/L, dy/L);
+        gquad(P,N,U,[p.x+a.hw,a.y,p.z-a.hd],[p.x-a.hw,a.y,p.z-a.hd],[p.x-b.hw,b.y,p.z-b.hd],[p.x+b.hw,b.y,p.z-b.hd],0,-dr/L,-dy/L);
+        dr=b.hw-a.hw;L=Math.hypot(dy,dr)||1;
+        gquad(P,N,U,[p.x+a.hw,a.y,p.z+a.hd],[p.x+a.hw,a.y,p.z-a.hd],[p.x+b.hw,b.y,p.z-b.hd],[p.x+b.hw,b.y,p.z+b.hd], dy/L,-dr/L,0);
+        gquad(P,N,U,[p.x-a.hw,a.y,p.z-a.hd],[p.x-a.hw,a.y,p.z+a.hd],[p.x-b.hw,b.y,p.z+b.hd],[p.x-b.hw,b.y,p.z-b.hd],-dy/L,-dr/L,0);
+      }
+      gGlass.push(mkGeo(P,N,U));
+    }
+    // -- glazing ribs: thin frame tubes riding the ogee at a FIXED fraction
+    // of the half-depth/half-width, so every rib stays on the surface and
+    // converges at the ridge (the ref's radiating bars). Wall mullions below.
+    const rib=(u,onX)=>{
+      for(const s of[-1,1]){
+        const pts=[];
+        for(let i=0;i<=8;i++){const t=i/8,L=lev(t);
+          pts.push(onX?new THREE.Vector3(p.x+s*L.hw,L.y,p.z+u*L.hd)
+                      :new THREE.Vector3(p.x+u*L.hw,L.y,p.z+s*L.hd));}
+        gFrame.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),9,0.055,3,false));
+        const wy=(BASE_H+0.13+p.eaveH)/2,wh=p.eaveH-BASE_H-0.13;
+        if(wh>0.25){
+          if(onX)box(gFrame,0.12,wh,0.10,p.x+s*(hw+0.05),wy,p.z+u*hd,0);
+          else    box(gFrame,0.10,wh,0.12,p.x+u*hw,wy,p.z+s*(hd+0.05),0);
+        }
+      }
+    };
+    for(let k=0;k<rL;k++)rib((k+0.5)/rL*2-1,true);
+    for(let k=0;k<rS;k++)rib((k+0.5)/rS*2-1,false);
+    for(const t of[0,0.5]){                              // eave-line + mid-height horizontal bands
+      const L=lev(t);
+      for(const sz of[-1,1])box(gFrame,L.hw*2+0.20,0.14,0.16,p.x,L.y,p.z+sz*L.hd,0);
+      for(const sx of[-1,1])box(gFrame,0.16,0.14,L.hd*2-0.10,p.x+sx*L.hw,L.y,p.z,0);
+    }
+    // -- verdigris copper ridge cap (a flat slab with a small overhang) ----
+    const top=lev(1);
+    box(gCopper,top.hw*2+0.60,0.24,top.hd*2+0.60,p.x,p.capH+0.12,p.z,0);
+    box(gCopper,top.hw*2+0.24,0.10,top.hd*2+0.24,p.x,p.capH+0.29,p.z,0);
+  }
+  // finial knobs on the palm cap corners
+  {
+    const P=C.palm,t=levOf(P)(1);
+    for(const sx of[-1,1])for(const sz of[-1,1]){
+      const fx=P.x+sx*(t.hw+0.22),fz=P.z+sz*(t.hd+0.22);
+      const s=new THREE.SphereGeometry(0.17,8,6);s.translate(fx,P.capH+0.42,fz);gCopper.push(s);
+      const c=new THREE.ConeGeometry(0.11,0.26,6);c.translate(fx,P.capH+0.68,fz);gCopper.push(c);
+    }
+  }
+
+  // -- (1b) THE OPEN RIDGE LANTERN on the palm house, with dark palm crowns
+  // cresting through it. Self-lit glass can't show an interior, so the
+  // sanctioned "palms above the ridge" read is literal: heads over the ridge.
+  {
+    const P=C.palm,lw=1.8,ld=2.6,y0=P.capH+0.35,y1=y0+1.20;
+    for(const sx of[-1,1])for(const sz of[-1,1])box(gFrame,0.15,1.20,0.15,P.x+sx*lw,(y0+y1)/2,P.z+sz*ld,0);
+    for(const sz of[-1,1])box(gFrame,0.13,1.20,0.13,P.x,(y0+y1)/2,P.z+sz*ld,0);
+    {
+      const Q=[],N=[],U=[];
+      gquad(Q,N,U,[P.x-lw,y0,P.z+ld],[P.x+lw,y0,P.z+ld],[P.x+lw,y1,P.z+ld],[P.x-lw,y1,P.z+ld],0,0,1);
+      gquad(Q,N,U,[P.x+lw,y0,P.z-ld],[P.x-lw,y0,P.z-ld],[P.x-lw,y1,P.z-ld],[P.x+lw,y1,P.z-ld],0,0,-1);
+      gquad(Q,N,U,[P.x+lw,y0,P.z+ld],[P.x+lw,y0,P.z-ld],[P.x+lw,y1,P.z-ld],[P.x+lw,y1,P.z+ld],1,0,0);
+      gquad(Q,N,U,[P.x-lw,y0,P.z-ld],[P.x-lw,y0,P.z+ld],[P.x-lw,y1,P.z+ld],[P.x-lw,y1,P.z-ld],-1,0,0);
+      gGlass.push(mkGeo(Q,N,U));
+    }
+    for(const sz of[-1,1])box(gCopper,lw*2+0.34,0.13,0.30,P.x,y1+0.06,P.z+sz*ld,0);   // open vent coping (NO top)
+    for(const sx of[-1,1])box(gCopper,0.30,0.13,ld*2-0.10,P.x+sx*lw,y1+0.06,P.z,0);
+    // 3 chunky palm crowns poking 0.8-1.6 m above the ridge line (y1 = 12.05)
+    for(const[px,pz,s,cy]of[[-71.0,682.3,1.05,12.85],[-69.7,684.5,1.15,13.20],[-68.9,686.2,0.95,12.75]]){
+      const tr=new THREE.CylinderGeometry(0.10*s,0.17*s,cy-y0+0.5,6);
+      tr.translate(px,(y0-0.5+cy)/2,pz);gTrunk.push(tr);
+      const core=new THREE.IcosahedronGeometry(0.34*s,0);core.translate(px,cy,pz);gPalm2.push(core);
+      for(let k=0;k<7;k++){
+        const a=k*0.8976,tilt=0.92+0.22*(k%2);
+        const f=new THREE.ConeGeometry(0.17*s,1.00*s,5);
+        f.translate(0,0.50*s,0);f.rotateZ(tilt);f.rotateY(-a);f.translate(px,cy,pz);
+        (k%2?gPalm2:gPalm).push(f);
+      }
+    }
+  }
+
+  // =====================================================================
+  // (2) THE GLASS PYRAMID VESTIBULE on the SOUTH face + the awning sign
+  // =====================================================================
+  const vHW=V.w/2,vHD=V.d/2,SILL=0.40,EAVE=V.awning.y,zS=V.z+vHD;   // eave 2.55 = the awning top
+  box(gStone,V.w+0.4,SILL,V.d+0.3,V.x,SILL/2,V.z,0);                // low stone sill
+  box(gStoneD,V.w+0.5,0.10,V.d+0.4,V.x,SILL+0.05,V.z,0);
+  {
+    const P=[],N=[],U=[];
+    gquad(P,N,U,[V.x-vHW,SILL,zS],[V.x+vHW,SILL,zS],[V.x+vHW,EAVE,zS],[V.x-vHW,EAVE,zS],0,0,1);
+    gquad(P,N,U,[V.x+vHW,SILL,V.z-vHD],[V.x-vHW,SILL,V.z-vHD],[V.x-vHW,EAVE,V.z-vHD],[V.x+vHW,EAVE,V.z-vHD],0,0,-1);
+    gquad(P,N,U,[V.x+vHW,SILL,zS],[V.x+vHW,SILL,V.z-vHD],[V.x+vHW,EAVE,V.z-vHD],[V.x+vHW,EAVE,zS],1,0,0);
+    gquad(P,N,U,[V.x-vHW,SILL,V.z-vHD],[V.x-vHW,SILL,zS],[V.x-vHW,EAVE,zS],[V.x-vHW,EAVE,V.z-vHD],-1,0,0);
+    // the 4 triangular glass slopes
+    const ap=[V.x,V.apexH,V.z],rise=V.apexH-EAVE;
+    let L=Math.hypot(rise,vHD);
+    gtri(P,N,U,[V.x-vHW,EAVE,zS],[V.x+vHW,EAVE,zS],ap,0,vHD/L,rise/L);
+    gtri(P,N,U,[V.x+vHW,EAVE,V.z-vHD],[V.x-vHW,EAVE,V.z-vHD],ap,0,vHD/L,-rise/L);
+    L=Math.hypot(rise,vHW);
+    gtri(P,N,U,[V.x+vHW,EAVE,zS],[V.x+vHW,EAVE,V.z-vHD],ap,vHW/L,rise/L,0);
+    gtri(P,N,U,[V.x-vHW,EAVE,V.z-vHD],[V.x-vHW,EAVE,zS],ap,-vHW/L,rise/L,0);
+    gGlass.push(mkGeo(P,N,U));
+  }
+  for(const sx of[-1,1])for(const sz of[-1,1]){                     // pale hip edges
+    const c=new THREE.LineCurve3(new THREE.Vector3(V.x+sx*vHW,EAVE,V.z+sz*vHD),new THREE.Vector3(V.x,V.apexH,V.z));
+    gFrame.push(new THREE.TubeGeometry(c,1,0.065,4,false));
+  }
+  for(const sz of[-1,1])box(gFrame,V.w+0.22,0.14,0.16,V.x,EAVE,V.z+sz*vHD,0);     // eave ring
+  for(const sx of[-1,1])box(gFrame,0.16,0.14,V.d-0.10,V.x+sx*vHW,EAVE,V.z,0);
+  {const k=new THREE.SphereGeometry(0.16,8,6);k.translate(V.x,V.apexH+0.10,V.z);gCopper.push(k);}
+
+  // -- the DARK-GREEN AWNING BAND. LP_CONSERVATORY.vestibule.awning.w is 11.5
+  // and the porch is only 5.8 wide: the band WRAPS the entry corners exactly
+  // as the ref photo shows — 6.3 across the front + a 2.6 return down each
+  // side = 11.5 running metres.
+  const awT=V.awning.y,awB=awT-V.awning.drop,awY=(awT+awB)/2,awZ=zS+0.225;
+  box(gAwn,V.w+0.5,V.awning.drop,0.45,V.x,awY,awZ,0);
+  for(const sx of[-1,1])box(gAwn,0.45,V.awning.drop,2.6,V.x+sx*(vHW+0.025),awY,zS-1.30+0.10,0);
+  {  // 'LINCOLN PARK CONSERVATORY / · FREE ADMISSION ·' — the zoo east-gate
+     // canvas recipe. FrontSide plane facing SOUTH (+z, PlaneGeometry's own
+     // default normal, so NO rotateY) 0.06 proud of the SOLID awning box,
+     // which is its own backing (the bridge-sign precedent: no mirror
+     // artifact, and one fewer merged bucket than a separate dark backer).
+    const cv=document.createElement('canvas');cv.width=1024;cv.height=160;const g=cv.getContext('2d');
+    g.fillStyle='#'+C.awnGreen.toString(16).padStart(6,'0');g.fillRect(0,0,1024,160);
+    g.textAlign='center';g.textBaseline='middle';
+    g.fillStyle='#f0e8d2';fit(g,V.sign,950,72,'800');g.fillText(V.sign,512,58);
+    const reg='· '+V.register+' ·';
+    g.fillStyle='#e5c56a';fit(g,reg,640,32,'700');g.fillText(reg,512,124);
+    const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
+    const pl=new THREE.Mesh(new THREE.PlaneGeometry(5.0,0.78),curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide})));
+    pl.position.set(V.x,awY+0.03,awZ+0.285);scene.add(pl);
+  }
+  // -- doors + the single FREE ADMISSION glow pane (the Theater glow recipe)
+  box(gBrown,2.40,2.00,0.12,V.x,SILL+1.00,zS+0.06,0);
+  box(gFrame,0.09,2.00,0.15,V.x,SILL+1.00,zS+0.10,0);                      // meeting mullion
+  for(const sx of[-1,1])box(gFrame,0.12,2.14,0.15,V.x+sx*1.26,SILL+1.07,zS+0.08,0);
+  box(gFrame,2.64,0.12,0.15,V.x,SILL+2.07,zS+0.08,0);
+  {const g=new THREE.PlaneGeometry(1.62,0.88);g.translate(V.x,SILL+0.80,zS+0.14);gGlow.push(g);}   // ONE warm pane; the dark leaves frame it
+
+  // =====================================================================
+  // (3) THE ELI BATES FOUNTAIN — low broad ring, dominant reed thicket
+  // =====================================================================
+  const WY=0.425;                                        // basin water level
+  {  // the red-brown paved apron (the pooled zoo-brick 0x8e4f3c, NOT the
+     // data's 0x8a5a40 — that hex has no other consumer and would open a
+     // whole extra merged bucket for one disc; the zoo brick is the
+     // sanctioned pooled equivalent and reads identically).
+    const a=new THREE.CircleGeometry(B.apronR,40);a.rotateX(-Math.PI/2);
+    a.translate(B.x,0.06,B.z);gApron.push(a);
+  }
+  {  // two concentric grey rings: a low outer step, then the flat sitting ledge
+    const st=new THREE.CylinderGeometry(3.55,3.55,0.25,32);st.translate(B.x,0.125,B.z);gGrey.push(st);
+    const ow=new THREE.CylinderGeometry(B.basinR,B.basinR,B.rimH,36,1,true);ow.translate(B.x,B.rimH/2,B.z);gGrey.push(ow);
+    const lg=new THREE.RingGeometry(B.basinR-B.rimW,B.basinR,36,1);lg.rotateX(-Math.PI/2);
+    lg.translate(B.x,B.rimH,B.z);gGrey.push(lg);
+    const fl=new THREE.CylinderGeometry(B.basinR-B.rimW+0.03,B.basinR-B.rimW+0.03,WY,32);
+    fl.translate(B.x,WY/2,B.z);gGrey.push(fl);                             // basin floor stone
+    const w=new THREE.CircleGeometry(B.basinR-B.rimW+0.01,32);w.rotateX(-Math.PI/2);
+    w.translate(B.x,WY+0.005,B.z);gWater.push(w);
+  }
+  // -- THE THICKET: the win condition. 21 near-black bronze reeds, 1.55..reedH
+  // tall on a golden-angle spiral, leaning out — a spiky vertical cluster
+  // 3-4x the birds' height that reads as the mass from any standing distance.
+  const NREED=26,reedTip=[];
+  for(let i=0;i<NREED;i++){
+    const a=i*2.39996323,r=0.09+0.58*Math.sqrt(hsh(i)),
+          h=1.55+(B.reedH-1.55)*hsh(i+37),lean=0.045+0.14*hsh(i+91);
+    const bx=B.x+Math.cos(a)*r,bz=B.z+Math.sin(a)*r;
+    // THIN is the read: fat stems went mid-brown under the toon ramp and lost
+    // the near-black spike; slender stems keep sky between them.
+    const g=new THREE.CylinderGeometry(0.011,0.038,h,5);
+    g.translate(0,h/2,0);g.rotateZ(lean);g.rotateY(-a);g.translate(bx,WY,bz);gReed.push(g);
+    reedTip.push([bx,bz,a,h,lean]);
+  }
+  for(let i=1;i<NREED;i+=3){                              // cattail heads (bronze, not black — they catch the light)
+    // seated ON the stem axis: rotateZ(lean) maps the +Y stem to NEGATIVE local
+    // x, so the axis direction is (-sin·cos a, cos, -sin·sin a) — a + sign here
+    // hung every head ~0.5 m off its stem in the air (the floating-pill read)
+    const[bx,bz,a,h,lean]=reedTip[i],f=h*0.80,
+          ax=-Math.sin(lean)*Math.cos(a),ay=Math.cos(lean),az=-Math.sin(lean)*Math.sin(a);
+    const px=bx+ax*f,py=WY+ay*f,pz=bz+az*f;
+    const c=new THREE.CylinderGeometry(0.048,0.048,0.26,6);
+    c.rotateZ(lean);c.rotateY(-a);c.translate(px,py,pz);gBronze.push(c);
+    for(const s of[-1,1]){const e=new THREE.SphereGeometry(0.048,7,5);
+      e.translate(px+s*ax*0.13,py+s*ay*0.13,pz+s*az*0.13);gBronze.push(e);}
+  }
+  // -- a local rig: build a figure in its own +z-forward frame, then swing it
+  // out to (ox,oz) facing `yaw` (outward from the thicket).
+  const rigAt=(ox,oy,oz,yaw)=>{
+    const W=new THREE.Matrix4().makeRotationY(yaw).premultiply(new THREE.Matrix4().makeTranslation(ox,oy,oz));
+    return(arr,geo,lx,ly,lz,rx,ry,rz,sx,sy,sz)=>{
+      const L=new THREE.Matrix4().compose(new THREE.Vector3(lx,ly,lz),
+        new THREE.Quaternion().setFromEuler(new THREE.Euler(rx||0,ry||0,rz||0)),
+        new THREE.Vector3(sx===undefined?1:sx,sy===undefined?1:sy,sz===undefined?1:sz));
+      geo.applyMatrix4(L.premultiply(W));arr.push(geo);return geo;};
+  };
+  // -- 2 STORKS, wings out, spouting from the beak (rim-height silhouettes) --
+  const spouts=[];
+  for(const a of[0.62,0.62+Math.PI]){
+    const sx=B.x+Math.sin(a)*1.18,sz=B.z+Math.cos(a)*1.18,put=rigAt(sx,WY,sz,a);
+    for(const s of[-1,1])put(gBronze,new THREE.CylinderGeometry(0.028,0.028,0.34,5),s*0.085,0.17,0.02);
+    put(gBronze,new THREE.SphereGeometry(0.24,10,8),0,0.44,0,0,0,0,1,0.78,1.45);
+    put(gBronze,new THREE.CylinderGeometry(0.050,0.065,0.24,6),0,0.62,0.05,-0.45,0,0);
+    put(gBronze,new THREE.CylinderGeometry(0.045,0.050,0.22,6),0,0.80,0.155,0.50,0,0);
+    put(gBronze,new THREE.SphereGeometry(0.085,8,6),0,0.90,0.22);
+    put(gBronze,new THREE.ConeGeometry(0.037,0.30,6),0,0.955,0.335,0.96,0,0);
+    for(const s of[-1,1]){                                     // flattened wing slabs swept up-and-out
+      const wg=new THREE.BoxGeometry(0.58,0.07,0.44);wg.translate(0.29,0,0);
+      put(gBronze,wg,s*0.09,0.60,0,0,s<0?Math.PI:0,0.90);
+    }
+    spouts.push([sx+Math.sin(a)*0.458,WY+1.041,sz+Math.cos(a)*0.458,a]);
+  }
+  // -- 3 MERBOYS wrestling fish (silhouette only, no faces) -----------------
+  for(const a of[1.90,3.02,5.40]){
+    const mx=B.x+Math.sin(a)*1.02,mz=B.z+Math.cos(a)*1.02,put=rigAt(mx,WY,mz,a);
+    put(gBronze,new THREE.ConeGeometry(0.15,0.30,7),0,0.17,-0.02,Math.PI,0,0);          // tail root
+    put(gBronze,new THREE.ConeGeometry(0.095,0.30,6),0,0.10,-0.17,0.95,0,0);            // the curl
+    put(gBronze,new THREE.BoxGeometry(0.22,0.05,0.16),0,0.06,-0.30,0.5,0,0);            // fluke
+    put(gBronze,new THREE.SphereGeometry(0.185,9,7),0,0.42,0.02,-0.22,0,0,1,1.15,0.9);  // torso, leaning into the fish
+    put(gBronze,new THREE.SphereGeometry(0.110,8,6),0,0.65,0.07);                       // head
+    for(const s of[-1,1])put(gBronze,new THREE.CylinderGeometry(0.042,0.042,0.32,5),s*0.16,0.47,0.13,-1.05,0,s*0.35);
+    put(gBronze,new THREE.SphereGeometry(0.170,9,7),0,0.55,0.31,0,0.30,0.42,1.9,0.85,0.72);   // the unwieldy fish
+    put(gBronze,new THREE.ConeGeometry(0.13,0.20,4),-0.30,0.42,0.24,0,0.30,-1.25);      // its thrashing tail fluke
+  }
+  // -- STATIC SPRAY (the Millennium crossed-billboard plume, never animated):
+  // a modest central plume through the reeds, a small arc off each beak, and
+  // a splash bloom on the water. ONE transparent bmat, ONE merged mesh.
+  {
+    const pl=(w,h)=>uvTo(new THREE.PlaneGeometry(w,h),0.5,0,1,1);
+    for(const ry of[0,Math.PI/2]){
+      const g=pl(1.10,2.25);g.translate(0,1.13,0);g.rotateY(ry);g.translate(B.x,WY,B.z);gFx.push(g);
+    }
+    for(const[px,py,pz,a]of spouts)for(const off of[-0.55,0.55]){
+      const g=pl(0.30,0.85);g.translate(0,0.42,0);g.rotateX(0.96);g.rotateY(a+off);g.translate(px,py,pz);gFx.push(g);
+    }
+    const sp=uvTo(new THREE.PlaneGeometry(3.4,3.4),0,0,0.5,1);
+    sp.rotateX(-Math.PI/2);sp.translate(B.x,WY+0.012,B.z);gFx.push(sp);
+  }
+
+  // =====================================================================
+  // (4) GARDEN FURNISHINGS — bed soil, globe lamps, conifer sentinels, bench
+  // =====================================================================
+  for(const b of C.beds)                                   // the parterre soil slabs props.js plants into
+    box(gBrown,(b.x1-b.x0)-0.2,0.12,(b.z1-b.z0)-0.2,(b.x0+b.x1)/2,0.06,(b.z0+b.z1)/2,0);
+  for(const[lx,lz]of C.lamps){
+    const p=new THREE.CylinderGeometry(0.075,0.115,2.60,7);p.translate(lx,1.30,lz);gDark.push(p);
+    const c=new THREE.CylinderGeometry(0.13,0.10,0.16,7);c.translate(lx,2.62,lz);gDark.push(c);
+    const gl=new THREE.SphereGeometry(0.16,10,8);gl.translate(lx,2.82,lz);gLamp.push(gl);
+  }
+  for(const[cx,cz,s]of C.conifers){
+    const t=new THREE.CylinderGeometry(0.11*s,0.15*s,0.55*s,6);t.translate(cx,0.275*s,cz);gTrunk.push(t);
+    const c1=new THREE.ConeGeometry(0.95*s,2.05*s,8);c1.translate(cx,1.50*s,cz);gPalm.push(c1);
+    const c2=new THREE.ConeGeometry(0.72*s,1.70*s,8);c2.translate(cx,2.45*s,cz);gPalm2.push(c2);
+    const c3=new THREE.ConeGeometry(0.46*s,1.30*s,8);c3.translate(cx,3.35*s,cz);gPalm.push(c3);
+  }
+  {  // Grandmother's bench, facing EAST across the Stockton crossing
+    const BN=C.grandmothers.bench,put=rigAt(BN.x,0,BN.z,BN.ry);
+    for(const s of[-1,1]){
+      put(gDark,new THREE.BoxGeometry(0.10,0.45,0.52),s*0.78,0.225,0);
+      put(gDark,new THREE.BoxGeometry(0.09,0.58,0.10),s*0.78,0.74,-0.20,0,0,-0.14);
+    }
+    for(const z of[-0.16,0,0.16])put(gWood,new THREE.BoxGeometry(1.80,0.06,0.13),0,0.47,z);
+    for(const y of[0.70,0.92])put(gWood,new THREE.BoxGeometry(1.80,0.14,0.05),0,y,-0.22,0,0,0);
+  }
+
+  // -- emit: ONE merged mesh per material ---------------------------------
+  const glassM=bmat(0xffffff,{map:conservatoryGlassTex(C.glass,C.glassWarm)});
+  emit(gGlass,glassM);
+  emit(gStone,toon(C.stone));      emit(gStoneD,toon(C.stoneDark));
+  emit(gFrame,toon(C.frame));      emit(gCopper,toon(C.copper));
+  emit(gPalm,toon(C.palmDark));    emit(gPalm2,toon(C.palmDark2));
+  emit(gTrunk,toon(C.trunk));      emit(gAwn,toon(C.awnGreen));
+  emit(gBrown,toon(C.flora.soil)); emit(gGlow,bmat(C.doorGlow));
+  emit(gGrey,toon(B.stone));       emit(gWater,bmat(B.water));
+  emit(gBronze,toon(B.bronze));    emit(gReed,toon(B.reedBronze));
+  emit(gApron,toon(0x8e4f3c));     emit(gDark,toon(0x2f3430));
+  emit(gWood,toon(0x8a6a44));      emit(gLamp,bmat(0xfff4dc));
+  emit(gFx,bmat(0xffffff,{map:conservatorySprayTex(),transparent:true,depthWrite:false,side:THREE.DoubleSide}));
+}
+
 export function buildStructures(){
   const POSTS=[],RAILS=[];
   buildDogFence(POSTS,RAILS);
@@ -2714,6 +3153,7 @@ export function buildStructures(){
   buildZoo(POSTS,RAILS);             // task 114: zoo campus — perimeter/gates/pool/lion house/yard append to the tail (collide:false, data-carved walkability)
   buildZooHabitats(POSTS,RAILS);     // task 115: habitat dioramas + Farm-in-the-Zoo — rails append to the tail (collide:false, data-carved walkability)
   buildSouthPond(POSTS,RAILS);       // task 117: Café Brauer + honeycomb pavilion + Nature Boardwalk deck/rails/plates/bridge — rails append to the tail (collide:false, zero rng)
+  buildConservatory();               // task 122: ogee glasshouse + glass-pyramid vestibule + Eli Bates fountain + garden furnishings (zero rng, no fences, no colliders — det-safe insert)
   emitFences(POSTS,RAILS);
   buildFieldhouse();
   buildParkBait();

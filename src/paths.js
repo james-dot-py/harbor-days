@@ -394,6 +394,23 @@ export function buildPaths(){
   // intended). pathSamples2 ONLY (ribbonOn is rng-free) — world scatter frozen.
   ribbonOn(curveOf(CH.ZOO.habitats.walkN),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
   ribbonOn(curveOf(CH.ZOO.farmyard.lane),CH.ZOO.loopStyle.width,CH.ZOO.loopStyle.color,CH.ZOO.loopStyle.y,0,pathSamples2);
+  // 122 CONSERVATORY GARDEN WALKS: six NEW pale-gravel ribbons — the closed
+  // parterre LOOP and the closed Bates basin RING (first==last control point ->
+  // ribbonOn's weldSeam miters each one's own start/end), the two AXIS stubs on
+  // the vestibule centreline (door threshold -> loop -> ring -> loop), the EAST
+  // connector T-ing into LP_TRAIL_PARK's (-8,714) control point (no dead end),
+  // and the STOCKTON crossing running west to Grandmother's Garden. The stubs/
+  // connectors T in WITHOUT join frames — the zoo-spur precedent, junction discs
+  // cover the miterless seams. GARDEN_STYLE y 0.066 tucks UNDER the 0.074
+  // limestone walks at those junctions (the y-ladder law). pathSamples2 ONLY
+  // (ribbonOn is rng-free; LP is scatter-free ground) — world scatter frozen.
+  const GS=CH.LP_GARDEN_STYLE;
+  ribbonOn(curveOf(CH.LP_GARDEN_LOOP),GS.width,GS.color,GS.y,0,pathSamples2);
+  ribbonOn(curveOf(CH.LP_BATES_RING),GS.width,GS.color,GS.y,0,pathSamples2);
+  ribbonOn(curveOf(CH.LP_GARDEN_AXIS_N),GS.width,GS.color,GS.y,0,pathSamples2);
+  ribbonOn(curveOf(CH.LP_GARDEN_AXIS_S),GS.width,GS.color,GS.y,0,pathSamples2);
+  ribbonOn(curveOf(CH.LP_GARDEN_EAST),GS.width,GS.color,GS.y,0,pathSamples2);
+  ribbonOn(curveOf(CH.LP_STOCKTON_CROSSING),GS.width,GS.color,GS.y,0,pathSamples2);
   flushJunctions();   // 102: one instanced mesh for every paved junction dot
   // 106: register the DRAWN dual trail + spur centerlines as the footstep
   // 'asphalt' corridor (onTrail). rng-free; the miters only touch edge verts, so

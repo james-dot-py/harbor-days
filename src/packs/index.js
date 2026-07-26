@@ -58,6 +58,7 @@ import './lp-seal-feeding.js';   // SEAL FEEDING TIME at the Sea Lion Pool — k
 import './lp-heron-scope.js';    // SPOT THE NIGHT-HERON — scope on the Nature Boardwalk + session-camera eyepiece (task 118)
 import './lp-farm-antics.js';    // FARM ANTICS — toss the feed, hens scatter, the keeper kid (task 118)
 import './lp-dusk-chorus.js';    // SOUTH POND DUSK CHORUS — cricket + spring-peeper ambience by the boardwalk (task 118)
+import './lp-conservatory.js'; // conservatory garden cell + Bates mist/burble + door beat (task 122)
 import './favors-pilot.js';   // THE ECONOMY's pilot favor — "an Old Style for the Malört guy" (task 078)
 import './economy-pilot.js';   // THE ECONOMY's beach kiosk + pilot toys — popcorn/tennis ball/bucket hat (task 078)
 import './economy-payouts.js';   // THE ECONOMY's unowned dibs — zone discovery, the fireworks finale, the jetski (task 079)
