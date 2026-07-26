@@ -1023,4 +1023,19 @@ few turns to find; keep each to one line of symptom + fix.
   the player is in the cut; duck BELOW grade — at +0.2 the grade-edge lawn strip
   fills the frame. Verify any covered/sunken walk with a default-camera shot on BOTH
   viewports, not just its authored framings.
+- The chase-cam mayor PINS to frame centre, and his chibi head is ~1 m wide: any
+  subject within ~±4° of the view axis is behind him. The margin scales hard with
+  distance — a 7° aim-off that clears at 12 m is fully swallowed at dist 3.4 (his
+  angular half-width there is ~8°). Rules from 122's six-framing burn-down: subjects
+  need ≥8–10° of aim-off at dist ~5, ≥15° for anything closer; lettered signs must
+  either sit HIGH (low pitch + dist ≥6 drops his head below an awning line) or be
+  owned by an oblique framing. Never aim a framing's view axis THROUGH the thing it
+  promises.
+- Geometry composed by rotateZ(θ) THEN rotateY(−a) displaces a +Y point to
+  (−sinθ·cos a, cosθ, −sinθ·sin a) — the lateral sign is NEGATIVE. Placing a child
+  part (cattail head on its reed, 122) with +sinθ offsets hangs it in mid-air on the
+  mirror side of its parent, and over a bright backdrop the thin parent washes out
+  so the child reads as floating debris. Derive child positions from the SAME
+  rotation pipeline as the parent (or compose both from one matrix), and check
+  attachment in a shot against a BRIGHT background, where thin stems wash out.
 

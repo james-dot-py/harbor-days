@@ -760,3 +760,15 @@ cut becomes a revert task.
   Belmont↔Montrose connectors, harbor rim and beach back-edge now hold the
   ~50 m discovery rhythm. — src/packs/trail-discovery.js + CH.TRAIL_DISCOVERY /
   CH.BENCHES — task 121
+- The CONSERVATORY — the Victorian ogee glasshouse against the sky: palm crowns
+  cresting the open ridge lantern, a glass pyramid vestibule whose green awning
+  reads LINCOLN PARK CONSERVATORY / · FREE ADMISSION ·, warm door glow, and a
+  "peek inside" beat at the doors ("warm palm air drifts out — ferns, orchids,
+  a koi pool — free admission"). — Lincoln Park, conservatory block —
+  src/structures.js buildConservatory + src/packs/lp-conservatory.js — task 122
+- Bates fountain "Storks at Play" — the low grey sitting-ledge ring holds a
+  near-black bronze reed thicket, two beak-spouting storks and three merboys
+  wrestling fish; a modest plume, drifting mist and a soft water burble that
+  swells as you approach across the formal garden's hot parterre beds. —
+  Lincoln Park, formal garden axis — src/structures.js +
+  src/packs/lp-conservatory.js — task 122
