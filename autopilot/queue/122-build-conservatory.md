@@ -64,12 +64,24 @@ acceptance: >
   can run.
 refs:
   - autopilot/queue/parked/116-orphaned-data.patch (the STAGED data + GEOGRAPHY
-    116 ruling — verify-then-apply, do not blind-force)
+    116 ruling — verify-then-apply, do not blind-force). SUPERVISOR VERIFIED
+    2026-07-26: `git apply --check` FAILS — GEOGRAPHY.md hunk 2 no longer matches
+    (the file drifted through 117/118/119/120). Hand-reconcile as the task says;
+    do not force it. The patch is data + documentation ONLY (GEOGRAPHY.md 33 lines,
+    src/data/chicago.js 66 lines) — NO geometry was ever written by 116, so treat
+    this as a full build, not a finish-the-last-mile.
   - autopilot/queue/parked/116-build-conservatory.md (the original full spec +
     its session-117 orphaned-data note)
+  - **refs/lincoln-park/BATES-FOUNTAIN.md** — NEW (supervisor, 2026-07-26, from an
+    owner-supplied source): the Commons gap is CLOSED. Authoritative composition
+    (circular granite basin; two bronze storks/herons, wings out, water from the
+    beaks; three half-boy/half-fish figures each wrestling a fish; bronze reeds and
+    cattails at center; Saint-Gaudens + MacMonnies, 1887) plus form notes read off
+    the photo. READ IT FIRST — it contains the build's win condition.
   - refs/lincoln-park/BRIEF.md (§conservatory — glass profile + garden axis) +
-    refs/lincoln-park/ imagery (Lincoln_Park_Conservatory*.jpg/JPG, the Palm
-    House; Bates fountain has a Commons gap — hand-model from the documented type)
+    refs/lincoln-park/ imagery. **The key shot is
+    `Lincoln_Park_Conservatory_(9719113515).jpg`** — it frames the fountain AND the
+    glasshouse south face in one image, i.e. both waypoints of this task.
   - GEOGRAPHY.md Lincoln Park section (111 finals + the 116 ruling if applied)
   - src/structures.js + the static merge pool (glass/frame statics), the
     Millennium fountain/spray vocabulary (reuse precedent), src/data/chicago.js
@@ -93,3 +105,37 @@ merit issue file was ever written; the failures may have been transient, cf. the
 2026-07-20 Fable-limit 429 cascade that parked other tasks); this retry starts
 with the staged data and a clear, refined spec. Owner can veto by deleting this
 task or reordering the queue; the sign-off (123) is renumbered to run AFTER it.
+
+## Supervisor addendum 2026-07-26 — why 116 died, and an OWNER RULING
+
+**The three 116 failures were pure infrastructure, zero merit.** Verified in the
+session logs: attempt 1 ran 15 h / 47 turns / $6.46 and ended
+`API Error: Response stalled mid-stream`; attempt 2 ran 56 min / 48 turns / $7.14
+and ended with the *same* stall; attempt 3 ran 3 min / 1 turn / $0 and ended
+`API Error: Unable to connect to API (ENOTFOUND)` after 10 retries. Nothing about
+the conservatory itself failed. **Watch the 47–48 turn mark** — two independent
+stalls at nearly the same turn count smells like one oversized write rather than
+coincidence. Prefer several moderate edits over one enormous geometry blob, and
+commit progressively so a stall costs one step, not the session.
+
+**OWNER RULING (2026-07-26): the re-siting is APPROVED.** The owner was shown the
+116 ruling — glasshouse moved to x −70, z 688 (22 × 30) clear of the built zoo
+fence, and the entry vestibule flipped from the 111 plan's north face to the
+**SOUTH** face over the garden axis — and said: *"You can change where the
+building sits."* Build it there; this is settled, not an open question. The
+reference photo independently confirms the south-face vestibule.
+
+Two form corrections the photo forces, both of which outrank the earlier spec text:
+
+1. **The vestibule is a GLASS pyramid, not a white one** — pale silver-green glass
+   with light framing and a **dark green awning band** over the doors at its base.
+2. **The Palm House profile is an OGEE, not a plain arch** — it sweeps up in a soft
+   double curve to a flat copper ridge cap, with lower glass wings stepping down
+   east and west, over a warm rusticated stone base band. A single round arch will
+   read wrong to anyone who knows the building.
+
+And for the fountain: the win condition is the **low, broad grey granite ring**
+(a sitting ledge, people perch on it) with the **tall near-black bronze reed/cattail
+thicket** at its center. From player distance the reeds dominate and the birds and
+merboys read as rim-height silhouettes — get those two masses right before
+detailing the figures. Water is a modest low plume plus beak spouts, not a jet.

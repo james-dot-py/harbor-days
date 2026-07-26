@@ -439,7 +439,7 @@
       "license": "No restrictions",
       "credit": "https://www.flickr.com/photos/field_museum_library/3409403031/",
       "description": "Lincoln Park Conservatory building exterior, fountain, plants, trees and gardens. Looking north, Stockton Avenue, Chicago, Illinois. 1899. Eli Bates Fountain (also called Storks at Play) by Augustus Saint-Gaudens installed in 1887. Lincoln Park Conservatory built in 1890 designed by architect, Joseph L. Silsbee. Original size and material: 4x5 inch glass negative Digital Identifier: CSB5252 Part of the Illinois Urban Landscapes Project: http://www.fieldmuseum.org/urbanlandscapes/",
-      "fetchDate": "2026-07-20T01:35:34.519Z",
+      "fetchDate": "2026-07-26T18:56:15.368Z",
       "bytes": 221455
     },
     {
@@ -506,6 +506,45 @@
       "description": "Eliason Barn",
       "fetchDate": "2026-07-22T21:14:29.132Z",
       "bytes": 663266
+    },
+    {
+      "source": "wikimedia-commons",
+      "file": "Lincoln_Park_Conservatory_(9719113515).jpg",
+      "title": "File:Lincoln Park Conservatory (9719113515).jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lincoln_Park_Conservatory_(9719113515).jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Lincoln_Park_Conservatory_%289719113515%29.jpg/1920px-Lincoln_Park_Conservatory_%289719113515%29.jpg",
+      "author": "Ben Schumin from Montgomery Village, Maryland, USA",
+      "license": "CC BY-SA 2.0",
+      "credit": "Lincoln Park Conservatory",
+      "description": "The Lincoln Park Conservatory in Chicago, Illinois. More at The Schumin Web: &lt;a href=\"https://www.schuminweb.com/life-and-times/chicago-2012-part-1/\" rel=\"noreferrer nofollow\"&gt;www.schuminweb.com/life-and-times/chicago-2012-part-1/&lt;/a&gt; Ben Schumin is a professional photographer who captures the intricacies of daily life. This image may be used under Creative Commons Attribution-ShareAlike 2.0. Please provide artist attribution, as well as a link to the original photo and to the license terms.",
+      "fetchDate": "2026-07-26T18:56:16.026Z",
+      "bytes": 913767
+    },
+    {
+      "source": "wikimedia-commons",
+      "file": "Formal_Garden_3.JPG",
+      "title": "File:Formal Garden 3.JPG",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Formal_Garden_3.JPG",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b9/Formal_Garden_3.JPG/1920px-Formal_Garden_3.JPG",
+      "author": "Cuongpham95",
+      "license": "CC BY-SA 4.0",
+      "credit": "Own work",
+      "description": "French-style Formal Garden",
+      "fetchDate": "2026-07-26T18:56:28.243Z",
+      "bytes": 818509
+    },
+    {
+      "source": "wikimedia-commons",
+      "file": "Formal_Gardens_(3603894014).jpg",
+      "title": "File:Formal Gardens (3603894014).jpg",
+      "sourceUrl": "https://commons.wikimedia.org/wiki/File:Formal_Gardens_(3603894014).jpg",
+      "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Formal_Gardens_%283603894014%29.jpg/1920px-Formal_Gardens_%283603894014%29.jpg",
+      "author": "David B. Gleason from Chicago, IL",
+      "license": "CC BY-SA 2.0",
+      "credit": "Formal Gardens",
+      "description": "Currently unplanted.",
+      "fetchDate": "2026-07-26T18:56:30.323Z",
+      "bytes": 484861
     }
   ]
 }
