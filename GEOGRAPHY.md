@@ -677,7 +677,7 @@ bank) from the Diversey corner down under Fullerton; **Theater on the Lake** sit
 ALONE on the east lakefront strip at Fullerton; the **zoo** is a fenced-but-open
 campus SOUTH of Fullerton (historic Sea Lion Pool + Lion House at its north-center,
 z≈820); the **conservatory + formal garden + Bates fountain + Lily Pool** cluster
-NW of the zoo across Fullerton (z≈695–780); **South Pond** hangs off the zoo's
+NW of the zoo across Fullerton (z≈673–737, RULED 116 / BUILT 122); **South Pond** hangs off the zoo's
 SOUTH end (z≈895–1015) with the **boardwalk ring** around it, **Café Brauer** at
 its NW shoulder and the **honeycomb pavilion** on its SE boardwalk peninsula;
 **Farm-in-the-Zoo** just NW of the pond.
@@ -847,12 +847,44 @@ in the distance just fade away."* The gate now **RECEDES then hazes**:
   (long axis N–S, 18×26) to fit the 111-planned strip bulge (x ≤ 52) — order/
   adjacency unchanged. *(Commons imagery gap stands — hand-modeled from the
   documented Perkins Prairie-brick type.)*
-- **Lincoln Park Conservatory** (glasshouse ≈ x −70, z 716): copper-green vaulted
-  glass roofs + a white-pyramid vestibule (FREE ADMISSION doors), red-brick base,
-  over a **formal garden** (clipped beds + feathery straw grasses, z 740–790) on the
-  **Eli Bates "Storks at Play" fountain** axis (≈ −73, 776), with the **Alfred
-  Caldwell Lily Pool** (≈ −58, 697) NE. Glass goes self-lit `bmat` (the Bean/Crown
-  green-ground-bounce dodge). Data: `LP_CONSERVATORY`.
+- **Lincoln Park Conservatory** (**RULED 116 / BUILT 122**, resolving the
+  staged-const conflict with the built 114/115 campus — the 115 pond-ruling
+  precedent: the 111 staging put the formal garden z 740–790 + Bates (−73,776)
+  INSIDE the zoo's built north fence (z 738–741) / penguin cove / polar tundra,
+  and hung the vestibule on the NORTH face while every ref puts the entry
+  pyramid + Palm House front on the SOUTH face over the garden axis;
+  **owner-approved 2026-07-26** — "you can change where the building sits"):
+  **glasshouse x −70, z 688** (22 wide × 30 deep, x −81…−59, z 673…703 — 5 m
+  clear of the Fullerton culvert walk) — the tall **PALM HOUSE** center mass
+  with its **OGEE profile** (curved pale-green glass slopes sweeping up in a
+  soft double curve to flat verdigris copper ridge caps — the 9719113515 ref;
+  NOT a plain round arch), lower flanking glass wings E/W, a warm
+  rusticated-stone base band, dark palm silhouettes inside/above the ridge
+  glass; the **GLASS pyramid VESTIBULE on the SOUTH face** (≈ −70, 705.4 —
+  pale silver-green glass with light framing, NOT opaque white, the owner's
+  photo correction) with the dark-green awning band (LINCOLN PARK CONSERVATORY
+  — geographic/civic, real) over FREE ADMISSION doors (door glow only, no
+  walkable interior — the 111-plan decision stands). The **formal garden**
+  fills z 712…737, x −84…−56 (a central lawn axis between hot parterre ribbon
+  beds — reds/magenta/silver-white edging per the ref — plus straw grasses,
+  globe lamps and a garden LOOP walk) running up to the zoo's north fence
+  (true adjacency), with the **Eli Bates "Storks at Play" fountain ON the axis
+  (−70, 726)**: the win condition (BATES-FOUNTAIN.md) is the **low broad grey
+  granite sitting-ledge ring** (r 3.2, rim h 0.5, carved) around a **tall
+  near-black bronze reed/cattail thicket**, the two beak-spouting storks +
+  three merboys-with-fish reading as rim-height silhouettes at its base, a
+  modest low plume (Millennium spray vocab — reuse, not a jet) over a
+  red-brown paved apron. **Grandmother's Garden** sits WEST ACROSS the
+  Stockton walk (looser cottage bed clumps, x ≈ −103…−96.5, z 706…788) on a
+  modest LAND bulge (west edge → ≈ x −107 over z 690–800; clamp −112 and the
+  relocated L band ≈ −118 both hold). Garden walks: the loop + the Bates ring
+  + axis stubs + an EAST connector T-ing into the park spine at its (−8,714)
+  control point + the **Stockton crossing** west to a bench focal in
+  Grandmother's. The **Alfred Caldwell Lily Pool** re-stages NE and clear
+  (x −52…−40, z 676…700 — scaffolding, future scope); the (−64,704) shade elm
+  re-sites to (−54,712) (the new NE shoulder). Glass goes self-lit `bmat` (the
+  Bean/Crown green-ground-bounce dodge). Data: `LP_CONSERVATORY` +
+  `LP_GARDEN_*`/`LP_BATES_RING` walks.
 - **The ZOO** (a fenced-but-**open** campus, z ≈ 738–1006, x −9…−95; **CAMPUS
   ARMATURE BUILT, task 114** — fence runs/gates/pool/Lion House/loop in `ZOO`).
   **FREE ADMISSION — open gates, no ticket booth, no turnstile** (the opposite of
@@ -981,6 +1013,14 @@ Cannon, Theater on the Lake, Nature Boardwalk, Chicago Park District/Harbors).
   (the honest west-reach numbers) — recorded 115, resolving the 114 pond
   conflict; order/adjacency preserved (farm NW of the pond, Brauer its NW
   shoulder across the spur).
+- **The conservatory block re-sites NORTH of the built zoo fence** (glasshouse
+  z 673–703, garden z 712–737, Bates ON the axis at (−70,726); vestibule
+  flipped to the SOUTH face per the refs) and **Grandmother's Garden rides a
+  small LAND bulge west of Stockton** (west edge ≈ −107 over z 690–800) —
+  ruled 116, built 122, owner-approved 2026-07-26; resolves the 111 staging's
+  overlap with the built 114/115 campus; order/adjacency preserved
+  (conservatory NW of the zoo, garden between them, Grandmother's west across
+  Stockton).
 - **The Lakefront Trail is ONE CONTINUOUS DUAL PATH through the Diversey corner**
   (recorded 120, issue 033). `TRAIL_MAIN` ends at (30,406) and `LP_TRAIL_LAKE`
   starts on that EXACT point; it is now a **dual** ribbon (asphalt bike on the

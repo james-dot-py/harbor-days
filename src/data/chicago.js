@@ -1558,9 +1558,9 @@ export const LINCOLN_ANCHORS = {
   diverseyHarbor:{ x:-24, z:520 },   // lagoon mid (west of berm)
   theaterOnLake: { x:30,  z:615 },   // ALONE on the east lakefront strip (x>14)
   fullertonUnderpass:{ x:6, z:661 }, // the FIRST working crossing (through the berm)
-  conservatory:  { x:-70, z:715 },   // NW of the zoo, across Fullerton
-  batesFountain: { x:-73, z:776 },   // formal-garden axis S of the glasshouse
-  lilyPool:      { x:-58, z:697 },   // Caldwell lily pool, NE of the conservatory
+  conservatory:  { x:-70, z:706 },   // NW of the zoo, across Fullerton (122: the 116 ruling — vestibule/doors on the SOUTH face; anchor on walkable forecourt)
+  batesFountain: { x:-70, z:733 },   // formal-garden axis S of the glasshouse (122: fountain at (-70,726); anchor just S of the basin carve, walkable)
+  lilyPool:      { x:-46, z:688 },   // Caldwell lily pool, NE of the conservatory (122 re-stage — scaffolding, future scope)
   zooGate:       { x:-10, z:830 },   // 114: the FRONT DOOR — the EAST gate off Cannon (arch + FREE SINCE 1868); the west lion-plinth gate is secondary at (-93.9,858)
   seaLionPool:   { x:-60, z:820 },   // the hero — historic rock-rimmed pool (114: refined -56,822 -> -60,820 to clear the Lion House NW corner; recorded in GEOGRAPHY.md)
   lionHouse:     { x:-34, z:831 },   // Kovler Lion House (1912 red brick)
@@ -1658,7 +1658,7 @@ export const LP_LAND_WEST = [
   [0,560],[0,720],[0,900],[0,1006],     // EAST edge = the berm's west face (x0)
   [-28,1024],[-64,1028],[-94,1022],     // SOUTH edge (South Pond lawn — stubbed for 117)
   [-104,958],[-104,876],                // SW corner
-  [-102,792],[-98,706],                 // WEST edge (Stockton / conservatory frontage) N-bound (holds LP_TRAIL_STOCKTON x-92..-99)
+  [-103,810],[-107,795],[-107,700],[-99,688],  // WEST edge N-bound — 122 (the 116 ruling): the Grandmother's Garden LAND bulge (west edge ~ -107 over z 690..800; clamp -112 + the relocated L band -118 both hold; holds LP_TRAIL_STOCKTON x-92..-99)
   [-88,624],[-80,540],
   [-74,470],[-70,414],                  // NW corner
   [0,412],                              // NORTH edge back to NE (wide lawn north of the lagoon)
@@ -1753,7 +1753,21 @@ export function lpBlockedHit(x,z){
   const B=LP_CAFE_BRAUER;   // 117: Café Brauer hall footprint — SOLID (the 052 sink law; open loggia arms east of the hall stay walkable terrace; NO colliders, anti-trap)
   if(x>=B.x-B.w/2-0.3&&x<=B.x+B.w/2+0.3&&z>=B.z-B.d/2-0.3&&z<=B.z+B.d/2+0.3)return true;
   if(lpUnderpassRim(x,z))return true;   // 120: the Fullerton cut's retaining-wall rim (issue 035) — data carve, no colliders
-  return zooBlockedHit(x,z);   // 114: the zoo campus carves (fence band / pool / yard / hall / pier pads)
+  return zooBlockedHit(x,z)      // 114: the zoo campus carves (fence band / pool / yard / hall / pier pads)
+       ||conservatoryBlockedHit(x,z);  // 122 (the 116 ruling): glasshouse + vestibule footprints + the Bates basin
+}
+// 122 CONSERVATORY walkability carves — pure data, NO colliders (anti-trap
+// law): the glasshouse + vestibule footprints and the Bates basin disc.
+// Shared engine + walkprobe via lpBlockedHit above. Beds/lawn stay walkable
+// (soft ground cover — the flowers forgive a shortcut).
+export function conservatoryBlockedHit(x,z){
+  if(z<671||z>731||x<-83||x>-57)return false;          // block bbox early-out
+  const C=LP_CONSERVATORY,G=C.glasshouse;
+  if(x>=G.x0&&x<=G.x1&&z>=G.z0&&z<=G.z1)return true;   // the glasshouse
+  const V=C.vestCarve;
+  if(x>=V.x0&&x<=V.x1&&z>=V.z0&&z<=V.z1)return true;   // the vestibule porch
+  const B=C.batesFountain,dx=x-B.x,dz=z-B.z;
+  return dx*dx+dz*dz<=B.carveR*B.carveR;               // the Bates basin
 }
 // 114 ZOO walkability carves — pure data, NO colliders (anti-trap law): the
 // fence is a thin BLOCKED band under the rail line (both sides walkable, gates
@@ -1971,13 +1985,82 @@ export const ZOO = {
   ],
 };
 
-// ---- CONSERVATORY + FORMAL GARDEN + Bates fountain + Lily Pool (116) --------
+// ---- CONSERVATORY + FORMAL GARDEN + Bates fountain + Lily Pool (BUILT 122;
+// the GEOGRAPHY.md 116 ruling, owner-approved 2026-07-26 — the block re-sites
+// NORTH of the built zoo fence, the vestibule flips to the SOUTH face per the
+// refs, Grandmother's Garden rides a small LAND bulge west across Stockton).
+// structures.js builds the glasshouse/garden/fountain from this const (zero
+// rng); props.js grows the beds (index-gated 2nd seed, +0 buckets);
+// packs/lp-conservatory.js owns the ambient beats; walkability = the carves
+// in conservatoryBlockedHit above (shared engine + walkprobe, NO colliders).
 export const LP_CONSERVATORY = {
-  glasshouse:{ x:-70, z:716, w:22, d:30, ry:0, vestibule:[-70,700] },   // copper-green vaulted glass; white pyramid vestibule N (FREE ADMISSION doors)
-  formalGarden:{ x0:-84, x1:-56, z0:740, z1:790 },                      // clipped beds + feathery straw grasses S of the glasshouse
-  batesFountain:{ x:-73, z:776 },                                       // Eli Bates "Storks at Play" (person; KEPT)
-  lilyPool:{ x0:-64, x1:-52, z0:678, z1:713 },                          // Alfred Caldwell Lily Pool (person; KEPT), NE
+  // the glasshouse: nested OGEE glass pavilions (the 9719113515 ref: curved
+  // eave slopes sweeping up in a soft double curve to flat verdigris copper
+  // ridge caps — NOT plain round arches) on a rusticated warm sandstone base —
+  // the tall PALM HOUSE mass center, a smaller front gable bell south of it,
+  // lower flanking wings E/W; the pale silver-green GLASS pyramid VESTIBULE
+  // (the owner's photo correction — glass, not opaque white) fronts SOUTH over
+  // the garden axis (dark-green awning band + FREE ADMISSION door glow — no
+  // walkable interior, the 111-plan decision).
+  glasshouse:{ x0:-81, x1:-59, z0:673, z1:703 },   // footprint carve — walls/base sit ON this rect
+  palm:  { x:-70, z:684, w:14,  d:18, eaveH:3.4, capH:10.5, capW:5.2, capD:7   },  // the big ogee bell (flat copper cap + open ridge LANTERN — palm heads poke through)
+  gable: { x:-70, z:697, w:9.6, d:11, eaveH:2.6, capH:7.0,  capW:3.4, capD:4.2 },  // the front (south) bell behind the vestibule
+  wings: [ { x:-78.9, z:688, w:4.2, d:26, eaveH:2.0, capH:5.2 },                   // W wing (long axis N-S)
+           { x:-61.1, z:688, w:4.2, d:26, eaveH:2.0, capH:5.2 } ],                 // E wing
+  vestibule:{ x:-70, z:705.4, w:5.8, d:4.8, apexH:4.8,                             // the GLASS pyramid porch (pale framing + glass slopes)
+              awning:{ w:11.5, y:2.55, drop:0.85 },
+              sign:'LINCOLN PARK CONSERVATORY', register:'FREE ADMISSION' },       // real names — geographic/civic (RENAMES law)
+  vestCarve:{ x0:-73.2, x1:-66.8, z0:703, z1:708 },                                // vestibule footprint carve
+  glass:0xcfe4d8, glassWarm:0xe8eec6, frame:0xbcd6c4, copper:0x6fa08a,             // pale mint glass / warm interior glow tint / rib frame green-white / verdigris caps
+  stone:0x9a7a56, stoneDark:0x7c5f42, awnGreen:0x2e4f38, doorGlow:0xffe2ae,        // rusticated base / base shadow course / awning + lettering band / door glow
+  palmDark:0x2d5a3a, palmDark2:0x1f4030, trunk:0x6e5638,                           // interior/above-ridge palm silhouettes
+  conifers:[ [-76,704.5,1.1],[-64,704.5,1.2],[-80.5,707,0.9],[-59.5,707,0.95] ],   // dark evergreen sentinels flanking the vestibule (the ref's screen planting; x,z,scale — thin trunks, no carve)
+  // FORMAL GARDEN on the axis south of the doors (z 712..737, up to the zoo's
+  // north fence z~740 — true adjacency): a central lawn axis between hot
+  // parterre ribbon beds (the ref: reds/magenta/silver-white edging), straw
+  // fountain grasses, globe lamps, and the Bates fountain ON the axis.
+  formalGarden:{ x0:-84, x1:-56, z0:712, z1:737 },
+  batesFountain:{ x:-70, z:726, basinR:3.2, rimH:0.5, rimW:0.6, carveR:3.55,       // Eli Bates "Storks at Play" (person; KEPT real). THE READ (BATES-FOUNTAIN.md):
+                  reedH:2.7,                                                       // a LOW BROAD grey granite sitting-ledge ring around a tall near-black bronze
+                  apronR:5.2, apron:0x8a5a40,                                      // reed/cattail THICKET; 2 beak-spouting storks + 3 merboys-with-fish read as
+                  water:0x4e8a7a, stone:0x9a988c,                                  // rim-height silhouettes at its base; a modest low plume (Millennium spray
+                  bronze:0x4f3a28, reedBronze:0x2a2118 },                          // vocab), NOT a jet; red-brown paved apron disc under the ring walk
+  beds:[  // ribbon parterre beds (SOFT ground — walkable, no carve; props.js fills them; c indexes bedColors)
+    { x0:-79,   x1:-74,   z0:715.5, z1:721,   c:0 },   // NW panel
+    { x0:-66,   x1:-61,   z0:715.5, z1:721,   c:1 },   // NE panel
+    { x0:-79,   x1:-74,   z0:731,   z1:735.5, c:1 },   // SW panel
+    { x0:-66,   x1:-61,   z0:731,   z1:735.5, c:0 },   // SE panel
+    { x0:-83.4, x1:-81.6, z0:714,   z1:735,   c:2 },   // W edge ribbon
+    { x0:-58.4, x1:-56.6, z0:714,   z1:735,   c:2 },   // E edge ribbon
+  ],
+  bedColors:[0xc23b4a,0xb03a8c,0xdfe0d2],   // hot red / magenta / silver-white edging (the ref parterre palette)
+  flora:{ bedSeed:0x22b3d51, bedPer:26,      // flowers per parterre bed (6 beds -> 156; props.js index-gated 2nd-seed grow, +0 buckets)
+          gmSeed:0x22d5f73, gmPer:14,        // flowers per Grandmother's clump (7 clumps -> 98)
+          tuftSeed:0x22c4e62, tufts:90, tuftScaleY:[1.5,2.6],   // feathery straw grasses in the formal garden (height IS the read — instance tint is documentary)
+          soil:0x5c4632 },                   // low soil slab under each parterre bed (pooled door-brown -> +0 draws)
+  lamps:[ [-73.4,713.4],[-66.6,713.4],[-74.2,730.4],[-65.8,730.4] ],   // white globe lamps flanking the axis (the ref; clear of walks/beds/ring)
+  // GRANDMOTHER'S GARDEN west across the Stockton walk — looser cottage-style
+  // bed clumps in open lawn (the palette contrast) + the crossing's bench focal
+  grandmothers:{ x0:-103, x1:-96.5, z0:706, z1:788, bench:{ x:-101.5, z:714, ry:1.57 },
+                 clumps:[ [-100.5,712,2.2],[-98.3,721,1.8],[-101.5,731,2.6],[-98.8,743,2.0],[-101,757,2.4],[-98.5,769,1.9],[-100.5,781,2.2] ],  // [x,z,r] loose drifts down the west lawn
+                 colors:[0xf2c14e,0x9a3f8c,0x6b3fa0,0xe8853a] },   // goldenrod/liatris/ironweed/cottage-orange — the informal side
+  lilyPool:{ x0:-52, x1:-40, z0:676, z1:700 },     // Alfred Caldwell Lily Pool re-staged NE + clear (scaffolding — future scope)
 };
+// Garden WALKS (122, the 116 plan) — all pathSamples2 ribbons (LP is
+// scatter-free ground; ribbonOn is rng-free). The LOOP rings the beds (closed —
+// first==last -> weldSeam); the basin RING circles Bates (closed); the AXIS
+// stubs run door threshold -> loop -> ring on the vestibule axis (shared exact
+// endpoints -> mitered seams); the EAST connector Ts off the loop's east point
+// into LP_TRAIL_PARK's (-8,714) control point; the STOCKTON crossing runs the
+// loop west point THROUGH the new (-93.2,716) LP_TRAIL_STOCKTON control point
+// to the Grandmother's bench focal.
+export const LP_GARDEN_LOOP = crChain([[-70,710.5],[-78,714],[-81,722],[-78.5,731],[-70,735],[-61.5,731],[-59,722],[-62,714],[-70,710.5]],3);
+export const LP_BATES_RING  = crChain([[-70,721],[-66.46,722.46],[-65,726],[-66.46,729.54],[-70,731],[-73.54,729.54],[-75,726],[-73.54,722.46],[-70,721]],2);  // r 5.0 (CR sag leaves the inner edge > carveR+halfW — the 071 sampled-curve law)
+export const LP_GARDEN_AXIS_N = crChain([[-70,708.6],[-70,710.5],[-70,721]],2);   // door threshold -> loop north pt -> ring north pt (the vestibule axis; 708.6 clears the vestCarve z1 708)
+export const LP_GARDEN_AXIS_S = crChain([[-70,731],[-70,735]],2);     // ring south pt -> loop south pt
+export const LP_GARDEN_EAST = crChain([[-59,722],[-42,719.5],[-24,717],[-8,714]],3);        // T into the park spine (no dead end)
+export const LP_STOCKTON_CROSSING = crChain([[-81,722],[-87.5,719],[-93.2,716],[-98.5,714]],3);  // west into Grandmother's (bench focal 3 m past the end)
+export const LP_GARDEN_STYLE = { width:2.0, color:0xc9c3b4, y:0.066 };  // pale garden gravel — tucks UNDER the 0.074 limestone walks at the junctions (y-ladder law)
 
 // ---- CAFÉ BRAUER + Nature Boardwalk + honeycomb pavilion (BUILT 117) --------
 // The pond is the pipeline's quiet finale — a NATURALIZED prairie pond (algae-
@@ -2066,7 +2149,7 @@ export const LP_SOUTHPOND = {
 // keeps >=1.3 m of ground at its east edge (the 113 strip law).
 export const LP_TRAIL_LAKE = crChain([[30,406],[28,436],[27,500],[26,560],[26,614],[26,644],[25.5,661]],4);
 export const LP_TRAIL_PARK = crChain([[-11.5,661],[-14,668],[-13,684],[-10,700],[-8,714],[-8.2,752],[-8,788],[-8,810],[-8.6,824],[-11.5,830]],4);  // 114 RESHAPE / 120: starts at the WEST ramp head (x -11.5) of the sunken crossing -> south along the zoo flank (between Cannon and the fence) -> THROUGH the east gate (ends at the gate pad; ZOO.loop takes over inside, ZOO.spur continues to the pond). Det-safe: LP is scatter-free ground (GEOGRAPHY liberty note)
-export const LP_TRAIL_STOCKTON = crChain([[-92,700],[-96,820],[-99,900],[-96,1000]],4);   // the west campus walk (Stockton side)
+export const LP_TRAIL_STOCKTON = crChain([[-92,700],[-93.2,716],[-96,820],[-99,900],[-96,1000]],4);   // the west campus walk (Stockton side; 122 inserts the (-93.2,716) control point — the Stockton-crossing junction. Det-safe: pathSamples2 content-scan only, LP is scatter-free ground)
 
 // 112 SHELL: hand-placed shade elms on the new parkland (individual frustum-culled
 // meshes built in coast.js — NO scatter rng, NO new InstancedMesh bucket). Clear of
@@ -2074,7 +2157,7 @@ export const LP_TRAIL_STOCKTON = crChain([[-92,700],[-96,820],[-99,900],[-96,100
 export const LP_TREES = [
   [-56,468,1.4],[-76,520,1.2],[-80,584,1.15],[-84,640,1.3],   // west of the Diversey lagoon
   [-48,500,1.25],[-46,572,1.15],                               // 113: west-bank leaners — old shade trees over the quay walk (BRIEF harbor read)
-  [-64,704,1.2],[-84,762,1.35],[-60,812,1.2],[-70,868,1.25],   // west park interior (between the trails)
+  [-54,712,1.2],[-84,762,1.35],[-60,812,1.2],[-70,868,1.25],   // west park interior (122: the (-64,704) elm re-sited to (-54,712) — its old spot is the conservatory forecourt; the new spot is the block's NE shoulder, clear of the lily-pool scaffold + the east connector)
   [-84,910,1.15],[-60,922,1.3],[-62,944,1.2],[-58,884,1.1],    // 115: the (-72,966) elm moved to (-62,944) — its old spot is the farm forecourt (lane clearance)
   [-40,868,1.25],[-55,940,1.1],[-30,1010,1.15],[-42,1012,1.2],   // 117: the three elms that stood inside the RULED pond re-sited to its shoulders — (-38,936)->(-55,940) W of the spur (S of Café Brauer), (-24,908)->(-30,1010) + (-30,984)->(-42,1012) on the south lawn; clear of the boardwalk/pavilion/Brauer/plates + Garibaldi
   [42,478,1.2],[48,540,1.3],[44,576,1.15],[46,658,1.1],        // east lakefront strip (113: the z606 elm moved N of the Theater footprint)
