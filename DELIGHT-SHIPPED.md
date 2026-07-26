@@ -742,3 +742,21 @@ cut becomes a revert task.
   — 100% WebAudio, actx-guarded, softened for reduced-motion. The prairie-pond-in-
   the-city at perpetual dusk, heard not seen. — South Pond / Nature Boardwalk
   (cull center -30, 952), src/packs/lp-dusk-chorus.js — task 118
+- THE DEADPAN PLAQUE TRAIL. Five lectern markers from the "lakefront historical
+  society" dot the just-walking stretches, each an interaction whose toast lands
+  the punchline: RAY'S BIG FISH at the harbor mouth ("it did not come back"),
+  POINT OF INTEREST on the spit ("nothing happened here for 150 years. it was
+  lovely."), HISTORIC AIR SPACE on the golf corridor ("we still talk about it"),
+  THE FOG OF 1953 on the Montrose promenade ("nobody saw anything"), and ABOUT
+  THE LAKE at the beach ("it has always been cold. swim anyway."). — rim (82,-52),
+  spit (180.5,-130), corridor (170,-437.5), bay (162,-722), beach (195,-950),
+  src/packs/trail-discovery.js — task 121
+- GULL HUDDLES + PAINTED ROCKS + MICRO-FINDS. Loafing gull clusters (a juvenile
+  and a turned-head lookout in each) claim the seawalls and sand; kindness-rock
+  patches drop paint-bright dots along the fences; and seven shell/feather
+  micro-picks glint at ground level — pocket one for +dibs through the trailfind
+  register ("lake-tumbled. pocketed." / "flight-worthy. probably."). Three new
+  benches (harbor rim, cove waist, beach back-edge) each carry a sitSpot. The
+  Belmont↔Montrose connectors, harbor rim and beach back-edge now hold the
+  ~50 m discovery rhythm. — src/packs/trail-discovery.js + CH.TRAIL_DISCOVERY /
+  CH.BENCHES — task 121

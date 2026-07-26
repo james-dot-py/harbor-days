@@ -951,7 +951,84 @@ export const BENCHES = [
   // the headland facing NE across the harbor mouth to the hook + entrance light
   { x:154, z:-612, ry:1.37 },
   { x:205, z:-659, ry:2.4 },   // 104: pulled inland with the receded bay corner (mouth shore now passes ~(208,-660))
+  // 121 MICRO-DISCOVERY benches (append-only — the bench build loop draws no
+  // rng, so appends are determinism-free and +0 draw calls). Each gets a
+  // sitSpot via TRAIL_DISCOVERY.sits (packs/trail-discovery.js), coords 1:1.
+  { x:80,    z:-256,  ry:1.5 },    // Belmont harbor rim, facing east over the basin (tree at 76.2,-253.5 gives shade)
+  { x:143,   z:-641,  ry:1.25 },   // the bay waist, facing ENE over the cove water
+  { x:195.5, z:-1032, ry:1.55 },   // Montrose beach back-edge, facing the sand + The Dock
 ];
+
+// 121 TRAIL MICRO-DISCOVERY — the 2026-07-19 design audit's B3 fix: one
+// noticeable thing per ~50 m on the stretches that degraded to just-walking
+// (the Belmont harbor rim, the spit spine, the Belmont↔Montrose connectors,
+// the Montrose beach back-edge). ALL placement data lives HERE (the city-pack
+// rule); packs/trail-discovery.js consumes it with a LOCAL seed only. Every
+// coord was probed against the live world (tools/tmp/121-siteprobe.mjs):
+// clear of both trail ribbons, tree trunks, fences and building footprints.
+// `s` is the STRETCH key — the pack merges each stretch's statics into its
+// own meshes so bounding spheres stay local and fogcull drops them from every
+// far view (the mp/wv draw budgets never see them).
+export const TRAIL_DISCOVERY = {
+  // deadpan historical plaques: angled cream face on two short wood posts,
+  // 'read the plaque' interaction toasts the full gag. ry = face normal yaw
+  // ((sin ry, cos ry) points AT the reader's approach).
+  plaques:[
+    { s:'rim',  x:82,    z:-52,    ry:-1.35,        title:"RAY'S BIG FISH",
+      lines:['ON THIS SPOT IN 1974,','A GUY NAMED RAY SAW A','REALLY BIG FISH.'],
+      sub:'it did not come back. — lakefront historical society' },
+    { s:'spit', x:180.5, z:-130,   ry:0.9,          title:'POINT OF INTEREST',
+      lines:['NOTHING HAPPENED HERE','FOR 150 YEARS.','IT WAS LOVELY.'],
+      sub:'the trees agree. — lakefront historical society' },
+    { s:'golf', x:170,   z:-437.5, ry:0,            title:'HISTORIC AIR SPACE',   // face normal +z = SOUTH, toward the corridor trail (z-433; the first cut's ry:π faced the golf fence)
+      lines:['IN 1987 A GOLF BALL','CLEARED THIS FENCE.','WE STILL TALK ABOUT IT.'],
+      sub:'nobody caught it. nobody ever will. — lakefront historical society' },
+    { s:'bay',  x:162,   z:-722,   ry:Math.PI/2,    title:'THE FOG OF 1953',
+      lines:['THE HARBOR FOG OF 1953','ROLLED IN ON A TUESDAY.','NOBODY SAW ANYTHING.'],
+      sub:'it rolled back out on thursday. — lakefront historical society' },
+    { s:'beach',x:195,   z:-950,   ry:-Math.PI/2,   title:'ABOUT THE LAKE',
+      lines:['THE LAKE IS COLD.','IT HAS ALWAYS BEEN COLD.','SWIM ANYWAY.'],
+      sub:'— chicago park district, unofficially' },
+  ],
+  // loafing gull huddles (favors-wrigley makeGull recipe at BIRD_SCALE ~1.55,
+  // one juvenile, one head-turned; merged static — never animated). ry = the
+  // huddle's mean facing (gulls face the water/wind); n birds, local jitter.
+  gulls:[
+    { s:'rim',  x:83,  z:-160,  n:5, ry:1.3,  seed:0x1211 },  // on the basin seawall edge
+    { s:'spit', x:196, z:-170,  n:4, ry:1.6,  seed:0x1212 },  // peninsula lake-edge lawn
+    { s:'golf', x:222, z:-505,  n:5, ry:0.6,  seed:0x1213 },  // revetment-top lawn east of the walk ribbon
+    { s:'bay',  x:184, z:-706,  n:5, ry:1.2,  seed:0x1214 },  // Montrose basin west edge, north of the dock root
+    { s:'beach',x:205, z:-957,  n:6, ry:2.6,  seed:0x1215 },  // back sand west of the dune rope
+  ],
+  // painted kindness-rock clusters: squashed toon stones, most wearing one
+  // bright painted color (coral/teal/gold/sky/pink), a couple bare grey.
+  rocks:[
+    { s:'rim',  x:80,    z:-215,   n:6, seed:0x1221 },
+    { s:'spit', x:183.5, z:-82,    n:5, seed:0x1222 },
+    { s:'golf', x:125,   z:-437.3, n:6, seed:0x1223 },  // corridor, fence-side grass
+    { s:'golf', x:207.5, z:-562,   n:5, seed:0x1224 },  // golf-run west strip
+    { s:'bay',  x:154,   z:-757,   n:6, seed:0x1225 },
+    { s:'beach',x:196,   z:-963,   n:5, seed:0x1226 },
+  ],
+  // shell/feather micro-picks: tiny prop + halo/core glint, 'pocket the …'
+  // pays wallet.pay({key:'trailfind', first:3, repeat:1, cd:6}) — the
+  // ECONOMY.md register row. One pocket per spot per session.
+  picks:[
+    { kind:'feather', x:81,  z:-302  },   // rim, under the lakeside tree
+    { kind:'feather', x:187, z:-185  },   // spit treed strip, east side
+    { kind:'feather', x:186.5, z:-222 },  // spit treed strip, east side (the west spot sat dead on the md-spit f2 axis — mayor-eclipsed)
+    { kind:'shell',   x:218, z:-548  },   // golf-run lakeside strip
+    { kind:'feather', x:166, z:-692  },   // bay lawn
+    { kind:'shell',   x:203, z:-1030 },   // beach back sand, by the new bench
+    { kind:'shell',   x:204, z:-1044 },   // beach back sand, near The Dock
+  ],
+  // sitSpots for the three 121 benches appended to BENCHES above (coords 1:1).
+  sits:[
+    { x:80,    z:-256,  ry:1.5,  label:'sit by the harbor' },
+    { x:143,   z:-641,  ry:1.25, label:'sit above the cove' },
+    { x:195.5, z:-1032, ry:1.55, label:'sit by the sand' },
+  ],
+};
 
 // pier plank decks (peninsula lake side + the new corner pier) with walkable rects.
 // Corner pier: x116-126, jutting SOUTH toward the skyline. Its NW corner lands on

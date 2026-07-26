@@ -73,5 +73,6 @@ import './favors-downtown.js';   // downtown favors — the chalk bag, the lucky
 import './favors-montrose.js';   // Montrose favors — the wind-blown field notes, one for the Park Bait wall (task 081)
 import './mayor-for-real.js';   // MAYOR FOR REAL — city stamps, the AIDS-Garden ceremony, the regalia returns (task 081)
 import './citymap.js';   // THE CITY MAP + compass breadcrumb — full-city card, Red Line thread, landmark headings (task 086)
+import './trail-discovery.js';   // TRAIL MICRO-DISCOVERY — plaques, gull huddles, painted rocks, shell/feather picks, bench sit spots (task 121)
 import './lake-moods.js';   // LAKE MOODS — date-seeded fog / warm-drizzle / firefly nights over the canon dusk; imports LAST so every cell exists (task 090)
 import './welcome-back.js';   // "BACK ALREADY?" — the once-a-day welcome-back card; imports after lake-moods so it reads that mood (task 105)

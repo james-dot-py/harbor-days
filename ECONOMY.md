@@ -85,6 +85,7 @@ celebrates the moment. `first` is the once-ever gift; `repeat` is the trickle.
 | sea glass, pocketed | `seaglass` | 5 | 2 | lake glass, pocketed (080) |
 | an Old Style at the drink rail | `rooftop.rail` | 5 | 2 (cd 20) | the drink rail (080) |
 | a zone, first found (×11) | `zone.<name>` | 3 | **0** | found \<name\> |
+| trail micro-find (shell/feather, 121) | `trailfind` | 3 | 1 (cd 6) | pocketed a little find |
 | favor: an Old Style for the Malört guy | (favors) | 12 | — | the Malört guy |
 
 **The biggest single payout in the park is getting EJECTED from Wrigley (+10).**

@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-26T16:46:28.687Z",
- "count": 157,
+ "generated": "2026-07-26T18:38:46.984Z",
+ "count": 164,
  "waypoints": [
   {
    "id": "spawn",
@@ -913,6 +913,209 @@
     }
    ],
    "expectation": "THE SANCTUARY GATEWAY (task 071): a weathered timber gateway spans the sanctuary path — MONTROSE POINT BIRD SANCTUARY in chunky yellow letters on the header beam, split-rail fence at its flanks and a dark rules board at the jamb; beyond it the pale crushed-limestone path curves into meadow and hedge. The likeness register: two heavy posts + header beam (not an arch), routed-yellow lettering LEGIBLE and not mirrored, rails reading as split timber; a chibi songbird greeter on the beam is a plus. NOT a generic sign on a stick, NOT floating, the path visibly passing under it."
+  },
+  {
+   "id": "md-rim-north",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 73.54,
+   "z": -50,
+   "framings": [
+    {
+     "yaw": 1.45,
+     "pitch": 0.08,
+     "dist": 9
+    },
+    {
+     "x": 74.67,
+     "z": -158,
+     "yaw": 1.45,
+     "pitch": 0.08,
+     "dist": 8
+    },
+    {
+     "x": 75.19,
+     "z": -128,
+     "yaw": 2.35,
+     "pitch": 0.1,
+     "dist": 12
+    }
+   ],
+   "expectation": "121 MICRO-DISCOVERY — THE HARBOR RIM, NORTH HALF (design audit B3: the rim degraded to just-walking). The west-shore seawall walk between the dock groups is no longer bare lawn. f0: a small deadpan HISTORICAL PLAQUE (angled cream face on short wood posts — the 'a guy named Ray saw a really big fish' marker) reads beside the mayor with the basin masts beyond; f1: a huddle of chunky toon GULLS loafs on the seawall edge with moored sailboats behind; f2 looks north down the rim and the stretch reads DOTTED — plaque, gulls, dock rhythm. Nothing stands on the trail ribbons or blocks the seawall walk."
+  },
+  {
+   "id": "md-rim-south",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 73.76,
+   "z": -208,
+   "framings": [
+    {
+     "yaw": 2,
+     "pitch": 0.08,
+     "dist": 9
+    },
+    {
+     "x": 73,
+     "z": -248,
+     "yaw": 2,
+     "pitch": 0.07,
+     "dist": 9
+    },
+    {
+     "x": 76.56,
+     "z": -294,
+     "yaw": 2.25,
+     "pitch": 0.08,
+     "dist": 9
+    }
+   ],
+   "expectation": "121 MICRO-DISCOVERY — THE HARBOR RIM, SOUTH HALF: f0: a little cluster of PAINTED ROCKS (bright kindness-rock tops on grey stones) sits in the rim grass with the dock group behind; f1: a NEW warm wood-slat bench faces east over the basin water; f2: a feather micro-find GLINTS in the lawn near the basin head (a warm sparkle at ground level). Each framing shows its thing clearly beside or ahead of the mayor; the rim reads cared-for, not empty."
+  },
+  {
+   "id": "md-spit",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 183,
+   "z": -142,
+   "framings": [
+    {
+     "yaw": 0.15,
+     "pitch": 0.07,
+     "dist": 9
+    },
+    {
+     "x": 192,
+     "z": -175,
+     "yaw": 1,
+     "pitch": 0.07,
+     "dist": 8
+    },
+    {
+     "x": 184,
+     "z": -207,
+     "yaw": -2.75,
+     "pitch": 0.08,
+     "dist": 9
+    }
+   ],
+   "expectation": "121 MICRO-DISCOVERY — THE SPIT SPINE: the peninsula road is no longer 200 m of just trees. f0 south down the spine: a deadpan wood-post PLAQUE reads trail-side beside the mayor; f1 at the lake edge: a GULL huddle loafs on the revetment-top grass with open lake beyond; f2 north up the spine: a small white FEATHER find lies in the treed strip beside the road (vane readable on the grass; its warm glint reads on approach). All props sit clear of the spur ribbon — nothing on the asphalt."
+  },
+  {
+   "id": "md-corridor",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 140,
+   "z": -429.5,
+   "framings": [
+    {
+     "yaw": -1.75,
+     "pitch": 0.07,
+     "dist": 9
+    },
+    {
+     "x": 166.5,
+     "z": -433,
+     "yaw": 2.75,
+     "pitch": 0.06,
+     "dist": 4.5
+    },
+    {
+     "x": 188,
+     "z": -429,
+     "yaw": -1.45,
+     "pitch": 0.09,
+     "dist": 13
+    }
+   ],
+   "expectation": "121 MICRO-DISCOVERY — THE GOLF CORRIDOR (the z-433 east run between sanctuary and golf): f0 west down the corridor: PAINTED ROCKS dot the fence-side grass in the mid-distance; f1: a deadpan GOLF plaque reads close, its angled cream face legible (title + a line readable); f2 the east-end pull-back: the corridor reads DOTTED (plaque + rocks along the run) — a noticeable thing per ~50 m, none of it standing on either ribbon."
+  },
+  {
+   "id": "md-golfside",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 212.5,
+   "z": -514,
+   "framings": [
+    {
+     "yaw": 0.45,
+     "pitch": 0.07,
+     "dist": 9
+    },
+    {
+     "x": 213,
+     "z": -542,
+     "yaw": 2.75,
+     "pitch": 0.07,
+     "dist": 9
+    },
+    {
+     "x": 212,
+     "z": -568,
+     "yaw": 2.9,
+     "pitch": 0.12,
+     "dist": 12
+    }
+   ],
+   "expectation": "121 MICRO-DISCOVERY — THE GOLF LAKESIDE RUN (x≈211, z−448…−572): f0 south down the dual trail: a GULL huddle loafs on the revetment-top lawn east of the walk ribbon; f1 north: a SHELL micro-find glints on the lakeside strip and painted rocks read on the fence side; f2 the long north read: the run between golf fence and lake reads dotted with small finds instead of empty. Nothing stands on the asphalt or the limestone."
+  },
+  {
+   "id": "md-bay",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 138,
+   "z": -647,
+   "framings": [
+    {
+     "yaw": 0.95,
+     "pitch": 0.07,
+     "dist": 8
+    },
+    {
+     "x": 166,
+     "z": -712,
+     "yaw": -2.45,
+     "pitch": 0.06,
+     "dist": 8
+    },
+    {
+     "x": 178,
+     "z": -700,
+     "yaw": 2,
+     "pitch": 0.07,
+     "dist": 8
+    }
+   ],
+   "expectation": "121 MICRO-DISCOVERY — THE BAY CONNECTOR + HARBOR APPROACH (the 084 cove → Montrose harbor promenade): f0: a NEW east-facing bench sits on the lawn above the cove waist with the trail and open cove water beyond it; f1 north up the west promenade: a deadpan HARBOR plaque reads trail-side against the open lawn (Cricket Hill's silhouette may read beyond); f2: a GULL huddle loafs at the basin's west edge with docks/boats behind. The connector reads inhabited, not just-walking."
+  },
+  {
+   "id": "md-beach-back",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 192,
+   "z": -945,
+   "framings": [
+    {
+     "yaw": 2.4,
+     "pitch": 0.06,
+     "dist": 8
+    },
+    {
+     "x": 199,
+     "z": -947,
+     "yaw": 2.2,
+     "pitch": 0.07,
+     "dist": 8
+    },
+    {
+     "x": 192,
+     "z": -1024,
+     "yaw": 2.35,
+     "pitch": 0.07,
+     "dist": 9
+    }
+   ],
+   "expectation": "121 MICRO-DISCOVERY — THE MONTROSE BEACH BACK-EDGE (the trail-side lawn behind the sand): f0 north from the dune corner: a deadpan beach PLAQUE reads beside the walk ribbon with painted rocks beyond; f1: GULLS loaf on the back sand by the dune rope; f2 north toward The Dock: a NEW bench faces the sand, a SHELL micro-find glints nearby, The Dock's teal awning far beyond. Back-edge walkers get something to notice every ~50 m; nothing on the ribbons, nothing inside the roped dune."
   },
   {
    "id": "lp-arrival",

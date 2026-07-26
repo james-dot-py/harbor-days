@@ -383,6 +383,69 @@ add('mt-shore-waterline', 'montrose', 'lakefront', 228, -1000, [
   ]);
 }
 
+/* ---- 121 MICRO-DISCOVERY (the 2026-07-19 design audit, B3): judged waypoints
+   along the "just-walking" stretches BEFORE anything is placed (measurement
+   first) — the Belmont harbor rim, the spit spine, the Belmont↔Montrose
+   connectors (golf corridor + golf lakeside + the bay/harbor approach), and
+   the Montrose beach back-edge. Stands derive from the data modules
+   (BASIN_W_PARAMS/FINGER_DOCKS/TRAIL_SPUR/TRAIL_MAIN/TRAIL_MONTROSE) so they
+   survive layout rework; every framing aims PAST its subject (047 law). The
+   placements they judge live in CH.TRAIL_DISCOVERY (packs/trail-discovery.js). */
+{
+  const bw = CH.BASIN_W_PARAMS.fx;                  // Belmont basin west seawall x(z)
+  // north rim half: the RAY plaque (by the mouth, where the fish would be) +
+  // the seawall gull huddle + the rhythm read. Main stand sits at z-50 — the
+  // harbor-house landmark (60,-100) keeps its own landmark-0 waypoint (the
+  // <20 m dedup), and the house is the rim's existing anchor between the two.
+  add('md-rim-north', 'lakefront', 'lakefront', R(bw(-50) - 11), -50, [
+    { yaw: 1.45, pitch: 0.08, dist: 9 },                            // ENE past the plaque -> mouth + mooring cans (plaque left of axis)
+    { x: R(bw(-158) - 10), z: -158, yaw: 1.45, pitch: 0.08, dist: 8 }, // the seawall gulls + moored boats behind
+    { x: R(bw(-128) - 11), z: -128, yaw: 2.35, pitch: 0.10, dist: 12 },// north down-rim: the stretch reads dotted, not bare
+  ]);
+  // south rim half: painted rocks + the new rim bench + the feather micro-find
+  add('md-rim-south', 'lakefront', 'lakefront', R(bw(-208) - 11), -208, [
+    { yaw: 2.0, pitch: 0.08, dist: 9 },                             // rocks right of axis, dock group behind
+    { x: R(bw(-248) - 12), z: -248, yaw: 2.0, pitch: 0.07, dist: 9 },  // the east-facing rim bench + basin
+    { x: R(bw(-294) - 9),  z: -294, yaw: 2.25, pitch: 0.08, dist: 9 }, // feather glint (81,-302) ~19° off-axis + the rim curving to the basin head
+  ]);
+  // the spit spine (TRAIL_SPUR's z-260..-70 run): plaque / lake-edge gulls / feather
+  {
+    const SP = CH.TRAIL_SPUR, mid = SP[11];                         // [183,-150]
+    add('md-spit', 'lakefront', 'lakefront', mid[0], mid[1] + 8, [
+      { yaw: 0.15, pitch: 0.07, dist: 9 },                          // south down the spine: the plaque trail-side left
+      { x: 192, z: -175, yaw: 1.0, pitch: 0.07, dist: 8 },          // the lake-edge gull huddle ~19° left at 6 m, lake beyond (the first cut read them as specks behind the mayor)
+      { x: 184, z: -207, yaw: -2.75, pitch: 0.08, dist: 9 },        // north up the spine: feather glint (186.5,-222) right of axis in the treed strip
+    ]);
+  }
+  // the golf corridor (TRAIL_MAIN's z-433 east run): rocks / plaque / rhythm
+  {
+    const T = CH.TRAIL_MAIN, c1 = T[34];                            // [145,-433]
+    add('md-corridor', 'lakefront', 'lakefront', c1[0] - 5, c1[1] + 3.5, [
+      { yaw: -1.75, pitch: 0.07, dist: 9 },                         // WSW down the corridor: painted rocks ~17° left (dead-on -2.05 hid them behind the mayor)
+      { x: 166.5, z: -433, yaw: 2.75, pitch: 0.06, dist: 4.5 },     // the GOLF plaque CLOSE (title legible; it sits on the NORTH/fence side)
+      { x: 188, z: -429, yaw: -1.45, pitch: 0.09, dist: 13 },       // east-end pull-back: the corridor reads dotted
+    ]);
+  }
+  // the golf lakeside run (x~211, z-448..-572): gulls / shell + rocks / long read
+  add('md-golfside', 'lakefront', 'lakefront', 212.5, -514, [
+    { yaw: 0.45, pitch: 0.07, dist: 9 },                            // south down the dual trail: revetment-top gulls (222,-505) ahead-left
+    { x: 213, z: -542, yaw: 2.75, pitch: 0.07, dist: 9 },           // north: shell glint right, painted rocks fence-side left
+    { x: 212, z: -568, yaw: 2.9, pitch: 0.12, dist: 12 },           // the whole run north: dotted between fence and lake
+  ]);
+  // the bay connector + harbor approach (TRAIL_MONTROSE z-598..-764)
+  add('md-bay', 'montrose', 'lakefront', 138, -647, [
+    { yaw: 0.95, pitch: 0.07, dist: 8 },                            // the new cove bench mid-left, cove water beyond
+    { x: 166, z: -712, yaw: -2.45, pitch: 0.06, dist: 8 },          // north up the promenade: the HARBOR plaque + Perch Bait far
+    { x: 178, z: -700, yaw: 2.0, pitch: 0.07, dist: 8 },            // the basin-edge gulls + the mooring field behind
+  ]);
+  // the Montrose beach back-edge (the trail-side lawn behind the sand)
+  add('md-beach-back', 'montrose', 'lakefront', 192, -945, [
+    { yaw: 2.4, pitch: 0.06, dist: 8 },                             // north: the LAKE-IS-COLD plaque + painted rocks beyond
+    { x: 199, z: -947, yaw: 2.2, pitch: 0.07, dist: 8 },            // NNE: gulls on the back sand by the dune rope
+    { x: 192, z: -1024, yaw: 2.35, pitch: 0.07, dist: 9 },          // north toward The Dock: the new bench + a shell glint + awning
+  ]);
+}
+
 // LINCOLN PARK SHELL (task 112 — the map's FIRST growth WEST of the Drive and south
 // of the old z408 fence). The connective SHELL waypoints; 113-117 add the lagoon
 // docks / zoo / conservatory / pond and site their own lp-* stands. Framings per
