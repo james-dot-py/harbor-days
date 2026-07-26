@@ -159,18 +159,40 @@ export function buildSky(){
     // is NORTH of the corner the materials stay OPAQUE (transparent=false) so the
     // signature Belmont read (baseline.png) is BYTE-IDENTICAL — no rng, frozen
     // mulberry32(0x5c1000) geometry + instance counts untouched, same draw count.
-    { const G=CH.LP_SKYLINE_GATE, sMats=[];
-      grp.traverse(o=>{ if(o.material){ const a=Array.isArray(o.material)?o.material:[o.material]; for(const m of a) sMats.push(m); } });
+    // 120 AMENDMENT (issue 034 — "the buildings that are supposed to be in the
+    // distance just fade away"): the 112 gate was a straight opacity ramp, so
+    // walking south the whole downtown dissolved into SEE-THROUGH GLASS towers
+    // in plain view over ~30 s and then blinked out. It now RECEDES first and
+    // HAZES as it goes:
+    //   pz <= holdZ  IDENTITY — position 0, opaque, original colors. Untouched
+    //                while the player never leaves the north (the `gated` latch),
+    //                so the Belmont read / baseline.png stay BIT-IDENTICAL.
+    //   pz >  holdZ  grp.position.z = (pz-holdZ)*recede — the BACKDROP translates
+    //                south at 1.8x the player's southward progress, so downtown
+    //                pulls gently away instead of dissolving. Only position.z
+    //                ever changes: no scale, no rotation.
+    //   fadeZ0..1    opacity ramps to 0 AND each material's color lerps toward
+    //                the horizon haze (= the scene fog color). A pure opacity
+    //                fade reads as broken glass; hazing out reads as atmospheric
+    //                perspective. Hidden past hiddenSouthOf.
+    // Originals are captured ONCE here into a parallel array — no cloned
+    // materials, no extra draw calls, no rng.
+    { const G=CH.LP_SKYLINE_GATE, sMats=[], sCol=[], HAZE=new THREE.Color(G.haze);
+      grp.traverse(o=>{ if(o.material){ const a=Array.isArray(o.material)?o.material:[o.material];
+        for(const m of a) if(sMats.indexOf(m)<0){ sMats.push(m); sCol.push(m.color.clone()); } } });
       let gated=false;
       skyGroup.userData.skylineGate=(pz)=>{
-        if(pz<=G.fadeZ0){                                   // north of the corner: fully opaque + visible (the frozen read)
-          if(gated){ for(const m of sMats){ m.transparent=false; m.opacity=1; m.needsUpdate=true; } grp.visible=true; gated=false; }
+        if(pz<=G.holdZ){                                    // north of the corner: identity (the frozen read)
+          if(gated){ for(let i=0;i<sMats.length;i++){ const m=sMats[i]; m.transparent=false; m.opacity=1; m.color.copy(sCol[i]); m.needsUpdate=true; }
+            grp.position.z=0; grp.visible=true; gated=false; }
           return;
         }
         gated=true;
-        const f=1-Math.min(1,(pz-G.fadeZ0)/(G.fadeZ1-G.fadeZ0));   // 1 at the corner -> 0 by fadeZ1
-        grp.visible=f>0.002;
-        if(grp.visible) for(const m of sMats){ m.transparent=true; m.opacity=f; }
+        grp.position.z=(pz-G.holdZ)*G.recede;                       // pull downtown away, don't dissolve it
+        const f=1-Math.min(1,Math.max(0,(pz-G.fadeZ0)/(G.fadeZ1-G.fadeZ0)));   // 1 until fadeZ0 -> 0 by fadeZ1
+        grp.visible=f>0.002&&pz<=G.hiddenSouthOf;
+        if(grp.visible) for(let i=0;i<sMats.length;i++){ const m=sMats[i];
+          m.transparent=true; m.opacity=f; m.color.copy(sCol[i]).lerp(HAZE,0.85*(1-f)); }
       };
     }
   }
@@ -242,9 +264,41 @@ function buildLakeviewBand(){
       z+=w+rr(B.spacing[0],B.spacing[1]);
     }
   };
+  // 120 (issue 034): the SOUTH CITY EDGE. The three marches above walk NORTH-
+  // SOUTH at a fixed x front; this one walks WEST-EAST at a fixed z front with
+  // the bodies extending SOUTH (+z) from it, so the horizon ahead of a player
+  // walking south out of the park is a low-rise city edge instead of empty sky.
+  // Same block vocabulary + the same local-xorshift pattern (its OWN seed — the
+  // shared world rng is never touched), pushed into the SAME bodies/caps arrays
+  // -> the three InstancedMeshes just grow: +0 draw calls.
+  // NOTE the field swap: the instancing below reads S.set(b.d,b.h,b.w), i.e.
+  // x-scale=b.d and z-scale=b.w, which is right for a z-marching row (frontage
+  // along z). For an X-marching row the frontage w runs along X and the depth d
+  // along Z, so the record carries {w:d, d:w}.
+  // NO windows: the row faces NORTH and the window quads are built facing +x.
+  const marchX=(x0,x1,seed,frontZ)=>{
+    let hs=seed>>>0;
+    const jr=()=>{hs^=hs<<13;hs>>>=0;hs^=hs>>>17;hs^=hs<<5;hs>>>=0;return hs/4294967296;};
+    const rr=(a,b)=>a+(b-a)*jr();
+    let x=x0;
+    for(;;){
+      const w=rr(B.w[0],B.w[1]);                            // frontage along X
+      if(x+w>x1) break;                                     // last block fully inside the range
+      const tall=jr()<B.tallProb;
+      const h=tall?rr(B.tallH[0],B.tallH[1]):rr(B.h[0],B.h[1]);
+      const d=rr(B.depth[0],B.depth[1]);                    // depth extends SOUTH
+      const col=new THREE.Color(B.colors[(jr()*B.colors.length)|0]);
+      const xc=x+w/2, zc=frontZ+d/2;                        // north face at z=frontZ, extends south
+      bodies.push({w:d,h,d:w,x:xc,z:zc,c:col});
+      caps.push({w:d,h,d:w,x:xc,z:zc,c:col.clone().lerp(white,0.34)});   // limestone cornice lip
+      x+=w+rr(B.spacing[0],B.spacing[1]);
+    }
+  };
+
   march(B.zr[0],B.zr[1],0x2f6b1c07);                       // original span, original seed -> byte-identical
   if(B.zrN) march(B.zrN[0],B.zrN[1],0x6d21f8a3);           // MONTROSE north extension, own seed
   if(B.zrS) march(B.zrS[0],B.zrS[1],0x3ac91d55,B.frontS);  // 112 LINCOLN PARK south extension: far-west front (Clark/Lincoln wall), own seed
+  if(B.southRow){ const R=B.southRow; marchX(R.x0,R.x1,R.seed,R.z); }   // 120 SOUTH CITY EDGE — LAST, so every existing block stays byte-identical
 
   const M=new THREE.Matrix4(),V=new THREE.Vector3(),Q=new THREE.Quaternion(),S=new THREE.Vector3();
 

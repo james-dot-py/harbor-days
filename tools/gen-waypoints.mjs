@@ -395,10 +395,17 @@ add('lp-arrival', 'lincolnpark', 'lakefront', 22, 445, [
   { yaw: 0.4,  pitch: 0.12, dist: 9 },   // SSE wider: the crushed-limestone trail + lake glinting to the left, elms ahead
   { yaw: -0.35, pitch: 0.14, dist: 8 },  // SSW: the Drive + its low embankment carrying south, open park lawn to the right
 ]);
+// 120 REBUILD (issue 035, the marquee): the crossing is now a SUNKEN underpass —
+// the path ramps down under the Drive and the Drive rides a bridge deck over it.
+// Framings are AXIS-ALIGNED E–W (the interior/tunnel camera rule: a cross-body
+// camera exits a tunnel) and the stands sit ON the ramps/floor, so the follow-cam
+// rides down with the player under 3.62 m of headroom. f3 is the OUTSIDE read —
+// the whole point of the fix is that the crossing looks like a real bridge.
 add('lp-underpass', 'lincolnpark', 'lakefront', 18, 661, [
-  { yaw: -1.57, pitch: 0.0,  dist: 4 },              // WEST, axis-aligned: straight down the tunnel, open arch, see-through to the park
-  { yaw: -1.57, pitch: 0.07, dist: 5.5 },            // wider/higher: the stone voussoir arch + the far mouth glowing beyond
-  { x: -8, z: 661, yaw: 1.57, pitch: 0.05, dist: 5 }, // from the PARK side, back EAST through the tunnel toward the lakefront strip
+  { yaw: -1.57, pitch: 0.02, dist: 6 },                 // WEST down the east ramp: the bridge soffit + parapets overhead, tunnel mouth ahead, far mouth glowing through
+  { x: 7, z: 661, yaw: -1.57, pitch: 0.02, dist: 6 },   // INSIDE, under the Drive: the mayor fully visible with the highway carried OVERHEAD — never inside him
+  { x: -4, z: 661, yaw: 1.57, pitch: 0.02, dist: 6 },   // DOWN the west ramp looking back EAST — f0's recipe mirrored: west portal + voussoir + soffit overhead, see-through to the lakefront side (a grade-level stand hides the portal below the trench lip)
+  { x: 22, z: 650, yaw: -1.15, pitch: 0.26, dist: 13 }, // 3/4 from the north bank: the Drive on its deck, parapets, the trench + retaining walls reading as a real crossing
 ]);
 // (lp-westpanel RETIRED task 114 — its stand is now inside the zoo campus; the
 // three lp-zoo-* stands below supersede the honest-interim-lawn read.)
@@ -448,7 +455,7 @@ add('lp-farm', 'lincolnpark', 'lakefront', -68, 961, [
 // (the DOWNTOWN-SKYLINE PHYSICS RULING). 118 will add a heron interaction here.
 add('lp-cafe-brauer', 'lincolnpark', 'lakefront', -49, 920, [
   { yaw: -2.30, pitch: 0.12, dist: 8 },                   // hero: Brauer E/S face + loggia + green hip + twin lanterns + clock, paddleboats right
-  { x: -22, z: 912, yaw: -1.95, pitch: 0.09, dist: 9 },   // establishing: café face + clock + loggia + green hip over the pond, the paddleboat raft (green pedal boats + white swan) reading in front
+  { x: -10, z: 916, yaw: -1.95, pitch: 0.09, dist: 9 },   // establishing from the EAST BANK: café face + clock + loggia + green hip over the pond, the paddleboat raft reading in front. 120: the old stand (-22,912) was INSIDE the pond polygon — the mayor stood on the water in the signature shot, the exact issue-036 class this task burns down
   { x: -47, z: 900, yaw: 3.00, pitch: 0.10, dist: 7 },    // the north loggia arm + terrace along the shore
 ]);
 add('lp-boardwalk', 'lincolnpark', 'lakefront', -25, 974, [
@@ -471,6 +478,32 @@ add('lp-theater', 'lincolnpark', 'lakefront', 24, 588, [
   { yaw: 0.95, pitch: 0.12, dist: 8 },                 // SE oblique: west arcade band angling away, lake glinting past the south end
   { yaw: 0.72, pitch: 0.10, dist: 10 },                // wider pull: the whole pavilion — arcade + deep-eave hip roof + lake beyond
   { x: 26, z: 636, yaw: 2.62, pitch: 0.10, dist: 7 },  // from the S on the trail: arcade + sign + the strip running north
+]);
+
+// ===== 120 — THE OWNER'S 2026-07-24 PLAYTEST BURN-DOWN. One JUDGED waypoint per
+// issue, standing on the owner's own coordinates where he gave them, so each fix
+// has a measurement that outlives the session (fix-the-measurement-first).
+// lf-west-screen is tagged `lakefront` (it is the Belmont stretch, not the park)
+// so `--area` stays honest; run it by --ids alongside the lincolnpark sweep.
+add('lf-west-screen', 'lakefront', 'lakefront', 18.4, 233.3, [
+  { yaw: -1.57, pitch: 0.06, dist: 9 },   // issue 032, the owner's exact spot+heading: WEST past the screening hedges — CITY GROUND under the L, no lake
+  { yaw: -1.57, pitch: 0.42, dist: 16 },  // high over the hedge line: the viaduct bents + Lakeview flats standing on solid ground the whole way west
+  { yaw: -2.35, pitch: 0.10, dist: 10 },  // SW along the trail: the hedge screen + berm + the city beyond, no water gap at any angle
+]);
+add('lp-corner-weld', 'lincolnpark', 'lakefront', 29.1, 403.7, [
+  { yaw: 0.20, pitch: 0.70, dist: 15 },   // issue 033, the owner's spot: near-top-down — ONE continuous dual path, no chopped caps, no lateral offset
+  { yaw: 0.15, pitch: 0.22, dist: 11 },   // SOUTH along it: bike + walk lanes running unbroken into Lincoln Park, dashes rhythmic across the seam
+  { yaw: 3.00, pitch: 0.25, dist: 11 },   // NORTH back up the trail: the same weld from the other side
+]);
+add('lp-southbound', 'lincolnpark', 'lakefront', 40, 430, [
+  { yaw: 0.15, pitch: 0.03, dist: 10 },                  // issue 034: walking SOUTH — downtown SOLID on the horizon, receding, never see-through
+  { x: 34, z: 478, yaw: 0.15, pitch: 0.03, dist: 10 },   // deeper south: still a solid skyline, hazed by distance rather than dissolving
+  { x: 28, z: 530, yaw: 0.15, pitch: 0.05, dist: 11 },   // past the fade: the horizon is haze + park, with no glassy tower remnants
+]);
+add('lp-zoo-lakeview', 'lincolnpark', 'lakefront', -1, 838, [
+  { yaw: 1.57, pitch: 0.50, dist: 20 },                  // issue 036: high, EAST over the Drive across the open lake — the WATER IS EMPTY (no crowd standing on it)
+  { yaw: 1.90, pitch: 0.10, dist: 8 },                   // eye level ESE from the zoo's Cannon flank to the waterline
+  { x: -3, z: 900, yaw: 1.45, pitch: 0.12, dist: 10 },   // further south along the flank: same read, nobody on the water
 ]);
 
 // Diversey ENTERABLE bay (task 028): stand on the ground hitting deck at a

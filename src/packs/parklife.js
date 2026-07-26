@@ -25,7 +25,8 @@
 import { onWorldReady, registerUpdate, createChibi, registerBumpable, bakeChibiRig } from '../framework.js';
 import * as THREE from 'three';
 import { scene, camera, toon, bmat, curveMat, WATER_Y } from '../core.js';
-import { coastQuery, tierAt } from '../coast.js';
+import { coastQuery, tierAt, inPierChannel } from '../coast.js';
+import { PIER_CHANNEL } from '../data/chicago.js';   // 120: the corner pier SLIP band (issue-036 class fix in stepSitter)
 import { pathSamples } from '../paths.js';
 
 // local deterministic rng — never the shared core rng()/rand()
@@ -98,6 +99,7 @@ const LINES_CORNER = ["there's the Hancock","ope — take a seat, plenty of room
 function makeChibi(x,z,ry,pal,scale=CITIZEN){
   const {group,parts} = createChibi(Object.assign({scale}, pal));
   group.position.set(x,0,z); group.rotation.y = ry; scene.add(group);
+  group.userData.src='parklife';   // 120: provenance for tools/no-solid-in-water.mjs — a rig standing in the lake is otherwise an anonymous 'chibi' among ~30 packs
   return {group,parts};
 }
 // sit cross-legged / knees-up on the ground: legs forward, hips dropped to grass
@@ -379,10 +381,28 @@ onWorldReady(() => {
     function stepSitter(seedX,seedZ,lat,tang,opt){
       opt=opt||{};
       let p=marchLat(seedX,seedZ,lat);
-      const tx=-p.n.z, tz=p.n.x;                                    // shore tangent
+      let tx=-p.n.z, tz=p.n.x;                                      // shore tangent
       if(tang) p=marchLat(p.x+tx*tang, p.z+tz*tang, lat);          // side-by-side, re-snap to the same step
+      // 120 (issue 036 class, caught by tools/no-solid-in-water.mjs): the corner
+      // PIER SLIP (PIER_CHANNEL, task 021) carved these terraces away to OPEN
+      // WATER, and the (120,372) reader marched straight into it — a reader
+      // sitting on the lake beside the pier, unnoticed since 021.
+      // The slip is an x-BAND (PIER_CHANNEL x 113..126), so step STRAIGHT out of
+      // the nearer x edge and re-snap onto the same terrace step there. Two
+      // things make the obvious "slide along the tangent" version a no-op:
+      // inside the slip coastQuery reports lat 1e3, so BOTH seaNormal (the
+      // tangent) and marchLat's Newton step are meaningless there. Only the
+      // x-band bound is trustworthy from inside. Local math, no shared rng —
+      // world layout is untouched.
+      if(inPierChannel(p.x,p.z)){
+        const P=PIER_CHANNEL;
+        const outX = (p.x-P.x0) <= (P.x1-p.x) ? P.x0-1.5 : P.x1+1.5;
+        const m=marchLat(outX,p.z,lat);
+        p = inPierChannel(m.x,m.z) ? {x:outX,z:p.z,n:seaNormal(outX,p.z)} : m;
+      }
       const ry=Math.atan2(p.n.x,p.n.z), y=groundY(p.x,p.z);        // face seaward, sit ON the step
       const {group,parts}=makeChibi(p.x,p.z,ry,nextPal(),opt.scale||CITIZEN);
+      group.userData.src='parklife:stepSitter('+seedX+','+seedZ+')';
       poseSeated(group,parts,y);
       if(opt.book) bookSpots.push({x:p.x+p.n.x*0.34,y:y+0.6,z:p.z+p.n.z*0.34,ry,tilt:-0.6});
       if(opt.point){ parts.armR.rotation.x=-2.15; parts.armR.rotation.z=-0.15;   // pointing out at the boats

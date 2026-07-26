@@ -21,7 +21,7 @@
 // =====================================================================
 import * as THREE from 'three';
 import { onWorldReady, createChibi, registerBumpable, bakeChibiRig,
-         addSitSpot, addInteraction, toast } from '../framework.js';
+         addSitSpot, addInteraction, toast, addAtWorld } from '../framework.js';
 import { scene, toon, mulberry32 } from '../core.js';
 import { OPEN_GRANT } from '../data/millennium.js';
 
@@ -77,7 +77,7 @@ onWorldReady(() => {
     const { group, parts } = createChibi(Object.assign({ scale: CITIZEN }, e.pal));
     group.position.set(e.x, 0, e.z);
     group.rotation.y = -Math.PI / 2 + jit(0.12);      // face WEST over Michigan Ave
-    scene.add(group);
+    addAtWorld(group, e.x, e.z);   // 120 (issue 036): hand the rig to the millennium cell root — a bare scene.add left these step-eaters visible on the lakefront's open lake once Lincoln Park grew within 145 m of them
     poseSeated(group, parts, TREAD_Y);                // sit ON the tread (y ~ 1.28)
     if (e.squint) parts.eyeL.scale.set(1.1, 0.42, 1); // happy lunch squint (eyeL===eyeR on a face:true rig)
     const s = makeSandwich();

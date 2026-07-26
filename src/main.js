@@ -19,7 +19,7 @@ import { initAvatarSelect, updateAvatarSelect } from './avatarselect.js';
 import { mmInit, mmDraw, initMinimapToggle } from './minimap.js';
 import * as CH from './data/chicago.js';
 import { worldReady, runUpdates, state, setIdleGroundProbe } from './framework.js';
-import { beginCellCapture, endCellCapture, mergeCellStatic, getCell, cellWalk, cellSurf, cellClamp, cellKind } from './cells.js';
+import { beginCellCapture, endCellCapture, mergeCellStatic, getCell, cellWalk, cellSurf, cellClamp, cellKind, allCells } from './cells.js';
 import './packs/index.js';   // content packs (side-effect); loaded before world build
 
 // ---- dev/debug URL params (harmless in prod build) ----
@@ -178,6 +178,7 @@ function walkable(x,z){
 }
 function surfaceY(x,z){
   const cs=cellSurf();if(cs)return cs(x,z);   // active cell owns surface height
+  const uh=CH.lpUnderpassH(x,z);if(uh!==null)return uh;   // 120 (issue 035): the SUNKEN Fullerton crossing — ramps down under the Drive and back up. Analytic + shared with tools/walkprobe.mjs (the 052 never-fork law); replaces the 112 flat walkRect
   const r=onRect(x,z);if(r)return r.h;
   const hh=CH.cricketHillH(x,z);if(hh!==null)return hh;   // task 073: Cricket Hill analytic mound (on LAND, walkable via pip)
   const bh=beachH(x,z);if(bh!==null)return bh;
@@ -237,6 +238,16 @@ window.__hd.landDbg=landDbg;   // debug/tools only: last landing thud {n,fall,pe
 window.__hd.rustleDbg=rustleDbg;   // debug/tools only: last brush rustle {n,freq,t} (109)
 window.__hd.rustleStats=rustleStats;   // debug/tools only: rustle-grid census {cells,pts,cool} (109)
 window.__hd.landPitch=()=>jphys.landPitch;   // debug/tools only: live landing camera-settle offset (109)
+// 120 (issues 032/036): the permanent no-solid-in-water gate's probes.
+// solidProbe answers "is this point solid ground?" with the ENGINE's own
+// walkable() plus the two non-walkable DRY surfaces (the west grade + the LSD
+// berm — CH.isDryGround), so tools/no-solid-in-water.mjs can never measure a
+// fiction. cellsDbg lists every registered cell's clamp so the same tool can
+// flag pack content parked inside a HARD cell but hung off the scene root
+// (which is how Millennium's park visitors ended up "sitting in the water east
+// of the zoo" once Lincoln Park grew to within 60 m of them).
+window.__hd.solidProbe=(x,z)=>({walk:walkable(x,z),water:isWater(x,z),dry:CH.isDryGround(x,z),y:surfaceY(x,z)});
+window.__hd.cellsDbg=allCells;
 setIdleGroundProbe((x,z)=>({walk:walkable(x,z),y:surfaceY(x,z)}));   // task 087: let the idle-charm sit only land on safe flat ground (shared engine walk data)
 window.__hd.buildMs={build:Math.round(_tm0-_tb0),merge:Math.round(_tm1-_tm0),packs:Math.round(performance.now()-_tp0)};
 console.log('[perf] world build '+window.__hd.buildMs.build+'ms · mergeCellStatic '+window.__hd.buildMs.merge+'ms · packs '+window.__hd.buildMs.packs+'ms');
@@ -476,6 +487,16 @@ function frame(now){
     pvx-Math.sin(cam.yaw)*horiz,
     Math.max(player.y+0.55,Math.max(-1.5,pvy+Math.sin(downP)*effD+upT*1.2)),
     pvz-Math.cos(cam.yaw)*horiz);
+  // 120 (issue 035): the sunken Fullerton crossing — at the DEFAULT pitch (0.34,
+  // dist 8.2) the chase cam rides ABOVE the bridge deck while the player walks
+  // the tunnel, so the Drive hides the walker: the owner's "you're obscured by
+  // it", back from a new angle. While the player is down in the cut, duck the
+  // camera under the soffit whenever it hangs over the trench/deck footprint
+  // (camPos's lerp makes the dip/restore smooth; no rng, spawn view untouched).
+  {const uh=CH.lpUnderpassH(player.x,player.z);
+   if(uh!==null&&uh<-0.5){const U=CH.LP_UNDERPASS;
+     if(camTarget.z>U.z0-2&&camTarget.z<U.z1+2&&camTarget.x>U.rampW.x0-2&&camTarget.x<U.rampE.x1+2)
+       camTarget.y=Math.min(camTarget.y,-0.2);}}   // just below grade: the height the proven f0/f2 framings use — under the soffit AND under the grade-level lawn/berm edges that fill the frame at +0.2
   if(camCtl.snap){camPos.copy(camTarget);camCtl.snap=false;}
   camPos.lerp(camTarget,1-Math.exp(-8*dt));
   const shA=game.calm?0:fw.shake*0.5;   // reduced-motion disables the firework camera sway (task 085)

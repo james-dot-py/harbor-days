@@ -33,7 +33,7 @@
 //  so the crowd clusters x 126–161, z 804–832 where those framings see it.
 // =====================================================================
 import * as THREE from 'three';
-import { onWorldReady, createChibi, registerBumpable, bakeChibiRig, makeNPC } from '../framework.js';
+import { onWorldReady, createChibi, registerBumpable, bakeChibiRig, makeNPC, addAtWorld } from '../framework.js';
 import { scene, toon, curveMat, mulberry32 } from '../core.js';
 
 const CITIZEN = 0.74;                              // canonical chibi scale (matches the mayor / makeNPC)
@@ -79,7 +79,11 @@ onWorldReady((player) => {
   // ---- shared chibi helpers ------------------------------------------
   function makeChibi(x, z, ry, pal, scale = CITIZEN) {
     const { group, parts } = createChibi(Object.assign({ scale }, pal));
-    group.position.set(x, 0, z); group.rotation.y = ry; scene.add(group);
+    // 120 (issue 036): addAtWorld, not scene.add — a bare scene.add left these
+    // Millennium lawn figures hanging off the SCENE root, so once Lincoln Park
+    // grew to z 1020 the lakefront player stood 60 m away (inside the 145 m NPC
+    // cull) and saw them standing on the open lake east of the zoo.
+    group.position.set(x, 0, z); group.rotation.y = ry; addAtWorld(group, x, z);
     return { group, parts };
   }
   // sit cross-legged on the ground (copied verbatim from packs/lawnlife.js)

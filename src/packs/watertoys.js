@@ -127,6 +127,7 @@ onWorldReady(() => {
     const rig = new THREE.Group();
     rig.position.set(hx, WATER_Y, hz);
     rig.rotation.y = Math.random()*Math.PI*2;
+    rig.userData.overWater = true;   // 120: DELIBERATELY afloat — the permanent tools/no-solid-in-water.mjs gate (issues 032/036) allowlists rigs that carry this flag, so the tubers read as an exception ON PURPOSE rather than surviving as an unexplained gate hole
     scene.add(rig);
 
     const {group:cg, parts} = createChibi(Object.assign({scale:CITIZEN}, PAL[i%PAL.length]));
@@ -170,6 +171,7 @@ onWorldReady(() => {
   // ================================================================= //
   const pbRig = new THREE.Group();
   pbRig.position.set(PB.x, WATER_Y, PB.z);
+  pbRig.userData.overWater = true;   // 120: on a paddleboard, by design (see the tuber note)
   scene.add(pbRig);
 
   const board = new THREE.Mesh(new THREE.BoxGeometry(0.62,0.12,2.5), toon(0xf2e3b0));

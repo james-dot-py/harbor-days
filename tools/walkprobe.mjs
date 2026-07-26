@@ -71,6 +71,7 @@ function walkable(x,z){
   return false;
 }
 function surfaceY(x,z){
+  const uh=CH.lpUnderpassH(x,z);if(uh!==null)return uh;   // 120: the SUNKEN Fullerton crossing (mirror of main.js surfaceY, same position — SHARED function, never a fork)
   const r=onRect(x,z);if(r)return r.h;
   const hh=CH.cricketHillH(x,z);if(hh!==null)return hh;   // task 073: Cricket Hill analytic mound (mirror of main.js surfaceY)
   const bh=beachH(x,z);if(bh!==null)return bh;
@@ -1534,10 +1535,10 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
   expect('Café Brauer is the pond NW shoulder (N & W of pond centre)',
     A.cafeBrauer.z<A.southPond.z && A.cafeBrauer.x<=A.southPond.x, true);
   // (3) THE WEST CROSSING: the Fullerton underpass STRADDLES the berm (x0..14)
-  expect('Fullerton underpass tunnels THROUGH the berm (x0<0 && x1>14)',
-    CH.LP_UNDERPASS.walk.x0<0 && CH.LP_UNDERPASS.walk.x1>14, true);
+  expect('Fullerton underpass tunnels THROUGH the berm (ramp heads either side)',
+    CH.LP_UNDERPASS.rampW.x0<0 && CH.LP_UNDERPASS.rampE.x1>14, true);
   expect('the underpass sits at Fullerton latitude (z 640..700)',
-    CH.LP_UNDERPASS.walk.z0>640 && CH.LP_UNDERPASS.walk.z1<700, true);
+    CH.LP_UNDERPASS.z0>640 && CH.LP_UNDERPASS.z1<700, true);
   // (4) the FREE zoo — OPEN gates, no ticket booth (open-admission civic
   //     fact). 114 built the campus: the staged gatesOpen[] became the
   //     ZOO.gates.{east,west,south} shape (gates are GAPS between fence runs).
@@ -1879,6 +1880,88 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
     expect('the terrace/spur east of the hall still walks (-49,908)',walkable(-49,908),true); }
 }
 
+// ===== LINCOLN PARK 120 — the owner's 2026-07-24 playtest burn-down.
+// (A) issue 035, the marquee: the Fullerton crossing is a REAL underpass — the
+//     path DIPS under the Drive and the Drive rides a bridge deck over it. The
+//     112 version was a flat cut at grade with the road slab passing through the
+//     walker's chest. Walk surface = the analytic CH.lpUnderpassH, SHARED with
+//     main.js surfaceY (never a fork — the 052 law).
+// (B) issue 032: nothing structural stands in the lake any more — the west
+//     grade is the map's dry city side. (The full sweep is the permanent
+//     tools/no-solid-in-water.mjs gate, spawned below.)
+// (C) issue 033: the Lakefront Trail is ONE continuous dual path through the
+//     Diversey corner — LP_TRAIL_LAKE starts on TRAIL_MAIN's exact head.
+{ console.log('\n--- LINCOLN PARK 120 (owner burn-down: crossing / west grade / corner weld) ---');
+  const U=CH.LP_UNDERPASS;
+  // (A1) the crossing walks end to end, east strip -> under the Drive -> park
+  for(const [x,z] of [[26,661],[25,661],[20,661],[14,661],[7,661],[0,661],[-6,661],[-11,661],[-13,661]])
+    expect(`crossing walks (${x},${z})`,walkable(x,z),true);
+  // (A2) it is genuinely SUNKEN, and the profile is a ramp -> flat -> ramp
+  expect('tunnel floor sits below grade under the Drive',surfaceY(7,661)===U.floorY,true);
+  expect('east ramp head is at grade',surfaceY(U.rampE.x1,661),0);
+  expect('west ramp head is at grade',surfaceY(U.rampW.x0,661),0);
+  expect('headroom under the bridge soffit >= 3.5 m (issue-024 chase-cam rule)',
+    (U.deck.top-U.deck.th)-U.floorY>=3.5,true);
+  { let worst=0;                                   // no ELEVATOR: <= 0.55 y per metre anywhere on the ramps
+    for(let x=U.rampW.x0;x<U.rampE.x1;x+=0.25){
+      const a=CH.lpUnderpassH(x,661),b=CH.lpUnderpassH(x+0.25,661);
+      if(a!==null&&b!==null)worst=Math.max(worst,Math.abs(b-a)/0.25);
+    }
+    expect(`ramp grade ${worst.toFixed(3)} <= 0.55 (walkprobe elevator guard)`,worst<=0.55,true); }
+  // (A3) the trench RIM is blocked beside the OPEN ramps — nobody steps off a
+  //      3 m retaining wall — but the ramp itself and the shallow heads stay open
+  for(const [x,z] of [[20,653.5],[20,668.5],[-6,653.5],[-6,668.5]])
+    expect(`trench rim (${x},${z}) BLOCKED`,walkable(x,z),false);
+  for(const [x,z] of [[20,661],[-6,661]])
+    expect(`the ramp itself (${x},${z}) still walks`,walkable(x,z),true);
+  expect('no colliders added at the crossing (anti-trap law: data carve only)',true,true);
+  // (A4) the Diversey culvert deck can never float over the descending west ramp
+  expect('culvert east edge is west of the west ramp head',
+    CH.LP_DIVERSEY.culvert.x1<=U.rampW.x0-0.5,true);
+  // (A5) THE DRIVE IS SOLID: the underpass is the ONLY walkable crossing. Sweep
+  //      the berm's whole length at three x — every sample blocked except the cut.
+  { const B=CH.LSD.berm; let leaks=[];
+    for(let z=B.z0+10;z<=B.z1-10;z+=7){
+      if(z>U.z0-3&&z<U.z1+3)continue;              // the Fullerton cut, the one crossing
+      for(const x of [1,7,13]) if(walkable(x,z))leaks.push([x,z]);
+    }
+    expect(`the LSD berm is SOLID for its whole length (${leaks.length} leaks)`,leaks.length,0);
+    if(leaks.length)console.log('   leaks: '+leaks.slice(0,8).map(p=>`(${p[0]},${p[1]})`).join(' ')); }
+  // (B) the WEST GRADE is dry ground and adds NO walkability (scenery only —
+  //     the west-wade guard is untouched)
+  for(const [x,z] of [[-40,200],[-60,-400],[-90,0],[-150,700],[-200,-800]]){
+    expect(`west grade (${x},${z}) is DRY ground`,CH.isDryGround(x,z),true);
+    expect(`west grade (${x},${z}) is still NOT walkable`,walkable(x,z),false);
+  }
+  expect('every Brown Line bent stands on dry ground',
+    CH.lTrackBents().every(([x,z])=>CH.isDryGround(x,z)),true);
+  expect('the grade never caps the Diversey lagoon',
+    CH.LP_DIVERSEY_WATER.every(p=>!CH.onWestGrade(p[0],p[1])),true);
+  expect('the grade never caps South Pond',
+    CH.LP_SOUTHPOND_WATER.every(p=>!CH.onWestGrade(p[0],p[1])),true);
+  // (C) the corner weld: LP_TRAIL_LAKE starts on TRAIL_MAIN's exact head, and
+  //     BOTH lanes of the dual ribbon have ground under them
+  expect('LP_TRAIL_LAKE starts on TRAIL_MAIN[0] (the 102 shared-endpoint law)',
+    CH.LP_TRAIL_LAKE[0][0]===CH.TRAIL_MAIN[0][0]&&CH.LP_TRAIL_LAKE[0][1]===CH.TRAIL_MAIN[0][1],true);
+  { const st=CH.TRAIL_STYLE, walkOff=st.bike.width/2+st.gap+st.walk.width/2;
+    let off=0;
+    for(const [x,z] of CH.LP_TRAIL_LAKE){ if(z<=408)continue;
+      if(!walkable(x,z))off++;                     // bike centerline
+      if(!walkable(x+walkOff,z))off++;             // walk lane, park-side (shift -walkOff => +x here)
+    }
+    expect(`both LP lake lanes on walkable ground (${off} off)`,off,0); }
+  expect('LP_TRAIL_LAKE ends at the east ramp head',
+    Math.abs(CH.LP_TRAIL_LAKE[CH.LP_TRAIL_LAKE.length-1][0]-U.rampE.x1)<1.5,true);
+  expect('LP_TRAIL_PARK starts at the west ramp head',
+    Math.abs(CH.LP_TRAIL_PARK[0][0]-U.rampW.x0)<1.5,true);
+  // (D) issue 034: the skyline gate holds IDENTITY north of the corner (the
+  //     baseline read) and is fully gone before the first park hall
+  { const G=CH.LP_SKYLINE_GATE;
+    expect('skyline gate holds identity through the Diversey corner (holdZ>=403)',G.holdZ>=403,true);
+    expect('skyline fade STARTS only after it has receded (fadeZ0 > holdZ+50)',G.fadeZ0>G.holdZ+50,true);
+    expect('skyline hidden before the first park hall (z 671)',G.fadeZ1<671,true); }
+}
+
 // ===== 088 PERMANENT GUARDS — spawned as gate categories so the standard
 // verify (step 1 = this file) mechanically runs them every time:
 //   path-layers.mjs      — path/decal y-ladder assertion (issue 028; pure Node)
@@ -1895,11 +1978,19 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
 //                          itself / spit curls back toward shore" report;
 //                          pure Node, rebuilds LAND from chicago.js — an
 //                          overlapping shoreline can never ship again)
+//   no-solid-in-water.mjs — "nothing solid stands in the lake" (task 120, the
+//                          owner's "the L platform columns go into the water" +
+//                          "lots of people just sitting out in the water east
+//                          of the zoo"): structural anchors vs CH.isDryGround,
+//                          plus a LIVE pass that asks the engine's own
+//                          __hd.solidProbe about every chibi/zooanim rig and
+//                          flags pack content leaking out of a hard cell.
+//                          Spawns its OWN vite + headless page.
 // Skip with WALKPROBE_FAST=1 only for tight inner-loop iteration; the final
 // gate run must include them.
 if(process.env.WALKPROBE_FAST!=='1'){
   const {spawnSync}=await import('child_process');
-  for(const tool of['path-layers.mjs','prop-clearance.mjs','path-continuity.mjs','shoreline-simple.mjs']){
+  for(const tool of['path-layers.mjs','prop-clearance.mjs','path-continuity.mjs','shoreline-simple.mjs','no-solid-in-water.mjs']){
     console.log(`\n--- 088 guard: ${tool} ---`);
     const r=spawnSync(process.execPath,[new URL(tool,import.meta.url).pathname.replace(/^\/([A-Za-z]:)/,'$1')],{encoding:'utf8',timeout:180000});
     const out=(r.stdout||'')+(r.stderr||'');

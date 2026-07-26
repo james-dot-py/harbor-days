@@ -30,6 +30,7 @@ import { fw } from './fx.js';
 import { getAudioCtx, setAmbienceGrade } from './audio.js';
 import * as CH from './data/chicago.js';
 import { getSave, markDirty, getFlag, setFlag, wasSaveRecovered } from './store.js';   // the guarded save adapter (task 078; 082 corrupt-recovery)
+import { cellAt } from './cells.js';   // 120 (issue 036): hard-cell adoption for pack NPC rigs
 
 export { createChibi, tintChibiLimb, bakeChibiRig } from './character.js';   // re-export chibi builder + limb recolor + static-rig baker for packs
 // getAudioCtx() -> {actx,sfxBus,musicBus,noiseBuf,mf,noiseHit} (actx null until audio starts)
@@ -353,6 +354,35 @@ const CITIZEN=0.74;   // canonical citizen scale — matches the mayor (scale:1 
 // own — updateChibiShadows precedent). Treat as read-only; a consumer's private
 // per-NPC fields go on the npc object itself (the _lodActive convention).
 export function npcList(){return _npcs;}
+// ---- HARD-CELL ADOPTION (task 120, issue 036) -------------------------------
+// makeNPC has always done a bare scene.add(): cells.js promised that pack
+// content across a "300+ unit gap" was handled by distance culling. Lincoln
+// Park's growth to z 1020 (task 112) put the player ~60 m from the Millennium
+// cell's park visitors — inside the 145 m NPC cull — and because those rigs
+// hang off the SCENE root they stayed visible on the lakefront, reading as the
+// owner's "lots of people just sitting out in the water east of the zoo".
+// A rig whose spawn point falls inside a HARD cell's clamp is adopted by that
+// cell's root, so it hides with the cell. Adoption is DEFERRED to the first
+// update frame: cells are registered inside their own pack's onWorldReady and
+// callbacks fire in packs/index.js import order, so at makeNPC time the owning
+// cell may not exist yet (the task-051 law). Cell roots sit at the identity
+// transform, so re-parenting never moves a rig. The lakefront cell has no clamp
+// -> lakefront rigs are never adopted and behave exactly as before.
+const _cellAdopt=[];
+let _adopted=false;
+// Packs that pose their own rigs (createChibi + poseSeated + bakeChibiRig —
+// the 048 lawnlife register) never go through makeNPC, so they need the same
+// adoption explicitly: `addAtWorld(obj, x, z)` replaces their bare scene.add.
+export function addAtWorld(obj,x,z){ scene.add(obj); _cellAdopt.push({x,z,objs:[obj]}); return obj; }
+function runCellAdoption(){
+  if(_adopted)return;_adopted=true;
+  for(const rec of _cellAdopt){
+    const c=cellAt(rec.x,rec.z);
+    if(!c||!c.root)continue;
+    for(const o of rec.objs)if(o&&o.parent!==c.root)c.root.add(o);
+  }
+  _cellAdopt.length=0;
+}
 export function makeNPC({x,z,ry=0,palette,name='',lines,wander=0,scale=1,staticLod=false,moverLod=false}){
   scale*=CITIZEN;
   const {group,parts}=createChibi(Object.assign({scale},palette));
@@ -378,8 +408,11 @@ export function makeNPC({x,z,ry=0,palette,name='',lines,wander=0,scale=1,staticL
       bubble.textContent=text;npc._bubbleT=secs; },
     setFace(expr){ const{eyeL,eyeR}=parts;const sc=expr==='happy'?[1,0.55,1]:expr==='surprised'?[1.3,1.3,1.3]:[1,1,1];
       eyeL.scale.set(sc[0],sc[1],sc[2]);eyeR.scale.set(sc[0],sc[1],sc[2]); },
-    remove(){ scene.remove(group);if(npc.twin)scene.remove(npc.twin);bubble.remove();const i=_npcs.indexOf(npc);if(i>=0)_npcs.splice(i,1); }};
+    // 120: a rig may have been ADOPTED by a hard cell's root, so remove from its
+    // ACTUAL parent — a bare scene.remove() would silently leave it in the world.
+    remove(){ if(group.parent)group.parent.remove(group);if(npc.twin&&npc.twin.parent)npc.twin.parent.remove(npc.twin);bubble.remove();const i=_npcs.indexOf(npc);if(i>=0)_npcs.splice(i,1); }};
   _npcs.push(npc);
+  _cellAdopt.push({x,z,objs:twin?[group,twin]:[group]});   // 120 (issue 036): adopted by the owning hard cell on the first update frame
   return npc;
 }
 function updateNPC(npc,dt,t,player){
@@ -971,6 +1004,7 @@ function updateAffordance(dt,t,player){
 let _lpx=null,_lpz=null,_prevCool=0,_fcArmed=false,_zoneAcc=0,_npcCullAcc=0,_prevB=false;
 export function runUpdates(dt,t,player){
   if(dt<0)dt=0;                          // frame-0 rAF can hand us a negative dt
+  runCellAdoption();                     // 120 (issue 036): one-shot — hand every pack rig spawned inside a hard cell's clamp to that cell's root (every cell is registered by now — the 051 law)
   econUpdate(dt);                        // one-shot __hd/worn restore + slow save snapshot
   // --- distance walked ---
   if(_lpx!==null&&game.running)state.distanceWalked+=Math.hypot(player.x-_lpx,player.z-_lpz);

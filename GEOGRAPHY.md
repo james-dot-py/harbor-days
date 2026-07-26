@@ -686,11 +686,13 @@ its NW shoulder and the **honeycomb pavilion** on its SE boardwalk peninsula;
 - **The berm/road (x 0–14) stays**; the park opens WEST. The LAND polygon extends
   west to ≈ x −104 (Stockton) in the Lincoln Park band ONLY; north of the corner
   its west edge stays x14 (the L/city, non-park). `WORLD_CLAMP.xMin` drops 14 → −112.
-- **The Fullerton underpass (z ≈ 656–666) is the map's FIRST WORKING crossing of
-  the Drive** — a walkable tunnel through the berm linking the east lakefront strip
-  (x14–24) to the west park (x < 0). The Belmont/Addison/Irving/Montrose portals
+- **The Fullerton underpass (z 655–667) is the map's FIRST WORKING crossing of
+  the Drive** — a walkable tunnel **UNDER** the berm linking the east lakefront strip
+  to the west park (x < 0). The Belmont/Addison/Irving/Montrose portals
   stay fenced dead-end doors; **only Fullerton opens.** Axis-aligned E–W (the
-  camera-math interior rule). Data: `LP_UNDERPASS`.
+  camera-math interior rule). Data: `LP_UNDERPASS`. **REBUILT 120 — see
+  STRUCTURAL FIRST #4 below; the 112–119 version was a flat cut at grade and the
+  Drive's road slab passed through the player's chest.**
 - **Diversey gets NO second pedestrian crossing.** The real Diversey inlet crosses
   under LSD as WATER (a water-under-causeway detail, optional for 113); it is not a
   foot gate. One working crossing keeps the structural first clean.
@@ -709,7 +711,69 @@ axes; only distance is squeezed. Every feature keeps its own footprint at 1:1
 object scale (buildings/props never shrink — the scale law); the compression pulls
 their CENTER positions together, tightening the connective LAND, not the halls.
 
-#### STRUCTURAL RULING — THE SKYLINE-BILLBOARD GATE (binding on 112/113)
+#### STRUCTURAL FIRST #3 — THE WEST GRADE (task 120, issue 032)
+Everything WEST of the Drive was **open lake** for the whole life of the map: the
+Brown Line viaduct's bents and the Belmont platform stood IN the water, the
+Lakeview backdrop flats floated on it, and from the Lakefront Trail you saw the
+lake through the gap past the screening hedges — where the CITY should be (owner
+playtest 2026-07-24: *"you can see water past the right of the bushes… the L
+platform columns go into the water"*). **Ruling: the map's west face is LAND.**
+Two flat panels of solid city ground (`WEST_GRADE`, coast.js) fill it:
+
+| panel | x | z | note |
+|---|---|---|---|
+| N | −300 … +2 | −1100 … 412 | the whole pre-Lincoln-Park map, berm-west to past the backdrop |
+| S | −300 … −66 | 412 … 1032 | the Lincoln Park band, WEST of `LP_LAND_WEST` only |
+
+They sit at **y −0.06** (0.06 m under the park lawn, so `LP_LAND_WEST`/`LAND`
+always win the seam) and tuck 2 m UNDER the berm's west face. The S panel stops
+at x −66 so it can NEVER cap the Diversey lagoon (x ≥ −43) or South Pond
+(x ≥ −47) — the 041 grade-carpet law. **Not walkable** (`isWater`'s x>20 gate
+already reads it BLOCKED, never wadeable) — this is scenery, and the definition
+of "dry land" for the permanent guard: `CH.isDryGround(x,z)` (grade ∪ berm) is
+the single truth shared by the engine, `walkprobe.mjs` and
+`tools/no-solid-in-water.mjs`. Data: `WEST_GRADE`, `L_TRACK` (the viaduct's
+bents moved out of `packs/ambient.js` into the data module so the gate can
+assert every bent stands on ground).
+
+#### STRUCTURAL FIRST #4 — THE FULLERTON UNDERPASS IS A REAL CROSSING (task 120, issue 035)
+The 112 "crossing" was a flat cut at grade: the berm split at z 654–668 and the
+Drive's road slab (y 1.02) simply ran across it, THROUGH the walker's chest — the
+owner's *"there's not a real bridge over lakeshore drive… you have to pass
+through the highway and you're obscured by it; solids shouldn't pass through
+solids."* **Ruling: the path DIPS UNDER the Drive and the Drive is carried OVER
+it on a bridge deck** — the real Fullerton underpass.
+
+- The cut is **z 655–667** (a 12 m passage), floor **y −3.1**.
+- **Ramps** at ≈0.28 m/m (well inside the walkprobe 0.55 elevator guard):
+  east x 25 → 14, west x −11 → 0; the level tunnel runs x 0 … 14 (under the
+  berm). The west ramp head stops at x −11 because the 113 Diversey CULVERT
+  deck carries Fullerton over the lagoon neck immediately west (its east edge
+  pulled −8 → −12 by this task so it can never float over the ramp).
+- **Headroom 3.62 m** under the bridge soffit (y 0.52) — over the 3.5 m
+  chase-camera rule (issue 024), so the follow-cam never buries in the deck.
+  Two support rules live outside the data: the floor digs below WATER_Y, so
+  coast.js CLIPS the trench footprint out of the WATER_S plane (the 041
+  grade-carpet law, water edition — else the cut reads as a flooded canal);
+  and main.js DUCKS the chase camera to y −0.2 over the footprint while the
+  player is down in the cut (at the default pitch the camera otherwise rides
+  above the deck and the Drive hides the walker — the owner's complaint from a
+  new angle).
+- The Drive rides a **bridge deck** (x −0.2 … 14.2, z 653 … 669, top 1.02,
+  0.5 m thick) on stone **abutment walls**; low parapets read the bridge from
+  the roadway. Retaining walls line the whole cut; a **blocked rim lip**
+  (±2.2 m in z beside the open ramps, `lpBlockedHit`) means no one can step off
+  a 3 m wall — walk data, **no colliders** (the anti-trap law).
+- Walkability is the analytic **`lpUnderpassH(x,z)`** (null off the footprint,
+  else the y) — shared by `main.js` surfaceY, `walkable()` and `walkprobe.mjs`;
+  the 112 flat `walkRects` entry is GONE. The LSD berm/road is **solid
+  everywhere else on the map**: the underpass is the ONE walkable crossing, and
+  `walkprobe` asserts the berm non-walkable along its whole length.
+- The trail ribbons stop at the ramp heads (`LP_TRAIL_LAKE` ends x 25.5,
+  `LP_TRAIL_PARK` starts x −11.5) — a ribbon drawn flat at y 0.05 would
+  otherwise float over the trench.
+
+#### STRUCTURAL RULING — THE SKYLINE-BILLBOARD GATE (binding on 112/113; AMENDED 120)
 The global downtown skyline billboard (`sky.js`, world **z 504–677**, fog:false,
 InstancedMesh fills, drawn in EVERY view) sits in what used to be empty south lake.
 Contiguous Lincoln Park now fills z 410–1020 — INTO and PAST the billboard — so
@@ -728,6 +792,28 @@ Determinism: the billboard geometry + its `mulberry32(0x5c1000)` extents are
 FROZEN (`tools/tmp-billboard-extent.mjs`); only a player-z visibility/opacity
 uniform is added — no rng, no new buckets, same draw count when visible. Data:
 `LP_SKYLINE_GATE`.
+
+**AMENDMENT (task 120, issue 034).** A straight opacity fade over z 403→503 made
+the whole downtown skyline dissolve into *see-through glass towers* in plain
+view over ~30 s of walking — the owner's *"the buildings that are supposed to be
+in the distance just fade away."* The gate now **RECEDES then hazes**:
+
+- **z ≤ 403 — IDENTITY.** No transform, no transparency. Every view north of the
+  corner (baseline.png, the Belmont Rocks read) is BYTE-IDENTICAL. Non-negotiable.
+- **z > 403 — RECEDE.** The group translates south at **1.8× the player's
+  southward progress**, so downtown pulls away gently (a 38 % shrink over the
+  first 77 m) instead of dissolving. It always stays ≥101 m ahead of the player
+  and everything it overlaps is past fog-opaque (210 m), so it can never be seen
+  interpenetrating a park hall.
+- **z 470 → 545 — HAZE OUT.** Only once it is ~half size do the materials fade,
+  and they lerp their COLOR toward the horizon haze (`0xf6ab84`, the fog color)
+  as the opacity drops — atmospheric perspective, not glass. Hidden past 545,
+  by which point the front face is still ~100 m short of the first park hall
+  (z 671). Data: `LP_SKYLINE_GATE {holdZ, recede, fadeZ0, fadeZ1, haze}`.
+- **The south horizon is no longer empty.** `LAKEVIEW_BAND.southRow` marches the
+  same three InstancedMeshes (**+0 draw calls**, own seed) along a front at
+  **z 1046, x −160…120** — the city edge south of the park (North Ave / Old
+  Town), so the walk south always has something in the distance ahead.
 
 #### The features (compressed-frame anchors — scaffolding; 113–117 refine)
 - **Diversey Harbor** (the connective lagoon — BUILT 113): z ≈ 415–664 west of the
@@ -895,6 +981,18 @@ Cannon, Theater on the Lake, Nature Boardwalk, Chicago Park District/Harbors).
   (the honest west-reach numbers) — recorded 115, resolving the 114 pond
   conflict; order/adjacency preserved (farm NW of the pond, Brauer its NW
   shoulder across the spur).
+- **The Lakefront Trail is ONE CONTINUOUS DUAL PATH through the Diversey corner**
+  (recorded 120, issue 033). `TRAIL_MAIN` ends at (30,406) and `LP_TRAIL_LAKE`
+  starts on that EXACT point; it is now a **dual** ribbon (asphalt bike on the
+  centerline + crushed-limestone walk 4 m park-side, shift −walkOff so it lands
+  on MAIN's side) **mitre-welded to MAIN's START frame** — `ribbonOn` grew a
+  `startFrame` twin of the 102 `endFrame` so a successor can splice onto a
+  predecessor's head, not just its tail. Before 120 the corner showed three
+  chopped ribbon ends offset from each other (*"paths disjointed, looks bad"*).
+  Dash phase carries across the seam by symmetry (both sides start half a
+  spacing from the shared point). Asserted by `tools/path-continuity.mjs`.
+- **The west grade is scenery, never walkable** (120) — the city side of the
+  Drive reads solid but the berm still blocks; only Fullerton crosses.
 - **The park spine passes THROUGH the free zoo** (east gate → south gate) — the
   campus is open ground on the walk south, not a detour; recorded 114 (the
   112-scaffold spine through the campus interior/hall footprints is superseded;

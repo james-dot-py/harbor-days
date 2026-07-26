@@ -136,8 +136,13 @@ function ribbonOn(curve,width,color,y,shift,samples=pathSamples,join=null){
     if(res.disc){
       addJunction(res.disc.x,res.disc.z,res.disc.r,y+0.006,color);
     }else{
+      // slot 0 of the station is EL, slot 1 is ER (stride 6). A START frame fed
+      // joinSeam its edges swapped (see startFrame below) so the side-pairing
+      // stays correct against the reversed outward dir — un-swap here so each
+      // miter still lands in its own vertex slot.
       const A=join.attr.array,o=join.n*6;
-      A[o]=res.mL[0];A[o+2]=res.mL[1]; A[o+3]=res.mR[0];A[o+5]=res.mR[1];
+      const wL=join.swap?res.mR:res.mL, wR=join.swap?res.mL:res.mR;
+      A[o]=wL[0];A[o+2]=wL[1]; A[o+3]=wR[0];A[o+5]=wR[1];
       join.attr.needsUpdate=true;
     }
   }
@@ -165,6 +170,36 @@ function ribbonOn(curve,width,color,y,shift,samples=pathSamples,join=null){
   // the chainable end frame (join target for a continuing ribbon; the attr
   // handle lets the successor rewrite THIS ribbon's last quad to the miter)
   cl.endFrame={c:cl[n],pc:cl[n-1],l:EL[n],r:ER[n],pl:EL[n-1],pr:ER[n-1],dir:dirOf(cl[n-1],cl[n]),attr:g.getAttribute('position'),n};
+  // 120: the START-frame twin (issue 033 — the Diversey corner). A ribbon may
+  // also continue a predecessor's HEAD: TRAIL_MAIN's control list runs
+  // south->north, so the Lincoln Park continuation splices onto MAIN's FIRST
+  // station, not its last. pathgeom.joinSeam is UNCHANGED — it only ever speaks
+  // in relative terms:
+  //   join.dir  = the predecessor's OUTWARD direction at the seam. For an end
+  //               frame that is pc->c (cl[n-1]->cl[n]); for a start frame it is
+  //               cl[1]->cl[0], i.e. pointing back out of the head.
+  //   join.pc/pl/pr = the NEIGHBOURING station (cl[1]/EL[1]/ER[1] here) — what
+  //               the seam corners are clamped against and fold-tested with.
+  //   join.l/r  = the seam edges ordered LEFT-then-RIGHT *of join.dir*, because
+  //               joinSeam pairs the successor's edges by their side relative to
+  //               join.dir. THIS IS THE ONE THING THAT FLIPS: reversing the
+  //               direction reverses handedness, so at a HEAD the ribbon's own
+  //               EL (left of its forward tangent) is the RIGHT edge of the
+  //               outward dir. A start frame must therefore present ER as `l`
+  //               and EL as `r` (same for pl/pr) or joinSeam cross-pairs the
+  //               sides: measured, that mitres MAIN's east edge to LP's west
+  //               edge and necks the 3.2 m bike seam to 1.554 m. Swapped, the
+  //               seam measures 3.262 m — the exact miter width for this ~21°
+  //               corner (3.2/cos 10.5°).
+  //   join.attr + join.n = where to rewrite the predecessor's seam quad. The
+  //               vertex layout is [EL[i].x,y,EL[i].z, ER[i].x,y,ER[i].z] per
+  //               station (stride 6), so station 0 lives at offset 0 — exactly
+  //               as station n lives at n*6. n:0 is literal, not a flag. That
+  //               layout is FIXED, so `swap` tells the writer below to put mR in
+  //               the EL slot and mL in the ER slot, undoing the l/r swap.
+  // (quadFolds is orientation-agreement, so listing the neighbour station first
+  // instead of last flips both triangles together and the test is unchanged.)
+  cl.startFrame={c:cl[0],pc:cl[1],l:ER[0],r:EL[0],pl:ER[1],pr:EL[1],dir:dirOf(cl[1],cl[0]),attr:g.getAttribute('position'),n:0,swap:true};
   return cl;
 }
 
@@ -254,6 +289,10 @@ export function buildPaths(){
     }
   }
   const montroseCurve=curveOf(CH.TRAIL_MONTROSE);
+  // 120: built HERE (not at the Lincoln Park ribbon block below) only because the
+  // dash loop needs it and runs first. curveOf is rng-free, so hoisting the curve
+  // object moves nothing in the world; the RIBBONS still draw in their 112 slot.
+  const lpLakeCurve=curveOf(CH.LP_TRAIL_LAKE);
   // 102 JOINS: the Montrose run CONTINUES MAIN (shared endpoint [208,-572] in
   // the data) — splice each ribbon to its MAIN counterpart's end frame so the
   // hand-off is one shared mitered edge (no gap/overlap/step by construction;
@@ -271,11 +310,18 @@ export function buildPaths(){
   // start against the PREVIOUS list entry's end, so the continuation must be
   // adjacent (main,spur,montrose silently never carried; the gate mirrors
   // this list).
+  // 120: lpLakeCurve carries the dashes onto the new Lincoln Park bike lane. It
+  // goes LAST so it cannot disturb the existing main->montrose carry (the carry
+  // only ever looks at the PREVIOUS entry). It continues MAIN's HEAD, not MAIN's
+  // tail, so the `cont` test correctly does NOT fire and it starts its own phase
+  // at spacing/2 — which is exactly right: MAIN's own first dash is spacing/2
+  // from that same shared point going the other way, so the gap ACROSS the seam
+  // is exactly one spacing and the rhythm reads unbroken through the corner.
   {
     const dashes=[];
     let carry=null;      // arc-length from the last placed dash to the previous curve's end
     let prevEnd=null;
-    for(const cv of[mainCurve,montroseCurve,spurCurve]){
+    for(const cv of[mainCurve,montroseCurve,spurCurve,lpLakeCurve]){
       const L=cv.getLength();
       const cont=carry!==null&&cv.getPoint(0).distanceTo(prevEnd)<1e-3;
       const s0=cont?st.dash.spacing-carry:st.dash.spacing/2;
@@ -303,13 +349,31 @@ export function buildPaths(){
   // — spliced; the ~100° kink there falls back to a paved junction dot (the
   // miter would fold), covering the wedge the owner-era build left in the bend.
   ribbonOn(curveOf(MP.paths.loop),MP.paths.width,st.walk.color,st.walk.y,0,pathSamples2,mpEnt.endFrame);
-  // 112 LINCOLN PARK: three NEW crushed-limestone ribbons — the Lakefront Trail
-  // continuing south on the east strip, the west park spine (through the Fullerton
-  // underpass into the zoo/pond), and the Stockton campus walk. pathSamples2 ONLY
-  // (merged into pathSamples AFTER buildProps in main.js -> world scatter frozen);
-  // NEVER reshape TRAIL_MAIN. Standalone starts (no bit-exact shared endpoint), so
-  // no miter join. crChain-densified already (chicago.js) -> curveOf directly.
-  const lpLake=ribbonOn(curveOf(CH.LP_TRAIL_LAKE),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
+  // 112 LINCOLN PARK / 120 RESHAPE (issue 033, "paths disjointed, looks bad"):
+  // the Lakefront Trail continuing south on the east strip, the west park spine
+  // (through the Fullerton underpass into the zoo/pond), and the Stockton campus
+  // walk. pathSamples2 ONLY (merged into pathSamples AFTER buildProps in main.js
+  // -> world scatter frozen; NEVER pathSamplesMain, which props' tree post-filter
+  // scans during buildProps). NEVER reshape TRAIL_MAIN. crChain-densified already
+  // (chicago.js) -> curveOf directly.
+  //
+  // LP_TRAIL_LAKE is the Lakefront Trail ITSELF continuing south, so it is a DUAL
+  // ribbon like MAIN — walk first, then bike, the same order MAIN builds in — and
+  // each lane is mitre-spliced to its MAIN counterpart's START frame (the data
+  // shares MAIN's exact first control point [30,406]; MAIN's list runs
+  // south->north, so its HEAD is the Diversey corner). Before 120 this was a lone
+  // walk-width ribbon starting 3 m away at [27,409]: three chopped caps and a
+  // lateral step, the owner's playtest report.
+  // SHIFT SIGN: trailFrame's normal is the LEFT one (-t.z, t.x). MAIN's tangent at
+  // its head points NORTH (-z), so MAIN's walk ribbon sits +4 m EAST of the bike
+  // line here. LP_TRAIL_LAKE runs SOUTH (+z), so ITS left normal points WEST — a
+  // +walkOff shift would throw the walk lane to the opposite side and the join
+  // would cross itself. -walkOff lands it on MAIN's side.
+  const lpLakeWalk=ribbonOn(lpLakeCurve,st.walk.width,st.walk.color,st.walk.y,-walkOff,pathSamples2,walkCl.startFrame);
+  const lpLakeBike=ribbonOn(lpLakeCurve,st.bike.width,st.bike.color,st.bike.y,0,pathSamples2,trailLanes.bike.startFrame);
+  // LP_TRAIL_PARK (120): reshaped in data to start at the WEST ramp head of the
+  // rebuilt sunken Fullerton crossing — a flat ribbon may not run over the trench.
+  // Single walk ribbon; the data change is the whole change.
   ribbonOn(curveOf(CH.LP_TRAIL_PARK),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
   ribbonOn(curveOf(CH.LP_TRAIL_STOCKTON),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
   // 114 ZOO CAMPUS: three NEW ribbons — the red-brick paver MAIN LOOP (closed
@@ -340,4 +404,10 @@ export function buildPaths(){
   stepLane(trailLanes.mtrWalk,st.walk.width);
   stepLane(trailLanes.mtrBike,st.bike.width);
   stepLane(spurCl,st.spur.width);
+  // 120: the Lincoln Park continuation is the same paved corridor — register its
+  // two DRAWN centerlines so footsteps stay 'paved' straight through the Diversey
+  // corner. Deliberately NOT added to `trailLanes`: the 101 npc-paths gate reads
+  // exactly walk/bike/mtrWalk/mtrBike off that object.
+  stepLane(lpLakeWalk,st.walk.width);
+  stepLane(lpLakeBike,st.bike.width);
 }

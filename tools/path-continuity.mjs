@@ -127,6 +127,15 @@ function applyJoin(B, join, id) {
   else B.joined = true;
 }
 function endFrame(r) { return { c: r.cl[r.cl.length - 1], pc: r.cl[r.cl.length - 2], pl: r.L[r.L.length - 2], pr: r.R[r.R.length - 2], l: r.L[r.L.length - 1], r: r.R[r.R.length - 1], dir: dirOf(r.cl[r.cl.length - 2], r.cl[r.cl.length - 1]) }; }
+// 120: the START-frame twin (paths.js `cl.startFrame`) — a successor may splice
+// onto a predecessor's HEAD, not only its tail (TRAIL_MAIN's control list runs
+// south->north, so LP_TRAIL_LAKE continues it at station 0). joinSeam pairs the
+// successor's edges by side relative to `join.dir` and implicitly assumes
+// `join.l` lies to that dir's LEFT — true at a tail, INVERTED at a head because
+// dir is reversed. So the head frame presents l:R[0] / r:L[0] (and pl/pr
+// likewise); paths.js un-swaps when it writes the seam quad back. Mirroring the
+// swap here is what makes this gate measure the SHIPPED seam.
+function startFrame(r) { return { c: r.cl[0], pc: r.cl[1], pl: r.R[1], pr: r.L[1], l: r.R[0], r: r.L[0], dir: dirOf(r.cl[1], r.cl[0]), swap: true }; }
 function applyWeld(r) {
   const P0 = r.ctrl[0], P1 = r.ctrl[r.ctrl.length - 1], n = r.n;
   if (Math.hypot(P0[0] - P1[0], P0[1] - P1[1]) >= 1e-6 || n < 4) return;
@@ -153,6 +162,16 @@ const R = [
   { id: 'bike:mtr',   net: 'bike',   ctrl: CH.TRAIL_MONTROSE,  w: st.bike.width, y: st.bike.y, shift: 0 },
   { id: 'point:ent',  net: 'point',  ctrl: MP.paths.entrance,  w: MP.paths.width, y: st.walk.y, shift: 0 },
   { id: 'point:loop', net: 'point',  ctrl: MP.paths.loop,      w: MP.paths.width, y: st.walk.y, shift: 0 },
+  // 120 (issue 033, "paths disjointed, looks bad"): the Lakefront Trail
+  // CONTINUES south into Lincoln Park as a DUAL ribbon spliced to TRAIL_MAIN's
+  // HEAD. Before 120 the LP continuation was a single walk-width ribbon that
+  // started 3 m away from MAIN's terminus — three chopped caps, all offset —
+  // and this gate never saw it because the LP lanes were not in the universe.
+  // shift is -walkOff: LP runs SOUTH, so its left normal points WEST and only a
+  // negative shift lands the walk lane on MAIN's (east/park) side.
+  { id: 'walk:lp',    net: 'walk',   ctrl: CH.LP_TRAIL_LAKE,   w: st.walk.width, y: st.walk.y, shift: -walkOff },
+  { id: 'bike:lp',    net: 'bike',   ctrl: CH.LP_TRAIL_LAKE,   w: st.bike.width, y: st.bike.y, shift: 0 },
+  { id: 'park:lp',    net: 'lppark', ctrl: CH.LP_TRAIL_PARK,   w: st.walk.width, y: st.walk.y, shift: 0 },
 ];
 for (const r of R) Object.assign(r, ribbon(r.ctrl, r.w, r.shift));
 // buildPaths order: welds first (closed outlines self-miter inside ribbonOn),
@@ -162,6 +181,12 @@ for (const r of R) applyWeld(r);
 applyJoin(R.find(r => r.id === 'walk:mtr'), endFrame(R.find(r => r.id === 'walk:main')), 'walk:main x walk:mtr');
 applyJoin(R.find(r => r.id === 'bike:mtr'), endFrame(R.find(r => r.id === 'bike:main')), 'bike:main x bike:mtr');
 applyJoin(R.find(r => r.id === 'point:loop'), endFrame(R.find(r => r.id === 'point:ent')), 'point:ent x point:loop');
+// 120: the LP lake lanes splice onto MAIN's HEAD (start frames), in paths.js order.
+for (const [succ, pred, tag] of [['walk:lp', 'walk:main', 'walk:main(head) x walk:lp'], ['bike:lp', 'bike:main', 'bike:main(head) x bike:lp']]) {
+  const P = R.find(r => r.id === pred);
+  applyJoin(R.find(r => r.id === succ), startFrame(P), tag);
+  P.joined = true;   // the miter moved the PREDECESSOR's station-0 edges too — exempt its first stations from the sawtooth detectors, exactly as a tail join exempts the successor's
+}
 
 // ---- small geometry helpers ----------------------------------------------
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -384,7 +409,12 @@ console.log('--- dashes: network-phase paint rhythm ---');
   let carry = null, prevEnd = null;
   // ORDER mirrors paths.js: montrose directly AFTER main (the carry compares
   // each curve's start against the PREVIOUS entry's end).
-  for (const [name, ctrl] of [['main', CH.TRAIL_MAIN], ['mtr', CH.TRAIL_MONTROSE], ['spur', CH.TRAIL_SPUR]]) {
+  // 120: lpLake is LAST in paths.js's list too. It starts at MAIN's HEAD, so the
+  // `cont` test correctly does not fire and it begins its own phase at
+  // spacing/2 — which IS the right rhythm: MAIN's first dash is also spacing/2
+  // from the shared point in the other direction, so the cross-seam gap is
+  // exactly one spacing. Asserted below.
+  for (const [name, ctrl] of [['main', CH.TRAIL_MAIN], ['mtr', CH.TRAIL_MONTROSE], ['spur', CH.TRAIL_SPUR], ['lplake', CH.LP_TRAIL_LAKE]]) {
     const L = crLength(ctrl);
     const cont = carry !== null && dist(crPoint(ctrl, 0), prevEnd) < 1e-3;
     const s0 = cont ? st.dash.spacing - carry : st.dash.spacing / 2;
@@ -413,6 +443,14 @@ console.log('--- dashes: network-phase paint rhythm ---');
   const seamGap = dist(lastMain.p, firstMtr.p);
   expect(`MAIN->MONTROSE dash gap across the seam ${seamGap.toFixed(2)} m in [1.4, 4.2]`,
     (seamGap < st.dash.spacing / 2 || seamGap > st.dash.spacing * 1.5) ? seamGap.toFixed(2) : 0, 0);
+  // 120: the Diversey-corner seam — MAIN's FIRST dash to LP's first dash. Both
+  // sit spacing/2 from the shared point, on opposite sides, so the gap should
+  // read as one normal interval.
+  const firstMain = series.find(d => d.name === 'main');
+  const firstLp = series.find(d => d.name === 'lplake');
+  const cornerGap = dist(firstMain.p, firstLp.p);
+  expect(`MAIN->LINCOLN PARK dash gap across the corner seam ${cornerGap.toFixed(2)} m in [1.4, 4.2]`,
+    (cornerGap < st.dash.spacing / 2 || cornerGap > st.dash.spacing * 1.5) ? cornerGap.toFixed(2) : 0, 0);
 }
 
 console.log(`\n==== path-continuity: ${pass} passed, ${fail} failed ====`);

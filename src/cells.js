@@ -42,6 +42,28 @@ export function registerCell(c) {
 }
 export const activeCell = () => activeId;
 export const getCell = id => cells[id];
+// 120 (issue 036) — WHICH HARD CELL OWNS THIS GROUND?
+// The header above promised that pack content (NPCs, episodic meshes) never
+// needed capturing because "distance culling and fog already handle it across a
+// 300+ unit gap". Lincoln Park's growth to z 1020 (task 112) put the player
+// ~60 m from the Millennium cell's park visitors — inside makeNPC's 145 m cull
+// — and because those rigs hang off the SCENE root, not the cell root, they
+// stayed visible on the lakefront: the owner's "lots of people just sitting out
+// in the water east of the zoo". A rig created inside a hard cell's clamp is now
+// adopted by that cell's root (framework.js), so it hides with the cell.
+// The LAKEFRONT cell has no clamp, so lakefront content is never adopted and its
+// behaviour is unchanged.
+export function cellAt(x, z) {
+  for (const k in cells) {
+    const c = cells[k], cl = c.clamp;
+    if (!cl || !c.root) continue;
+    if (x >= cl.xMin && x <= cl.xMax && z >= cl.zMin && z <= cl.zMax) return c;
+  }
+  return null;
+}
+// debug/tools only: every registered cell's id + clamp, for the permanent
+// tools/no-solid-in-water.mjs leak check (exposed on __hd.cellsDbg by main.js).
+export const allCells = () => Object.keys(cells).map(k => ({ id: k, clamp: cells[k].clamp || null }));
 // hot-path hooks for main.js (null → lakefront default logic)
 export const cellWalk  = () => { const c = cells[activeId]; return (c && c.walkable)  || null; };
 export const cellSurf  = () => { const c = cells[activeId]; return (c && c.surfaceY) || null; };

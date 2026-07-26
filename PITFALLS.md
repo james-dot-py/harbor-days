@@ -1003,4 +1003,24 @@ few turns to find; keep each to one line of symptom + fix.
   1.35) at WALK speed (joy.len 0.85) with a TIGHT look-ahead (1.6) on the exact
   LP_BOARDWALK centerline points, or steering overshoot false-stalls it into the pond
   edge. maxDy/frame 0.040 over the whole run = no elevator seam anywhere.
+- r128 keys its PROGRAM CACHE on onBeforeCompile.toString(): two materials from the
+  same factory whose CLOSURES produce different shader strings (coast.js
+  livingWaterMat's per-instance clip rect, 120) silently SHARE whichever program
+  compiled first — the second material's shader edit never runs, with no error and
+  no visual hint beyond "my patch does nothing". Any conditional onBeforeCompile
+  needs `material.customProgramCacheKey = () => <key including the variant>`.
+- The 041 grade-carpet law has a WATER edition: a map-spanning water plane CAPS any
+  feature dug below WATER_Y (−2.3) exactly like the y0 lawn caps a sunken pit — the
+  120 Fullerton underpass (floor −3.1) rendered as a flooded canal, mayor waist-deep
+  under the Drive. You can't occlude a plane that sits BETWEEN camera and floor:
+  carve it (fragment `discard` over the footprint rect — legit water is never lost
+  when the rect is fully under LAND) or don't dig below the waterline.
+- A SUNKEN passage under a deck fails at the DEFAULT chase camera even when every
+  tuned waypoint framing reads perfectly: at pitch 0.34/dist 8.2 the cam rides ABOVE
+  the bridge deck and the roadway hides the walker for the whole tunnel (120 — found
+  only by a default-camera PORTRAIT shot, since all lp-underpass framings use pitch
+  0.02–0.26). main.js now ducks camTarget.y to −0.2 over the trench footprint while
+  the player is in the cut; duck BELOW grade — at +0.2 the grade-edge lawn strip
+  fills the frame. Verify any covered/sunken walk with a default-camera shot on BOTH
+  viewports, not just its authored framings.
 

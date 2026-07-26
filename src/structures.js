@@ -116,11 +116,15 @@ function buildLSD(){
   const L=CH.LSD,B=L.berm,R=L.road,LN=L.lane;
   const zc=(B.z0+B.z1)/2,len=B.z1-B.z0,xc=(B.x0+B.x1)/2,w=B.x1-B.x0;
   // 112 LINCOLN PARK: the berm runs the full new length but is SPLIT at the
-  // Fullerton underpass gap (B.gap) so the path passes through (the road bridges
-  // over). Two box segments instead of one; the road/dashes stay continuous.
+  // Fullerton underpass gap so the path passes through (the road bridges over).
+  // Two box segments instead of one; the road/dashes stay continuous.
+  // 120: the gap moved to LSD.gap (widened to 653..669 to match the bridge deck)
+  // — reading the stale B.gap left the berm UNSPLIT, and its underside roofed the
+  // whole sunken cut with a green ceiling. Accept either spelling.
+  const G=L.gap||B.gap;
   const bermSeg=(z0,z1)=>{const l=z1-z0;if(l<=0.5)return;const sz=Math.max(2,Math.round(l/6));
     const m=new THREE.Mesh(new THREE.BoxGeometry(w,B.h,l,1,1,sz),toon(B.color));m.position.set(xc,B.h/2,(z0+z1)/2);scene.add(m);};
-  if(B.gap){ bermSeg(B.z0,B.gap.z0); bermSeg(B.gap.z1,B.z1); }
+  if(G){ bermSeg(B.z0,G.z0); bermSeg(G.z1,B.z1); }
   else bermSeg(B.z0,B.z1);
   const segZ=Math.max(2,Math.round(len/6));                       // z subdivisions for the world curve
   const rw=R.x1-R.x0,rxc=(R.x0+R.x1)/2;
@@ -160,28 +164,127 @@ function buildLSD(){
   buildLPUnderpass();   // 112: the Fullerton WORKING crossing (open both ends, walkable)
 }
 
-// 112 LINCOLN PARK — the map's FIRST WORKING underpass. Unlike the fenced dead-end
-// portals (dark door plane), BOTH mouths are OPEN — you see straight through to the
-// far side (the invitation). A crushed paved floor makes it walkable; the berm is
-// split around it (buildLSD) so the passage is a real opening, the road bridging
-// over. Axis-aligned E-W. No collider (the anti-trap law) — walkability is the rect.
+// 120 LINCOLN PARK (issue 035) — the map's FIRST WORKING crossing, REBUILT as a
+// REAL sunken underpass. The 112 version was a flat cut AT GRADE: the berm split
+// and the Drive's road slab (y 1.02) ran straight through the walker's chest —
+// the owner's "there's not a real bridge over lakeshore drive… solids shouldn't
+// pass through solids". Now the path DIPS: ramps down from both trail heads, a
+// level tunnel under the Drive, and the Drive is carried OVER it on a bridge deck
+// with parapets. Every floor sample comes from CH.lpUnderpassH — THE walk surface
+// (main.js surfaceY/walkable + tools/walkprobe.mjs) — so geometry and walkability
+// can NEVER diverge; the 112 flat walkRect is gone. Axis-aligned E-W (the
+// camera-math interior rule). NO colliders (the anti-trap law): the trench rim is
+// a data carve (lpUnderpassRim). Both mouths stay OPEN — you see straight through
+// to the far side (the invitation), unlike the fenced dead-end portals.
+// Draw budget: plain meshes on CACHED toon colours, so mergeCellStatic folds each
+// colour to one bucket (no InstancedMesh here — r128 instances are never culled).
 function buildLPUnderpass(){
-  const U=CH.LP_UNDERPASS,wr=U.walk,z=U.portalE[1],hw=U.w/2,H=U.h;
-  const stone=toon(CH.LSD.portal.arch),voussoir=toon(0xe8dcc2),paveM=toon(0xc9c3b4);
-  // walkable paved floor through the cut (a crushed-limestone path)
-  const floor=new THREE.Mesh(new THREE.BoxGeometry(wr.x1-wr.x0,0.1,wr.z1-wr.z0),paveM);
-  floor.position.set((wr.x0+wr.x1)/2,0.05,(wr.z0+wr.z1)/2);scene.add(floor);
-  walkRects.push({x1:wr.x0,x2:wr.x1,z1:wr.z0,z2:wr.z1,h:wr.h});
-  // two OPEN stone portal mouths (no dark door): east faces the lakefront strip,
-  // west faces the park. Voussoir arch + flank posts, mirroring the dead-end frame.
-  const QY=new THREE.Euler(0,Math.PI/2,0);
-  for(const px of[U.portalE[0],U.portalW[0]]){
-    const g=new THREE.Group();
-    for(const s of[-1,1]){const post=new THREE.Mesh(new THREE.BoxGeometry(1.0,H,1.0),stone);post.position.set(0,H/2,s*(hw+0.5));g.add(post);}
-    const lintel=new THREE.Mesh(new THREE.BoxGeometry(1.3,0.9,U.w+2.6),stone);lintel.position.set(0,H-0.35,0);g.add(lintel);
-    const arch=new THREE.Mesh(new THREE.TorusGeometry(hw+0.5,0.26,6,18,Math.PI),voussoir);
-    arch.rotation.copy(QY);arch.position.set(0,H-0.35,0);g.add(arch);
-    g.position.set(px,0,z);scene.add(g);
+  const U=CH.LP_UNDERPASS,D=U.deck,P=U.parapet,R=CH.LSD.road;
+  const z=U.portalE[1],hw=U.w/2,zc=(U.z0+U.z1)/2;
+  const wallM=toon(U.wall),floorM=toon(U.floor),deckM=toon(U.soffit),voussoirM=toon(0xe8dcc2);
+  const SOF=D.top-D.th;                       // 0.52 — bridge soffit = abutment top (3.62 m headroom)
+  const COPE=0.15;                            // retaining-wall coping, proud of park grade
+  const LIFT=0.06;                            // paving rides just over the analytic walk surface
+  const surf=(x,zz)=>{const h=CH.lpUnderpassH(x,zz);return (h===null?0:h)+LIFT;};
+
+  // 1. THE PAVED CUT — one strip sampled from lpUnderpassH: west ramp down, the
+  // level tunnel, east ramp up. Runs ~1.2 m PAST each ramp head so the trail
+  // ribbon caps (LP_TRAIL_LAKE x 25.5 / LP_TRAIL_PARK x -11.5) meet paving with
+  // no gap. Subdivided in x AND z so the world curve reads across the span.
+  {
+    const xA=U.rampW.x0-1.2,xB=U.rampE.x1+1.2,nx=64,nz=6;
+    const pos=[],uv=[],idx=[];
+    for(let i=0;i<=nx;i++){
+      const x=xA+(xB-xA)*i/nx;
+      for(let k=0;k<=nz;k++){
+        const zz=U.z0+(U.z1-U.z0)*k/nz;
+        pos.push(x,surf(x,zz),zz);uv.push((x-xA)/4,(zz-U.z0)/4);
+      }
+    }
+    const row=nz+1;
+    for(let i=0;i<nx;i++)for(let k=0;k<nz;k++){
+      const a=i*row+k,b=(i+1)*row+k;
+      idx.push(a,a+1,b+1,a,b+1,b);          // wound so the face normal is +y
+    }
+    const g=new THREE.BufferGeometry();
+    g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
+    g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
+    g.setIndex(idx);g.computeVertexNormals();
+    scene.add(new THREE.Mesh(g,floorM));
+  }
+
+  // 2. RETAINING WALLS down both long sides of the whole cut — bottom follows the
+  // floor, top is a coping lip 0.15 proud of grade (so the trench edge reads from
+  // above) and rises to the deck soffit under the bridge, where the same wall is
+  // the ABUTMENT carrying the deck.
+  {
+    const WT=0.7;
+    const span=(x0,x1,top)=>{
+      const n=Math.max(1,Math.round((x1-x0)/1.0));
+      for(let i=0;i<n;i++){
+        const a=x0+(x1-x0)*i/n,b=x0+(x1-x0)*(i+1)/n;
+        const bot=Math.min(surf(a,zc),surf(b,zc))-0.7;
+        for(const s of[-1,1]){
+          const m=new THREE.Mesh(new THREE.BoxGeometry(b-a+0.02,top-bot,WT),wallM);
+          m.position.set((a+b)/2,(top+bot)/2,(s<0?U.z0:U.z1)+s*WT/2);scene.add(m);
+        }
+      }
+    };
+    span(U.rampW.x0-0.2,D.x0,COPE);         // open west ramp
+    span(D.x0,D.x1,SOF);                    // the abutments under the bridge
+    span(D.x1,U.rampE.x1+0.2,COPE);         // open east ramp
+  }
+
+  // 3. THE BRIDGE DECK — the Drive rides OVER the cut (the road slab in buildLSD
+  // is one continuous box at y 1.02; its underside 0.96 sits INSIDE this deck, so
+  // no coplanar faces = no z-fight) — plus low parapets outboard of the roadway,
+  // which are what read this as a BRIDGE from the Drive and from the trail.
+  // The deck is SELF-LIT (bmat): a big toon slab seen from BELOW picks up the
+  // hemisphere light's green ground-bounce and reads PEA-GREEN — the standing
+  // raised-canopy pitfall (044/062). The parapets stay toon: they are vertical,
+  // read from the roadway, and never become a ceiling.
+  {
+    const deck=new THREE.Mesh(new THREE.BoxGeometry(D.x1-D.x0,D.th,D.z1-D.z0,3,1,4),bmat(U.soffit));
+    deck.position.set((D.x0+D.x1)/2,D.top-D.th/2,(D.z0+D.z1)/2);scene.add(deck);
+    for(const px of[R.x0-0.06-P.t/2,R.x1+0.06+P.t/2]){
+      const w=new THREE.Mesh(new THREE.BoxGeometry(P.t,P.h+0.1,D.z1-D.z0,1,1,4),deckM);
+      w.position.set(px,D.top+P.h/2-0.05,(D.z0+D.z1)/2);scene.add(w);   // foot sunk 0.1 into the deck
+    }
+  }
+
+  // 4. THE TWO OPEN MOUTHS at the berm faces, now down at floor level: solid
+  // jambs the full width of the trench shoulder, a shallow segmental voussoir
+  // ring over the 9 m opening (clear head U.h above the floor at the crown) and
+  // the spandrel above it closed up to the soffit — so no daylight slot.
+  {
+    const dx=1.4,pw=1.55,rise=0.55,ring=0.2,ncol=26;
+    const headY=U.floorY+U.h;
+    for(const px of[U.portalW[0],U.portalE[0]]){
+      for(const s of[-1,1]){
+        const post=new THREE.Mesh(new THREE.BoxGeometry(dx,SOF-U.floorY,pw),wallM);
+        post.position.set(px,(U.floorY+SOF)/2,z+s*(hw+pw/2));scene.add(post);
+      }
+      for(let i=0;i<ncol;i++){
+        const za=-hw+2*hw*i/ncol,zb=-hw+2*hw*(i+1)/ncol,zm=(za+zb)/2,w=zb-za+0.02;
+        const yi=headY-rise*(zm/hw)*(zm/hw);            // parabolic intrados
+        const rt=Math.min(yi+ring,SOF);
+        const v=new THREE.Mesh(new THREE.BoxGeometry(dx,rt-yi,w),voussoirM);
+        v.position.set(px,(yi+rt)/2,z+zm);scene.add(v);
+        if(SOF-rt>0.01){
+          const sp=new THREE.Mesh(new THREE.BoxGeometry(dx,SOF-rt,w),wallM);
+          sp.position.set(px,(rt+SOF)/2,z+zm);scene.add(sp);
+        }
+      }
+    }
+  }
+
+  // 5. LANTERNS — warm self-lit glows along the tunnel walls so the crossing
+  // reads LIT, not a black hole. One shared material => one merged draw.
+  {
+    const lampM=bmat(U.lamp),lg=new THREE.SphereGeometry(0.26,10,8);
+    for(const lx of[2.6,7.0,11.4])for(const s of[-1,1]){
+      const l=new THREE.Mesh(lg,lampM);l.position.set(lx,0,z+s*5.8);scene.add(l);
+    }
   }
 }
 

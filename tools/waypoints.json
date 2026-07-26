@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-24T21:00:25.346Z",
- "count": 153,
+ "generated": "2026-07-26T16:46:28.687Z",
+ "count": 157,
  "waypoints": [
   {
    "id": "spawn",
@@ -948,23 +948,32 @@
    "framings": [
     {
      "yaw": -1.57,
-     "pitch": 0,
-     "dist": 4
+     "pitch": 0.02,
+     "dist": 6
     },
     {
+     "x": 7,
+     "z": 661,
      "yaw": -1.57,
-     "pitch": 0.07,
-     "dist": 5.5
+     "pitch": 0.02,
+     "dist": 6
     },
     {
-     "x": -8,
+     "x": -4,
      "z": 661,
      "yaw": 1.57,
-     "pitch": 0.05,
-     "dist": 5
+     "pitch": 0.02,
+     "dist": 6
+    },
+    {
+     "x": 22,
+     "z": 650,
+     "yaw": -1.15,
+     "pitch": 0.26,
+     "dist": 13
     }
    ],
-   "expectation": "THE FIRST WORKING CROSSING OF THE DRIVE (task 112): a low stone underpass tunnels beneath Lake Shore Drive — a pale voussoir arch on stone posts over a paved walkway — OPEN at both ends so you see straight through to the green park on the far side. Unlike the Belmont/Addison/Irving/Montrose portals (fenced dead-end doors), this one is a real passage the mayor walks through: the mayor stands on the tunnel floor, the far mouth an inviting opening onto lawn, NOT a wall. Axis-aligned down-the-tunnel framing."
+   "expectation": "THE FULLERTON CROSSING, REBUILT (task 120, issue 035 — the owner: \"there’s not a real bridge over lakeshore drive… you have to pass through the highway and you’re obscured by it; solids shouldn’t pass through solids\"). A REAL sunken underpass: a crushed-limestone path ramps DOWN from the lakefront trail between pale stone retaining walls, passes UNDER Lake Shore Drive through an open voussoir portal into a warmly lit tunnel, and ramps back up into Lincoln Park. The Drive is visibly CARRIED OVER on a bridge deck with low parapets. The mayor walks through fully visible with ~3.6 m of headroom — the roadway is ABOVE him, never through him. Both mouths open, you see straight through to the green park beyond. Axis-aligned down-the-tunnel framings, plus one 3/4 from the bank that reads the bridge from outside."
   },
   {
    "id": "lp-zoo-gate",
@@ -1138,8 +1147,8 @@
      "dist": 8
     },
     {
-     "x": -22,
-     "z": 912,
+     "x": -10,
+     "z": 916,
      "yaw": -1.95,
      "pitch": 0.09,
      "dist": 9
@@ -1238,6 +1247,112 @@
     }
    ],
    "expectation": "THEATER ON THE LAKE at the Fullerton point: a long LOW Prairie-brick pavilion standing alone on the lakefront strip — a rhythmic arcade band of tall round-arched openings glowing warm between brick piers, limestone trim at the spring line, all under a broad hip roof with deep overhanging eaves; THEATER ON THE LAKE lettered over the west arches. The crushed-limestone Lakefront Trail sweeps past its west front and the open lake glints beyond the pavilion. Reads as a landmark civic building, not a shed: the arches dominate the walls and the roof reads wide and low."
+  },
+  {
+   "id": "lf-west-screen",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 18.4,
+   "z": 233.3,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.06,
+     "dist": 9
+    },
+    {
+     "yaw": -1.57,
+     "pitch": 0.42,
+     "dist": 16
+    },
+    {
+     "yaw": -2.35,
+     "pitch": 0.1,
+     "dist": 10
+    }
+   ],
+   "expectation": "THE CITY SIDE OF THE DRIVE (task 120, issue 032 — the owner, standing on this exact spot: \"you can see water past the right of the bushes… the L platform columns go into the water\"). Looking WEST from the Lakefront Trail past the screening hedges: solid CITY GROUND behind the Lake Shore Drive berm, with the Brown Line viaduct standing on it — every bent planted on land — and the low-rise Lakeview brick flats behind. NO open lake anywhere west of the berm, at eye level or from above; no seam or z-fight where the ground meets the park lawn. The lake belongs to the EAST only."
+  },
+  {
+   "id": "lp-corner-weld",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": 29.1,
+   "z": 403.7,
+   "framings": [
+    {
+     "yaw": 0.2,
+     "pitch": 0.7,
+     "dist": 15
+    },
+    {
+     "yaw": 0.15,
+     "pitch": 0.22,
+     "dist": 11
+    },
+    {
+     "yaw": 3,
+     "pitch": 0.25,
+     "dist": 11
+    }
+   ],
+   "expectation": "THE DIVERSEY CORNER WELD (task 120, issue 033 — the owner: \"paths disjointed, looks bad\"). The Lakefront Trail runs through the corner into Lincoln Park as ONE CONTINUOUS DUAL PATH: an asphalt bike ribbon with rhythmic yellow centre dashes and a crushed-limestone walking ribbon beside it, both carrying straight through the seam. No chopped ribbon caps, no lateral offset between the north and south stretches, no gap, no doubled or z-fighting band, and the walking lane stays on the SAME side throughout. The near-top-down framing is the judge."
+  },
+  {
+   "id": "lp-southbound",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": 40,
+   "z": 430,
+   "framings": [
+    {
+     "yaw": 0.15,
+     "pitch": 0.03,
+     "dist": 10
+    },
+    {
+     "x": 34,
+     "z": 478,
+     "yaw": 0.15,
+     "pitch": 0.03,
+     "dist": 10
+    },
+    {
+     "x": 28,
+     "z": 530,
+     "yaw": 0.15,
+     "pitch": 0.05,
+     "dist": 11
+    }
+   ],
+   "expectation": "WALKING SOUTH INTO THE PARK (task 120, issue 034 — the owner: \"the buildings that are supposed to be in the distance just fade away\"). Downtown reads as a SOLID skyline on the south horizon that gently pulls away and hazes into the warm dusk air as you walk — never a see-through glass ghost, never a pop. By the deepest framing the towers have resolved into distance haze with no glassy remnants and the park has taken over the frame. Judge the middle framing hardest: any tower you can see the sky THROUGH is a fail."
+  },
+  {
+   "id": "lp-zoo-lakeview",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -1,
+   "z": 838,
+   "framings": [
+    {
+     "yaw": 1.57,
+     "pitch": 0.5,
+     "dist": 20
+    },
+    {
+     "yaw": 1.9,
+     "pitch": 0.1,
+     "dist": 8
+    },
+    {
+     "x": -3,
+     "z": 900,
+     "yaw": 1.45,
+     "pitch": 0.12,
+     "dist": 10
+    }
+   ],
+   "expectation": "THE LAKE EAST OF THE ZOO IS EMPTY WATER (task 120, issue 036 — the owner: \"lots of people just sitting out in the water east of the zoo\"). Looking east from the zoo’s Cannon flank across Lake Shore Drive: the berm, the roadway, and then OPEN LAKE to the horizon with nothing standing on it — no chibi figures, no benches, no props adrift. Just water, whitecaps and sky. The high framing sweeps the whole surface; a single person out there is a fail."
   },
   {
    "id": "dv-bay-deck",

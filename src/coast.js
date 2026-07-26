@@ -187,9 +187,21 @@ export let waterS=null;   // 112 LINCOLN PARK south water plane (lagoon + south 
 // world-curve as curveMat, plus (1) a gentle 2-octave swell, (2) sparse warm
 // sun-glints, (3) a very slow large-scale hue drift. Keeps the userData.sh /
 // uTime contract main.js ticks. No shared rng, no geometry change, no textures.
-function livingWaterMat(baseHex){
+// clip (optional, MESH-LOCAL xz rect): fragments inside it are DISCARDED. The 041
+// grade-carpet law, water edition (task 120): a map-spanning water plane CAPS any
+// feature dug below WATER_Y exactly like the lawn fill caps a sunken pit — the
+// rebuilt Fullerton underpass (floor y -3.1 < WATER_Y -2.3) rendered as a flooded
+// canal with the mayor waist-deep under the Drive. The trench footprint is
+// entirely under LAND (shoreline x~48 at that z), so no legitimate water is lost;
+// the discard edges hide under the land plane / culvert deck on every side.
+function livingWaterMat(baseHex,clip){
   const m=new THREE.MeshToonMaterial({color:baseHex,gradientMap:gmap});
   m.userData.timeAnim=true;              // shader-time swell keyed on LOCAL position -> never bake/merge this
+  // r128 keys its PROGRAM CACHE on onBeforeCompile.toString(): every
+  // livingWaterMat shares that source, so a clipped instance would silently
+  // reuse the first (unclipped) plane's compiled shader and the discard never
+  // runs. A per-clip cache key forces its own program.
+  m.customProgramCacheKey=()=>'livingWater'+(clip?JSON.stringify(clip):'');
   m.onBeforeCompile=sh=>{
     sh.uniforms.uCurv={value:CURV};
     sh.uniforms.uTime={value:0};
@@ -217,6 +229,7 @@ function livingWaterMat(baseHex){
     // Then the broad slow hue drift layers ON TOP (before toon lighting -> flat).
     sh.fragmentShader=sh.fragmentShader.replace(
       'vec4 diffuseColor = vec4( diffuse, opacity );',
+      (clip?'if(vWc.x>'+clip.x0.toFixed(2)+' && vWc.x<'+clip.x1.toFixed(2)+' && vWc.y>'+clip.z0.toFixed(2)+' && vWc.y<'+clip.z1.toFixed(2)+') discard;\n\t':'')+
       'vec3 cShore=vec3(0.3490,0.8588,0.9098);\n'+   // 0x59dbe8 bright turquoise (0-14 m)
       '\tvec3 cAqua =vec3(0.1843,0.6392,0.7098);\n'+ // 0x2fa3b5 mid aqua  (14-38 m, the old base)
       '\tvec3 cTeal =vec3(0.1451,0.5490,0.6275);\n'+ // 0x258ca0 deeper teal (38-85 m)
@@ -246,6 +259,35 @@ function livingWaterMat(baseHex){
 }
 
 export function buildCoast(){
+  // ---------------------- THE WEST GRADE (issue 032) ---------------------
+  // For the whole life of the map everything WEST of the Lake Shore Drive
+  // berm was OPEN LAKE: the Brown Line viaduct's bents plunged into water,
+  // the Lakeview backdrop flats floated on it, and from the Lakefront Trail
+  // the player saw whitecaps through the gap past the screening hedges —
+  // where the CITY should be (owner playtest 2026-07-24). CH.WEST_GRADE lays
+  // flat panels of solid city ground over that whole west face, 0.06 m UNDER
+  // the park lawn so LAND / LP_LAND_WEST always win the seam.
+  //
+  // SCENERY, NOT WALKABLE: isWater()'s `x>20` gate already reads every point
+  // out here as BLOCKED (never wadeable), so the west-wade guard and every
+  // walk function are untouched — no walkability change, no colliders.
+  //
+  // Pure data, ZERO rng of any kind (the shared mulberry32 call ORDER is a
+  // hard constraint) — one lone Mesh per panel, added inside the lakefront
+  // cell capture so a hard cell (Millennium/Wrigleyville) hides it with the
+  // rest of the lakefront. The sx/sz segment counts exist so the quadratic
+  // world curve (mvPosition.y -= CURV*z*z, injected by toon()) is SAMPLED
+  // finely enough across a panel this large — never reduce them.
+  {
+    const G=CH.WEST_GRADE,gm=toon(G.color);       // one shared cached toon material for all panels
+    for(const p of G.panels){
+      const g=new THREE.PlaneGeometry(p.x1-p.x0,p.z1-p.z0,p.sx,p.sz);g.rotateX(-Math.PI/2);
+      const m=new THREE.Mesh(g,gm);
+      m.position.set((p.x0+p.x1)/2,G.y,(p.z0+p.z1)/2);
+      scene.add(m);
+    }
+  }
+
   // Junction-WELDED vertex tangents. Each coast piece smooths its own vertex
   // tangents but clamps at its endpoints, so two pieces meeting at a corner
   // disagreed about the tangent there — slabs/piles tore at the seams (the
@@ -690,12 +732,16 @@ export function buildCoast(){
     scene.add(flatShape(CH.LP_LAND_EAST,0,lpGreen));       // east lakefront strip
 
     // WATER_S — south lake + Diversey lagoon (living water, shore-banded like main)
-    { const N=CH.WATER_S;
+    { const N=CH.WATER_S,U=CH.LP_UNDERPASS;
       const ng=new THREE.PlaneGeometry(N.size,N.size,N.seg,N.seg);ng.rotateX(-Math.PI/2);
       const pos=ng.attributes.position,nn=pos.count,aSh=new Float32Array(nn);
       for(let i=0;i<nn;i++)aSh[i]=shoreDist(pos.getX(i)+N.cx,pos.getZ(i)+N.cz);
       ng.setAttribute('aShore',new THREE.BufferAttribute(aSh,1));
-      const wn=new THREE.Mesh(ng,livingWaterMat(0x2fa3b5));
+      // 120: the Fullerton trench (floor -3.1) digs below this plane — clip its
+      // footprint out of the water or the underpass reads as a flooded canal
+      // (livingWaterMat clip note). Local coords: rect minus the mesh centre.
+      const wn=new THREE.Mesh(ng,livingWaterMat(0x2fa3b5,
+        {x0:U.rampW.x0-1.5-N.cx,x1:U.rampE.x1+1.5-N.cx,z0:U.z0-1.2-N.cz,z1:U.z1+1.2-N.cz}));
       wn.userData.live=true;                                // animated + local swell -> exempt from the cell merge
       wn.position.set(N.cx,WATER_Y+N.yOff,N.cz);scene.add(wn);
       waterS=wn;
@@ -849,12 +895,24 @@ export function buildCoast(){
         return new THREE.ExtrudeGeometry(s,{depth:0.5,bevelEnabled:false});
       };
       const parts=[];
+      // The face plate / parapet / curb span the DECK: inset 2 m at the WEST
+      // end (today's look, all over land) and FLUSH at the east. 120 pulled
+      // the culvert's east edge -8 -> -12 (CH.LP_DIVERSEY.culvert.x1) so the
+      // deck can never float over the sunken Fullerton underpass's descending
+      // west ramp — but these three were hard-coded to the PRE-120 deck
+      // (BoxGeometry(24) at x -22 = -34..-10, plate(-34,-10)) and would now
+      // hang 2 m PAST the deck edge over the ramp head. Derived from the data
+      // now, like the deck itself. The arch opening is clamped 0.8 m inside
+      // the plate: A.x1 (-12) now meets the deck edge, and a THREE.Shape hole
+      // may never touch its outer boundary.
+      const fx0=C.x0+2,fx1=C.x1,fwid=fx1-fx0,fxc=(fx0+fx1)/2;
+      const ax0=Math.max(A.x0,fx0+0.8),ax1=Math.min(A.x1,fx1-0.8);
       // north parapet ON the deck (overhangs the water edge — unreachable, no collider)
-      const par=new THREE.BoxGeometry(24,C.parapetH,0.5);par.translate(-22,C.deckY+C.parapetH/2,C.z0-0.2);parts.push(par.toNonIndexed());
+      const par=new THREE.BoxGeometry(fwid,C.parapetH,0.5);par.translate(fxc,C.deckY+C.parapetH/2,C.z0-0.2);parts.push(par.toNonIndexed());
       // south curb — low, steppable-looking (visual only)
-      const curb=new THREE.BoxGeometry(24,0.16,0.4);curb.translate(-22,0.08,C.z1+0.15);parts.push(curb.toNonIndexed());
+      const curb=new THREE.BoxGeometry(fwid,0.16,0.4);curb.translate(fxc,0.08,C.z1+0.15);parts.push(curb.toNonIndexed());
       // culvert NORTH arch face, extruded southward under the deck
-      const nf=plate(-34,-10,C.deckY,-2.95,A.x0,A.x1,A.topY,A.rise);nf.translate(0,0,C.z0-0.05);parts.push(nf);
+      const nf=plate(fx0,fx1,C.deckY,-2.95,ax0,ax1,A.topY,A.rise);nf.translate(0,0,C.z0-0.05);parts.push(nf);
       // MOUTH face at the NE head — length runs along z, extruded 0.5 EAST.
       // Shape x = -world z (rotateY(PI/2) maps local +x -> world -z, +z -> +x).
       const mf=plate(-M.z1,-M.z0,LD.wallTop,-2.95,-(M.z1-1.2),-(M.z0+1.2),-0.6,0.5);

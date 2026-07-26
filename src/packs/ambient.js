@@ -21,11 +21,15 @@ import * as CH from '../data/chicago.js';
 import { activeCell } from '../cells.js';
 
 // ---- fixed track geometry (world coords) ----
-const TRACK_X = -8;           // centre of the elevated structure, just W of the LSD berm (outside the world clamp)
-const DECK_TOP = 7.6;         // top of the track deck
+// 120: the numbers moved into the CITY PACK (CH.L_TRACK + CH.lTrackBents) so
+// tools/walkprobe.mjs and the permanent no-solid-in-water gate can assert every
+// viaduct BENT stands on dry ground (issue 032 — for the map's whole life they
+// stood in the lake). Pure refactor: the rendered geometry is bit-identical.
+const TRACK_X = CH.L_TRACK.x; // centre of the elevated structure, just W of the LSD berm (outside the world clamp)
+const DECK_TOP = CH.L_TRACK.deckTop;         // top of the track deck
 const CAR_Y = DECK_TOP + 1.6; // car centre height
-const PLATFORM_Z = 105;       // Belmont platform stub, aligned with the Belmont underpass (moved to z 105)
-const Z_N = -1094, Z_S = 316;  // north / south ends — the full map z range (Z_N -1094: MONTROSE growth, matches the LSD berm z0). deck=1 Mesh, rails=1 InstancedMesh(2), bents=1 InstancedMesh(dynamic count) => extending north is +0 draws
+const PLATFORM_Z = CH.L_TRACK.platform.z;    // Belmont platform stub, aligned with the Belmont underpass (moved to z 105)
+const Z_N = CH.L_TRACK.zN, Z_S = CH.L_TRACK.zS;  // north / south ends — the full map z range (Z_N -1094: MONTROSE growth, matches the LSD berm z0). deck=1 Mesh, rails=1 InstancedMesh(2), bents=1 InstancedMesh(dynamic count) => extending north is +0 draws
 
 // ---- module runtime handles (built in onWorldReady) ----
 let TRAIN = null, JETS = null, WRIG = null, WRIG_GRP = null;
@@ -111,18 +115,20 @@ function buildTrack(){
   const rails=new THREE.InstancedMesh(new THREE.BoxGeometry(0.24,0.16,zLen,1,1,zSeg),toon(0x6b5b4a),2);
   [-1.25,1.25].forEach((dx,i)=>{M.compose(V.set(TRACK_X+dx,DECK_TOP+0.08,zc),Q.identity(),S.set(1,1,1));rails.setMatrixAt(i,M);});
   rails.instanceMatrix.needsUpdate=true;scene.add(rails);
-  // ---- columns: two posts per bent, instanced ----
-  const zs=[];for(let z=Z_N+6;z<=Z_S-6;z+=9)zs.push(z);
+  // ---- columns: two posts per bent, instanced (spacing/inset/offsets = CH.L_TRACK,
+  //      the same numbers CH.lTrackBents() hands the dry-ground gate) ----
+  const LT=CH.L_TRACK;
+  const zs=[];for(let z=Z_N+LT.bentInset;z<=Z_S-LT.bentInset;z+=LT.bentStep)zs.push(z);
   const posts=new THREE.InstancedMesh(new THREE.BoxGeometry(0.55,DECK_TOP-0.6,0.55),steel,zs.length*2);
-  let pi=0;for(const z of zs)for(const dx of[-2,2]){M.compose(V.set(TRACK_X+dx,(DECK_TOP-0.6)/2,z),Q.identity(),S.set(1,1,1));posts.setMatrixAt(pi++,M);}
+  let pi=0;for(const z of zs)for(const dx of LT.bentDx){M.compose(V.set(TRACK_X+dx,(DECK_TOP-0.6)/2,z),Q.identity(),S.set(1,1,1));posts.setMatrixAt(pi++,M);}
   posts.instanceMatrix.needsUpdate=true;scene.add(posts);
 
   // ---- Belmont platform stub (east side, faces the park) ----
-  const px=TRACK_X+3.3;
-  const pdeck=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.4,18),toon(0x9a938a));pdeck.position.set(px,DECK_TOP-0.2,PLATFORM_Z);scene.add(pdeck);
-  const canopy=new THREE.Mesh(new THREE.BoxGeometry(4.0,0.22,18),toon(0x2f6fb0));canopy.position.set(px,DECK_TOP+2.7,PLATFORM_Z);scene.add(canopy);
+  const px=TRACK_X+LT.platform.dx,plen=LT.platform.len;
+  const pdeck=new THREE.Mesh(new THREE.BoxGeometry(3.4,0.4,plen),toon(0x9a938a));pdeck.position.set(px,DECK_TOP-0.2,PLATFORM_Z);scene.add(pdeck);
+  const canopy=new THREE.Mesh(new THREE.BoxGeometry(4.0,0.22,plen),toon(0x2f6fb0));canopy.position.set(px,DECK_TOP+2.7,PLATFORM_Z);scene.add(canopy);
   const cposts=new THREE.InstancedMesh(new THREE.BoxGeometry(0.16,2.8,0.16),toon(0x4a4a4a),4);
-  let ci=0;for(const cx of[px-1.5,px+1.5])for(const cz of[PLATFORM_Z-8,PLATFORM_Z+8]){M.compose(V.set(cx,DECK_TOP+1.2,cz),Q.identity(),S.set(1,1,1));cposts.setMatrixAt(ci++,M);}
+  let ci=0;for(const cx of[px-1.5,px+1.5])for(const cz of[PLATFORM_Z-(plen/2-1),PLATFORM_Z+(plen/2-1)]){M.compose(V.set(cx,DECK_TOP+1.2,cz),Q.identity(),S.set(1,1,1));cposts.setMatrixAt(ci++,M);}
   cposts.instanceMatrix.needsUpdate=true;scene.add(cposts);
   // BELMONT sign — FrontSide facing east (+x) into the park; its back faces the
   // tracks (never walkable), so a DoubleSide plane only risked a mirrored back —

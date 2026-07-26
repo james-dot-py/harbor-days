@@ -975,6 +975,12 @@ export const LAKEVIEW_BAND = {
   zr:[-812,408],             // the ORIGINAL span — marched FIRST with the original seed so every existing block stays byte-identical
   zrN:[-1080,-812],          // MONTROSE growth: the north extension, marched SECOND with its OWN seed (existing band unperturbed; same 3 InstancedMeshes -> 0 new buckets)
   zrS:[416,1016],            // 112 LINCOLN PARK south extension: marched THIRD at frontS with its OWN seed (existing band byte-identical; same 3 InstancedMeshes -> 0 new buckets)
+  // 120 (issue 034): the SOUTH CITY EDGE. Walking south through the park the
+  // horizon ahead was empty sky once the skyline gate let go — nothing "in the
+  // distance" at all. This row marches along X at a front z (North Ave / Old
+  // Town across the park's south edge), bodies extending SOUTH, into the SAME
+  // three InstancedMeshes: +0 draw calls, own seed, existing band untouched.
+  southRow:{ z:1046, x0:-160, x1:0, seed:0x51b7d3a9 },   // x1 0 = the Drive. The city south of Lincoln Park sits WEST of LSD; east of it is beach and lake, so no block may stand past the berm
   spacing:[15,30],           // street-ish gaps between buildings
   depth:[8,14],              // how far the blocks extend west
   w:[10,22],                 // frontage widths
@@ -1032,12 +1038,58 @@ export const DOG_PROPS = {
 // the `lsd.js` content pack; the static berm/road/portals build here.
 export const LSD = {
   berm:{ x0:0, x1:14, z0:-1094, z1:1020, h:1.0, color:0x6f9e5c },   // z1 418->1020 (112 LINCOLN PARK): the berm/road/Drive continue SOUTH as an INTERIOR ribbon (park on BOTH sides). buildLSD splits the berm at the Fullerton underpass gap (LP_UNDERPASS)
-  gap:{ z0:654, z1:668 },   // the Fullerton working-underpass cut in the berm (structures.js splits the box here; the road bridges over)
+  gap:{ z0:653, z1:669 },   // 120: the Fullerton underpass CUT in the berm (structures.js splits the box here; the road rides the LP_UNDERPASS.deck bridge over the sunken passage)
   road:{ x0:2.5, x1:11.5, y:1.02, color:0x8f9298 },
   lane:{ color:0xf2ede0, w:0.16, len:2.4, gap:3.2, count:7 },   // dashed center lines
   underpasses:[105, -400, -600, -771],                        // Belmont z105, Addison -400, Irving -600 (084: at the vignette golf's north), Montrose -771 (084 frame)
   portal:{ w:7, h:4.2, recess:0x211f22, arch:0xd8cbb0 },
 };
+
+// ---- THE WEST GRADE (task 120, issue 032; GEOGRAPHY.md STRUCTURAL FIRST #3) --
+// Everything WEST of the Drive used to be OPEN LAKE: the Brown Line viaduct's
+// bents and the Belmont platform stood IN the water, the Lakeview flats floated
+// on it, and from the trail you saw the lake through the gap past the screening
+// hedges (owner playtest 2026-07-24). The map's west face is LAND. Two flat
+// panels of solid city ground, 0.06 m UNDER the park lawn so LAND/LP_LAND_WEST
+// always win the seam, tucked 2 m under the berm's west face.
+// The SOUTH panel stops at x -66 so it can never CAP the Diversey lagoon
+// (x >= -43) or South Pond (x >= -47) — the 041 grade-carpet law.
+// NOT walkable: isWater()'s x>20 gate already reads this BLOCKED, never
+// wadeable, so the west-wade guard is untouched. Rendered in coast.js.
+export const WEST_GRADE = {
+  y:-0.06, color:0x6aa85f,          // a duller, greyer city green than the park lawn 0x7ecb6f — reads as "the other side of the Drive"
+  panels:[
+    { x0:-300, x1:2, z0:-1100, z1:412, sx:16, sz:200 },    // N: the whole pre-Lincoln-Park map length
+    { x0:-300, x1:-66, z0:412, z1:1032, sx:12, sz:60 },    // S: the Lincoln Park band, WEST of LP_LAND_WEST only
+    { x0:-66,  x1:2,  z0:1006, z1:1032, sx:8,  sz:4 },     // S2: the wedge between LP_LAND_WEST's DIAGONAL south edge (z 1007..1028) and the S3 panel — 24 m of open lake showed on the south horizon without it. z0 1006 clears South Pond (zMax 1002) so the grade can never cap it (the 041 law)
+    { x0:-300, x1:2,  z0:1032, z1:1104, sx:20, sz:8 },     // S3: the ground past the park's south edge, under LAKEVIEW_BAND.southRow. x1 2 stops at the berm — the lake east of the Drive must keep reading as lake
+  ],
+};
+export function onWestGrade(x,z){for(const p of WEST_GRADE.panels)if(x>=p.x0&&x<=p.x1&&z>=p.z0&&z<=p.z1)return true;return false}
+// DRY GROUND — the single truth for "this point is solid land, not lake", shared
+// by tools/no-solid-in-water.mjs (the permanent guard, issues 032/036) and
+// walkprobe. Walkable ground is dry by definition; this adds the two NON-walkable
+// dry surfaces: the west grade and the Drive's own embankment.
+export function isDryGround(x,z){
+  if(onWestGrade(x,z))return true;
+  const B=LSD.berm;return x>=B.x0&&x<=B.x1&&z>=B.z0&&z<=B.z1;
+}
+
+// ---- THE BROWN LINE 'L' (task 120: moved out of packs/ambient.js) -----------
+// The elevated backdrop track west of the Drive. It lived as module consts in
+// the pack, which meant no tool could assert that its BENTS stand on ground —
+// and for the map's whole life they did not (issue 032). Data module now, so
+// walkprobe + tools/no-solid-in-water.mjs check every bent against isDryGround.
+export const L_TRACK = {
+  x:-8, deckTop:7.6, zN:-1094, zS:316,      // z span = the full north map (the L stops at the Diversey corner; the south band is brick flats)
+  bentDx:[-2,2], bentStep:9, bentInset:6,   // two posts per bent, every 9 m, inset 6 m from each end
+  platform:{ z:105, dx:3.3, len:18 },       // Belmont platform stub, aligned with the Belmont underpass
+};
+export function lTrackBents(){
+  const out=[];for(let z=L_TRACK.zN+L_TRACK.bentInset;z<=L_TRACK.zS-L_TRACK.bentInset;z+=L_TRACK.bentStep)
+    for(const dx of L_TRACK.bentDx)out.push([L_TRACK.x+dx,z]);
+  return out;
+}
 
 // Waveland clock-tower fieldhouse (warm brick over a limestone plinth,
 // quoined corners, arched windows, gabled copper roof, tall square clock
@@ -1406,7 +1458,23 @@ export const LP_LSD_DRIFT = [ [403,196],[600,195],[794,234],[1000,283],[1200,324
 // visibility flag — the billboard geometry + its mulberry32(0x5c1000) extents
 // stay frozen; zero new buckets, zero rng). Keep the fade band (z 450..560)
 // content-LOW (lagoon water + docks, no tall halls — the halls start z>=671).
-export const LP_SKYLINE_GATE = { fadeZ0:403, fadeZ1:503, hiddenSouthOf:503 };
+// 120 AMENDMENT (issue 034 — "the buildings that are supposed to be in the
+// distance just fade away"): a straight opacity fade dissolved the whole
+// skyline into SEE-THROUGH GLASS towers in plain view over ~30 s of walking.
+// It now RECEDES then HAZES:
+//   z <= holdZ   IDENTITY — no transform, no transparency (baseline.png and
+//                every north view stay BYTE-IDENTICAL; non-negotiable)
+//   z >  holdZ   the group translates south at `recede` x the player's
+//                southward progress (a gentle pull-away, not a dissolve). It
+//                stays >= 101 m ahead and everything it overlaps is past
+//                fog-opaque (210 m), so no hall is ever seen through it.
+//   fadeZ0..1    only once it is ~half size do the materials fade — and their
+//                COLOR lerps toward the horizon `haze` as opacity drops, so it
+//                reads as atmospheric perspective instead of glass. Hidden past
+//                fadeZ1, where the front face is still ~100 m short of the
+//                first park hall (z 671).
+export const LP_SKYLINE_GATE = { holdZ:403, recede:1.8, fadeZ0:470, fadeZ1:545, haze:0xf6ab84,
+  fadeZ0Legacy:403, hiddenSouthOf:545 };
 
 // ---- FEATURE ANCHORS (compressed-frame landmark centres; scaffolding) -------
 export const LINCOLN_ANCHORS = {
@@ -1469,7 +1537,11 @@ export const LP_DIVERSEY = {
   // The rect is WALKABLE (lpLandHit returns true here BEFORE the water
   // subtraction — shared by engine + walkprobe); the deck/parapets/arch are
   // coast.js visuals. Water reads through the north arch face.
-  culvert:{ x0:-36, x1:-8, z0:646, z1:668, deckY:0.055, parapetH:0.55,
+  // 120: east edge -8 -> -12 so the deck can never float over the Fullerton
+  // underpass's descending WEST ramp (LP_UNDERPASS.rampW head x -11). The arch
+  // (x -28..-12) already ended there, and the lagoon's east bank in this z band
+  // sits at x ~-14, so the neck stays fully covered.
+  culvert:{ x0:-36, x1:-12, z0:646, z1:668, deckY:0.055, parapetH:0.55,
             arch:{ x0:-28, x1:-12, topY:-0.3, rise:0.7 } },
   mouth:{ x:-1.7, z0:417, z1:427 },        // NE head: the Diversey inlet under the Drive (water-under-causeway hint, faces W)
   dockRows:[444,468,492,516,540,564,588,612],  // 8 east-bank finger docks (jut WEST off the promenade)
@@ -1516,7 +1588,7 @@ export const LP_LAND_WEST = [
 ];
 export const LP_LAND_EAST = [
   [14,402],                    // NW (berm east face, overlapping the pre-112 corner land)
-  [40,410],[48,450],           // wide north mouth -> shore NE (connects the trail exiting the corner at ~x30)
+  [44,406],[48,450],           // 120: the north mouth widened 40,410 -> 44,406 so the DUAL trail (bike x30 + walk x34 at the corner weld, issue 033) keeps ground under both ribbons where the strip takes over from the pre-112 corner land (whose shoreline is x~55 at z403)
   [54,536],[54,612],           // Theater-on-the-Lake bulge (113: widened x52->54 so the pavilion's east wall x51 keeps >=1.3 m of ground through z626; z<700 so the millennium CLAMP_FULL_M disjointness holds)
   [48,662],[38,702],           // narrowing south
   [28,726],[16,714],           // SE tip (Fullerton / trail south end)
@@ -1528,9 +1600,30 @@ export const LP_LAND_EAST = [
 // NO second pedestrian crossing — its inlet is a water-under-causeway detail).
 // A walkable tunnel THROUGH the berm (x0-14) linking the east strip to the west
 // park. Axis-aligned E-W (camera-math doctrine for interiors/tunnels).
+// 120 REBUILD (issue 035 — the marquee). The 112 version was a flat cut AT
+// GRADE: the berm split and the Drive's road slab (y 1.02) ran straight through
+// the walker's chest ("solids shouldn't pass through solids"). The path now
+// DIPS UNDER the Drive and the Drive is carried OVER it on a bridge deck — the
+// real Fullerton underpass. Ramps ~0.28 m/m (inside the walkprobe 0.55 elevator
+// guard); headroom 3.62 m under the soffit (over the 3.5 m chase-camera rule,
+// issue 024). Walkability is the ANALYTIC lpUnderpassH below — shared by
+// main.js surfaceY/walkable() and tools/walkprobe.mjs; the 112 flat walkRect is
+// gone. NO colliders (the anti-trap law): the trench rim is a data carve in
+// lpBlockedHit so no one can step off a 3 m retaining wall.
+// The west ramp stops at x -11: the 113 Diversey CULVERT deck carries Fullerton
+// over the lagoon neck immediately west of it (its east edge pulled -8 -> -12 by
+// this task so the deck can never float over the descending ramp), and the
+// lagoon's own east bank sits at x ~-14 in this z band.
 export const LP_UNDERPASS = {
-  walk:{ x0:-12, x1:24, z0:656, z1:666, h:0 },   // walkRect through the berm
-  portalE:[16,661], portalW:[-2,661], w:9, h:4.2,
+  z0:655, z1:667,                    // the passage (12 m wide)
+  floorY:-3.1,
+  rampW:{ x0:-11, x1:0 },            // west ramp head x-11 (grade) -> x0 (floor, the berm's west face)
+  rampE:{ x0:14,  x1:25 },           // east ramp x14 (floor, the berm's east face) -> head x25 (grade)
+  portalE:[14,661], portalW:[0,661], w:9, h:3.4,   // the two OPEN stone mouths at the berm faces
+  deck:{ x0:-0.2, x1:14.2, z0:653, z1:669, top:1.02, th:0.5 },   // the LSD bridge over the cut (soffit y 0.52 -> 3.62 m headroom)
+  parapet:{ h:0.9, t:0.5 },          // low walls on the bridge, read from the roadway
+  rimLip:2.2, rimDepth:0.6,          // blocked band in z beside the OPEN ramps, only where the cut is genuinely deep (walk data, no colliders)
+  wall:0xd8cbb0, floor:0xc9c3b4, soffit:0x9c968a, lamp:0xffd9a0,
 };
 
 // ---- SHARED LINCOLN PARK WALKABILITY (the engine main.js AND tools/walkprobe.mjs
@@ -1582,6 +1675,7 @@ export function lpBlockedHit(x,z){
   if(x>=T.x0&&x<=T.x1&&z>=T.z0&&z<=T.z1)return true;
   const B=LP_CAFE_BRAUER;   // 117: Café Brauer hall footprint — SOLID (the 052 sink law; open loggia arms east of the hall stay walkable terrace; NO colliders, anti-trap)
   if(x>=B.x-B.w/2-0.3&&x<=B.x+B.w/2+0.3&&z>=B.z-B.d/2-0.3&&z<=B.z+B.d/2+0.3)return true;
+  if(lpUnderpassRim(x,z))return true;   // 120: the Fullerton cut's retaining-wall rim (issue 035) — data carve, no colliders
   return zooBlockedHit(x,z);   // 114: the zoo campus carves (fence band / pool / yard / hall / pier pads)
 }
 // 114 ZOO walkability carves — pure data, NO colliders (anti-trap law): the
@@ -1641,7 +1735,28 @@ export function zooBlockedHit(x,z){
 // point-in-campus (definePlace contains + tools) — the closed perimeter poly
 export function zooInside(x,z){return z>735&&z<1008&&x<-8&&x>-96&&_pipLP(x,z,ZOO.perimeter);}
 // The Fullerton underpass floor — a flat walk rect through the berm (surfaceY 0).
-export function lpUnderpassHit(x,z){const u=LP_UNDERPASS.walk;return x>=u.x0&&x<=u.x1&&z>=u.z0&&z<=u.z1;}
+// 120: the SUNKEN Fullerton crossing's walk surface — null off the footprint,
+// else the y (ramp down / tunnel floor / ramp up). THE shared definition: main.js
+// surfaceY + walkable(), and tools/walkprobe.mjs mirror it by importing this
+// function (never a fork — the 052 law).
+export function lpUnderpassH(x,z){
+  const U=LP_UNDERPASS;
+  if(z<U.z0||z>U.z1||x<U.rampW.x0||x>U.rampE.x1)return null;
+  if(x<=U.rampW.x1)return U.floorY*((x-U.rampW.x0)/(U.rampW.x1-U.rampW.x0));          // -11 (0) -> 0 (floorY)
+  if(x<U.rampE.x0)return U.floorY;                                                     // the level tunnel under the Drive
+  return U.floorY*(1-(x-U.rampE.x0)/(U.rampE.x1-U.rampE.x0));                          // 14 (floorY) -> 25 (0)
+}
+export function lpUnderpassHit(x,z){return lpUnderpassH(x,z)!==null;}
+// The trench RIM beside the open ramps: a blocked lip so no one walks off a 3 m
+// retaining wall into the cut. Only where the cut is OPEN (outside the berm,
+// which is non-walkable anyway). Folded into lpBlockedHit.
+export function lpUnderpassRim(x,z){
+  const U=LP_UNDERPASS;
+  if(x<U.rampW.x0||x>U.rampE.x1)return false;
+  if(!((z>U.z1&&z<=U.z1+U.rimLip)||(z<U.z0&&z>=U.z0-U.rimLip)))return false;
+  const h=lpUnderpassH(x,(U.z0+U.z1)/2);          // only beside the DEEP part — a ramp head has no wall to fall off
+  return h!==null&&h<-U.rimDepth;
+}
 
 // ---- THEATER ON THE LAKE (113) — the 1920 Perkins Prairie-brick venue, ALONE
 // on the east lakefront strip at Fullerton. Hand-modeled (Commons imagery gap —
@@ -1864,8 +1979,16 @@ export const LP_SOUTHPOND = {
 // TRAIL_MAIN; pathSamples is PHASE-sensitive — PITFALLS). LP_TRAIL_LAKE
 // continues the Lakefront Trail south on the EAST strip; LP_TRAIL_PARK is the
 // west park's interior spine (through the underpass into the zoo/pond).
-export const LP_TRAIL_LAKE = crChain([[27,409],[29,450],[31,520],[30,590],[27,650],[23,700]],4);  // 112: the Lakefront Trail continues south on the EAST strip from the corner exit down to the Fullerton underpass mouth (then LP_TRAIL_PARK carries it west into the park)
-export const LP_TRAIL_PARK = crChain([[22,660],[6,661],[-4,664],[-6.5,684],[-8,714],[-8.2,752],[-8,788],[-8,810],[-8.6,824],[-11.5,830]],4);  // 114 RESHAPE: underpass mouth -> south along the zoo flank (between Cannon and the fence) -> THROUGH the east gate (ends at the gate pad; ZOO.loop takes over inside, ZOO.spur continues to the pond). Det-safe: LP is scatter-free ground (GEOGRAPHY liberty note); the old spine ran through the campus interior/hall footprints
+// 120 RESHAPE (issue 033 — "paths disjointed, looks bad"). LP_TRAIL_LAKE now
+// STARTS on TRAIL_MAIN's exact first control point (30,406) and is built as a
+// DUAL ribbon (bike centerline + walk 4 m park-side, shift -walkOff so it lands
+// on MAIN's side) mitre-welded to MAIN's START frame — the 102 continuation law
+// applied to a predecessor's head. It ENDS at the east ramp head of the rebuilt
+// Fullerton underpass (x 25.5); a flat ribbon may not run over the trench.
+// The bike line holds x ~26 past Theater on the Lake (x0 33) so the walk ribbon
+// keeps >=1.3 m of ground at its east edge (the 113 strip law).
+export const LP_TRAIL_LAKE = crChain([[30,406],[28,436],[27,500],[26,560],[26,614],[26,644],[25.5,661]],4);
+export const LP_TRAIL_PARK = crChain([[-11.5,661],[-14,668],[-13,684],[-10,700],[-8,714],[-8.2,752],[-8,788],[-8,810],[-8.6,824],[-11.5,830]],4);  // 114 RESHAPE / 120: starts at the WEST ramp head (x -11.5) of the sunken crossing -> south along the zoo flank (between Cannon and the fence) -> THROUGH the east gate (ends at the gate pad; ZOO.loop takes over inside, ZOO.spur continues to the pond). Det-safe: LP is scatter-free ground (GEOGRAPHY liberty note)
 export const LP_TRAIL_STOCKTON = crChain([[-92,700],[-96,820],[-99,900],[-96,1000]],4);   // the west campus walk (Stockton side)
 
 // 112 SHELL: hand-placed shade elms on the new parkland (individual frustum-culled
