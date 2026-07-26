@@ -2,7 +2,7 @@
 id: 122
 area: lincolnpark
 type: build
-model: opus
+model: fable
 turns: 120
 title: The CONSERVATORY + formal garden — Victorian glass, Storks at Play, Grandmother's Garden (retry of parked 116, sign-off prerequisite)
 acceptance: >

@@ -2,7 +2,7 @@
 id: 121
 area: lakefront
 type: delight
-model: opus
+model: fable
 turns: 100
 title: Trail micro-discovery pass — something worth noticing every ~50 m (B3)
 acceptance: >

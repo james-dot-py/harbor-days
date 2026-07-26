@@ -36,6 +36,13 @@ that. Follow the steps below in order.
   to fetch) to executor subagents and keep judgment work — reading PNGs,
   taste calls, geometry truth — in the main session. Use file-based notes
   (PITFALLS.md, issue files) whenever a lesson costs more than a few turns.
+- **Your executor subagents run on Opus 5** (the loop sets
+  `CLAUDE_CODE_SUBAGENT_MODEL`), so delegation is cheap and parallel — the
+  owner's standing split is that the steering model spends its turns on taste
+  and truth, not on grind. When you are steering on Fable this matters most:
+  hand off the mechanical passes (bulk edits, shot batteries, ref fetches,
+  gate re-runs) rather than grinding them yourself, and spend what you save on
+  looking hard at the result. You still personally Read every PNG.
 
 ## Camera math (agents waste turns on this — internalize it)
 Camera sits at player − (sin yaw, cos yaw)·dist and looks along +(sin yaw, cos yaw);

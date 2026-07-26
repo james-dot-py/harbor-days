@@ -2,7 +2,7 @@
 id: 120
 area: lincolnpark
 type: polish
-model: opus
+model: fable
 turns: 140
 title: Lincoln Park POLISH R2 — owner playtest burn-down (issues 032–036) + AAA pass
 acceptance: >
@@ -76,3 +76,22 @@ be AAA before the loop moves on — this is the quality it takes to make a local
 say "they nailed it," not a checklist to green. The LSD crossing is the one that
 changes how the place FEELS: it is the front door to the whole neighborhood.
 Make it real.
+
+## WIP NOTE — a previous attempt left real work in the tree (supervisor, 2026-07-26)
+
+An earlier 120 session ran ~26 h and was killed by a machine restart BEFORE it
+could commit. Its work is still in the working tree, uncommitted — do NOT
+`git checkout`/revert it blind, and do not rebuild it from scratch:
+
+- modified: `GEOGRAPHY.md`, `src/cells.js`, `src/coast.js`, `src/data/chicago.js`,
+  `src/framework.js`, `src/main.js`, `src/paths.js`, `src/sky.js`,
+  `src/structures.js`, `src/packs/{ambient,artinstitute,millennium-lawnlife,
+  parklife,watertoys}.js`, `tools/{gen-waypoints,path-continuity,walkprobe}.mjs`,
+  `tools/waypoints.json`, `tools/waypoints.expect.json`
+- new: `tools/no-solid-in-water.mjs` (the permanent guard this task asks for)
+- scratch to delete before close-out: `tools/tmp-120-*.mjs`
+
+**First**, survey what is actually there (`git diff --stat`, read the new guard,
+run the gates) and judge it on its merits: keep what holds, finish what is
+half-done, discard only what you can show is wrong. Then carry the task to green
+normally. Treat the state as a head start, not as truth — it was never verified.

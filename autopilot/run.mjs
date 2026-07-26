@@ -16,7 +16,7 @@
 //     green → move task to queue/done/, notify; failed → leave issue, notify, retry;
 //     same task failed 3× → move to queue/parked/, notify loudly.
 //  6. Append every event to autopilot/logs/run-<YYYYMMDD>.jsonl.
-import { readFileSync, writeFileSync, existsSync, readdirSync, renameSync, mkdirSync, statSync, appendFileSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, readdirSync, renameSync, mkdirSync, statSync, appendFileSync, unlinkSync } from 'fs';
 import { dirname, join, basename } from 'path';
 import { fileURLToPath } from 'url';
 import { spawn, spawnSync } from 'child_process';
@@ -193,23 +193,54 @@ function turnBudget(taskFile, planner) {
 // otherwise: sign-offs + planner picks (rare, taste-critical) get Fable,
 // everything else Opus. Values accept aliases 'fable' / 'opus' / 'kimi'
 // (kimi = kimi-k3; owner 2026-07-19: kimi runs today's queue, no fable).
-// 2026-07-22: owner's Fable credits are EXHAUSTED — the implicit Fable
-// defaults (planner + untyped sign-offs) now route to Opus so the loop can't
-// stall on an empty-credit model. A frontmatter `model: fable` still honors
-// the request (and will fail loudly) — this only changes the DEFAULTS. Revert
-// the two DEFAULT_MODEL uses below to MODEL_IDS.fable when credits return.
-const MODEL_IDS = { fable: 'claude-fable-5', opus: 'claude-opus-5', kimi: 'kimi-k3' };   // opus alias bumped 4.8 -> 5 (owner 2026-07-24, Opus 5 launch day: same $5/$25, better, and Fable/Kimi are both out). 'opus4' kept as an escape hatch below.
+// 2026-07-22: owner's Fable credits were EXHAUSTED, so the implicit Fable
+// defaults temporarily routed to Opus. SUPERSEDED 2026-07-26 (see below).
+// 2026-07-26 (owner): Fable credits are BACK (probe green) and Fable is back
+// in charge of beauty + orchestration — DEFAULT_MODEL returns to Fable, and
+// EVERY session (Fable or Opus) now delegates its grind to Opus 5 subagents
+// via CLAUDE_CODE_SUBAGENT_MODEL: Fable orchestrates, Opus 5 executes. When
+// Fable runs dry again the loop no longer parks good tasks — it arms the
+// FABLE-OUT sentinel, re-runs the task on Opus 5 with NO strike, and retries
+// Fable automatically 12h later.
+const MODEL_IDS = { fable: 'claude-fable-5', opus: 'claude-opus-5', kimi: 'kimi-k3' };   // opus alias bumped 4.8 -> 5 (owner 2026-07-24, Opus 5 launch day: same $5/$25, better). 'opus4' kept as an escape hatch below.
 const MODEL_ALIASES = { opus4: 'claude-opus-4-8', opus5: 'claude-opus-5' };
-const DEFAULT_MODEL = MODEL_IDS.opus;   // was fable for planner/signoff; see note above
+const SUBAGENT_MODEL = MODEL_IDS.opus;   // executor subagents, on every model
+const DEFAULT_MODEL = MODEL_IDS.fable;   // planner + untyped sign-offs = taste-critical
+
+// Fable exhaustion is MODEL-specific, not account-wide: the account is fine,
+// this one model refuses. Historic wordings — "Usage credits are required for
+// this model" (2026-07-17) and a Fable-only usage limit (2026-07-13) — used to
+// instant-fail every Fable spawn and cascade-park good tasks while Opus greened
+// (the "fable-only parks while opus greens" signature). Now it degrades.
+const FABLE_OUT = join(HERE, 'FABLE-OUT');
+const FABLE_RETRY_MS = 12 * 60 * 60 * 1000;   // re-probe Fable twice a day
+const FABLE_UNAVAILABLE_RE = /credits? (are |is )?required for this model|usage credits are required|insufficient (credits|balance)|not available (on|for) your (plan|account)|model[_ ]not[_ ]available/i;
+function fableOut() {
+  if (!existsSync(FABLE_OUT)) return false;
+  let armed = 0;
+  try { armed = Date.parse(readFileSync(FABLE_OUT, 'utf8').trim()) || 0; } catch { }
+  if (armed && Date.now() - armed > FABLE_RETRY_MS) {
+    // the allowance window has almost certainly rolled — let Fable try again
+    try { unlinkSync(FABLE_OUT); } catch { }
+    log({ event: 'fable-out-expired', msg: 'sentinel older than 12h — retrying Fable' });
+    return false;
+  }
+  return true;
+}
+function armFableOut() { try { writeFileSync(FABLE_OUT, new Date().toISOString() + '\n'); } catch { } }
+
 function taskModel(taskFile, planner) {
-  if (planner) return DEFAULT_MODEL;
+  // one door: any Fable pick becomes Opus 5 while the sentinel is armed
+  const pick = (m) => (m === MODEL_IDS.fable && fableOut()) ? MODEL_IDS.opus : m;
+  if (planner) return pick(DEFAULT_MODEL);
   const fm = frontmatter(taskFile);
   const m = (fm.model || '').trim().toLowerCase();
-  if (MODEL_IDS[m]) return MODEL_IDS[m];
-  if (m.startsWith('claude-')) return fm.model.trim();   // explicit full model id
+  if (MODEL_IDS[m]) return pick(MODEL_IDS[m]);
+  if (MODEL_ALIASES[m]) return MODEL_ALIASES[m];          // 'opus4' / 'opus5' escape hatch
+  if (m.startsWith('claude-')) return pick(fm.model.trim());   // explicit full model id
   // unknown aliases ('any', typos) fall back to the default instead of
   // becoming a bogus --model arg (parked 024 three times, 2026-07-10)
-  return (fm.type === 'signoff') ? DEFAULT_MODEL : MODEL_IDS.opus;
+  return pick((fm.type === 'signoff') ? DEFAULT_MODEL : MODEL_IDS.opus);
 }
 
 // ---- bookkeeping durability -------------------------------------------------
@@ -296,7 +327,9 @@ function claudeArgs({ prompt, maxTurns, resume, model }) {
 function runClaude({ prompt, maxTurns, resume, model }) {
   return new Promise((resolve) => {
     const args = claudeArgs({ prompt, maxTurns, resume, model });
-    const child = spawn('claude', args, { cwd: ROOT });
+    // Fable orchestrates, Opus 5 executes: the session's executor subagents run
+    // on Opus 5 regardless of which model is steering (owner, 2026-07-26).
+    const child = spawn('claude', args, { cwd: ROOT, env: { ...process.env, CLAUDE_CODE_SUBAGENT_MODEL: SUBAGENT_MODEL } });
     // persist the RAW stream — without this, diagnosing a dead session means
     // spelunking ~/.claude transcripts (learned in the first Phase 5 dry run)
     mkdirSync(LOGS, { recursive: true });
@@ -349,8 +382,21 @@ async function resumeOrFresh(attempt, prompt, maxTurns, model) {
   }
   return resumed;
 }
+// A Fable spawn that dies FAST with no result is the model-out signature, not a
+// merit failure — hand it back so the caller can fall through to Opus 5 instead
+// of sleeping for hours (Fable-only limit) or eating strikes toward a park.
+function looksFableOut(attempt, model, elapsedMs) {
+  if (model !== MODEL_IDS.fable) return false;
+  const blob = (attempt.resultText || '') + ' ' + (attempt.limitText || '');
+  if (AUTH_RE.test(blob)) return false;              // auth halts loudly on its own path
+  if (FABLE_UNAVAILABLE_RE.test(blob)) return true;
+  // 3-minute code=1 wall with a limit smell and nothing accomplished
+  return elapsedMs < 5 * 60 * 1000 && !attempt.sawResult && classifyLimit(attempt) === 'limit';
+}
 async function runWithLimitResilience({ prompt, maxTurns, model }) {
+  const t0 = Date.now();
   let attempt = await runClaude({ prompt, maxTurns, model });
+  if (looksFableOut(attempt, model, Date.now() - t0)) { attempt.fableOut = true; return attempt; }
   if (classifyLimit(attempt) === 'spend') { attempt.spendLimit = true; return attempt; }
   if (attempt.maxTurnsHit && attempt.sessionId) {
     log({ event: 'turns-topup', msg: 'resuming ' + attempt.sessionId + ' with +' + maxTurns + ' turns' });
@@ -431,8 +477,21 @@ async function iterationOnce() {
   // 3-4. spawn + limit resilience
   const spawnTime = Date.now();
   log({ event: 'spawn', msg: (planner ? 'planner' : task.name) + ' maxTurns=' + maxTurns + ' model=' + model });
-  const res = await runWithLimitResilience({ prompt, maxTurns, model });
+  let res = await runWithLimitResilience({ prompt, maxTurns, model });
   log({ event: 'session-done', msg: 'code=' + res.code + ' session=' + (res.sessionId || '?') });
+
+  // Fable ran dry: arm the sentinel, re-run this same task on Opus 5, no strike.
+  // Every later Fable pick routes to Opus 5 until the sentinel expires (12h).
+  if (res.fableOut) {
+    armFableOut();
+    log({ event: 'fable-out', msg: taskId + ' — Fable unavailable; falling back to Opus 5 (no strike)' });
+    await notify('Ope! autopilot: Fable is out — switching to Opus 5',
+      'Fable refused the spawn for ' + taskId + ' (credits/limit). No fail strike: the task is re-running on Opus 5 now, and Fable picks route to Opus 5 for 12h before an automatic retry. Delete autopilot/FABLE-OUT to retry sooner.',
+      { priority: 'default' });
+    log({ event: 'spawn', msg: (planner ? 'planner' : task.name) + ' maxTurns=' + maxTurns + ' model=' + MODEL_IDS.opus + ' (fable fallback)' });
+    res = await runWithLimitResilience({ prompt, maxTurns, model: MODEL_IDS.opus });
+    log({ event: 'session-done', msg: 'fallback code=' + res.code + ' session=' + (res.sessionId || '?') });
+  }
 
   // 5. read result.json — must postdate the spawn (ignore stale ones)
   let result = null;
