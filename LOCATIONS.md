@@ -61,35 +61,35 @@ feasibility inside perf + single-file constraints.
   Montrose DUNES hold the canonical plover story; issue 026 (basin water
   foam-blobs) root-caused and fixed at sign-off (e4a4d55).
 
+- **Lincoln Park Zoo and the conservatory** ("lincolnpark") — PLANNER PICK
+  2026-07-19 (§5.3, queue 110–123). Contiguous 1:2 growth SOUTH-WEST through
+  the Diversey-Lincoln Park gate: Diversey Harbor channel + Theater on the
+  Lake (112/113), the free zoo — open gates, the Seal Pool, the Kovler Lion
+  House, the habitat cast, Farm-in-the-Zoo (114/115) — South Pond's Nature
+  Boardwalk + honeycomb pavilion + Café Brauer (117), delight 118, polish
+  119, owner-issue burn-down 120 (issues 032–036), trail micro-discovery
+  121, the conservatory + Bates fountain + formal garden 122 (unblocking
+  issue 031). **SIGNED OFF 2026-07-26** (task 123,
+  refs/lincoln-park/SIGNOFF.md; walkthrough run `ms2deh6h`, 16 waypoints ×
+  51 framings all MET, max 370/480 draws; evocation blind-named "the
+  Lincoln Park lakefront… South Pond / Lincoln Park Zoo campus… Café
+  Brauer, the Fullerton Avenue underpass, Theater on the Lake, Diversey
+  Harbor, up to the Lincoln Park Conservatory" with confidence
+  "Unmistakable"; 11+ delight moments logged; uncut Rocks→boardwalk
+  continuity walk, 0 stalls). Standing liberties worth knowing (full list
+  in SIGNOFF.md): the **WEST-REACH COMPRESSION** (the park interior west of
+  LSD compressed 2× west / 2⁄3 south, topological order preserved — the
+  glasshouse is visible from the trail as a side effect); the **L-BACKDROP
+  RELOCATION** (Brown Line viaduct + Lakeview band moved onto the solid
+  WEST_GRADE city panel — the map's first land west of the Drive, with the
+  Fullerton underpass its first working crossing); the **SKYLINE PHYSICS
+  RULING at South Pond** (far plane + fog + the z-gate recede/haze mean the
+  pond's money view is the pavilion arch + Café Brauer, never the postcard
+  downtown skyline).
+
 ## In progress
 
-- **Lincoln Park Zoo and the conservatory** ("lincolnpark") — PLANNER PICK
-  2026-07-19 (§5.3, queue 110–120). Contiguous 1:2 growth SOUTH-WEST
-  through the staged Diversey-Lincoln Park gate (GEOGRAPHY.md's SW
-  terminus, trail end ~(30,406)): Diversey Harbor channel + Theater on
-  the Lake as connective tissue (112/113), then the free zoo — open
-  gates, the Seal Pool, the Kovler Lion House, the habitat cast,
-  Farm-in-the-Zoo (114/115) — the conservatory + Bates fountain + formal
-  garden (116), and South Pond's Nature Boardwalk + honeycomb pavilion +
-  Café Brauer (117); delight 118, polish 119, sign-off 120. Rationale
-  vs criteria: recognizability (iconic to every Chicago kid, four
-  distinct silhouettes), connectivity (adjacent growth, no hard cell —
-  and it serves the owner's vision line "Lincoln Park + conservatory +
-  ponds" directly), variety (the map's FIRST ANIMALS; a glasshouse and a
-  channel harbor are new registers; North Ave Beach deferred — a third
-  beach scores lowest on variety), feasibility (staged narrow like
-  Montrose 067–076). Structural firsts for the layout task to rule with
-  the 084/east-reach precedents: land WEST of LSD (the L backdrop +
-  Lakeview band relocate) and the map's first WORKING underpass at
-  Fullerton.
-  - **SIGN-OFF BLOCKED 2026-07-24** (task 120 attempt, issue 031): the
-    stretch is one signature landmark short — the **conservatory** (planned
-    116) is parked-unbuilt (`LP_CONSERVATORY` data orphaned, consumed by no
-    builder). It is named in the owner's vision line and task 120's evocation
-    note, so it is required, not deferrable. Everything else verified green
-    (walkprobe 1554/0, single-file build, 118+ delight, no LP issues/feedback).
-    Filed task **122** (build conservatory, staged 116 head-start) and
-    renumbered the sign-off **120 → 123** to run after it. NOT shipped yet.
+(none — Lincoln Park signed off 2026-07-26; the §5.3 planner may run.)
 
 ## Candidates (famous Chicago spots, seeded per §5.3)
 - North Avenue Beach — adjacent south; the chess pavilion + boat-shaped

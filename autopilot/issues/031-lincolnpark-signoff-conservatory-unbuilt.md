@@ -73,3 +73,13 @@ the gate exists to catch.
 
 Owner override: delete task 122 / reorder the queue to redirect; the autopilot
 branch protects main regardless.
+
+---
+**RESOLVED (task 123, 2026-07-26).** Task 122 built the conservatory end to
+end (commit `053aa92`: ogee glasshouse + pyramid vestibule + Bates "Storks at
+Play" + formal garden + Grandmother's, wired via structures.js
+buildConservatory + src/packs/lp-conservatory.js), and the 123 sign-off retry
+ran the §5.2 walkthrough of record as ONE fresh full run INCLUDING
+lp-conservatory + lp-bates (run `ms2deh6h`, 16 waypoints / 51 framings, all
+MET). Evocation blind-named the conservatory unprompted with confidence
+"unmistakable". Lincoln Park is SIGNED OFF — refs/lincoln-park/SIGNOFF.md.
