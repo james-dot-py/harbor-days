@@ -1082,6 +1082,46 @@ few turns to find; keep each to one line of symptom + fix.
   draws (125: a whole gate + paver pad + walk ribbon = +1 total, the lettering
   band, whose CanvasTexture material is unique). "One new mesh = one new draw"
   is FALSE on the lakefront — measure with an A/B census, don't assume.
+- **TWO EASERS ON ONE NUMBER NEVER CONVERGE — the look-through camera law
+  (126, issue 039).** "Packs override the chase cam in registerUpdate, which
+  runs after main.js positioned it, so the pack wins the frame" is TRUE for
+  position/quaternion (a `copy()` beats a `set()`) and FALSE for anything both
+  sides *ease*. main.js pulls `camera.fov` toward `baseFov()` at rate 5 every
+  frame; the heron scope pulled it toward 26 at rate 9 every frame. Neither
+  wins: it settles at a dt-dependent midpoint (~34 at 60 fps, 43 headless —
+  measured) that shifts with every frame-time hitch. The owner's word for that
+  was "it just vibrates". All three look-through beats shipped with it (heron
+  scope, Jarvis binoculars, conservatory doors).
+  The fix is OWNERSHIP, not tuning: `takeCamera(id)` / `releaseCamera(id)` in
+  framework.js make main.js skip its ENTIRE camera block — transform *and* fov —
+  while a session holds it, and `__hd.camDbg()` + `tools/tmp-126-camstab.mjs`
+  assert per-frame stillness (fov delta, position delta, angular px/frame) so a
+  re-regression is mechanical, not a playtest note. main.js keeps lerping camPos
+  toward camTarget while held, so the release hands back a converged chase view.
+  Corollaries, each of which cost a shot to find:
+  * **A screenshot pair will not show you this.** Two stills 200 ms apart look
+    identical; the jitter is per-frame. Sample the RENDERED camera every rAF and
+    diff consecutive frames — measure before you theorise.
+  * **Who else writes it?** lp-conservatory ran `else mayor.visible = true`
+    unconditionally every frame and un-hid the heron scope's mayor from 276 m
+    away. Global singletons (mayor, camera, fov) need an owner, not a polite
+    convention: `setMayorHidden(id,…)` only obeys the camera owner and
+    `releaseCamera` always restores.
+  * **You cannot see the optic you are looking THROUGH.** The scope eye sat
+    0.16 m above and 0.45 m behind its own objective, so the tripod ate the
+    bottom third of the eyepiece. Hide the instrument's group for the session
+    ('zooanim' is fogcull-exempt, so the toggle is yours alone).
+  * **A mounted optic must not care where you stand.** Approaching from the
+    subject's side parked the player's own back across the lens. Judge the beat
+    from EVERY approach — the 126 waypoint ships three stands that must render
+    the same eyepiece.
+  * **vh-only vignettes are not circles on a phone.** 27vh = 228 px against a
+    390 px-wide portrait viewport, so the "eyepiece" read as a letterbox. Size
+    optic masks off the short side: `min(27vh,34vw)`.
+  * **Scale the zoom off baseFov(), not a literal** (the 096 law applies to the
+    zoom target too, not just the return): `26 * baseFov() / 50`.
+  * `?scope=1` / `?peek=1` fire-and-HOLD params make a look-through beat a plain
+    deterministic waypoint shot instead of a scripted act.mjs run.
 - baseline.png diffs are dominated by DOM overlays, not layout: 125's spawn read
   2.3% and none of it was the world — 19.6k of 21.4k diff px were the bottom
   #hint key bar (absent from the committed baseline), the rest animation. Mask

@@ -18,7 +18,7 @@ import { initSettings } from './settings.js';
 import { initAvatarSelect, updateAvatarSelect } from './avatarselect.js';
 import { mmInit, mmDraw, initMinimapToggle } from './minimap.js';
 import * as CH from './data/chicago.js';
-import { worldReady, runUpdates, state, setIdleGroundProbe } from './framework.js';
+import { worldReady, runUpdates, state, setIdleGroundProbe, cameraOwner } from './framework.js';
 import { beginCellCapture, endCellCapture, mergeCellStatic, getCell, cellWalk, cellSurf, cellClamp, cellKind, allCells } from './cells.js';
 import './packs/index.js';   // content packs (side-effect); loaded before world build
 
@@ -257,6 +257,13 @@ const camPos=new THREE.Vector3(CH.SPAWN.camera.x,CH.SPAWN.camera.y,CH.SPAWN.came
 const camTarget=new THREE.Vector3();
 export const camCtl={snap:false};   // packs set snap=true after a teleport (cells.js rides)
 window.__hd.camCtl=camCtl;   // debug/tools only: tools set snap=true after a __hd.player teleport so the chase cam doesn't swoosh
+// debug/tools only (126): the RENDERED camera transform + who owns it. Sampled
+// per rAF, consecutive-frame deltas are the look-through stability assertion —
+// a camera fight (two writers per frame) shows up as jitter no screenshot pair
+// reliably catches. See tools/tmp-126-camstab.mjs.
+window.__hd.camDbg=()=>({own:cameraOwner(),fov:camera.fov,
+  x:camera.position.x,y:camera.position.y,z:camera.position.z,
+  qx:camera.quaternion.x,qy:camera.quaternion.y,qz:camera.quaternion.z,qw:camera.quaternion.w});
 let assistAmt=0,introT=0;   // introT 1→0: start-of-game camera swoop (skipped in ?play=1)
 let stepT=0,sparkT=0;
 let last=performance.now();
@@ -499,12 +506,22 @@ function frame(now){
        camTarget.y=Math.min(camTarget.y,-0.2);}}   // just below grade: the height the proven f0/f2 framings use — under the soffit AND under the grade-level lawn/berm edges that fill the frame at +0.2
   if(camCtl.snap){camPos.copy(camTarget);camCtl.snap=false;}
   camPos.lerp(camTarget,1-Math.exp(-8*dt));
+  // 126 (issue 039): a look-through session (scope / binocular / glasshouse
+  // doors) TAKES the camera — while it is held, main.js writes neither the
+  // transform nor the fov. camPos keeps tracking camTarget above, so the
+  // release hands back an already-converged chase view (no swoosh, no lurch).
+  // Skipping the fov line is the whole point: two easers pulling the same
+  // number at different rates never converge, they settle at a dt-dependent
+  // midpoint and wobble with every frame-time hitch.
+  const camHeld=cameraOwner()!==null;
+  if(!camHeld){
   const shA=game.calm?0:fw.shake*0.5;   // reduced-motion disables the firework camera sway (task 085)
   const shx=(Math.random()-0.5)*shA,shy=(Math.random()-0.5)*shA,shz=(Math.random()-0.5)*shA;
   camera.position.set(camPos.x+shx,camPos.y+shy,camPos.z+shz);
   camera.lookAt(pvx,pvy+0.1+Math.tan(upT)*horiz*1.35,pvz);
   const fovT=baseFov()+(rideSpd>0?clamp((sp-7)*0.7,0,6):(runF&&sp>6?4:0))+(jphys.air?1.2:0);   // gentle speed/air FOV kick (+ a matching bike tier: eases from ~+2.5 cruising to +6 sprinting); base is aspect-aware (096, exactly 50 on desktop)
   if(Math.abs(camera.fov-fovT)>0.02){camera.fov=lerp(camera.fov,fovT,1-Math.exp(-5*dt));camera.updateProjectionMatrix()}
+  }
   skyGroup.position.set(camera.position.x,0,camera.position.z);
   if(skyGroup.userData.skylineGate)skyGroup.userData.skylineGate(player.z);   // 112: fade/hide the downtown billboard once the player crosses into Lincoln Park
   fw.shake=Math.max(0,fw.shake-dt*1.6);

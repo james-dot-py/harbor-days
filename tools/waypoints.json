@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-27T02:06:29.265Z",
- "count": 172,
+ "generated": "2026-07-27T02:51:54.127Z",
+ "count": 173,
  "waypoints": [
   {
    "id": "spawn",
@@ -1452,6 +1452,36 @@
     }
    ],
    "expectation": "THE NATURE BOARDWALK (task 117): a low wood boardwalk on pilings with a dark cable rail on the water side runs across a naturalized pond thick with green prairie grass, cattails and lily pads; an open laminated-timber HONEYCOMB PAVILION — a curved wooden lattice tunnel-arch of stylized hexagonal cells — curves over the water at the bend (you can walk under it); chunky black-crowned NIGHT HERONS work the green shallows (a couple perched, one hunched at the bank) and turtles bask on a half-log, dragonflies over the water. Reads as a living restored wetland — the deck + rail lead the eye to the pavilion arch, the herons READ chibi-chunky — NOT an empty pond. (No downtown skyline — the physics ruling.)"
+  },
+  {
+   "id": "lp-heron-scope",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -20.5,
+   "z": 983.2,
+   "framings": [
+    {
+     "yaw": 2.78,
+     "pitch": 0.06,
+     "dist": 8
+    },
+    {
+     "x": -19.3,
+     "z": 979.2,
+     "yaw": 2.53,
+     "pitch": 0.06,
+     "dist": 8
+    },
+    {
+     "x": -22.6,
+     "z": 980.6,
+     "yaw": 2.1,
+     "pitch": 0.06,
+     "dist": 8
+    }
+   ],
+   "expectation": "THROUGH THE SPOTTING SCOPE (task 126, issue 039 — the owner: \"scope on the path on the pond in lincoln park doesn't seem to work right, just vibrates when you look in it\"). q scope=1 fires and holds the look-through, so all three framings show the fired state. A dark round EYEPIECE vignette with a fine white crosshair-and-ring reticle masks the frame, and inside the bright circle the hunched BLACK-CROWNED NIGHT-HERON reads LARGE and unmistakable at the reticle — black crown, white cheek and head plume, pale chunky body over the shallows, the NIGHT HERONS interpretive sign behind it on the bank. The view is ZOOMED (a real magnification, not the walking-around camera with a dark ring drawn over it) and STILL. NOT acceptable: the mayor's back or head anywhere in the eyepiece, the scope's own tripod or tube eating the bottom of the circle, or a frame that is merely the chase view. The three stands are three different approaches to the same mounted scope and MUST render the same eyepiece — a mounted optic does not care where you stand.",
+   "q": "scope=1"
   },
   {
    "id": "lp-diversey-harbor",

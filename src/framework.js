@@ -122,6 +122,62 @@ export function worldReady(player){
   _readyQ.length=0;
 }
 
+// ------------------- camera ownership (task 126, issue 039) ------------
+// THE LAW: while a look-through beat is live, exactly ONE writer owns the
+// camera transform AND the fov.
+//
+// The old convention was "packs override the chase cam in registerUpdate,
+// which runs after main.js positioned it, so the pack wins the frame". That
+// holds for position/quaternion (a copy() beats a set()) but it is FALSE for
+// the fov, which both sides *ease*: main.js pulls toward baseFov() at rate 5,
+// the pack pulls toward its zoom at rate 9, every frame, forever. The two
+// pulls settle at a dt-dependent midpoint — the heron scope asked for 26° and
+// rendered ~34° at 60 fps, ~43° headless, wobbling with every frame-time
+// hitch. That is issue 039's "just vibrates".
+//
+// takeCamera(id) makes main.js skip its whole camera block (position, lookAt
+// AND fov) while the id is held; it keeps tracking camPos toward camTarget, so
+// releaseCamera(id) hands back a converged chase view with no swoosh. Look
+// input is frozen at entry and restored on release: a MOUNTED optic does not
+// turn, and the player comes back to the view they left (no residual yaw).
+let _camOwner=null,_camLook=null;
+// takeCamera(id,{lockLook}) : claim the camera for a session. id is any truthy
+// token (a string is plenty). Re-taking with the same id is a no-op, so it is
+// safe to call every frame. lockLook (default true) freezes cam.yaw/pitch.
+export function takeCamera(id,opt){
+  if(_camOwner===id)return;
+  _camOwner=id;
+  const lock=!opt||opt.lockLook!==false;
+  _camLook=lock?{yaw:cam.yaw,pitch:cam.pitch,dist:cam.dist}:null;
+}
+// releaseCamera(id) : hand the camera back to main.js's chase cam. Ignored if
+// someone else owns it (a session that already timed out can't steal a release).
+export function releaseCamera(id){
+  if(_camOwner!==id)return;
+  _camOwner=null;
+  if(_camLook){cam.yaw=_camLook.yaw;cam.pitch=_camLook.pitch;cam.dist=_camLook.dist;_camLook=null;}
+  if(!mayor.visible)mayor.visible=true;   // the owner never leaves the mayor hidden
+}
+// setMayorHidden(id,hide) : the camera owner may drop the mayor out of its own
+// shot (you are AT the eyepiece / behind the glass, not in the picture). ONLY
+// the owner may — 126 found lp-conservatory asserting mayor.visible=true every
+// frame from 276 m away, silently un-hiding the heron scope's. releaseCamera()
+// always restores, so no session can strand an invisible mayor.
+export function setMayorHidden(id,hide){
+  if(_camOwner!==id)return;
+  if(mayor.visible===!hide)return;
+  mayor.visible=!hide;
+}
+// cameraOwner() : the live owner id (null = main.js's chase cam). main.js reads
+// this; tools read it through __hd.camDbg().
+export function cameraOwner(){ return _camOwner; }
+// While a session owns the camera it also owns the look stick: hold cam.yaw/
+// pitch steady so a stray drag doesn't spin the world you return to.
+export function holdCameraLook(){
+  if(!_camOwner||!_camLook)return;
+  cam.yaw=_camLook.yaw;cam.pitch=_camLook.pitch;cam.dist=_camLook.dist;
+}
+
 // ------------------------------- DOM refs ------------------------------
 let elPrompt,elPromptK,elPromptL,elMeter,elFill,elToast,elToastMain,elToastSub,
     elJournal,elJournalBody,elBtnAct,_fxflash;
@@ -1004,6 +1060,7 @@ function updateAffordance(dt,t,player){
 let _lpx=null,_lpz=null,_prevCool=0,_fcArmed=false,_zoneAcc=0,_npcCullAcc=0,_prevB=false;
 export function runUpdates(dt,t,player){
   if(dt<0)dt=0;                          // frame-0 rAF can hand us a negative dt
+  holdCameraLook();                      // 126: a look-through session owns the look stick too (before pack updates read cam.yaw)
   runCellAdoption();                     // 120 (issue 036): one-shot — hand every pack rig spawned inside a hard cell's clamp to that cell's root (every cell is registered by now — the 051 law)
   econUpdate(dt);                        // one-shot __hd/worn restore + slow save snapshot
   // --- distance walked ---

@@ -23,7 +23,8 @@
 import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { onWorldReady, registerUpdate, addInteraction, chargeThrow, camForward,
-         holdItem, toast, journalSection, state, makeNPC, getAudioCtx, screenFx, wallet } from '../framework.js';
+         holdItem, toast, journalSection, state, makeNPC, getAudioCtx, screenFx, wallet,
+         takeCamera, releaseCamera } from '../framework.js';
 import { scene, camera, toon, bmat, curveMat, gmap, clamp, lerp, WATER_Y, baseFov } from '../core.js';
 import { beachH } from '../coast.js';
 import { cam, keys, joy } from '../input.js';
@@ -745,14 +746,21 @@ onWorldReady(player => {
   // ------------------------ binocular machine ------------------------- //
   const binoc = { active: false, ePrev: false, wobT: 0, idTgt: null, idHold: 0 };
   const binocInters = [];
+  // 126 (issue 039's twin): the binoculars are the OTHER look-through beat that
+  // eased the fov while main.js eased it back — take the camera so ours is the
+  // only writer. lockLook:false: Z/C orbit IS the aim here (unlike the mounted
+  // heron scope, which cannot be turned).
+  const BINOC_CAM = 'nature-binoc';
   function enterBinoc() {
     if (binoc.active) return;
     binoc.active = true; binoc.ePrev = true; binoc.idTgt = null; binoc.idHold = 0;
     wrap.style.display = 'block';
+    takeCamera(BINOC_CAM, { lockLook: false });
     for (const it of binocInters) it.enabled = false;
   }
   function exitBinoc() {
     binoc.active = false; wrap.style.display = 'none'; binoc.idTgt = null; binoc.idHold = 0;
+    releaseCamera(BINOC_CAM);
     for (const it of binocInters) it.enabled = true;
   }
   function identify(tgt) {
@@ -771,18 +779,19 @@ onWorldReady(player => {
       wallet.pay({ key: 'bingo.full', first: 10, repeat: 0, reason: 'birdwatch: BINGO', label: 'birdwatch' }); }
   }
   function updBinoc(dt, t, pl) {
-    // fov ease (24 while raised, back to the chase base otherwise — baseFov()
-    // is 50 on desktop, higher on portrait phones (096); a literal 50 here
-    // would fight main.js's fov lerp forever after exit on a portrait screen)
-    const B = baseFov();
-    const tgtFov = binoc.active ? 24 : B;
-    if (binoc.active || Math.abs(camera.fov - B) > 0.05) {
-      camera.fov = lerp(camera.fov, tgtFov, 1 - Math.exp(-9 * dt));
-      if (!binoc.active && Math.abs(camera.fov - B) < 0.05) camera.fov = B;
+    const eNow = keys.has('e'), ePress = eNow && !binoc.ePrev; binoc.ePrev = eNow;
+    if (!binoc.active) return;   // 126: lowered -> main.js owns the fov and eases it home. Easing toward
+                                 // baseFov() here too was the second writer (issue 039's class).
+    // fov ease to the 24° zoom while raised — ours alone while takeCamera()
+    // holds, so it actually REACHES it instead of settling at a dt-dependent
+    // midpoint. Scaled off baseFov() (096): 24 on desktop, proportionally
+    // wider on a portrait phone, where the base is wider to begin with.
+    const Z = 24 * baseFov() / 50;
+    if (Math.abs(camera.fov - Z) > 0.01) {
+      camera.fov = lerp(camera.fov, Z, 1 - Math.exp(-9 * dt));
+      if (Math.abs(camera.fov - Z) < 0.01) camera.fov = Z;
       camera.updateProjectionMatrix();
     }
-    const eNow = keys.has('e'), ePress = eNow && !binoc.ePrev; binoc.ePrev = eNow;
-    if (!binoc.active) return;
     if (moving() || ePress) { exitBinoc(); return; }
     // override the chase cam with a first-person look so the mayor doesn't
     // block the reticle; Z/C orbit still aims (they don't count as movement).

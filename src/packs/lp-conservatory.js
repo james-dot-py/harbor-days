@@ -59,11 +59,11 @@
 // =====================================================================
 import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { onWorldReady, registerUpdate, addInteraction, definePlace, toast, getAudioCtx, prefersCalm, state } from '../framework.js';
+import { onWorldReady, registerUpdate, addInteraction, definePlace, toast, getAudioCtx, prefersCalm, state,
+         takeCamera, releaseCamera, setMayorHidden } from '../framework.js';
 import { DUST } from '../fx.js';
 import { scene, camera, toon, bmat, lerp, clamp, baseFov } from '../core.js';
 import { cam, keys, joy } from '../input.js';
-import { mayor } from '../character.js';
 import * as CH from '../data/chicago.js';
 
 // ---- the two anchors this pack lives off (literals derived from data) ----
@@ -248,6 +248,7 @@ onWorldReady(() => {
 
   // ---- (4) THE BEAT — lean in and look (no walkable interior, no opening) --
   const sess = { active: false, t: 0, u: 0, wob: 0, held: false };
+  const DOOR_CAM = 'lp-conservatory-doors';   // 126: camera-ownership token
   const PEEK_HOLD = (() => { try { return /[?&]peek=1/.test(location.search); } catch (e) { return false; } })();
   const _eye = new THREE.Vector3(), _aim = new THREE.Vector3();
   // The eye is FIXED on the garden axis ~4 m out from the door plane, not
@@ -307,15 +308,21 @@ onWorldReady(() => {
       warmMat.color.setRGB(0.88 + 0.12 * sess.u, 0.84 + 0.12 * sess.u, 0.62 + 0.22 * sess.u);
     }
     state.idleBusy = sess.active;                       // 087: no idle charm while the doors own the camera
-    { const hide = sess.u > 0.5;                        // the mayor is not drawn while you look through the glass
-      if (mayor.visible === hide) mayor.visible = !hide; }
-    { const B = baseFov(), tgt = sess.active ? 34 : B;   // 096: never a literal 50
-      if (sess.active || Math.abs(camera.fov - B) > 0.05) {
-        camera.fov = lerp(camera.fov, tgt, 1 - Math.exp(-9 * dt));
-        if (!sess.active && Math.abs(camera.fov - B) < 0.05) camera.fov = B;
-        camera.updateProjectionMatrix();
-      } }
+    // 126 (issue 039's class): while sess.u > 0 this pack is the ONE camera
+    // writer — takeCamera() stops main.js touching the transform and the fov.
+    // The fov rides the SAME u as the eye/aim blend instead of racing main.js's
+    // ease (two easers on one number never converge; they settle at a
+    // dt-dependent midpoint and wobble), so at u=0 it is exactly baseFov() and
+    // the handover back to the chase cam is seamless.
+    if (sess.u > 0.001) takeCamera(DOOR_CAM); else releaseCamera(DOOR_CAM);
+    // the mayor is not drawn while you look through the glass. 126: this goes
+    // through the camera owner now — the unconditional `else mayor.visible=true`
+    // this used to run every frame reached across the whole map and un-hid the
+    // heron scope's mayor 276 m away.
+    setMayorHidden(DOOR_CAM, sess.u > 0.5);
     if (sess.u > 0.001) {                               // override the chase cam (packs own it here)
+      { const B = baseFov(), f = lerp(B, 34 * B / 50, sess.u);   // 096: never a literal 50 — the zoom scales with the base too
+        if (Math.abs(camera.fov - f) > 0.001) { camera.fov = f; camera.updateProjectionMatrix(); } }
       sess.wob += dt;
       const u = sess.u;
       const cx = pl.x - Math.sin(cam.yaw) * cam.dist, cz = pl.z - Math.cos(cam.yaw) * cam.dist;

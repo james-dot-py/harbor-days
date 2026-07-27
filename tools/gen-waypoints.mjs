@@ -543,6 +543,17 @@ add('lp-boardwalk', 'lincolnpark', 'lakefront', -25, 974, [
   { x: -33, z: 964, yaw: 2.68, pitch: 0.06, dist: 7 },    // NE through the arch from the west deck — the walk-under-the-tunnel read
   { x: -15, z: 946, yaw: 3.10, pitch: 0.06, dist: 9 },    // N up the east deck: rail + reeds + a heron + Café Brauer far
 ]);
+// 126 (owner playtest 2026-07-26, issue 039 — "the scope just vibrates when you
+// look in it"). THROUGH the 118 spotting scope. q scope=1 fires and HOLDS the
+// look-through (the 125 peek=1 recipe), so this is a plain deterministic shot.
+// The session eye is FIXED at the tripod and aimed at the hunched heron, so the
+// three stands must all render the SAME view — that is the assertion: where you
+// stand no longer changes (or blocks) what the eyepiece shows.
+add('lp-heron-scope', 'lincolnpark', 'lakefront', -20.5, 983.2, [
+  { yaw: 2.78, pitch: 0.06, dist: 8 },                    // f0 — pressed from the deck SOUTH of the tripod
+  { x: -19.3, z: 979.2, yaw: 2.53, pitch: 0.06, dist: 8 },// f1 — pressed from BETWEEN the scope and the bird: the approach that used to park the mayor's back across the lens
+  { x: -22.6, z: 980.6, yaw: 2.10, pitch: 0.06, dist: 8 },// f2 — pressed from the west deck: same eyepiece, third approach
+], { q: 'scope=1' });
 
 // 113 — Diversey Harbor + Theater on the Lake. The harbor's money shot is the
 // DOWN-THE-CHANNEL axis (docks + slips + the quay row + both banks + the

@@ -18,7 +18,8 @@
 import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { onWorldReady, registerUpdate, addInteraction, toast,
-         journalSection, getAudioCtx, wallet, state } from '../framework.js';
+         journalSection, getAudioCtx, wallet, state,
+         takeCamera, releaseCamera, setMayorHidden } from '../framework.js';
 import { scene, camera, toon, lerp, clamp, baseFov } from '../core.js';
 import { cam, keys, joy } from '../input.js';
 import * as CH from '../data/chicago.js';
@@ -67,7 +68,12 @@ onWorldReady(() => {
   Object.assign(wrap.style, { position: 'fixed', inset: '0', zIndex: '21', pointerEvents: 'none', display: 'none' });
   const vig = document.createElement('div');
   Object.assign(vig.style, { position: 'absolute', inset: '0', background: 'rgba(8,12,10,0.94)' });
-  const mask = 'radial-gradient(circle at 50% 50%, transparent 0, transparent 27vh, #000 41vh)';
+  // 126: the eyepiece hole is sized off the SHORT side. Pure vh made the circle
+  // wider than a portrait phone (27vh = 228 px against a 390 px width), so on
+  // mobile the "scope" read as a letterbox, not an eyepiece. min() keeps the
+  // desktop numbers exactly as shipped (27vh/41vh at 1280x720) and turns it
+  // back into a circle on a phone.
+  const mask = 'radial-gradient(circle at 50% 50%, transparent 0, transparent min(27vh,34vw), #000 min(41vh,52vw))';
   vig.style.webkitMaskImage = mask; vig.style.maskImage = mask;
   wrap.appendChild(vig);
   const ret = document.createElement('div');
@@ -94,13 +100,21 @@ onWorldReady(() => {
 
   // ---- the scope session -------------------------------------------------
   state.heronScoped = state.heronScoped || 0;
-  const sess = { active: false, ePrev: false, t: 0, wob: 0 };
+  const CAM_ID = 'lp-heron-scope';
+  const sess = { active: false, ePrev: false, t: 0, wob: 0, held: false };
+  // 126: ?scope=1 fires the look-through and HOLDS it, so the judged waypoint
+  // is a plain deterministic shot instead of a scripted act.mjs run (the 125
+  // ?peek=1 precedent). Never set in play.
+  const SCOPE_HOLD = (() => { try { return /[?&]scope=1/.test(location.search); } catch (e) { return false; } })();
   const _eye = new THREE.Vector3(), _aim = new THREE.Vector3();
 
   function enter() {
     if (sess.active) return;
     sess.active = true; sess.ePrev = true; sess.t = 0; sess.wob = 0;
     wrap.style.display = 'block';
+    takeCamera(CAM_ID);            // 126: ONE writer — main.js stops touching transform AND fov
+    setMayorHidden(CAM_ID, true);  // you are AT the eyepiece; approaching from the heron side used to park your own back right across the lens
+    grp.visible = false;           // and you do not see the tube you are looking THROUGH: the eye sits 0.16 m above / 0.45 m behind the objective, so the tripod ate the bottom third of the eyepiece ('zooanim' is fogcull-exempt, so this toggle is ours alone)
     inter.enabled = false;
     state.heronScoped++;
     quawk(0.06);
@@ -111,6 +125,8 @@ onWorldReady(() => {
   }
   function exit() {
     sess.active = false; wrap.style.display = 'none'; inter.enabled = true;
+    grp.visible = true;
+    releaseCamera(CAM_ID);         // main.js resumes from the converged camPos and eases the fov back — one writer either side of the handover (and restores the mayor)
   }
 
   const inter = addInteraction({ x: SCOPE.x, z: SCOPE.z, r: 2.4, label: 'look through the scope', onUse: enter });
@@ -119,19 +135,26 @@ onWorldReady(() => {
     <div class="jrow"><span>Scoped the rookery</span><b>${state.heronScoped}×</b></div>
     <div class="jrow"><span>Black-crowned night-heron</span><b>came home to nest</b></div>`);
 
+  let holdOnce = false;
   registerUpdate((dt, t, pl) => {
+    if (SCOPE_HOLD && !holdOnce) { holdOnce = true; sess.held = true; enter(); }   // shot determinism: fire and HOLD
     state.idleBusy = sess.active;                                     // 087: no idle charm while the scope owns the camera
-    // fov ease: 26 while scoped, back to baseFov otherwise (096: never a literal 50)
-    const B = baseFov(), tgt = sess.active ? 26 : B;
-    if (sess.active || Math.abs(camera.fov - B) > 0.05) {
-      camera.fov = lerp(camera.fov, tgt, 1 - Math.exp(-9 * dt));
-      if (!sess.active && Math.abs(camera.fov - B) < 0.05) camera.fov = B;
+    if (!sess.active) return;                                         // 126: released -> main.js owns the fov again and eases it home. We do NOT
+                                                                      // keep easing toward baseFov here: that was the second writer.
+    // fov ease to the 26° eyepiece zoom. Ours alone now — main.js's fov line
+    // is skipped for as long as takeCamera() holds, so this actually REACHES
+    // it instead of settling at a dt-dependent midpoint (~34 at 60 fps, 43
+    // headless) and wobbling with every frame-time hitch (issue 039). Scaled
+    // off baseFov() (096): 26 on desktop, proportionally wider on portrait.
+    const Z = 26 * baseFov() / 50;
+    if (Math.abs(camera.fov - Z) > 0.01) {
+      camera.fov = lerp(camera.fov, Z, 1 - Math.exp(-9 * dt));
+      if (Math.abs(camera.fov - Z) < 0.01) camera.fov = Z;
       camera.updateProjectionMatrix();
     }
-    if (!sess.active) return;
     sess.t += dt; sess.wob += dt;
     const eNow = keys.has('e'), ePress = eNow && !sess.ePrev; sess.ePrev = eNow;
-    if (ePress || movingNow() || sess.t > 8) { exit(); return; }      // never strand: auto-step-back after 8 s
+    if (!sess.held && (ePress || movingNow() || sess.t > 8)) { exit(); return; }   // never strand: auto-step-back after 8 s
 
     // override the chase cam: a fixed mounted-scope eye trained on the heron,
     // with a subtle hand/tripod sway so it feels alive
