@@ -1,0 +1,18 @@
+[
+  ["goto", -70, 733],
+  ["wait", 1600],
+  ["eval", "(()=>({calls:window.__hd.perf().drawCalls}))()"],
+  ["shot", "tmp125b-h-arrival-733"],
+
+  ["goto", -70, 719],
+  ["wait", 1600],
+  ["eval", "(()=>({calls:window.__hd.perf().drawCalls}))()"],
+  ["shot", "tmp125b-i-garden-far"],
+
+  ["goto", -70, 745],
+  ["wait", 1600],
+  ["eval", "(()=>{const c=window.__hd.input.cam;c.yaw=Math.PI;window.__hd.camCtl.snap=true;return 'cam';})()"],
+  ["wait", 900],
+  ["eval", "(()=>({calls:window.__hd.perf().drawCalls}))()"],
+  ["shot", "tmp125b-j-inside-leaves"]
+]

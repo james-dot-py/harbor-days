@@ -1,0 +1,5 @@
+[
+  ["goto", -70, 742],
+  ["wait", 1600],
+  ["eval", "(()=>{let band=0,pad=0,rib=0,tot=0;window.__hd.scene.traverse(o=>{if(!o.isMesh||o.isInstancedMesh)return;tot++;const g=o.geometry;if(!g.boundingBox)g.computeBoundingBox();const b=g.boundingBox;if(!b)return;const cx=(b.min.x+b.max.x)/2+o.position.x,cy=(b.min.y+b.max.y)/2+o.position.y,cz=(b.min.z+b.max.z)/2+o.position.z;const sx=b.max.x-b.min.x,sz=b.max.z-b.min.z;if(Math.abs(cx+70)<0.6&&Math.abs(cz-740.3)<0.6&&cy>3&&cy<5&&sx>5&&sx<7)band++;if(Math.abs(cx+70)<0.6&&Math.abs(cz-740.5)<0.6&&cy<0.2&&sx>10&&sx<12&&sz>7&&sz<9)pad++;if(b.min.z<735.5&&b.max.z>791&&b.min.x>-73&&b.max.x<-68&&cy<0.2)rib++;});return{gateBand:band,gatePad:pad,northWalkRibbon:rib,totalMeshes:tot,drawCalls:window.__hd.perf().drawCalls};})()"]
+]

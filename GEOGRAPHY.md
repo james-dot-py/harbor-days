@@ -900,6 +900,17 @@ in the distance just fade away."* The gate now **RECEDES then hazes**:
   re-sites to (−54,712) (the new NE shoulder). Glass goes self-lit `bmat` (the
   Bean/Crown green-ground-bounce dodge). Data: `LP_CONSERVATORY` +
   `LP_GARDEN_*`/`LP_BATES_RING` walks.
+  **THE DOORS SHOW AN INSIDE (task 125, issue 038).** 122 shipped a "peek
+  inside" E beat whose whole payload was a toast, so the owner pressed E at the
+  doors and the building did not change — it read as scenery. The standing
+  decision holds — **NO walkable interior, and the doors never open** (the
+  artinstitute.js precedent) — but the doorway is now a LIT WINDOW, not a blank
+  panel: a shallow PALM-HOUSE DIORAMA sits behind the door glass inside the
+  already-carved `vestCarve` footprint (warm back glow, dark palm/fern
+  silhouettes, a koi-pool shimmer), so the inside reads on approach. Pressing E
+  leans a session camera in and frames that doorway (the 118 scope precedent —
+  fov ease off `baseFov()`, never a literal 50), the interior warms up and warm
+  air puffs out over the threshold. It is a LOOK-IN, not a room.
 - **The ZOO** (a fenced-but-**open** campus, z ≈ 738–1006, x −9…−95; **CAMPUS
   ARMATURE BUILT, task 114** — fence runs/gates/pool/Lion House/loop in `ZOO`).
   **FREE ADMISSION — open gates, no ticket booth, no turnstile** (the opposite of
@@ -914,6 +925,27 @@ in the distance just fade away."* The gate now **RECEDES then hazes**:
   the layered granite LINCOLN PARK ZOO plinth (the entrance-identity ref; the
   ref's limestone Academy hall is OUTSIDE the zoo — not built, backdrop scope);
   the **south gate** (plain piers) opens toward the Farm + pond ground (115/117).
+  **FOURTH GATE — the NORTH/CONSERVATORY GATE (task 125, owner playtest
+  2026-07-26: "add an entrance to the zoo from the conservatory side").** Real:
+  the zoo's north entrance sits at Fullerton/Stockton right beside the
+  Conservatory, and both are free — a walker leaving the formal garden should
+  step straight into the campus, not hike the spine round to Cannon. Sited **on
+  the garden axis, x −70** (the axis the vestibule doors, `LP_GARDEN_AXIS_N/S`,
+  the Bates fountain and the garden loop's south point all already share), the
+  gap cut in the NORTH fence run at **x −74…−66, fence z ≈ 740.15…740.46**.
+  Read: the GARDEN GATE — twin brick piers with limestone caps (shorter than the
+  Cannon front door, `pierH` 3.0 vs 3.4, so the east gate stays the hero), an
+  open iron arch lettered LINCOLN PARK ZOO over the register **ALWAYS FREE**,
+  leaves swung back against the piers, brick-paver pad. Welcoming, never
+  controlled. Connection: **`ZOO.northWalk`** — a limestone ribbon from the
+  garden loop's exact **(−70, 735)** control point south through the gate and
+  down the empty north lawn, threading the **6 m gap between the Polar tundra
+  (x ≤ −74.5) and the Penguin cove (x ≥ −68.5)** to land on
+  `ZOO.habitats.walkN`'s exact **(−71, 791.5)** control point — shared exact
+  endpoints at both ends, so both seams mitre and there is no dead end.
+  Walkability: the gap is walkable BY CONSTRUCTION (the fence band is the only
+  blocker and it stops at the jambs); only the two pier pads carve, in
+  `zooBlockedHit` — data, so fence and gap can never disagree.
   **Cannon Dr is BUILT as the zoo's east flank** — a modest asphalt park drive
   x ≈ −3…−9, z 670–1012, emerging from the Fullerton culvert crossing and running
   south beside the fence; its lagoon-bank NORTHERN reach is represented by the

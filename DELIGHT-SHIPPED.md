@@ -772,3 +772,23 @@ cut becomes a revert task.
   swells as you approach across the formal garden's hot parterre beds. —
   Lincoln Park, formal garden axis — src/structures.js +
   src/packs/lp-conservatory.js — task 122
+- PEEK INSIDE, for real — the conservatory doors now SHOW you something. Under
+  the FREE ADMISSION awning the doorway is a lit opening with depth instead of a
+  blank panel: shut glass doors with a palm house behind them — layered fern and
+  palm crowns at three depths, scaly trunks, a dark koi pool with a few glints.
+  Press E and the camera leans in and frames it, the interior warms up, and warm
+  palm air puffs out past the jambs. No door opens and there is no room to walk
+  into — it is a look-in, the honest one. (Fixes owner issue 038, where the 122
+  beat fired a toast and changed nothing on screen.) — Lincoln Park,
+  conservatory vestibule — src/packs/lp-conservatory.js + src/structures.js —
+  task 125
+- The GARDEN GATE — you can finally walk out of the conservatory's formal garden
+  straight into the zoo, the way you actually can in Chicago. Brick piers,
+  limestone caps, an open iron arch lettered LINCOLN PARK ZOO · ALWAYS FREE on
+  BOTH faces, leaves swung back, and a limestone walk running from the garden
+  loop through the gap and down the campus's north lawn between the polar
+  tundra and the penguin cove. Look back north through it and the glasshouse
+  rises beyond the fountain — two free Chicago landmarks in one frame. (Owner
+  playtest 2026-07-26: "add an entrance to the zoo from the conservatory side.")
+  — Lincoln Park, zoo north fence at the garden axis — src/data/chicago.js
+  ZOO.gates.north + ZOO.northWalk, src/structures.js, src/paths.js — task 125

@@ -393,6 +393,15 @@ export function buildPaths(){
   // brick y 0.066 tucks UNDER the limestone spur at both T-junctions,
   // intended). pathSamples2 ONLY (ribbonOn is rng-free) — world scatter frozen.
   ribbonOn(curveOf(CH.ZOO.habitats.walkN),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
+  // 125 THE CONSERVATORY CONNECTION: ONE new limestone ribbon (walkN's exact
+  // style) from the garden loop's (-70,735) control point, south through the new
+  // NORTH/GARDEN GATE and down the north lawn, threading the gap between the
+  // Polar tundra and the Penguin cove onto walkN's (-71,791.5) control point.
+  // Shared exact endpoints at BOTH ends -> ribbonOn mitres both seams, no dead
+  // end. y 0.074 sits ABOVE the garden's 0.066 gravel at the (-70,735) weld (the
+  // gravel tucks under) and BELOW the 0.081 gate pad. pathSamples2 ONLY
+  // (ribbonOn is rng-free; LP is scatter-free ground) — world scatter frozen.
+  ribbonOn(curveOf(CH.ZOO.northWalk),st.walk.width,st.walk.color,st.walk.y,0,pathSamples2);
   ribbonOn(curveOf(CH.ZOO.farmyard.lane),CH.ZOO.loopStyle.width,CH.ZOO.loopStyle.color,CH.ZOO.loopStyle.y,0,pathSamples2);
   // 122 CONSERVATORY GARDEN WALKS: six NEW pale-gravel ribbons — the closed
   // parterre LOOP and the closed Bates basin RING (first==last control point ->

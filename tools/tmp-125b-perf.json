@@ -1,0 +1,16 @@
+[
+  ["goto", -70, 742],
+  ["wait", 1400],
+  ["eval", "(()=>{const c=window.__hd.input.cam;c.pitch=1.0;c.dist=16;window.__hd.camCtl.snap=true;return 'cam';})()"],
+  ["wait", 900],
+  ["eval", "(()=>({at:'overhead-742',calls:window.__hd.perf().drawCalls}))()"],
+  ["eval", "(()=>{let n=0;window.__hd.scene.traverse(o=>{if(o.isMesh&&!o.isInstancedMesh)n++;});let i=0;window.__hd.scene.traverse(o=>{if(o.isInstancedMesh)i++;});return{meshes:n,instanced:i};})()"],
+
+  ["goto", -70, 730],
+  ["wait", 1600],
+  ["eval", "(()=>({at:'arrival-730',calls:window.__hd.perf().drawCalls}))()"],
+
+  ["goto", -70, 770],
+  ["wait", 1600],
+  ["eval", "(()=>({at:'corridor-770',calls:window.__hd.perf().drawCalls}))()"]
+]

@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-27T01:02:10.558Z",
- "count": 168,
+ "generated": "2026-07-27T02:06:29.265Z",
+ "count": 172,
  "waypoints": [
   {
    "id": "spawn",
@@ -1672,6 +1672,116 @@
     }
    ],
    "expectation": "STORKS AT PLAY (Eli Bates fountain, task 122): a low broad ring of grey granite — a sitting-ledge basin — holds a tall near-black thicket of bronze reeds and cattails, two storks with spread wings and small merboys wrestling fish reading as dark silhouettes at its base, a modest plume of water rising over them; hot red and magenta parterre beds flank the lawn axis and the green glasshouse fills the view behind."
+  },
+  {
+   "id": "lp-conservatory-doors",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -70.6,
+   "z": 712.6,
+   "framings": [
+    {
+     "yaw": -3,
+     "pitch": 0.03,
+     "dist": 6.5
+    },
+    {
+     "x": -70.2,
+     "z": 710,
+     "yaw": -2.88,
+     "pitch": 0.01,
+     "dist": 3.4
+    },
+    {
+     "x": -65.5,
+     "z": 711.5,
+     "yaw": -2.45,
+     "pitch": 0.04,
+     "dist": 6
+    }
+   ],
+   "expectation": "THE DOORS SHOW AN INSIDE (task 125, issue 038 — the owner: \"doesn't look like you can peak inside the conservatory when you press E\"). NOTHING IS PRESSED IN THESE THREE SHOTS: this judges whether a player merely WALKING UP can already see that the glasshouse is inhabited. Under the dark-green FREE ADMISSION awning the doorway must read as a LIT OPENING WITH DEPTH — a recessed aperture, not the flat blank cream panel that shipped in 122 — and inside it, layered dark-green palm and fern silhouettes at more than one depth with a scaly trunk or two rising through, warm light washing them from behind, and a dark still koi pool low down with a glint or two on it (the kz05/kz07 interior refs). The doors themselves stay SHUT and read as doors — no opening, no gap you could walk through, no promise of a room. f2 is the off-axis test: from ~11 degrees off the axis the interior must still read as depth, NOT as a flat sticker, a floating black rectangle, or a hole in the wall. The rest of the 122 conservatory read (ogee bells, verdigris ridge, stone base, evergreens, parterre beds) is unchanged."
+  },
+  {
+   "id": "lp-conservatory-peek",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -70.4,
+   "z": 710.2,
+   "framings": [
+    {
+     "yaw": -3.05,
+     "pitch": 0.02,
+     "dist": 5
+    },
+    {
+     "x": -68.5,
+     "z": 711.5,
+     "yaw": -2.9,
+     "pitch": 0.04,
+     "dist": 6
+    }
+   ],
+   "expectation": "PEEK INSIDE — THE BEAT (task 125, issue 038; q peek=1 auto-fires it, so both framings show the fired state). Pressing E at the doors must deliver something you can SEE, not a line of text: the camera leans in and FRAMES THE DOORWAY, the aperture filling much of the frame in a narrowed, zoomed view (the 118 scope/binocular precedent), and inside it the palm house reads clearly — layered fern and palm silhouettes with real depth between them, the interior visibly WARMER and brighter than in the passive lp-conservatory-doors shots, the dark koi pool below. Warm air may drift out over the threshold as soft puffs. A gold toast may caption it, but the toast is NOT the payload — a shot whose only difference from the unpressed state is a toast is a FAIL. The doors must still be shut: this is a look-in, never a door that opens. f1 fires the beat from an off-axis stand and must land the same readable look-in.",
+   "q": "peek=1"
+  },
+  {
+   "id": "lp-zoo-north-gate",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -76,
+   "z": 736,
+   "framings": [
+    {
+     "yaw": 0.8,
+     "pitch": 0.14,
+     "dist": 8
+    },
+    {
+     "x": -70,
+     "z": 737.5,
+     "yaw": 0.1,
+     "pitch": 0.14,
+     "dist": 6.5
+    },
+    {
+     "x": -70,
+     "z": 748,
+     "yaw": 3.1,
+     "pitch": 0.1,
+     "dist": 7
+    }
+   ],
+   "expectation": "THE GARDEN GATE — THE ZOO'S CONSERVATORY-SIDE ENTRANCE (task 125, owner: \"add an entrance to the zoo from the conservatory side\"). Where the formal garden used to dead-end into an unbroken fence, there is now an obvious way through: twin brick piers with pale limestone caps standing in the fence line, an open iron arch between them lettered LINCOLN PARK ZOO over the register ALWAYS FREE, gate leaves swung fully back against the piers, a brick paver pad underfoot and a limestone walk running straight through the gap into the campus. It must read WELCOMING AND OPEN — walk-right-in, the way the free zoo actually is — with NO ticket booth, NO turnstile, no barrier of any kind, and nothing lying across the walk. The ornamental dark fence continues away to both sides so the gap reads as a real gate and not a broken fence. f1 is the head-on lettering test: LINCOLN PARK ZOO and ALWAYS FREE must be legible, facing the garden, upright and not mirrored, and must clear the mayor's head. f2 looks back north from inside the campus and is the money shot — the gate framed with the pale-green glasshouse rising beyond it, two free Chicago landmarks in one view. This gate is deliberately SHORTER than the Cannon Dr front door; if it out-grands the east gate it is wrong."
+  },
+  {
+   "id": "lp-zoo-north-walk",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -70.2,
+   "z": 762,
+   "framings": [
+    {
+     "yaw": 0.05,
+     "pitch": 0.16,
+     "dist": 8
+    },
+    {
+     "x": -70.8,
+     "z": 778,
+     "yaw": 0.15,
+     "pitch": 0.12,
+     "dist": 7
+    },
+    {
+     "x": -71,
+     "z": 787,
+     "yaw": 0.2,
+     "pitch": 0.14,
+     "dist": 7.5
+    }
+   ],
+   "expectation": "THE CONSERVATORY CONNECTION (task 125): the walk that makes the new gate mean something. A pale limestone ribbon runs south from the gate down the zoo's open north lawn — continuous, mitred into the ground, never a floating slab and never stopping in mid-lawn. f1 shows it threading the gap between the pale rockwork of the Polar tundra on the west and the Penguin cove on the east, comfortably clear of both enclosures. f2 shows it meeting the north habitat walk in a proper mitred junction — the two ribbons join, they do not overlap in a stack or stop short of each other, and there is NO DEAD END. Across all three the ground reads as walkable park lawn with the campus habitats and trees ahead; a player who came through the gate can obviously keep going into the zoo."
   },
   {
    "id": "dv-bay-deck",

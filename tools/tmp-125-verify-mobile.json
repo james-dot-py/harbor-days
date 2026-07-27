@@ -1,0 +1,12 @@
+[
+  ["goto", -70, 710],
+  ["wait", 1400],
+  ["shot", "tmp125-mob-a-approach"],
+  ["tapSel", "#btnAct"],
+  ["wait", 900],
+  ["eval", "(()=>{try{return window.__hd.conservatory()}catch(e){return String(e)}})()"],
+  ["shot", "tmp125-mob-b-peek"],
+  ["drag", {"x": 90, "y": 700, "dx": 0, "dy": -60, "steps": 6, "ms": 200, "hold": 900}],
+  ["wait", 900],
+  ["shot", "tmp125-mob-c-released"]
+]

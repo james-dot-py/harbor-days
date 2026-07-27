@@ -1,6 +1,15 @@
 {
   "images": [
     {
+      "source": "owner",
+      "file": "owner-2026-07-26-buddha-heads.jpg",
+      "title": "Buddha heads on the Lincoln Park lawn (owner photo, refs/inbox 2026-07-26)",
+      "author": "owner",
+      "license": "owner-supplied",
+      "description": "Owner's own photo, dropped in refs/inbox and filed here by task 125. Six or so big white sculpted BUDDHA HEADS sitting straight on an open sunlit lawn in Lincoln Park, no plinths — smooth domed skulls with deeply carved snail-curl hair, half-lidded serene faces, scaled roughly chest-to-head-height on a person. They are scattered loosely across the grass under big shade trees, not in a row, with Lake Shore Drive traffic and the north-lakefront high-rises behind. Reads as a temporary outdoor art installation on plain park lawn. NOT YET BUILT — queued as task 128.",
+      "fetchDate": "2026-07-26T00:00:00.000Z"
+    },
+    {
       "source": "wikimedia-commons",
       "file": "Seals_or_sea_lions_(3404663477).jpg",
       "title": "File:Seals or sea lions (3404663477).jpg",

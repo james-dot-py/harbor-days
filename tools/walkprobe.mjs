@@ -1541,9 +1541,10 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
     CH.LP_UNDERPASS.z0>640 && CH.LP_UNDERPASS.z1<700, true);
   // (4) the FREE zoo — OPEN gates, no ticket booth (open-admission civic
   //     fact). 114 built the campus: the staged gatesOpen[] became the
-  //     ZOO.gates.{east,west,south} shape (gates are GAPS between fence runs).
-  expect('zoo has all three OPEN gates (east front door + west plinth + south)',
-    !!(Z.gates && Z.gates.east && Z.gates.west && Z.gates.south), true);
+  //     ZOO.gates.{east,west,south} shape (gates are GAPS between fence runs);
+  //     125 added the FOURTH, the north/conservatory garden gate.
+  expect('zoo has all four OPEN gates (east front door + west plinth + south + north/conservatory)',
+    !!(Z.gates && Z.gates.east && Z.gates.west && Z.gates.south && Z.gates.north), true);
   expect('zoo halls include the Sea Lion Pool + Kovler Lion House hero pair',
     Z.halls.some(h=>h.id==='sea-lion-pool') && Z.halls.some(h=>h.id==='kovler-lion'), true);
   // (5) compression transforms are internally consistent (spot-check the laws)
@@ -1660,8 +1661,21 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
   const onRun=(ri,si,t)=>{const run=Z.fence.runs[ri],a=run[si],b=run[si+1];
     const dx=b[0]-a[0],dz=b[1]-a[1],L=Math.hypot(dx,dz);
     return {x:a[0]+dx*t,z:a[1]+dz*t,nx:-dz/L,nz:dx/L};};
-  for(const [ri,si,t,nm] of [[0,0,0.5,'north'],[2,1,0.5,'west B'],[6,0,0.5,'east B'],[4,0,0.5,'south B']]){
-    const p=onRun(ri,si,t);
+  // LAW (125): a fence run is identified by its ENDPOINTS, never by a bare
+  //     array index — 125's north SPLIT shifted every later index by +1 and the
+  //     old positional probes silently walked onto the WRONG runs (still fence,
+  //     so still green). Endpoint lookup FAILS LOUD when the data moves.
+  const runIdx=(ax,az,bx,bz)=>Z.fence.runs.findIndex(r=>
+    Math.abs(r[0][0]-ax)<1e-6&&Math.abs(r[0][1]-az)<1e-6&&
+    Math.abs(r[r.length-1][0]-bx)<1e-6&&Math.abs(r[r.length-1][1]-bz)<1e-6);
+  const RUN={'north A':runIdx(-10.2,738,-66,740.15), 'north B':runIdx(-74,740.46,-88,741),
+             'west A':runIdx(-88,741,-93.5,853),     'west B':runIdx(-94.4,863,-93,1000),
+             'south A':runIdx(-93,1000,-53,1005.5),  'south B':runIdx(-45,1005.5,-12,1003),
+             'east A':runIdx(-12,1003,-10.2,835),    'east B':runIdx(-10.2,825,-10.2,738)};
+  for(const nm of Object.keys(RUN)) expect(`fence run '${nm}' resolves by endpoints (idx ${RUN[nm]})`,RUN[nm]>=0,true);
+  for(const [nm,si,t] of [['north A',0,0.5],['north B',0,0.5],['west B',1,0.5],['east B',0,0.5],['south B',0,0.5]]){
+    if(RUN[nm]<0)continue;                 // already FAILED above — keep probing the rest
+    const p=onRun(RUN[nm],si,t);
     expect(`fence ${nm} band blocked (${p.x.toFixed(1)},${p.z.toFixed(1)})`,walkable(p.x,p.z),false);
     expect(`fence ${nm} side A open 0.9 m (${(p.x+p.nx*0.9).toFixed(1)},${(p.z+p.nz*0.9).toFixed(1)})`,walkable(p.x+p.nx*0.9,p.z+p.nz*0.9),true);
     expect(`fence ${nm} side B open 0.9 m (${(p.x-p.nx*0.9).toFixed(1)},${(p.z-p.nz*0.9).toFixed(1)})`,walkable(p.x-p.nx*0.9,p.z-p.nz*0.9),true);
@@ -1720,6 +1734,68 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
   //     it also clears every zoo carve (fence/pool/yard/hall/pads)
   expect('LP_TRAIL_PARK clear of all zoo carves',
     CH.LP_TRAIL_PARK.every(p=>!CH.lpBlockedHit(p[0],p[1])),true);
+}
+
+// ===== LINCOLN PARK 125 (the FOURTH gate — north/conservatory) — LIVE
+// walkability via the SAME shared chicago.js functions the engine uses
+// (zooBlockedHit -> lpBlockedHit). The owner asked to enter the zoo from the
+// conservatory side; the gate is a GAP between the two north fence runs, so the
+// only thing that may carve here is the two pier pads — everything between the
+// jambs is walkable BY CONSTRUCTION, and these asserts are what keeps that true.
+{ console.log('\n--- LINCOLN PARK 125 (north / conservatory gate) ---');
+  const Z=CH.ZOO,GN=Z.gates.north,HW=CH.TRAIL_STYLE.walk.width/2;   // HW: the limestone walk's half-width, derived (never copied)
+  const hasPt=(chain,x,z)=>chain.some(p=>Math.abs(p[0]-x)<1e-6&&Math.abs(p[1]-z)<1e-6);
+  // (a) THE THROUGH-LINE: garden (outside, north) -> gate -> campus lawn
+  //     (inside, south). This is the whole point of the task — if any of these
+  //     goes false the conservatory side is a dead end again.
+  for(const x of [-70,-68,-72])
+    for(const z of [733,736,738,740.31,742,745,750])
+      expect(`north gate through-line (${x},${z}) walks`,walkable(x,z),true);
+  // (b) A GATE IS A GAP, NOT A HOLE IN THE FENCE: the band still blocks just
+  //     outside both jambs (this is the assert that bites if the gap widens).
+  for(const [x,z] of [[-64,740.1],[-76,740.5],[-84,740.8]])
+    expect(`fence still blocks outside the north jambs (${x},${z})`,walkable(x,z),false);
+  // (c) the gate FURNITURE blocks (the two pier pads — 114's gate-furniture law)
+  expect(`north gate W pier pad (${GN.x0},${GN.z}) blocked`,walkable(GN.x0,GN.z),false);
+  expect(`north gate E pier pad (${GN.x1},${GN.z}) blocked`,walkable(GN.x1,GN.z),false);
+  // (d) the jambs sit EXACTLY on the fence-run gap ends — fence and gate can
+  //     never disagree (the data law: the gap ends ARE the jamb x's)
+  const nA=Z.fence.runs.find(r=>Math.abs(r[0][0]+10.2)<1e-6&&Math.abs(r[0][1]-738)<1e-6);
+  const nB=Z.fence.runs.find(r=>Math.abs(r[r.length-1][0]+88)<1e-6&&Math.abs(r[r.length-1][1]-741)<1e-6);
+  expect('both north fence runs still exist (the split survived)',!!nA&&!!nB,true);
+  expect('north gate E jamb == north-run-A end x',nA?nA[nA.length-1][0]:null,GN.x1);
+  expect('north gate W jamb == north-run-B start x',nB?nB[0][0]:null,GN.x0);
+  expect('the gap spans the gate (jambs bracket the pad)',GN.pad.x0>=GN.x0-2&&GN.pad.x1<=GN.x1+2,true);
+  // (e) ZOO.northWalk — the conservatory connection — runs on walkable ground
+  //     point by point and clears every zoo carve (the 114 (g)/115 (a) pattern)
+  for(const p of Z.northWalk){
+    expect(`northWalk (${p[0].toFixed(1)},${p[1].toFixed(1)}) walks`,walkable(p[0],p[1]),true);
+    expect(`northWalk (${p[0].toFixed(1)},${p[1].toFixed(1)}) clear of carves`,!CH.lpBlockedHit(p[0],p[1]),true);
+  }
+  expect('northWalk clear of every zoo carve (whole chain)',
+    Z.northWalk.every(p=>!CH.lpBlockedHit(p[0],p[1])),true);
+  // (f) BOTH WELDS ARE REAL (no dead ends): the chain's endpoints ARE control
+  //     points of the chains it meets, so both seams mitre.
+  const w0=Z.northWalk[0],w1=Z.northWalk[Z.northWalk.length-1];
+  expect('northWalk starts on the garden loop control point (-70,735)',
+    Math.abs(w0[0]+70)<1e-6&&Math.abs(w0[1]-735)<1e-6,true);
+  expect('northWalk ends on the walkN control point (-71,791.5)',
+    Math.abs(w1[0]+71)<1e-6&&Math.abs(w1[1]-791.5)<1e-6,true);
+  expect('LP_GARDEN_LOOP carries the (-70,735) weld point',hasPt(CH.LP_GARDEN_LOOP,-70,735),true);
+  expect('habitats.walkN carries the (-71,791.5) weld point',hasPt(Z.habitats.walkN,-71,791.5),true);
+  // (g) HABITAT CLEARANCE: over the threaded stretch the walk keeps its full
+  //     half-width east of the Polar tundra and west of the Penguin cove — the
+  //     ribbon can never overhang a blocked diorama (the 062 sagitta law's
+  //     plan-view cousin)
+  for(const p of Z.northWalk.filter(p=>p[1]>770&&p[1]<796)){
+    expect(`northWalk (${p[0].toFixed(2)},${p[1].toFixed(1)}) keeps ${HW} m east of polar x1`,p[0]-Z.habitats.polar.x1>=HW,true);
+    expect(`northWalk (${p[0].toFixed(2)},${p[1].toFixed(1)}) keeps ${HW} m west of penguin x0`,Z.habitats.penguin.x0-p[0]>=HW,true);
+  }
+  // (h) ANTI-TRAP: 125 adds ZERO colliders (piers/leaves/sign are statics; the
+  //     pads are data carves), so no collider ring can push the player into the
+  //     jamb — and the throat is wide open either side of each pad
+  for(const [x,z] of [[GN.x0+1.0,GN.z],[GN.x1-1.0,GN.z],[GN.x0-1.0,GN.z-1.6],[GN.x1+1.0,GN.z-1.6]])
+    expect(`clear beside the north piers (${x.toFixed(1)},${z.toFixed(1)})`,walkable(x,z),true);
 }
 
 // ===== LINCOLN PARK 115 (habitats + farm) — LIVE walkability via the SAME

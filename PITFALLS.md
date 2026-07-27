@@ -1058,4 +1058,33 @@ few turns to find; keep each to one line of symptom + fix.
   slots as cyan patches at the base of every approach view. And bmat() does NOT
   cache per hex like toon() — a second bmat(sameColor) opens a second merge
   bucket; share the material instance.
+- An interaction that FIRES is not an interaction that LANDS: 122's "peek
+  inside" registered fine, showed its prompt, ran onUse and toasted — and the
+  owner still filed it broken (issue 038), because the payload was text and the
+  building did not change one pixel. When an E beat points at a THING, the thing
+  must visibly change. Reproduce with act.mjs + an eval of the prompt/toast
+  state BEFORE theorising: all four of issue 038's ranked "likely causes"
+  (anchor, radius, shadowing, never-registered) were wrong.
+- A doorway you can look INTO needs a hole in the wall, not a panel stuck on it:
+  the vestibule's south face was one unbroken glass gquad, so anything built
+  behind it was invisible however well lit. Cut the opening in the face itself
+  (structures.js) and let the interior live in the gap.
+- Flat quads read as PAPER SHARDS, not foliage, at close range in this toon
+  style (shot and rejected twice in 125). The house vocabulary for planting is
+  solid faceted VOLUME — Icosahedron lobes / cone fronds, the same read as the
+  4-lobe tree canopies. Build leafy mass out of chunks.
+- Compose an interior for the SLOT its exterior leaves you: the 122 awning band
+  (y 1.70-2.55) hangs OUTSIDE the conservatory doorway, so from the garden the
+  opening is a wide short letterbox. Foliage staged above 1.70 was invisible
+  from every approach — check what the facade already covers before placing.
+- mergeCellStatic folds scene-level static meshes by MATERIAL after the build,
+  so a new lakefront mesh reusing an already-merged cached toon() hex costs +0
+  draws (125: a whole gate + paver pad + walk ribbon = +1 total, the lettering
+  band, whose CanvasTexture material is unique). "One new mesh = one new draw"
+  is FALSE on the lakefront — measure with an A/B census, don't assume.
+- baseline.png diffs are dominated by DOM overlays, not layout: 125's spawn read
+  2.3% and none of it was the world — 19.6k of 21.4k diff px were the bottom
+  #hint key bar (absent from the committed baseline), the rest animation. Mask
+  #mini AND #hint, and set the threshold from a MEASURED floor (two captures of
+  the same build differ ~1000 px), never from 0. tools/tmp-125-detdiff.mjs.
 

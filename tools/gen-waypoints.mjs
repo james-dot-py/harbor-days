@@ -606,6 +606,42 @@ add('lp-bates', 'lincolnpark', 'lakefront', -67, 733.8, [
   { x: -69.4, z: 729.8, yaw: -2.60, pitch: 0.07, dist: 4.6 },// f2 — close from the apron collar: thicket + figures right of the mayor (dist 3.4 dead-on put his head through the thicket)
 ]);
 
+// ---- 125 (owner playtest 2026-07-26) ------------------------------------
+// (A) issue 038 — the DOORS. 122's "peek inside" fired a toast and changed
+// nothing on screen, so the owner pressed E and saw no inside. These two stands
+// judge the FIX, split deliberately: -doors is the PASSIVE read (no key pressed
+// — does the doorway read as lit and inhabited to someone just walking up?) and
+// -peek is the BEAT (q peek=1 auto-fires it, so the session camera's framed
+// look-in is shot-deterministic — the 118 interaction-shot recipe).
+// All stands sit on the garden axis walk south of the doors; cameras land on
+// open gravel/lawn, north of the Bates apron and clear of the conifers.
+add('lp-conservatory-doors', 'lincolnpark', 'lakefront', -70.6, 712.6, [
+  { yaw: -3.00, pitch: 0.03, dist: 6.5 },                   // f0 — the 122-proven door framing (dist 6.5 drops the chibi head below the awning so the lettering clears): does the doorway now read LIT?
+  { x: -70.2, z: 710.0, yaw: -2.88, pitch: 0.01, dist: 3.4 },// f1 — CLOSE and swung ~20 deg off the axis so the mayor stops eating the opening (the 047 law): the interior at readable size
+  { x: -65.5, z: 711.5, yaw: -2.45, pitch: 0.04, dist: 6 }, // f2 — OFF-AXIS oblique (~11 deg aim-off, the 122 margin law): proves the interior is not a flat sticker that only works dead-on
+]);
+add('lp-conservatory-peek', 'lincolnpark', 'lakefront', -70.4, 710.2, [
+  { yaw: -3.05, pitch: 0.02, dist: 5 },                     // f0 — E pressed: the leaned-in framed look into the palm house
+  { x: -68.5, z: 711.5, yaw: -2.90, pitch: 0.04, dist: 6 }, // f1 — fired from an off-axis stand: the beat must land the same look-in wherever you press it
+], { q: 'peek=1' });
+
+// (B) the NORTH/CONSERVATORY GATE + its connecting walk. Owner: "add an entrance
+// to the zoo from the conservatory side." The gate stands on the x -70 garden
+// axis; the fence gap is x -74..-66 at z ~740.3. CAMERA TRAP HERE: the Bates
+// fountain sits ON the axis 14 m north, so any on-axis south-looking stand north
+// of z ~737 parks the follow-cam inside the reed thicket — f0 is therefore the
+// SW diagonal (camera over open lawn) and the axis stand sits close at z 737.5.
+add('lp-zoo-north-gate', 'lincolnpark', 'lakefront', -76, 736, [
+  { yaw: 0.80, pitch: 0.14, dist: 8 },                      // f0 — the SW diagonal walking approach: gate + fence running away + campus beyond
+  { x: -70, z: 737.5, yaw: 0.10, pitch: 0.14, dist: 6.5 },  // f1 — on the axis: both piers, the open arch, lettering clearing the mayor's head, the walk running through
+  { x: -70, z: 748, yaw: 3.10, pitch: 0.10, dist: 7 },      // f2 — the look BACK north from inside the campus: the gate with the glasshouse beyond it
+]);
+add('lp-zoo-north-walk', 'lincolnpark', 'lakefront', -70.2, 762, [
+  { yaw: 0.05, pitch: 0.16, dist: 8 },                      // f0 — south down the new limestone ribbon into the open north lawn, habitats ahead
+  { x: -70.8, z: 778, yaw: 0.15, pitch: 0.12, dist: 7 },    // f1 — threading the gap: Polar tundra west, Penguin cove east, walk running between them
+  { x: -71, z: 787, yaw: 0.20, pitch: 0.14, dist: 7.5 },    // f2 — the far weld onto walkN (camera stays 2 m clear of the polar rect at this yaw)
+]);
+
 // Diversey ENTERABLE bay (task 028): stand on the ground hitting deck at a
 // middle bay's hitting spot and look NORTH down the range — the axis-aligned
 // interior framing for the bay pocket (a cross-body camera sits in a divider);

@@ -1721,7 +1721,7 @@ function buildMontrosePoint(POSTS,RAILS){
 // merged mesh each (all geometry normalized toNonIndexed so Box/Extrude/Torus/
 // Sphere merge under one material — identical position/normal/uv sets).
 function buildZoo(POSTS,RAILS){
-  const Z=CH.ZOO,LH=Z.lionHouse,GE=Z.gates.east,GW=Z.gates.west,GS=Z.gates.south,P=Z.pool,Y=Z.yard;
+  const Z=CH.ZOO,LH=Z.lionHouse,GE=Z.gates.east,GW=Z.gates.west,GS=Z.gates.south,GN=Z.gates.north,P=Z.pool,Y=Z.yard;
 
   // -- per-material accumulators (merged + scene.add'd at the end) -----------
   const gBrick=[],gTrim=[],gBase=[],gIron=[],gRoof=[],gDoor=[],gGlow=[],gRock=[],gRock2=[],
@@ -1823,6 +1823,70 @@ function buildZoo(POSTS,RAILS){
     g.fillStyle='#d43b2a';g.beginPath();g.arc(408,238,10,0,7);g.fill();                 // you are here
     g.beginPath();g.moveTo(398,208);g.lineTo(418,208);g.lineTo(408,224);g.closePath();g.fill();  // arrow down to it
   });
+
+  // (2b) NORTH / CONSERVATORY GATE — THE GARDEN GATE (task 125, owner playtest
+  // 2026-07-26 "add an entrance to the zoo from the conservatory side"). Same
+  // vocabulary as the east front door (brick piers + limestone caps + flattened
+  // torus arch + chord bar + lettering band + swung-back leaves + paver pad) with
+  // TWO structural differences: it spans world X (not z) and it FACES NORTH (-z,
+  // toward the garden the player arrives from); and it is deliberately SHORTER
+  // (GN.pierH 3.0 vs 3.4) so Cannon Dr stays the hero front door. Welcoming, never
+  // controlled — NO booth, NO turnstile, no bollards, no second directory board.
+  // Everything reads out of Z.gates.north; zero rng.
+  {
+    const gcx=(GN.x0+GN.x1)/2, span=GN.x1-GN.x0;          // -70 (the garden axis), 8 m gap
+    const capW=GN.pierW*1.278, capTop=GN.pierH+0.18;      // caps in the east gate's proportion (1.15/0.9)
+    for(const px of[GN.x0,GN.x1]){
+      box(gBrick,GN.pierW,GN.pierH,GN.pierW,px,GN.pierH/2,GN.z,0);
+      box(gTrim,capW,0.18,capW,px,GN.pierH+0.09,GN.z,0);
+    }
+    {  // iron ARCH between the pier tops. The east gate rotateY(PI/2)s its torus so
+       // the arc spans world z; THIS arc must span world X, which is the torus's
+       // NATIVE plane — so NO rotateY, and the tube's +-0.13 already falls in z as
+       // the arch's depth. Crown scaled to the 3.0 piers: 3.90 (east is 4.5).
+      const R=span/2,flat=0.35;
+      const yc=capTop-0.045-R*flat*Math.cos(1.1);         // arc ends tuck 0.045 into the caps (the east gate's fit)
+      const a=new THREE.TorusGeometry(R,0.13,6,20,2.2);
+      a.rotateZ(Math.PI/2-1.1);                           // centre the 2.2-rad arc at the top
+      a.scale(1,flat,1);                                  // flatten shallow
+      a.translate(gcx,yc,GN.z);                           // crown yc + R*flat = 3.90
+      gIron.push(a);
+    }
+    box(gIron,span-0.8,0.18,0.1,gcx,capTop+0.04,GN.z,0);  // chord bar tying the piers (the sign band hangs on it)
+    {  // 'LINCOLN PARK ZOO / · ALWAYS FREE ·' band, lettered BOTH ways — a real
+       // park gate greets you leaving as well as arriving, and the campus-side
+       // look-back is the money framing (gate + the conservatory glasshouse).
+       // BACK-TO-BACK FrontSide pair (village.js twoSided law) sandwiching the
+       // SOLID gBack backing box: never a DoubleSide plane, which would show the
+       // lettering MIRRORED from behind (PITFALLS 010/032). Both faces share ONE
+       // canvas texture AND one merged geometry -> the pair is a single mesh.
+      const cv=document.createElement('canvas');cv.width=1024;cv.height=192;const g=cv.getContext('2d');
+      g.fillStyle='#2c2f2b';g.fillRect(0,0,1024,192);
+      g.textAlign='center';g.textBaseline='middle';
+      g.fillStyle='#f0e8d2';fit(g,GN.sign,940,92,'800');g.fillText(GN.sign,512,76);
+      const reg='· '+GN.register+' ·';
+      g.fillStyle='#e5c56a';fit(g,reg,700,40,'700');g.fillText(reg,512,156);
+      const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
+      const bw=span-2.0,by=capTop+0.73;                   // 6.0 m band, spanned to THIS gap; bottom edge sits on the chord
+      box(gBack,bw+0.2,1.22,0.08,gcx,by,GN.z+0.06,0);     // solid backing (faces z 740.33/740.41), tucked just SOUTH of the fence line
+      const pgN=new THREE.PlaneGeometry(bw,1.12);pgN.rotateY(Math.PI);pgN.translate(gcx,by,GN.z-0.02);  // faces -z: the GARDEN / conservatory side
+      const pgS=new THREE.PlaneGeometry(bw,1.12);pgS.translate(gcx,by,GN.z+0.14);                       // faces +z: the CAMPUS side (native plane normal, so upright, not mirrored)
+      scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries([pgN,pgS]),
+        curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide}))));   // world-coord geometry, one mesh, one draw
+    }
+    // OPEN leaves swung fully back against the piers — folded TIGHT E/W along the
+    // fence, angled the east gate's 0.35 rad into the campus (+z). Tips land at
+    // x -76.0 / -64.0, so they clear ZOO.northWalk (x -70 +- 1.2) by >2.2 m; the
+    // east gate's tips-on-the-pavers bug cannot repeat here.
+    leaf(GN.x0+0.6,GN.z+0.4,0.35-Math.PI/2,2.8,1.5);
+    leaf(GN.x1-0.6,GN.z+0.4,Math.PI/2-0.35,2.8,1.5);
+    {  // brick paver PAD under the gate (GN.pad rect) — top y 0.081, over both the
+       // 0.074 limestone walk running through it and the 0.066 garden gravel.
+      const pd=GN.pad;
+      const m=new THREE.Mesh(new THREE.BoxGeometry(pd.x1-pd.x0,0.05,pd.z1-pd.z0),toon(Z.loopStyle.color));
+      m.position.set((pd.x0+pd.x1)/2,0.056,(pd.z0+pd.z1)/2);scene.add(m);
+    }
+  }
 
   // (3) SEA LION POOL — rim ring (open cylinders + flat cap, DoubleSide)
   {
@@ -3022,7 +3086,15 @@ function buildConservatory(){
   box(gStoneD,V.w+0.5,0.10,V.d+0.4,V.x,SILL+0.05,V.z,0);
   {
     const P=[],N=[],U=[];
-    gquad(P,N,U,[V.x-vHW,SILL,zS],[V.x+vHW,SILL,zS],[V.x+vHW,EAVE,zS],[V.x-vHW,EAVE,zS],0,0,1);
+    // 125 (issue 038): the SOUTH face is glazed AROUND A REAL DOORWAY HOLE
+    // instead of one unbroken sheet. The old sheet is why "peek inside" could
+    // never show anything — it sealed the porch, and the door read was a slab
+    // stuck on its outside. packs/lp-conservatory.js fills this hole with the
+    // lit palm-house diorama and the shut glass doors.
+    const dHW=1.14,dTOP=2.42;                                                   // the opening: matches the jamb frames at V.x +- 1.26
+    gquad(P,N,U,[V.x-vHW,SILL,zS],[V.x-dHW,SILL,zS],[V.x-dHW,EAVE,zS],[V.x-vHW,EAVE,zS],0,0,1);   // west of the doors
+    gquad(P,N,U,[V.x+dHW,SILL,zS],[V.x+vHW,SILL,zS],[V.x+vHW,EAVE,zS],[V.x+dHW,EAVE,zS],0,0,1);   // east of the doors
+    gquad(P,N,U,[V.x-dHW,dTOP,zS],[V.x+dHW,dTOP,zS],[V.x+dHW,EAVE,zS],[V.x-dHW,EAVE,zS],0,0,1);   // the transom over them
     gquad(P,N,U,[V.x+vHW,SILL,V.z-vHD],[V.x-vHW,SILL,V.z-vHD],[V.x-vHW,EAVE,V.z-vHD],[V.x+vHW,EAVE,V.z-vHD],0,0,-1);
     gquad(P,N,U,[V.x+vHW,SILL,zS],[V.x+vHW,SILL,V.z-vHD],[V.x+vHW,EAVE,V.z-vHD],[V.x+vHW,EAVE,zS],1,0,0);
     gquad(P,N,U,[V.x-vHW,SILL,V.z-vHD],[V.x-vHW,SILL,zS],[V.x-vHW,EAVE,zS],[V.x-vHW,EAVE,V.z-vHD],-1,0,0);
@@ -3066,12 +3138,17 @@ function buildConservatory(){
     const pl=new THREE.Mesh(new THREE.PlaneGeometry(5.0,0.78),curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide})));
     pl.position.set(V.x,awY+0.03,awZ+0.285);scene.add(pl);
   }
-  // -- doors + the single FREE ADMISSION glow pane (the Theater glow recipe)
-  box(gBrown,2.40,2.00,0.12,V.x,SILL+1.00,zS+0.06,0);
+  // -- the DOOR SURROUND only. 125 (issue 038): the opaque brown leaf slab and
+  // the flat cream FREE ADMISSION pane that used to fill this opening are GONE.
+  // They were the whole reason "peek inside" showed the player nothing — the
+  // doorway was a blank panel with no inside behind it. packs/lp-conservatory.js
+  // now owns what sits in this hole: shut GLASS doors with the lit palm house
+  // reading through them. Everything here is the frame AROUND that opening —
+  // mullion, jambs, head — and it stays exactly where it was, so the doors still
+  // read as doors and still never open.
   box(gFrame,0.09,2.00,0.15,V.x,SILL+1.00,zS+0.10,0);                      // meeting mullion
   for(const sx of[-1,1])box(gFrame,0.12,2.14,0.15,V.x+sx*1.26,SILL+1.07,zS+0.08,0);
   box(gFrame,2.64,0.12,0.15,V.x,SILL+2.07,zS+0.08,0);
-  {const g=new THREE.PlaneGeometry(1.62,0.88);g.translate(V.x,SILL+0.80,zS+0.14);gGlow.push(g);}   // ONE warm pane; the dark leaves frame it
 
   // =====================================================================
   // (3) THE ELI BATES FOUNTAIN — low broad ring, dominant reed thicket

@@ -1,0 +1,13 @@
+[
+  ["goto", -70, 748],
+  ["wait", 1400],
+  ["eval", "(()=>{const c=window.__hd.input.cam;c.yaw=Math.PI;window.__hd.camCtl.snap=true;return 'cam';})()"],
+  ["wait", 900],
+  ["shot", "tmp125b-d-lookback-conservatory"],
+
+  ["goto", -70, 745],
+  ["wait", 1400],
+  ["eval", "(()=>{const c=window.__hd.input.cam;c.yaw=Math.PI;window.__hd.camCtl.snap=true;return 'cam';})()"],
+  ["wait", 900],
+  ["shot", "tmp125b-j-inside-leaves"]
+]

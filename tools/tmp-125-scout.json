@@ -1,0 +1,11 @@
+[
+  ["goto", -70, 736],
+  ["wait", 1200],
+  ["shot", "tmp125-scout-a-garden-south"],
+  ["goto", -70, 760],
+  ["wait", 1200],
+  ["shot", "tmp125-scout-b-campus-north-lawn"],
+  ["goto", -70, 785],
+  ["wait", 1200],
+  ["shot", "tmp125-scout-c-campus-mid"]
+]

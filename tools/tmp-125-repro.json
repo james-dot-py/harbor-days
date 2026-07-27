@@ -1,0 +1,12 @@
+[
+  ["goto", -70, 710],
+  ["wait", 1200],
+  ["eval", "(()=>{const p=document.getElementById('prompt');const s=getComputedStyle(p);return {promptDisplay:s.display,label:document.getElementById('promptlabel').textContent,player:window.__hd&&window.__hd.player?{x:+window.__hd.player.x.toFixed(2),z:+window.__hd.player.z.toFixed(2),y:+window.__hd.player.y.toFixed(2)}:null,cons:window.__hd&&window.__hd.conservatory?window.__hd.conservatory():null};})()"],
+  ["shot", "tmp125-repro-a-approach"],
+  ["key", "e"],
+  ["wait", 400],
+  ["eval", "(()=>{const t=document.getElementById('toast');return {toastShow:t.className,main:document.getElementById('toastMain').textContent,sub:document.getElementById('toastSub').textContent};})()"],
+  ["shot", "tmp125-repro-b-pressed-E"],
+  ["wait", 1200],
+  ["shot", "tmp125-repro-c-after"]
+]

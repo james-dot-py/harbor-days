@@ -1792,6 +1792,8 @@ export function zooBlockedHit(x,z){
   const GE=ZOO.gates.east,GW=ZOO.gates.west,GS=ZOO.gates.south;
   if(Math.abs(x-GE.x)<0.62&&(Math.abs(z-GE.z0)<0.62||Math.abs(z-GE.z1)<0.62))return true;  // east gate pier pads
   if(Math.abs(z-GS.z)<0.55&&(Math.abs(x-GS.x0)<0.55||Math.abs(x-GS.x1)<0.55))return true;  // south gate pier pads
+  const GN=ZOO.gates.north;   // 125 north/conservatory gate: ONLY the two pier pads carve — the 6.8 m between them is walkable by construction
+  if(Math.abs(z-GN.z)<0.6&&(Math.abs(x-GN.x0)<0.6||Math.abs(x-GN.x1)<0.6))return true;
   if(Math.abs(x-GW.x)<GW.plinth.w/2+0.35&&Math.abs(z-GW.z)<GW.plinth.d/2+0.35)return true; // west lion plinth
   const b2=ZOO.fence.band*ZOO.fence.band;
   for(const run of ZOO.fence.runs)
@@ -1869,6 +1871,7 @@ export const LP_THEATER = {
 
 // ---- THE ZOO — a FENCED-but-OPEN campus (free admission; open gates, no
 // ticket booth). CAMPUS ARMATURE BUILT task 114: fence runs + 3 open gates +
+// (125 adds a FOURTH — the north/conservatory garden gate + its northWalk) +
 // the Sea Lion Pool + Kovler Lion House + lion yard + paver loop/spur/Cannon.
 // Animals are NPC/pack register (culled >145 m), NEVER instanced buckets
 // (§BUILD-PLAN). Walkability: zooBlockedHit below (data carves, NO colliders —
@@ -1879,7 +1882,8 @@ export const ZOO = {
   // the ornamental fence = these RUNS (gates are the gaps between them);
   // POSTS/RAILS tail-append, collide:false — blocking is the data band below
   fence:{ runs:[
-    [[-10.2,738],[-88,741]],                          // north
+    [[-10.2,738],[-66,740.15]],                       // north A (gap x -74..-66 = NORTH/CONSERVATORY GATE, task 125)
+    [[-74,740.46],[-88,741]],                         // north B
     [[-88,741],[-92,790],[-93.5,853]],                // west A (gap 853-863 = WEST GATE)
     [[-94.4,863],[-95,900],[-94,950],[-93,1000]],     // west B
     [[-93,1000],[-72,1004],[-53,1005.5]],             // south A (gap x -53..-45 = SOUTH GATE)
@@ -1895,6 +1899,17 @@ export const ZOO = {
            plinth:{ w:2.8, d:2.2 }, sign:'LINCOLN PARK ZOO',
            bollards:[[-92.2,854.5],[-92.2,861.5]] },
     south:{ z:1005.5, x0:-53, x1:-45, pierW:0.7, pierH:2.6 },  // plain piers toward the Farm/pond ground (115/117)
+    // 125 (owner playtest 2026-07-26) — THE GARDEN GATE on the CONSERVATORY side.
+    // Sited on the x -70 garden axis the vestibule doors / AXIS_N/S / Bates /
+    // the garden loop's south point already share. Same vocabulary as the east
+    // front door (brick piers + limestone caps + open iron arch + lettering +
+    // swung-back leaves + paver pad) but DELIBERATELY SHORTER (pierH 3.0 vs
+    // 3.4) so Cannon stays the hero. Register reads ALWAYS FREE — welcoming,
+    // never controlled. The jamb x's are exactly the north-run gap ends, so the
+    // fence and the gap can never disagree.
+    north:{ z:740.31, x0:-74, x1:-66, pierW:0.85, pierH:3.0,
+            sign:'LINCOLN PARK ZOO', register:'ALWAYS FREE',
+            pad:{ x0:-75.5, x1:-64.5, z0:736.6, z1:744.4, y:0.081 } },   // top of the y-ladder (>=0.006 over the 0.074 walk running under it)
   },
   pool:{ x:-60, z:820, waterR:6.3, rimR:7.0, rimH:0.75, carveR:7.5, railR:7.25, railH:0.95,
          water:0x4e8a7a, rim:0x9a988c, rock:0x8f8f88, rock2:0x71726a, shelfY:0.55,
@@ -1910,6 +1925,13 @@ export const ZOO = {
   loop: crChain([[-11.5,830],[-14,820],[-20,806.5],[-30,802],[-42,801.5],[-53,806],[-64,810],[-69.5,820],[-66,834],[-56,842],[-44,847],[-31,849],[-20,845],[-13,837],[-11.5,830]],3),
   loopStyle:{ width:2.2, color:0x9a5a44, y:0.066 },   // Searle-plaza herringbone brick read (below walk 0.074, above dashes)
   spur: crChain([[-44,847],[-46,866],[-50,905],[-52,962],[-48.9,1005.5],[-48,1012]],4),
+  // 125 — THE CONSERVATORY CONNECTION. Limestone (st.walk, y 0.074) from the
+  // garden loop's EXACT (-70,735) control point, south through the new north
+  // gate, down the empty north lawn, threading the 6 m gap between the Polar
+  // tundra (x <= -74.5) and the Penguin cove (x >= -68.5) onto walkN's EXACT
+  // (-71,791.5) control point. Shared exact endpoints at BOTH ends -> both
+  // seams mitre, no dead end. Clear of every zooBlockedHit carve (probed).
+  northWalk: crChain([[-70,735],[-70,748],[-70.2,763],[-70.8,778],[-71,791.5]],3),
   place:{ fadeS:2.2,   // inside-the-zoo ambience cell (framework definePlace)
           grade:{ fogColor:0x9fbe8d, fogNear:30, fogFar:175, ambGround:0x7fb474, ambI:0.98, sunI:0.85 },
           amb:{ ext:0.55, bird:1.5 } },

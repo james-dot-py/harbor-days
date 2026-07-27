@@ -1,0 +1,42 @@
+[
+  ["goto", -70, 730],
+  ["wait", 1600],
+  ["eval", "(()=>window.__hd.perf())()"],
+  ["shot", "tmp125b-a-arrival-default"],
+
+  ["goto", -70, 734],
+  ["wait", 1300],
+  ["eval", "(()=>{const c=window.__hd.input.cam;c.pitch=0.05;c.dist=6.5;window.__hd.camCtl.snap=true;return{yaw:c.yaw,pitch:c.pitch,dist:c.dist};})()"],
+  ["wait", 700],
+  ["shot", "tmp125b-b-lettering-headon"],
+
+  ["goto", -70, 740],
+  ["wait", 1500],
+  ["eval", "(()=>window.__hd.perf())()"],
+  ["shot", "tmp125b-c-throat"],
+
+  ["goto", -70, 748],
+  ["wait", 1300],
+  ["eval", "(()=>{const c=window.__hd.input.cam;c.yaw=Math.PI;window.__hd.camCtl.snap=true;return{yaw:c.yaw,pitch:c.pitch,dist:c.dist};})()"],
+  ["wait", 900],
+  ["eval", "(()=>window.__hd.perf())()"],
+  ["shot", "tmp125b-d-lookback-conservatory"],
+
+  ["goto", -70, 770],
+  ["wait", 1500],
+  ["eval", "(()=>window.__hd.perf())()"],
+  ["shot", "tmp125b-e-corridor"],
+
+  ["goto", -71, 787],
+  ["wait", 1300],
+  ["eval", "(()=>{const c=window.__hd.input.cam;c.pitch=0.45;c.dist=7;window.__hd.camCtl.snap=true;return{yaw:c.yaw,pitch:c.pitch,dist:c.dist};})()"],
+  ["wait", 700],
+  ["shot", "tmp125b-f-weld"],
+
+  ["goto", -70, 742],
+  ["wait", 1300],
+  ["eval", "(()=>{const c=window.__hd.input.cam;c.pitch=1.0;c.dist=16;window.__hd.camCtl.snap=true;return{yaw:c.yaw,pitch:c.pitch,dist:c.dist};})()"],
+  ["wait", 800],
+  ["eval", "(()=>window.__hd.perf())()"],
+  ["shot", "tmp125b-g-leaves-overhead"]
+]

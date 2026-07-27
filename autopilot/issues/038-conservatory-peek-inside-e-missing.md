@@ -1,5 +1,20 @@
 # Issue 038 — pressing E at the conservatory does not let you peek inside
 
+- **STATUS: CLOSED by task 125.**
+- **Actual cause: (2) — it fires but has no visible payload.** Reproduced first
+  with `tools/act.mjs` at (-70,710): the prompt pill read "peek inside", E ran
+  `onUse`, and the toast appeared. Anchor, radius, registration and shadowing
+  were all fine — causes (1), (3) and (4) were wrong. The payload was a line of
+  text and the building did not change one pixel, because the doorway was a flat
+  cream panel on an unbroken glass wall with nothing behind it.
+- **Fix:** the vestibule's south face is now glazed around a REAL doorway hole;
+  a palm-house diorama (three depths of chunky fern/palm crowns, trunks, a dark
+  koi pool, warm back light) sits in it behind SHUT GLASS doors, visible on
+  approach. E leans a session camera in and frames it, the interior warms, and
+  warm air puffs out. No door opens, no walkable interior. Judged by the
+  `lp-conservatory-doors` (passive) and `lp-conservatory-peek` (fired, `q
+  peek=1`) waypoints.
+
 - **Reported by:** owner playtest 2026-07-26
 - **Area:** lincolnpark
 - **Severity:** MEDIUM — a shipped interaction that does not fire reads as broken.

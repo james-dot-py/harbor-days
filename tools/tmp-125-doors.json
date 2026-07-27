@@ -1,0 +1,11 @@
+[
+  ["goto", -70.6, 712.6],
+  ["wait", 1400],
+  ["shot", "tmp125c-1-doors-passive"],
+  ["key", "e"],
+  ["wait", 1600],
+  ["eval", "(()=>{try{return window.__hd.conservatory()}catch(e){return String(e)}})()"],
+  ["shot", "tmp125c-2-peek-fired"],
+  ["wait", 5200],
+  ["shot", "tmp125c-3-after-release"]
+]
