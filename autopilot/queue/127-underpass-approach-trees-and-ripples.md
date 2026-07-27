@@ -63,6 +63,30 @@ refs:
   - PITFALLS.md (prop clearance; instanced-color + Group crash at r128; setColorAt)
 ---
 
+## Supervisor note — a duplicate task was auto-filed and removed (2026-07-26)
+
+Task 125's session swept `refs/inbox/`, found the owner's buddha-heads photo with no
+covering note, correctly applied the "a ref drop with no note is a build request"
+rule, and authored `128-lincolnpark-buddha-heads.md` — not knowing THIS task already
+covered it. 128 has been deleted; 127 is the one that ships. Two corrections it
+surfaced, both settled here:
+
+- **They are HALF-SUNKEN, not sitting on the lawn.** 128 read the photo as heads
+  resting on the grass with no plinths. No plinths is right; resting is not. The
+  owner's own words are authoritative: *"these buddha heads half-sunken into the
+  ground."* Build them emerging — buried to roughly the jaw, lawn meeting sculpture
+  with no base, no lip, no shadow gap.
+- **Siting agrees.** 128 reasoned independently from the photo background (open lawn,
+  Lake Shore Drive traffic, the high-rise wall behind) to the east-facing park lawn
+  near the Drive, north of the zoo. That matches the Park District's record for the
+  real installation — "Just South of Diversey @ LSD" — so site it there with
+  confidence, NOT in the formal garden and NOT inside the zoo campus.
+
+If you sweep `refs/inbox/` and find the buddha photo already filed to
+`refs/lincoln-park/`, that is 125's doing — do not file a third task for it.
+
+---
+
 The owner walked from the Diversey corner toward the underpass, found the stretch
 bare, and sent a photo of the one thing that is actually there in real life: six
 white Buddha heads half-sunk in the grass under the trees, with Lake Shore Drive
