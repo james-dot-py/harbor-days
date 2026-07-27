@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-27T15:29:38.569Z",
- "count": 173,
+ "generated": "2026-07-27T17:00:42.432Z",
+ "count": 175,
  "waypoints": [
   {
    "id": "spawn",
@@ -1140,7 +1140,7 @@
      "dist": 8
     }
    ],
-   "expectation": "LINCOLN PARK ARRIVAL (112 shell + 113 harbor): the map opens SOUTH past the old z408 fence — broad green parkland ahead, scattered with big chunky shade elms, a pale crushed-limestone trail curving on into it, and Lake Shore Drive with its low embankment carrying south along one side. Reads as the lakefront FINALLY continuing into a big open park — honest lawn (the zoo and gardens come in 114-117), NOT a hole and NOT a dead-end fence; a few sailboat mast tips MAY show over the embankment to the right (the new Diversey lagoon, not required). No crisp downtown skyline is promised (far plane 900 + fog + the z-gate fade it out)."
+   "expectation": "LINCOLN PARK ARRIVAL (112 shell + 113 harbor): the map opens SOUTH past the old z408 fence — broad green parkland ahead, scattered with big chunky shade elms, a pale crushed-limestone trail curving on into it, and Lake Shore Drive with its low embankment carrying south along one side. Reads as the lakefront FINALLY continuing into a big open park — honest lawn (the zoo and gardens come in 114-117), NOT a hole and NOT a dead-end fence; a few sailboat mast tips MAY show over the embankment to the right (the new Diversey lagoon, not required). No crisp downtown skyline is promised (far plane 900 + fog + the z-gate fade it out). (127: the walk south is now visibly TREED — new canopies on both sides of the trail may frame the view, and a few small white ripple-head domes may show on the Drive-side lawn; both are correct.)"
   },
   {
    "id": "lp-underpass",
@@ -1616,7 +1616,7 @@
      "dist": 11
     }
    ],
-   "expectation": "WALKING SOUTH INTO THE PARK (task 120, issue 034 — the owner: \"the buildings that are supposed to be in the distance just fade away\"). Downtown reads as a SOLID skyline on the south horizon that gently pulls away and hazes into the warm dusk air as you walk — never a see-through glass ghost, never a pop. By the deepest framing the towers have resolved into distance haze with no glassy remnants and the park has taken over the frame. Judge the middle framing hardest: any tower you can see the sky THROUGH is a fail."
+   "expectation": "WALKING SOUTH INTO THE PARK (task 120, issue 034 — the owner: \"the buildings that are supposed to be in the distance just fade away\"). Downtown reads as a SOLID skyline on the south horizon that gently pulls away and hazes into the warm dusk air as you walk — never a see-through glass ghost, never a pop. By the deepest framing the towers have resolved into distance haze with no glassy remnants and the park has taken over the frame. Judge the middle framing hardest: any tower you can see the sky THROUGH is a fail. (127: the stretch is now tree-lined — canopies may partially hide towers; judge see-through only on towers that are actually visible, and the trail corridor itself must stay clear.)"
   },
   {
    "id": "lp-zoo-lakeview",
@@ -1812,6 +1812,71 @@
     }
    ],
    "expectation": "THE CONSERVATORY CONNECTION (task 125): the walk that makes the new gate mean something. A pale limestone ribbon runs south from the gate down the zoo's open north lawn — continuous, mitred into the ground, never a floating slab and never stopping in mid-lawn. f1 shows it threading the gap between the pale rockwork of the Polar tundra on the west and the Penguin cove on the east, comfortably clear of both enclosures. f2 shows it meeting the north habitat walk in a proper mitred junction — the two ribbons join, they do not overlap in a stack or stop short of each other, and there is NO DEAD END. Across all three the ground reads as walkable park lawn with the campus habitats and trees ahead; a player who came through the gate can obviously keep going into the zoo."
+  },
+  {
+   "id": "lp-ripples",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": 27,
+   "z": 455,
+   "framings": [
+    {
+     "yaw": -1.2,
+     "pitch": 0.09,
+     "dist": 7
+    },
+    {
+     "x": 21.5,
+     "z": 462,
+     "yaw": -2.75,
+     "pitch": 0.14,
+     "dist": 5
+    },
+    {
+     "x": 26,
+     "z": 470,
+     "yaw": -2.35,
+     "pitch": 0.1,
+     "dist": 8
+    },
+    {
+     "x": 22.1,
+     "z": 489.6,
+     "yaw": -2.6,
+     "pitch": 0.12,
+     "dist": 4.4
+    }
+   ],
+   "expectation": "TEN THOUSAND RIPPLES (task 127 — the owner's own photo refs/lincoln-park/owner-ten-thousand-ripples.jpg is the judgment standard): six matte WHITE Buddha heads HALF-SUNK in the Drive-side lawn just south of the Diversey corner, scattered loose and uneven — no rows, no plinths, no signage, no fence. Each reads as a ribbed/scalloped white DOME of concentric curl bands with a small topknot, buried to the jaw so the lawn meets the sculpture directly (no base, no lip, no floating shadow gap). At least one framing shows a calm minimal FACE (closed eyes) and at least one shows the curl-banded BACK; the heads read clearly against the green lawn at walking distance, with the Drive's embankment behind and shade trees over the lawn. Varied yaw and slight lean head to head — never identical twins in a line."
+  },
+  {
+   "id": "lp-underpass-walk",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": 31,
+   "z": 505,
+   "framings": [
+    {
+     "yaw": 0.1,
+     "pitch": 0.05,
+     "dist": 9
+    },
+    {
+     "x": 30,
+     "z": 552,
+     "yaw": 0.14,
+     "pitch": 0.04,
+     "dist": 10
+    },
+    {
+     "x": 30,
+     "z": 540,
+     "yaw": -3,
+     "pitch": 0.07,
+     "dist": 9
+    }
+   ],
+   "expectation": "THE DRESSED WALK (task 127 — the owner: 'Add trees on the way to the underpass too please'): the east-strip stretch between the Diversey corner and the Fullerton underpass now reads as a WOODED park walk, not bare filler — mature toon canopies over the lakeside lawns, a thinner tree line along the Drive side, the dual trail (asphalt bike + limestone walk) running CLEAR through the middle with no trunk on either ribbon and no canopy burying the corridor. Southbound framings should catch trees on BOTH sides receding toward Theater on the Lake; the north-looking framing reads the same canopy back toward the corner. Lawn stays visible under the trees — a park, not a forest wall."
   },
   {
    "id": "dv-bay-deck",

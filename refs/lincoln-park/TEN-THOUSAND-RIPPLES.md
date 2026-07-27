@@ -2,8 +2,9 @@
 
 Owner photographed these on 2026-07-26 and asked for them:
 *"there's also these buddha heads half-sunken into the ground at a spot along the
-way to the underpass."* Owner photo: `refs/inbox/owner-2026-07-26-buddha-heads.jpg`
-(move it to `refs/lincoln-park/owner-ten-thousand-ripples.jpg` when you build this).
+way to the underpass."* Owner photo: `refs/lincoln-park/owner-ten-thousand-ripples.jpg`
+(filed here by task 127, which built this — the photo is the judgment standard for
+the `lp-ripples` waypoint).
 
 **This is a real installation, not a rendering bug.** Do not "fix" sunken heads
 anywhere — they are supposed to be half-buried.

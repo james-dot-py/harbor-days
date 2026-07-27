@@ -200,6 +200,13 @@ increasing order of caution:
    task if a public submission is decided.
 3. **Cloud Gate / "the Bean"** is already rendered as a self-lit homage (see
    PITFALLS); keep it clearly stylized, never photographic.
+4. **Ten Thousand Ripples (task 127)** — Indira Freitas Johnson's Buddha-head
+   installation, rendered as a clearly stylized toon homage (six half-buried
+   heads on the Diversey lawn; simplified curl banding, no cast/mold likeness).
+   A living artist's copyrighted sculpture: same treatment class as Cloud Gate —
+   homage, never facsimile. In-game text uses only the public artwork title in
+   a single quiet toast; if a public submission requires it, the toast line can
+   drop the title without touching ids or saves.
 
 Recommendation: ship to **TestFlight as-is now**; make the 5.2 call (disclaimer
 vs. renames) before the public **Submit for Review**.

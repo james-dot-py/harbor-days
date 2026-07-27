@@ -862,6 +862,29 @@ in the distance just fade away."* The gate now **RECEDES then hazes**:
   (long axis N–S, 18×26) to fit the 111-planned strip bulge (x ≤ 52) — order/
   adjacency unchanged. *(Commons imagery gap stands — hand-modeled from the
   documented Perkins Prairie-brick type.)*
+- **The Diversey→Fullerton walk, DRESSED (task 127, owner 2026-07-26).** The east
+  lakefront strip (x 14…≈50, z 410–655) between the Diversey corner and the
+  Fullerton underpass carries the player's whole approach to Lincoln Park and was
+  bare lawn ("just walking"). Two additions, both real:
+  - **Strip planting** — the real park is heavily wooded here (mature canopy over
+    the lawns, thinner line hugging the Drive). `LP_TREEFILL` anchors grow
+    clusters into the SHARED props.js instanced tree buckets (the Montrose-071
+    append: LOCAL seed, post-filter append, **+0 buckets/draws**, rng order
+    untouched). Planting keeps the trail corridor clear (088 nudge +
+    prop-clearance gate), stays OUT of the portal-approach corridor (**z 622–676**
+    — the 124 sightlines are load-bearing) and the Theater sightline band
+    (**z 565–600**), and leaves the corner weld's top-down frame (z < 415) alone.
+  - **TEN THOUSAND RIPPLES** (Indira Freitas Johnson, 2012/13 — the Park District
+    sites it "Just South of Diversey @ LSD"): **six matte-white Buddha heads
+    half-sunk in the Drive-side lawn, x ≈ 17–23, z 425–487**, scattered loose and
+    uneven (9–18 m gaps), varied yaw + slight tilt, buried to the jaw — lawn
+    meets sculpture, no plinths, no signage, no fence. STYLIZED TOON HOMAGE (the
+    Cloud Gate / Crown Fountain precedent — living artist, never a facsimile;
+    APPSTORE.md §9a registers it). The read at distance is the **ribbed dome of
+    concentric curl bands**; the face stays minimal, eyes closed. ONE
+    InstancedMesh (+1 draw), clean collider rings fully on walkable lawn, a
+    quiet once-per-session toast on approach (pack `ripples.js`) instead of any
+    plaque. Data: `LP_RIPPLES`.
 - **Lincoln Park Conservatory** (**RULED 116 / BUILT 122**, resolving the
   staged-const conflict with the built 114/115 campus — the 115 pond-ruling
   precedent: the 111 staging put the formal garden z 740–790 + Bates (−73,776)

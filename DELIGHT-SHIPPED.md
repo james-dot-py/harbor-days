@@ -792,3 +792,13 @@ cut becomes a revert task.
   playtest 2026-07-26: "add an entrance to the zoo from the conservatory side.")
   — Lincoln Park, zoo north fence at the garden axis — src/data/chicago.js
   ZOO.gates.north + ZOO.northWalk, src/structures.js, src/paths.js — task 125
+- TEN THOUSAND RIPPLES — six matte-white Buddha heads half-sunk in the lawn
+  just south of the Diversey corner, right where Chicago actually keeps them
+  ("Just South of Diversey @ LSD"). No signage, no fence, no explanation —
+  just quiet ribbed white domes with calm closed-eye faces scattered under new
+  shade trees, buried to the jaw so the grass meets the sculpture. Walk up and
+  a single soft toast names the piece, once — "a hundred quiet heads across
+  the city — six of them here." And the bare walk to the Fullerton underpass
+  is now a wooded park stretch (both owner asks, 2026-07-26 playtest). —
+  Lincoln Park, Drive-side lawn z 425–487 — src/data/chicago.js LP_RIPPLES +
+  LP_TREEFILL, src/props.js, src/packs/ripples.js — task 127

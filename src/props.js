@@ -210,6 +210,35 @@ export function buildProps(){
       }
     }
 
+    // ---- Lincoln Park strip fill (127): the walk to the Fullerton underpass —
+    // grown into the SHARED tree buckets exactly like the Montrose block above
+    // (LOCAL seed, appended after the post-filter, before n → +0 buckets,
+    // shared rng untouched). Rejections per the LP_TREEFILL data comment.
+    {
+      const TF=CH.LP_TREEFILL,tr=mkrng(TF.seed),T2=CH.LP_THEATER,own=[];
+      // 1.4 m land inset on all four sides — no trunk at the water's edge
+      const land=(x,z)=>CH.lpLandHit(x,z)&&CH.lpLandHit(x+1.4,z)&&CH.lpLandHit(x-1.4,z)&&CH.lpLandHit(x,z+1.4)&&CH.lpLandHit(x,z-1.4);
+      const nearTrail=(x,z)=>{for(const p of CH.LP_TRAIL_LAKE){if((p[0]-x)**2+(p[1]-z)**2<42.25)return true}return false};   // >=6.5 m off the bike centerline (covers the walk lane too)
+      for(const[ax,az,per,sp]of TF.anchors){
+        for(let t=0;t<per;t++){
+          for(let tries=0;tries<24;tries++){
+            const x=ax+(tr()*2-1)*sp,z=az+(tr()*2-1)*sp;
+            if(x<16||!land(x,z))continue;                   // x>=16 keeps trunks off the berm toe
+            if(z>622&&z<676)continue;                       // 124 portal-approach corridor — load-bearing sightlines
+            if(z>565&&z<600)continue;                       // Theater sightline band
+            if(x>T2.x0-3&&x<T2.x1+3&&z>T2.z0-3&&z<T2.z1+3)continue;
+            if(nearTrail(x,z))continue;
+            let bad=false;
+            for(const h of CH.LP_RIPPLES.heads)if((h[0]-x)**2+(h[1]-z)**2<12.25){bad=true;break}   // >=3.5 m off every head
+            if(!bad)for(const e of CH.LP_TREES)if((e[0]-x)**2+(e[1]-z)**2<16){bad=true;break}      // >=4 m off the hand-placed elms
+            if(!bad)for(const o of own)if((o[0]-x)**2+(o[1]-z)**2<12.25){bad=true;break}
+            if(bad)continue;
+            own.push([x,z]);treeSpots.push([x,z,TF.scale[0]+tr()*(TF.scale[1]-TF.scale[0]),false]);break;
+          }
+        }
+      }
+    }
+
     // 088 CLEARANCE NUDGE — "trees in the middle of pathways" (owner). Pure
     // geometry, ZERO rng: runs AFTER all rng consumption so world scatter stays
     // byte-identical (per-tree color/scale are index-coupled — we MOVE x,z only,
@@ -341,6 +370,81 @@ export function buildProps(){
     for(let k=0;k<5;k++){meshes[k].count=counts[k];meshes[k].instanceMatrix.needsUpdate=true;if(meshes[k].instanceColor)meshes[k].instanceColor.needsUpdate=true;}
     shad.instanceMatrix.needsUpdate=true;
     scene.add(meshes[0],meshes[1],meshes[2],meshes[3],meshes[4],shad);
+  }
+
+  // ---- TEN THOUSAND RIPPLES (127) — six matte-white Buddha heads half-sunk in
+  // the Drive-side lawn just south of Diversey (Indira Freitas Johnson, 2012/13).
+  // A STYLIZED toon homage in the Cloud Gate / Crown Fountain precedent, never a
+  // facsimile. ONE merged BufferGeometry authored in a LOCAL frame (y=0 is the
+  // lawn line, +Z is the face direction) drawn as ONE InstancedMesh -> +1 draw,
+  // +0 further buckets. ZERO rng of ANY kind: every placement, yaw and lean is
+  // authored in CH.LP_RIPPLES.heads, and the only per-bump variation is a fixed
+  // function of (row, index). The geometry runs ~0.42 m BELOW y=0 so a leaning
+  // head never opens a gap at the grass, and there is NO shadow disc — these
+  // EMERGE from the lawn; a dark ring would read as a hole. ----
+  {
+    const R=CH.LP_RIPPLES,P=[],D=Math.PI/180;
+    const merge=A=>BufferGeometryUtils.mergeBufferGeometries(A.map(g=>g.index?g.toNonIndexed():g));
+    // SKULL — the ellipsoid dome. Top ~0.94, bottom ~-0.42 (buried to the jaw).
+    P.push(new THREE.SphereGeometry(0.60,12,9).scale(1.0,1.14,0.96).translate(0,0.26,0));
+    // CURL BANDS — the signature, and the ONLY thing that makes the piece
+    // recognizable at walking distance. The read we need is CONCENTRIC BANDS:
+    // horizontal white ridges with a shaded groove between them, not an allover
+    // studded ball. Three numbers do that work, and they fight each other:
+    //   * FEW, CHUNKY rows (5) — one rib per ~0.25 m of dome, so a rib survives
+    //     the 8-20 m framings instead of dissolving into texture.
+    //   * WITHIN a row the bumps OVERLAP (centre spacing 1.55x the bump radius
+    //     vs a 2x diameter) so the whole ring FUSES into one scalloped ridge.
+    //   * BETWEEN rows a real GROOVE: 22 deg of latitude (~0.26 m of arc) against
+    //     a 0.17 m ridge leaves ~0.09 m of bare skull for the shadow line.
+    // The rings ride a copy of the skull ellipsoid pushed 0.02 m proud (uniform,
+    // so the crown rows stay proud too — a radius-only offset sinks at the pole).
+    // Azimuth is NEVER staggered between rows: each ring is its own clean band.
+    // The face gap narrows with latitude and closes at the hairline (lat 52), so
+    // the bands wrap down the sides and past the ears.
+    const unit=new THREE.SphereGeometry(1,6,5),CA=0.62,CB=0.704;
+    const ROWS=[[-14,80,0.085],[8,62,0.085],[30,34,0.085],[52,0,0.085],[72,0,0.055]];   // [lat deg, face-gap half-angle deg, bump radius]
+    for(let ri=0;ri<ROWS.length;ri++){
+      const lat=ROWS[ri][0]*D,gap=ROWS[ri][1]*D,br=ROWS[ri][2];
+      const y=0.26+CB*Math.sin(lat),rr=CA*Math.cos(lat);
+      const cnt=Math.max(6,Math.round(2*Math.PI*rr/(1.55*br)));
+      for(let i=0;i<cnt;i++){
+        let az=i/cnt*Math.PI*2;if(az>Math.PI)az-=Math.PI*2;      // az=0 faces +Z
+        if(Math.abs(az)<gap)continue;
+        const k=br*(1+0.12*Math.sin(ri*12.9898+i*4.1421));       // deterministic +-12% bump size
+        P.push(unit.clone().scale(k,k,k).translate(rr*Math.sin(az),y,rr*Math.cos(az)*0.96));
+      }
+    }
+    // USHNISHA — the topknot, a distinct tier sitting inside the lat-72 ring.
+    P.push(new THREE.SphereGeometry(0.145,8,6).scale(1,0.82,1).translate(0,1.0,0));
+    // FACE — minimal and calm: brows bowing up, closed lids bowing down, a soft
+    // nose bar and lips. Deliberately under-detailed (the brief: do not
+    // over-detail the face; the hair is the piece).
+    // (127 round 2: features sized up ~20% and pushed ~0.015 prouder — at the
+    // f3 framing's ~5 m the original relief washed out white-on-white; the
+    // deeper lid tilt opens a shadow line under the arc so closed eyes read.)
+    for(const sx of[1,-1]){
+      const brow=new THREE.TorusGeometry(0.115,0.024,5,10,1.5);
+      brow.rotateZ(Math.PI/2-0.75);brow.rotateX(-0.45);brow.translate(sx*0.150,0.515,0.515);P.push(brow);
+      const eye=new THREE.TorusGeometry(0.088,0.021,5,10,1.35);
+      eye.rotateZ(-Math.PI/2-0.675);eye.rotateX(-0.62);eye.translate(sx*0.150,0.415,0.55);P.push(eye);
+      const ear=new THREE.BoxGeometry(0.07,0.20,0.13);          // long lobes, half-buried — sited in the groove between the two lowest bands so the ridges don't swallow them
+      ear.rotateZ(-sx*0.08);ear.translate(sx*0.615,0.225,0.02);P.push(ear);
+    }
+    const nose=new THREE.BoxGeometry(0.09,0.18,0.08);nose.rotateX(-0.12);nose.translate(0,0.33,0.57);P.push(nose);
+    const lips=new THREE.BoxGeometry(0.16,0.042,0.05);lips.rotateX(-0.1);lips.translate(0,0.175,0.585);P.push(lips);
+
+    const geo=merge(P);
+    const heads=new THREE.InstancedMesh(geo,toon(R.color),R.heads.length);
+    const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),V=new THREE.Vector3(),S=new THREE.Vector3(),Eu=new THREE.Euler();
+    for(let i=0;i<R.heads.length;i++){
+      const[x,z,ry,tx,tz,s]=R.heads[i];
+      Eu.set(tx,ry,tz,'YXZ');Q.setFromEuler(Eu);                // yaw first, the small leans head-local
+      M.compose(V.set(x,0,z),Q,S.set(s,s,s));heads.setMatrixAt(i,M);
+      collide(x,z,R.collide*s);
+    }
+    heads.instanceMatrix.needsUpdate=true;
+    scene.add(heads);
   }
 
   // ---- hedges ----

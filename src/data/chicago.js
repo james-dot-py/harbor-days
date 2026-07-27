@@ -2189,6 +2189,59 @@ export const LP_TREES = [
   [-78,842,1.2],[-86,828,1.25],[-79,876,1.15],[-66,876,1.2],   // 114: zoo campus shade elms (115: the (-78,792) elm moved to (-78,842) — its old spot is inside the polar tundra)
   [-16,880,1.15],[-34,790,1.1],
 ];
+// 127 — DRESS THE WALK TO THE UNDERPASS (owner 2026-07-26: "Add trees on the
+// way to the underpass too please"). Cluster anchors grown into the SHARED
+// props.js instanced tree buckets via the Montrose-071 append (LOCAL seed,
+// appended AFTER the post-filter, BEFORE n is taken → +0 buckets, +0 draws,
+// shared-rng order untouched). Anchors: [x, z, per, spread]. The west band
+// hugs the Drive (thinner planting, the real thing); the east band is the
+// mature canopy over the lakeside lawns. KEEP-OUTS (hard, enforced by the
+// props.js rejection loop + these anchor choices): the portal-approach
+// corridor z 622-676 (the 124 sightlines are load-bearing), the Theater
+// sightline band z 565-600, the corner weld's top-down frame (z < 415), the
+// LP_RIPPLES heads (>=3.5 m), the LP_TREES elms (>=4 m), the trail (>=6.5 m
+// off the LP_TRAIL_LAKE bike centerline covers the walk lane too), and a
+// 1.4 m land inset so no trunk stands at the water's edge.
+export const LP_TREEFILL = {
+  seed:0x127f11, scale:[1.1,1.8],
+  anchors:[
+    // west / Drive-side band (x >= 16 guard keeps trunks off the berm toe)
+    [17,420,1,2.5],[17.5,472,2,3],[20,515,2,5],[19,552,2,5],[20,608,2,4],
+    // east / lake-side band
+    [42,442,3,5],[42,468,3,5],[45,505,4,6],[40,538,2,5],[46,557,2,4],
+  ],
+};
+// 127 — TEN THOUSAND RIPPLES (Indira Freitas Johnson, 2012/13; the Park
+// District's Lincoln Park site record: "Just South of Diversey @ LSD" — the
+// owner photographed it 2026-07-26 and asked for it). Six matte-white Buddha
+// heads HALF-SUNK in the Drive-side lawn of the east strip, buried to the
+// jaw: lawn meets sculpture, no plinth, no lip, no signage, no fence.
+// STYLIZED TOON HOMAGE (Cloud Gate / Crown Fountain precedent — living
+// artist's copyrighted work, never a facsimile; APPSTORE.md §9a registers
+// it). The at-distance read is the RIBBED DOME of concentric curl bands; the
+// face stays minimal, eyes closed. Built in props.js as ONE InstancedMesh
+// (+1 draw, zero further buckets), zero rng of any kind — every placement is
+// authored here. heads: [x, z, ry, tiltX, tiltZ, s] (tilts are small
+// head-local leans; geometry extends ~0.4 m below the lawn so a tilt never
+// opens a shadow gap at the waterline). Colliders r 0.85*s — rings stay
+// entirely on open walkable lawn (>=2 m off the berm toe x14, >=3 m off the
+// bike ribbon's west edge; the anti-trap law holds).
+export const LP_RIPPLES = {
+  color:0xf3efe4,
+  heads:[
+    [17.8,425.5,  2.9,  0.06,-0.03, 1.06],
+    [23.0,433.5, -0.65,-0.05, 0.06, 0.94],
+    [16.9,447.0,  1.75, 0.04, 0.07, 1.12],   // the money face — looks EAST at the trail
+    [21.8,458.5,  0.4, -0.06,-0.04, 1.0 ],
+    [18.9,476.5, -2.35, 0.05, 0.04, 0.9 ],
+    [22.6,487.0,  0.4, -0.04, 0.06, 1.05],   // 127 walkthrough round 2: ry 1.1->0.4 — faces SSE, near-frontal to the lp-ripples f3 stand so ONE framing reads the calm closed-eye face (the chase cam can never resolve a face at f0/f2 range; from the trail it still shows a varied 3/4)
+  ],
+  collide:0.85,
+  // the quiet once-per-session approach toast (pack ripples.js) — reverent,
+  // no plaque, no fanfare; the real installation carries no signage.
+  toast:{ x:20.2, z:456, r:15, main:'TEN THOUSAND RIPPLES',
+          sub:'a hundred quiet heads across the city — six of them here' },
+};
 // ---- ZONES (discovery) + PROPS (statues) — LINCOLN_* mirrors of ZONES/props
 export const LINCOLN_ZONES = [
   { n:'Diversey Harbor',      x:-24, z:520,  r:44 },

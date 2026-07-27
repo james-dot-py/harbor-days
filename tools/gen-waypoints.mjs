@@ -653,6 +653,32 @@ add('lp-zoo-north-walk', 'lincolnpark', 'lakefront', -70.2, 762, [
   { x: -71, z: 787, yaw: 0.20, pitch: 0.14, dist: 7.5 },    // f2 — the far weld onto walkN (camera stays 2 m clear of the polar rect at this yaw)
 ]);
 
+// 127 — TEN THOUSAND RIPPLES + THE DRESSED WALK (the owner's 2026-07-26
+// playtest: the Buddha heads he photographed just south of Diversey, and
+// "add trees on the way to the underpass too please"). lp-ripples stands on
+// the trail-side lawn EAST of the head field (x 27) and looks WEST/SW across
+// it, so the domes read against green lawn with the Drive embankment behind;
+// f1 sits inside the field for the FACE read, f2 pulls back for the scatter.
+// lp-underpass-walk reads the newly-treed east strip between the Diversey
+// corner and the Fullerton portal — two southbound stands + one look back
+// north, all ON the trail so the corridor's own clearance is in frame.
+add('lp-ripples', 'lincolnpark', 'lakefront', 27, 455, [
+  { yaw: -1.2, pitch: 0.09, dist: 7 },
+  { x: 21.5, z: 462, yaw: -2.75, pitch: 0.14, dist: 5 },
+  { x: 26, z: 470, yaw: -2.35, pitch: 0.1, dist: 8 },
+  // f3 — THE FACE READ (round 2): the chase cam can't resolve a face at the
+  // f0/f2 ranges, so this stands 1.9 m off the SOUTH head (which faces SSE,
+  // data ry 0.55) with the camera ~5.7 m from the face, 18° off-frontal and
+  // 18° off-axis — close enough for the closed-eye relief to shade, lateral
+  // enough to clear the mayor (the 122 aim-off law).
+  { x: 22.1, z: 489.6, yaw: -2.6, pitch: 0.12, dist: 4.4 },
+]);
+add('lp-underpass-walk', 'lincolnpark', 'lakefront', 31, 505, [
+  { yaw: 0.1, pitch: 0.05, dist: 9 },
+  { x: 30, z: 552, yaw: 0.14, pitch: 0.04, dist: 10 },
+  { x: 30, z: 540, yaw: -3.0, pitch: 0.07, dist: 9 },
+]);
+
 // Diversey ENTERABLE bay (task 028): stand on the ground hitting deck at a
 // middle bay's hitting spot and look NORTH down the range — the axis-aligned
 // interior framing for the bay pocket (a cross-body camera sits in a divider);
