@@ -545,6 +545,13 @@
       "description": "Currently unplanted.",
       "fetchDate": "2026-07-26T18:56:30.323Z",
       "bytes": 484861
+    },
+    {
+      "source": "owner",
+      "file": "owner-2026-07-26-fullerton-underpass.png",
+      "title": "Owner playtest screenshot — the Fullerton underpass approach reads as blank slabs",
+      "description": "Owner 2026-07-26: 'neither side of the fullerton underpass looks like there's an underpass there.' West-approach in-game view: slab stack, no visible mouth, two cyan water patches at the berm base. The evidence behind issue 037 / task 124.",
+      "fetchDate": "2026-07-26"
     }
   ]
 }

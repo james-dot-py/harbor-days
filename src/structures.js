@@ -182,6 +182,7 @@ function buildLPUnderpass(){
   const U=CH.LP_UNDERPASS,D=U.deck,P=U.parapet,R=CH.LSD.road;
   const z=U.portalE[1],hw=U.w/2,zc=(U.z0+U.z1)/2;
   const wallM=toon(U.wall),floorM=toon(U.floor),deckM=toon(U.soffit),voussoirM=toon(0xe8dcc2);
+  const throatM=toon(U.throat),lampM=bmat(U.lamp);   // 124: throat = baked-shadow interior tone; ONE lampM instance shared by tunnel + pylon lanterns (bmat does NOT cache — a 2nd instance would open a 2nd merge bucket)
   const SOF=D.top-D.th;                       // 0.52 — bridge soffit = abutment top (3.62 m headroom)
   const COPE=0.15;                            // retaining-wall coping, proud of park grade
   const LIFT=0.06;                            // paving rides just over the analytic walk surface
@@ -219,20 +220,25 @@ function buildLPUnderpass(){
   // the ABUTMENT carrying the deck.
   {
     const WT=0.7;
-    const span=(x0,x1,top)=>{
+    const span=(x0,x1,top,mat)=>{
       const n=Math.max(1,Math.round((x1-x0)/1.0));
       for(let i=0;i<n;i++){
         const a=x0+(x1-x0)*i/n,b=x0+(x1-x0)*(i+1)/n;
         const bot=Math.min(surf(a,zc),surf(b,zc))-0.7;
         for(const s of[-1,1]){
-          const m=new THREE.Mesh(new THREE.BoxGeometry(b-a+0.02,top-bot,WT),wallM);
+          const m=new THREE.Mesh(new THREE.BoxGeometry(b-a+0.02,top-bot,WT),mat||wallM);
           m.position.set((a+b)/2,(top+bot)/2,(s<0?U.z0:U.z1)+s*WT/2);scene.add(m);
         }
       }
     };
     span(U.rampW.x0-0.2,D.x0,COPE);         // open west ramp
-    span(D.x0,D.x1,SOF);                    // the abutments under the bridge
+    span(D.x0,D.x1,SOF,throatM);            // the abutments under the bridge — 124: THROAT tone (dark, never black; the lanterns keep it lit) so the mouth reads as a shadowed opening against the tan portal face
     span(D.x1,U.rampE.x1+0.2,COPE);         // open east ramp
+    // 124: matching dark floor band under the deck (a thin overlay 0.012 proud
+    // of the paved strip — layer-ladder clear) — the throat goes dark floor to
+    // soffit, the open-cut ramps stay sunlit pale.
+    const fb=new THREE.Mesh(new THREE.BoxGeometry(D.x1-D.x0-0.3,0.02,U.z1-U.z0-1.6),throatM);
+    fb.position.set((D.x0+D.x1)/2,U.floorY+LIFT+0.022,zc);scene.add(fb);
   }
 
   // 3. THE BRIDGE DECK — the Drive rides OVER the cut (the road slab in buildLSD
@@ -260,6 +266,25 @@ function buildLPUnderpass(){
     const dx=1.4,pw=1.55,rise=0.55,ring=0.2,ncol=26;
     const headY=U.floorY+U.h;
     for(const px of[U.portalW[0],U.portalE[0]]){
+      // 124: THROAT COLLAR — a dark header band just inside each mouth. From
+      // approach distance the through-view under the arc is the SUNLIT far
+      // ramp, so the opening read pale-on-pale (worst from the west, where
+      // toon sun washes the whole face cream); this band makes the mouth's
+      // upper reveal read as shadow — the Belmont-portal dark-recess cue —
+      // while the tunnel stays open and lit below it.
+      { const s2=px<7?1:-1;
+        const hb=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.96,U.w),throatM);
+        hb.position.set(px+s2*0.85,0.03,z);scene.add(hb);     // y -0.45 .. 0.51, under the soffit line — tall enough to read from 30-40 m over the approach lip
+        // warm jamb lanterns flanking the mouth, HALF-EMBEDDED in the headwall
+        // face so they read as wall-mounted globes (the Belmont flank-lamp
+        // cue): two glowing dots marking the opening at distance. x sits 0.1
+        // inside the headwall face plane (face = px - s2*0.755) — a first cut
+        // at px-s2*0.35 buried them wholly INSIDE the shoulder box.
+        const jg=new THREE.SphereGeometry(0.2,10,8);
+        for(const t of[-1,1]){
+          const jl=new THREE.Mesh(jg,lampM);
+          jl.position.set(px-s2*0.86,0.32,z+t*(U.w/2+0.55));scene.add(jl);
+        } }
       for(const s of[-1,1]){
         const post=new THREE.Mesh(new THREE.BoxGeometry(dx,SOF-U.floorY,pw),wallM);
         post.position.set(px,(U.floorY+SOF)/2,z+s*(hw+pw/2));scene.add(post);
@@ -281,9 +306,59 @@ function buildLPUnderpass(){
   // 5. LANTERNS — warm self-lit glows along the tunnel walls so the crossing
   // reads LIT, not a black hole. One shared material => one merged draw.
   {
-    const lampM=bmat(U.lamp),lg=new THREE.SphereGeometry(0.26,10,8);
+    const lg=new THREE.SphereGeometry(0.26,10,8);
     for(const lx of[2.6,7.0,11.4])for(const s of[-1,1]){
       const l=new THREE.Mesh(lg,lampM);l.position.set(lx,0,z+s*5.8);scene.add(l);
+    }
+  }
+
+  // 6. PORTAL PRESENCE AT APPROACH DISTANCE (124, issue 037). The 120 mouth is
+  // entirely below grade (crown y +0.3), so from the walk the crossing read as
+  // blank slabs — "neither side of the fullerton underpass looks like there's
+  // an underpass there". Above-grade furniture in the Belmont/Addison portal
+  // idiom now marks BOTH faces: a stone HEADWALL over the mouth (shoulders
+  // closing the berm-gap corner slots + a lintel + pale coping), a PYLON with
+  // a lantern globe at each corner (the 30-40 m cue), and height-tapered WING
+  // WALLS canting outward along the open ramps — the funnel that aims the eye
+  // into the mouth. All plain meshes on the cached toon colours already in the
+  // merge pool (+0 buckets; lampM shared with section 5). Footings stand on
+  // the blocked rim lip (rimLip 2.6) or over the trench walls — no colliders
+  // (the anti-trap law).
+  {
+    const lg=new THREE.SphereGeometry(0.26,10,8);
+    const mzN=z-U.w/2,mzS=z+U.w/2;                 // mouth clear span (656.5 / 665.5)
+    for(const s of[-1,1]){                          // s -1 = west face, +1 = east
+      const face=s<0?D.x0:D.x1;
+      const hx=face+s*0.28;                         // headwall centre, 0.55 thick, proud of the fascia
+      const shoulder=(za,zb)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(0.55,2.12,zb-za),wallM);
+        m.position.set(hx,0.26,(za+zb)/2);scene.add(m);};       // y -0.80 .. 1.32 (seals the corner slot down past grade)
+      shoulder(U.z0-2.3,mzN);shoulder(mzS,U.z1+2.3);
+      const lin=new THREE.Mesh(new THREE.BoxGeometry(0.55,0.84,mzS-mzN),wallM);
+      lin.position.set(hx,0.90,z);scene.add(lin);               // lintel y 0.48 .. 1.32 — overlaps the spandrels (no daylight slot) but spares the voussoir crown (top ~0.5)
+      const cope=new THREE.Mesh(new THREE.BoxGeometry(0.8,0.24,(U.z1-U.z0)+4.9),voussoirM);
+      cope.position.set(hx,1.44,z);scene.add(cope);             // pale coping band y 1.32 .. 1.56 — the light cap line that reads at distance
+      for(const t of[-1,1]){
+        // corner pylon + cap + lantern globe
+        const px=face+s*0.95,pz=zc+t*7.8;
+        const py=new THREE.Mesh(new THREE.BoxGeometry(1.5,3.15,1.5),wallM);
+        py.position.set(px,0.775,pz);scene.add(py);             // y -0.80 .. 2.35
+        const cap=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.35,1.8),voussoirM);
+        cap.position.set(px,2.52,pz);scene.add(cap);            // y 2.35 .. 2.70
+        const l=new THREE.Mesh(lg,lampM);l.position.set(px,3.02,pz);scene.add(l);
+        // wing wall — 4 segments stepping DOWN (top 1.15 -> 0.25) and canting
+        // ~0.95 m OUTWARD from the trench line as they run along the open ramp
+        const wx0=face+s*1.7,Lr=6.6,segN=4;
+        for(let i=0;i<segN;i++){
+          const u0=i/segN,u1=(i+1)/segN,um=(u0+u1)/2;
+          const ax=wx0+s*Lr*u0,az=zc+t*(6.35+0.95*u0);
+          const bx=wx0+s*Lr*u1,bz=zc+t*(6.35+0.95*u1);
+          const top=1.15-0.9*um,len=Math.hypot(bx-ax,bz-az)+0.06;
+          const m=new THREE.Mesh(new THREE.BoxGeometry(len,top+0.5,0.5),wallM);
+          m.position.set((ax+bx)/2,(top-0.5)/2,(az+bz)/2);
+          m.rotation.y=-Math.atan2(bz-az,bx-ax);
+          scene.add(m);
+        }
+      }
     }
   }
 }

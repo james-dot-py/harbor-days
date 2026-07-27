@@ -1038,4 +1038,24 @@ few turns to find; keep each to one line of symptom + fix.
   so the child reads as floating debris. Derive child positions from the SAME
   rotation pipeline as the parent (or compose both from one matrix), and check
   attachment in a shot against a BRIGHT background, where thin stems wash out.
+- The 041 grade-carpet law, LAWN-over-ANALYTIC-SURFACE edition (124/issue 037): a
+  sunken feature whose floor is an analytic height function (lpUnderpassH) has no
+  geometry hole of its own, so the y0 LAND ShapeGeometry paves straight OVER the
+  cut and the whole trench+mouth is invisible from every approach — while every
+  framing STANDING IN the cut looks perfect (the 120 set), because from inside
+  the cap is behind the camera. The owner saw "slabs on turf" for four shipped
+  tasks. Digging a walk surface below grade REQUIRES carving its footprint out of
+  the ground polygon (a boundary NOTCH beats a hole — earcut holes may not touch
+  the outer ring), and the proof shot is an APPROACH framing at the DEFAULT chase
+  camera, never an interior one.
+- A below-grade portal has ~0 above-grade evidence, and toon has NO shadows so
+  its interior renders as BRIGHT as the outside — a tunnel mouth reads as a
+  tunnel only if you BAKE the shadow (dark throat walls/floor + a dark header
+  collar just inside the mouth) and put stone furniture ABOVE grade (headwall +
+  coping + pylons + lanterns, the Belmont-portal idiom). Also: clip rects that
+  "cover the trench" must cover the full BERM GAP — 120's WATER_S clip stopped
+  0.8 m short of the berm split ends and the lake showed through the two corner
+  slots as cyan patches at the base of every approach view. And bmat() does NOT
+  cache per hex like toon() — a second bmat(sameColor) opens a second merge
+  bucket; share the material instance.
 

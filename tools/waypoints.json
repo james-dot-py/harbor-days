@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-26T22:29:18.327Z",
- "count": 166,
+ "generated": "2026-07-27T01:02:10.558Z",
+ "count": 168,
  "waypoints": [
   {
    "id": "spawn",
@@ -1176,7 +1176,65 @@
      "dist": 13
     }
    ],
-   "expectation": "THE FULLERTON CROSSING, REBUILT (task 120, issue 035 — the owner: \"there’s not a real bridge over lakeshore drive… you have to pass through the highway and you’re obscured by it; solids shouldn’t pass through solids\"). A REAL sunken underpass: a crushed-limestone path ramps DOWN from the lakefront trail between pale stone retaining walls, passes UNDER Lake Shore Drive through an open voussoir portal into a warmly lit tunnel, and ramps back up into Lincoln Park. The Drive is visibly CARRIED OVER on a bridge deck with low parapets. The mayor walks through fully visible with ~3.6 m of headroom — the roadway is ABOVE him, never through him. Both mouths open, you see straight through to the green park beyond. Axis-aligned down-the-tunnel framings, plus one 3/4 from the bank that reads the bridge from outside."
+   "expectation": "THE FULLERTON CROSSING, REBUILT (task 120, issue 035 — the owner: \"there’s not a real bridge over lakeshore drive… you have to pass through the highway and you’re obscured by it; solids shouldn’t pass through solids\"). A REAL sunken underpass: a crushed-limestone path ramps DOWN from the lakefront trail between pale stone retaining walls, passes UNDER Lake Shore Drive through an open voussoir portal into a tunnel, and ramps back up into Lincoln Park. The Drive is visibly CARRIED OVER on a bridge deck with low parapets. The mayor walks through fully visible with ~3.6 m of headroom — the roadway is ABOVE him, never through him. Both mouths open, you see straight through to the far side. Axis-aligned down-the-tunnel framings, plus one 3/4 from the bank that reads the bridge from outside. (124, issue 037: the under-deck throat is now DARKER than the sunlit open cut — dark walls + floor band + a dark header collar just inside each mouth — with the warm lantern glows keeping it lit, never black; both faces wear the above-grade portal group — headwall, coping, corner pylons with lantern globes, wing walls — and the f3 outside read includes it.)"
+  },
+  {
+   "id": "lp-underpass-approach-e",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": 40,
+   "z": 661,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.34,
+     "dist": 8.2
+    },
+    {
+     "x": 33,
+     "z": 648,
+     "yaw": -1.15,
+     "pitch": 0.14,
+     "dist": 8
+    },
+    {
+     "x": 44,
+     "z": 640,
+     "yaw": -1,
+     "pitch": 0.12,
+     "dist": 9
+    }
+   ],
+   "expectation": "THE APPROACH READ, EAST SIDE (124, issue 037 — the owner: \"neither side of the fullerton underpass looks like there's an underpass there\"). From the east lakefront lawn at walking distance the crossing reads as an UNDERPASS without being told: a tan stone HEADWALL with a pale coping band over a genuinely DARK arched mouth, the paved cut visibly DESCENDING into it through a notch in the lawn, tapered wing walls funneling in, corner PYLONS with warm lantern globes flanking the gate (plus small jamb lamps at the mouth), and the Drive carried across ABOVE on its parapeted deck. NO cyan/water patches anywhere at the berm base (the WATER_S clip covers the full berm gap). Never a blank slab stack on unbroken turf."
+  },
+  {
+   "id": "lp-underpass-approach-w",
+   "area": "lincolnpark",
+   "cell": "lakefront",
+   "x": -24,
+   "z": 661,
+   "framings": [
+    {
+     "yaw": 1.57,
+     "pitch": 0.34,
+     "dist": 8.2
+    },
+    {
+     "x": -18,
+     "z": 653,
+     "yaw": 1.25,
+     "pitch": 0.1,
+     "dist": 7
+    },
+    {
+     "x": -34,
+     "z": 666,
+     "yaw": 1.9,
+     "pitch": 0.16,
+     "dist": 10
+    }
+   ],
+   "expectation": "THE APPROACH READ, WEST SIDE (124, issue 037 — the owner's own screenshot angle). From the west park lawn at walking distance: the same above-grade portal group as the east face — headwall + pale coping, corner pylons with lantern globes, wing walls tapering down the ramp — with the cut NOTCHED visibly into the lawn, the ramp descending to a mouth whose upper reveal reads DARK (throat collar) with warm jamb lamps flanking it, and the Drive + parapets crossing above. Theater on the Lake / the lake horizon may stand beyond. The sunset toon light washes the stone pale here — acceptable — but the mouth must still read as a dark opening and the cut as a real descent, NOT slabs on flat turf, and NO cyan water patches at the base."
   },
   {
    "id": "lp-zoo-gate",

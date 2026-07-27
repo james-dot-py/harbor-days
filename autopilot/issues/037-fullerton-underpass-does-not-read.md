@@ -41,3 +41,33 @@ north and south sides: a real mouth with depth, a lintel/headwall above it, chee
 walls with visible thickness, interior falloff that is dark but not black, and
 enough contrast against the berm face that it reads at distance. Then add judged
 waypoints at the *approach* distance on both sides so this can never pass blind again.
+
+## RESOLVED — task 124 (2026-07-26)
+
+Two root causes, both found by standing where the owner stood (both sides
+reproduced first):
+
+1. **The cyan patches** were the `WATER_S` plane showing through the two
+   berm-gap corner slots (z 653–654.3 / 667.7–669, x 0–14) where no ground
+   exists: the berm splits at z 653/669 but the trench walls start at z ~654.3
+   and 120's water clip stopped at z 653.8/668.2 — 0.8 m short on each side.
+   Fixed twice over: the clip now covers the full berm gap (z 652.6–669.4) and
+   the new headwall shoulders physically seal the slots to y −0.8.
+2. **The no-read was the LAWN, not the portal detail**: both LP land
+   ShapeGeometries rendered at y0 straight OVER the sunken cut (the 041
+   grade-carpet law, lawn edition), so from any approach the ramps and mouth
+   sat under unbroken turf — 120's framings all stood inside the cut and never
+   saw it. The trench is now NOTCHED out of both LAND polygons (data module, so
+   engine + walkprobe + render inherit), and both faces carry above-grade
+   portal furniture in the Belmont/Addison idiom: headwall + pale coping,
+   corner pylons with lantern globes, outward-canting tapered wing walls, warm
+   jamb lamps, and a dark throat (under-deck walls/floor + a header collar
+   inside each mouth) so the opening reads as a shadowed, lantern-lit mouth.
+
+Sides note: the passage runs E–W (the berm/Drive run N–S here), so the two
+approaches are EAST (lakefront) and WEST (park) — the judged waypoints are
+`lp-underpass-approach-e` / `lp-underpass-approach-w` (the issue's "north and
+south" wording named the same two sides). Each has a DEFAULT-chase-camera f0 at
+walking distance plus oblique and 35–40 m framings, expectations authored —
+the underpass can no longer green from inside the tunnel. Run of record
+`tools/shots/run-ms2iv2j2` (10/10 met, 0 errors, max 308/480 draws).

@@ -1655,7 +1655,9 @@ export const LP_SOUTHPOND_WATER = crChain([
 // Lakefront Trail south, bulging at Fullerton for Theater on the Lake; lake beyond.
 export const LP_LAND_WEST = [
   [0,412],                              // NE (berm west face x the Diversey corner)
-  [0,560],[0,720],[0,900],[0,1006],     // EAST edge = the berm's west face (x0)
+  [0,560],
+  [0,655],[-11.4,655],[-11.4,667],[0,667],   // 124 (issue 037): the Fullerton TRENCH NOTCH — the west ramp's cut carved OUT of the lawn polygon. The y0 lawn plane rendered right OVER the sunken ramp (the 041 grade-carpet law, LAWN edition), so from every approach the underpass read as slabs on turf; 120's framings all stood inside the cut and never saw it. Walkability unaffected: walkable() ORs lpUnderpassHit separately and surfaceY checks lpUnderpassH first.
+  [0,720],[0,900],[0,1006],             // EAST edge = the berm's west face (x0)
   [-28,1024],[-64,1028],[-94,1022],     // SOUTH edge (South Pond lawn — stubbed for 117)
   [-104,958],[-104,876],                // SW corner
   [-103,810],[-107,795],[-107,700],[-99,688],  // WEST edge N-bound — 122 (the 116 ruling): the Grandmother's Garden LAND bulge (west edge ~ -107 over z 690..800; clamp -112 + the relocated L band -118 both hold; holds LP_TRAIL_STOCKTON x-92..-99)
@@ -1669,6 +1671,7 @@ export const LP_LAND_EAST = [
   [54,536],[54,612],           // Theater-on-the-Lake bulge (113: widened x52->54 so the pavilion's east wall x51 keeps >=1.3 m of ground through z626; z<700 so the millennium CLAMP_FULL_M disjointness holds)
   [48,662],[38,702],           // narrowing south
   [28,726],[16,714],           // SE tip (Fullerton / trail south end)
+  [14,667],[25.4,667],[25.4,655],[14,655],   // 124 (issue 037): the Fullerton TRENCH NOTCH, east ramp — same lawn-cap carve as LP_LAND_WEST (the 041 law, lawn edition); the cut + retaining walls finally show from the approach
   [14,640],[14,470],[14,402],  // WEST edge = the berm's east face (x14)
 ];
 
@@ -1699,8 +1702,8 @@ export const LP_UNDERPASS = {
   portalE:[14,661], portalW:[0,661], w:9, h:3.4,   // the two OPEN stone mouths at the berm faces
   deck:{ x0:-0.2, x1:14.2, z0:653, z1:669, top:1.02, th:0.5 },   // the LSD bridge over the cut (soffit y 0.52 -> 3.62 m headroom)
   parapet:{ h:0.9, t:0.5 },          // low walls on the bridge, read from the roadway
-  rimLip:2.2, rimDepth:0.6,          // blocked band in z beside the OPEN ramps, only where the cut is genuinely deep (walk data, no colliders)
-  wall:0xd8cbb0, floor:0xc9c3b4, soffit:0x9c968a, lamp:0xffd9a0,
+  rimLip:2.6, rimDepth:0.6,          // blocked band in z beside the OPEN ramps, only where the cut is genuinely deep (walk data, no colliders). 124: 2.2 -> 2.6 so the portal pylons + outward-canting wing walls (issue 037) stand entirely on blocked ground
+  wall:0xd8cbb0, floor:0xc9c3b4, soffit:0x9c968a, lamp:0xffd9a0, throat:0x6f665c,   // 124: throat = under-deck wall/floor tone (warm dark stone) — toon light never darkens an interior, so the mouth needs a baked-shadow tone to read as an OPENING from the approach (issue 037)
 };
 
 // ---- SHARED LINCOLN PARK WALKABILITY (the engine main.js AND tools/walkprobe.mjs

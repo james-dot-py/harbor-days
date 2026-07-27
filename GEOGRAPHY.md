@@ -772,6 +772,21 @@ it on a bridge deck** — the real Fullerton underpass.
 - The trail ribbons stop at the ramp heads (`LP_TRAIL_LAKE` ends x 25.5,
   `LP_TRAIL_PARK` starts x −11.5) — a ribbon drawn flat at y 0.05 would
   otherwise float over the trench.
+- **124 (issue 037): the portal READS from the approach.** The 120 mouth is
+  entirely below grade (crown y +0.3), so from a walking approach the crossing
+  read as blank slabs — the owner: *"neither side of the fullerton underpass
+  looks like there's an underpass there."* Both berm faces now carry above-grade
+  portal furniture in the Belmont/Addison stone idiom: a tan HEADWALL band over
+  the mouth (shoulders + lintel + pale coping, grade → y ≈1.56), a stone PYLON
+  with a lantern globe at each of the four corners (cap y 2.7, the at-distance
+  cue), and height-tapered WING WALLS canting outward along the open ramps (the
+  funnel). Under the deck the walls + a floor band darken to a warm throat tone
+  (`LP_UNDERPASS.throat`) so the mouth reads as a shadowed-but-lit opening —
+  toon lighting never darkens an interior on its own. The rim lip widens
+  2.2 → 2.6 so every pylon/wing footing stands on blocked walk data (anti-trap:
+  still no colliders). The WATER_S trench clip now covers the FULL berm gap
+  (z 652.6–669.4) — the 120 rect (z 653.8–668.2) left the water plane visible
+  through the two berm-gap corner slots, the owner-reported cyan patches.
 
 #### STRUCTURAL RULING — THE SKYLINE-BILLBOARD GATE (binding on 112/113; AMENDED 120)
 The global downtown skyline billboard (`sky.js`, world **z 504–677**, fog:false,

@@ -740,8 +740,14 @@ export function buildCoast(){
       // 120: the Fullerton trench (floor -3.1) digs below this plane — clip its
       // footprint out of the water or the underpass reads as a flooded canal
       // (livingWaterMat clip note). Local coords: rect minus the mesh centre.
+      // 124 (issue 037): z margin 1.2 -> 2.4 so the clip covers the FULL berm
+      // gap (LSD.gap 653..669) — the old rect stopped at 653.8/668.2, and the
+      // water plane showed through the two berm-gap corner slots (z 653..654.3
+      // / 667.7..669, x 0..14, where no ground exists) as cyan patches at the
+      // base of every approach view. The whole rect stays under LAND/berm, so
+      // no legit lake is ever lost.
       const wn=new THREE.Mesh(ng,livingWaterMat(0x2fa3b5,
-        {x0:U.rampW.x0-1.5-N.cx,x1:U.rampE.x1+1.5-N.cx,z0:U.z0-1.2-N.cz,z1:U.z1+1.2-N.cz}));
+        {x0:U.rampW.x0-1.5-N.cx,x1:U.rampE.x1+1.5-N.cx,z0:U.z0-2.4-N.cz,z1:U.z1+2.4-N.cz}));
       wn.userData.live=true;                                // animated + local swell -> exempt from the cell merge
       wn.position.set(N.cx,WATER_Y+N.yOff,N.cz);scene.add(wn);
       waterS=wn;

@@ -470,6 +470,23 @@ add('lp-underpass', 'lincolnpark', 'lakefront', 18, 661, [
   { x: -4, z: 661, yaw: 1.57, pitch: 0.02, dist: 6 },   // DOWN the west ramp looking back EAST — f0's recipe mirrored: west portal + voussoir + soffit overhead, see-through to the lakefront side (a grade-level stand hides the portal below the trench lip)
   { x: 22, z: 650, yaw: -1.15, pitch: 0.26, dist: 13 }, // 3/4 from the north bank: the Drive on its deck, parapets, the trench + retaining walls reading as a real crossing
 ]);
+// 124 (issue 037) — the APPROACH reads, both sides. 120's four framings all sat
+// on the ramps/floor or the trench lip, so the fix was verified from INSIDE the
+// thing being fixed (the 080 blind-spot class) while every walking approach saw
+// blank slabs on an unbroken lawn. These stands are at WALKING distance on the
+// lawns; f0 on each side is the DEFAULT chase camera (pitch 0.34 / dist 8.2) —
+// the exact view a wandering player gets. A future session can no longer green
+// the underpass from inside the tunnel.
+add('lp-underpass-approach-e', 'lincolnpark', 'lakefront', 40, 661, [
+  { yaw: -1.57, pitch: 0.34, dist: 8.2 },               // the DEFAULT-CAMERA walking read, dead-on from the east lawn ~26 m out (portal sits above the mayor at this pitch)
+  { x: 33, z: 648, yaw: -1.15, pitch: 0.14, dist: 8 },  // NE oblique from the trail side: pylons + lanterns + dark mouth + wing-wall funnel in 3/4
+  { x: 44, z: 640, yaw: -1.00, pitch: 0.12, dist: 9 },  // the far 35-40 m read from the NE lawn (clear of the z658 elm): bridge + arch + dark mouth still obvious
+]);
+add('lp-underpass-approach-w', 'lincolnpark', 'lakefront', -24, 661, [
+  { yaw: 1.57, pitch: 0.34, dist: 8.2 },                // the DEFAULT-CAMERA walking read from the west park (the owner's own angle, issue 037)
+  { x: -18, z: 653, yaw: 1.25, pitch: 0.10, dist: 7 },  // low oblique at the funnel: collar-dark mouth + jamb lamps + descending cut
+  { x: -34, z: 666, yaw: 1.90, pitch: 0.16, dist: 10 }, // the far SW read: full portal group + the Drive crossing above, theater + lake beyond (yaw 1.85->1.90 + stand z-2: ~10 deg of mouth aim-off so the mayor's head clears the arch — the 122 margin law)
+]);
 // (lp-westpanel RETIRED task 114 — its stand is now inside the zoo campus; the
 // three lp-zoo-* stands below supersede the honest-interim-lawn read.)
 
