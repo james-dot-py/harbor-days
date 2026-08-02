@@ -1127,4 +1127,46 @@ few turns to find; keep each to one line of symptom + fix.
   #hint key bar (absent from the committed baseline), the rest animation. Mask
   #mini AND #hint, and set the threshold from a MEASURED floor (two captures of
   the same build differ ~1000 px), never from 0. tools/tmp-125-detdiff.mjs.
+- **A crChain-SMOOTHED shoreline is NOT its control points, and a deck rooted on
+  the control points floats over water** (128, owner issue 040 — "at the dock
+  approaching montrose harbor I fall in when I try to walk to end"). The Montrose
+  finger docks took `x0:186` straight from `mtBasinWestLine`'s control points; the
+  LAND polygon is built from the SMOOTHED chain, which at the four dock rows
+  passes 185.14 / 184.87 / 185.03 / 185.55. Every deck rooted 0.45–1.13 m out
+  over open water, so a non-walkable moat sat between the lawn and the first
+  plank: the player stalled at it, the wade rule banked 0.35 s, and he dropped
+  2.4 m into the basin. The docks were never reachable on foot AT ALL, and
+  nothing noticed for six tasks. Smoothing pulls an edge INWARD at a convex bend
+  — derive a shore-rooted structure from the same smoothed geometry walkability
+  uses, or measure it and leave margin (root now 183.4, ≥1.4 m of deck on grass).
+- **"walkprobe is green" says nothing about a surface walkprobe has never heard
+  of.** It passed 1729/0 through the whole life of that bug because its walk-rect
+  list MIRRORED the formulas in props.js and simply omitted MT_FINGER_DOCKS — the
+  named never-fork pitfall in its silent form. A mirror does not fail loudly when
+  it is INCOMPLETE. Both sides now read `CH.deckRects()`, and
+  `tools/deck-coverage.mjs` (walkprobe's 6th shell-out guard) closes the class
+  from the other end: it raycasts the RENDERED planks and asks the engine whether
+  each one holds you, so a deck can never again be drawn longer — or rooted
+  further out — than the surface under it.
+- **A walkable surface needs THREE assertions, not one**: (a) every rendered
+  plank is walkable, (b) surfaceY matches the rendered top face, (c) the deck is
+  REACHABLE from real ground. Issue 040 passed (a) and (b) perfectly — it was a
+  correct, well-formed, unreachable island. Coverage without reachability is a
+  gate that agrees with the bug.
+- **You could WADE off any deck**: standing on a walk rect and leaning on the
+  edge banked `jsk.wadeT` for 0.35 s and then walked you off a 2.4 m drop, with a
+  handrail rendered right there. 128 gates the wade accumulator on `onRect` —
+  a deck edge now stops you, and SPACE off the end is the deliberate, survivable
+  way in. Shores/sand/lawns carry no walk rect, so wading in is untouched; that
+  boundary is the regression to re-test if the rule is ever widened.
+- **r128 `Sprite.raycast` dereferences `raycaster.camera`**: a whole-scene ray
+  throws "Cannot read properties of null" unless you set
+  `raycaster.camera = __hd.camera` first. Tagged-object rays
+  (`intersectObject(mesh)`) are safe; scene-wide ones are not.
+- **Down-the-length framings put the mayor over the very seam you are judging.**
+  mt-dock-end-f1 aims west down the whole dock: his body covers the deck
+  centreline for its entire run, and only the two handrails converging past his
+  shoulders prove the planks reach land. Judge a continuity fix from a SIDE
+  profile (camera ~16 m off the axis) or from ABOVE (pitch 0.5 over the seam) —
+  aim off-subject.
 

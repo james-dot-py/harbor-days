@@ -1,6 +1,6 @@
 {
- "generated": "2026-07-27T17:00:42.432Z",
- "count": 175,
+ "generated": "2026-08-02T19:20:56.393Z",
+ "count": 177,
  "waypoints": [
   {
    "id": "spawn",
@@ -638,6 +638,61 @@
     }
    ],
    "expectation": "THE HOOK (task 070; 104 SPIT-LAKEWARD): mid-pier on the stone breakwater, looking SOUTH down its length — the walkable promenade runs ahead with a fishing railing along the harbor (inner) edge, riprap/terraced stone stepping down to the water on the lake side, the deck TAPERING as the arm rakes lakeward to its tip where the red-capped harbor entrance light stands with OPEN WATER beyond and around it. The mainland shore sits well WEST past the mouth — the pier must NOT read as continuing into the land beyond (the owner's 104 report). Reads as a spit extending INTO the lake, fisherfolk-ready and WALKABLE end to end; NOT a floating slab, NOT blocked, NO shelf on open water."
+  },
+  {
+   "id": "mt-dock-end",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 200,
+   "z": -754,
+   "framings": [
+    {
+     "yaw": 1.57,
+     "pitch": 0.07,
+     "dist": 8
+    },
+    {
+     "yaw": -2,
+     "pitch": 0.3,
+     "dist": 14
+    },
+    {
+     "yaw": -2.35,
+     "pitch": 0.12,
+     "dist": 9
+    }
+   ],
+   "expectation": "THE END OF A MONTROSE FINGER DOCK (task 128, owner issue 040 — 'at the dock approaching montrose harbor I fall in when I try to walk to end'): standing at the OUTER TIP of a narrow timber finger dock, out over the harbor basin. The mayor is ON the planks at the end, not in the water and not floating — warm orange deck boards underfoot, round-topped railing knobs and a handrail running back along both edges, dark pilings dropping from the deck underside into the basin. Past the tip: open blue harbor water with moored sailboats, and the stone hook breakwater across the basin. Looking back WEST the dock must read CONTINUOUS all the way to the mainland lawn — planks meeting grass, NO gap, NO stripe of water between the shore and the first board, NO stranded plank island. Reads as an inviting, walkable slip dock you can stroll to the end of; NOT a deck floating detached offshore, NOT a hole at either end."
+  },
+  {
+   "id": "mt-dock-root",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 184.5,
+   "z": -754,
+   "framings": [
+    {
+     "yaw": 1.57,
+     "pitch": 0.06,
+     "dist": 7
+    },
+    {
+     "yaw": -1.57,
+     "pitch": 0.05,
+     "dist": 6
+    },
+    {
+     "yaw": 1.57,
+     "pitch": 0.5,
+     "dist": 6
+    },
+    {
+     "yaw": 0,
+     "pitch": 0.02,
+     "dist": 6
+    }
+   ],
+   "expectation": "THE LANDWARD ROOT OF A MONTROSE FINGER DOCK (task 128, owner issue 040): the junction where the timber dock meets the mainland — the whole point of the fix. The deck's last metre and a half rests FLUSH ON THE GRASS (a low plank landing sitting on the lawn, no daylight under it, no stilts on the shore side), and the boards then run east over the seawall edge and out over the basin on pilings. The handrail runs the FULL length including this root stretch. There must be NO water gap, NO drop and NO step-off between the lawn and the first plank: from the low level side-profile framing the deck top sits a hand's width above the grass and the two surfaces read as one continuous walk. Park Bait and the harbor lawn sit behind to the west, basin water and moored boats ahead to the east. Compare to the owner's photo refs/montrose/owner-2026-08-02-montrose-dock-fallthrough.png, which shows this junction with the dock end hanging out over open water — that is what must NOT be there any more."
   },
   {
    "id": "mt-baitshop",

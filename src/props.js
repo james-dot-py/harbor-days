@@ -10,6 +10,16 @@ export const colliders=[];
 export const walkRects=[];
 export function collide(x,z,r,h=Infinity){colliders.push({x,z,r,h})}   // h: jumpable when player.y > h
 
+// 128 (issue 040): every RENDERED walkable plank surface, tagged where it is
+// BUILT so tools/deck-coverage.mjs can raycast the real geometry instead of
+// trusting a restated rectangle — the promise a walkable deck makes is "if you
+// can see yourself standing on it, it holds you", and nothing asserted it until
+// a Montrose finger dock shipped rooted 1 m out over open water.
+// Push the DECK SLAB only — never railings, posts, fascia or parapets (an
+// untagged rail is simply not a promise). {id, mesh}; mesh may be a Mesh or an
+// InstancedMesh (the guard grids per instance).
+export const deckMeshes=[];
+
 export const bobbers=[];
 // 109: the InstancedMeshes whose instances a passing player can brush (grass
 // tufts + flower heads). Filled during buildProps; src/rustle.js decomposes them
@@ -48,7 +58,7 @@ function makeSign(text,x,z,ry){
 }
 // (lamps + benches are built as InstancedMeshes in buildProps below)
 // ---- pier + basin dock (with rails, posts to the water) ----
-function plankDeck(x1,x2,z1,z2,y,apron,root){
+function plankDeck(x1,x2,z1,z2,y,apron,root,id){   // id (128): tags the walk-surface slab into deckMeshes
   const w=x2-x1,d=z2-z1;
   // landward fascia/curb: a solid face from the deck underside down past the shore
   // grade at whichever edge meets land, so the pier ROOTS FLUSH instead of floating
@@ -71,6 +81,7 @@ function plankDeck(x1,x2,z1,z2,y,apron,root){
     // the tip (north landing open), red life rings on white posts. No wood.
     const grp=new THREE.Group(),slab=toon(apron.slab),white=toon(apron.white),red=toon(apron.red);
     const deck=new THREE.Mesh(new THREE.BoxGeometry(w,0.24,d),slab);deck.position.set((x1+x2)/2,y,(z1+z2)/2);grp.add(deck);
+    if(id)deckMeshes.push({id,mesh:deck});            // 128: the walk surface (bollards/rings/piles are not walkable)
     for(let px=x1+1.4;px<x2;px+=4.2){                 // concrete piles to the water
       const pile=new THREE.Mesh(new THREE.BoxGeometry(0.36,y+3.4,0.36),slab);pile.position.set(px,(y-3.4)/2+0.55,z2-0.6);grp.add(pile);
     }
@@ -92,6 +103,7 @@ function plankDeck(x1,x2,z1,z2,y,apron,root){
   }
   const grp=new THREE.Group(),wm=toon(0xb07a46),wm2=toon(0x9c6a3a);
   const deck=new THREE.Mesh(new THREE.BoxGeometry(w,0.24,d),wm);deck.position.set((x1+x2)/2,y,(z1+z2)/2);grp.add(deck);
+  if(id)deckMeshes.push({id,mesh:deck});               // 128: the walk surface only — rails/posts/fascia below are not
   for(let px=x1+1;px<x2;px+=3.4)for(const pz of[z1+0.4,z2-0.4]){
     const post=new THREE.Mesh(new THREE.CylinderGeometry(0.14,0.14,y+3.4,6),wm2);post.position.set(px,(y-3.4)/2+0.55,pz);grp.add(post);
     const knob=new THREE.Mesh(new THREE.SphereGeometry(0.19,7,6),wm2);knob.position.set(px,y+1.05,pz);grp.add(knob);
@@ -1105,7 +1117,18 @@ export function buildProps(){
 
   // ---- pier (peninsula lake side) with rails, posts to the water ----
   // (the corner pier carries d.apron -> concrete-apron style, task 021)
-  for(const d of CH.DECKS){plankDeck(d.deck[0],d.deck[1],d.deck[2],d.deck[3],d.deck[4],d.apron,d.root);walkRects.push({x1:d.walk.x1,x2:d.walk.x2,z1:d.walk.z1,z2:d.walk.z2,h:d.walk.h});}
+  CH.DECKS.forEach((d,i)=>plankDeck(d.deck[0],d.deck[1],d.deck[2],d.deck[3],d.deck[4],d.apron,d.root,'pier-'+i));
+
+  // ---- EVERY formula-derived plank deck's walk rect, from ONE definition (128) --
+  // CH.deckRects() is the single truth (piers + Belmont/Montrose/Diversey fingers)
+  // that this engine and tools/walkprobe.mjs both read: the walkability of a deck
+  // must never be stated twice (PITFALLS — "walkprobe + main.js must share
+  // walkability definitions: put them in the data module"). Issue 040 is exactly
+  // what the fork bought: four places re-derived these rects locally, the Montrose
+  // ones from stale control-point x's, and every finger rooted out over open water
+  // with a non-walkable moat to the lawn. Consumes ZERO rng (determinism gate);
+  // rect ORDER in walkRects is irrelevant — none of them overlap.
+  for(const r of CH.deckRects())walkRects.push({x1:r.x1,x2:r.x2,z1:r.z1,z2:r.z2,h:r.h});
 
   // ---- finger docks along the west seawall + sailboats moored in the slips ----
   // The deck reads CONTINUOUS with the west-shore lawn (issue 016 / task 038): it
@@ -1130,13 +1153,13 @@ export function buildProps(){
       const xSea=CH.BASIN_W_PARAMS.fx(zc);                   // basin west seawall x at this row = the land/water line
       M.compose(V.set(FD.x0+FD.len/2,deckY,zc),Q.identity(),S.set(FD.len,1,FD.halfW*2));decks.setMatrixAt(i,M);
       for(const px of postXs)if(px>xSea)for(const pz of[zc-FD.halfW,zc+FD.halfW])postSpots.push([px,pz]);
-      walkRects.push({x1:FD.x0,x2:FD.x0+FD.len,z1:zc-FD.halfW,z2:zc+FD.halfW,h:deckY});
       makeBoat(FD.boat.xMid,zc-FD.boat.dz,Math.PI/2,FD.hulls[bi%FD.hulls.length],FD.sails[bi%FD.sails.length],FD.boat.scale);bi++;
       makeBoat(FD.boat.xMid,zc+FD.boat.dz,-Math.PI/2,FD.hulls[bi%FD.hulls.length],FD.sails[bi%FD.sails.length],FD.boat.scale);bi++;
     });
     const posts=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.14,0.14,postH,6),toon(0x9c6a3a),Math.max(1,postSpots.length));
     postSpots.forEach(([px,pz],k)=>{M.compose(V.set(px,deckY-postH/2+0.02,pz),Q.identity(),S.set(1,1,1));posts.setMatrixAt(k,M);});
     decks.instanceMatrix.needsUpdate=posts.instanceMatrix.needsUpdate=true;scene.add(decks,posts);
+    deckMeshes.push({id:'belmont-fingers',mesh:decks});   // 128: one tag, 4 instances = the 4 belmont-finger-* rects
   }
 
   // ---- boats / buoys ----
@@ -1286,15 +1309,26 @@ export function buildProps(){
     const grp=new THREE.Group();
     for(const zc of MD.rows){
       const deck=new THREE.Mesh(deckGeo,deckMat);deck.position.set(MD.x0+MD.len/2,deckY,zc);grp.add(deck);
+      deckMeshes.push({id:'montrose-finger-'+zc,mesh:deck});   // 128: the walk surface (posts/knobs/rails below are not)
       for(let px=MD.x0+1.2;px<MD.x0+MD.len;px+=3.4){
-        if(px<=186)continue;                           // posts ONLY on the over-water span (east of the x=186 seawall)
+        // 128: the deck now ROOTS ON THE GRASS (x0 183.4, inland of the smoothed
+        // shore), so the two emissions split. The long PILING drops below the
+        // water and may only stand east of the real shore (MD.shoreX) — west of
+        // it, it would punch up through the lawn. The KNOB + RAIL ride the deck
+        // itself, so they run the FULL length including the on-grass root
+        // stretch (before, the handrail started a third of the way out).
+        const overWater=px>MD.shoreX;
         for(const pz of[zc-MD.halfW,zc+MD.halfW]){
-          const post=new THREE.Mesh(postGeo,woodMat);post.position.set(px,deckY-postH/2+0.02,pz);grp.add(post);   // top flush with deck underside
+          if(overWater){const post=new THREE.Mesh(postGeo,woodMat);post.position.set(px,deckY-postH/2+0.02,pz);grp.add(post);}   // top flush with deck underside
           const knob=new THREE.Mesh(knobGeo,woodMat);knob.position.set(px,deckY+0.34,pz);grp.add(knob);          // piling cap
-          if(px+3.4<MD.x0+MD.len+1){const rail=new THREE.Mesh(railGeo,woodMat);rail.position.set(px+1.7,deckY+0.5,pz);grp.add(rail);}  // rail to the next piling
+          // rail to the next piling, CLIPPED at the tip — the shared 3.4 m bar is
+          // scaled on its last run so no handrail juts out over open water past
+          // the last plank (128: the lengthened deck put the final station 2.8 m
+          // from the end and a rail stub hung off the tip).
+          const rx2=Math.min(px+3.4,MD.x0+MD.len);
+          if(rx2>px+0.3){const rail=new THREE.Mesh(railGeo,woodMat);rail.scale.x=(rx2-px)/3.4;rail.position.set((px+rx2)/2,deckY+0.5,pz);grp.add(rail);}
         }
       }
-      walkRects.push({x1:MD.x0,x2:MD.x0+MD.len,z1:zc-MD.halfW,z2:zc+MD.halfW,h:deckY});   // walkable boardwalk (same array the Belmont fingers use)
     }
     scene.add(grp);
 
@@ -1314,8 +1348,8 @@ export function buildProps(){
   // ZERO rng, ZERO new InstancedMesh buckets: every value comes from CH.LP_DIVERSEY
   // + the sampled-bank lpDivBank (the single truth shared with coast.js, moorings.js
   // and tools/walkprobe.mjs). All 8 docks FOLD to three merged meshes (decks /
-  // posts+knobs / dock boxes) → ~3 draws for the whole harbor; walkRects use the
-  // EXACT formula mirrored in walkprobe — never fork it.
+  // posts+knobs / dock boxes) → ~3 draws for the whole harbor; the walk rects are
+  // NOT restated here — CH.deckRects() states them once for engine + walkprobe (128).
   {
     const LD=CH.LP_DIVERSEY;
     const deckGs=[],postGs=[],boxGs=[];
@@ -1335,9 +1369,9 @@ export function buildProps(){
       }
       const box=new THREE.BoxGeometry(0.85,0.55,0.5);                       // the refs' white dock box at each slip root
       box.translate(root-1.1,LD.deckY+0.395,zc+LD.dockHalfW-0.05);boxGs.push(box.toNonIndexed());
-      walkRects.push({x1:root-LD.dockLen,x2:root+0.3,z1:zc-LD.dockHalfW,z2:zc+LD.dockHalfW,h:LD.deckY});   // walkable deck (EXACT formula mirrored in tools/walkprobe.mjs)
     }
-    scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(deckGs),toon(LD.deckWood)));
+    const divDecks=new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(deckGs),toon(LD.deckWood));
+    scene.add(divDecks);deckMeshes.push({id:'diversey-fingers',mesh:divDecks});   // 128: one merged mesh = the 8 diversey-finger-* rects
     scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(postGs),toon(LD.postWood)));
     scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(boxGs),toon(LD.boxCream)));
 

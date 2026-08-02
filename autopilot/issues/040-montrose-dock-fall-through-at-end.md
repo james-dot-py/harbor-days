@@ -1,5 +1,35 @@
 # Issue 040 — you fall in the water walking to the end of the dock at Montrose harbor
 
+- **STATUS: CLOSED by task 128.**
+- **Actual cause: suspect 1, but at the ROOT, not the tip — and nobody guessed
+  the mechanism.** `MT_FINGER_DOCKS.x0` was 186 because that is what
+  `mtBasinWestLine`'s CONTROL POINTS read (`[186,−681] [185,−724] [185,−788]
+  [186,−850]`). The LAND polygon is built from the crChain-**SMOOTHED** chain,
+  which at the four dock rows passes x **185.14 / 184.87 / 185.03 / 185.55** —
+  so every deck rooted **0.45–1.13 m out over open water**, with a non-walkable
+  moat between the lawn and the first plank. Walking east you stalled at the
+  moat (a point-test step of ~0.07 m can never jump it), `jsk.wadeT` banked for
+  0.35 s, and the wade rule walked you into the basin: a 2.4 m drop. The deck
+  was **never reachable on foot at all**. Reproduced before any fix
+  (`tools/tmp-128-repro.mjs`): engine profile `x176.0-184.8 WALK · x184.9-185.9
+  no · x186.0-201.0 WALK`, and a real steering walk that stalls at x=184.87 and
+  drops to y=−1.51 by x=185.67.
+- **Suspect 4 was also true, in its silent form:** `tools/walkprobe.mjs` built
+  its walk rects by MIRRORING the props.js formulas and simply **omitted
+  MT_FINGER_DOCKS**. 1729/0 green never once asked whether these planks held the
+  player. Both sides now read `CH.deckRects()`.
+- **Fix:** root moved to x183.4 (inland of the smoothed edge at every row, ≥1.4 m
+  of deck resting on the grass), `len` 15 → 17.6 so the tip stays at x201; the
+  piling gate now keys on the measured shore (`MD.shoreX`) instead of the literal
+  186, and knob+rail run the full length so the handrail no longer starts a third
+  of the way out. Plus an engine rule: **you never wade off a deck** — standing
+  on a walk rect no longer banks `wadeT`, so a deck edge stops you and SPACE off
+  the end is the deliberate, survivable way in.
+- **The permanent guard:** `tools/deck-coverage.mjs`, walkprobe's 6th shell-out.
+  It raycasts every RENDERED walkable plank in the live game (15 tagged decks)
+  and asserts (A) every interior plank cell is walkable, (B) surfaceY matches the
+  rendered top face within 0.3 m, (C) the deck is reachable from real ground by a
+  0.2 m BFS. 040 would have failed A *and* C.
 - **Reported by:** owner playtest 2026-08-02 (screenshot)
 - **Area:** montrose
 - **Severity:** HIGH — a walkable structure that dumps the player into the lake.

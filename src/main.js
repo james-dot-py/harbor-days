@@ -3,7 +3,7 @@ import { renderer, scene, camera, amb, clamp, lerp, lerpAngle, hexRGB, pip, rng,
 import { skyGroup, clouds, buildSky } from './sky.js';
 import { buildCoast, water, waterN, waterS, coastQuery, profileTotal, tierAt, beachH, LAND } from './coast.js';
 import { buildPaths, pathSamples, pathSamples2, pathSamplesMain, ribbonLanes, trailLanes, onTrail } from './paths.js';
-import { buildProps, colliders, walkRects, bobbers, drifter, dogTail, foam, fireflies, TREE_SPOTS, RUSTLE_MESHES } from './props.js';
+import { buildProps, colliders, walkRects, deckMeshes, bobbers, drifter, dogTail, foam, fireflies, TREE_SPOTS, RUSTLE_MESHES } from './props.js';
 import { buildStructures } from './structures.js';
 import { mayor, mparts, buildMayor, updateCharacter, updateChibiShadows } from './character.js';
 import { updateFogCull, fogCullStats } from './fogcull.js';
@@ -157,7 +157,16 @@ const ESC_RINGS=[0.6,1.2,2.0,3.0,4.2];
 let TRAP_TEST=null;
 // movement gate: on land = walkable; on water = open water; transitions gated
 function canMove(nx,nz){
-  if(jsk.on)return isWater(nx,nz)||(walkable(nx,nz)&&surfaceY(nx,nz)<=-0.55);  // beach at low shores only
+  // 128: low shores (beaches) — OR any plank DECK, which is what a dock is FOR.
+  // Without the deck clause, hopping off a pier was one-way: the jetski's exit
+  // test wants surfaceY <= -0.55 and a deck sits at +0.12 (piers +0.42), so you
+  // were pinned against the deck's face and the nearest legal dismount from the
+  // Montrose slips was 43 m away, out past the hook. Predates this task (Belmont
+  // behaved identically), but 128 is what makes the Montrose docks reachable at
+  // all. Riding INTO a deck cell hops you out on contact — you pull up to the
+  // dock and climb on. Lawns/promenades carry no walk rect, so the "no riding
+  // out onto dry land" rule is untouched.
+  if(jsk.on)return isWater(nx,nz)||(walkable(nx,nz)&&(surfaceY(nx,nz)<=-0.55||!!onRect(nx,nz)));
   if(walkable(nx,nz))return true;
   return isWater(nx,nz)&&(jphys.air||jsk.wadeT>0.35)&&!(state.rideSpeed>0)&&(state.speedMult||1)<=1.05; // jump/wade in (not on a Divvy: rideSpeed>0 = mounted; speedMult keeps the pre-existing hot-dog-buff no-wade)
 }
@@ -248,6 +257,7 @@ window.__hd.landPitch=()=>jphys.landPitch;   // debug/tools only: live landing c
 // of the zoo" once Lincoln Park grew to within 60 m of them).
 window.__hd.solidProbe=(x,z)=>({walk:walkable(x,z),water:isWater(x,z),dry:CH.isDryGround(x,z),y:surfaceY(x,z)});
 window.__hd.cellsDbg=allCells;
+window.__hd.deckMeshes=deckMeshes;   // 128 (issue 040): the RENDERED walkable plank meshes, tagged where they are built — tools/deck-coverage.mjs raycasts these against solidProbe so a deck can never again be drawn longer (or rooted further out) than the surface that holds you.
 setIdleGroundProbe((x,z)=>({walk:walkable(x,z),y:surfaceY(x,z)}));   // task 087: let the idle-charm sit only land on safe flat ground (shared engine walk data)
 window.__hd.buildMs={build:Math.round(_tm0-_tb0),merge:Math.round(_tm1-_tm0),packs:Math.round(performance.now()-_tp0)};
 console.log('[perf] world build '+window.__hd.buildMs.build+'ms · mergeCellStatic '+window.__hd.buildMs.merge+'ms · packs '+window.__hd.buildMs.packs+'ms');
@@ -321,7 +331,14 @@ function frame(now){
 
   // ---- slide collision against the world (water-aware) ----
   const wtx=player.x+mvx*0.7,wtz=player.z+mvz*0.7;   // probe by INPUT dir (velocity dies when blocked)
-  if(!jsk.on&&mag>0.3&&!walkable(wtx,wtz)&&isWater(wtx,wtz))jsk.wadeT+=dt;else jsk.wadeT=Math.max(0,jsk.wadeT-dt*2);
+  // 128 (issue 040): you never WADE off a DECK. Leaning on the edge of a pier or
+  // finger dock used to bank wadeT for 0.35 s and then walk you off a 2.4 m drop
+  // into the harbor — a surprise fall with a railing rendered right there. On a
+  // walkRect the edge simply stops you; SPACE off the end still works, which is
+  // the deliberate, survivable way in (and the way to the jetski). Shores, sand
+  // and lawns are untouched — they carry no walk rect, so wading in still works.
+  const onDeck=!!onRect(player.x,player.z);
+  if(!jsk.on&&mag>0.3&&!onDeck&&!walkable(wtx,wtz)&&isWater(wtx,wtz))jsk.wadeT+=dt;else jsk.wadeT=Math.max(0,jsk.wadeT-dt*2);
   const nx=player.x+player.vx*dt;
   if(canMove(nx,player.z))player.x=nx;else player.vx=0;
   const nz=player.z+player.vz*dt;

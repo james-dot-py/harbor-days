@@ -44,10 +44,22 @@ function coastQuery(x,z){let best=null,bd2=1e9;for(const C of QUERY_SEGS)for(con
 function tierAt(lat,zc){const p=tierProfile(zc);let acc=0;for(let i=0;i<p.w.length;i++){acc+=p.w[i];if(lat<=acc)return{h:-i*p.step,i,edge:acc}}return null}
 function beachH(x,z){const b=CH.DOG_BEACH.bounds,s=CH.DOG_BEACH.slope;if(x>=b.x0&&x<=b.x1&&z>=b.z0&&z<=b.z1){const t=clamp((z-s.ref)/s.span,0,1);return s.depth*smooth(t)}return CH.montroseBeachH(x,z)}  // task 072: Montrose beach too (shared helper)
 
-// walkRects: finger docks + pier decks (from data)
+// walkRects: THE shared deck rects (task 128) + the single-const deck rects.
+//
+// 128 / issue 040 — NEVER FORK A WALKABILITY DEFINITION. The four FORMULA-DERIVED
+// plank families (the two pier decks, the Belmont fingers, the Montrose fingers,
+// the Diversey fingers) used to be MIRRORED right here: this file re-derived
+// CH.FINGER_DOCKS / CH.DECKS / lpDivBank(zc).e+0.6 by hand. CH.MT_FINGER_DOCKS was
+// simply never mirrored at all — so 1729 green expects never once asked whether the
+// Montrose planks held the player, and the owner walked off one into the basin.
+// That is PITFALLS verbatim: "walkprobe + main.js must share walkability
+// definitions: put them in the data module". CH.deckRects() is now THE single
+// definition and src/props.js pushes the identical list into the engine's
+// walkRects, so a deck can never again be walkable in one and not the other.
 const walkRects=[];
-for(const zc of CH.FINGER_DOCKS.rows)walkRects.push({x1:CH.FINGER_DOCKS.x0,x2:CH.FINGER_DOCKS.x0+CH.FINGER_DOCKS.len,z1:zc-CH.FINGER_DOCKS.halfW,z2:zc+CH.FINGER_DOCKS.halfW});
-for(const d of CH.DECKS)walkRects.push(d.walk);
+for(const r of CH.deckRects())walkRects.push({x1:r.x1,x2:r.x2,z1:r.z1,z2:r.z2,h:r.h});
+// The three blocks below stay hand-written on purpose: each reads a SINGLE data
+// const (a literal rect), so there is no formula to fork.
 { const D=CH.SANCTUARY.deck;                     // sanctuary bird-watching deck + stairs (matches buildSanctuary)
   walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:D.h});
   for(const st of D.stairs)walkRects.push({x1:st.x0,x2:st.x1,z1:st.z0,z2:st.z1,h:st.h}); }
@@ -55,9 +67,8 @@ for(const d of CH.DECKS)walkRects.push(d.walk);
   walkRects.push({x1:B.x0,x2:B.x1,z1:B.z0,z2:B.z1,h:B.h}); }
 { const D=CH.THE_DOCK.deckRect;                   // task 072: The Dock raised wood deck (matches structures.js walkRects.push)
   walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:CH.THE_DOCK.deckY}); }
-{ const D=CH.LP_DIVERSEY;                         // 113: Diversey finger docks (matches props.js walkRects.push — same lpDivBank formula)
-  for(const zc of D.dockRows){const root=CH.lpDivBank(zc).e+0.6;
-    walkRects.push({x1:root-D.dockLen,x2:root+0.3,z1:zc-D.dockHalfW,z2:zc+D.dockHalfW,h:D.deckY});} }
+// (113's Diversey finger-dock block lived here and re-derived lpDivBank(zc).e+0.6 —
+//  folded into CH.deckRects() above by task 128.)
 function onRect(x,z){for(const r of walkRects)if(x>=r.x1&&x<=r.x2&&z>=r.z1&&z<=r.z2)return r;return null}
 
 function walkable(x,z){
@@ -1204,6 +1215,52 @@ console.log('\n--- Task 104: the hook TIP plateau + light spot walkable, curl in
 console.log('\n--- Task 070: harbor west shore (mainland) walkable ---');
 for(const [x,z] of [[176,-740],[172,-794],[168,-769]]) expect(`west shore (${x},${z})`,walkable(x,z),true);
 
+// ===== 128 / issue 040: the Montrose finger docks hold the player root-to-tip ==
+// Owner playtest 2026-08-02: "at the dock approaching montrose harbor I fall in
+// when I try to walk to end". Root cause was a MOAT — MT_FINGER_DOCKS.x0 was 186
+// (mtBasinWestLine's CONTROL points) while the LAND polygon uses the crChain-
+// SMOOTHED line, which at these four rows sits at x 184.8/184.9/185.1/185.6. Each
+// deck therefore started 0.4-1.2 m out over open water with a non-walkable strip
+// between the lawn and the first plank: you stalled at the gap, the wade rule
+// fired after 0.35 s, and you dropped 2.4 m into the basin. The deck was never
+// reachable on foot at all — and walkprobe couldn't tell, because it had never
+// heard of these rows (see the CH.deckRects() note at the top of this file).
+// The assertion that would have caught it is the MARCH: walk the row centreline
+// from 6 m inland to the tip and demand ZERO non-walkable gaps once the lawn
+// starts. Point probes on the planks alone pass happily over a moat.
+console.log('\n--- 128 (issue 040): Montrose finger docks hold the player root-to-tip ---');
+{
+  const M=CH.MT_FINGER_DOCKS, deckY=+(CH.SEAWALL_Y.top+0.08).toFixed(6);
+  const xRoot=M.x0+0.2, xMid=M.x0+M.len/2, xTip=M.x0+M.len-0.2;
+  for(const zc of M.rows){
+    // (a) root / mid / TIP are walkable AND sit at the deck height
+    for(const [nm,x] of [['root',xRoot],['mid',xMid],['tip',xTip]]){
+      expect(`dock z${zc} ${nm} (${x.toFixed(1)},${zc}) walkable`,walkable(x,zc),true);
+      const r=onRect(x,zc);
+      expect(`dock z${zc} ${nm} on a deck rect at y${deckY}`,r?+r.h.toFixed(6):null,deckY);
+    }
+    // (b) NO MOAT — march the centreline from 6 m inland to the tip. Once the
+    //     lawn goes walkable it may never go back to water before the tip.
+    { const x0=M.x0-6, x1=M.x0+M.len; let first=-1,bad=-1;
+      for(let x=x0;x<=x1+1e-9;x+=0.1){ const w=walkable(x,zc);
+        if(w){ if(first<0)first=x; } else if(first>=0&&bad<0)bad=x; }
+      let detail='';
+      if(bad>=0||first<0){                        // failure: dump the marched profile so the gap is visible
+        const prof=[]; for(let x=x0;x<=x1+1e-9;x+=0.1)prof.push(walkable(x,zc)?'#':'.');
+        detail=` [first walk x=${first<0?'NONE':first.toFixed(1)}, first GAP x=${bad<0?'-':bad.toFixed(1)}, profile x${x0.toFixed(1)}..${x1.toFixed(1)} step0.1: ${prof.join('')}]`;
+      }
+      expect(`dock z${zc} NO MOAT: continuous walk lawn->tip (x${x0.toFixed(1)}..${x1.toFixed(1)})${detail}`,bad<0&&first>=0,true); }
+    // (c) the deck really is a dock: open basin water just past the tip
+    expect(`dock z${zc} water east of the tip (${(M.x0+M.len+1.5).toFixed(1)},${zc}) NOT walkable`,walkable(M.x0+M.len+1.5,zc),false);
+  }
+  // (d) the slips BETWEEN the fingers stay open water (the decks aren't one raft)
+  for(let i=0;i<M.rows.length-1;i++){ const zs=(M.rows[i]+M.rows[i+1])/2;
+    expect(`slip between z${M.rows[i]} and z${M.rows[i+1]} (${xMid.toFixed(1)},${zs}) NOT walkable`,walkable(xMid,zs),false); }
+  // (e) the root is genuinely INLAND of the smoothed shore at every row — the
+  //     flush-root law the old x0 broke (belt and braces on the march above)
+  expect(`root x${M.x0} is inland of the eastmost smoothed shore edge (x${M.shoreX})`,M.x0<M.shoreX-1.4,true);
+}
+
 console.log('\n--- Task 069: Montrose underpass berm (x<14, outside LAND) NOT walkable ---');
 for(const [x,z] of [[7,-771],[10,-771]]) expect(`berm behind the fence (${x},${z}) NOT walkable`,walkable(x,z),false);
 
@@ -2095,11 +2152,21 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
 //                          __hd.solidProbe about every chibi/zooanim rig and
 //                          flags pack content leaking out of a hard cell.
 //                          Spawns its OWN vite + headless page.
+//   deck-coverage.mjs    — "every plank you can see holds you, and you can reach
+//                          it from shore" (task 128, the owner's "at the dock
+//                          approaching montrose harbor I fall in when I try to
+//                          walk to end"): it raycasts every RENDERED walkable
+//                          plank in the live game and asserts the engine's OWN
+//                          walkability holds you there, plus that the deck is
+//                          reachable on foot from the shore — so a deck drawn
+//                          longer than its walk surface, or rooted out over
+//                          water with a moat in front of it, can never ship
+//                          again. Spawns its OWN vite + headless page.
 // Skip with WALKPROBE_FAST=1 only for tight inner-loop iteration; the final
 // gate run must include them.
 if(process.env.WALKPROBE_FAST!=='1'){
   const {spawnSync}=await import('child_process');
-  for(const tool of['path-layers.mjs','prop-clearance.mjs','path-continuity.mjs','shoreline-simple.mjs','no-solid-in-water.mjs']){
+  for(const tool of['path-layers.mjs','prop-clearance.mjs','path-continuity.mjs','shoreline-simple.mjs','no-solid-in-water.mjs','deck-coverage.mjs']){
     console.log(`\n--- 088 guard: ${tool} ---`);
     const r=spawnSync(process.execPath,[new URL(tool,import.meta.url).pathname.replace(/^\/([A-Za-z]:)/,'$1')],{encoding:'utf8',timeout:180000});
     const out=(r.stdout||'')+(r.stderr||'');

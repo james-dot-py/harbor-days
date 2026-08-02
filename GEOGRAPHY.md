@@ -251,9 +251,9 @@ osm x (osm harbor water spans x −230…75, breakwater to osm x 243 — squeeze
   the direction, compressed); (c) the full shoreline polyline must stay SIMPLE —
   enforced permanently by `tools/shoreline-simple.mjs` (gate: no LAND polygon
   self-intersection, no facing-apron water pinch below the visible-water floor).
-- **WEST SHORE**: finger docks (`MT_FINGER_DOCKS`, x0 186, reaching east into the
-  basin — REUSE the Belmont dock deck/post + boat vocabulary, zero new InstancedMesh
-  buckets), the public boat **LAUNCH** ramp (a wide slab sloping into the water,
+- **WEST SHORE**: finger docks (`MT_FINGER_DOCKS`, **root x0 183.4 → tip x201**,
+  reaching east into the basin — REUSE the Belmont dock deck/post + boat vocabulary,
+  zero new InstancedMesh buckets), the public boat **LAUNCH** ramp (a wide slab sloping into the water,
   ~x186 z −1250), and **Park Bait** (`PARK_BAIT`, the real bait/tackle shop — small,
   signed, on the mainland ~176,−1180, facing the basin). **Mooring cans + rows +
   star docks** mid-basin (moorings.js Montrose field, the existing hull/mast/can
@@ -370,6 +370,25 @@ footprint sits on LAND, so only HEIGHT is added (no walk rects). Clear WEST of
 the trail (x 160–180 there) and EAST of the LSD berm. Dome mesh + kites +
 kite-flyer NPCs: packs/cricket-hill.js (073/074). Waypoints:
 `mt-crickethill-summit` (112,−1315), `mt-crickethill-base` (112,−1272).
+
+**The FLUSH-ROOT law (task 128, owner issue 040 — 2026-08-02).** A walkable deck
+that meets the shore must root on the **crChain-SMOOTHED land edge, not on the
+polyline's control points.** `MT_FINGER_DOCKS.x0` was 186 because
+`mtBasinWestLine`'s control points read `[186,−681] [185,−724] [185,−788]
+[186,−850]` — but the LAND polygon is built from the *smoothed* chain, which at
+the four dock rows passes x **185.14 / 184.87 / 185.03 / 185.55**. Every deck
+therefore rooted 0.45–1.13 m out over open water, with a non-walkable moat
+between the lawn and the first plank: walking east you stalled at the moat, the
+wade rule banked 0.35 s, and you dropped 2.4 m into the basin. The docks were
+never reachable on foot at all, and no gate noticed for six tasks. The root is
+now x **183.4** — inland of the smoothed edge at every row, ≥1.4 m of deck
+resting on the grass — and the tip stays at x201 (`len` 15 → 17.6). Smoothing
+moves an edge INWARD at a convex bend: derive a shore-rooted structure's x from
+the same smoothed geometry the walkability uses, or measure it and leave margin.
+Held permanently by `tools/deck-coverage.mjs`, which walkprobe now shells out to
+on every run: it raycasts every RENDERED walkable plank in the live game and
+asserts the engine's own walkability holds you there and that the deck is
+reachable from real ground.
 
 #### Standing liberties (Montrose — deliberate, keep)
 

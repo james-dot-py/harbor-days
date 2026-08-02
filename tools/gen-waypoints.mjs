@@ -287,6 +287,26 @@ add('mt-hook', 'montrose', 'lakefront', 229, -776, [
   { yaw: 0.30, pitch: 0.07, dist: 11 },    // SSE: the hook curl + light with open lake to the left
   { yaw: 0.0,  pitch: 0.14, dist: 13 },    // from further, wider down-pier (rail + riprap read)
 ]);
+// 128 (issue 040 — the owner walked out on a finger dock and fell in the lake):
+// the two judged reads of the FIXED dock. Both stands DERIVE from
+// MT_FINGER_DOCKS, so a coast reshape carries the framings with the planks.
+{
+  const MD = CH.MT_FINGER_DOCKS, zc = MD.rows[1], tip = MD.x0 + MD.len;   // the second finger (z -754); tip x201
+  add('mt-dock-end', 'montrose', 'lakefront', R(tip - 1), zc, [
+    { yaw:  1.57, pitch: 0.07, dist: 8  },   // EAST off the tip: the deck end + open basin, hook beyond
+    { yaw: -2.0,  pitch: 0.30, dist: 14 },   // high oblique from the NE: the WHOLE dock root-to-tip, planks meeting the lawn.
+                                             // NOT a straight down-the-length shot (yaw -1.57): from the tip the mayor's body
+                                             // covers the deck centreline for its entire run and only the converging handrails
+                                             // survive — the continuity this waypoint exists to judge would be invisible.
+    { yaw: -2.35, pitch: 0.12, dist: 9  },   // oblique over the tip corner: pilings, handrail stopping flush, water below
+  ]);
+  add('mt-dock-root', 'montrose', 'lakefront', R(MD.x0 + 1.1), zc, [
+    { yaw:  1.57, pitch: 0.06, dist: 7  },   // EAST from the grass root, straight down the dock over the basin
+    { yaw: -1.57, pitch: 0.05, dist: 6  },   // WEST at the junction: plank meeting lawn under the mayor's feet
+    { yaw:  1.57, pitch: 0.50, dist: 6  },   // from ABOVE the seam looking east: the plank landing sitting on the grass, read around the mayor
+    { yaw:  0.0,  pitch: 0.02, dist: 6  },   // LOW near-level side profile of the seam (PITFALLS: flush/height edits need a close, low, level framing)
+  ]);
+}
 add('mt-baitshop', 'montrose', 'lakefront', 183, -736, [
   { yaw: -1.33, pitch: 0.05, dist: 8 },    // WNW at Park Bait's signed front (shop off-centre, sign reads)
   { yaw: -1.75, pitch: 0.06, dist: 8 },    // WSW from the other side (roof + shack form)

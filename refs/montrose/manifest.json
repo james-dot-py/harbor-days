@@ -337,6 +337,14 @@
       "description": "The sign leading into The Montrose Point Bird Sanctuary, nicknamed The Magic Hedge,located ini Uptown Chicago, IL.",
       "fetchDate": "2026-07-16T19:22:52.247Z",
       "bytes": 1450998
+    },
+    {
+      "source": "owner",
+      "file": "owner-2026-08-02-montrose-dock-fallthrough.png",
+      "title": "Owner playtest 2026-08-02 — falling in at a Montrose finger dock (issue 040)",
+      "description": "In-game capture from the owner's playtest: 'at the dock approaching montrose harbor I fall in when I try to walk to end.' Shows a west-shore finger dock at its LANDWARD junction — orange plank deck, round-topped railing knobs and handrail, pilings dropping into the basin — with the deck end hanging out over open water and the stepped seawall, harbor lawn, gulls and a mooring bollard beyond. The gap between the planks and the shore is the bug: the deck rooted at x186 while the smoothed LAND edge sat at x184.8-185.6, so a non-walkable moat separated the lawn from the first board. Fixed in task 128 (root moved to x183.4, flush on the grass); the permanent guard is tools/deck-coverage.mjs.",
+      "fetchDate": "2026-08-02T00:00:00.000Z",
+      "poi": "montrose-finger-docks"
     }
   ]
 }

@@ -866,16 +866,26 @@ export const FINGER_DOCKS = {
 };
 
 // ---- MONTROSE HARBOR west-shore content (task 070) ------------------------
-// Finger docks root FLUSH on the basin west seawall (x186, mtBasinWestLine) and
-// reach EAST into the basin. Deck y derives from SEAWALL_Y.top (issue 016 — a
-// coast reshape carries the docks). props.js builds them as individual
-// frustum-culled meshes (plankDeck vocabulary) — ZERO new InstancedMesh buckets;
-// the moored boats ride the moorings.js buckets (LOCAL seed), never makeBoat
-// (which draws world rng). Each deck is a walkRect (walkable boardwalk).
+// Finger docks root FLUSH on the basin west shore (mtBasinWestLine) and reach
+// EAST into the basin. Deck y derives from SEAWALL_Y.top (issue 016 — a coast
+// reshape carries the docks). props.js builds them as individual frustum-culled
+// meshes (plankDeck vocabulary) — ZERO new InstancedMesh buckets; the moored
+// boats ride the moorings.js buckets (LOCAL seed), never makeBoat (which draws
+// world rng). Each deck is a walkRect (walkable boardwalk) via deckRects().
+//
+// 128 / issue 040 (owner playtest 2026-08-02, "I fall in when I try to walk to
+// the end"): x0 was 186 because mtBasinWestLine's CONTROL POINTS are x185-186 —
+// but the LAND polygon uses the crChain-SMOOTHED line, which at the four dock
+// rows sits at x 184.8 / 184.9 / 185.1 / 185.6. So every deck rooted 0.4-1.2 m
+// OUT OVER THE WATER: a non-walkable moat between the lawn and the first plank.
+// Walking east you stalled at the gap, the wade rule fired after 0.35 s, and you
+// dropped 2.4 m into the basin — the deck was never reachable on foot at all.
+// The root now sits INLAND of the smoothed edge at every row (>=1.4 m of deck on
+// the grass, the flush-root law) and the tip stays put at x201.
 export const MT_FINGER_DOCKS = {
-  x0:186, len:15, halfW:0.95,
+  x0:183.4, len:17.6, halfW:0.95,    // root x183.4 (inland of the smoothed shore at every row) -> tip x201
   rows:[-714,-754,-792,-826],        // 4 finger groups down the west shore
-  seawallX:-186,                          // |x| of the basin west seawall (deck sits on grade west of it, on posts east of it)
+  shoreX:185.6,                      // eastmost smoothed LAND edge across the rows: posts start east of THIS, never west (they'd punch through the lawn)
 };
 // public boat LAUNCH ramp — a wide pale slab sloping from the shore into the basin.
 export const MT_LAUNCH = { x0:186, x1:204, z0:-864, z1:-850, topY:0.05, botY:-2.05, color:0xb9b3a2 };
@@ -1629,6 +1639,35 @@ export const LP_DIVERSEY = {
   lampEvery:36,                            // dock-box lamps along the east promenade
   sign:{ x:-3.0, z:610, ry:-0.4, text:'DIVERSEY HARBOR' },  // real name — geographic/civic (RENAMES law). On the WIDE south promenade (bank e~-9 there), SW-facing toward the underpass/culvert arrival; the head promenade (z<450) is <3 m wide — a 3.2 m board + its ring doesn't fit
 };
+// ---- THE DECK RECTS (task 128) --------------------------------------------
+// THE single definition of every FORMULA-DERIVED plank walk surface in the city
+// — the two pier decks, the Belmont fingers, the Montrose fingers and the
+// Diversey fingers. props.js pushes these straight into the engine's walkRects
+// and tools/walkprobe.mjs reads the SAME function: the walkability of a deck
+// must never be stated twice (PITFALLS — "walkprobe + main.js must share
+// walkability definitions: put them in the data module"). Issue 040 was exactly
+// what that fork buys you: the Montrose rows were mirrored NOWHERE in the probe,
+// so 1729 green expects never once asked whether their planks held the player.
+//
+// Every rect is {id, x1,x2,z1,z2, h} in world metres, h = the walk surface y.
+// The RENDERED plank footprint must match each rect — asserted per-frame-free by
+// tools/deck-coverage.mjs, which raycasts the real geometry instead of trusting
+// these numbers.
+export function deckRects(){
+  const out=[];
+  const fingerY=SEAWALL_Y.top+0.08;                     // low boardwalk flush on the shore grade (~0.12)
+  DECKS.forEach((d,i)=>out.push({ id:'pier-'+i, x1:d.walk.x1, x2:d.walk.x2, z1:d.walk.z1, z2:d.walk.z2, h:d.walk.h }));
+  for(const zc of FINGER_DOCKS.rows)
+    out.push({ id:'belmont-finger-'+zc, x1:FINGER_DOCKS.x0, x2:FINGER_DOCKS.x0+FINGER_DOCKS.len, z1:zc-FINGER_DOCKS.halfW, z2:zc+FINGER_DOCKS.halfW, h:fingerY });
+  for(const zc of MT_FINGER_DOCKS.rows)
+    out.push({ id:'montrose-finger-'+zc, x1:MT_FINGER_DOCKS.x0, x2:MT_FINGER_DOCKS.x0+MT_FINGER_DOCKS.len, z1:zc-MT_FINGER_DOCKS.halfW, z2:zc+MT_FINGER_DOCKS.halfW, h:fingerY });
+  for(const zc of LP_DIVERSEY.dockRows){                // rooted 0.6 onto the promenade so the deck reads flush (issue-016 flush-root law)
+    const root=lpDivBank(zc).e+0.6;
+    out.push({ id:'diversey-finger-'+zc, x1:root-LP_DIVERSEY.dockLen, x2:root+0.3, z1:zc-LP_DIVERSEY.dockHalfW, z2:zc+LP_DIVERSEY.dockHalfW, h:LP_DIVERSEY.deckY });
+  }
+  return out;
+}
+
 // Cannon Dr (BUILT 114 — the zoo's east flank): a modest asphalt park drive
 // emerging from the Fullerton culvert crossing and running south between the
 // berm and the zoo fence to the pond ground. The old scaffolding polyline ran

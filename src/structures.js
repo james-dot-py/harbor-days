@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { scene, rng, rand, toon, bmat, curveMat, gmap, pip } from './core.js';
 import { LAND, COAST_CORNER, buildSegs, tierProfile, profileTotal } from './coast.js';
-import { collide, walkRects } from './props.js';
+import { collide, walkRects, deckMeshes } from './props.js';
 import { createChibi } from './character.js';
 import * as CH from './data/chicago.js';
 
@@ -719,6 +719,12 @@ function buildSanctuary(POSTS,RAILS){
       collide(px,pz,0.26,D.h*0.9);
     }
     const top=new THREE.Mesh(new THREE.BoxGeometry(w+0.3,0.2,d+0.3),plankM);top.position.set(cx,D.h-0.1,cz);scene.add(top);
+    // 128 (issue 040): tag every RENDERED walkable deck slab where it is BUILT so
+    // tools/deck-coverage.mjs can raycast the real planks and ask the engine's own
+    // walkable()/surfaceY() whether they hold the player — "if you can see yourself
+    // standing on it, it holds you". Deck SLABS only: rails, posts, rims and fascia
+    // are not promises, and a wrongly-tagged one makes the gate lie.
+    deckMeshes.push({id:'sanctuary-deck',mesh:top});
     const rim=new THREE.Mesh(new THREE.BoxGeometry(w+0.44,0.3,d+0.44),wood);rim.position.set(cx,D.h-0.34,cz);scene.add(rim);
     // guard rails on N/E/S rims (stairs land on the WEST edge): posts + top bar
     const railPosts=[],railBars=[];
@@ -746,11 +752,13 @@ function buildSanctuary(POSTS,RAILS){
       for(let k=0;k<=n;k++)collide(x1+(x2-x1)*k/n,z1+(z2-z1)*k/n,0.22,D.h+1.1);
     }
     // stairs — solid risers on the west side; each is its own walk rect
+    let sti=0;
     for(const st of D.stairs){
       const sw=st.x1-st.x0,sd=st.z1-st.z0;
       const step=new THREE.Mesh(new THREE.BoxGeometry(sw,st.h,sd),plankM);
       step.position.set((st.x0+st.x1)/2,st.h/2,(st.z0+st.z1)/2);scene.add(step);
       walkRects.push({x1:st.x0,x2:st.x1,z1:st.z0,z2:st.z1,h:st.h});
+      deckMeshes.push({id:'sanctuary-stair-'+sti++,mesh:step});   // 128: each tread is its own walk rect at its own height
     }
     walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:D.h});
   }
@@ -976,6 +984,12 @@ function buildDiversey(POSTS,RAILS){
   setBox(deckM,dmi++,bxc,B.deckRect.h/2,bzc,bW,B.deckRect.h,dep);   // ground platform (walkable, top at deckRect.h)
   setBox(deckM,dmi++,bxc,sH+deckT/2,bzc,bW,deckT,dep);          // upper deck slab (top at y1)
   deckM.instanceMatrix.needsUpdate=true;scene.add(deckM);
+  // 128 (issue 040): tag the GROUND tier — instance 0, top at B.deckRect.h —
+  // as the walkable slab. Instance 1 (top y1) is the decorative upper tier: it is
+  // gated, correctly NOT walkable, and shares this bucket because splitting it
+  // would cost a new InstancedMesh. Hence the `inst` field on the tag: the guard
+  // grids + raycasts instance 0 ONLY (tools/deck-coverage.mjs tag contract).
+  deckMeshes.push({id:'diversey-bay-deck',mesh:deckM,inst:0});
 
   // per-bay divider walls, both levels (perLevel+1 walls x 2 = 14)
   const divM=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),toon(B.divider),(B.perLevel+1)*2);
@@ -1018,6 +1032,10 @@ function buildDiversey(POSTS,RAILS){
   for(let cx=bx0;cx<=bx1+0.01;cx+=1.3)collide(cx,zB,0.34);   // back (south) wall — behind the glow panels
   // the ground tier is a walkable hitting deck (engine reads walkRects->surfaceY)
   walkRects.push({x1:B.deckRect.x0,x2:B.deckRect.x1,z1:B.deckRect.z0,z2:B.deckRect.z1,h:B.deckRect.h});
+  // This rect IS gated: the slab that renders it (deckM instance 0, tagged
+  // 'diversey-bay-deck' where it is built above) is raycast against the engine's
+  // own walkable()/surfaceY() by tools/deck-coverage.mjs every run. Change the
+  // rect or the slab and the other side has to move with it.
 
   // ---- posed chibi golfers mid-swing (B.golfers: upper-deck decorative only) ----
   const CIT=0.74;
@@ -1378,6 +1396,7 @@ function buildTheDock(){
 
   // raised wood deck (top at y=deckY) + a darker edge fascia skirt
   const deck=new THREE.Mesh(new THREE.BoxGeometry(dw,0.3,dd),woodM);deck.position.y=dy-0.15;grp.add(deck);
+  deckMeshes.push({id:'the-dock-deck',mesh:deck});    // 128: the plank slab only — the fascia skirt below is not walkable
   const fascia=new THREE.Mesh(new THREE.BoxGeometry(dw+0.15,0.28,dd+0.15),barM);fascia.position.y=dy-0.14;grp.add(fascia);
   // register the deck as WALKABLE (this rect is mirrored in tools/walkprobe.mjs — keep identical)
   walkRects.push({x1:D.deckRect.x0,x2:D.deckRect.x1,z1:D.deckRect.z0,z2:D.deckRect.z1,h:D.deckY});
@@ -2676,7 +2695,8 @@ function buildSouthPond(POSTS,RAILS){
       const L=edge(i,-1),R=edge(i,1);
       quad(FP,FN,FU,[L[0],dy,L[1]],[R[0],dy,R[1]],[R[0],fb,R[1]],[L[0],fb,L[1]],s*NZA[i],0,-s*NXA[i]);
     }
-    scene.add(new THREE.Mesh(mkGeo(DP,DN,DU),toon(ST.wood2)));              // deck planks
+    const bwDeck=new THREE.Mesh(mkGeo(DP,DN,DU),toon(ST.wood2));scene.add(bwDeck);   // deck planks
+    deckMeshes.push({id:'lp-boardwalk',mesh:bwDeck});   // 128: ONE mesh for the whole run; walkability is data-carved (lpBoardwalkHit), the guard asks the engine, not a rect
     gWood.push(mkGeo(FP,FN,FU));                                            // fascia -> the dark-wood pool
     let run=0,next=0;
     for(let i=0;i<NS-1;i++){
