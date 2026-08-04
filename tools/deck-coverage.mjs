@@ -48,8 +48,15 @@
 //         only for that shape — a bucket whose instances are ALL walkable stays
 //         one untagged-by-instance entry.
 //
+//   cell  OPTIONAL hard-cell id (task 130). A cell owns its own walkable()/
+//         surfaceY() and window.__hd.solidProbe only ever answers for the
+//         ACTIVE cell, so a deck inside one was invisible to this gate by
+//         construction. A tag carrying {cell:'millennium'} is measured against
+//         THAT cell's own functions through window.__hd.cellProbe, with the cell
+//         never made active. Omit it for lakefront-cell decks (the default).
+//
 //   CHECK R  RENDERED — the tagged mesh really is drawn where we measured it
-//            (see the detached-mesh note below); the premise of the other three.
+//            (see the detached-mesh note below); the premise of the others.
 //   CHECK A  COVERAGE — every INTERIOR plank cell is walkable. A miss is a
 //            plank you can see yourself standing on that does not hold you.
 //   CHECK B  HEIGHT   — |solidProbe.y - rendered top face| <= 0.30 m, so you
@@ -59,11 +66,68 @@
 //            CLEAR m clear of every plank) within 40 m. A deck that holds you
 //            but that you cannot walk onto is still a hole in the world — that
 //            is literally what issue 040 was.
+//   CHECK F  FACING (task 130) — the tagged mesh's up-face is wound UP. r128
+//            culls a backwards-wound triangle for the raycaster AND the
+//            renderer, so such a deck is neither drawn from above nor
+//            measurable: mp-nichols-deck landed reporting 20 plank cells over a
+//            95 m span, 1 interior cell, and "ok" on every other check. The
+//            sweep now runs with DoubleSide (walkability does not care how a
+//            triangle is wound) and CHECK F re-casts a sample with the mesh's
+//            OWN side flag. A guard that can be satisfied by measuring nothing
+//            is not a guard.
+//   CHECK L  LEDGES (task 130) — THE REVERSE DIRECTION, and a HARD FAIL:
+//            every interior cell of every walk surface has a rendered plank
+//            under it. Sources: CH.allWalkRects() (all 28 constructed rects)
+//            and the one DATA-CARVED deck, lp-boardwalk (walkability is
+//            CH.lpBoardwalkHit, not a rect). 128 shipped this as WARN-only and
+//            it printed four pre-existing ledges every run: both piers carried
+//            a walk rect 0.5 m LONGER than their slab at BOTH ends — half a
+//            metre of standable air over open lake at the tip of each pier —
+//            and the Diversey fingers ran 0.3 m past their plank at the root.
+//            130 trimmed the data (CH.DECKS states `deck` ONLY and deckRects()
+//            derives the rect from it; the Diversey rect ends at the plank
+//            root) and deleted the escape hatch. There is no WARN tier any
+//            more: a walk surface with no plank under it fails the gate.
+//   CHECK W  MIRROR — the LIVE engine's walkRects array is EXACTLY
+//            CH.allWalkRects(). The 128 pitfall was "a mirror does not fail
+//            loudly when it is INCOMPLETE": walkprobe simply never mirrored
+//            MT_FINGER_DOCKS and stayed green through the whole life of issue
+//            040. Now the tools' list and the engine's list are compared
+//            rect-for-rect at runtime, so a deck added to one side only is a
+//            gate failure the day it lands.
 //
-// Plus, as WARN lines that do NOT fail the gate, the reverse direction: cells
-// inside a CH.deckRects() rect with NO rendered plank under them (an invisible
-// ledge). Two are pre-existing and known — see the WARN note; sweeping them is
-// task 130, so they are printed, never silently swallowed.
+// WHAT THIS GATE STILL DOES NOT SEE (the 130 census — recorded here rather
+// than left implicit, because an unstated exclusion reads as coverage):
+//   · ANALYTIC ground: terraces (coast.js tierAt), the Montrose mole/beach/
+//     Cricket Hill, LP land panels, roads and lawns. These have no "plank":
+//     the rendered surface IS the analytic height, and coast.js/
+//     tools/shoreline-simple.mjs + no-solid-in-water.mjs own that class.
+//     NOTE the exception that proves the rule — the Fullerton underpass cut is
+//     analytic too (CH.lpUnderpassH) but its floor IS a distinct rendered mesh,
+//     so 130 tagged it. It was worth it: the census that found it also found a
+//     0.4 x 12 m band at BOTH ramp heads that belonged to nothing (124's lawn
+//     notch was cut 0.4 m wider than the ramp span) — an invisible wall across
+//     the map's only crossing of the Drive, with paving drawn over it. If a
+//     surface has a mesh, tag it; "analytic" is not a reason to look away.
+//   · HARD-CELL decks that are NOT single meshes. The cellProbe path above
+//     makes cell decks measurable, but a tag needs a MESH: cell content emitted
+//     into a merged/instanced pool (kit emit/emitMerged/emitInstanced,
+//     segStrip, bandQ) has no per-surface handle, and splitting one out would
+//     add draw calls (CLAUDE.md constraint 3). Each such surface is listed with
+//     its verdict in the 130 close-out; the ones that ARE single meshes are
+//     tagged above.
+//   · Cafe Brauer's terrace + loggia floors (structures.js), merged into the
+//     shared `gPave` pool — splitting one out costs a draw call. Its walk
+//     surface is NOT a carve and NOT a rect: it is walkable purely by being LP
+//     LAND, minus the pond. 130 measured it live rather than assuming: the
+//     SOUTH loggia arm renders x -54..-42 at y 0.13, and LP_SOUTHPOND_WATER's
+//     west edge cuts walkability at x ~-45.1 (z 916.4) to -45.4 (z 920) — so
+//     ~11 m2 of visible brick quay stops holding you 3.2 m before its edge. Not
+//     a fall (isWater's west-wade gate blocks the pond) — an invisible wall on
+//     a real walking route, filed as its own queue task with both fixes priced.
+//     The north arm clears the pond by 1.36 m. This bullet used to claim
+//     no-solid-in-water covered it; it does not — that gate asserts the other
+//     direction (no solid prop standing in water).
 //
 // Notes for whoever edits this next:
 //  - "INTERIOR" = the cell AND all four orthogonal neighbours produced a ray
@@ -85,9 +149,10 @@
 //    there. (It is also why a teeth test must call mesh.updateMatrixWorld(true)
 //    itself: setting .position on an orphan moves nothing.)
 //  - CHECK C's escape must be CLEAR m clear of every plank, not merely
-//    plank-free: several walk rects overhang their own deck (the pier rects by
-//    0.5 m in z — see the WARN block), and a deck stranded in the lake would
-//    otherwise "reach" its own invisible ledge and pass.
+//    plank-free. 130 trimmed the overhanging rects that motivated this, but the
+//    margin stays: a walk surface abutting a deck (a landing, a flush root, the
+//    next dock along) is not shore, and a deck stranded in the lake must never
+//    be able to "reach" one and pass.
 //
 // Usage:  node tools/deck-coverage.mjs [--quiet]
 // Exit 0 clean, 1 on any failure. Spawns its OWN vite (never the foreign 5173
@@ -111,6 +176,16 @@
 //         (()=>{const P=window.__hd.solidProbe;window.__hd.solidProbe=(x,z)=>{const p=P(x,z);
 //           return (x>=183.4&&x<=185.7&&z>=-830&&z<=-710)?{walk:false,water:p.water,dry:p.dry,y:p.y}:p;};
 //           return 'moat';})()
+//   (3) CHECK L (130) — the INVISIBLE LEDGE, i.e. the reverse of (1): a walk
+//       surface hanging past its plank. Shrink both pier slabs 0.5 m in z and
+//       the trimmed rects instantly overhang again, exactly as they shipped
+//       from 021 to 129 (caught 126 + 78 interior rect cells, 7.9 + 4.9 m2):
+//         (()=>{for(const d of window.__hd.deckMeshes)if(d.id.startsWith('pier-'))
+//           {d.mesh.scale.z=1-1/(d.id==='pier-0'?30:33);d.mesh.updateMatrixWorld(true);}
+//           window.__hd.scene.updateMatrixWorld(true);return 'shrunk';})()
+//   (4) CHECK W (130) — the mirror gone stale: drop a rect from the engine's
+//       live list and the tools' CH.allWalkRects() no longer matches it:
+//         (()=>{window.__hd.walkRects.pop();return 'popped';})()
 // =====================================================================
 import { spawn } from 'child_process';
 import { dirname, join } from 'path';
@@ -131,7 +206,14 @@ const CFG = {
   G: 0.25,          // plank sampling lattice (m) — one ray down per cell
   B: 0.2,           // reach-BFS lattice (m); the player's per-frame stride is ~0.07 m
   TOL_Y: 0.30,      // CHECK B tolerance (m)
-  REACH: 40,        // CHECK C search radius (m of BFS depth)
+  REACH: 140,       // CHECK C search radius (m of BFS depth). 40 was sized for
+                    // finger docks; 130's cell tags broke that assumption — the
+                    // Bluhm terrace's ONLY route to ground is the 95 m Nichols
+                    // Bridgeway, and every metre of it is tagged plank, so the
+                    // terrace read as a 207 m2 island. The radius costs nothing
+                    // on a deck that finds shore in 6 steps (the BFS stops at
+                    // the first escape); it is only paid where an escape is
+                    // genuinely far, which is exactly where it must be paid.
   CLEAR: 0.75,      // CHECK C: an escape cell must be this clear of EVERY plank
                     // (a walk rect that overhangs its own deck is not shore)
   MAX_CELLS: 400000,// per-deck ray budget (never reached in practice; hang guard)
@@ -183,14 +265,27 @@ function pageBoot(cfg) {
         boxes.push(geo.boundingBox.clone().applyMatrix4(full));
       }
     } else boxes.push(geo.boundingBox.clone().applyMatrix4(m.matrixWorld));
-    dc.items.push({ id: d.id, mesh: m, only, boxes });
+    dc.items.push({ id: d.id, mesh: m, only, boxes, cell: d.cell || null });
   }
+  // 130: which walkability answers for this deck — the world's, or the hard
+  // cell that owns the ground it stands on. cellProbe never activates the cell.
+  dc.probeFor = (it) => it.cell
+    ? ((x, z) => window.__hd.cellProbe(it.cell, x, z) || { walk: false, y: 0 })
+    : window.__hd.solidProbe;
 
   // 2) grid each box and cast one ray straight DOWN per cell, against THIS mesh
   // only. Cells with no hit are simply not plank.
   dc.measure = (i) => {
     const it = dc.items[i], cells = new Map();
     let planned = 0, measured = 0, capped = 0;
+    // 130: sweep with backface culling OFF. Walkability does not care which way
+    // a triangle is wound, so the geometry's true footprint is the DoubleSide
+    // answer — and measuring with the mesh's own side flag let a backwards-wound
+    // deck (see CHECK F) report 20 plank cells over a 95 m span and pass every
+    // check vacuously. The nearest hit still wins, so a slab's top face is still
+    // what a downward ray finds; only phantom misses change.
+    const side0 = it.mesh.material.side;
+    it.mesh.material.side = T.DoubleSide;
     for (const bb of it.boxes) {
       const ix0 = Math.ceil(bb.min.x / G), ix1 = Math.floor(bb.max.x / G);
       const iz0 = Math.ceil(bb.min.z / G), iz1 = Math.floor(bb.max.z / G);
@@ -218,8 +313,30 @@ function pageBoot(cfg) {
       if (cells.has((ix + 1) + ',' + iz) && cells.has((ix - 1) + ',' + iz) &&
           cells.has(ix + ',' + (iz + 1)) && cells.has(ix + ',' + (iz - 1))) interior.push(k);
     }
+    it.mesh.material.side = side0;
     it.cells = cells; it.interior = interior;
     return { id: it.id, boxes: it.boxes.length, planned, measured, capped, hits: cells.size, interior: interior.length };
+  };
+
+  // 2c) CHECK F — FACING (task 130). Re-cast a spread sample of plank cells with
+  // the mesh's OWN side flag. A deck whose up-face is wound backwards is culled
+  // by r128 for the raycaster AND the renderer: it is not drawn from above, and
+  // the gate cannot see it. That is how mp-nichols-deck first landed — 20 plank
+  // hits out of 15,488 grid cells, 1 interior cell, "ok" on every other check.
+  // A guard that can be satisfied by measuring nothing is not a guard.
+  dc.facing = (i, n) => {
+    const it = dc.items[i], keys = [...it.cells.keys()], N = keys.length;
+    if (!N) return { samples: 0, hits: 0 };
+    let hits = 0, s = 0;
+    for (; s < n && s < N; s++) {
+      const k = keys[Math.min(N - 1, Math.floor(s * N / Math.min(n, N)))];
+      const c = k.split(','), hy = it.cells.get(k);
+      org.set((+c[0]) * G, hy + 0.5, (+c[1]) * G);
+      ray.set(org, down); ray.near = 0; ray.far = 1.0;
+      for (const h of ray.intersectObject(it.mesh, false))
+        if (it.only === null || h.instanceId === it.only) { hits++; break; }
+    }
+    return { samples: s, hits };
   };
 
   // 2b) CHECK R — is the tagged mesh actually DRAWN where we just measured it?
@@ -245,7 +362,7 @@ function pageBoot(cfg) {
 
   // 3) CHECK A + CHECK B, asking the ENGINE about every interior cell.
   dc.checks = (i) => {
-    const it = dc.items[i], P = window.__hd.solidProbe;
+    const it = dc.items[i], P = dc.probeFor(it);
     const miss = []; let missN = 0, worst = 0, worstAt = null, hiN = 0; const hi = [];
     for (const k of it.interior) {
       const c = k.split(','), x = (+c[0]) * G, z = (+c[1]) * G, hy = it.cells.get(k);
@@ -265,7 +382,7 @@ function pageBoot(cfg) {
   // count as an escape). Probes are memoised in `seen` (one probe per cell,
   // blocked cells remembered as -1) and the visited set is capped.
   dc.reach = (i) => {
-    const it = dc.items[i], P = window.__hd.solidProbe;
+    const it = dc.items[i], P = dc.probeFor(it);
     const seen = new Map(), qk = [], qd = [];
     const R = Math.ceil(cfg.CLEAR / G);
     const isGround = (x, z) => {                       // exact cell first (island cells reject in 1 lookup)
@@ -305,9 +422,10 @@ function pageBoot(cfg) {
     return { ok: !!exit, exit, steps, island, visited: seen.size, capped, truncated, why: exit ? '' : 'walked a closed island' };
   };
 
-  // 5) the REVERSE direction (WARN only): a data walk rect with no plank under
-  // it — an invisible ledge. Rect INTERIOR only (cell + 4 neighbours inside the
-  // rect), same anti-aliasing rule as the plank side.
+  // 5) CHECK L — the REVERSE direction, a HARD FAIL since 130: a walk surface
+  // cell with no plank under it (an invisible ledge). Rect INTERIOR only (cell
+  // + 4 neighbours inside the rect), the same anti-aliasing rule as the plank
+  // side, so a rect that merely shares its slab's edge never cries wolf.
   dc.ledger = (rects) => {
     const out = [];
     for (const r of rects) {
@@ -320,9 +438,20 @@ function pageBoot(cfg) {
     }
     return out;
   };
+  // 5b) the same check for a DATA-CARVED deck, whose walk surface is a hit
+  // function rather than a rect (the only one is lp-boardwalk —
+  // CH.lpBoardwalkHit). Node side computes the interior carve cells (it owns
+  // the data module); the page only answers "is there a plank there".
+  dc.carve = (id, cells) => {
+    let n = 0; const holes = [];
+    for (const c of cells) if (!dc.plank.has(c[0] + ',' + c[1])) {
+      n++; if (holes.length < 3) holes.push([+(c[0] * G).toFixed(2), +(c[1] * G).toFixed(2)]);
+    }
+    return n ? { id, n, holes, m2: +(n * G * G).toFixed(1) } : null;
+  };
 
   return dc.items.map(it => ({
-    id: it.id, boxes: it.boxes.length, instanced: !!it.mesh.isInstancedMesh, only: it.only,
+    id: it.id, boxes: it.boxes.length, instanced: !!it.mesh.isInstancedMesh, only: it.only, cell: it.cell,
     tris: Math.round((it.mesh.geometry.index ? it.mesh.geometry.index.count : it.mesh.geometry.attributes.position.count) / 3),
   }));
 }
@@ -351,12 +480,33 @@ const kill = () => process.platform === 'win32'
   : vite.kill();
 
 const rows = [];                 // per-deck table
-const warns = [];
+const ledges = [];               // CHECK L hits (130) — walk surface with no plank
 const deferred = [];
-let totalInterior = 0, totalRays = 0, cappedDecks = 0;
+let totalInterior = 0, totalRays = 0, cappedDecks = 0, rectCount = 0, mirrorOK = false;
 let worstDy = 0, worstDyAt = null, worstDyDeck = '';
-const badR = [], badA = [], badB = [], badC = [];
+const badR = [], badA = [], badB = [], badC = [], badF = [];
 const R_SAMPLES = 3;     // CHECK R: live-scene rays per deck (a full-scene ray is ~10 ms)
+const F_SAMPLES = 24;    // CHECK F: own-side rays per deck (cheap — one tagged-mesh ray each)
+
+// ---- CHECK L, part 2: the interior cells of the one DATA-CARVED deck. Its
+// walk surface is CH.lpBoardwalkHit(), so there is no rect to sweep — grid the
+// polyline's own bbox and keep the cells whose 4 neighbours are also carve
+// (the rect side's anti-aliasing rule, stated the same way).
+const carveCells = (() => {
+  const G = CFG.G, H = CH.LP_BOARDWALK_HALF + G;
+  let x0 = Infinity, x1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+  for (const p of CH.LP_BOARDWALK) {
+    if (p[0] < x0) x0 = p[0]; if (p[0] > x1) x1 = p[0];
+    if (p[1] < z0) z0 = p[1]; if (p[1] > z1) z1 = p[1];
+  }
+  const hit = (ix, iz) => CH.lpBoardwalkHit(ix * G, iz * G);
+  const out = [];
+  for (let ix = Math.ceil((x0 - H) / G); ix <= Math.floor((x1 + H) / G); ix++)
+    for (let iz = Math.ceil((z0 - H) / G); iz <= Math.floor((z1 + H) / G); iz++)
+      if (hit(ix, iz) && hit(ix + 1, iz) && hit(ix - 1, iz) && hit(ix, iz + 1) && hit(ix, iz - 1))
+        out.push([ix, iz]);
+  return out;
+})();
 
 const browser = await puppeteer.launch({ headless: 'new', args: ['--mute-audio'], protocolTimeout: 300000 });
 try {
@@ -370,11 +520,29 @@ try {
   // a guard that measured a BROKEN page is worse than no guard.
   expect('canary echoed (we are looking at OUR build)', canary.some(c => c.includes('deckcov')), canary.join('|'));
   expect('no page errors', errors.length === 0, errors.join(' | '));
-  const haveHandles = await page.evaluate(() => !!(window.__hd && window.__hd.deckMeshes && window.__hd.solidProbe && window.__hd.THREE));
-  expect('page exposes __hd.deckMeshes + solidProbe + THREE', haveHandles);
+  const haveHandles = await page.evaluate(() => !!(window.__hd && window.__hd.deckMeshes && window.__hd.solidProbe && window.__hd.THREE && window.__hd.walkRects && window.__hd.cellProbe));
+  expect('page exposes __hd.deckMeshes + solidProbe + walkRects + cellProbe + THREE', haveHandles);
   if (!haveHandles) throw new Error('missing __hd handles — nothing to measure');
 
   if (INJECT) await page.evaluate(readFileSync(INJECT, 'utf8'));
+
+  // ---- CHECK W — the tools' walk-rect list IS the engine's (task 130). Rects
+  // are compared as sorted geometry keys: same count, same rectangles, same
+  // heights. Ids are ours alone (the engine's list carries none), so the
+  // comparison is on the four bounds + h, rounded to the millimetre.
+  {
+    const key = r => [r.x1, r.x2, r.z1, r.z2, r.h].map(v => (+v).toFixed(3)).join('/');
+    const mine = CH.allWalkRects().map(key).sort();
+    const live = (await page.evaluate(() => window.__hd.walkRects.map(r => [r.x1, r.x2, r.z1, r.z2, r.h])))
+      .map(a => a.map(v => (+v).toFixed(3)).join('/')).sort();
+    const missing = mine.filter(k => !live.includes(k));      // in the data module, not in the engine
+    const extra = live.filter(k => !mine.includes(k));        // in the engine, not in the data module
+    mirrorOK = missing.length === 0 && extra.length === 0;
+    expect(`CHECK W — the engine's ${live.length} live walk rects are exactly CH.allWalkRects() (${mine.length})`,
+      mirrorOK,
+      `${missing.length} rect(s) only in CH.allWalkRects(): ${missing.slice(0, 4).join('  ')}\n      ` +
+      `${extra.length} rect(s) only in the ENGINE: ${extra.slice(0, 4).join('  ')}`);
+  }
 
   const decks = await page.evaluate(pageBoot, CFG);
   expect(`decks tagged in the live scene (${decks.length})`, decks.length > 0,
@@ -400,6 +568,9 @@ try {
     const d = INJECT ? { samples: 0, missing: [] } : await page.evaluate((i, n) => window.__dc.rendered(i, n), i, R_SAMPLES);
     const c = await page.evaluate(i => window.__dc.checks(i), i);
     const r = await page.evaluate(i => window.__dc.reach(i), i);
+    const f = await page.evaluate((i, n) => window.__dc.facing(i, n), i, F_SAMPLES);
+    const okF = f.samples > 0 && f.hits >= Math.ceil(f.samples * 0.9);
+    if (!okF) badF.push(`${id}: only ${f.hits}/${f.samples} sampled plank cells hit with the mesh's own side flag — its up-face is wound BACKWARDS (culled by r128 for the raycaster AND the renderer: this deck is not drawn from above)`);
     const okI = m.interior > 0;
     const okR = INJECT ? true : (okI && d.missing.length === 0);
     const okA = okI && c.missN === 0;
@@ -425,16 +596,17 @@ try {
   log('\n--- per-deck ---');
   for (const r of rows) log(r);
 
-  // ---- the reverse direction: WARN only ----
-  const led = await page.evaluate(rects => window.__dc.ledger(rects), CH.deckRects());
-  for (const w of led) warns.push(w);
-  if (warns.length) {
-    console.log('\n--- WARN: walk rect with no rendered plank under it (invisible ledge) ---');
-    for (const w of warns) console.log(`WARN  ${w.id}: ${w.n} interior rect cells (${w.m2} m2) have no plank  e.g. ${w.holes.map(fmt).join(' ')}`);
-    console.log('      Known + pre-existing: the CH.DECKS pier walk rects overhang their slab by 0.5 m in z at');
-    console.log('      both ends, and the Diversey rects run 0.3 m past the plank at the landward root (a');
-    console.log('      deliberate flush root, over walkable promenade anyway). Sweeping these is TASK 130 —');
-    console.log('      they are warnings, not gate failures, so nothing is silently swallowed.');
+  // ---- CHECK L — the reverse direction, over every walk surface in the game:
+  // the 28 constructed rects plus the one data-carved deck. HARD FAIL (130).
+  const rects = CH.allWalkRects(); rectCount = rects.length;
+  for (const w of await page.evaluate(rs => window.__dc.ledger(rs), rects)) ledges.push(w);
+  const cw = await page.evaluate((id, cells) => window.__dc.carve(id, cells), 'lp-boardwalk (data carve)', carveCells);
+  if (cw) ledges.push(cw);
+  if (ledges.length) {
+    console.log('\n--- CHECK L: walk surface with no rendered plank under it (invisible ledge) ---');
+    for (const w of ledges) console.log(`LEDGE  ${w.id}: ${w.n} interior cells (${w.m2} m2) have no plank  e.g. ${w.holes.map(fmt).join(' ')}`);
+    console.log('      A walk surface may state only what is rendered. Trim the rect to the plank in the');
+    console.log('      DATA module (engine + walkprobe move together), or extend the plank to the rect.');
   }
 
   expect(`CHECK R — every tagged deck is really drawn where we measured it (${INJECT ? 'SKIPPED under --inject' : `${R_SAMPLES} samples/deck`})`,
@@ -445,21 +617,27 @@ try {
     badB.length === 0, badB.join('\n      '));
   expect(`CHECK C — every deck is walkable onto from real ground (${decks.length - badC.length}/${decks.length} decks)`,
     badC.length === 0, badC.join('\n      '));
+  expect(`CHECK L — every walk surface has a plank under it (${rects.length} rects + ${carveCells.length} carve cells)`,
+    ledges.length === 0, ledges.map(w => `${w.id}: ${w.n} cells (${w.m2} m2) e.g. ${w.holes.map(fmt).join(' ')}`).join('\n      '));
+  expect(`CHECK F — every tagged deck's up-face is wound UP, so it is drawn (and measurable) from above (${F_SAMPLES} samples/deck)`,
+    badF.length === 0, badF.join('\n      '));
 } finally {
   await browser.close();
   kill();
 }
 
-// ---- walkprobe prints only the LAST 6 LINES of this tool, so the tail is
-// exactly 6 lines of summary (the blank separator is the 7th and gets dropped):
-// header, then one line per check, then the verdict. ----
+// ---- walkprobe prints only the LAST 7 LINES of this tool, so the tail is
+// exactly 7 lines of summary (the blank separator is the 8th and gets dropped):
+// header, then one line per check (R+W share the premise line), then the
+// verdict. Add a check here and bump the slice in walkprobe.mjs. ----
 const secs = ((Date.now() - t0) / 1000).toFixed(1);
 const ids = (b) => b.map(s => s.split(':')[0]).join(', ');
-console.log(`\ndeck-coverage · ${rows.length} decks · ${totalInterior} interior cells · ${totalRays} rays · grid ${CFG.G} m · BFS ${CFG.B} m · ${secs}s`
-  + ` · ${deferred.length} deferred · ${warns.length} ledge-warn (task 130) · ${cappedDecks} capped${INJECT ? ' · INJECTED (NOT a gate run)' : ''}`);
-console.log(`  R drawn    : ${INJECT ? 'skipped under --inject' : (badR.length ? 'FAIL — ' + ids(badR) : `all ${rows.length} decks render where they measure`)}`);
+console.log(`\ndeck-coverage · ${rows.length} decks · ${totalInterior} interior cells · ${totalRays} rays · ${rectCount} walk rects + ${carveCells.length} carve cells`
+  + ` · grid ${CFG.G} m · BFS ${CFG.B} m · ${secs}s · ${deferred.length} deferred · ${cappedDecks} capped${INJECT ? ' · INJECTED (NOT a gate run)' : ''}`);
+console.log(`  R+W+F frame: ${INJECT ? 'R skipped under --inject' : (badR.length ? 'R FAIL — ' + ids(badR) : `all ${rows.length} decks render where they measure`)}; walk rects ${mirrorOK ? 'match' : 'DIVERGE from'} CH.allWalkRects(); ${badF.length ? 'F FAIL — ' + ids(badF) : 'every up-face wound up'}`);
 console.log(`  A coverage : ${badA.length ? 'FAIL — ' + ids(badA) : `all ${rows.length} decks hold you on every interior plank cell`}`);
 console.log(`  B height   : ${badB.length ? 'FAIL — ' + ids(badB) : `worst |dy| ${worstDy.toFixed(2)} m at ${worstDyDeck} ${worstDyAt ? fmt(worstDyAt) : ''} (tol ${CFG.TOL_Y})`}`);
 console.log(`  C reach    : ${badC.length ? 'FAIL — ' + ids(badC) : `all ${rows.length} decks reachable on foot from real ground`}`);
+console.log(`  L ledges   : ${ledges.length ? 'FAIL — ' + ledges.map(w => `${w.id} (${w.m2} m2)`).join(', ') : 'no walk surface anywhere hangs past its planks'}`);
 console.log(fails ? `deck-coverage: ${fails} FAIL` : 'deck-coverage: clean');
 process.exit(fails ? 1 : 0);

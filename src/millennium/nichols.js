@@ -17,8 +17,16 @@
 // CatmullRom (no jacknifed corners, 048 contour law) but every deck sample's y
 // is RE-PINNED to the walk-data value — computed by projecting the smoothed
 // (x,z) onto the straight node segment and lerping exactly as surfaceYM does —
-// so feet never float/sink (a >0.15 drift would). deck half-width 1.5 ≤ walk
-// halfW 1.6, so the tiny lateral smoothing stays over the walkable strip.
+// so feet never float/sink (a >0.15 drift would). Deck half-width is 1.5; the
+// LIVE walk band is NICHOLS_BAND_HW = 1.4 (data/millennium.js — bandQ over
+// NICHOLS_DECK_PTS is what walkableM actually answers with; NICHOLS2_M.halfW 1.6
+// is the raw alignment field, NOT the walkable width). So the rendered deck
+// overhangs the walkable strip by 0.10 m PER SIDE — deliberate: the parapet
+// posts stand at ±1.5 and the inset lane keeps the mayor from wedging into them.
+// 0.10 is inside the deck gate's edge margin (tools/deck-coverage.mjs grids at
+// 0.25 m and only judges INTERIOR cells), so the rim aliases, never a plank you
+// would actually stand on. Widen the deck or narrow the band and that stops
+// being true.
 //
 // DRAW-CALL / GREEN-STEEL DISCIPLINE (PITFALLS "toon SILVER reads GREEN"): the
 // curved under-shell would pick up the hemisphere's green ground-bounce on its
@@ -39,7 +47,7 @@ import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { millenniumRoot, flatGrid, poolInstanced } from './index.js';
 import { toon, bmat, mulberry32 } from '../core.js';
-import { collide } from '../props.js';
+import { collide, deckMeshes } from '../props.js';
 import * as M from '../data/millennium.js';
 
 const R = mulberry32(0x4e494348);               // 'NICH' — local, never the world rng
@@ -135,17 +143,34 @@ export function buildNichols() {
   for (let k = 0; k < nSamp; k++) {
     const Lw0 = P[k].clone().addScaledVector(EZ[k], halfW), Le0 = P[k].clone().addScaledVector(EZ[k], -halfW);
     const Lw1 = P[k + 1].clone().addScaledVector(EZ[k + 1], halfW), Le1 = P[k + 1].clone().addScaledVector(EZ[k + 1], -halfW);
-    pushTri(Lw0, Le0, Lw1); pushTri(Le0, Le1, Lw1);              // top faces up
+    // WINDING (130): the ribbon is FrontSide toon, so the side the normal points
+    // at is the ONLY side r128 draws OR raycasts. (EZ, EX, EY) is a right-handed
+    // triple (EY = EZ x EX above), so west -> along -> east gives N = +EY = deck-up
+    // and top -> down -> along gives N = +/-EZ = out through the lip. 060 shipped
+    // the opposite hand on all three ("top faces up" — it did not): the walk face
+    // was a BACK face, culled for the renderer (from above you saw the cream hull
+    // belly THROUGH the deck) and for the raycaster (tools/deck-coverage.mjs found
+    // 20 plank cells on a 95 m span and passed vacuously), while both fascia lips
+    // faced inward under the hull. computeVertexNormals follows winding, so this
+    // was the lighting too. Flip either triangle here and the deck disappears.
+    pushTri(Lw0, Lw1, Le0); pushTri(Le0, Lw1, Le1);              // top face, N = +EY
     const dw0 = Lw0.clone().addScaledVector(EY[k], -0.12), de0 = Le0.clone().addScaledVector(EY[k], -0.12);
     const dw1 = Lw1.clone().addScaledVector(EY[k + 1], -0.12), de1 = Le1.clone().addScaledVector(EY[k + 1], -0.12);
-    pushTri(Lw0, Lw1, dw0); pushTri(Lw1, dw1, dw0);             // west fascia
-    pushTri(Le0, de0, Le1); pushTri(Le1, de0, de1);             // east fascia
+    pushTri(Lw0, dw0, Lw1); pushTri(Lw1, dw0, dw1);             // west fascia, N = +EZ
+    pushTri(Le0, Le1, de0); pushTri(Le1, de1, de0);             // east fascia, N = -EZ
   }
   const deckGeo = new THREE.BufferGeometry();
   deckGeo.setAttribute('position', new THREE.Float32BufferAttribute(dpos, 3));
   deckGeo.setAttribute('uv', new THREE.Float32BufferAttribute(duv, 2));
   deckGeo.computeVertexNormals();
-  root.add(new THREE.Mesh(deckGeo, toon(0xd6d3c9)));
+  const walkDeck = new THREE.Mesh(deckGeo, toon(0xd6d3c9));
+  root.add(walkDeck);
+  // 130: the deck ribbon is the promise — a 300 m span whose walkability is a
+  // BAND, not a rect, so nothing but a raycast against these very triangles can
+  // prove the planks and walkableM agree end to end. The hull belly, parapets,
+  // cap rail and trestle piers are not standing room. Millennium is a HARD CELL,
+  // so the tag names it (solidProbe only ever answers for the active cell).
+  deckMeshes.push({ id: 'mp-nichols-deck', mesh: walkDeck, cell: 'millennium' });
 
   // ==================== 2. THE HULL BELLY (the signature) =============
   // Smooth rounded hull under-shell: rim at the deck edge (±1.5) curving down to
@@ -172,14 +197,23 @@ export function buildNichols() {
   while (kEnd > 1 && P[kEnd].x > 124.3) kEnd--;                   // stop just west of the terrace
   const hpos = [], huv = [];
   const hTri = (a, b, c) => { hpos.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z); huv.push(0, 0, 1, 0, 0, 1); };
+  // WINDING: DoubleSide + unlit bmat means the hull renders identically either
+  // hand — but 060 wound the shell INWARD (mean face normal +y, into the boat),
+  // same slip as the deck above, and the day anyone swaps this to toon() it would
+  // light from inside. j climbs toward +EZ and k toward +EX, so along -> across
+  // is the outward hand. The end caps share one fan, so the far cap has to run
+  // the profile backwards: outward is -EX at the low end and +EX at the terrace.
   for (let k = 0; k < kEnd; k++)                                  // longitudinal strips
     for (let j = 0; j < nProf - 1; j++) {
       const a = hullVert(k, j), b = hullVert(k, j + 1), c = hullVert(k + 1, j), d = hullVert(k + 1, j + 1);
-      hTri(a, b, c); hTri(b, d, c);
+      hTri(a, c, b); hTri(b, c, d);
     }
   for (const k of [0, kEnd]) {                                    // end caps (fan from the top-centre)
-    const top = P[k].clone().addScaledVector(EY[k], -0.12);
-    for (let j = 0; j < nProf - 1; j++) hTri(top, hullVert(k, j), hullVert(k, j + 1));
+    const top = P[k].clone().addScaledVector(EY[k], -0.12), far = k === kEnd;
+    for (let j = 0; j < nProf - 1; j++) {
+      const u = hullVert(k, j), v = hullVert(k, j + 1);
+      if (far) hTri(top, v, u); else hTri(top, u, v);
+    }
   }
   const hullGeo = new THREE.BufferGeometry();
   hullGeo.setAttribute('position', new THREE.Float32BufferAttribute(hpos, 3));
@@ -199,7 +233,11 @@ export function buildNichols() {
     const dir = b.clone().sub(a), len = dir.length(); dir.normalize();
     const up = Math.abs(dir.y) > 0.99 ? new THREE.Vector3(1, 0, 0) : worldUp;
     const ez = new THREE.Vector3().crossVectors(dir, up).normalize();
-    const ex = new THREE.Vector3().crossVectors(ez, dir).normalize();
+    // 130: dir x ez, NOT ez x dir — the latter makes (ex, dir, ez) LEFT-handed, so
+    // makeBasis MIRRORS the box and every strut ships inside-out (silhouette
+    // identical for an unlit square section, but the depth buffer records the FAR
+    // face and a toon swap would light it from inside). Same slip as the deck.
+    const ex = new THREE.Vector3().crossVectors(dir, ez).normalize();
     return boxOriented(thick, len, thick, a.clone().add(b).multiplyScalar(0.5), ex, dir, ez);
   };
 

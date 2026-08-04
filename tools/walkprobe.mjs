@@ -56,22 +56,18 @@ function beachH(x,z){const b=CH.DOG_BEACH.bounds,s=CH.DOG_BEACH.slope;if(x>=b.x0
 // definitions: put them in the data module". CH.deckRects() is now THE single
 // definition and src/props.js pushes the identical list into the engine's
 // walkRects, so a deck can never again be walkable in one and not the other.
+//
+// 130 finishes the job: the four hand-written blocks that used to sit here (the
+// sanctuary deck + treads, the Diversey hitting deck, The Dock, the reserve
+// platform + treads) were each "a SINGLE data const, so there is no formula to
+// fork" — true, and still four more places to forget. CH.allWalkRects() states
+// the WHOLE set once, id-matched to the deckMeshes tags, and deck-coverage
+// CHECK W asserts the LIVE engine's walkRects array is exactly this list.
 const walkRects=[];
-for(const r of CH.deckRects())walkRects.push({x1:r.x1,x2:r.x2,z1:r.z1,z2:r.z2,h:r.h});
-// The three blocks below stay hand-written on purpose: each reads a SINGLE data
-// const (a literal rect), so there is no formula to fork.
-{ const D=CH.SANCTUARY.deck;                     // sanctuary bird-watching deck + stairs (matches buildSanctuary)
-  walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:D.h});
-  for(const st of D.stairs)walkRects.push({x1:st.x0,x2:st.x1,z1:st.z0,z2:st.z1,h:st.h}); }
-{ const B=CH.DIVERSEY.bays.deckRect;              // Diversey ground-tier hitting deck (matches structures.js walkRects.push)
-  walkRects.push({x1:B.x0,x2:B.x1,z1:B.z0,z2:B.z1,h:B.h}); }
-{ const D=CH.THE_DOCK.deckRect;                   // task 072: The Dock raised wood deck (matches structures.js walkRects.push)
-  walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:CH.THE_DOCK.deckY}); }
-{ const P=CH.MONTROSE_RESERVE.platform, D=P.deckRect;   // task 129: the reserve viewing platform + its three stair treads (matches structures.js walkRects.push — derived from the const, never a hand-copied rect)
-  walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:P.deckY});
-  for(const st of P.stairs)walkRects.push({x1:st.x0,x2:st.x1,z1:st.z0,z2:st.z1,h:st.h}); }
+for(const r of CH.allWalkRects())walkRects.push({x1:r.x1,x2:r.x2,z1:r.z1,z2:r.z2,h:r.h});
 // (113's Diversey finger-dock block lived here and re-derived lpDivBank(zc).e+0.6 —
-//  folded into CH.deckRects() above by task 128.)
+//  folded into CH.deckRects() by task 128; the last four consts folded into
+//  CH.allWalkRects() by task 130.)
 function onRect(x,z){for(const r of walkRects)if(x>=r.x1&&x<=r.x2&&z>=r.z1&&z<=r.z2)return r;return null}
 
 function walkable(x,z){
@@ -390,7 +386,8 @@ for(const zc of [348,362,376,390,400]){
 // ===== Job 4 + pier re-anchor: THE PIER lands on the revetment top edge and
 // then SPANS OPEN WATER (a carved slip), walkable root->tip, water beyond rails.
 console.log('\n--- Job 4: corner pier lands on the top edge, spans open water, walkable to the tip ---');
-{ const P=CH.DECKS[1].walk;                             // corner pier walk rect
+{ const d1=CH.DECKS[1].deck;                            // 130: the pier states its footprint ONCE (the rendered slab) and the walk rect derives from it — the separate `walk` rect this used to read ran 0.5 m past the slab at both ends, which is the ledge CHECK L now fails on
+  const P={x1:d1[0],x2:d1[1],z1:d1[2],z2:d1[3]};
   const xc=(P.x1+P.x2)/2;
   // terrain (ignoring the plank rect) at a point: true only if genuine OPEN WATER
   const overWater=(x,z)=>{ if(pip(x,z,LAND))return false; const q=coastQuery(x,z);
@@ -2033,6 +2030,18 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
   // (A1) the crossing walks end to end, east strip -> under the Drive -> park
   for(const [x,z] of [[26,661],[25,661],[20,661],[14,661],[7,661],[0,661],[-6,661],[-11,661],[-13,661]])
     expect(`crossing walks (${x},${z})`,walkable(x,z),true);
+  // (A1b) 130: the RAMP-HEAD SEAMS, sampled at 0.1 m across the whole 12 m
+  // width. The samples above straddled the gap exactly — x25 and x26, x-11 and
+  // x-13 — and never touched x25.2 / x-11.2, where 124's lawn TRENCH NOTCH ran
+  // 0.4 m WIDER than the ramp it was carved for. That band belonged to nothing:
+  // not lawn, not ramp, paving rendered right across it, a hard wall on the map's
+  // only crossing of the Drive. The notch is now exactly the ramp span, and
+  // nothing may ever again be walkable at 0.1 m either side of a ramp head.
+  for(const z of [U.z0+0.5,661,U.z1-0.5]){
+    let bad=null;
+    for(let x=U.rampW.x0-1.0;x<=U.rampE.x1+1.0&&!bad;x+=0.1) if(!walkable(x,z)) bad=+x.toFixed(2);
+    expect(`crossing seam-scan z${z}: continuous walk x${(U.rampW.x0-1).toFixed(1)}..${(U.rampE.x1+1).toFixed(1)} step0.1${bad===null?'':` [first GAP x=${bad}]`}`,bad===null,true);
+  }
   // (A2) it is genuinely SUNKEN, and the profile is a ramp -> flat -> ramp
   expect('tunnel floor sits below grade under the Drive',surfaceY(7,661)===U.floorY,true);
   expect('east ramp head is at grade',surfaceY(U.rampE.x1,661),0);
@@ -2283,7 +2292,12 @@ console.log('\n--- Task 129: the reserve expansion (dune-and-swale unit + nest c
 //                          reachable on foot from the shore — so a deck drawn
 //                          longer than its walk surface, or rooted out over
 //                          water with a moat in front of it, can never ship
-//                          again. Spawns its OWN vite + headless page.
+//                          again. 130 closed the OTHER direction and made it a
+//                          hard fail (CHECK L: every walk surface has a plank
+//                          under it — both piers were shipping 0.5 m of
+//                          standable air over the lake at each tip) and added
+//                          CHECK W, which diffs THIS file's rect list against
+//                          the engine's live one. Spawns its OWN vite + page.
 // Skip with WALKPROBE_FAST=1 only for tight inner-loop iteration; the final
 // gate run must include them.
 if(process.env.WALKPROBE_FAST!=='1'){
@@ -2292,7 +2306,7 @@ if(process.env.WALKPROBE_FAST!=='1'){
     console.log(`\n--- 088 guard: ${tool} ---`);
     const r=spawnSync(process.execPath,[new URL(tool,import.meta.url).pathname.replace(/^\/([A-Za-z]:)/,'$1')],{encoding:'utf8',timeout:180000});
     const out=(r.stdout||'')+(r.stderr||'');
-    const tail=out.trim().split('\n').slice(-6).join('\n');
+    const tail=out.trim().split('\n').slice(-7).join('\n');   // 130: deck-coverage's summary grew to 7 lines (CHECK L + CHECK W); the other five tools just show one line more
     console.log(tail);
     expect(`088 guard ${tool} exit 0`,r.status,0);
   }

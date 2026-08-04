@@ -21,7 +21,7 @@ import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { millenniumRoot, poolInstanced, flatGrid } from './index.js';
 import { toon, bmat, mulberry32 } from '../core.js';
-import { collide } from '../props.js';
+import { collide, deckMeshes } from '../props.js';
 import * as M from '../data/millennium.js';
 
 // ---- palette (literal hex; folded per-color at the static merge) ----------
@@ -530,7 +530,13 @@ export function buildArtInstitute() {
     box(0.6, 13.4, 930 - 909.5, 170.8, 6.7, (909.5 + 930) / 2, wingWhite);
     // the Bluhm terrace: solid under-plinth + pale slab whose top hits y13
     box(B.x1 - B.x0, 12.7, B.z1 - B.z0, (B.x0 + B.x1) / 2, 6.35, (B.z0 + B.z1) / 2, wingWhite);
-    box(B.x1 - B.x0 + 0.4, 0.3, B.z1 - B.z0 + 0.4, (B.x0 + B.x1) / 2, 12.85, (B.z0 + B.z1) / 2, C.plaza);
+    // 130: the pale slab IS the Nichols landing you stand on — its top face is
+    // exactly y13, the height of the bluhm walk quad. The 12.7 m under-plinth
+    // below and the flying-carpet canopy above are mass, not standing room, so
+    // this one slab carries the promise. Millennium is a HARD CELL: the tag
+    // names it so the gate measures against walkableM/surfaceYM.
+    const bluhm = box(B.x1 - B.x0 + 0.4, 0.3, B.z1 - B.z0 + 0.4, (B.x0 + B.x1) / 2, 12.85, (B.z0 + B.z1) / 2, C.plaza);
+    deckMeshes.push({ id: 'mp-bluhm-terrace', mesh: bluhm, cell: 'millennium' });
     // small pave court where the deck sweeps in south of the terrace
     q(B.x0, 132.4, B.z1, 930, 0.004, C.plaza);
     // FLYING-CARPET canopy: a thin white slab floating over roof + terrace +

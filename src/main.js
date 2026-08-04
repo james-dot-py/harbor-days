@@ -259,6 +259,16 @@ window.__hd.landPitch=()=>jphys.landPitch;   // debug/tools only: live landing c
 window.__hd.solidProbe=(x,z)=>({walk:walkable(x,z),water:isWater(x,z),dry:CH.isDryGround(x,z),y:surfaceY(x,z)});
 window.__hd.cellsDbg=allCells;
 window.__hd.deckMeshes=deckMeshes;   // 128 (issue 040): the RENDERED walkable plank meshes, tagged where they are built — tools/deck-coverage.mjs raycasts these against solidProbe so a deck can never again be drawn longer (or rooted further out) than the surface that holds you.
+window.__hd.walkRects=walkRects;     // 130: the LIVE engine walk-rect list. deck-coverage CHECK W asserts it is exactly CH.allWalkRects(), so the tools' mirror can never again be silently INCOMPLETE (the 128 pitfall) — a rect added to one side and not the other now fails the gate.
+// 130: a HARD CELL owns its own walkability, and solidProbe only ever answers
+// for the ACTIVE one — so every deck inside a cell (the Nichols Bridgeway, the
+// BP/Maggie bridge deck, the Wrigleyville rooftops) was invisible to the deck
+// gate by construction. cellProbe asks a NAMED cell directly, without making it
+// active, so a deckMeshes tag carrying {cell:'<id>'} is measured against that
+// cell's own walkable()/surfaceY(). Returns null for an unknown cell or one
+// with no walk function (the lakefront cell, whose walkability is main.js's).
+window.__hd.cellProbe=(id,x,z)=>{const c=getCell(id);if(!c||!c.walkable)return null;
+  return {walk:!!c.walkable(x,z),y:c.surfaceY?c.surfaceY(x,z):0};};
 setIdleGroundProbe((x,z)=>({walk:walkable(x,z),y:surfaceY(x,z)}));   // task 087: let the idle-charm sit only land on safe flat ground (shared engine walk data)
 window.__hd.buildMs={build:Math.round(_tm0-_tb0),merge:Math.round(_tm1-_tm0),packs:Math.round(performance.now()-_tp0)};
 console.log('[perf] world build '+window.__hd.buildMs.build+'ms · mergeCellStatic '+window.__hd.buildMs.merge+'ms · packs '+window.__hd.buildMs.packs+'ms');

@@ -211,7 +211,15 @@ function buildLPUnderpass(){
     g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));
     g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));
     g.setIndex(idx);g.computeVertexNormals();
-    scene.add(new THREE.Mesh(g,floorM));
+    const cut=new THREE.Mesh(g,floorM);scene.add(cut);
+    // 130: THIS strip is the walk surface — every vertex is CH.lpUnderpassH+LIFT,
+    // the same function main.js walks on — so the deck gate can hold the ramps
+    // and tunnel floor to a plank's promise: what you see yourself standing on
+    // holds you, and you can walk down onto it from either trail head. The
+    // retaining walls, coping and the Drive's deck overhead are structure, not
+    // standing room, so the paved cut alone is tagged. Lakefront cell: no {cell}
+    // field, main.js's own walkable()/surfaceY() answer for it.
+    deckMeshes.push({id:'underpass-cut',mesh:cut});
   }
 
   // 2. RETAINING WALLS down both long sides of the whole cut — bottom follows the

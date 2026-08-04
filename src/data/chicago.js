@@ -1184,15 +1184,22 @@ export const LAKEVIEW_BAND = {
   winColor:0xf2e0b6, winLitProb:0.35,   // sparse warm windows at dusk
 };
 
+// 130: a pier's walk surface IS its plank footprint — `deck` is the ONE
+// statement of both. Until 130 each pier carried a separate `walk` rect that
+// ran 0.5 m PAST the slab in z at both ends: half a metre of standable air
+// hanging over open lake at the tip of both piers (the exact reverse of issue
+// 040 — a walk surface with no plank under it). Deriving the rect from the
+// rendered slab makes the two structurally incapable of diverging, and
+// tools/deck-coverage.mjs now hard-fails either direction.
 export const DECKS = [
   // peninsula pier juts EAST over the lake; its landward root is the WEST edge
   // (root:'w') — a fascia closes the daylight where it meets the spit (issue 016).
-  { deck:[200,216,-120,-90,0.42], walk:{ x1:200, x2:216, z1:-120.5, z2:-89.5, h:0.42 }, root:'w' },
+  { deck:[200,216,-120,-90,0.42], root:'w' },
   // corner pier restyled task 021 (owner photos 0395/0399): a pale CONCRETE
   // APRON — white bollards inset along the long edges + tip (north landing
   // open), two red life rings on white posts, NO wooden rails. It juts SOUTH, so
   // its landward root is the NORTH edge (root:'n') — a curb roots it to the top edge.
-  { deck:[116,126,373,406,0.42],  walk:{ x1:116, x2:126, z1:372.5, z2:406.5, h:0.42 }, root:'n',
+  { deck:[116,126,373,406,0.42],  root:'n',
     apron:{ slab:0xbdb8ae, white:0xf2ece0, red:0xd23b34,
             bollard:{ inset:0.55, spacing:3.4, r:0.13, h:0.82 },
             rings:[ {x:125.45, z:395, ry:-Math.PI/2}, {x:116.55, z:381, ry:Math.PI/2} ] } },
@@ -1763,15 +1770,49 @@ export const LP_DIVERSEY = {
 export function deckRects(){
   const out=[];
   const fingerY=SEAWALL_Y.top+0.08;                     // low boardwalk flush on the shore grade (~0.12)
-  DECKS.forEach((d,i)=>out.push({ id:'pier-'+i, x1:d.walk.x1, x2:d.walk.x2, z1:d.walk.z1, z2:d.walk.z2, h:d.walk.h }));
+  DECKS.forEach((d,i)=>out.push({ id:'pier-'+i, x1:d.deck[0], x2:d.deck[1], z1:d.deck[2], z2:d.deck[3], h:d.deck[4] }));   // 130: DERIVED from the rendered slab, never restated (props.js plankDeck builds from the same d.deck)
   for(const zc of FINGER_DOCKS.rows)
     out.push({ id:'belmont-finger-'+zc, x1:FINGER_DOCKS.x0, x2:FINGER_DOCKS.x0+FINGER_DOCKS.len, z1:zc-FINGER_DOCKS.halfW, z2:zc+FINGER_DOCKS.halfW, h:fingerY });
   for(const zc of MT_FINGER_DOCKS.rows)
     out.push({ id:'montrose-finger-'+zc, x1:MT_FINGER_DOCKS.x0, x2:MT_FINGER_DOCKS.x0+MT_FINGER_DOCKS.len, z1:zc-MT_FINGER_DOCKS.halfW, z2:zc+MT_FINGER_DOCKS.halfW, h:fingerY });
   for(const zc of LP_DIVERSEY.dockRows){                // rooted 0.6 onto the promenade so the deck reads flush (issue-016 flush-root law)
-    const root=lpDivBank(zc).e+0.6;
-    out.push({ id:'diversey-finger-'+zc, x1:root-LP_DIVERSEY.dockLen, x2:root+0.3, z1:zc-LP_DIVERSEY.dockHalfW, z2:zc+LP_DIVERSEY.dockHalfW, h:LP_DIVERSEY.deckY });
+    const root=lpDivBank(zc).e+0.6;                     // 130: x2 is the PLANK root exactly — it used to run root+0.3, a 0.3 m lip of walk surface with no deck under it (harmless over the promenade, but the gate now asserts both directions and a rect states only what is rendered)
+    out.push({ id:'diversey-finger-'+zc, x1:root-LP_DIVERSEY.dockLen, x2:root, z1:zc-LP_DIVERSEY.dockHalfW, z2:zc+LP_DIVERSEY.dockHalfW, h:LP_DIVERSEY.deckY });
   }
+  return out;
+}
+
+// ---- THE COMPLETE WALK-RECT LEDGER (task 130) ------------------------------
+// deckRects() states the FORMULA-DERIVED plank rects; four more walk rects are
+// stated beside the structures that build them (structures.js pushes each into
+// the engine's walkRects as it builds). This function is the ONE place that
+// knows the whole set, and every id matches that surface's deckMeshes tag
+// EXACTLY, so a ledger row and a rendered plank can be compared by name.
+//
+// It exists because 128 only ever gated ONE direction. tools/deck-coverage.mjs
+// now runs both over THIS list:
+//   forward  every rendered plank cell is walkable  (CHECK A/B/C)
+//   reverse  every walk-rect cell has a plank under it (CHECK L) — no more
+//            invisible ledges, and no rect may quietly outgrow its slab again.
+// tools/walkprobe.mjs builds its mirror from this function instead of
+// re-deriving four consts by hand, and deck-coverage CHECK W asserts the LIVE
+// engine's walkRects array is exactly this set — the 128 pitfall ("a mirror
+// does not fail loudly when it is INCOMPLETE") made mechanical.
+// Order matches the engine's own push order within each group (the sanctuary
+// treads precede their deck, the reserve deck precedes its treads) so a
+// first-match onRect() lookup answers identically on both sides.
+export function allWalkRects(){
+  const out=deckRects();
+  { const D=SANCTUARY.deck;
+    D.stairs.forEach((st,i)=>out.push({ id:'sanctuary-stair-'+i, x1:st.x0, x2:st.x1, z1:st.z0, z2:st.z1, h:st.h }));
+    out.push({ id:'sanctuary-deck', x1:D.x0, x2:D.x1, z1:D.z0, z2:D.z1, h:D.h }); }
+  { const B=DIVERSEY.bays.deckRect;                     // ground-tier hitting deck (the upper tier is decorative — deckMeshes tags inst 0 only)
+    out.push({ id:'diversey-bay-deck', x1:B.x0, x2:B.x1, z1:B.z0, z2:B.z1, h:B.h }); }
+  { const D=THE_DOCK.deckRect;
+    out.push({ id:'the-dock-deck', x1:D.x0, x2:D.x1, z1:D.z0, z2:D.z1, h:THE_DOCK.deckY }); }
+  { const P=MONTROSE_RESERVE.platform, D=P.deckRect;
+    out.push({ id:'reserve-platform', x1:D.x0, x2:D.x1, z1:D.z0, z2:D.z1, h:P.deckY });
+    P.stairs.forEach((st,i)=>out.push({ id:'reserve-platform-stair-'+i, x1:st.x0, x2:st.x1, z1:st.z0, z2:st.z1, h:st.h })); }
   return out;
 }
 
@@ -1802,7 +1843,7 @@ export const LP_SOUTHPOND_WATER = crChain([
 export const LP_LAND_WEST = [
   [0,412],                              // NE (berm west face x the Diversey corner)
   [0,560],
-  [0,655],[-11.4,655],[-11.4,667],[0,667],   // 124 (issue 037): the Fullerton TRENCH NOTCH — the west ramp's cut carved OUT of the lawn polygon. The y0 lawn plane rendered right OVER the sunken ramp (the 041 grade-carpet law, LAWN edition), so from every approach the underpass read as slabs on turf; 120's framings all stood inside the cut and never saw it. Walkability unaffected: walkable() ORs lpUnderpassHit separately and surfaceY checks lpUnderpassH first.
+  [0,655],[-11,655],[-11,667],[0,667],   // 124 (issue 037): the Fullerton TRENCH NOTCH — the west ramp's cut carved OUT of the lawn polygon. The y0 lawn plane rendered right OVER the sunken ramp (the 041 grade-carpet law, LAWN edition), so from every approach the underpass read as slabs on turf; 120's framings all stood inside the cut and never saw it. 130: the notch was x-11.4 while LP_UNDERPASS.rampW.x0 is -11, so the 0.4 m between them belonged to NEITHER — not lawn (notched out), not ramp (lpUnderpassH returns null west of the head): a 0.4 x 12 m INVISIBLE WALL across the whole ramp head, on the only working crossing of the Drive, with paving rendered right over it. The notch must be EXACTLY the ramp span; walkprobe pins both seams.
   [0,720],[0,900],[0,1006],             // EAST edge = the berm's west face (x0)
   [-28,1024],[-64,1028],[-94,1022],     // SOUTH edge (South Pond lawn — stubbed for 117)
   [-104,958],[-104,876],                // SW corner
@@ -1817,7 +1858,7 @@ export const LP_LAND_EAST = [
   [54,536],[54,612],           // Theater-on-the-Lake bulge (113: widened x52->54 so the pavilion's east wall x51 keeps >=1.3 m of ground through z626; z<700 so the millennium CLAMP_FULL_M disjointness holds)
   [48,662],[38,702],           // narrowing south
   [28,726],[16,714],           // SE tip (Fullerton / trail south end)
-  [14,667],[25.4,667],[25.4,655],[14,655],   // 124 (issue 037): the Fullerton TRENCH NOTCH, east ramp — same lawn-cap carve as LP_LAND_WEST (the 041 law, lawn edition); the cut + retaining walls finally show from the approach
+  [14,667],[25,667],[25,655],[14,655],   // 124 (issue 037): the Fullerton TRENCH NOTCH, east ramp — same lawn-cap carve as LP_LAND_WEST (the 041 law, lawn edition); the cut + retaining walls finally show from the approach. 130: was x25.4 against LP_UNDERPASS.rampE.x1 = 25 — the same 0.4 m dead band as the west head (see LP_LAND_WEST), and the east one is the head you arrive at from the lakefront trail.
   [14,640],[14,470],[14,402],  // WEST edge = the berm's east face (x14)
 ];
 
@@ -1869,12 +1910,23 @@ export function lpWaterHit(x,z){return z>408&&(_pipLP(x,z,LP_DIVERSEY_WATER)||_p
 // (no walkable water-shelf — the Montrose terraced-tip law); the rest of the
 // pond stays non-walkable. NO colliders (anti-trap law) — the pilings stand in
 // water no walker can reach. Shared engine + walkprobe (NEVER fork).
+// 130 (deck-coverage CHECK L): the run is a CAPSULE and _segD2 clamps to the
+// segment, so the distance band used to bulge a HALF-DISC of radius HALF past
+// BOTH end samples — 4.3 m2 of walk surface with no plank under it, since
+// structures.js sweeps the deck between the samples and caps it SQUARE. It sat
+// over the two spur welds (walkable ground, so nobody could fall), but a walk
+// surface may state only what is rendered. The two end-plane tests below clip
+// the caps to the same perpendicular the mitred end quad uses.
 export function lpBoardwalkHit(x,z){
   if(z<896||z>1010||x<-52||x>-12)return false;              // ring bbox early-out
-  const h2=LP_BOARDWALK_HALF*LP_BOARDWALK_HALF;
-  for(let i=0;i<LP_BOARDWALK.length-1;i++){
-    const a=LP_BOARDWALK[i],b=LP_BOARDWALK[i+1];
-    if(_segD2(x,z,a[0],a[1],b[0],b[1])<=h2)return true;
+  const B=LP_BOARDWALK,N=B.length,h2=LP_BOARDWALK_HALF*LP_BOARDWALK_HALF;
+  for(let i=0;i<N-1;i++){                                    // _segD2 inlined: the two OUTER caps must be SQUARE, which needs the projection t
+    const a=B[i],b=B[i+1],dx=b[0]-a[0],dz=b[1]-a[1],L=dx*dx+dz*dz;
+    let t=L?((x-a[0])*dx+(z-a[1])*dz)/L:0;
+    if(t<0){ if(i===0)continue; t=0; }                       // before the FIRST sample = past the NW end cap, never covered by this segment
+    if(t>1){ if(i===N-2)continue; t=1; }                     // beyond the LAST sample = past the SW end cap
+    const cx=a[0]+t*dx,cz=a[1]+t*dz;
+    if((x-cx)*(x-cx)+(z-cz)*(z-cz)<=h2)return true;
   }
   return false;
 }

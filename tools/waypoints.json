@@ -1,6 +1,6 @@
 {
- "generated": "2026-08-04T16:13:56.773Z",
- "count": 181,
+ "generated": "2026-08-04T17:08:24.340Z",
+ "count": 182,
  "waypoints": [
   {
    "id": "spawn",
@@ -347,6 +347,58 @@
     }
    ],
    "expectation": "The Belmont Red Line stop cluster and its DESTINATION PICKER (task 051): a red-header 'RED LINE · BELMONT · lakefront stop' identity pylon (white transit disc) flanked by two lollipop DEPARTURE BOARDS, each its own boarding point you walk up to — '→ ADDISON / Wiggly Field / Howard-bound' and '→ MONROE / Millennium Park / 95th / Dan Ryan-bound'. Text crisp and UPRIGHT (never mirrored), posts end below the panels (no bisected text), and the read stays uncluttered beside the existing blue Belmont Harbor park sign."
+  },
+  {
+   "id": "belmont-pier-edge",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 211,
+   "z": -91.2,
+   "framings": [
+    {
+     "yaw": 0,
+     "pitch": 0.16,
+     "dist": 7
+    },
+    {
+     "yaw": 0.55,
+     "pitch": 0.1,
+     "dist": 9
+    },
+    {
+     "x": 211,
+     "z": -118.8,
+     "yaw": 3.141592653589793,
+     "pitch": 0.16,
+     "dist": 7
+    }
+   ],
+   "expectation": "The peninsula pier's long SOUTH edge (f0/f1) and NORTH edge (f2), stood on a metre inside each (130). Warm wood planks, rail posts with knob caps marching out toward the tip, the lake right there under the edge, the Belmont Rocks/spit behind. THE READ THIS EXISTS FOR: the deck edge and the mayor's feet in one frame — the walk surface stops where the planks stop. From 021 to 130 the walk rect ran 0.5 m past this edge at BOTH ends of the pier: half a metre of standable air over open lake, which no waypoint had ever looked at."
+  },
+  {
+   "id": "corner-pier-tip",
+   "area": "lakefront",
+   "cell": "lakefront",
+   "x": 121,
+   "z": 404.8,
+   "framings": [
+    {
+     "yaw": 0,
+     "pitch": 0.18,
+     "dist": 7
+    },
+    {
+     "yaw": 0.6,
+     "pitch": 0.12,
+     "dist": 9
+    },
+    {
+     "yaw": -0.6,
+     "pitch": 0.12,
+     "dist": 9
+    }
+   ],
+   "expectation": "The corner pier's TIP, stood on a metre inside its own edge (130 — this stand supersedes the auto-generated deck-1, which framed the pier from its centre and could never show an edge). The pale concrete apron jutting SOUTH over open water from the corner-wrap revetment, white bollards inset along the flanks, a red life ring on its post, water under both flanks and past the end. THE READ THIS EXISTS FOR: the mayor stands ON planks with the slab edge visibly under/ahead of him and the lake beyond — walkable ends exactly where the apron ends, no lip of standable nothing hanging past the concrete."
   },
   {
    "id": "shop-kiosk",
@@ -2324,31 +2376,6 @@
    "expectation": "The plaza loop per aerial-path-structure.jpg: a TWO-LOBE peanut of crushed-limestone path — the ring around the green Haring statue's lawn plus a larger southwest lawn lobe — clearly NOT a plain circle; the connector joins from the west, MAIN skims the east point, and the entrance path heads off NE toward the lake. Flower beds and garden life around; statue upright on its pad."
   },
   {
-   "id": "deck-1",
-   "area": "lakefront",
-   "cell": "lakefront",
-   "x": 121,
-   "z": 389.5,
-   "framings": [
-    {
-     "yaw": 0,
-     "pitch": 0.22,
-     "dist": 12
-    },
-    {
-     "yaw": 3.14,
-     "pitch": 0.22,
-     "dist": 12
-    },
-    {
-     "yaw": 1.57,
-     "pitch": 0.3,
-     "dist": 14
-    }
-   ],
-   "expectation": "The corner pier: a deck jutting SOUTH over open water from the corner-wrap revetment, lamp at its tip; skyline backdrop to the south, water under its flanks."
-  },
-  {
    "id": "landmark-0",
    "area": "lakefront",
    "cell": "lakefront",
@@ -2456,12 +2483,12 @@
    "z": 350,
    "framings": [
     {
-     "yaw": -0.75,
+     "yaw": -0.74,
      "pitch": 0.16,
      "dist": 15
     },
     {
-     "yaw": -1.3,
+     "yaw": -1.29,
      "pitch": 0.3,
      "dist": 11
     },
@@ -2478,7 +2505,7 @@
    "area": "lakefront",
    "cell": "lakefront",
    "x": 121,
-   "z": 388.5,
+   "z": 389,
    "framings": [
     {
      "yaw": 3.14,
@@ -2528,7 +2555,7 @@
    "area": "lakefront",
    "cell": "lakefront",
    "x": 121,
-   "z": 402.5,
+   "z": 402,
    "framings": [
     {
      "yaw": -1.35,

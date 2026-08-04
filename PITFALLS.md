@@ -1169,4 +1169,51 @@ few turns to find; keep each to one line of symptom + fix.
   shoulders prove the planks reach land. Judge a continuity fix from a SIDE
   profile (camera ~16 m off the axis) or from ABOVE (pitch 0.5 over the seam) —
   aim off-subject.
+- **A one-and-a-half-direction gate is a gate that agrees with half the bugs**
+  (130). 128 asserted "every rendered plank holds you" and printed the reverse
+  direction as WARN — so both piers shipped a walk rect 0.5 m LONGER than their
+  slab at BOTH ends: half a metre of standable air over open lake at each tip,
+  visible in every run's output for two tasks, failing nothing. If you can state
+  a check, state it as a FAIL; a warning tier is where findings go to be read and
+  not acted on. CHECK L is now hard, both pier rects are DERIVED from the
+  rendered slab (`CH.DECKS` states `deck` only), and the escape hatch is gone.
+- **A mirror can be complete and still wrong: check it against the LIVE list,
+  not against your reading of it** (130). walkprobe re-derived four "single
+  const, no formula to fork" walk rects by hand — safe-looking, and four more
+  places to forget. `CH.allWalkRects()` states all 28 once and deck-coverage
+  CHECK W compares it rect-for-rect with the ENGINE's live `walkRects` array at
+  runtime. The 128 pitfall ("a mirror does not fail loudly when it is
+  INCOMPLETE") is only mechanical once something diffs the two at runtime.
+- **"Walkability unaffected" in a comment is a claim, and claims rot** (130).
+  124's Fullerton TRENCH NOTCH cut the lawn polygon at x -11.4/25.4 while
+  `LP_UNDERPASS.rampW.x0`/`rampE.x1` are -11/25: the 0.4 m between belonged to
+  NEITHER — not lawn (notched out), not ramp (`lpUnderpassH` returns null) — a
+  0.4 x 12 m invisible wall across BOTH heads of the map's only working crossing
+  of the Drive, with paving drawn right over it. The comment asserting it was
+  fine sat directly above the numbers that made it false. Both walkprobe sweeps
+  straddled the gap exactly (x 25 and 26; x -11 and -13). When two systems must
+  meet at a number, SCAN the seam at 0.1 m and pin it with an expect — a
+  waypoint list that samples the round numbers samples the safe ones.
+- **A backwards-wound deck is invisible to the renderer AND to the gate that
+  guards it** (130). `src/millennium/nichols.js` wound its walk-deck quads so the
+  up-face was a BACK face; `toon()` never sets `side`, so r128 culled those
+  triangles for GL and for `Ray.intersectTriangle` alike. The Bridgeway measured
+  20 plank cells out of 15,488 and passed A/B/C/R "ok" — a guard satisfied by
+  measuring nothing. deck-coverage now sweeps with DoubleSide (walkability does
+  not care about winding) and CHECK F re-casts a sample with the mesh's own side
+  flag, so a culled up-face fails loudly. Hand-wound geometry: check the sign of
+  `(b−a)×(c−a).y` before you write "top faces up" in a comment.
+- **There is no step-up limit in the engine** (130, verified live): `canMove()`
+  tests only `walkable()` and the grounded branch lerps `player.y` to `surf`
+  unconditionally, so ANY rise is climbable at any speed. The 0.5 m threshold is
+  DOWN-only (`player.y − surf > 0.5` → airborne). The sanctuary's 0.575 m treads
+  climb fine — but the same number means every tread DESCENDS as a free-fall
+  (4 airborne episodes per trip down, impacts >3 m/s firing the landing thud +
+  dust ring). Keep stair rises under 0.5 m or the stair walks down as a stumble.
+- **A carve built from point-to-polyline distance has ROUND END CAPS; a swept
+  deck built from the same polyline has SQUARE ones** (130). `lpBoardwalkHit`
+  bulged a half-disc of radius `LP_BOARDWALK_HALF` past both end samples — 4.3 m2
+  of walk surface with no plank, at the two spur welds. Harmless only by luck
+  (both caps sit over walkable lawn). Clip the outer caps with the projection `t`
+  on the first/last segment; the middle joints keep the clamped kernel.
 

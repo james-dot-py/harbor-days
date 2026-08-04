@@ -183,6 +183,31 @@ add('redline-belmont', 'lakefront', 'lakefront', 26, 106, [
   { yaw: -1.42, pitch: 0.06, dist: 9 },    // angled toward the MONROE board (south)
 ]);
 
+/* ---- 130: THE TWO PIER EDGES. Both CH.DECKS piers carried a walk rect 0.5 m
+   longer than their slab at BOTH ends — standable air over open lake at every
+   tip — from task 021 until 130 trimmed it, and neither pier had ever had a
+   waypoint at all. These stand ON the deck a metre inside the trimmed edge and
+   look OFF it, so the plank edge, the water below and the mayor's feet are in
+   one frame: the read that would have caught it. Stands + yaws DERIVE from
+   CH.DECKS, so a pier reshape carries its own framings (the mt-dock-end law). */
+{
+  const P0 = CH.DECKS[0].deck, P1 = CH.DECKS[1].deck;   // [x0,x1,z0,z1,y]
+  // peninsula pier: juts EAST off the spit; the trimmed lips were its long
+  // NORTH (z0) and SOUTH (z1) edges, both over open lake.
+  add('belmont-pier-edge', 'lakefront', 'lakefront', R((P0[0] + P0[1]) / 2 + 3), R(P0[3] - 1.2), [
+    { yaw: 0.0,  pitch: 0.16, dist: 7 },    // SOUTH over the south edge: planks stop, water starts, rail posts marching to the tip
+    { yaw: 0.55, pitch: 0.10, dist: 9 },    // SSE oblique along the edge — the deck line read past the mayor's shoulder (047: aim off-subject)
+    { x: R((P0[0] + P0[1]) / 2 + 3), z: R(P0[2] + 1.2), yaw: Math.PI, pitch: 0.16, dist: 7 },   // the NORTH edge, the same read mirrored
+  ]);
+  // corner pier: juts SOUTH off the revetment; its TIP (z1) is the end over
+  // open water, and the corner-slip carve makes both flanks water at the tip.
+  add('corner-pier-tip', 'lakefront', 'lakefront', R((P1[0] + P1[1]) / 2), R(P1[3] - 1.2), [
+    { yaw: 0.0,  pitch: 0.18, dist: 7 },    // SOUTH off the tip: apron edge, bollards, open water beyond
+    { yaw: 0.6,  pitch: 0.12, dist: 9 },    // SSE oblique: the tip corner + the pale apron slab against the lake
+    { yaw: -0.6, pitch: 0.12, dist: 9 },    // SSW oblique: the other tip corner, life ring post in frame
+  ]);
+}
+
 /* ---- 088 VISUAL-TRUTH waypoints (issues 027-030): the loop never framed the
    SHOP SIGNS close enough to read, never judged the bike/walk trail SEAM, and
    never once looked EAST at the Montrose waterline (the 072-075 framings all
@@ -846,7 +871,8 @@ CH.MAP_LANDMARKS.forEach((lm, i) => {   // only landmarks no other waypoint cove
 {
   const CV = CH.CHEVRON.pos;                       // Chevron pad [96,0,372]
   const cfx = CH.COAST_CORNER_PARAMS.fx;           // corner revetment top-edge x at z
-  const D = CH.DECKS[1].walk;                      // corner pier walk rect (x116-126, z372.5-406.5)
+  const d1 = CH.DECKS[1].deck;                     // corner pier slab [x0,x1,z0,z1,y] = 116-126, 373-406
+  const D = { x1: d1[0], x2: d1[1], z1: d1[2], z2: d1[3] };   // 130: was DECKS[1].walk, a SEPARATE rect that ran 0.5 m past the slab at both ends; the pier now states its footprint once and the walk rect derives from it (CH.deckRects), so these stands read the slab directly
   const pierX = (D.x1 + D.x2) / 2;
 
   // (1) Chevron closeup — IMG_0389 (two-tone mast + crossing arms, water behind).

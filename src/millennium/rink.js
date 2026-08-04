@@ -22,7 +22,7 @@
 import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { toon, bmat, mulberry32 } from '../core.js';
-import { collide } from '../props.js';
+import { collide, deckMeshes } from '../props.js';
 import * as M from '../data/millennium.js';
 import { millenniumRoot, flatGrid } from './index.js';
 
@@ -115,6 +115,13 @@ export function buildRink() {
     const merged = BufferGeometryUtils.mergeBufferGeometries(geos, false);
     const ice = new THREE.Mesh(merged, bmat(0xffffff, { vertexColors: true }));
     millenniumRoot.add(ice);
+    // 130: the SHEET is the walk surface (WALK_M's rink quad; kindAtM returns
+    // 'ice' over exactly this, which is what the glide rides) — the boards, the
+    // concrete apron pad under it and the rim planters are not, so only the ice
+    // is the promise. Millennium is a HARD CELL and solidProbe only answers for
+    // the active one, so the tag names the cell: the gate asks walkableM /
+    // surfaceYM directly, without ever activating it.
+    deckMeshes.push({ id: 'mp-rink-ice', mesh: ice, cell: 'millennium' });
   }
 
   // ---- 3. retaining walls (west split at the stair) + rim planters -----

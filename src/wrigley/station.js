@@ -6,7 +6,7 @@
 // shared world rng, never wrand (keeps this file order-independent).
 import * as THREE from 'three';
 import { toon, bmat, mulberry32 } from '../core.js';
-import { collide } from '../props.js';
+import { collide, deckMeshes } from '../props.js';
 import { wrigleyRoot } from './index.js';
 import { atlasPlane } from './village.js';   // shared static-plane atlas (buildVillage emits it, last)
 // Geometry follows STATION_W (../data/wrigleyville.js): embank x-148..-132 topY7.0;
@@ -279,6 +279,13 @@ export function buildStation() {
   {
     const slab = new THREE.Mesh(new THREE.BoxGeometry(6, 0.25, 18, 1, 1, 6), toon(SLAB));
     slab.position.set(CX, 7.475, -442); wrigleyRoot.add(slab);
+    // 130: the slab is the promise — top face y7.6, exactly the platform walk
+    // height, and the only thing up here you stand on. The tactile strips ride
+    // 0.03 proud of it, the north railing and canopy columns stand ON it, and
+    // the stair down to Addison is treads (each its own surface, not this one).
+    // Wrigleyville is a HARD CELL, so the tag names it: the gate asks
+    // walkableW/surfaceYW without ever making the cell active.
+    deckMeshes.push({ id: 'wv-station-platform', mesh: slab, cell: 'wrigleyville' });
   }
   {                                                       // yellow tactile warning strips
     const mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(0.34, 0.06, 18, 1, 1, 6), bmat(YEL), 2);
