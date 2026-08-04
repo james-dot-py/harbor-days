@@ -802,3 +802,23 @@ cut becomes a revert task.
   is now a wooded park stretch (both owner asks, 2026-07-26 playtest). —
   Lincoln Park, Drive-side lawn z 425–487 — src/data/chicago.js LP_RIPPLES +
   LP_TREEFILL, src/props.js, src/packs/ripples.js — task 127
+- THE DUNES GREW — the biggest empty lawn in the game is now the piping
+  plover reserve's inland unit: drifting marram swales with bare sand pannes,
+  a rope-and-post perimeter you respect, snow fence catching sand at the
+  gates, and a crushed-limestone corridor on the Montrose-underpass axis so
+  walking THROUGH it is the point. One quiet toast at the rope: "the dunes
+  grew — stay on the paths, plovers about." — Montrose lawn x 33–171,
+  z −834…−672 — src/data/chicago.js MONTROSE_RESERVE, src/props.js,
+  src/structures.js, src/paths.js, src/packs/montrose-reserve.js — task 129
+- SCOPE THE NEST — a low wooden viewing platform by the corridor with a
+  mounted tripod scope: E and the world narrows to a binocular vignette on
+  the wire nest EXCLOSURE, a plover pair working the sand beside it (the 126
+  camera-ownership recipe; the first look checks the Piping Plover off the
+  bird list). — Montrose reserve platform (56,−779) —
+  src/packs/montrose-reserve.js scope beat, src/structures.js platform —
+  task 129
+- MORNING WATCH — volunteer monitors at the nest-cell rope (tripod scope +
+  binoculars, the real Montrose morning-watch ritual), bumpable for plover
+  lore: Monty & Rose 2019, Imani coming back, Searocket's four chicks; the
+  cell-A placard cycles honest plover facts. — Montrose reserve cell A —
+  src/packs/montrose-reserve.js monitors + placard interaction — task 129

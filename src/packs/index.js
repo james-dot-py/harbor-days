@@ -51,6 +51,7 @@ import './cricket-hill.js';   // Cricket Hill — the walkable kite mound + flye
 import './montrose-harbor-life.js';   // Montrose Harbor delight — the hook fisherman's catch + Park Bait cricket chirp (task 074)
 import './montrose-kite.js';   // FLY A KITE on Cricket Hill — hold-to-launch, session cam, reel-in (task 074)
 import './montrose-point.js';   // THE MAGIC HEDGE — Montrose Point sanctuary life: birders + scopes + clustered chibi migrants + graded birdsong (task 071)
+import './montrose-reserve.js';   // THE RESERVE — the inland dunes unit: nesting plovers, volunteer monitors, the platform scope look-through (task 129)
 import './zoo.js';   // LINCOLN PARK ZOO — the map's first animals: seal pool arcs + lions + free-gate ambience (task 114)
 import './zoo-habitats.js';   // ZOO HABITATS — penguins/polar bear/snow monkeys/flamingos/farm cast + windmill wheel (task 115)
 import './lp-pond-life.js';   // SOUTH POND LIFE — night herons + turtles + dragonflies + paddleboats + lily pads (task 117)

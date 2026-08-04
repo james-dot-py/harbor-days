@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { BufferGeometryUtils } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { scene, rng, rand, toon, bmat, curveMat, gmap, pointsMat, pip, WATER_Y } from './core.js';
 import { COAST_SEGS, MTR_SEGS, tierProfile, profileTotal, beachH, LAND, LAND_GHOST084, coastQuery } from './coast.js';
-import { pathSamples, pathSamples2, mainCurve, ribbonLanes } from './paths.js';
+import { pathSamples, pathSamples2, pathSamplesMain, mainCurve, ribbonLanes } from './paths.js';
 import * as CH from './data/chicago.js';
 
 // --------------------------- world props ------------------------------
@@ -167,6 +167,60 @@ export function buildProps(){
     for(const p of CH.LP_SOUTHPOND.plates)if((x-p.x)**2+(z-p.z)**2<1)return false;
     return true;
   };
+  // ---- 129 THE RESERVE EXPANSION: the shared LOCAL geometry every dressing
+  // grow below consumes (pure math, ZERO rng — declared here because the sapling
+  // grow lives up in the tree block). The PERIMETER is ONE closed outline built
+  // by concatenating the three rope runs and letting the three GATE gaps close
+  // as straight bridges (run0.end->run1.start = south gate, run1.end->run2.start
+  // = west gate, run2.end->run0.start = east gate), so "inside the reserve" is a
+  // single point-in-polygon test that follows any data reshape automatically and
+  // can never fork from the rope the player sees. ----
+  const RSV=CH.MONTROSE_RESERVE;
+  const rsvPoly=[].concat(...RSV.rope);
+  const rsvBox=(()=>{let x0=Infinity,x1=-Infinity,z0=Infinity,z1=-Infinity;
+    for(const p of rsvPoly){if(p[0]<x0)x0=p[0];if(p[0]>x1)x1=p[0];if(p[1]<z0)z0=p[1];if(p[1]>z1)z1=p[1]}
+    return{x0,x1,z0,z1}})();
+  const rsvIn=(x,z)=>{                                   // even-odd ray cast on the closed outline
+    let c=false;
+    for(let i=0,j=rsvPoly.length-1;i<rsvPoly.length;j=i++){
+      const xi=rsvPoly[i][0],zi=rsvPoly[i][1],xj=rsvPoly[j][0],zj=rsvPoly[j][1];
+      if((zi>z)!==(zj>z)&&x<(xj-xi)*(z-zi)/(zj-zi)+xi)c=!c;
+    }
+    return c;
+  };
+  // every DRAWN ribbon sample in reach of the reserve, gathered ONCE: the new
+  // corridor + spur (pathSamples2, drawn in buildPaths before us) and the real
+  // Montrose trail lanes (pathSamplesMain). Sampling the DRAWN centerlines, not
+  // a local curve mirror, is why a ribbon reshape can never strand a tuft on the
+  // pavement (the 088 prop-clearance law).
+  const rsvN=[];
+  for(const arr of[pathSamples2,pathSamplesMain])for(const p of arr)
+    if(p[0]>rsvBox.x0-9&&p[0]<rsvBox.x1+9&&p[1]>rsvBox.z0-9&&p[1]<rsvBox.z1+9)rsvN.push(p);
+  const rsvNear=(x,z,d2)=>{for(let i=0;i<rsvN.length;i++){const p=rsvN[i];if((p[0]-x)**2+(p[1]-z)**2<d2)return true}return false};
+  // NE-SW SWALE BANDS: a line of constant (x+z) runs SW->NE, so phasing the
+  // accept test on (x+z)/period gives the drifting density stripes the refs'
+  // dune-and-swale ground has (dense marram ridge, thin blowout, repeat).
+  const rsvBand=(x,z)=>{const b=((x+z)/RSV.grass.bands.period)%1;return (b<0?b+1:b)<RSV.grass.bands.duty};
+  const rsvCellF=(x,z,fr)=>{for(const c of RSV.cells)if(x>=c.x0-fr&&x<=c.x1+fr&&z>=c.z0-fr&&z<=c.z1+fr)return true;return false};
+  // THE shared accept test for grass + straw. The nest CELLS are deliberately
+  // ALLOWED (and their cellFringe halo skips the band gate, so the roped cells
+  // read as the densest habitat in the unit — which is why they are roped).
+  const rsvDress=(x,z)=>{
+    const G=RSV.grass;
+    if(!rsvIn(x,z))return false;
+    if(!(rsvCellF(x,z,G.cellFringe)||rsvBand(x,z)))return false;
+    if(rsvNear(x,z,G.clearD*G.clearD))return false;
+    const D=RSV.platform.deckRect;
+    if(x>D.x0-1.3&&x<D.x1+1.3&&z>D.z0-1.3&&z<D.z1+3.2)return false;          // off the platform footprint + its stair run
+    if((x-RSV.exclosure.x)**2+(z-RSV.exclosure.z)**2<1.8)return false;        // the exclosure floor stays bare so the clutch reads
+    return true;
+  };
+  // CLUMP CENTERS — filled by the grass grow, reused by the straw grow. Marram
+  // does not carpet a dune, it grows in CLUMPS with bare blowout sand between
+  // them (the refs' language, and the first round's flat uniform scatter read as
+  // "cones on a lawn" instead). Sharing the centers is what mixes the straw INTO
+  // the green clumps rather than laying a second independent field over them.
+  let rsvClumps=null;
   // ---- trees ----
   {
     const T=CH.TREES;
@@ -246,6 +300,43 @@ export function buildProps(){
             if(!bad)for(const o of own)if((o[0]-x)**2+(o[1]-z)**2<12.25){bad=true;break}
             if(bad)continue;
             own.push([x,z]);treeSpots.push([x,z,TF.scale[0]+tr()*(TF.scale[1]-TF.scale[0]),false]);break;
+          }
+        }
+      }
+    }
+
+    // ---- 129 THE RESERVE EXPANSION cottonwood SCRUB: low volunteer saplings in
+    // the swales — grown into the SHARED tree buckets exactly like the Montrose
+    // Point and LP blocks above (LOCAL saplings.seed, appended after the
+    // post-filter and before n is taken → +0 InstancedMesh buckets, +0 draws;
+    // the shared rng is untouched). Rejections, in the order they bite:
+    //   · inside the perimeter and on LAND (never on the berm or the trail side)
+    //   · NOT inside a nest cell — a tree in the exclosure panne is wrong twice
+    //     (habitat AND it would hide the signature object)
+    //   · >=6 m off every corridor/spur/trail sample
+    //   · >=7 m off the mt-lawn-fill SIGHTLINE (164,-735)->(112,-879): that axis
+    //     IS the owner's 041 framing, and Cricket Hill + its kites have to stay
+    //     the mid-distance read through it (GEOGRAPHY §Sightline law)
+    //   · >=6 m off the platform and the exclosure.
+    {
+      const SP=RSV.saplings,sr=mkrng(SP.seed);
+      const sight=(x,z)=>{                                    // point-to-segment, squared
+        const ax=164,az=-735,bx=112,bz=-879,dx=bx-ax,dz=bz-az,L=dx*dx+dz*dz;
+        let u=((x-ax)*dx+(z-az)*dz)/L;u=u<0?0:u>1?1:u;
+        return (x-(ax+u*dx))**2+(z-(az+u*dz))**2;
+      };
+      const D=RSV.platform.deckRect,E=RSV.exclosure;
+      const pcx=(D.x0+D.x1)/2,pcz=(D.z0+D.z1)/2;
+      for(const[ax,az]of SP.anchors){
+        const per=SP.per[0]+Math.floor(sr()*(SP.per[1]-SP.per[0]+1));
+        for(let t=0;t<per;t++){
+          for(let tries=0;tries<22;tries++){
+            const x=ax+(sr()*2-1)*5.5,z=az+(sr()*2-1)*5.5;
+            if(!pip(x,z,LAND)||!rsvIn(x,z)||CH.inReserveCell(x,z))continue;
+            if(rsvNear(x,z,36))continue;                       // >=6 m off every ribbon
+            if(sight(x,z)<49)continue;                         // >=7 m off the 041 sightline
+            if((x-pcx)**2+(z-pcz)**2<36||(x-E.x)**2+(z-E.z)**2<36)continue;
+            treeSpots.push([x,z,SP.scale[0]+sr()*(SP.scale[1]-SP.scale[0]),false]);break;
           }
         }
       }
@@ -510,7 +601,7 @@ export function buildProps(){
   // ---- grass tufts (small, dense — human scale) ----
   {
     const TU=CH.TUFTS,n=TU.count,tm=toon(TU.color);
-    const tuft=new THREE.InstancedMesh(new THREE.ConeGeometry(0.09,0.3,5),tm,n+CH.MONTROSE_DUNE.grass.count+CH.MONTROSE_POINT.prairie.tufts+spB.tufts+spB.reeds+CH.LP_CONSERVATORY.flora.tufts);   // 117: + the South Pond bank grass/reeds; 122: + the conservatory straw grasses (APPENDED — every existing index is unchanged)
+    const tuft=new THREE.InstancedMesh(new THREE.ConeGeometry(0.09,0.3,5),tm,n+CH.MONTROSE_DUNE.grass.count+CH.MONTROSE_POINT.prairie.tufts+spB.tufts+spB.reeds+CH.LP_CONSERVATORY.flora.tufts+RSV.grass.count);   // 117: + the South Pond bank grass/reeds; 122: + the conservatory straw grasses; 129: + the reserve swale grass (APPENDED — every existing index is unchanged)
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
     // no grass poking through the entrance monument's decomposed-granite pad
     // (task 023): the scaleY rand is still drawn (rng order frozen), the tuft
@@ -632,8 +723,71 @@ export function buildProps(){
         M.compose(V.set(x,0.14,z),Q.identity(),S.set(1,FLO.tuftScaleY[0]+gr()*(FLO.tuftScaleY[1]-FLO.tuftScaleY[0]),1));tuft.setMatrixAt(placed++,M);break;
       }
     }
+    // ---- 129 THE RESERVE EXPANSION swale grass: clumpy marram in NE-SW density
+    // bands across the inland dune unit — grown into the SAME tuft bucket in
+    // place (placed continues past the conservatory grasses → +0 InstancedMesh
+    // buckets, +0 draws). LOCAL grass.seed rng, rejection-sampled through the
+    // shared rsvDress test. ZERO shared rng (strictly after the frozen fill, so
+    // every pre-129 tuft matrix is byte-identical).
+    // The bucket is ONE flat toon green and nothing ever calls setColorAt on it,
+    // so grass.color reads as HEIGHT — scaleY 1.4-2.6 makes these the tallest
+    // grass in the game, which is the whole dune read (the 072 dune-grass /
+    // 071 prairie precedent). ----
+    {
+      const G=RSV.grass,gr=mkrng(G.seed);
+      rsvClumps=[];                                      // ~12 stems per clump, 2.0 m spread
+      for(let c=0;c<Math.ceil(G.count/12);c++)for(let t=0;t<24;t++){
+        const x=rsvBox.x0+gr()*(rsvBox.x1-rsvBox.x0),z=rsvBox.z0+gr()*(rsvBox.z1-rsvBox.z0);
+        if(!rsvDress(x,z))continue;
+        rsvClumps.push([x,z]);break;
+      }
+      for(let i=0;i<G.count&&rsvClumps.length;i++){
+        const C=rsvClumps[i%rsvClumps.length];
+        for(let t=0;t<8;t++){
+          const a=gr()*Math.PI*2,rr=Math.sqrt(gr())*2.0,x=C[0]+Math.cos(a)*rr,z=C[1]+Math.sin(a)*rr;
+          if(!rsvDress(x,z))continue;
+          M.compose(V.set(x,0.14,z),Q.identity(),S.set(1,G.scaleY[0]+gr()*(G.scaleY[1]-G.scaleY[0]),1));tuft.setMatrixAt(placed++,M);break;
+        }
+      }
+    }
     tuft.count=placed;                                   // trim any unfilled tail (no stray tuft at origin)
     tuft.instanceMatrix.needsUpdate=true;scene.add(tuft);RUSTLE_MESHES.push(tuft);   // 109: brushable
+
+    // ---- 129 reserve STRAW: the dead-stalk half of the dune palette (the refs'
+    // "mixed straw-and-green clumpy marram"), the MONTROSE_POINT.prairie recipe
+    // — clone one thin cone, tilt/scale each, merge into ONE frustum-culled
+    // Mesh. Its hex is the Point prairie's own strawColor, so mergeCellStatic
+    // folds the two straw meshes into one bucket: +0 draws, not +1. ----
+    {
+      const ST=RSV.straw,sr=mkrng(ST.seed),base=new THREE.ConeGeometry(0.05,1,4),parts=[];
+      const CL=rsvClumps&&rsvClumps.length?rsvClumps:null;
+      for(let i=0;i<ST.count;i++)for(let t=0;t<10;t++){
+        let x,z;
+        if(CL){const C=CL[(i*3+1)%CL.length],a=sr()*Math.PI*2,rr=Math.sqrt(sr())*2.4;   // stride 3 so straw and grass do not walk the clumps in lockstep
+          x=C[0]+Math.cos(a)*rr;z=C[1]+Math.sin(a)*rr;}
+        else{x=rsvBox.x0+sr()*(rsvBox.x1-rsvBox.x0);z=rsvBox.z0+sr()*(rsvBox.z1-rsvBox.z0);}
+        if(!rsvDress(x,z))continue;
+        const h=ST.h[0]+sr()*(ST.h[1]-ST.h[0]),g=base.clone();
+        g.scale(1,h,1);g.rotateX((sr()*2-1)*0.14);g.rotateZ((sr()*2-1)*0.14);g.translate(x,h*0.5,z);
+        parts.push(g);break;
+      }
+      base.dispose();
+      if(parts.length)scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(parts),toon(ST.color)));
+    }
+
+    // ---- 129 reserve BARE SAND PANNES: the blowouts between the grass clumps
+    // (and the two nest-cell floors) — ONE frustum-culled merged Mesh of flat
+    // ellipses. Walkable, visual only. y 0.035 sits 0.015 above the GRASS_PATCH
+    // discs (0.02) and 0.015 below the bike asphalt (0.05): the 088 ground
+    // y-ladder, so the sand never z-fights the lawn and the paths always cover
+    // the sand. ----
+    {
+      const parts=RSV.pannes.map(([cx,cz,rx,rz])=>{
+        const g=new THREE.CircleGeometry(1,20);g.rotateX(-Math.PI/2);g.scale(rx,1,rz);g.translate(cx,0.035,cz);
+        return g.toNonIndexed();
+      });
+      scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(parts),toon(RSV.sand)));
+    }
   }
 
   // ---- AIDS Garden: flowers + sculpture tribute ----
@@ -652,8 +806,12 @@ export function buildProps(){
     // the same index-gated grow, APPENDED after South Pond (existing indices
     // unchanged). Derived from the data, never a copied literal.
     const LPC=CH.LP_CONSERVATORY,lpcM=LPC.beds.length*LPC.flora.bedPer+LPC.grandmothers.clumps.length*LPC.flora.gmPer;
-    const stems=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05,0.05,0.55,5),toon(0x4f9f52,{}),n+mpM+spM+lpcM);
-    const heads=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.19,0),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),n+mpM+spM+lpcM);
+    // 129: + the reserve's beach-pea drifts — the same index-gated grow,
+    // APPENDED after the conservatory (existing indices unchanged). Derived from
+    // the data, never a copied literal.
+    const rsvFL=RSV.flowers,rsvM=rsvFL.drifts.length*rsvFL.perDrift;
+    const stems=new THREE.InstancedMesh(new THREE.CylinderGeometry(0.05,0.05,0.55,5),toon(0x4f9f52,{}),n+mpM+spM+lpcM+rsvM);
+    const heads=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.19,0),curveMat(new THREE.MeshToonMaterial({gradientMap:gmap})),n+mpM+spM+lpcM+rsvM);
     const M=new THREE.Matrix4(),Q=new THREE.Quaternion(),S=new THREE.Vector3(),V=new THREE.Vector3();
     for(let i=0;i<n;i++){
       let x,z;
@@ -765,6 +923,28 @@ export function buildProps(){
           heads.setColorAt(idx,col);idx++;break;             // idx advances ONLY on a placed flower (no uncolored gaps)
         }
       });
+      stems.count=heads.count=idx;
+    }
+    // ---- 129 THE RESERVE EXPANSION beach-pea drifts: violet mats sprawling
+    // through the swales and along the cell edges — grown into the SAME
+    // stems+heads buckets in place (idx continues past Grandmother's Garden →
+    // +0 InstancedMesh buckets, +0 draws). LOCAL flowers.seed rng, the Montrose
+    // Point drift() idiom (sqrt-radius disc per drift), setColorAt tinting every
+    // head violet. Beach pea IS the cell habitat, so unlike the grass this grow
+    // deliberately ignores the swale bands and the cell boundaries — it only
+    // keeps >=1.5 m off the ribbons (nothing sprawls onto crushed limestone) and
+    // stays inside the rope. ZERO shared rng. ----
+    {
+      const fr=mkrng(rsvFL.seed),col=new THREE.Color(rsvFL.color);
+      let idx=stems.count;                                  // continues past the conservatory grows
+      for(const d of rsvFL.drifts)for(let k=0;k<rsvFL.perDrift;k++)for(let tries=0;tries<24;tries++){
+        const a=fr()*Math.PI*2,rr=Math.sqrt(fr())*d[2],x=d[0]+Math.cos(a)*rr,z=d[1]+Math.sin(a)*rr;
+        if(!rsvIn(x,z)||rsvNear(x,z,2.25))continue;         // inside the rope, >=1.5 m off every ribbon
+        const s=0.9+fr()*0.5;
+        M.compose(V.set(x,0.28*s,z),Q.identity(),S.set(1,s,1));stems.setMatrixAt(idx,M);
+        M.compose(V.set(x,0.62*s,z),Q.identity(),S.set(1,0.8,1));heads.setMatrixAt(idx,M);
+        heads.setColorAt(idx,col);idx++;break;              // idx advances ONLY on a placed flower
+      }
       stems.count=heads.count=idx;
     }
     stems.instanceMatrix.needsUpdate=heads.instanceMatrix.needsUpdate=true;heads.instanceColor.needsUpdate=true;
@@ -1095,7 +1275,13 @@ export function buildProps(){
   }
   // benches: instanced seats + backs + legs (3 draw calls)
   {
-    const wm=toon(0xa9713f),lm=toon(0x6d4526),nB=CH.BENCHES.length;
+    // 129: the reserve's two benches (east gate + the platform approach) ride
+    // the SAME seat/back/leg buckets — the list is concatenated, not copied into
+    // CH.BENCHES, so the city-pack table stays the trail's and the reserve keeps
+    // its furniture with its own data. The loop draws no rng, so the append is
+    // determinism-free and +0 draw calls.
+    const BENCHES=CH.BENCHES.concat(RSV.benches);
+    const wm=toon(0xa9713f),lm=toon(0x6d4526),nB=BENCHES.length;
     const seats=new THREE.InstancedMesh(new THREE.BoxGeometry(2.4,0.16,0.7),wm,nB);
     const backs=new THREE.InstancedMesh(new THREE.BoxGeometry(2.4,0.6,0.12),wm,nB);
     const legs=new THREE.InstancedMesh(new THREE.BoxGeometry(0.14,0.62,0.6),lm,nB*2);
@@ -1103,7 +1289,7 @@ export function buildProps(){
     const seatL=new THREE.Matrix4().makeTranslation(0,0.62,0);
     const backL=new THREE.Matrix4().makeTranslation(0,1.05,-0.32).multiply(new THREE.Matrix4().makeRotationX(-0.15));
     const legLm=new THREE.Matrix4().makeTranslation(-1,0.31,0),legRm=new THREE.Matrix4().makeTranslation(1,0.31,0);
-    CH.BENCHES.forEach((b,i)=>{
+    BENCHES.forEach((b,i)=>{
       E.set(0,b.ry,0);Q.setFromEuler(E);base.compose(V.set(b.x,0,b.z),Q,S1);
       tmp.multiplyMatrices(base,seatL);seats.setMatrixAt(i,tmp);
       tmp.multiplyMatrices(base,backL);backs.setMatrixAt(i,tmp);
@@ -1459,4 +1645,145 @@ export function buildProps(){
       grp.position.set(SG.x,0,SG.z);grp.rotation.y=SG.ry;scene.add(grp);collide(SG.x,SG.z,0.35);   // thin post — walk around
     }
   }
+
+  // ---- 129 THE RESERVE EXPANSION signage — the 072 dune-sign register --------
+  // Two big interpretive GATE signs, the cell-A nesting sign (a straight copy of
+  // the dune sign's class, its own lines), and six small laminated PLACARDS
+  // zip-tied to rope posts. Word-sign laws (028/032/050): each DISTINCT text
+  // gets its own measureText-FITTED canvas, a FrontSide plane only, and a solid
+  // rear (the backing box) so no mirrored-text artifact can ever show. The two
+  // gate signs carry IDENTICAL lines, so they SHARE one canvas/material and all
+  // six placards share another — three unique textured materials for eleven
+  // objects, and mergeCellStatic folds each shared pair/set into one draw.
+  // Zero rng. ----
+  {
+    const SG=RSV.signs;
+    // (i) the shared gate-sign canvas: cream board, dark border, a low dune
+    // profile with marram tufts, the two fitted lines and a park-district band.
+    const gateTex=(()=>{
+      const cv=document.createElement('canvas');cv.width=512;cv.height=344;const g=cv.getContext('2d');
+      g.fillStyle='#efe4c8';g.fillRect(0,0,512,344);
+      g.strokeStyle='#4a5c46';g.lineWidth=9;g.strokeRect(13,13,486,318);
+      g.fillStyle='#d9c087';                                              // dune profile
+      g.beginPath();g.moveTo(40,120);g.quadraticCurveTo(150,62,250,104);g.quadraticCurveTo(350,146,472,100);
+      g.lineTo(472,142);g.lineTo(40,142);g.closePath();g.fill();
+      g.strokeStyle='#7f9455';g.lineWidth=5;                              // marram tufts on the ridge
+      for(let i=0;i<11;i++){const bx=60+i*36,by=126-Math.sin(i*0.9)*16;
+        for(const dx of[-7,0,7]){g.beginPath();g.moveTo(bx,by+16);g.lineTo(bx+dx,by-14);g.stroke();}}
+      g.textAlign='center';g.textBaseline='middle';
+      const put=(txt,y,size,col,max)=>{let fs=size;g.font=`800 ${fs}px "Trebuchet MS",sans-serif`;
+        while(g.measureText(txt).width>max&&fs>10){fs-=2;g.font=`800 ${fs}px "Trebuchet MS",sans-serif`;}
+        g.fillStyle=col;g.fillText(txt,256,y);};
+      put(SG.gateE.lines[0],202,44,'#2d4a2a',430);
+      put(SG.gateE.lines[1],254,40,'#4a5c46',430);
+      put('CHICAGO PARK DISTRICT',306,24,'#7a5a3a',400);
+      const t=new THREE.CanvasTexture(cv);t.anisotropy=4;return t;
+    })();
+    const gateM=curveMat(new THREE.MeshBasicMaterial({map:gateTex,side:THREE.FrontSide}));
+    // ONE dark-wood hex for posts AND backings: reusing a pool colour stops a
+    // NEW bucket being allocated (145), but it cannot make a physically-new
+    // object free — a bucket whose other members sit 120 m away at the Point
+    // still costs +1 draw in every reserve view. Fewer distinct hexes = fewer
+    // view-local draws, so the whole kit runs on six (see the buildMontroseReserve
+    // header in structures.js for the measured ledger).
+    const postM=toon(0x7d6b52),backM=postM;
+    for(const S of[SG.gateE,SG.gateW]){
+      const grp=new THREE.Group();
+      for(const sx of[-0.62,0.62]){                                       // TWO posts, ending at the panel's BOTTOM edge (lollipop law — a post through the text bisects it)
+        const post=new THREE.Mesh(new THREE.BoxGeometry(0.1,1.15,0.1),postM);
+        post.position.set(sx,0.575,-0.04);grp.add(post);
+      }
+      const back=new THREE.Mesh(new THREE.BoxGeometry(1.58,1.08,0.07),backM);back.position.set(0,1.66,-0.05);grp.add(back);
+      const panel=new THREE.Mesh(new THREE.PlaneGeometry(1.5,1.0),gateM);panel.position.y=1.66;grp.add(panel);
+      grp.position.set(S.x,0,S.z);grp.rotation.y=S.ry;scene.add(grp);
+      collide(S.x,S.z,0.5);
+    }
+    // (ii) CELL A — the 072 dune sign's exact class (plover glyph + three fitted
+    // lines on a single post), on the cell's south rope facing the corridor.
+    {
+      const S=SG.cellA;
+      const cv=document.createElement('canvas');cv.width=360;cv.height=260;const g=cv.getContext('2d');
+      g.fillStyle='#efe4c8';g.fillRect(0,0,360,260);
+      g.strokeStyle='#8a7a5c';g.lineWidth=8;g.strokeRect(12,12,336,236);
+      g.fillStyle='#4a3b2f';
+      g.beginPath();g.ellipse(180,52,25,15,0,0,Math.PI*2);g.fill();        // body
+      g.beginPath();g.arc(201,40,10,0,Math.PI*2);g.fill();                 // head
+      g.beginPath();g.moveTo(209,40);g.lineTo(222,42);g.lineTo(209,45);g.closePath();g.fill();  // beak
+      g.strokeStyle='#4a3b2f';g.lineWidth=3;
+      g.beginPath();g.moveTo(174,66);g.lineTo(174,80);g.moveTo(186,66);g.lineTo(186,80);g.stroke();
+      g.textAlign='center';g.textBaseline='middle';
+      const ys=[124,166,206];
+      for(let i=0;i<S.lines.length;i++){
+        let fs=34;g.font=`700 ${fs}px "Trebuchet MS",sans-serif`;
+        while(g.measureText(S.lines[i]).width>300&&fs>12){fs-=2;g.font=`700 ${fs}px "Trebuchet MS",sans-serif`;}
+        g.fillStyle=i===2?'#7a5a3a':'#4a3b2f';g.fillText(S.lines[i],180,ys[i]);
+      }
+      const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
+      const grp=new THREE.Group();
+      const post=new THREE.Mesh(new THREE.BoxGeometry(0.08,0.9,0.08),postM);post.position.y=0.45;grp.add(post);
+      const back=new THREE.Mesh(new THREE.BoxGeometry(1.66,1.21,0.06),backM);back.position.set(0,1.25,-0.05);grp.add(back);
+      const panel=new THREE.Mesh(new THREE.PlaneGeometry(1.6,1.15),curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide})));
+      panel.position.y=1.25;grp.add(panel);
+      // RY FIX, not a data edit (the ry-faces-away trap): the data's Math.PI
+      // aims the face at -z = NORTH, into the cell it is warning you away from.
+      // The reader stands on the CORRIDOR, ~8 m SOUTH of this rope, so the panel
+      // has to look +z. Corrected here in the builder — the const stays the
+      // owner's/planner's (executor A's file), and the correction is visible.
+      grp.position.set(S.x,0,S.z);grp.rotation.y=S.ry+Math.PI;scene.add(grp);
+      collide(S.x,S.z,0.35);
+    }
+    // (iii) PLACARDS — 'FRAGILE DUNE HABITAT / Please stay on paths', blue on
+    // white, snapped onto the NEAREST REAL ROPE POST (the data coords are hints;
+    // one of them — (33.2,-771) at the west gate — sits ON the corridor, and a
+    // post planted in the middle of a path is exactly what prop-clearance
+    // exists to stop). Each card then faces the nearest DRAWN ribbon sample:
+    // a placard is read by someone standing on the path. No collider — you walk
+    // straight past a laminated card.
+    {
+      const cv=document.createElement('canvas');cv.width=256;cv.height=192;const g=cv.getContext('2d');
+      g.fillStyle='#f6f6f2';g.fillRect(0,0,256,192);
+      g.strokeStyle='#2f5aa8';g.lineWidth=7;g.strokeRect(9,9,238,174);
+      g.textAlign='center';g.textBaseline='middle';
+      const put=(txt,y,size,w,col)=>{let fs=size;g.font=`${w} ${fs}px "Trebuchet MS",sans-serif`;
+        while(g.measureText(txt).width>210&&fs>8){fs-=2;g.font=`${w} ${fs}px "Trebuchet MS",sans-serif`;}
+        g.fillStyle=col;g.fillText(txt,128,y);};
+      put('FRAGILE',52,34,'800','#2f5aa8');
+      put('DUNE HABITAT',88,30,'800','#2f5aa8');
+      put('Please stay',131,24,'400','#41506b');
+      put('on paths',157,24,'400','#41506b');
+      const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
+      const cardM=curveMat(new THREE.MeshBasicMaterial({map:tex,side:THREE.FrontSide})),cardBackM=toon(0xb59a6f);
+      // every rope post, stepped with fenceRun's own spacing math (spacing 2.6,
+      // n = max(1, round(len/2.6))) so a card lands ON a post, never between two
+      const posts=[];
+      const runs=RSV.rope.slice();
+      for(const c of RSV.cells)for(const ln of rectLines2(c))runs.push(ln);
+      for(const run of runs)for(let i=0;i<run.length-1;i++){
+        const ax=run[i][0],az=run[i][1],dx=run[i+1][0]-ax,dz=run[i+1][1]-az,len=Math.hypot(dx,dz);
+        if(len<1e-4)continue;
+        const n=Math.max(1,Math.round(len/2.6));
+        for(let k=0;k<=n;k++)posts.push([ax+dx*k/n,az+dz*k/n]);
+      }
+      for(const[px,pz]of RSV.placards){
+        let best=posts[0],bd=Infinity;
+        for(const q of posts){const d=(q[0]-px)**2+(q[1]-pz)**2;if(d<bd){bd=d;best=q;}}
+        let ax=best[0],az=best[1],fd=Infinity,fx=ax,fz=az+1;
+        for(const s of rsvN){const d=(s[0]-ax)**2+(s[1]-az)**2;if(d>0.6&&d<fd){fd=d;fx=s[0];fz=s[1];}}
+        const grp=new THREE.Group();
+        const back=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.26,0.025),cardBackM);back.position.z=-0.02;grp.add(back);
+        const card=new THREE.Mesh(new THREE.PlaneGeometry(0.32,0.24),cardM);grp.add(card);
+        grp.position.set(ax,0.38,az);
+        grp.rotation.y=Math.atan2(fx-ax,fz-az);
+        grp.rotateX(0.14);grp.rotateZ(((ax*7.13+az*3.71)%1+1)%1*0.14-0.07);   // rng-free lean/roll — zip ties are never square
+        scene.add(grp);
+      }
+    }
+  }
 }
+
+// rectLines twin for props.js (structures.js keeps its own — one closed loop of
+// four segments around a nest cell). Pure geometry, no rng, no shared state.
+function rectLines2(b){return [
+  [[b.x0,b.z0],[b.x1,b.z0]],[[b.x1,b.z0],[b.x1,b.z1]],
+  [[b.x1,b.z1],[b.x0,b.z1]],[[b.x0,b.z1],[b.x0,b.z0]],
+];}

@@ -273,7 +273,43 @@ add('mt-gate', 'montrose', 'lakefront', 34, -771, [
   { yaw: -1.57, pitch: 0.12, dist: 11 },   // due WEST at the Montrose Ave underpass portal
   { yaw: -1.4,  pitch: 0.1,  dist: 10 },   // angled: portal + flanking hedge + Lakeview backdrop
   { yaw: -1.74, pitch: 0.14, dist: 12 },   // angled the other way
-]);
+]);                                        // 129: the stand now sits on the reserve CORRIDOR's west gate mouth
+
+// THE RESERVE EXPANSION (129, owner issue 041 — "too much space in this area,
+// let's minimize negative space"): the four judged reads of the inland unit of
+// the Montrose Beach Dunes Natural Area. Every stand DERIVES from
+// MONTROSE_RESERVE.stands, so a reshape of the reserve carries the framings.
+{
+  const RS = CH.MONTROSE_RESERVE, S = RS.stands;
+  // mt-lawn-fill IS the owner's frame: standing on the bike path looking NNW at
+  // Cricket Hill across what used to be unbroken fairway. f0 is the 041 view
+  // itself (GEOGRAPHY §Sightline law keeps this axis clear of tall statics).
+  add('mt-lawn-fill', 'montrose', 'lakefront', S.lawnfill[0], S.lawnfill[1], [
+    { yaw: -2.6,  pitch: 0.10, dist: 9 },   // NNW: the reserve fills the near/mid ground, hill + kites beyond
+    { yaw: -2.35, pitch: 0.12, dist: 11 },  // swung west: more of the swale/panne field + the corridor cutting west
+    { yaw: -0.52, pitch: 0.10, dist: 9 },   // back SSE down the trail: the east rope + gate sign from the path side
+  ]);
+  // mt-reserve: INSIDE the unit, on the crushed-limestone corridor mid-reserve.
+  add('mt-reserve', 'montrose', 'lakefront', S.reserve[0], S.reserve[1], [
+    { yaw: -1.57, pitch: 0.08, dist: 8 },   // due WEST down the corridor: swales both sides, platform beyond
+    { yaw: -2.31, pitch: 0.10, dist: 9 },   // NW into the dune field toward Cell A's rope + the monitor
+    { yaw:  0.58, pitch: 0.10, dist: 9 },   // SSE back over the spur junction + placard, berm/Lakeview closing
+  ]);
+  // mt-exclosure: the signature object at the Cell-A rope (the 072 register).
+  // Subject bearing from the stand is -2.88 — both framings keep ~0.3 rad OFF
+  // that axis so the mayor never occludes the cage (128 down-the-length lesson).
+  add('mt-exclosure', 'montrose', 'lakefront', S.exclosure[0], S.exclosure[1], [
+    { yaw: -2.53, pitch: 0.08, dist: 7 },   // N across the rope, cage right-of-centre + the plover pair
+    { yaw: -3.20, pitch: 0.06, dist: 5 },   // closer, swung the other side: cage left-of-centre + sign + scope
+  ]);
+  // mt-overlook: ON the viewing platform deck (reached by its south stairs).
+  // f0 offset from the cell bearing (2.11) so the deck scope + cage read beside
+  // the mayor, not behind him.
+  add('mt-overlook', 'montrose', 'lakefront', S.overlook[0], S.overlook[1], [
+    { yaw: 2.45, pitch: 0.14, dist: 8 },    // ENE off the deck: scope near-right, cell + exclosure + swales, hill beyond
+    { yaw: 2.63, pitch: 0.12, dist: 9 },    // ESE along the corridor: the deck reading grounded on the grass
+  ]);
+}
 
 // MONTROSE HARBOR (task 070): the basin + moored boats, the HOOK breakwater pier,
 // and Park Bait. All on walkable ground (west promenade / the mole top via LAND).

@@ -1,6 +1,6 @@
 {
- "generated": "2026-08-02T19:20:56.393Z",
- "count": 177,
+ "generated": "2026-08-04T16:13:56.773Z",
+ "count": 181,
  "waypoints": [
   {
    "id": "spawn",
@@ -587,7 +587,97 @@
      "dist": 12
     }
    ],
-   "expectation": "The Montrose Avenue underpass (z-771, x0-14): a fenced dead-end portal through the LSD berm matching the Belmont/Addison/Irving register — a voussoir stone arch over a dark recessed door, limestone posts/lintel, warm lanterns, flanked by the perimeter hedge with the gap aligned to the mouth, and the low-rise Lakeview brick backdrop rising behind the berm. NO gag sign. Reads as a real neighborhood gate, sealed for now."
+   "expectation": "The Montrose Avenue underpass (z-771, x0-14): a fenced dead-end portal through the LSD berm matching the Belmont/Addison/Irving register — a voussoir stone arch over a dark recessed door, limestone posts/lintel, warm lanterns, flanked by the perimeter hedge with the gap aligned to the mouth, and the low-rise Lakeview brick backdrop rising behind the berm. NO gag sign. NEW (129): the crushed-limestone reserve corridor now runs from the mouth east under the camera, with the reserve's west rope gate + snow-fence flanks at the frame edges — the portal reads as opening ONTO the reserve walk, still sealed for now."
+  },
+  {
+   "id": "mt-lawn-fill",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 164,
+   "z": -735,
+   "framings": [
+    {
+     "yaw": -2.6,
+     "pitch": 0.1,
+     "dist": 9
+    },
+    {
+     "yaw": -2.35,
+     "pitch": 0.12,
+     "dist": 11
+    },
+    {
+     "yaw": -0.52,
+     "pitch": 0.1,
+     "dist": 9
+    }
+   ],
+   "expectation": "ISSUE 041 CLOSED — THE OWNER'S FRAME, FILLED: standing on the bike path looking NNW toward Cricket Hill, the old unbroken fairway now reads as the Montrose Beach Dunes Natural Area's inland unit — drifts of pale marram/dune grass in uneven swales with bare sand pannes showing through, a white rope-and-post perimeter skirting the path with a gated opening where the corridor meets it (the interpretive sign reads at approach range, not from here), low cottonwood scrub clusters, and the crushed-limestone corridor cutting west; Cricket Hill still rises mid-distance with kites aloft and the LSD viaduct on the horizon. The read: a used, protected natural area — NOT a golf fairway, NOT prop clutter; the hill + kites stay the clear mid-distance subject."
+  },
+  {
+   "id": "mt-reserve",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 100,
+   "z": -769,
+   "framings": [
+    {
+     "yaw": -1.57,
+     "pitch": 0.08,
+     "dist": 8
+    },
+    {
+     "yaw": -2.31,
+     "pitch": 0.1,
+     "dist": 9
+    },
+    {
+     "yaw": 0.58,
+     "pitch": 0.1,
+     "dist": 9
+    }
+   ],
+   "expectation": "INSIDE THE RESERVE (129): on the crushed-limestone corridor mid-reserve — dune-grass swales roll away on BOTH sides in uneven drifts (taller + paler than lawn), bare sand pannes between them, rope lines keeping the path honest (small placards at the posts of the nest-cell rope), the wire exclosure + a volunteer monitor at the roped cell to the northwest, and the corridor running west toward the LSD berm/Lakeview backdrop that closes the view. Reads as walking THROUGH a protected dune restoration, not around a fenced hole; the path stays clean of grass."
+  },
+  {
+   "id": "mt-exclosure",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 80,
+   "z": -776,
+   "framings": [
+    {
+     "yaw": -2.53,
+     "pitch": 0.08,
+     "dist": 7
+    },
+    {
+     "yaw": -3.2,
+     "pitch": 0.06,
+     "dist": 5
+    }
+   ],
+   "expectation": "THE EXCLOSURE (the signature object): at the Cell-A rope, a low wire dome cage sits on open sand over a nest scrape — thin arched ribs + rings reading as a protective cage, not a solid dome — with a piping plover pair (pale sand-grey back, white breast, black collar + brow band, orange legs) working the panne beside it; the white rope-and-post line with its 'PIPING PLOVER NESTING AREA' sign crosses the near ground; a volunteer's tripod scope stands aimed at the cage. Quiet + protective, the 072 dunes register — NOT a zoo exhibit."
+  },
+  {
+   "id": "mt-overlook",
+   "area": "montrose",
+   "cell": "lakefront",
+   "x": 56,
+   "z": -779,
+   "framings": [
+    {
+     "yaw": 2.45,
+     "pitch": 0.14,
+     "dist": 8
+    },
+    {
+     "yaw": 2.63,
+     "pitch": 0.12,
+     "dist": 9
+    }
+   ],
+   "expectation": "FROM THE VIEWING PLATFORM: standing on the low railed wooden deck (reachable by its south stairs), the reserve spreads north and east — the roped nest cell with the wire exclosure and plovers on its sand panne, swales of marram grass streaked with bare sand, and Cricket Hill with its kites beyond. The deck reads grounded on the grass (no float, no moat), the scope tripod mounted at the rail."
   },
   {
    "id": "mt-harbor",

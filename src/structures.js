@@ -1728,6 +1728,205 @@ function buildMontrosePoint(POSTS,RAILS){
   }
 }
 
+// ---- 129 THE RESERVE EXPANSION — the inland dune unit's BUILT kit -----------
+// Rope perimeter + the two nest-cell loops, slatted snow-fence panels, the
+// viewing PLATFORM (walkable deck + three treads + rail + a mounted scope) and
+// the signature wire EXCLOSURE over its nest scrape. Every value from
+// CH.MONTROSE_RESERVE; ZERO shared rng (the only variation is a rng-free
+// deterministic hash of the panel index — see `jit`).
+//
+// DRAW-CALL DISCIPLINE (PITFALLS "+0 draw calls by cached toon color" / 145):
+// every solid here is a plain toon() Mesh on a hex that ALREADY has static
+// members in the lakefront cell's z-band −4 (floor(z/240), i.e. z −960…−720 —
+// where the whole kit lives), verified live with tools/tmp-129-b-pool.mjs
+// (never assumed — a colour consumed only by an InstancedMesh opens a NEW
+// bucket). So mergeCellStatic allocates ZERO new buckets. The hexes and their
+// band−4 anchors:
+//   0x8a6a44 (192,−790) deck planks/treads · 0x7d6b52 (176,−740, Park Bait
+//   trim) skirt/deck posts/snow-fence rails/sign posts + backings/exclosure
+//   stakes · 0xb59a6f (127,−874) deck rails/fence slats/nest scrape/placard
+//   backings · 0x3a3f45 (223,−896, the Point's tripod scopes) the deck scope +
+//   the exclosure wire · 0xd8cbb0 (13,−771) the eggs. Ropes ride the shared
+//   fenceRun POSTS/RAILS InstancedMeshes (tail-appended: every earlier instance
+//   index is unchanged), so they are +0 everywhere.
+//
+// MEASURED, not assumed (tools/tmp-129-b-attrib.mjs, which splits every
+// in-frustum draw unit's vertices into inside/outside the reserve and asks
+// whether the remainder would have been in frustum on its own): +0 BUCKETS is
+// not the same as +0 DRAWS. Every one of these buckets has its other members
+// 100−150 m away at the Point / Park Bait / the underpass, so in a reserve
+// framing the bucket is on screen ONLY because of this kit — one draw each.
+// That is why the palette is deliberately SIX hexes and not eleven: each extra
+// distinct colour is a whole extra view-local draw. See the report ledger.
+function buildMontroseReserve(POSTS,RAILS){
+  const RS=CH.MONTROSE_RESERVE,P=RS.platform,D=P.deckRect;
+
+  // (a) ROPE PERIMETER — the refs' sagging white rope on thin posts, three runs
+  // with the east/west/south GATE gaps built into the data, plus a closed loop
+  // on each nest cell's EXACT boundary so the non-walkable carve (inReserveCell,
+  // engine + walkprobe) reads as the rope the player can see. collide:false —
+  // 065 law: a data carve never gets a collider ring.
+  const ropeOpt={spacing:2.6,postH:0.5,color:0xcbb994,collide:false};
+  for(const run of RS.rope)fenceRun(run,ropeOpt,POSTS,RAILS);
+  for(const cell of RS.cells)for(const ln of rectLines(cell))fenceRun(ln,ropeOpt,POSTS,RAILS);
+
+  // (b) SNOW FENCE — slatted wind-catch panels at the gates and along the kite-
+  // ring north edge. Each panel runs PARALLEL to the nearest perimeter rope
+  // segment (derived, so a data reshape can never leave a panel crossing its own
+  // rope). `jit` is a rng-free deterministic hash of (panel, slat) — the slats
+  // lean a few hundredths of a radian each, which is what makes a fence read as
+  // weathered instead of extruded.
+  {
+    const jit=(i,k)=>{const s=Math.sin(i*127.1+k*311.7)*43758.5453;return (s-Math.floor(s))*2-1;};
+    const SF=RS.snowFence,slatG=[],frameG=[];
+    const nearestDir=(cx,cz)=>{
+      let best=null;
+      for(const run of RS.rope)for(let i=0;i<run.length-1;i++){
+        const ax=run[i][0],az=run[i][1],bx=run[i+1][0],bz=run[i+1][1];
+        const dx=bx-ax,dz=bz-az,L=dx*dx+dz*dz;
+        let u=L?((cx-ax)*dx+(cz-az)*dz)/L:0;u=u<0?0:u>1?1:u;
+        const d=(cx-(ax+u*dx))**2+(cz-(az+u*dz))**2;
+        if(!best||d<best.d)best={d,ry:Math.atan2(dx,dz)};
+      }
+      return best?best.ry:0;
+    };
+    SF.panels.forEach(([cx,cz,len],pi)=>{
+      const ry=nearestDir(cx,cz),h=SF.h,n=9;
+      for(let k=0;k<n;k++){
+        const t=(k+0.5)/n-0.5,lz=t*len,hh=h*(0.86+0.14*((jit(pi,k)+1)/2));
+        const g=new THREE.BoxGeometry(0.02,hh,0.06);
+        g.rotateZ(jit(pi,k)*0.05);g.rotateX(jit(pi,k+40)*0.04);
+        g.translate(0,hh/2,lz);g.rotateY(ry);g.translate(cx,0,cz);slatG.push(g.toNonIndexed());
+      }
+      for(const by of[h*0.34,h*0.80]){                                   // two horizontal wires/rails
+        const g=new THREE.BoxGeometry(0.035,0.045,len);
+        g.translate(0,by,0);g.rotateY(ry);g.translate(cx,0,cz);frameG.push(g.toNonIndexed());
+      }
+    });
+    scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(slatG),toon(0xb59a6f)));
+    scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(frameG),toon(0x7d6b52)));
+  }
+
+  // (c) THE VIEWING PLATFORM — the low wooden deck at (56,−779). FLUSH-ROOT /
+  // deck-coverage law (128, issue 040): the RENDERED slab's TOP FACE is exactly
+  // deckY and its footprint is exactly deckRect (no oversize lip to alias the
+  // coverage sweep), it is the ONLY mesh tagged into deckMeshes, and every tread
+  // is its own tagged mesh at its own walkRect height. The rects are DERIVED
+  // from the const — tools/walkprobe.mjs reads the same const, so engine and
+  // probe can never fork.
+  const woodM=toon(0x8a6a44),skirtM=toon(0x7d6b52),railM=toon(0xb59a6f);
+  {
+    const cx=(D.x0+D.x1)/2,cz=(D.z0+D.z1)/2,w=D.x1-D.x0,d=D.z1-D.z0;
+    const slab=new THREE.Mesh(new THREE.BoxGeometry(w,0.28,d),woodM);
+    slab.position.set(cx,P.deckY-0.14,cz);scene.add(slab);
+    deckMeshes.push({id:'reserve-platform',mesh:slab});                  // the plank slab ONLY
+    walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:P.deckY});
+    const fascia=new THREE.Mesh(new THREE.BoxGeometry(w+0.18,0.24,d+0.18),skirtM);
+    fascia.position.set(cx,P.deckY-0.16,cz);scene.add(fascia);           // top 1.46 — UNDER the walking surface, and UNtagged (a skirt is not a promise)
+    for(const[px,pz]of[[D.x0+0.32,D.z0+0.32],[D.x1-0.32,D.z0+0.32],[D.x0+0.32,D.z1-0.32],[D.x1-0.32,D.z1-0.32]]){
+      const post=new THREE.Mesh(new THREE.CylinderGeometry(0.10,0.12,P.deckY-0.28,7),skirtM);
+      post.position.set(px,(P.deckY-0.28)/2,pz);scene.add(post);         // NO collider: the corners sit INSIDE the walk rect (the dock precedent)
+    }
+    let sti=0;
+    for(const st of P.stairs){                                           // rise 0.375 per tread — each its own rect + tag
+      const step=new THREE.Mesh(new THREE.BoxGeometry(st.x1-st.x0,st.h,st.z1-st.z0),woodM);
+      step.position.set((st.x0+st.x1)/2,st.h/2,(st.z0+st.z1)/2);scene.add(step);
+      walkRects.push({x1:st.x0,x2:st.x1,z1:st.z0,z2:st.z1,h:st.h});
+      deckMeshes.push({id:'reserve-platform-stair-'+sti++,mesh:step});
+    }
+    // RAIL — N/E/W rims plus the two SOUTH FLANKS either side of the stair
+    // mouth. The flanks are the elevator guard (PITFALLS: an elevated walk rect
+    // adjacent to grade acts as a lift): with them, the ONLY ground->deck route
+    // is the 1.2 m stair mouth. Colliders sit INBOARD of the deck edge and stop
+    // 0.1 m short of the mouth on each side, so nothing can ever trap (065).
+    const ri=0.11,RH=0.95,S0=P.stairs[0];
+    const edges=[
+      [D.x0+ri,D.z0+ri,D.x1-ri,D.z0+ri],          // north rim
+      [D.x1-ri,D.z0+ri,D.x1-ri,D.z1-ri],          // east rim
+      [D.x0+ri,D.z0+ri,D.x0+ri,D.z1-ri],          // west rim
+      [D.x0+ri,D.z1-ri,S0.x0,D.z1-ri],            // south flank, west of the stair mouth
+      [S0.x1,D.z1-ri,D.x1-ri,D.z1-ri],            // south flank, east of the stair mouth
+    ];
+    for(const[x1,z1,x2,z2]of edges){
+      const len=Math.hypot(x2-x1,z2-z1);if(len<0.2)continue;
+      const rot=Math.atan2(x2-x1,z2-z1),n=Math.max(2,Math.round(len/1.2));
+      for(let k=0;k<=n;k++){
+        const post=new THREE.Mesh(new THREE.BoxGeometry(0.07,RH,0.07),railM);
+        post.position.set(x1+(x2-x1)*k/n,P.deckY+RH/2,z1+(z2-z1)*k/n);scene.add(post);
+      }
+      for(const by of[P.deckY+RH-0.05,P.deckY+RH*0.52]){
+        const bar=new THREE.Mesh(new THREE.BoxGeometry(0.055,0.07,len),railM);
+        bar.position.set((x1+x2)/2,by,(z1+z2)/2);bar.rotation.y=rot;scene.add(bar);
+      }
+      const cn=Math.max(2,Math.round(len/0.8));
+      for(let k=0;k<=cn;k++)collide(x1+(x2-x1)*k/cn,z1+(z2-z1)*k/cn,0.20,P.deckY+RH);
+    }
+  }
+
+  // (d) THE MOUNTED SCOPE on the deck — the Montrose Point birder-scope register
+  // (three splayed legs to an apex + a yawed tube + an eyepiece knob, ONE merged
+  // frustum-culled geometry), lifted onto the deck and aimed at the exclosure.
+  // No collider: it stands 0.9 m inboard of the east rim, inside the walk rect.
+  {
+    const S=P.scope,yaw=Math.atan2(S.aim[0]-S.x,S.aim[1]-S.z),parts=[];
+    for(let i=0;i<3;i++){
+      const leg=new THREE.CylinderGeometry(0.02,0.02,1.25,6);
+      leg.translate(0,-0.625,0);leg.rotateX(0.35);leg.rotateY(i*2*Math.PI/3);leg.translate(0,1.18,0);
+      parts.push(leg);
+    }
+    const tube=new THREE.CylinderGeometry(0.055,0.075,0.42,10);
+    tube.rotateX(Math.PI/2);tube.rotateY(yaw);tube.translate(0,1.28,0);parts.push(tube);
+    const knob=new THREE.SphereGeometry(0.045,8,6);
+    knob.translate(-0.24*Math.sin(yaw),1.28,-0.24*Math.cos(yaw));parts.push(knob);
+    const scope=new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(parts),toon(0x3a3f45));
+    scope.position.set(S.x,P.deckY,S.z);scene.add(scope);
+  }
+
+  // (e) THE EXCLOSURE — the signature object. A low OPEN wire cage over a nest
+  // scrape in Cell A: six half-arc ribs squashed to h, two horizontal rings and
+  // four anchor stakes. It has to read SEE-THROUGH (that is the whole point of a
+  // predator exclosure — the plovers walk out, everything bigger stays out), so
+  // it is thin tube geometry, never a shell. NO collider: it stands inside the
+  // non-walkable cell, which is a data carve.
+  {
+    const E=RS.exclosure,wire=[],stakes=[];
+    for(let i=0;i<6;i++){
+      const rib=new THREE.TorusGeometry(E.r,0.026,4,9,Math.PI);          // half-arc in XY
+      rib.scale(1,E.h/E.r,1);rib.rotateY(i*Math.PI/6);wire.push(rib.toNonIndexed());
+    }
+    for(const f of[0.34,0.68]){
+      const ring=new THREE.TorusGeometry(E.r*Math.sqrt(Math.max(0.04,1-f*f)),0.022,4,22);
+      ring.rotateX(-Math.PI/2);ring.translate(0,E.h*f,0);wire.push(ring.toNonIndexed());
+    }
+    for(const[sx,sz]of[[-0.78,-0.78],[0.78,-0.78],[-0.78,0.78],[0.78,0.78]]){
+      const st=new THREE.CylinderGeometry(0.028,0.02,0.34,5);
+      st.translate(sx*E.r,0.12,sz*E.r);stakes.push(st.toNonIndexed());
+    }
+    // 090 SAME-HUE-VANISH: round 1 built the cage in galvanised 0xb0b8c2 and it
+    // DISAPPEARED — pale grey wire over a pale sand panne, invisible at 7 m and
+    // at 15 m alike (shot and rejected). Recolour the PROP, never the ground:
+    // 0x3a3f45 is the Point's tripod-scope charcoal (band−4 pool, so still +0
+    // draws) and dark wire is exactly how a real exclosure photographs against
+    // bright sand. Tube radii went 0.016/0.013 -> 0.026/0.022 in the same pass.
+    const cage=new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(wire),toon(0x3a3f45));
+    cage.position.set(E.x,0,E.z);scene.add(cage);
+    const stk=new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(stakes),skirtM);
+    stk.position.set(E.x,0,E.z);scene.add(stk);
+    // the scrape + its clutch. y 0.048 sits above the sand pannes (0.035, props)
+    // which sit above the grass patches (0.02) — the 088 ground y-ladder.
+    const scrape=new THREE.CircleGeometry(0.36,18);scrape.rotateX(-Math.PI/2);
+    scrape.translate(E.x,0.048,E.z);
+    scene.add(new THREE.Mesh(scrape,railM));                              // 0xb59a6f — a shade darker than the panne sand, so the hollow reads
+    const eggs=[];
+    for(let i=0;i<E.eggs;i++){
+      const a=i/E.eggs*Math.PI*2+0.6,g=new THREE.SphereGeometry(0.045,8,6);
+      g.scale(1,0.86,1.25);g.rotateY(a);g.translate(E.x+Math.cos(a)*0.075,0.086,E.z+Math.sin(a)*0.075);
+      eggs.push(g.toNonIndexed());
+    }
+    scene.add(new THREE.Mesh(BufferGeometryUtils.mergeBufferGeometries(eggs),toon(0xd8cbb0)));
+  }
+}
+
 // ---- LINCOLN PARK ZOO campus (task 114) ------------------------------------
 // The fenced-but-OPEN free zoo: ornamental perimeter fence (gates = gaps between
 // runs), the east front-door arch + open leaves, the Sea Lion Pool with its
@@ -3326,6 +3525,7 @@ export function buildStructures(){
   buildZooHabitats(POSTS,RAILS);     // task 115: habitat dioramas + Farm-in-the-Zoo — rails append to the tail (collide:false, data-carved walkability)
   buildSouthPond(POSTS,RAILS);       // task 117: Café Brauer + honeycomb pavilion + Nature Boardwalk deck/rails/plates/bridge — rails append to the tail (collide:false, zero rng)
   buildConservatory();               // task 122: ogee glasshouse + glass-pyramid vestibule + Eli Bates fountain + garden furnishings (zero rng, no fences, no colliders — det-safe insert)
+  buildMontroseReserve(POSTS,RAILS); // task 129: the inland dune unit's rope perimeter/nest-cell loops/snow fence/viewing platform/scope/exclosure — fences TAIL-append (every earlier POSTS/RAILS index unchanged), zero shared rng
   emitFences(POSTS,RAILS);
   buildFieldhouse();
   buildParkBait();

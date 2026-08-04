@@ -63,3 +63,14 @@ Montrose because of the nesting plovers. It also converts dead lawn into somethi
 with a reason to exist.
 
 Full direction in **task 129**.
+
+## RESOLVED (task 129, 2026-08-04)
+
+The reserve expansion shipped: the lawn in the owner's frame is now the
+Montrose Beach Dunes Natural Area's inland dune-and-swale unit (GEOGRAPHY.md
+§The RESERVE EXPANSION). The acceptance measure was the reproduced view
+itself — `tools/shots/129-before.png` (the empty fairway) vs the same framing
+after (`mt-lawn-fill` f0, the run of record): swales + sand pannes + rope
+perimeter + gate + corridor + monitors now fill the frame while Cricket Hill
+and its kites stay the mid-distance subject. Montrose re-sign-off queued as
+task 131.

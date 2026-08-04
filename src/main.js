@@ -175,6 +175,7 @@ function walkable(x,z){
   const cw=cellWalk();if(cw)return TRAP_TEST&&x>=TRAP_TEST.x0&&x<=TRAP_TEST.x1&&z>=TRAP_TEST.z0&&z<=TRAP_TEST.z1?false:cw(x,z);   // active cell owns walkability (TRAP_TEST: debug-only synthetic block, issue 025)
   if(onRect(x,z))return true;
   if(CH.beachCarved(x,z))return false;             // task 072: roped plover dune + beach-house hall (data carve, no collider — 065 law)
+  if(CH.inReserveCell(x,z))return false;           // task 129: reserve nest cells (data carve, no collider — same law; rope on the boundary)
   const bh=beachH(x,z);if(bh!==null)return CH.beachWalkable(x,z);   // dog + Montrose beaches
   if(pip(x,z,LAND))return true;
   if((CH.lpLandHit(x,z)&&!CH.lpBlockedHit(x,z))||CH.lpUnderpassHit(x,z))return true;   // 112/113 LINCOLN PARK: west park + east strip + Fullerton underpass/culvert, minus the Theater footprint carve (shared data — walkprobe mirrors)

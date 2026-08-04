@@ -420,6 +420,34 @@ export function buildPaths(){
   ribbonOn(curveOf(CH.LP_GARDEN_AXIS_S),GS.width,GS.color,GS.y,0,pathSamples2);
   ribbonOn(curveOf(CH.LP_GARDEN_EAST),GS.width,GS.color,GS.y,0,pathSamples2);
   ribbonOn(curveOf(CH.LP_STOCKTON_CROSSING),GS.width,GS.color,GS.y,0,pathSamples2);
+  // 129 THE RESERVE EXPANSION: the two NEW crushed-limestone ribbons through the
+  // inland dune unit — the CORRIDOR on the Montrose-underpass axis (west gate
+  // mouth (16,-771) east to the trail-bow gate (163,-764)) and the SPUR that
+  // leaves the corridor at (104,-768.5), runs south out the south gate and
+  // curves SE across the bay lawn into the trail bend at (150.5,-639.3).
+  // TRAIL_STYLE.walk styling — y 0.074 is the TOP of the 088 ladder, so where
+  // each ribbon crosses the Montrose trail the limestone covers the asphalt AND
+  // its yellow dashes (paint yields to the crossing surface) and the junction
+  // reads as a path crossing, not a floating stub. Both endpoints were measured
+  // against the DRAWN trail lanes (tools/tmp-129-b-weld.mjs): the corridor's cap
+  // lands inside the walk ribbon's east edge, the spur's cap lands on the walk
+  // centreline — no gap, no dead end, no data nudge needed.
+  //
+  // pathSamples2 ONLY (ribbonOn is rng-free). The reserve sits at z −639…−834,
+  // far outside CH.TREES.region (z −400…300) and CH.TREES.north (z −417…−359),
+  // so props' tree POST-filter (near2, which scans pathSamples2 during
+  // buildProps) finds nothing in range to drop — world scatter frozen.
+  //
+  // The SPUR T's IN WITHOUT a join frame (the zoo-spur / conservatory-connector
+  // precedent). It shares the corridor's MIDDLE control point, not an endpoint,
+  // and joinSeam snaps a successor's first station BIT-EXACT onto the
+  // predecessor's end frame — handing it the corridor's endFrame would have
+  // yanked the spur head 59 m east onto (163,-764). Sharing the centreline point
+  // instead means the spur's own cap sits under the corridor's half-width, so
+  // the T is covered at any angle and needs no junction disc.
+  const RS=CH.MONTROSE_RESERVE;
+  ribbonOn(curveOf(RS.paths.corridor),RS.paths.width,st.walk.color,st.walk.y,0,pathSamples2);
+  ribbonOn(curveOf(RS.paths.spur),RS.paths.width,st.walk.color,st.walk.y,0,pathSamples2);
   flushJunctions();   // 102: one instanced mesh for every paved junction dot
   // 106: register the DRAWN dual trail + spur centerlines as the footstep
   // 'asphalt' corridor (onTrail). rng-free; the miters only touch edge verts, so

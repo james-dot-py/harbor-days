@@ -547,6 +547,113 @@ export const MONTROSE_POINT = {
   ],
 };
 
+// ---- THE RESERVE EXPANSION (129, owner directive 2026-08-02) ---------------
+// The inland unit of the Montrose Beach Dunes Natural Area: the big interior
+// lawn WEST of the bike path (issue 041's negative space) becomes a dune-and-
+// swale restoration in the reserve's own vocabulary. GEOGRAPHY.md §The RESERVE
+// EXPANSION is the law — read it first. NO LAND/coast change: everything sits
+// on existing lawn; walkability changes are DATA CARVES only (the 072 dune-
+// block precedent: two roped nest cells, non-walkable, NO collider — 065 law;
+// rope sits exactly on the cell boundary so the block reads as the rope).
+// All dressing uses LOCAL seeds; +0 InstancedMesh buckets (tuft/tree/flower
+// bucket growth + two frustum-culled merged Meshes: straw + sand pannes).
+export const MONTROSE_RESERVE = {
+  // symbolic perimeter (fenceRun collide:false), three runs with GATE gaps:
+  // east gate (the trail's west bow — the main entrance), west gate (the
+  // Montrose-underpass axis), south gate (the spur to the bay lawn).
+  rope:[
+    [[153.5,-762],[156.5,-746],[161,-724],[165.5,-702],[168.5,-688],[170,-679],[170.5,-677],
+     [156,-674],[138,-672.5],[122,-673.5],[108,-675]],                       // east edge (skirts the trail >=4 m off the bike centerline — the 129 rope law) + south edge -> south gate E side
+    [[100,-676.5],[82,-678],[60,-680],[44,-682],[36,-684],[34,-700],[33,-720],
+     [33.5,-744],[33,-767]],                                                  // south gate W side -> SW corner -> west gate S side
+    [[33,-775],[34,-794],[35,-812],[36,-828],[42,-832],[56,-833.5],[74,-834],
+     [94,-834],[112,-833],[128,-832],[138,-831],[146,-828],[151,-820],[152,-808],
+     [150,-792],[151,-778],[152.5,-770],[153.5,-766]],                        // west gate N side -> NW corner -> kite-ring N edge -> east gate N side (gap z-766..-762 straddles the corridor at z~-764, >=1.9 m each side)
+  ],
+  // roped NEST CELLS — interior NON-walkable by data (inReserveCell), rope on
+  // the exact boundary (closed loops, fenceRun collide:false).
+  cells:[
+    { x0:62, x1:90, z0:-802, z1:-780 },   // Cell A — the exclosure sand panne
+    { x0:114, x1:140, z0:-740, z1:-716 }, // Cell B — dune-swale habitat
+  ],
+  // both NEW crushed-limestone ribbons (TRAIL_STYLE.walk), pathSamples-append
+  // law; endpoints weld into the trail's WALK ribbon (102 miter law; the Point-
+  // loop idiom — compute the sampled weld point, do not double-pave).
+  paths:{
+    corridor:[[16,-771],[26,-771],[36,-771],[48,-772],[62,-773.5],[76,-773],
+              [90,-770.5],[104,-768.5],[118,-767],[132,-766],[144,-765],[152,-764.2],[163,-764]],
+    spur:[[104,-768.5],[102,-750],[101,-730],[102,-710],[104,-692],[105,-678],
+          // 129 executor-B NUDGE (tools/prop-clearance.mjs, a permanent gate):
+          // the staged [138,-641.5],[144,-640.3] ran the spur 0.5 m from the 121
+          // micro-discovery BENCH at (143,-641) — its r1.0 collider sat ON the new
+          // pavement (need >=w/2-0.05 = 1.15 m). Swung 2.5 m south so the bench
+          // now sits BESIDE the spur (2.3 m off the centerline, ~1.1 m of grass to
+          // the ribbon edge) instead of in it — a bench on the new path is the
+          // better read anyway. The welded endpoint [150.5,-639.3] is untouched.
+          [107,-664],[114,-654],[126,-646],[138,-644],[144,-643.2],[150.5,-639.3]],
+    width:2.4,
+  },
+  // the VIEWING PLATFORM (low wooden deck; obeys the FLUSH-ROOT/deck-coverage
+  // law — literal rects, rendered top at h, stairs descend SOUTH to the lawn by
+  // the corridor, every tread its own walkRect + deckMeshes tag, rise 0.375
+  // (<0.45 — the sanctuary's 0.57 predates the law, don't copy it)).
+  platform:{ deckRect:{ x0:53.9, x1:58.1, z0:-780.6, z1:-777.4 }, deckY:1.5,
+             stairs:[ { x0:55.4, x1:56.6, z0:-777.4, z1:-776.5, h:1.125 },
+                      { x0:55.4, x1:56.6, z0:-776.5, z1:-775.6, h:0.75 },
+                      { x0:55.4, x1:56.6, z0:-775.6, z1:-774.7, h:0.375 } ],
+             wood:0x9c7a4e, rail:0xb7a888,
+             scope:{ x:57.2, z:-779.5, aim:[76,-791] } },
+  // the signature object: a low wire dome EXCLOSURE over a nest scrape (Cell A)
+  exclosure:{ x:76, z:-791, r:1.15, h:0.85, wire:0x9aa4a8, eggs:4 },
+  // volunteer monitors (makeNPC wander:0); plovers keep >=8-10 m away (084 rule)
+  monitors:[
+    { x:84, z:-778, aim:[76,-791], scope:true },    // cell-A shoulder, scope on the exclosure
+    { x:150, z:-761, aim:[120,-778], binocs:true }, // east gate, glassing the swales
+  ],
+  // plover pairs working the cell sand (pack: ground-bird jitter is fine)
+  plovers:[ {x:70,z:-796,ry:0.7}, {x:82,z:-788,ry:2.4},   // Cell A pair (beside the exclosure)
+            {x:120,z:-730,ry:1.2}, {x:131,z:-722,ry:4.1} ], // Cell B pair
+  signs:{
+    gateE:{ x:152.5, z:-766.8, ry:2.0, lines:['MONTROSE BEACH DUNES','NATURAL AREA'] },  // faces the trail approach
+    gateW:{ x:35.5, z:-766.6, ry:-Math.PI/2, lines:['MONTROSE BEACH DUNES','NATURAL AREA'] }, // faces the underpass mouth
+    cellA:{ x:76, z:-780.6, ry:Math.PI, lines:['PIPING PLOVER','NESTING AREA','— please keep out —'] }, // on the A rope, faces the corridor (the 072 register)
+  },
+  // small laminated placards zip-tied at rope posts (blue-on-white, the refs'
+  // 'Fragile dune habitat — Please stay on paths'); placed on the nearest rope
+  placards:[ [62,-790],[90,-791],[114,-728],[140,-729],[103,-676.2],[33.2,-771] ],
+  benches:[ {x:150,z:-758,ry:Math.PI/2}, {x:59,z:-772,ry:Math.PI} ],
+  // dune dressing (ALL local seeds; bucket growth + 2 merged Meshes)
+  // 129 executor-B DENSITY RAISE (count 850->3200, straw 520->1800): the staged
+  // counts were authored for a dune-sized patch and this unit is ~17,000 m2 —
+  // 1 stem per 12 m2 shot as "cones on a lawn", not a restoration (the 072 dune
+  // ships at 1 per 9, the 071 Point prairie at 1 per 2.8). props.js also clumps
+  // them (~12 per clump, 2 m spread) so bare blowout sand shows BETWEEN clumps,
+  // which is the refs' read. Value-only change: one InstancedMesh + one merged
+  // straw Mesh, local seeds, +0 draw calls.
+  grass:{ seed:0x129a11, count:3200, scaleY:[1.4,2.6], color:0x9fb56b,
+          bands:{ period:26, duty:0.62 },   // NE-SW swale bands (density modulation)
+          clearD:2.2, cellFringe:3 },
+  straw:{ seed:0x129a22, count:1800, h:[0.45,0.95], color:0xcfba7e },
+  // bare sand pannes (walkable, visual only) [cx,cz,rx,rz] + the cell floors
+  pannes:[ [50,-748,5,3.6],[68,-716,4,3],[96,-806,5,4],[128,-796,6,4],[142,-702,4,3],
+           [76,-791,11,8.5],[127,-728,10,7] ],
+  sand:0xd9c087,   // the 075 beach tan
+  saplings:{ seed:0x129a33, anchors:[[44,-706],[58,-822],[94,-820],[134,-748],[150,-688]],
+             per:[2,4], scale:[0.5,0.75] },   // cottonwood scrub — tree-bucket growth, >=6 m off every ribbon
+  flowers:{ seed:0x129a44, drifts:[[60,-790,3],[88,-772,2.5],[118,-742,3],[46,-770,2],[149,-767,2]],   // drift 1 sits OFF the platform-scope sightline (57.2,-779.5)->(76,-791) — purple blobs filled the eyepiece foreground at (64,-784)
+            perDrift:12, color:0x8f6fc9 },    // beach pea (violet), stems+heads bucket growth
+  snowFence:{ panels:[ [154,-768.5,2.0],[155.5,-771,2.0],[31.5,-777,2.0],[31.5,-765,2.0],
+                       [60,-835,2.4],[96,-835.5,2.4] ], h:1.1, wood:0xb7a888 }, // [cx,cz,len] slatted wind-catch panels at gates + N edge
+  stands:{ lawnfill:[164,-735], reserve:[100,-769], exclosure:[80,-776], overlook:[56,-779] },
+};
+// reserve nest-cell carve — SHARED by engine walkability and tools/walkprobe.mjs
+// (the beachCarved lineage: blocked by DATA, no collider, no ring-trap).
+export function inReserveCell(x,z){
+  for(const c of MONTROSE_RESERVE.cells)
+    if(x>=c.x0&&x<=c.x1&&z>=c.z0&&z<=c.z1)return true;
+  return false;
+}
+
 // scattered mottled-grass circles across the whole park
 export const GRASS_PATCHES = { count:45, xr:[16,225], zr:[-790,300], radius:[2.5,7], scaleX:[1,1.8], tries:40, segs:18, color:0x72c163 };
 

@@ -60,6 +60,11 @@ feasibility inside perf + single-file constraints.
   "Monty & Rose" pen at Belmont stays a recorded local homage while the
   Montrose DUNES hold the canonical plover story; issue 026 (basin water
   foam-blobs) root-caused and fixed at sign-off (e4a4d55).
+  **RESERVE EXPANSION (task 129, owner directive 2026-08-02 / issue 041):**
+  the interior lawn west of the bike path became the natural area's inland
+  dune-and-swale unit (corridor + spur route, nest cells + wire exclosure,
+  viewing platform + scope, monitors + animated plovers) — GEOGRAPHY.md
+  §The RESERVE EXPANSION; re-sign-off queued as task 131.
 
 - **Lincoln Park Zoo and the conservatory** ("lincolnpark") — PLANNER PICK
   2026-07-19 (§5.3, queue 110–123). Contiguous 1:2 growth SOUTH-WEST through

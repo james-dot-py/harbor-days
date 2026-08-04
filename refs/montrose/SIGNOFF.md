@@ -1,5 +1,20 @@
 # Montrose (harbor · Point · beach · Cricket Hill) — §5.2 SIGN-OFF
 
+> **129 ADDENDUM (2026-08-04): the sign-off below predates the RESERVE
+> EXPANSION.** Owner directive 2026-08-02 (issue 041, "too much negative
+> space… expand the piping plover reserve"): the big interior lawn west of
+> the bike path (x ~33–171, z ~−834…−672) is now the **inland unit of the
+> Montrose Beach Dunes Natural Area** — dune-grass swales + sand pannes,
+> rope-and-post perimeter with three gates, the underpass-axis corridor +
+> south spur (crushed limestone), two roped nest cells (data carves), the
+> wire nest EXCLOSURE, a viewing platform with a 126-ownership scope beat,
+> volunteer monitors, and animated plover pairs. Four new judged waypoints
+> (mt-lawn-fill / mt-reserve / mt-exclosure / mt-overlook); mt-gate
+> re-authored. GEOGRAPHY.md §The RESERVE EXPANSION is the law. This is a
+> large enough layout change that **task 131 (queued) re-runs the §5.2
+> sign-off end to end**; until it lands, this file describes the
+> pre-expansion place plus this addendum.
+
 - Date: 2026-07-16 (task 076, autopilot)
 - Walkthrough of record: ONE fresh full run `node tools/walkthrough.mjs --area montrose`
   → run `mro0rpja` (own vite, canary echoed on every shot): **14 waypoints × 3

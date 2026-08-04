@@ -67,6 +67,9 @@ for(const r of CH.deckRects())walkRects.push({x1:r.x1,x2:r.x2,z1:r.z1,z2:r.z2,h:
   walkRects.push({x1:B.x0,x2:B.x1,z1:B.z0,z2:B.z1,h:B.h}); }
 { const D=CH.THE_DOCK.deckRect;                   // task 072: The Dock raised wood deck (matches structures.js walkRects.push)
   walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:CH.THE_DOCK.deckY}); }
+{ const P=CH.MONTROSE_RESERVE.platform, D=P.deckRect;   // task 129: the reserve viewing platform + its three stair treads (matches structures.js walkRects.push — derived from the const, never a hand-copied rect)
+  walkRects.push({x1:D.x0,x2:D.x1,z1:D.z0,z2:D.z1,h:P.deckY});
+  for(const st of P.stairs)walkRects.push({x1:st.x0,x2:st.x1,z1:st.z0,z2:st.z1,h:st.h}); }
 // (113's Diversey finger-dock block lived here and re-derived lpDivBank(zc).e+0.6 —
 //  folded into CH.deckRects() above by task 128.)
 function onRect(x,z){for(const r of walkRects)if(x>=r.x1&&x<=r.x2&&z>=r.z1&&z<=r.z2)return r;return null}
@@ -74,6 +77,7 @@ function onRect(x,z){for(const r of walkRects)if(x>=r.x1&&x<=r.x2&&z>=r.z1&&z<=r
 function walkable(x,z){
   if(onRect(x,z))return true;
   if(CH.beachCarved(x,z))return false;             // task 072: roped dune + beach-house hall (data carve, no collider)
+  if(CH.inReserveCell(x,z))return false;           // task 129: reserve nest cells (data carve, no collider — same law; rope on the boundary)
   const bh=beachH(x,z);if(bh!==null)return CH.beachWalkable(x,z);   // task 072: dog + Montrose sand
   if(pip(x,z,LAND))return true;
   if((CH.lpLandHit(x,z)&&!CH.lpBlockedHit(x,z))||CH.lpUnderpassHit(x,z))return true;   // 112/113 LINCOLN PARK: west park + east strip + Fullerton underpass/culvert, minus the Theater carve (shared data — mirrors main.js walkable(), same position after pip(LAND))
@@ -2126,6 +2130,124 @@ expect('082 fresh player NOT recovered',sv5.wasSaveRecovered(),false);
   // (f) topology: the garden sits BETWEEN the vestibule and the zoo's north fence
   expect('garden z-band S of the doors',C.formalGarden.z0>C.vestCarve.z1,true);
   expect('garden stops N of the zoo fence band',C.formalGarden.z1<738,true);
+}
+
+// ===== Task 129: the reserve expansion ======================================
+// Owner playtest 2026-08-02 (issue 041): "too much space in this area, let's
+// minimize negative space" -> the big interior lawn WEST of the bike path
+// becomes the inland unit of the Montrose Beach Dunes Natural Area. GEOGRAPHY.md
+// §The RESERVE EXPANSION (129) is the law. NO LAND/coast change: the reserve
+// interior stays plain lawn (walkable via pip(LAND)), so the ONLY new
+// non-walkable ground on the whole map is the two roped nest cells
+// (CH.inReserveCell — the 072 beachCarved lineage: blocked by DATA, no collider,
+// no ring-trap, rope exactly on the boundary), and the ONLY new elevated walk
+// surfaces are the viewing platform deck + its three stair treads. Everything
+// below derives from CH.MONTROSE_RESERVE so a data reshape carries the probe.
+console.log('\n--- Task 129: the reserve expansion (dune-and-swale unit + nest cells + platform) ---');
+{
+  const RS=CH.MONTROSE_RESERVE, PF=RS.platform, ST=RS.stands;
+  // (a) every waypoint stand holds the mayor — a framing authored over a hole
+  //     judges nothing. The overlook stand is ON the platform deck.
+  for(const nm of ['lawnfill','reserve','exclosure']){
+    const [x,z]=ST[nm];
+    expect(`129 stand ${nm} (${x},${z}) walkable`,walkable(x,z),true);
+    expect(`129 stand ${nm} (${x},${z}) outside every nest cell`,CH.inReserveCell(x,z),false);
+  }
+  { const [x,z]=ST.overlook;
+    expect(`129 stand overlook (${x},${z}) walkable (via the deck rect)`,walkable(x,z),true);
+    expect(`129 stand overlook (${x},${z}) surfaceY == deckY`,+surfaceY(x,z).toFixed(3),+PF.deckY.toFixed(3)); }
+
+  // (b) both new crushed-limestone ribbons run on walkable ground, control point
+  //     by control point (corridor = the underpass axis, spur = south to the bay).
+  for(const [nm,arr] of [['corridor',RS.paths.corridor],['spur',RS.paths.spur]])
+    for(const [x,z] of arr) expect(`129 ${nm} ctrl (${x},${z}) walkable`,walkable(x,z),true);
+
+  // (c) the nest cells are the carve: interiors BLOCKED (spot checks + 1 m inside
+  //     each corner, so a shrunken/flipped rect can't pass on centre probes alone)
+  for(const [x,z] of [[76,-791],[70,-796],[84,-790],[127,-728],[120,-730],[135,-722]])
+    expect(`129 nest-cell interior (${x},${z}) BLOCKED`,walkable(x,z),false);
+  for(let i=0;i<RS.cells.length;i++){ const c=RS.cells[i], nm=i?'B':'A';
+    for(const [x,z] of [[c.x0+1,c.z0+1],[c.x1-1,c.z0+1],[c.x0+1,c.z1-1],[c.x1-1,c.z1-1]])
+      expect(`129 cell ${nm} 1 m inside corner (${x},${z}) BLOCKED`,walkable(x,z),false); }
+
+  // (d) ...and the carve stops AT the rope: the lawn just outside every cell edge
+  //     still walks (no invisible moat around the cells — the 072 wrap rule)
+  for(const [x,z] of [[76,-778.5],[92.5,-791],[60.5,-791],[76,-803.5],[112.5,-728],[127,-741.5]])
+    expect(`129 lawn just OUTSIDE the cell rope (${x},${z}) walkable`,walkable(x,z),true);
+
+  // (e) the three rope GAPS are real gates you can walk through
+  for(const [nm,x,z] of [['west (underpass axis)',34,-771],['east (trail bow)',154.5,-763.5],['south (spur)',104,-676.5]])
+    expect(`129 ${nm} gate (${x},${z}) walkable`,walkable(x,z),true);
+
+  // (f) the surviving open ring: the kite ring stays open lawn OFF the hill (the
+  //     fetch that makes Cricket Hill a kite hill), and the berm-side strip walks
+  for(const [x,z] of [[112,-836],[112,-845]]){
+    expect(`129 kite ring (${x},${z}) open lawn`,walkable(x,z),true);
+    expect(`129 kite ring (${x},${z}) is NOT on the hill (cricketHillH null)`,CH.cricketHillH(x,z),null);
+  }
+  for(const [x,z] of [[24,-770],[24,-700]]) expect(`129 berm-side strip (${x},${z}) walkable`,walkable(x,z),true);
+
+  // (g) the VIEWING PLATFORM: deck + every tread carry their own height, and the
+  //     stair FOOT is clear ground at grade — deck-coverage CHECK C (reachable on
+  //     foot from the lawn) has nowhere to start otherwise (the 128 law).
+  { const D=PF.deckRect, cx=(D.x0+D.x1)/2, cz=(D.z0+D.z1)/2;
+    expect(`129 platform deck centre (${cx},${cz}) walkable`,walkable(cx,cz),true);
+    expect(`129 platform deck centre surfaceY == deckY`,+surfaceY(cx,cz).toFixed(3),+PF.deckY.toFixed(3));
+    let prev=0,riseMax=0;
+    for(let i=0;i<PF.stairs.length;i++){ const st=PF.stairs[PF.stairs.length-1-i];   // walk them UP from the lawn
+      const sx=(st.x0+st.x1)/2, sz=+((st.z0+st.z1)/2).toFixed(3);
+      expect(`129 tread ${i+1} centre (${sx},${sz}) walkable`,walkable(sx,sz),true);
+      expect(`129 tread ${i+1} centre surfaceY == its h`,+surfaceY(sx,sz).toFixed(3),+st.h.toFixed(3));
+      riseMax=Math.max(riseMax,st.h-prev); prev=st.h; }
+    riseMax=Math.max(riseMax,PF.deckY-prev);
+    expect(`129 stair ladder: biggest rise ${riseMax.toFixed(3)} <= 0.45 (the 128 flush-root law)`,riseMax<=0.45+1e-9,true);
+    expect('129 stair foot (56,-774) at grade (surfaceY 0)',+surfaceY(56,-774).toFixed(3),0);
+    expect('129 stair foot (56,-774) walkable',walkable(56,-774),true); }
+
+  // (h) DATA-LEVEL guards — pure math over the consts (no engine, always on).
+  //     These are the laws a later data reshape would silently break.
+  const corrC=crSample(RS.paths.corridor,1.2), spurC=crSample(RS.paths.spur,1.2);
+  const mtBike129=crSample(CH.TRAIL_MONTROSE,1.2);
+  const polyD=(x,z,pts)=>{let m=1e9;for(let i=0;i<pts.length-1;i++){const r=ptSeg(x,z,pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1]);if(r.d<m)m=r.d;}return m;};
+  // the 084 perch-exclusion rule, ground-bird edition: a monitor standing on top
+  // of a plover reads as a keeper in the nest, not a volunteer watching one.
+  { let m=1e9,w=null;
+    for(const mo of RS.monitors)for(const p of RS.plovers){const d=Math.hypot(mo.x-p.x,mo.z-p.z);
+      if(d<m){m=d;w=`monitor(${mo.x},${mo.z}) vs plover(${p.x},${p.z})`;}}
+    expect(`129 every plover >=8 m from every monitor (min ${m.toFixed(2)}: ${w})`,m>=8-1e-6,true); }
+  // cottonwood scrub stays OFF every ribbon (the 029 tree-on-path lesson) ...
+  { let m=1e9,w=null;
+    for(const a of RS.saplings.anchors){
+      const d=Math.min(polyD(a[0],a[1],corrC),polyD(a[0],a[1],spurC),polyD(a[0],a[1],mtBike129));
+      if(d<m){m=d;w=`(${a[0]},${a[1]})`;}}
+    expect(`129 every sapling anchor >=6 m off corridor/spur/TRAIL_MONTROSE (min ${m.toFixed(2)} at ${w})`,m>=6-1e-6,true); }
+  // ... and OFF the mt-lawn-fill f0 axis (GEOGRAPHY §Sightline law): that line is
+  // the owner's issue-041 view, and Cricket Hill + kites must stay its subject.
+  { let m=1e9,w=null;
+    for(const a of RS.saplings.anchors){const d=ptSeg(a[0],a[1],164,-735,112,-879).d;if(d<m){m=d;w=`(${a[0]},${a[1]})`;}}
+    expect(`129 every sapling anchor >=7 m off the (164,-735)->(112,-879) sightline (min ${m.toFixed(2)} at ${w})`,m>=7-1e-6,true); }
+  // the corridor may not crowd Cell A's rope — you walk PAST the nest cell, not
+  // along its edge (the near edge is the SOUTH one: the const's z1, -780).
+  { const A=RS.cells[0], near=Math.max(A.z0,A.z1); let m=1e9,w=null;
+    for(const p of corrC){const d=ptSeg(p[0],p[1],A.x0,near,A.x1,near).d;if(d<m){m=d;w=`(${p[0].toFixed(1)},${p[1].toFixed(1)})`;}}
+    expect(`129 corridor keeps >=5 m off Cell A's near edge z${near} (min ${m.toFixed(2)} at ${w})`,m>=5-1e-6,true); }
+  // THE TRAIL IS NEVER BISECTED: the east rope run only SKIRTS the bike path
+  // (GEOGRAPHY §The RESERVE EXPANSION: "its east rope follows the trail at >=4 m
+  // from the bike centerline"). On failure, dump the whole run so the offending
+  // control points are named — the 128 moat-profile idiom.
+  { let m=1e9,w=null;
+    for(const p of RS.rope[0]){const d=polyD(p[0],p[1],mtBike129);if(d<m){m=d;w=`(${p[0]},${p[1]})`;}}
+    if(m<4-1e-6) for(const p of RS.rope[0]){ const d=polyD(p[0],p[1],mtBike129);
+      if(d<4)console.log(`  OFFENDER east rope (${p[0]},${p[1]}) is ${d.toFixed(2)} m from the bike centerline (want >=4)`); }
+    expect(`129 east rope run >=4 m off the TRAIL_MONTROSE bike centerline (min ${m.toFixed(2)} at ${w})`,m>=4-1e-6,true); }
+  // rope posts stay off the new ribbons everywhere EXCEPT the gates — and the
+  // gate flanks are exactly the six run ENDPOINTS (each gate is the gap between
+  // two runs), so the exemption is derived, never a hand-listed pardon.
+  { let m=1e9,w=null;
+    for(const run of RS.rope)for(let i=1;i<run.length-1;i++){ const p=run[i];
+      const d=Math.min(polyD(p[0],p[1],corrC),polyD(p[0],p[1],spurC));
+      if(d<m){m=d;w=`(${p[0]},${p[1]})`;}}
+    expect(`129 rope points (minus the 6 gate-flanking run ends) >=2 m off corridor/spur (min ${m.toFixed(2)} at ${w})`,m>=2-1e-6,true); }
 }
 
 // ===== 088 PERMANENT GUARDS — spawned as gate categories so the standard

@@ -390,6 +390,80 @@ on every run: it raycasts every RENDERED walkable plank in the live game and
 asserts the engine's own walkability holds you there and that the deck is
 reachable from real ground.
 
+#### The RESERVE EXPANSION (129, owner directive 2026-08-02) — canonical game coords (NEW frame)
+
+Owner playtest (issue 041), verbatim: *"too much space in this area, let's minimize
+'negative space'"* and, asked how: *"expand the piping plover reserve so we use more
+of the negative space, adjust the other features in montrose harbor so it makes
+sense with it."* The big interior lawn WEST of the bike path (x 14…158,
+z −660…−852 — the largest open ground in the game, reading as a golf fairway)
+becomes the **inland unit of the Montrose Beach Dunes Natural Area**: a
+dune-and-swale / panne meadow restoration in the reserve's own vocabulary (marram
+grass swales, bare sand pannes, rope-and-post perimeter, laminated placards, snow
+fence, volunteer monitors, a wire nest EXCLOSURE). Recorded liberty (the 084/116
+class): the real natural area sits at the beach and HAS genuinely expanded over
+the years; the game sweeps that documented growth inland to absorb the dead lawn
+— topological order untouched, no landmark moves, **no LAND/coast change** (the
+whole unit sits on existing lawn; walkability changes are data carves only).
+The beach DUNES block (072) stays as-shipped — the canonical Monty & Rose nest
+site; the inland unit is the "new" restoration and carries the expansion story
+(Imani generation). The bike path SKIRTS the reserve (its east rope follows the
+trail at ≥4 m from the bike centerline); it is never bisected.
+
+- **Perimeter** (`MONTROSE_RESERVE.rope`, fenceRun collide:false, organic hand
+  polyline): W edge x ≈ 33–36 (16–20 m of open berm-side lawn survives), N edge
+  z ≈ −831…−834 (the **kite ring**: open lawn z −832…−852 + the whole hill stays
+  clear — the fetch that makes Cricket Hill a kite hill), E edge skirting the
+  trail ((153,−764) bow → (170,−678)), S edge z ≈ −673…−684 (the bay lawn
+  z −580…−672 stays the open sports/picnic ground). GATES (rope gaps, generous):
+  EAST at the trail's west bow (~x 150–156, z −764, main interpretive sign),
+  WEST on the underpass axis (x 33–36, z −767…−775), SOUTH for the spur
+  (x 100–108, z ~−676).
+- **INTERIOR IS WALKABLE** (it must be something you DO, not a fenced-off hole)
+  EXCEPT two roped nest cells, non-walkable by DATA CARVE (no collider — the 065
+  law, the 072 dune-block precedent; rope sits exactly on the cell boundary so
+  the block reads as the rope): **Cell A** x 62…90, z −802…−780 — the sand panne
+  with the **wire EXCLOSURE at (76,−791)** (the signature object: a low wire
+  dome over a nest scrape, eggs inside) + a plover pair working the sand +
+  'PIPING PLOVER NESTING AREA' sign; **Cell B** x 114…140, z −740…−716 — dune
+  swale habitat (mounds, grass, beach pea) + a second foraging pair.
+- **ROUTE THROUGH** (both new crushed-limestone ribbons, pathSamples-append law):
+  the **CORRIDOR** on the Montrose-underpass axis — gate mouth (16,−771) east to
+  the trail-bow gate (~160,−764), welded to the walk ribbon (102 miter law) —
+  and the **SPUR** from the corridor mid (104,−768.5) south out the south gate,
+  curving SE across the bay lawn to weld into the trail bend at ~(146,−640).
+  The perimeter/edge walk is the surviving open ring (berm strip, kite ring,
+  bay lawn, trail).
+- **VIEWING PLATFORM** (`deck` 4.2×3.2 m, deckY 1.5, stairs south to the
+  corridor, rail) at **(56,−779)**, with a mounted tripod scope: the look-through
+  beat REUSES the 126 camera-ownership API (takeCamera/releaseCamera, the
+  lp-heron-scope recipe) — no fourth camera-fighting beat. Deck obeys the
+  FLUSH-ROOT/deck-coverage gate (on grass, reachable via stairs).
+- **Monitors** (volunteer NPCs, makeNPC wander:0): M1 (84,−778) tripod scope
+  aimed at the exclosure; M2 (150,−761) at the east gate. Plovers keep ≥8–10 m
+  from every monitor (the 084 perch-exclusion rule, ground-bird edition).
+- **Dressing** (all local seeds, +0 InstancedMesh buckets): swale grass = tuft
+  bucket growth in NE–SW density bands (dune palette 0x9fb56b mixed with park
+  green, taller scaleY like the 072 dunes) + straw cones (its own frustum-culled
+  merged Mesh, the MONTROSE_POINT.prairie recipe); bare sand pannes = ONE
+  frustum-culled merged Mesh of flat ellipses (walkable, visual only) at
+  ~(50,−748) (68,−716) (96,−806) (128,−796) (142,−702) + the cell floors;
+  cottonwood sapling clusters = tree-bucket growth at scale 0.5–0.75, anchors
+  (44,−706) (58,−822) (94,−820) (134,−748) (150,−688), ≥6 m off every ribbon;
+  beach-pea drifts = stems/heads flower-bucket growth (violet 0x8f6fc9);
+  snow-fence panels + gate posts + placards + exclosure + platform = merged
+  statics with colors already in the pool (145 law).
+- **Waypoints**: `mt-lawn-fill` (164,−735 — the owner's bike-path framing, f0
+  yaw −2.6 pitch 0.10 dist 9 IS the 041 view), `mt-reserve` (100,−769, corridor
+  interior), `mt-exclosure` (80,−776, cell-A rope), `mt-overlook` (56,−779, on
+  the platform deck). `mt-arrival`/`mt-trail`/`mt-gate` expectations re-authored
+  (the reserve now reads in their frames); `mt-crickethill-base` stand (112,−836)
+  sits in the open kite ring 4 m north of the reserve rope — untouched.
+- **Sightline law**: the mt-lawn-fill f0 axis (164,−735)→(112,−879) crosses the
+  corridor at the east gate; keep saplings/tall statics off that line (it passes
+  x≈153 at z −764, x≈140 at z −800, x≈130 at z −830) so the hill + kites stay
+  the mid-distance read.
+
 #### Standing liberties (Montrose — deliberate, keep)
 
 - **East-reach compression ~2.8×** beyond the 1:2 base: the real Point tip /
@@ -408,6 +482,12 @@ reachable from real ground.
 - **Plovers in two places**: the canonical Monty & Rose / Imani story lives at
   the DUNES (072); the Belmont dog-beach pen stays a recorded local homage —
   the PLOVER TENSION ruling below.
+- **The reserve expansion sweeps INLAND (129, owner 2026-08-02)**: the real
+  Montrose Beach Dunes Natural Area's documented growth is carried onto the
+  interior lawn west of the bike path as a dune-and-swale restoration unit —
+  the game's answer to issue 041's negative space. The beach dune block keeps
+  the canonical nest; the inland unit carries the expansion story. See §The
+  RESERVE EXPANSION above.
 
 **The stub shore (069, `COAST_MTR_*` — the COAST_TIP determinism precedent).** The
 Montrose shore is FIVE separate revetment pieces, each kept OUT of the shared
