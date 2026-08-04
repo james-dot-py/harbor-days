@@ -149,10 +149,12 @@ export function buildNichols() {
     // and top -> down -> along gives N = +/-EZ = out through the lip. 060 shipped
     // the opposite hand on all three ("top faces up" — it did not): the walk face
     // was a BACK face, culled for the renderer (from above you saw the cream hull
-    // belly THROUGH the deck) and for the raycaster (tools/deck-coverage.mjs found
-    // 20 plank cells on a 95 m span and passed vacuously), while both fascia lips
-    // faced inward under the hull. computeVertexNormals follows winding, so this
-    // was the lighting too. Flip either triangle here and the deck disappears.
+    // belly THROUGH the deck — measured: every deck pixel was #e6e4dc, the hull's
+    // own hex) and for the raycaster (which is how deck-coverage measured 20 plank
+    // cells on a 95 m span and passed vacuously; that gate now sweeps DoubleSide
+    // and asserts the winding on its own in CHECK F), while both fascia lips faced
+    // inward under the hull. computeVertexNormals follows winding, so this was the
+    // lighting too. Flip either triangle here and the deck disappears.
     pushTri(Lw0, Lw1, Le0); pushTri(Le0, Lw1, Le1);              // top face, N = +EY
     const dw0 = Lw0.clone().addScaledVector(EY[k], -0.12), de0 = Le0.clone().addScaledVector(EY[k], -0.12);
     const dw1 = Lw1.clone().addScaledVector(EY[k + 1], -0.12), de1 = Le1.clone().addScaledVector(EY[k + 1], -0.12);
