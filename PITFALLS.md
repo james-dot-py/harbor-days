@@ -1216,4 +1216,57 @@ few turns to find; keep each to one line of symptom + fix.
   of walk surface with no plank, at the two spur welds. Harmless only by luck
   (both caps sit over walkable lawn). Clip the outer caps with the projection `t`
   on the first/last segment; the middle joints keep the clamped kernel.
+- **A hard-coded world coordinate does not fail loudly when the map moves — it
+  just points somewhere else** (132). Task 084 ("MONTROSE COMPRESSION, +436 block
+  shift") slid Cricket Hill from z=-1316 to z=-879 and left TWO copies of the old
+  number behind. One was in a tool (`tmp-080-kite-verify.mjs` spawned at
+  z=-1316), one was in the SHIPPED GAME (`economy-pilot.js` measured
+  `hypot(curPX-108, curPZ+1316)` to pick the kite-bundle hint). The game bug was
+  live for 48 tasks: standing ON the summit d was 436 m, so the bundle told you
+  to go and find the hill you were standing on, and "this is the spot" was
+  unreachable. It stayed invisible because the only harness that asserted it had
+  gone stale on the SAME shift — a test pointed at the wrong place cannot report
+  the broken code at the right one. Two rules: a pack that needs a landmark's
+  position imports it from `data/chicago.js` (never a copy), and when a task
+  shifts a block, grep the WHOLE repo — `src/` AND `tools/` — for the old number.
+- **`#prompt span:last-child` is not a contract; `#promptlabel` is** (132). The
+  080 kite E2E read the action-pill label positionally. Task 108's first-press
+  coach mark appended a THIRD span inside `#prompt` (`.pk` / `#promptlabel` /
+  `#coachPress`), so the assertion silently started reading "say hi — press E"
+  and reported a wrong-prompt failure at a spawn where the pill on screen plainly
+  said "fly a kite". A DOM probe that selects by POSITION breaks the next time
+  anyone adds a sibling, and it breaks by LYING rather than by throwing. Use ids.
+- **Converting a session cam to 126 ownership: hold through the ease-back, not
+  just the beat** (132, the kite). The Cricket Hill flight ends with its OWN
+  reconstruct-the-chase-pos-and-lerp-onto-it phase. `releaseCamera()` at the
+  START of that phase would hand main.js the camera mid-ease and it would snap to
+  `camPos`; the release belongs at the END, once the pack's own ease has
+  converged. And proving "the flight feel is IDENTICAL" needs a NOISE FLOOR: the
+  ascend/release eases run at tens of m/s, so two runs of the SAME code differ by
+  metres at a given timestamp purely from which frame processed the keyup — a
+  36 ms launch jitter reads as a 1.5 m camera regression
+  (`tools/tmp-132-kitecam.mjs` + `tmp-132-cmp.mjs`).
+- **One same-code pair is not a noise floor, and max-vs-max is not a test** (132).
+  The obvious next move — measure the floor with ONE repeat run and require
+  before-vs-after ≤ it — flip-flopped: the kite's ascend floor measured 0.26 m
+  from the `after/after2` pair and 0.79 m from `before/before2`, so the verdict
+  depended on which pair you happened to measure. Comparing max(9 cross pairs)
+  against max(6 same pairs) is worse than useless: draw more pairs from the same
+  distribution and its max wins on sample count alone. What actually settled it
+  was noticing the deltas track WHICH RUN is in the pair (one frame-hitchy run
+  sits far from every other run, same-code or not) — so the honest test is a
+  PERMUTATION TEST on the labelling: run three flights per side, split the six
+  runs into 3+3 every way (10 splits), and check whether the TRUE before/after
+  split separates cross from same any better than an arbitrary relabelling. It
+  ranked LAST of 10 on nearly every phase — the conversion is invisible to the
+  data (`tools/tmp-132-table.mjs`). Reach for this whenever "did this change the
+  feel?" has to be answered over a noisy transient.
+- **tmp-126-camstab's settled window is FRAME-counted, so a cold first run can
+  false-fail** (132). Its stillness window is the last 45 SAMPLED frames before
+  walk-out, not a wall-clock slice — on the first run of the day (vite dep
+  optimize) the frames are slow enough that 45 of them reach back into the
+  blend-in, which is motion by design, and a beat fails with `d-fov 0.2754` while
+  still reporting `fov 26.00/26` (it reached the zoom; only the per-frame delta
+  blew). Elevated d-ang on EVERY beat in the same run is the tell. Re-run before
+  believing it; if it repeats on a warm run, it is real.
 

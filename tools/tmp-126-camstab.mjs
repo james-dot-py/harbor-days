@@ -5,6 +5,12 @@
 // session's zoom (a camera fight settles at a midpoint and never arrives).
 // Also proves the release restores the chase cam (owner back to null, fov home).
 //   node tools/tmp-126-camstab.mjs [port]
+// NOT covered here: the Cricket Hill KITE session (132). It is the map's fourth
+// session cam and it does take/release the camera, but it does not fit a BEAT —
+// it is entered with a HELD charge (release on the power meter's peak) and left
+// with a reel tap, and it has no fov zoom to reach (it simply holds the chase
+// fov). Its equivalent stillness assertion, on these same thresholds, lives in
+// tools/tmp-132-kitecam.mjs. Run both when you touch camera ownership.
 import { spawn } from 'child_process';
 import puppeteer from 'puppeteer';
 import { dirname, join } from 'path';

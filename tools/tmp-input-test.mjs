@@ -58,12 +58,16 @@ function record(label, toast, want, extra = '') {
   const page = await browser.newPage(); wire(page);
   await page.setViewport({ width: 1280, height: 720 });
   // fly a kite — chargeThrow: press E, hold to wind up, release to launch
-  await loadAt(page, 108, -1316);
+  // 132: both spawns here were PRE-084 ("+436 block shift"): the summit moved to
+  // z=-880 and the dune sign to (218,-979.5). Stale since 084 — a harness with a
+  // hard-coded world coordinate does not fail loudly when the map moves, it just
+  // stands somewhere else and reports the interaction missing.
+  await loadAt(page, 108, -880);
   await page.keyboard.down('e'); await sleep(700); await page.keyboard.up('e'); await sleep(1500);
   await page.screenshot({ path: join(here, 'shots', 'mt-input-kite-desktop.png') });
   record('desktop fly-a-kite (E hold/release)', await readToast(page), 'UP SHE GOES');
   // meet the plovers — simple E tap toast
-  await loadAt(page, 220, -1418);
+  await loadAt(page, 220, -981.5);   // 132: MONTROSE_DUNE.sign (218,-979.5) + the interaction's (+2,-2)
   await page.keyboard.down('e'); await sleep(160); await page.keyboard.up('e'); await sleep(700);
   await page.screenshot({ path: join(here, 'shots', 'mt-input-plover-desktop.png') });
   record('desktop meet-the-plovers (E)', await readToast(page), 'MONTY & ROSE');
@@ -73,12 +77,12 @@ function record(label, toast, want, extra = '') {
 {
   const page = await browser.newPage(); wire(page);
   await page.setViewport({ width: 390, height: 844, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
-  await loadAt(page, 108, -1316);
+  await loadAt(page, 108, -880);
   const touchOn = await page.evaluate(() => document.body.classList.contains('touch'));
   const t1 = await holdTapSel(page, '#btnAct', 260); await sleep(1500);
   await page.screenshot({ path: join(here, 'shots', 'mt-input-kite-mobile.png') });
   record('mobile fly-a-kite (✋ #btnAct hold)', await readToast(page), 'UP SHE GOES', ` [body.touch=${touchOn} btnAct=${t1.tapped}]`);
-  await loadAt(page, 220, -1418);
+  await loadAt(page, 220, -981.5);
   const t2 = await holdTapSel(page, '#btnAct', 200); await sleep(700);
   await page.screenshot({ path: join(here, 'shots', 'mt-input-plover-mobile.png') });
   record('mobile meet-the-plovers (✋ #btnAct)', await readToast(page), 'MONTY & ROSE', ` [btnAct=${t2.tapped}]`);

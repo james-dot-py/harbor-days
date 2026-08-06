@@ -36,6 +36,7 @@ import { mparts } from '../character.js';   // framework does NOT re-export mpar
 import { FX } from '../fx.js';
 import { setCrumbLure } from './nature.js';
 import { keys, joy } from '../input.js';
+import { CRICKET_HILL } from '../data/chicago.js';   // 132: the hill's own coordinates, never a copy of them
 
 // ------------------------------- site --------------------------------
 // Site-audited grass N of the dog-beach fence (tools/tmp-078-kiosk-site.mjs +
@@ -398,14 +399,18 @@ onWorldReady(player => {
 
   // ---- kite (080): hold a wrapped bundle + a where-to-fly-it hint (Cricket Hill) ----
   // Owning it changes the Cricket Hill flight (montrose-kite.js reads bag.has('kite'));
-  // here it is a held prop + a distance-aware hint toward the summit (108,−1316).
+  // here it is a held prop + a distance-aware hint toward the summit (CRICKET_HILL).
   let kiteMesh = null;
   bag.define({ id: 'kite', name: 'a kite of your own', icon: '🪁', kind: 'gear', caption: 'wants a hill and wind off the lake — Cricket Hill.',
     onUse() {
       const m = kiteMesh || (kiteMesh = makeKiteBundle());
       if (m.parent) m.parent.remove(m);
       m.position.set(0, 0.02, 0.05); m.rotation.set(0, 0, 0); holdItem(m);
-      const d = Math.hypot(curPX - 108, curPZ + 1316);      // Cricket Hill summit
+      // 132: this read `curPZ + 1316` — the summit's PRE-084 z. The "+436 block
+      // shift" moved Cricket Hill to z=-879 and left the copy behind, so from the
+      // real summit d was 436 m and the game told you to go and find the hill you
+      // were standing on ("this is the spot" was unreachable). Read the hill.
+      const d = Math.hypot(curPX - CRICKET_HILL.cx, curPZ - CRICKET_HILL.cz);
       if (d > 60) toast('the wind wants a hill', 'Cricket Hill — north end, past Montrose Harbor');
       else toast('this is the spot', 'the summit — fly it');
     } });

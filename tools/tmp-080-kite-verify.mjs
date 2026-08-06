@@ -28,13 +28,22 @@ const isNoise = t => t.includes('favicon') || t.includes('404') || t.includes('m
 page.on('console', m => { const t = m.text(); if (m.type() === 'error' && !isNoise(t)) errors.push(t); else if (t.startsWith('[canary]')) canaries.push(t); if (t.includes('[framework]') || t.includes('[econ]')) warns.push(t); });
 page.on('pageerror', e => errors.push('[pageerror] ' + e.message));
 
-// summit stand (108,-1316), r3.4 — spawn just west of it
-const SPAWN = `play=1&quiet=1&x=105.5&z=-1316&dibs=30&canary=${canary}`;
+// summit stand (108,-880), r3.4 — spawn just west of it.
+// 132: this read z=-1316 — the anchor 084 ("MONTROSE COMPRESSION, +436 block
+// shift") moved out from under it. A hard-coded world coordinate in a harness
+// does not fail loudly when the map moves: it just spawns somewhere else and
+// every assertion goes red at once (the prompt here read "say hi — press E",
+// i.e. a passing NPC). Silently stale since 084.
+const SPAWN = `play=1&quiet=1&x=105.5&z=-880&dibs=30&canary=${canary}`;
 const load = async () => { await page.goto(`http://localhost:${port}/?${SPAWN}`, { waitUntil: 'networkidle0', timeout: 60000 });
   await page.waitForFunction(() => window.__hd && window.__hd.econ, { timeout: 15000 }); await sleep(800); };
 const key = async (k, hold) => { await page.evaluate(kk => window.dispatchEvent(new KeyboardEvent('keydown', { key: kk })), k);
   await sleep(hold); await page.evaluate(kk => window.dispatchEvent(new KeyboardEvent('keyup', { key: kk })), k); };
-const promptLabel = () => page.evaluate(() => { const el = document.querySelector('#prompt span:last-child') || document.querySelector('#prompt'); return el ? el.textContent : ''; });
+// 132: was `#prompt span:last-child` — 108's first-press coach mark appended a
+// THIRD span inside #prompt (<span class=pk>/<span id=promptlabel>/<span
+// id=coachPress>), so :last-child silently started reading "say hi — press E".
+// Read the label by its id: position in the pill is not a contract, the id is.
+const promptLabel = () => page.evaluate(() => { const el = document.getElementById('promptlabel'); return el ? el.textContent : ''; });
 const dibs = () => page.evaluate(() => window.__hd.econ.wallet.dibs);
 
 await load();

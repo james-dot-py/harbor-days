@@ -16,7 +16,8 @@
 // =====================================================================
 import * as THREE from 'three';
 import { onWorldReady, registerUpdate, addInteraction, chargeThrow, toast,
-         journalSection, state, getAudioCtx, bag, wallet } from '../framework.js';
+         journalSection, state, getAudioCtx, bag, wallet,
+         takeCamera, releaseCamera } from '../framework.js';
 import { scene, camera, toon, bmat, clamp, lerp, lerpAngle, chaseDistK } from '../core.js';
 import { cam } from '../input.js';
 import { mayor, mparts } from '../character.js';
@@ -96,6 +97,7 @@ onWorldReady((player) => {
   // 'release' (camera eases back onto the chase cam). tUp/tLean lerp toward targets.
   const sess = { active: false, phase: 'off', seed: false, t: 0, relT: 0,
                  up: 0, lean: 0, upTgt: 0, leanTgt: 0 };
+  const CAM_ID = 'montrose-kite';                       // 132: the 126 camera-ownership token
   // scratch (hoisted — zero per-frame allocation)
   const _cp = new THREE.Vector3(), _ct = new THREE.Vector3(),
         _dP = new THREE.Vector3(), _dT = new THREE.Vector3();
@@ -105,6 +107,12 @@ onWorldReady((player) => {
     sail.material.color.set(own ? OWN_COL : KITE_COL);
     if (midBow) midBow.material.color.set(own ? OWN_COL : KITE_COL);
     sess.active = true; sess.phase = 'ascend'; sess.seed = true; sess.t = 0;
+    // 132: the flight OWNS the camera for its whole arc — including the 'release'
+    // ease-back, which is this pack's own hand-off and must keep writing until it
+    // has converged (releasing early would let main.js snap to camPos mid-ease).
+    // With the lockLook default the look stick is frozen too, so an orbit drag
+    // mid-flight can't spin the world you come back to; releaseCamera restores it.
+    takeCamera(CAM_ID);
     sess.up = 1.2; sess.lean = 0.3;                     // starts near the hand
     sess.upTgt = 8 + power * 5;                         // ~8..13 m — matches the ambient flyers' kites
     sess.leanTgt = 3 + power * 2.5;                     // ~3..5.5 m lakeward lean
@@ -179,6 +187,12 @@ onWorldReady((player) => {
     kite.rotation.x = flut;
 
     // ------------------------------ session camera ------------------------------
+    // 132 (issue 039 class): ONE writer. takeCamera() holds for the whole flight,
+    // so main.js writes neither the transform nor the fov while we do — and this
+    // pack never writes camera.fov at all, so for the length of a flight the fov
+    // simply HOLDS at whatever the chase cam had converged to (50 on desktop).
+    // No second easer, nothing to fight. main.js keeps tracking camPos toward
+    // camTarget underneath us, so the hand-off below lands on a converged view.
     if(sess.phase === 'release'){                       // reconstruct main.js's chase pos, ease on
       sess.relT += dt;
       const dp = Math.max(0, cam.pitch), dd = cam.dist * chaseDistK(cam.dist), hz = Math.cos(dp) * dd;   // 096: match main.js's portrait-scaled dist or the release lerp lands short
@@ -198,7 +212,10 @@ onWorldReady((player) => {
     _ct.lerp(_dT, 1 - Math.exp(-kT * dt));
     camera.position.copy(_cp);
     camera.lookAt(_ct);
-    if(sess.phase === 'release' && sess.relT > 0.5){ sess.active = false; sess.phase = 'off'; }
+    if(sess.phase === 'release' && sess.relT > 0.5){    // eased home — hand the chase cam back
+      sess.active = false; sess.phase = 'off';
+      releaseCamera(CAM_ID);                            // main.js resumes from the converged camPos (and the look aim we froze)
+    }
   });
 
   // -------------------------------- journal --------------------------------
