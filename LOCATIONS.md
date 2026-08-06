@@ -64,7 +64,16 @@ feasibility inside perf + single-file constraints.
   the interior lawn west of the bike path became the natural area's inland
   dune-and-swale unit (corridor + spur route, nest cells + wire exclosure,
   viewing platform + scope, monitors + animated plovers) — GEOGRAPHY.md
-  §The RESERVE EXPANSION; re-sign-off queued as task 131.
+  §The RESERVE EXPANSION. **RE-SIGNED OFF 2026-08-06** (task 131,
+  refs/montrose/SIGNOFF.md new record): fresh full run `mshm7l5r` (25
+  waypoints × 74 framings all MET — the set grew by mt-lawn-fill /
+  mt-reserve / mt-exclosure / mt-overlook + the re-authored mt-gate, plus
+  the 121 md-* net and the 128/130 dock waypoints since 076), max 362/480
+  draws; contiguity walk re-proven WITH a reserve detour (spur → corridor →
+  west gate → east gate, 0 stalls); evocation blind-named "Montrose
+  Harbor / Montrose Beach… the fenced piping-plover nesting dune (the
+  Monty & Rose enclosure)" unprompted, confidence "Unmistakable"; the
+  platform scope passes the 126 camera-stability harness.
 
 - **Lincoln Park Zoo and the conservatory** ("lincolnpark") — PLANNER PICK
   2026-07-19 (§5.3, queue 110–123). Contiguous 1:2 growth SOUTH-WEST through

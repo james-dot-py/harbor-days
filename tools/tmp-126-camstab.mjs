@@ -21,6 +21,7 @@ const BEATS = [
   { id: 'heron-scope-north', x: -19.3, z: 979.2, zoom: 26, note: 'approach from the heron side — the player used to sit across the lens' },
   { id: 'jarvis-binoc', x: 100.5, z: -381, zoom: 24, note: 'the Bill Jarvis sanctuary-gate binoculars (issue 039 twin)' },
   { id: 'conservatory-doors', x: -70, z: 711.2, zoom: 34, note: 'the glasshouse doors peek (issue 039 twin)' },
+  { id: 'reserve-scope', x: 56, z: -778, zoom: 26, note: 'the 129 reserve platform scope (131 re-sign-off — stand on the deck, anchor 57.2,-779.5 r2.2; deliberate tripod sway stays under the px budget)' },
 ];
 const MAX_FOV_D = 0.02;      // deg / frame — a fov fight pumps every frame
 const MAX_POS_D = 0.004;     // m / frame

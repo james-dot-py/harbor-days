@@ -41,23 +41,48 @@ const runDir = join(here, 'shots', 'run-' + runId);
 mkdirSync(runDir, { recursive: true });
 
 // 2. own Vite; parse the ACTUAL port from stdout
-const vite = spawn(process.execPath, [join(root, 'node_modules', 'vite', 'bin', 'vite.js')], { cwd: root });
-const port = await new Promise((res, rej) => {
-  let buf = '';
-  const to = setTimeout(() => rej(new Error('vite did not report a port in 30s:\n' + buf)), 30000);
-  vite.stdout.on('data', d => {
-    buf += d.toString();
-    // strip ANSI color codes — vite prints them mid-URL (localhost:\x1b[1m5175)
-    const m = buf.replace(/\x1b\[[0-9;]*m/g, '').match(/localhost:(\d+)/);
-    if (m) { clearTimeout(to); res(+m[1]); }
+const spawnVite = (fixedPort = null) => {
+  const args = [join(root, 'node_modules', 'vite', 'bin', 'vite.js')];
+  if (fixedPort) args.push('--port', String(fixedPort), '--strictPort');
+  const proc = spawn(process.execPath, args, { cwd: root });
+  const ready = new Promise((res, rej) => {
+    let buf = '';
+    const to = setTimeout(() => rej(new Error('vite did not report a port in 30s:\n' + buf)), 30000);
+    proc.stdout.on('data', d => {
+      buf += d.toString();
+      // strip ANSI color codes — vite prints them mid-URL (localhost:\x1b[1m5175)
+      const m = buf.replace(/\x1b\[[0-9;]*m/g, '').match(/localhost:(\d+)/);
+      if (m) { clearTimeout(to); res(+m[1]); }
+    });
+    proc.stderr.on('data', d => { buf += d.toString(); });
+    proc.on('exit', c => rej(new Error('vite exited early (' + c + '):\n' + buf)));
   });
-  vite.stderr.on('data', d => { buf += d.toString(); });
-  vite.on('exit', c => rej(new Error('vite exited early (' + c + '):\n' + buf)));
-});
-const killVite = () => { process.platform === 'win32' ? spawn('taskkill', ['/pid', String(vite.pid), '/t', '/f']) : vite.kill(); };
+  return { proc, ready };
+};
+let vite = spawnVite();
+const port = await vite.ready;
+const killVite = () => { process.platform === 'win32' ? spawn('taskkill', ['/pid', String(vite.proc.pid), '/t', '/f']) : vite.proc.kill(); };
 console.log('vite on port ' + port + ' · run ' + runId + ' · ' + wps.length + ' waypoints');
 
-const browser = await puppeteer.launch({ headless: 'new', args: ['--window-size=1280,720', '--mute-audio'] });
+const launchBrowser = () => puppeteer.launch({ headless: 'new', args: ['--window-size=1280,720', '--mute-audio'] });
+let browser = await launchBrowser();
+// A ~20-page WebGL run can kill the shared Chromium (or the vite) mid-flight —
+// it happened on the 131 run of record. Recover instead of failing 50 shots.
+const ensureAlive = async () => {
+  const connected = browser && (browser.connected ?? (browser.isConnected && browser.isConnected()));
+  if (!connected) {
+    try { await browser.close(); } catch {}
+    browser = await launchBrowser();
+    console.log('  [recover] browser relaunched');
+  }
+  try { await fetch('http://localhost:' + port + '/', { signal: AbortSignal.timeout(3000) }); }
+  catch {
+    try { killVite(); } catch {}
+    vite = spawnVite(port);
+    await vite.ready;
+    console.log('  [recover] vite respawned on ' + port);
+  }
+};
 let failures = 0;
 const report = { runId, port, date: new Date().toISOString(), budget: BUDGET, waypoints: [], shots: [] };
 
@@ -82,12 +107,13 @@ try {
       for (const k of ['yaw', 'pitch', 'dist']) if (f[k] !== undefined) q.set(k, f[k]);
       if (w.q) for (const [k, v] of new URLSearchParams(w.q)) q.set(k, v);
       const name = w.id + '-f' + i;
-      // one shot must never kill the run: retry once, then record the failure
+      // one shot must never kill the run: recover a dead browser/vite and
+      // retry (two recoveries), then record the failure
       let r;
       for (let attempt = 0; ; attempt++) {
         try { r = await shot({ name, query: q.toString(), waitMs: WAIT, port, browser, dir: runDir, perf: true }); break; }
         catch (e) {
-          if (attempt === 0) { await new Promise(s => setTimeout(s, 1500)); continue; }
+          if (attempt < 2) { await new Promise(s => setTimeout(s, 1500)); await ensureAlive(); continue; }
           r = { file: join(runDir, name + '.png'), started: 'failed', errors: ['[shot-failed] ' + e.message.split('\n')[0]], canary: [], perf: null };
           break;
         }
@@ -112,8 +138,10 @@ try {
     report.waypoints.push(entry);
   }
 } finally {
-  await browser.close();
-  killVite();
+  // cleanup must never eat the report (a Windows EBUSY on the puppeteer
+  // profile lockfile aborted the whole run's bookkeeping once)
+  try { await browser.close(); } catch (e) { console.log('browser close failed (' + e.message.split('\n')[0] + ')'); }
+  try { killVite(); } catch {}
 }
 
 // 5. report + contact sheet
